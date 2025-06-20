@@ -13,9 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.TimeUnit;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
@@ -27,8 +24,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 
-@Feature("Component Tests - Repository")
-@Story("Controller Management")
+/**
+ * Feature: Component Tests - Repository<br/>
+ * Story: Controller Management
+ */
 @TestPropertySource(locations = "classpath:/jpa-test.properties", properties = {
         "hawkbit.server.repository.eagerPollPersistence=false",
         "hawkbit.server.repository.pollPersistenceFlushTime=1000" })
@@ -37,9 +36,10 @@ class LazyControllerManagementTest extends AbstractJpaIntegrationTest {
     @Autowired
     private RepositoryProperties repositoryProperties;
 
-    @Test
-    @Description("Verifies that lazy target poll update is executed as specified.")
-    @ExpectEvents({
+    /**
+     * Verifies that lazy target poll update is executed as specified.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2) })
     void lazyFindOrRegisterTargetIfItDoesNotExist() throws InterruptedException {

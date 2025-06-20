@@ -19,9 +19,6 @@ import java.util.concurrent.locks.Lock;
 
 import javax.sql.DataSource;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.junit.jupiter.api.Test;
@@ -43,8 +40,10 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-@Feature("Component Tests - Repository")
-@Story("Distributed Lock")
+/**
+ * Feature: Component Tests - Repository<br/>
+ * Story: Distributed Lock
+ */
 @SpringBootTest(classes = { DistributedLockTest.Config.class }, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Slf4j
 class DistributedLockTest extends AbstractJpaIntegrationTest {
@@ -94,9 +93,11 @@ class DistributedLockTest extends AbstractJpaIntegrationTest {
         }
     }
 
+    /**
+     * Test to verify that lock is kept while ping runs
+     */
     @SuppressWarnings({"java:S2925"})
     @Test
-    @Description("Test to verify that lock is kept while ping runs")
     void keepLockAlive() {
         final LockRegistry lockRegistry0 = new JdbcLockRegistry(lockRepository0);
         final LockRegistry lockRegistry1 = new JdbcLockRegistry(lockRepository1);

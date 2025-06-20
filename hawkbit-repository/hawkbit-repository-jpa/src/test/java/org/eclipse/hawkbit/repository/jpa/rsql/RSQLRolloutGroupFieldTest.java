@@ -11,9 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.RolloutGroupFields;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -27,8 +24,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.jpa.vendor.Database;
 
-@Feature("Component Tests - Repository")
-@Story("RSQL filter rollout group")
+/**
+ * Feature: Component Tests - Repository<br/>
+ * Story: RSQL filter rollout group
+ */
 class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
 
     private Long rolloutGroupId;
@@ -45,9 +44,10 @@ class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
         this.rolloutGroupId = rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getContent().get(0).getId();
     }
 
-    @Test
-    @Description("Test filter rollout group by  id")
-    void testFilterByParameterId() {
+    /**
+     * Test filter rollout group by  id
+     */
+    @Test    void testFilterByParameterId() {
         assertRSQLQuery(RolloutGroupFields.ID.name() + "==" + rolloutGroupId, 1);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "!=" + rolloutGroupId, 3);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "==" + -1, 0);
@@ -62,9 +62,10 @@ class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(RolloutGroupFields.ID.name() + "=out=(" + rolloutGroupId + ",10000000)", 3);
     }
 
-    @Test
-    @Description("Test filter rollout group by name")
-    void testFilterByParameterName() {
+    /**
+     * Test filter rollout group by name
+     */
+    @Test    void testFilterByParameterName() {
         assertRSQLQuery(RolloutGroupFields.NAME.name() + "==group-1", 1);
         assertRSQLQuery(RolloutGroupFields.NAME.name() + "!=group-1", 3);
         assertRSQLQuery(RolloutGroupFields.NAME.name() + "==*", 4);
@@ -73,9 +74,10 @@ class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(RolloutGroupFields.NAME.name() + "=out=(group-1,group-2)", 2);
     }
 
-    @Test
-    @Description("Test filter rollout group by description")
-    void testFilterByParameterDescription() {
+    /**
+     * Test filter rollout group by description
+     */
+    @Test    void testFilterByParameterDescription() {
         assertRSQLQuery(RolloutGroupFields.DESCRIPTION.name() + "==group-1", 1);
         assertRSQLQuery(RolloutGroupFields.DESCRIPTION.name() + "!=group-1", 3);
         assertRSQLQuery(RolloutGroupFields.DESCRIPTION.name() + "==group*", 4);

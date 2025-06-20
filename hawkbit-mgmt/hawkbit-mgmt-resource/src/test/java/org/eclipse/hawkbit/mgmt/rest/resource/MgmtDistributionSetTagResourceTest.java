@@ -27,9 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
@@ -51,16 +48,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
-@Feature("Component Tests - Management API")
-@Story("Distribution Set Tag Resource")
+/**
+ * Feature: Component Tests - Management API<br/>
+ * Story: Distribution Set Tag Resource
+ */
 class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String DISTRIBUTIONSETTAGS_ROOT = "http://localhost" + MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/";
     private static final Random RND = new Random();
 
-    @Test
-    @Description("Verifies that a paged result list of DS tags reflects the content on the repository side.")
-    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
+    /**
+     * Verifies that a paged result list of DS tags reflects the content on the repository side.
+     */
+    @Test    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
     void getDistributionSetTags() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
         final DistributionSetTag assigned = tags.get(0);
@@ -79,18 +79,20 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
     }
 
-    @Test
-    @Description("Handles the GET request of retrieving all distribution set tags based by parameter")
-    void getDistributionSetTagsWithParameters() throws Exception {
+    /**
+     * Handles the GET request of retrieving all distribution set tags based by parameter
+     */
+    @Test    void getDistributionSetTagsWithParameters() throws Exception {
         testdataFactory.createDistributionSetTags(2);
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "?limit=10&sort=name:ASC&offset=0&q=name==DsTag"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
     }
 
-    @Test
-    @Description("Verifies that a paged result list of DS tags reflects the content on the repository side when filtered by distribution set id.")
-    void getDistributionSetTagsByDistributionSetId() throws Exception {
+    /**
+     * Verifies that a paged result list of DS tags reflects the content on the repository side when filtered by distribution set id.
+     */
+    @Test    void getDistributionSetTagsByDistributionSetId() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
         final DistributionSetTag tag1 = tags.get(0);
         final DistributionSetTag tag2 = tags.get(1);
@@ -127,9 +129,10 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(1)));
     }
 
-    @Test
-    @Description("Verifies that a paged result list of DS tags reflects the content on the repository side when filtered by distribution set id field AND tag field.")
-    void getDistributionSetTagsByDistributionSetIdAndTagDescription() throws Exception {
+    /**
+     * Verifies that a paged result list of DS tags reflects the content on the repository side when filtered by distribution set id field AND tag field.
+     */
+    @Test    void getDistributionSetTagsByDistributionSetIdAndTagDescription() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
         final DistributionSetTag tag1 = tags.get(0);
         final DistributionSetTag tag2 = tags.get(1);
@@ -155,9 +158,10 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(1)));
     }
 
-    @Test
-    @Description("Verifies that a single result of a DS tag reflects the content on the repository side.")
-    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
+    /**
+     * Verifies that a single result of a DS tag reflects the content on the repository side.
+     */
+    @Test    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
     void getDistributionSetTag() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
         final DistributionSetTag assigned = tags.get(0);
@@ -173,9 +177,10 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                         equalTo(DISTRIBUTIONSETTAGS_ROOT + assigned.getId() + "/assigned?offset=0&limit=50")));
     }
 
-    @Test
-    @Description("Verifies that created DS tags are stored in the repository as send to the API.")
-    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
+    /**
+     * Verifies that created DS tags are stored in the repository as send to the API.
+     */
+    @Test    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
     void createDistributionSetTags() throws Exception {
         final Tag tagOne = entityFactory.tag().create().colour("testcol1").description("its a test1").name("thetest1")
                 .build();
@@ -203,9 +208,10 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                 .andExpect(applyTagMatcherOnArrayResult(createdTwo));
     }
 
-    @Test
-    @Description("Verifies that an updated DS tag is stored in the repository as send to the API.")
-    @ExpectEvents({
+    /**
+     * Verifies that an updated DS tag is stored in the repository as send to the API.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetTagUpdatedEvent.class, count = 1) })
     void updateDistributionSetTag() throws Exception {
@@ -232,9 +238,10 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                 .andExpect(applyTagMatcherOnArrayResult(updated));
     }
 
-    @Test
-    @Description("Verifies that the delete call is reflected by the repository.")
-    @ExpectEvents({
+    /**
+     * Verifies that the delete call is reflected by the repository.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetTagDeletedEvent.class, count = 1) })
     void deleteDistributionSetTag() throws Exception {
@@ -248,9 +255,10 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
         assertThat(distributionSetTagManagement.get(original.getId())).isNotPresent();
     }
 
-    @Test
-    @Description("Ensures that assigned DS to tag in repository are listed with proper paging results.")
-    @ExpectEvents({
+    /**
+     * Ensures that assigned DS to tag in repository are listed with proper paging results.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 5),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 5) })
@@ -268,9 +276,10 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(setsAssigned)));
     }
 
-    @Test
-    @Description("Ensures that assigned DS to tag in repository are listed with proper paging results with paging limit parameter.")
-    @ExpectEvents({
+    /**
+     * Ensures that assigned DS to tag in repository are listed with proper paging results with paging limit parameter.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 5),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 5) })
@@ -290,9 +299,10 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(limitSize)));
     }
 
-    @Test
-    @Description("Ensures that assigned DS to tag in repository are listed with proper paging results with paging limit and offset parameter.")
-    @ExpectEvents({
+    /**
+     * Ensures that assigned DS to tag in repository are listed with proper paging results with paging limit and offset parameter.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 5),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 5) })
@@ -315,9 +325,10 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(expectedSize)));
     }
 
-    @Test
-    @Description("Verifies that tag assignments done through tag API command are correctly stored in the repository.")
-    @ExpectEvents({
+    /**
+     * Verifies that tag assignments done through tag API command are correctly stored in the repository.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1) })
@@ -334,9 +345,10 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
         assertThat(updated.stream().map(DistributionSet::getId).toList()).containsOnly(set.getId());
     }
 
-    @Test
-    @Description("Verifies that tag assignments done through tag API command are correctly stored in the repository.")
-    @ExpectEvents({
+    /**
+     * Verifies that tag assignments done through tag API command are correctly stored in the repository.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 2) })
@@ -355,9 +367,10 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                 .containsAll(sets.stream().map(DistributionSet::getId).toList());
     }
 
-    @Test
-    @Description("Verifies that tag unassignments done through tag API command are correctly stored in the repository.")
-    @ExpectEvents({
+    /**
+     * Verifies that tag unassignments done through tag API command are correctly stored in the repository.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 3) })
@@ -380,9 +393,10 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                 .containsOnly(assigned.getId());
     }
 
-    @Test
-    @Description("Verifies that tag unassignments done through tag API command are correctly stored in the repository.")
-    @ExpectEvents({
+    /**
+     * Verifies that tag unassignments done through tag API command are correctly stored in the repository.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 5) })
@@ -406,9 +420,10 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                 .containsOnly(assigned.getId());
     }
 
-    @Test
-    @Description("Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.")
-    @ExpectEvents({
+    /**
+     * Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2) })
     void assignDistributionSetsNotFound() throws Exception {

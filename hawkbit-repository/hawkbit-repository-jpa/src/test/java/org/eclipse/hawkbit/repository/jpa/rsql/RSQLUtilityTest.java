@@ -36,9 +36,6 @@ import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.SingularAttribute;
 import jakarta.persistence.metamodel.Type;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
@@ -69,10 +66,12 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
-@Feature("Component Tests - Repository")
-@Story("RSQL search utility")
+/**
+ * Feature: Component Tests - Repository<br/>
+ * Story: RSQL search utility
+ */
 @Disabled
-// TODO: fully document tests -> @Description for long text and reasonable
+// TODO: fully document tests -> description for long text and reasonable
 // method name as short text
 class RSQLUtilityTest {
 
@@ -362,9 +361,10 @@ class RSQLUtilityTest {
                 .isThrownBy(() -> rsqlSpecification.toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock));
     }
 
-    @Test
-    @Description("Tests the resolution of overdue_ts placeholder in context of a RSQL expression.")
-    void correctRsqlWithOverdueMacro() {
+    /**
+     * Tests the resolution of overdue_ts placeholder in context of a RSQL expression.
+     */
+    @Test    void correctRsqlWithOverdueMacro() {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String overdueProp = "overdue_ts";
         final String overduePropPlaceholder = "${" + overdueProp + "}";
@@ -384,9 +384,10 @@ class RSQLUtilityTest {
         verify(criteriaBuilderMock, never()).lessThanOrEqualTo(pathOfString(baseSoftwareModuleRootMock), overduePropPlaceholder);
     }
 
-    @Test
-    @Description("Tests RSQL expression with an unknown placeholder.")
-    void correctRsqlWithUnknownMacro() {
+    /**
+     * Tests RSQL expression with an unknown placeholder.
+     */
+    @Test    void correctRsqlWithUnknownMacro() {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String overdueProp = "unknown";
         final String overduePropPlaceholder = "${" + overdueProp + "}";

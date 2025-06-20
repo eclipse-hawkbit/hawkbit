@@ -16,9 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
 import org.eclipse.hawkbit.repository.builder.TargetTypeUpdate;
@@ -31,13 +28,16 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 
-@Feature("Component Tests - Access Control")
-@Story("Test Target Type Access Controller")
+/**
+ * Feature: Component Tests - Access Control<br/>
+ * Story: Test Target Type Access Controller
+ */
 class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
 
-    @Test
-    @Description("Verifies read access rules for target types")
-    void verifyTargetTypeReadOperations() {
+    /**
+     * Verifies read access rules for target types
+     */
+    @Test    void verifyTargetTypeReadOperations() {
         permitAllOperations(AccessController.Operation.CREATE);
         final TargetType permittedTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type1"));
         final TargetType hiddenTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type2"));
@@ -96,9 +96,10 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
-    @Test
-    @Description("Verifies delete access rules for target types")
-    void verifyTargetTypeDeleteOperations() {
+    /**
+     * Verifies delete access rules for target types
+     */
+    @Test    void verifyTargetTypeDeleteOperations() {
         permitAllOperations(AccessController.Operation.CREATE);
         final TargetType manageableTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type1"));
 
@@ -119,9 +120,10 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
                 .isInstanceOfAny(InsufficientPermissionException.class, EntityNotFoundException.class);
     }
 
-    @Test
-    @Description("Verifies update operation for target types")
-    void verifyTargetTypeUpdateOperations() {
+    /**
+     * Verifies update operation for target types
+     */
+    @Test    void verifyTargetTypeUpdateOperations() {
         permitAllOperations(AccessController.Operation.CREATE);
         final TargetType manageableTargetType = targetTypeManagement
                 .create(entityFactory.targetType().create().name("type1"));
@@ -146,9 +148,10 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
                 .isInstanceOf(InsufficientPermissionException.class);
     }
 
-    @Test
-    @Description("Verifies create operation blocked by controller")
-    void verifyTargetTypeCreationBlockedByAccessController() {
+    /**
+     * Verifies create operation blocked by controller
+     */
+    @Test    void verifyTargetTypeCreationBlockedByAccessController() {
         defineAccess(AccessController.Operation.CREATE); // allows for none
         // verify targetTypeManagement#create for any type
         final TargetTypeCreate targetTypeCreate = entityFactory.targetType().create().name("type1");

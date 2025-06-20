@@ -15,9 +15,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
@@ -35,8 +32,10 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConversionException;
 
 @ExtendWith(MockitoExtension.class)
-@Feature("Component Tests - Device Management Federation API")
-@Story("Base Amqp Service Test")
+/**
+ * Feature: Component Tests - Device Management Federation API<br/>
+ * Story: Base Amqp Service Test
+ */
 class BaseAmqpServiceTest {
 
     @Mock
@@ -49,9 +48,10 @@ class BaseAmqpServiceTest {
         baseAmqpService = new BaseAmqpService(rabbitTemplate);
     }
 
-    @Test
-    @Description("Verify that the message conversion works")
-    void convertMessageTest() {
+    /**
+     * Verify that the message conversion works
+     */
+    @Test    void convertMessageTest() {
         final DmfActionUpdateStatus actionUpdateStatus = createActionStatus();
         when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());
 
@@ -60,18 +60,20 @@ class BaseAmqpServiceTest {
         assertThat(convertedActionUpdateStatus).usingRecursiveComparison().isEqualTo(actionUpdateStatus);
     }
 
-    @Test
-    @Description("Tests invalid null message content")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    /**
+     * Tests invalid null message content
+     */
+    @Test    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void convertMessageWithNullContent() {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .as("Expected IllegalArgumentException for invalid (null) JSON")
                 .isThrownBy(() -> createMessage(null));
     }
 
-    @Test
-    @Description("Tests invalid empty message content")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    /**
+     * Tests invalid empty message content
+     */
+    @Test    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void updateActionStatusWithEmptyContent() {
         final Message message = createMessage("".getBytes());
         assertThatExceptionOfType(MessageConversionException.class)
@@ -79,9 +81,10 @@ class BaseAmqpServiceTest {
                 .isThrownBy(() -> baseAmqpService.convertMessage(message, DmfActionUpdateStatus.class));
     }
 
-    @Test
-    @Description("Tests invalid json message content")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    /**
+     * Tests invalid json message content
+     */
+    @Test    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void updateActionStatusWithInvalidJsonContent() {
         final Message message = createMessage("Invalid Json".getBytes());
         when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());

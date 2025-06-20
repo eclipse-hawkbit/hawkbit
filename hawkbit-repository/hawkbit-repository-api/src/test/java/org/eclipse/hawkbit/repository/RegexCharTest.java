@@ -11,23 +11,23 @@ package org.eclipse.hawkbit.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.RegexCharacterCollection.RegexChar;
 import org.junit.jupiter.api.Test;
 
-@Feature("Unit Tests - Repository")
-@Story("Regular expression helper")
+/**
+ * Feature: Unit Tests - Repository<br/>
+ * Story: Regular expression helper
+ */
 class RegexCharTest {
 
     private static final int INDEX_FIRST_PRINTABLE_ASCII_CHAR = 32;
     private static final int INDEX_LAST_PRINTABLE_ASCII_CHAR = 127;
     private static final String TEST_STRING = getPrintableAsciiCharacters();
 
-    @Test
-    @Description("Verifies every RegexChar can be used to exclusively find the desired characters in a String.")
-    void allRegexCharsOnlyFindExpectedChars() {
+    /**
+     * Verifies every RegexChar can be used to exclusively find the desired characters in a String.
+     */
+    @Test    void allRegexCharsOnlyFindExpectedChars() {
         for (final RegexChar character : RegexChar.values()) {
             switch (character) {
                 case DIGITS:
@@ -49,9 +49,10 @@ class RegexCharTest {
         }
     }
 
-    @Test
-    @Description("Verifies that combinations of RegexChars can be used to find the desired characters in a String.")
-    void combinedRegexCharsFindExpectedChars() {
+    /**
+     * Verifies that combinations of RegexChars can be used to find the desired characters in a String.
+     */
+    @Test    void combinedRegexCharsFindExpectedChars() {
         final RegexCharacterCollection greaterAndLessThan = new RegexCharacterCollection(RegexChar.GREATER_THAN,
                 RegexChar.LESS_THAN);
         final RegexCharacterCollection equalsAndQuestionMark = new RegexCharacterCollection(RegexChar.EQUALS_SYMBOL,

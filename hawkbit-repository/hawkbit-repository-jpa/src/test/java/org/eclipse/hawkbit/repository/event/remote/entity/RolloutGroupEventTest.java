@@ -14,9 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Collections;
 import java.util.UUID;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -27,22 +24,25 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test the remote entity events.
+  * <p/>
+ * Feature: Component Tests - Repository<br/>
+ * Story: Test RolloutGroupCreatedEvent and RolloutGroupUpdatedEvent
  */
-@Feature("Component Tests - Repository")
-@Story("Test RolloutGroupCreatedEvent and RolloutGroupUpdatedEvent")
 class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<RolloutGroup> {
 
-    @Test
-    @Description("Verifies that the rollout group entity reloading by remote created event works")
-    void testRolloutGroupCreatedEvent() {
+    /**
+     * Verifies that the rollout group entity reloading by remote created event works
+     */
+    @Test    void testRolloutGroupCreatedEvent() {
         final RolloutGroupCreatedEvent createdEvent = (RolloutGroupCreatedEvent) assertAndCreateRemoteEvent(
                 RolloutGroupCreatedEvent.class);
         assertThat(createdEvent.getRolloutId()).isNotNull();
     }
 
-    @Test
-    @Description("Verifies that the rollout group entity reloading by remote updated event works")
-    void testRolloutGroupUpdatedEvent() {
+    /**
+     * Verifies that the rollout group entity reloading by remote updated event works
+     */
+    @Test    void testRolloutGroupUpdatedEvent() {
         assertAndCreateRemoteEvent(RolloutGroupUpdatedEvent.class);
     }
 

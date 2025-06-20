@@ -23,9 +23,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystem;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
@@ -65,8 +62,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles({ "test" })
-@Feature("Component Tests - Device Management Federation API")
-@Story("AmqpMessage Dispatcher Service Test")
+/**
+ * Feature: Component Tests - Device Management Federation API<br/>
+ * Story: AmqpMessage Dispatcher Service Test
+ */
 @SpringBootTest(classes = { RepositoryApplicationConfiguration.class }, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
@@ -116,9 +115,10 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         return argumentCaptor.getValue();
     }
 
-    @Test
-    @Description("Verifies that download and install event with 3 software modules and no artifacts works")
-    void testSendDownloadRequestWithSoftwareModulesAndNoArtifacts() {
+    /**
+     * Verifies that download and install event with 3 software modules and no artifacts works
+     */
+    @Test    void testSendDownloadRequestWithSoftwareModulesAndNoArtifacts() {
         final DistributionSet createDistributionSet = testdataFactory
                 .createDistributionSet(UUID.randomUUID().toString());
         testdataFactory.addSoftwareModuleMetadata(createDistributionSet);
@@ -155,9 +155,10 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         }
     }
 
-    @Test
-    @Description("Verifies that download and install event with software modules and artifacts works")
-    void testSendDownloadRequest() {
+    /**
+     * Verifies that download and install event with software modules and artifacts works
+     */
+    @Test    void testSendDownloadRequest() {
         DistributionSet dsA = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         SoftwareModule module = dsA.getModules().iterator().next();
         final List<AbstractDbArtifact> receivedList = new ArrayList<>();
@@ -206,9 +207,10 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         }
     }
 
-    @Test
-    @Description("Verifies that sending update controller attributes event works.")
-    void sendUpdateAttributesRequest() {
+    /**
+     * Verifies that sending update controller attributes event works.
+     */
+    @Test    void sendUpdateAttributesRequest() {
         final String amqpUri = "amqp://anyhost";
         final TargetAttributesRequestedEvent targetAttributesRequestedEvent = new TargetAttributesRequestedEvent(TENANT,
                 1L, CONTROLLER_ID, amqpUri, Target.class, serviceMatcher.getBusId());
@@ -219,9 +221,10 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         assertUpdateAttributesMessage(sendMessage);
     }
 
-    @Test
-    @Description("Verifies that send cancel event works")
-    void testSendCancelRequest() {
+    /**
+     * Verifies that send cancel event works
+     */
+    @Test    void testSendCancelRequest() {
         final Action action = mock(Action.class);
         when(action.getId()).thenReturn(1L);
         when(action.getTenant()).thenReturn(TENANT);
@@ -235,9 +238,10 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     }
 
-    @Test
-    @Description("Verifies that sending a delete message when receiving a delete event works.")
-    void sendDeleteRequest() {
+    /**
+     * Verifies that sending a delete message when receiving a delete event works.
+     */
+    @Test    void sendDeleteRequest() {
 
         // setup
         final String amqpUri = "amqp://anyhost";
@@ -252,9 +256,10 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         assertDeleteMessage(sendMessage);
     }
 
-    @Test
-    @Description("Verifies that a delete message is not send if the address is not an amqp address.")
-    void sendDeleteRequestWithNoAmqpAddress() {
+    /**
+     * Verifies that a delete message is not send if the address is not an amqp address.
+     */
+    @Test    void sendDeleteRequestWithNoAmqpAddress() {
 
         // setup
         final String noAmqpUri = "http://anyhost";
@@ -268,9 +273,10 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         Mockito.verifyNoInteractions(senderService);
     }
 
-    @Test
-    @Description("Verifies that a delete message is not send if the address is null.")
-    void sendDeleteRequestWithNullAddress() {
+    /**
+     * Verifies that a delete message is not send if the address is null.
+     */
+    @Test    void sendDeleteRequestWithNullAddress() {
 
         // setup
         final String noAmqpUri = null;

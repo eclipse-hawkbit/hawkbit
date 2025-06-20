@@ -76,7 +76,6 @@
         <!-- test -->
         <rabbitmq.http-client.version>5.4.0</rabbitmq.http-client.version>
         <classgraph.version>4.8.179</classgraph.version>
-        <allure.version>2.29.1</allure.version>
         <awaitility.version>4.3.0</awaitility.version>
         <!-- Misc libraries versions - END -->
 
@@ -216,13 +215,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.qameta.allure</groupId>
-            <artifactId>allure-junit5</artifactId>
-            <version>${allure.version}</version>
-            <scope>runtime</scope>
-            <optional>true</optional>
         </dependency>
     </dependencies>
 

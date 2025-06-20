@@ -25,8 +25,6 @@ import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.junit.jupiter.api.Test;
@@ -36,8 +34,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@Feature("Component Tests - Management API")
-@Story("File streaming")
+/**
+ * Feature: Component Tests - Management API<br/>
+ * Story: File streaming
+ */
 class FileStreamingUtilTest {
 
     private static final String CONTENT = "This is some very long string which is intended to test";

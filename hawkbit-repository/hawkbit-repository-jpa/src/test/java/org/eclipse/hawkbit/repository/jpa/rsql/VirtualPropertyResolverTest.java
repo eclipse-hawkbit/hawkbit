@@ -14,9 +14,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.concurrent.Callable;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.apache.commons.text.StringSubstitutor;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
@@ -37,8 +34,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
-@Feature("Unit Tests - Repository")
-@Story("Placeholder resolution for virtual properties")
+/**
+ * Feature: Unit Tests - Repository<br/>
+ * Story: Placeholder resolution for virtual properties
+ */
 class VirtualPropertyResolverTest {
 
     private static final TenantConfigurationValue<String> TEST_POLLING_TIME_INTERVAL =
@@ -61,9 +60,10 @@ class VirtualPropertyResolverTest {
                 .thenReturn(TEST_POLLING_OVERDUE_TIME_INTERVAL);
     }
 
-    @Test
-    @Description("Tests VirtualPropertyResolver with a placeholder unknown to VirtualPropertyResolver.")
-    void handleUnknownPlaceholder() {
+    /**
+     * Tests VirtualPropertyResolver with a placeholder unknown to VirtualPropertyResolver.
+     */
+    @Test    void handleUnknownPlaceholder() {
         final String placeholder = "${unknown}";
         final String testString = "lhs=lt=" + placeholder;
 
@@ -71,9 +71,10 @@ class VirtualPropertyResolverTest {
         assertThat(resolvedPlaceholders).as("unknown should not be resolved!").contains(placeholder);
     }
 
-    @Test
-    @Description("Tests escape mechanism for placeholders (syntax is $${SOME_PLACEHOLDER}).")
-    void handleEscapedPlaceholder() {
+    /**
+     * Tests escape mechanism for placeholders (syntax is $${SOME_PLACEHOLDER}).
+     */
+    @Test    void handleEscapedPlaceholder() {
         final String placeholder = "${OVERDUE_TS}";
         final String escapedPlaceholder = StringSubstitutor.DEFAULT_ESCAPE + placeholder;
         final String testString = "lhs=lt=" + escapedPlaceholder;
@@ -82,9 +83,11 @@ class VirtualPropertyResolverTest {
         assertThat(resolvedPlaceholders).as("Escaped OVERDUE_TS should not be resolved!").contains(placeholder);
     }
 
+    /**
+     * Tests resolution of NOW_TS by using a StringSubstitutor configured with the VirtualPropertyResolver.
+     */
     @ParameterizedTest
     @ValueSource(strings = { "${NOW_TS}", "${OVERDUE_TS}", "${overdue_ts}" })
-    @Description("Tests resolution of NOW_TS by using a StringSubstitutor configured with the VirtualPropertyResolver.")
     void resolveNowTimestampPlaceholder(final String placeholder) {
         when(securityContext.runAsSystem(Mockito.any())).thenAnswer(a -> ((Callable<?>) a.getArgument(0)).call());
         final String testString = "lhs=lt=" + placeholder;

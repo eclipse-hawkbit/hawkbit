@@ -12,9 +12,6 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import java.util.List;
 import java.util.Random;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
@@ -23,8 +20,10 @@ import org.eclipse.hawkbit.repository.jpa.AbstractRepositoryManagementSecurityTe
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.junit.jupiter.api.Test;
 
-@Feature("SecurityTests - SoftwareModuleTypeManagement")
-@Story("SecurityTests SoftwareModuleTypeManagement")
+/**
+ * Feature: SecurityTests - SoftwareModuleTypeManagement<br/>
+ * Story: SecurityTests SoftwareModuleTypeManagement
+ */
 class SoftwareModuleTypeManagementSecurityTest
         extends AbstractRepositoryManagementSecurityTest<SoftwareModuleType, SoftwareModuleTypeCreate, SoftwareModuleTypeUpdate> {
 
@@ -43,15 +42,17 @@ class SoftwareModuleTypeManagementSecurityTest
         return entityFactory.softwareModuleType().update(1L).description("description");
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void getByKeyPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void getByKeyPermissionsCheck() {
         assertPermissions(() -> softwareModuleTypeManagement.findByKey("key"), List.of(SpPermission.READ_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void getByNamePermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void getByNamePermissionsCheck() {
         assertPermissions(() -> softwareModuleTypeManagement.findByName("name"), List.of(SpPermission.READ_REPOSITORY));
     }
 

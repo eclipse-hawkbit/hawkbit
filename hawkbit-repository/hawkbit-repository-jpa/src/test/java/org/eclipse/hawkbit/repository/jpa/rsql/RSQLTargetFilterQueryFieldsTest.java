@@ -12,9 +12,6 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -26,8 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.orm.jpa.vendor.Database;
 
-@Feature("Component Tests - Repository")
-@Story("RSQL filter target filter query")
+/**
+ * Feature: Component Tests - Repository<br/>
+ * Story: RSQL filter target filter query
+ */
 class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest {
 
     private TargetFilterQuery filter1;
@@ -52,9 +51,10 @@ class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest {
         assertEquals(3L, targetFilterQueryManagement.count());
     }
 
-    @Test
-    @Description("Test filter target filter query by id")
-    void testFilterByParameterId() {
+    /**
+     * Test filter target filter query by id
+     */
+    @Test    void testFilterByParameterId() {
         assertRSQLQuery(TargetFilterQueryFields.ID.name() + "==" + filter1.getId(), 1);
         assertRSQLQuery(TargetFilterQueryFields.ID.name() + "!=" + filter1.getId(), 2);
         assertRSQLQuery(TargetFilterQueryFields.ID.name() + "==" + -1, 0);
@@ -70,9 +70,10 @@ class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest {
 
     }
 
-    @Test
-    @Description("Test filter target filter query by name")
-    void testFilterByParameterName() {
+    /**
+     * Test filter target filter query by name
+     */
+    @Test    void testFilterByParameterName() {
         assertRSQLQuery(TargetFilterQueryFields.NAME.name() + "==" + filter1.getName(), 1);
         assertRSQLQuery(TargetFilterQueryFields.NAME.name() + "==" + filter2.getName(), 1);
         assertRSQLQuery(TargetFilterQueryFields.NAME.name() + "==filter_*", 3);
@@ -81,9 +82,10 @@ class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFilterQueryFields.NAME.name() + "=out=(" + filter1.getName() + ",notexist)", 2);
     }
 
-    @Test
-    @Description("Test filter target filter query by auto assigned ds name")
-    void testFilterByAutoAssignedDsName() {
+    /**
+     * Test filter target filter query by auto assigned ds name
+     */
+    @Test    void testFilterByAutoAssignedDsName() {
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".name=="
                 + filter1.getAutoAssignDistributionSet().getName(), 1);
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".name=="
@@ -96,9 +98,10 @@ class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest {
                 + filter1.getAutoAssignDistributionSet().getName() + ",notexist)", 2);
     }
 
-    @Test
-    @Description("Test filter target filter query by auto assigned ds version")
-    void testFilterByAutoAssignedDsVersion() {
+    /**
+     * Test filter target filter query by auto assigned ds version
+     */
+    @Test    void testFilterByAutoAssignedDsVersion() {
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".version=="
                 + TestdataFactory.DEFAULT_VERSION, 2);
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".version==*1*", 2);

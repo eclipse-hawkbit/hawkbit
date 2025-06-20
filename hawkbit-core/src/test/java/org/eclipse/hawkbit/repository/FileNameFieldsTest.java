@@ -16,14 +16,14 @@ import java.util.List;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
-import io.qameta.allure.Description;
 import org.junit.jupiter.api.Test;
 
 class FileNameFieldsTest {
 
-    @Test
-    @Description("Verifies that fields classes are correctly implemented")
-    @SuppressWarnings("unchecked")
+    /**
+     * Verifies that fields classes are correctly implemented
+     */
+    @Test    @SuppressWarnings("unchecked")
     void repositoryManagementMethodsArePreAuthorizedAnnotated() {
         final String packageName = getClass().getPackage().getName();
         try (final ScanResult scanResult = new ClassGraph().acceptPackages(packageName).scan()) {

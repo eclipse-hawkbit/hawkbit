@@ -13,13 +13,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.junit.jupiter.api.Test;
 
-@Feature("Unit Tests - Management API")
-@Story("Serialization")
+/**
+ * Feature: Unit Tests - Management API<br/>
+ * Story: Serialization
+ */
 class AuditFieldSerializationTest {
 
     @Test

@@ -12,66 +12,72 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import java.util.List;
 import java.util.Map;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-@Feature("SecurityTests - TargetManagement")
-@Story("SecurityTests TargetManagement")
+/**
+ * Feature: SecurityTests - TargetManagement<br/>
+ * Story: SecurityTests TargetManagement
+ */
 class TenantConfigurationManagementSecurityTest extends AbstractJpaIntegrationTest {
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void addOrUpdateConfigurationPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void addOrUpdateConfigurationPermissionsCheck() {
         assertPermissions(() -> tenantConfigurationManagement.addOrUpdateConfiguration("authentication.header.enabled", true),
                 List.of(SpPermission.TENANT_CONFIGURATION));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void addOrUpdateConfigurationWithMapPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void addOrUpdateConfigurationWithMapPermissionsCheck() {
         assertPermissions(() -> tenantConfigurationManagement.addOrUpdateConfiguration(Map.of("authentication.header.enabled", true)),
                 List.of(SpPermission.TENANT_CONFIGURATION));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void deleteConfigurationPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void deleteConfigurationPermissionsCheck() {
         assertPermissions(() -> {
             tenantConfigurationManagement.deleteConfiguration("authentication.header.enabled");
             return null;
         }, List.of(SpPermission.TENANT_CONFIGURATION));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void getConfigurationValuePermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void getConfigurationValuePermissionsCheck() {
         assertPermissions(() -> tenantConfigurationManagement.getConfigurationValue("authentication.header.enabled"),
                 List.of(SpPermission.READ_TENANT_CONFIGURATION));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void getConfigurationValueWithTypePermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void getConfigurationValueWithTypePermissionsCheck() {
         assertPermissions(() -> tenantConfigurationManagement.getConfigurationValue("authentication.header.enabled", Boolean.class),
                 List.of(SpPermission.READ_TENANT_CONFIGURATION));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void getGlobalConfigurationValuePermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void getGlobalConfigurationValuePermissionsCheck() {
         assertPermissions(() -> tenantConfigurationManagement.getGlobalConfigurationValue("authentication.header.enabled", Boolean.class),
                 List.of(SpPermission.READ_TENANT_CONFIGURATION));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void pollStatusResolverPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void pollStatusResolverPermissionsCheck() {
         assertPermissions(() -> tenantConfigurationManagement.pollStatusResolver(), List.of(SpPermission.READ_TARGET));
     }
 }

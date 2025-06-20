@@ -14,9 +14,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
@@ -34,8 +31,10 @@ import org.springframework.test.web.servlet.ResultActions;
                         CorsTest.ALLOWED_ORIGIN_SECOND,
                 "hawkbit.server.security.cors.exposedHeaders=" +
                         HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN })
-@Feature("Integration Test - Security")
-@Story("CORS")
+/**
+ * Feature: Integration Test - Security<br/>
+ * Story: CORS
+ */
 class CorsTest extends AbstractSecurityTest {
 
     static final String ALLOWED_ORIGIN_FIRST = "http://test.first.origin";
@@ -44,9 +43,10 @@ class CorsTest extends AbstractSecurityTest {
     private static final String INVALID_ORIGIN = "http://test.invalid.origin";
     private static final String INVALID_CORS_REQUEST = "Invalid CORS request";
 
-    @Test
-    @Description("Ensures that Cors is working.")
-    @WithUser(authorities = SpRole.TENANT_ADMIN, autoCreateTenant = false)
+    /**
+     * Ensures that Cors is working.
+     */
+    @Test    @WithUser(authorities = SpRole.TENANT_ADMIN, autoCreateTenant = false)
     void validateCorsRequest() throws Exception {
         performOptionsRequestToRestWithOrigin(ALLOWED_ORIGIN_FIRST).andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, ALLOWED_ORIGIN_FIRST));

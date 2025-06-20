@@ -12,87 +12,96 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 
-@Feature("SecurityTests - ArtifactManagement")
-@Story("SecurityTests ArtifactManagement")
+/**
+ * Feature: SecurityTests - ArtifactManagement<br/>
+ * Story: SecurityTests ArtifactManagement
+ */
 class ArtifactManagementSecurityTest extends AbstractJpaIntegrationTest {
 
-    @Test
-    @Description("Tests ArtifactManagement#count() method")
-    @WithUser(principal = "user", authorities = { SpPermission.READ_REPOSITORY })
+    /**
+     * Tests ArtifactManagement#count() method
+     */
+    @Test    @WithUser(principal = "user", authorities = { SpPermission.READ_REPOSITORY })
     void countPermissionCheck() {
         assertPermissions(() -> artifactManagement.count(), List.of(SpPermission.READ_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ArtifactManagement#create() method")
-    void createPermissionCheck() {
+    /**
+     * Tests ArtifactManagement#create() method
+     */
+    @Test    void createPermissionCheck() {
         ArtifactUpload artifactUpload = new ArtifactUpload(new ByteArrayInputStream("RandomString".getBytes()), 1L, "filename", false, 1024);
         assertPermissions(() -> artifactManagement.create(artifactUpload), List.of(SpPermission.CREATE_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ArtifactManagement#delete() method")
-    void deletePermissionCheck() {
+    /**
+     * Tests ArtifactManagement#delete() method
+     */
+    @Test    void deletePermissionCheck() {
         assertPermissions(() -> {
             artifactManagement.delete(1);
             return null;
         }, List.of(SpPermission.DELETE_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ArtifactManagement#get() method")
-    void getPermissionCheck() {
+    /**
+     * Tests ArtifactManagement#get() method
+     */
+    @Test    void getPermissionCheck() {
         assertPermissions(() -> artifactManagement.get(1L), List.of(SpPermission.READ_REPOSITORY));
         assertPermissions(() -> artifactManagement.get(1L), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ArtifactManagement#getByFilenameAndSoftwareModule() method")
-    void getByFilenameAndSoftwareModulePermissionCheck() {
+    /**
+     * Tests ArtifactManagement#getByFilenameAndSoftwareModule() method
+     */
+    @Test    void getByFilenameAndSoftwareModulePermissionCheck() {
         assertPermissions(() -> artifactManagement.getByFilenameAndSoftwareModule("filename", 1L),
                 List.of(SpPermission.READ_REPOSITORY), List.of(SpPermission.CREATE_REPOSITORY));
         assertPermissions(() -> artifactManagement.getByFilenameAndSoftwareModule("filename", 1L),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ArtifactManagement#findFirstBySHA1() method")
-    void findFirstBySHA1PermissionCheck() {
+    /**
+     * Tests ArtifactManagement#findFirstBySHA1() method
+     */
+    @Test    void findFirstBySHA1PermissionCheck() {
         assertPermissions(() -> artifactManagement.findFirstBySHA1("sha1"), List.of(SpPermission.READ_REPOSITORY));
         assertPermissions(() -> artifactManagement.findFirstBySHA1("sha1"), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ArtifactManagement#getByFilename() method")
-    void getByFilenamePermissionCheck() {
+    /**
+     * Tests ArtifactManagement#getByFilename() method
+     */
+    @Test    void getByFilenamePermissionCheck() {
         assertPermissions(() -> artifactManagement.getByFilename("filename"), List.of(SpPermission.READ_REPOSITORY));
         assertPermissions(() -> artifactManagement.getByFilename("filename"), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ArtifactManagement#findBySoftwareModule() method")
-    void findBySoftwareModulePermissionCheck() {
+    /**
+     * Tests ArtifactManagement#findBySoftwareModule() method
+     */
+    @Test    void findBySoftwareModulePermissionCheck() {
         assertPermissions(() -> artifactManagement.findBySoftwareModule(1L, PAGE), List.of(SpPermission.READ_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ArtifactManagement#countBySoftwareModule() method")
-    void countBySoftwareModulePermissionCheck() {
+    /**
+     * Tests ArtifactManagement#countBySoftwareModule() method
+     */
+    @Test    void countBySoftwareModulePermissionCheck() {
         assertPermissions(() -> artifactManagement.countBySoftwareModule(1L), List.of(SpPermission.READ_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ArtifactManagement#loadArtifactBinary() method")
-    void loadArtifactBinaryPermissionCheck() {
+    /**
+     * Tests ArtifactManagement#loadArtifactBinary() method
+     */
+    @Test    void loadArtifactBinaryPermissionCheck() {
         assertPermissions(() -> artifactManagement.loadArtifactBinary("sha1", 1L, false), List.of(SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT), List.of(SpPermission.CREATE_REPOSITORY));
         assertPermissions(() -> artifactManagement.loadArtifactBinary("sha1", 1L, false), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
     }

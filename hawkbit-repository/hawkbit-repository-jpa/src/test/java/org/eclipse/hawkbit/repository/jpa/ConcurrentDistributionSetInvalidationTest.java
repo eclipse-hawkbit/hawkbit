@@ -19,9 +19,6 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.repository.exception.StopRolloutException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
@@ -46,16 +43,18 @@ import org.springframework.test.context.TestPropertySource;
 /**
  * Test class testing the invalidation of a {@link DistributionSet} while the
  * handle rollouts is ongoing.
+  * <p/>
+ * Feature: Component Tests - Repository<br/>
+ * Story: Concurrent Distribution Set invalidation
  */
-@Feature("Component Tests - Repository")
-@Story("Concurrent Distribution Set invalidation")
 @ContextConfiguration(classes = ConcurrentDistributionSetInvalidationTest.Config.class)
 @TestPropertySource(properties = { "hawkbit.server.repository.dsInvalidationLockTimeout=1" })
 class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTest {
 
-    @Test
-    @Description("Verify that a large rollout causes a timeout when trying to invalidate a distribution set")
-    void verifyInvalidateDistributionSetWithLargeRolloutThrowsException() {
+    /**
+     * Verify that a large rollout causes a timeout when trying to invalidate a distribution set
+     */
+    @Test    void verifyInvalidateDistributionSetWithLargeRolloutThrowsException() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final Rollout rollout = createRollout(distributionSet);
         final String tenant = tenantAware.getCurrentTenant();

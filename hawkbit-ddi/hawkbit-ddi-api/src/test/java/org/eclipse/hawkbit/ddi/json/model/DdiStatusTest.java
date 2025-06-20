@@ -21,9 +21,6 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -31,16 +28,19 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Test serializability of DDI api model 'DdiStatus'
+  * <p/>
+ * Feature: Unit Tests - Direct Device Integration API<br/>
+ * Story: Serializability of DDI api Models
  */
-@Feature("Unit Tests - Direct Device Integration API")
-@Story("Serializability of DDI api Models")
 class DdiStatusTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+    /**
+     * Verify the correct serialization and deserialization of the model
+     */
     @ParameterizedTest
     @MethodSource("ddiStatusPossibilities")
-    @Description("Verify the correct serialization and deserialization of the model")
     void shouldSerializeAndDeserializeObject(final DdiResult ddiResult, final DdiStatus ddiStatus) throws IOException {
         // Test
         final String serializedDdiStatus = OBJECT_MAPPER.writeValueAsString(ddiStatus);
@@ -54,9 +54,10 @@ class DdiStatusTest {
         assertThat(deserializedDdiStatus.getDetails()).isEqualTo(ddiStatus.getDetails());
     }
 
-    @Test
-    @Description("Verify the correct deserialization of a model with a additional unknown property")
-    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    /**
+     * Verify the correct deserialization of a model with a additional unknown property
+     */
+    @Test    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiStatus = "{\"execution\":\"proceeding\",\"result\":{\"finished\":\"none\"," +
                 "\"progress\":{\"cnt\":30,\"of\":100}},\"details\":[],\"unknownProperty\":\"test\"}";
@@ -70,9 +71,10 @@ class DdiStatusTest {
         assertThat(ddiStatus.getResult().getProgress().getOf()).isEqualTo(100);
     }
 
-    @Test
-    @Description("Verify the correct deserialization of a model with a provided code (optional)")
-    void shouldDeserializeObjectWithOptionalCode() throws IOException {
+    /**
+     * Verify the correct deserialization of a model with a provided code (optional)
+     */
+    @Test    void shouldDeserializeObjectWithOptionalCode() throws IOException {
         // Setup
         final String serializedDdiStatus = "{\"execution\":\"proceeding\",\"result\":{\"finished\":\"none\"," +
                 "\"progress\":{\"cnt\":30,\"of\":100}},\"code\": 12,\"details\":[]}";
@@ -86,9 +88,10 @@ class DdiStatusTest {
         assertThat(ddiStatus.getResult().getProgress().getOf()).isEqualTo(100);
     }
 
-    @Test
-    @Description("Verify that deserialization fails for known properties with a wrong datatype")
-    void shouldFailForObjectWithWrongDataTypes() {
+    /**
+     * Verify that deserialization fails for known properties with a wrong datatype
+     */
+    @Test    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiStatus = "{\"execution\":[\"proceeding\"],\"result\":{\"finished\":\"none\"," +
                 "\"progress\":{\"cnt\":30,\"of\":100}},\"details\":[]}";

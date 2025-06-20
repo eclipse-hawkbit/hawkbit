@@ -17,23 +17,22 @@ import java.io.IOException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 
 /**
  * Test serializability of DDI api model 'DdiArtifact'
+  * <p/>
+ * Feature: Unit Tests - Direct Device Integration API<br/>
+ * Story: Serializability of DDI api Models
  */
-@Feature("Unit Tests - Direct Device Integration API")
-@Story("Serializability of DDI api Models")
 class DdiArtifactTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    @Test
-    @Description("Verify the correct serialization and deserialization of the model")
-    void shouldSerializeAndDeserializeObject() throws IOException {
+    /**
+     * Verify the correct serialization and deserialization of the model
+     */
+    @Test    void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         final String filename = "testfile.txt";
         final DdiArtifactHash hashes = new DdiArtifactHash("123", "456", "789");
@@ -52,9 +51,10 @@ class DdiArtifactTest {
         assertThat(deserializedDdiArtifact.getHashes().getSha256()).isEqualTo(hashes.getSha256());
     }
 
-    @Test
-    @Description("Verify the correct deserialization of a model with a additional unknown property")
-    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    /**
+     * Verify the correct deserialization of a model with a additional unknown property
+     */
+    @Test    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiArtifact = "{\"filename\":\"test.file\",\"hashes\":{\"sha1\":\"123\",\"md5\":\"456\",\"sha256\":\"789\"},\"size\":111,\"links\":[],\"unknownProperty\": \"test\"}";
 
@@ -67,9 +67,10 @@ class DdiArtifactTest {
         assertThat(ddiArtifact.getHashes().getSha256()).isEqualTo("789");
     }
 
-    @Test
-    @Description("Verify that deserialization fails for known properties with a wrong datatype")
-    void shouldFailForObjectWithWrongDataTypes() {
+    /**
+     * Verify that deserialization fails for known properties with a wrong datatype
+     */
+    @Test    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiArtifact = "{\"filename\": [\"test.file\"],\"hashes\":{\"sha1\":\"123\",\"md5\":\"456\",\"sha256\":\"789\"},\"size\":111,\"links\":[]}";
 

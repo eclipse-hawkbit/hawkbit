@@ -9,28 +9,28 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.junit.jupiter.api.Test;
 
 /**
  * Test the remote entity events.
+  * <p/>
+ * Feature: Component Tests - Repository<br/>
+ * Story: Test TargetTagCreatedEvent and TargetTagUpdateEvent
  */
-@Feature("Component Tests - Repository")
-@Story("Test TargetTagCreatedEvent and TargetTagUpdateEvent")
 class TargetTagEventTest extends AbstractRemoteEntityEventTest<TargetTag> {
 
-    @Test
-    @Description("Verifies that the target tag entity reloading by remote created event works")
-    void testTargetTagCreatedEvent() {
+    /**
+     * Verifies that the target tag entity reloading by remote created event works
+     */
+    @Test    void testTargetTagCreatedEvent() {
         assertAndCreateRemoteEvent(TargetTagCreatedEvent.class);
     }
 
-    @Test
-    @Description("Verifies that the target tag entity reloading by remote updated event works")
-    void testTargetTagUpdateEventt() {
+    /**
+     * Verifies that the target tag entity reloading by remote updated event works
+     */
+    @Test    void testTargetTagUpdateEventt() {
         assertAndCreateRemoteEvent(TargetTagUpdatedEvent.class);
     }
 

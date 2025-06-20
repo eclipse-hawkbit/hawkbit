@@ -11,9 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -26,8 +23,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.jpa.vendor.Database;
 
-@Feature("Component Tests - Repository")
-@Story("RSQL filter software module")
+/**
+ * Feature: Component Tests - Repository<br/>
+ * Story: RSQL filter software module
+ */
 class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
 
     private SoftwareModule ah;
@@ -58,9 +57,10 @@ class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
         softwareModuleManagement.updateMetadata(softwareModuleMetadata2);
     }
 
-    @Test
-    @Description("Test filter software module by id")
-    void testFilterByParameterId() {
+    /**
+     * Test filter software module by id
+     */
+    @Test    void testFilterByParameterId() {
         assertRSQLQuery(SoftwareModuleFields.ID.name() + "==" + ah.getId(), 1);
         assertRSQLQuery(SoftwareModuleFields.ID.name() + "!=" + ah.getId(), 5);
         assertRSQLQuery(SoftwareModuleFields.ID.name() + "==" + -1, 0);
@@ -75,9 +75,10 @@ class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(SoftwareModuleFields.ID.name() + "=out=(" + ah.getId() + ",1000000)", 5);
     }
 
-    @Test
-    @Description("Test filter software module by name")
-    void testFilterByParameterName() {
+    /**
+     * Test filter software module by name
+     */
+    @Test    void testFilterByParameterName() {
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==agent-hub", 1);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "!=agent-hub", 5);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==agent-hub*", 2);
@@ -96,17 +97,19 @@ class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*\\**", 1);
     }
 
-    @Test
-    @Description("Test filter software module by name which contain mutated vowels ")
-    void testFilterByParameterNameWithUmlaut() {
+    /**
+     * Test filter software module by name which contain mutated vowels 
+     */
+    @Test    void testFilterByParameterNameWithUmlaut() {
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ö*", 1);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ä*", 1);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ü*", 1);
     }
 
-    @Test
-    @Description("Test filter software module by description")
-    void testFilterByParameterDescription() {
+    /**
+     * Test filter software module by description
+     */
+    @Test    void testFilterByParameterDescription() {
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "==''", 1);
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "!=''", 5);
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "==agent-hub", 1);
@@ -116,18 +119,20 @@ class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "=out=(agent-hub,notexist)", 5);
     }
 
-    @Test
-    @Description("Test filter software module by version")
-    void testFilterByParameterVersion() {
+    /**
+     * Test filter software module by version
+     */
+    @Test    void testFilterByParameterVersion() {
         assertRSQLQuery(SoftwareModuleFields.VERSION.name() + "==1.0.1", 2);
         assertRSQLQuery(SoftwareModuleFields.VERSION.name() + "!=v1.0", 6);
         assertRSQLQuery(SoftwareModuleFields.VERSION.name() + "=in=(1.0.1,1.0.2)", 2);
         assertRSQLQuery(SoftwareModuleFields.VERSION.name() + "=out=(1.0.1)", 4);
     }
 
-    @Test
-    @Description("Test filter software module by type key")
-    void testFilterByType() {
+    /**
+     * Test filter software module by type key
+     */
+    @Test    void testFilterByType() {
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==" + TestdataFactory.SM_TYPE_APP, 2);
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "!=" + TestdataFactory.SM_TYPE_APP, 4);
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==noExist*", 0);
@@ -135,9 +140,10 @@ class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "=out=(" + TestdataFactory.SM_TYPE_APP + ")", 4);
     }
 
-    @Test
-    @Description("Test filter software module by metadata")
-    void testFilterByMetadata() {
+    /**
+     * Test filter software module by metadata
+     */
+    @Test    void testFilterByMetadata() {
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey==metaValue", 1);
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey!=metaValue", 1);
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey!=notexist", 2);

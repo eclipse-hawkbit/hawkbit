@@ -14,18 +14,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 
-@Feature("Unit Tests - Management API")
-@Story("Error Handling")
+/**
+ * Feature: Unit Tests - Management API<br/>
+ * Story: Error Handling
+ */
 class ExceptionInfoTest {
 
-    @Test
-    @Description("Ensures that setters and getters match on teh payload.")
-    void setterAndGetterOnExceptionInfo() {
+    /**
+     * Ensures that setters and getters match on teh payload.
+     */
+    @Test    void setterAndGetterOnExceptionInfo() {
         final String knownExceptionClass = "hawkbit.test.exception.Class";
         final String knownErrorCode = "hawkbit.error.code.Known";
         final String knownMessage = "a known message";

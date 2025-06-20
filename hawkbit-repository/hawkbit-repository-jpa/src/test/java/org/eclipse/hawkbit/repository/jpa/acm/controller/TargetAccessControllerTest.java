@@ -18,9 +18,6 @@ import java.util.List;
 
 import jakarta.persistence.criteria.Predicate;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
@@ -42,16 +39,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-@Feature("Component Tests - Access Control")
-@Story("Test Target Access Controller")
+/**
+ * Feature: Component Tests - Access Control<br/>
+ * Story: Test Target Access Controller
+ */
 class TargetAccessControllerTest extends AbstractAccessControllerTest {
 
     @Autowired
     AutoAssignChecker autoAssignChecker;
 
-    @Test
-    @Description("Verifies read access rules for targets")
-    void verifyTargetReadOperations() {
+    /**
+     * Verifies read access rules for targets
+     */
+    @Test    void verifyTargetReadOperations() {
         permitAllOperations(AccessController.Operation.CREATE);
 
         final Target permittedTarget = targetManagement
@@ -203,9 +203,10 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
                 .isInstanceOf(InsufficientPermissionException.class);
     }
 
-    @Test
-    @Description("Verifies rules for target assignment")
-    void verifyTargetAssignment() {
+    /**
+     * Verifies rules for target assignment
+     */
+    @Test    void verifyTargetAssignment() {
         permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
         permitAllOperations(AccessController.Operation.UPDATE);
@@ -249,9 +250,10 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
                 .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
     }
 
-    @Test
-    @Description("Verifies rules for target assignment")
-    void verifyTargetAssignmentOnNonUpdatableTarget() {
+    /**
+     * Verifies rules for target assignment
+     */
+    @Test    void verifyTargetAssignmentOnNonUpdatableTarget() {
         permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
         permitAllOperations(AccessController.Operation.UPDATE);
@@ -289,9 +291,10 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
                 Action.ActionType.FORCED).getAssigned()).isEqualTo(1);
     }
 
-    @Test
-    @Description("Verifies only manageable targets are part of the rollout")
-    void verifyRolloutTargetScope() {
+    /**
+     * Verifies only manageable targets are part of the rollout
+     */
+    @Test    void verifyRolloutTargetScope() {
         permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
         permitAllOperations(AccessController.Operation.UPDATE);
@@ -330,9 +333,10 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
                         .anyMatch(readTarget -> readTarget.getId().equals(target.getId())));
     }
 
-    @Test
-    @Description("Verifies only manageable targets are part of an auto assignment.")
-    void verifyAutoAssignmentTargetScope() {
+    /**
+     * Verifies only manageable targets are part of an auto assignment.
+     */
+    @Test    void verifyAutoAssignmentTargetScope() {
         permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
         permitAllOperations(AccessController.Operation.UPDATE);

@@ -14,9 +14,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -33,8 +30,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@Feature("Unit Tests - Security")
-@Story("Gateway token authentication")
+/**
+ * Feature: Unit Tests - Security<br/>
+ * Story: Gateway token authentication
+ */
 @ExtendWith(MockitoExtension.class)
 class SecurityTokenAuthenticatorTest {
 
@@ -66,9 +65,10 @@ class SecurityTokenAuthenticatorTest {
                 new SystemSecurityContext(tenantAware), controllerManagementMock);
     }
 
-    @Test
-    @Description("Tests successful authentication with gateway token")
-    void testWithSecToken() {
+    /**
+     * Tests successful authentication with gateway token
+     */
+    @Test    void testWithSecToken() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(SECURITY_TOKEN);
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))
@@ -84,9 +84,10 @@ class SecurityTokenAuthenticatorTest {
                 .hasFieldOrPropertyWithValue("principal", CONTROLLER_ID);
     }
 
-    @Test
-    @Description("Tests that if gateway token doesn't match, the authentication fails")
-    void testWithBadSecToken() {
+    /**
+     * Tests that if gateway token doesn't match, the authentication fails
+     */
+    @Test    void testWithBadSecToken() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(UNKNOWN_TOKEN);
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))
@@ -95,15 +96,17 @@ class SecurityTokenAuthenticatorTest {
         assertThat(authenticator.authenticate(securityToken)).isNull();
     }
 
-    @Test
-    @Description("Tests that if gateway token miss, the authentication fails")
-    void testWithoutSecToken() {
+    /**
+     * Tests that if gateway token miss, the authentication fails
+     */
+    @Test    void testWithoutSecToken() {
         assertThat(authenticator.authenticate(new ControllerSecurityToken("DEFAULT", CONTROLLER_ID))).isNull();
     }
 
-    @Test
-    @Description("Tests that if disabled, the authentication fails")
-    void testWithSecTokenButDisabled() {
+    /**
+     * Tests that if disabled, the authentication fails
+     */
+    @Test    void testWithSecTokenButDisabled() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(SECURITY_TOKEN);
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))

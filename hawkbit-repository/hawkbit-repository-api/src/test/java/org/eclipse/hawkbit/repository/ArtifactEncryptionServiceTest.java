@@ -12,23 +12,22 @@ package org.eclipse.hawkbit.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.exception.ArtifactEncryptionUnsupportedException;
 import org.junit.jupiter.api.Test;
 
 /**
  * Test class to verify that no {@link ArtifactEncryptionService} required beans
  * are loaded and therefore the encryption support is not given.
+  * <p/>
+ * Feature: Unit Tests - Repository<br/>
+ * Story: Artifact Encryption Service
  */
-@Feature("Unit Tests - Repository")
-@Story("Artifact Encryption Service")
 class ArtifactEncryptionServiceTest {
 
-    @Test
-    @Description("Verify that no artifact encryption support is given")
-    void verifyNoArtifactEncryptionSupport() {
+    /**
+     * Verify that no artifact encryption support is given
+     */
+    @Test    void verifyNoArtifactEncryptionSupport() {
         final ArtifactEncryptionService artifactEncryptionService = ArtifactEncryptionService.getInstance();
 
         assertThat(artifactEncryptionService.isEncryptionSupported()).isFalse();

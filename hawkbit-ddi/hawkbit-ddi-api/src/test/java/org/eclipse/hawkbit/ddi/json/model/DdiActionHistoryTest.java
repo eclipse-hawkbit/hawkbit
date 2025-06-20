@@ -19,23 +19,22 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 
 /**
  * Test serializability of DDI api model 'DdiActionHistory'
+  * <p/>
+ * Feature: Unit Tests - Direct Device Integration API<br/>
+ * Story: Serializability of DDI api Models
  */
-@Feature("Unit Tests - Direct Device Integration API")
-@Story("Serializability of DDI api Models")
 class DdiActionHistoryTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    @Test
-    @Description("Verify the correct serialization and deserialization of the model")
-    void shouldSerializeAndDeserializeObject() throws IOException {
+    /**
+     * Verify the correct serialization and deserialization of the model
+     */
+    @Test    void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         final String actionStatus = "TestAction";
         final List<String> messages = Arrays.asList("Action status message 1", "Action status message 2");
@@ -48,9 +47,10 @@ class DdiActionHistoryTest {
         assertThat(deserializedDdiActionHistory.toString()).contains(actionStatus, messages.get(0), messages.get(1));
     }
 
-    @Test
-    @Description("Verify the correct deserialization of a model with a additional unknown property")
-    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    /**
+     * Verify the correct deserialization of a model with a additional unknown property
+     */
+    @Test    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiActionHistory = """
                 {
@@ -64,9 +64,10 @@ class DdiActionHistoryTest {
         assertThat(ddiActionHistory.toString()).contains("SomeAction", "Some message");
     }
 
-    @Test
-    @Description("Verify that deserialization fails for known properties with a wrong datatype")
-    void shouldFailForObjectWithWrongDataTypes() {
+    /**
+     * Verify that deserialization fails for known properties with a wrong datatype
+     */
+    @Test    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiActionFeedback = """
                 {

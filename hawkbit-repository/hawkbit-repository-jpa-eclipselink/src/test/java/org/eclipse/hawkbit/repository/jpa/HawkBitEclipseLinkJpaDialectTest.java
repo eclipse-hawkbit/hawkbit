@@ -18,32 +18,33 @@ import java.sql.SQLException;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.PersistenceException;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.UncategorizedDataAccessException;
 
 /**
  * Mapping tests for {@link HawkbitEclipseLinkJpaDialect}.
+  * <p/>
+ * Feature: Unit Tests - Repository<br/>
+ * Story: Exception handling
  */
-@Feature("Unit Tests - Repository")
-@Story("Exception handling")
 class HawkBitEclipseLinkJpaDialectTest {
 
     private final HawkbitEclipseLinkJpaDialect hawkBitEclipseLinkJpaDialectUnderTest = new HawkbitEclipseLinkJpaDialect();
 
-    @Test
-    @Description("Use Case: PersistenceException that can be mapped by EclipseLinkJpaDialect into corresponding DataAccessException.")
-    void jpaOptimisticLockExceptionIsConcurrencyFailureException() {
+    /**
+     * Use Case: PersistenceException that can be mapped by EclipseLinkJpaDialect into corresponding DataAccessException.
+     */
+    @Test    void jpaOptimisticLockExceptionIsConcurrencyFailureException() {
         assertThat(hawkBitEclipseLinkJpaDialectUnderTest.translateExceptionIfPossible(mock(OptimisticLockException.class)))
                 .isInstanceOf(ConcurrencyFailureException.class);
     }
 
+    /**
+     * Use Case: PersistenceException that could not be mapped by EclipseLinkJpaDialect directly but
+     * instead is wrapped into JpaSystemException. Cause of PersistenceException is an SQLException.
+     */
     @Test
-    @Description("Use Case: PersistenceException that could not be mapped by EclipseLinkJpaDialect directly but "
-            + "instead is wrapped into JpaSystemException. Cause of PersistenceException is an SQLException.")
     void jpaSystemExceptionWithSqlDeadLockExceptionIsConcurrencyFailureException() {
         final PersistenceException persEception = mock(PersistenceException.class);
         when(persEception.getCause()).thenReturn(new SQLException("simulated transaction ER_LOCK_DEADLOCK", "40001"));
@@ -52,9 +53,11 @@ class HawkBitEclipseLinkJpaDialectTest {
                 .isInstanceOf(ConcurrencyFailureException.class);
     }
 
+    /**
+     * Use Case: PersistenceException that could not be mapped by EclipseLinkJpaDialect directly but instead is wrapped
+     *  into JpaSystemException. Cause of PersistenceException is not an SQLException.
+     */
     @Test
-    @Description("Use Case: PersistenceException that could not be mapped by EclipseLinkJpaDialect directly but instead is wrapped"
-            + " into JpaSystemException. Cause of PersistenceException is not an SQLException.")
     void jpaSystemExceptionWithNumberFormatExceptionIsNull() {
         final PersistenceException persEception = mock(PersistenceException.class);
         when(persEception.getCause()).thenReturn(new NumberFormatException());
@@ -63,9 +66,11 @@ class HawkBitEclipseLinkJpaDialectTest {
                 .isInstanceOf(UncategorizedDataAccessException.class);
     }
 
+    /**
+     * Use Case: RuntimeException that could not be mapped by EclipseLinkJpaDialect directly.
+     * Cause of RuntimeException is an SQLException.
+     */
     @Test
-    @Description("Use Case: RuntimeException that could not be mapped by EclipseLinkJpaDialect directly. Cause of "
-            + "RuntimeException is an SQLException.")
     void runtimeExceptionWithSqlDeadLockExceptionIsConcurrencyFailureException() {
         final RuntimeException persEception = mock(RuntimeException.class);
         when(persEception.getCause()).thenReturn(new SQLException("simulated transaction ER_LOCK_DEADLOCK", "40001"));
@@ -74,9 +79,11 @@ class HawkBitEclipseLinkJpaDialectTest {
                 .isInstanceOf(ConcurrencyFailureException.class);
     }
 
+    /**
+     * Use Case: RuntimeException that could not be mapped by EclipseLinkJpaDialect directly. Cause of 
+     * RuntimeException is not an SQLException.
+     */
     @Test
-    @Description("Use Case: RuntimeException that could not be mapped by EclipseLinkJpaDialect directly. Cause of "
-            + "RuntimeException is not an SQLException.")
     void runtimeExceptionWithNumberFormatExceptionIsNull() {
         final RuntimeException persEception = mock(RuntimeException.class);
         when(persEception.getCause()).thenReturn(new NumberFormatException());

@@ -14,9 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Duration;
 import java.util.List;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -28,16 +25,19 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.jupiter.api.Test;
 
-@Feature("Unit Tests - Repository")
-@Story("Deployment Management")
+/**
+ * Feature: Unit Tests - Repository<br/>
+ * Story: Deployment Management
+ */
 class ActionTest extends AbstractJpaIntegrationTest {
 
     private Target target;
     private DistributionSet distributionSet;
 
-    @Test
-    @Description("Ensures that timeforced moded switch from soft to forces after defined timeframe.")
-    void timeForcedHitNewHasCodeIsGenerated() {
+    /**
+     * Ensures that timeforced moded switch from soft to forces after defined timeframe.
+     */
+    @Test    void timeForcedHitNewHasCodeIsGenerated() {
         // current time + 1 seconds
         final long sleepTime = 1000;
         final long timeForceTimeAt = System.currentTimeMillis() + sleepTime;
@@ -50,9 +50,10 @@ class ActionTest extends AbstractJpaIntegrationTest {
         Awaitility.await().atMost(Duration.ofSeconds(2)).pollInterval(Duration.ofMillis(100)).until(timeforcedAction::isForcedOrTimeForced);
     }
 
-    @Test
-    @Description("Tests the action type mapping.")
-    void testActionTypeConvert() {
+    /**
+     * Tests the action type mapping.
+     */
+    @Test    void testActionTypeConvert() {
         final long id = createAction().getId();
         for (final ActionType actionType : ActionType.values()) {
             final JpaAction action = actionRepository.findById(id).orElseThrow(() -> new IllegalStateException("Action not found"));
@@ -63,9 +64,10 @@ class ActionTest extends AbstractJpaIntegrationTest {
         }
     }
 
-    @Test
-    @Description("Tests the status mapping.")
-    void testStatusConvert() {
+    /**
+     * Tests the status mapping.
+     */
+    @Test    void testStatusConvert() {
         final long id = createAction().getId();
         for (final Status status : Status.values()) {
             final JpaAction action = actionRepository.findById(id).orElseThrow(() -> new IllegalStateException("Action not found"));
@@ -76,9 +78,10 @@ class ActionTest extends AbstractJpaIntegrationTest {
         }
     }
 
-    @Test
-    @Description("Tests the action status status mapping.")
-    void testActionsStatusStatusConvert() {
+    /**
+     * Tests the action status status mapping.
+     */
+    @Test    void testActionsStatusStatusConvert() {
         for (final Status status : Status.values()) {
             final long id = createAction().getId();
             controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(id).status(status));

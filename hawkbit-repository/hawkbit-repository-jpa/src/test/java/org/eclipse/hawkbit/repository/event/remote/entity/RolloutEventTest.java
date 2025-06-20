@@ -11,9 +11,6 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import java.util.Collections;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
@@ -23,14 +20,16 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test the remote entity events.
+  * <p/>
+ * Feature: Component Tests - Repository<br/>
+ * Story: Test RolloutUpdatedEvent
  */
-@Feature("Component Tests - Repository")
-@Story("Test RolloutUpdatedEvent")
 class RolloutEventTest extends AbstractRemoteEntityEventTest<Rollout> {
 
-    @Test
-    @Description("Verifies that the rollout entity reloading by remote updated event works")
-    void testRolloutUpdatedEvent() {
+    /**
+     * Verifies that the rollout entity reloading by remote updated event works
+     */
+    @Test    void testRolloutUpdatedEvent() {
         assertAndCreateRemoteEvent(RolloutUpdatedEvent.class);
     }
 

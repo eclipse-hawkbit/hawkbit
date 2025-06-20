@@ -11,9 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.util.List;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
@@ -22,8 +19,10 @@ import org.eclipse.hawkbit.repository.jpa.AbstractRepositoryManagementSecurityTe
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.junit.jupiter.api.Test;
 
-@Feature("SecurityTests - SoftwareManagement")
-@Story("SecurityTests SoftwareManagement")
+/**
+ * Feature: SecurityTests - SoftwareManagement<br/>
+ * Story: SecurityTests SoftwareManagement
+ */
 class SoftwareManagementSecurityTest
         extends AbstractRepositoryManagementSecurityTest<SoftwareModule, SoftwareModuleCreate, SoftwareModuleUpdate> {
 
@@ -42,9 +41,10 @@ class SoftwareManagementSecurityTest
         return entityFactory.softwareModule().update(1L).locked(true);
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void createMetaDataPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void createMetaDataPermissionsCheck() {
         assertPermissions(
                 () -> softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().create(1L).key("key").value("value")),
                 List.of(SpPermission.UPDATE_REPOSITORY));
@@ -55,30 +55,34 @@ class SoftwareManagementSecurityTest
         }, List.of(SpPermission.UPDATE_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void deleteMetaDataPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void deleteMetaDataPermissionsCheck() {
         assertPermissions(() -> {
             softwareModuleManagement.deleteMetadata(1L, "key");
             return null;
         }, List.of(SpPermission.UPDATE_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findByAssignedToPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findByAssignedToPermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.findByAssignedTo(1L, PAGE), List.of(SpPermission.READ_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void countByAssignedToPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void countByAssignedToPermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.countByAssignedTo(1L), List.of(SpPermission.READ_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findByTextAndTypePermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findByTextAndTypePermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.findByTextAndType("text", 1L, PAGE), List.of(SpPermission.READ_REPOSITORY));
     }
 
@@ -88,60 +92,68 @@ class SoftwareManagementSecurityTest
                 List.of(SpPermission.READ_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void getMetaDataBySoftwareModuleIdPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void getMetaDataBySoftwareModuleIdPermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.getMetadata(1L, "key"), List.of(SpPermission.READ_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findMetaDataBySoftwareModuleIdPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findMetaDataBySoftwareModuleIdPermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.getMetadata(1L), List.of(SpPermission.READ_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findMetaDataBySoftwareModuleIdAndTargetVisiblePermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findMetaDataBySoftwareModuleIdAndTargetVisiblePermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(1L, PAGE),
                 List.of(SpPermission.READ_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findByTypePermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findByTypePermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.findByType(1L, PAGE), List.of(SpPermission.READ_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void lockPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void lockPermissionsCheck() {
         assertPermissions(() -> {
             softwareModuleManagement.lock(1L);
             return null;
         }, List.of(SpPermission.UPDATE_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void unlockPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void unlockPermissionsCheck() {
         assertPermissions(() -> {
             softwareModuleManagement.unlock(1L);
             return null;
         }, List.of(SpPermission.UPDATE_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void updateMetaDataPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void updateMetaDataPermissionsCheck() {
         assertPermissions(
                 () -> softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().update(1L, "key").value("value")),
                 List.of(SpPermission.UPDATE_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findMetaDataBySoftwareModuleIdsAndTargetVisiblePermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findMetaDataBySoftwareModuleIdsAndTargetVisiblePermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(List.of(1L)),
                 List.of(SpPermission.READ_REPOSITORY));
     }

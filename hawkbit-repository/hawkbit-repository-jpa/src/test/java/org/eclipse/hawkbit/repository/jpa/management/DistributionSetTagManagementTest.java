@@ -21,10 +21,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
@@ -45,24 +41,28 @@ import org.springframework.data.domain.Pageable;
 
 /**
  * {@link DistributionSetTagManagement} tests.
+  * <p/>
+ * Feature: Component Tests - Repository<br/>
+ * Story: DistributionSet Tag Management
  */
-@Feature("Component Tests - Repository")
-@Story("DistributionSet Tag Management")
 class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
 
     private static final Random RND = new Random();
 
-    @Test
-    @Description("Verifies that management get access reacts as specified on calls for non existing entities by means of Optional not present.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    /**
+     * Verifies that management get access reacts as specified on calls for non existing entities by means of Optional not present.
+     */
+    @Test    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(distributionSetTagManagement.findByName(NOT_EXIST_ID)).isNotPresent();
         assertThat(distributionSetTagManagement.get(NOT_EXIST_IDL)).isNotPresent();
     }
 
+    /**
+     * Verifies that management queries react as specified on calls for non existing entities by means of throwing 
+     * EntityNotFoundException.
+     */
     @Test
-    @Description("Verifies that management queries react as specified on calls for non existing entities by means of throwing " +
-            "EntityNotFoundException.")
     @ExpectEvents({
             @Expect(type = DistributionSetTagUpdatedEvent.class, count = 0),
             @Expect(type = TargetTagUpdatedEvent.class, count = 0) })
@@ -74,9 +74,10 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
                 "DistributionSetTag");
     }
 
-    @Test
-    @Description("Full DS tag lifecycle tested. Create tags, assign them to sets and delete the tags.")
-    void createAndAssignAndDeleteDistributionSetTags() {
+    /**
+     * Full DS tag lifecycle tested. Create tags, assign them to sets and delete the tags.
+     */
+    @Test    void createAndAssignAndDeleteDistributionSetTags() {
         final Collection<DistributionSet> dsAs = testdataFactory.createDistributionSets("DS-A", 20);
         final Collection<DistributionSet> dsBs = testdataFactory.createDistributionSets("DS-B", 10);
         final Collection<DistributionSet> dsCs = testdataFactory.createDistributionSets("DS-C", 25);
@@ -136,9 +137,10 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
                 Stream.of(dsCs, dsACs, dsBCs, dsABCs));
     }
 
-    @Test
-    @Description("Verifies assign/unassign.")
-    void assignAndUnassignDistributionSetTags() {
+    /**
+     * Verifies assign/unassign.
+     */
+    @Test    void assignAndUnassignDistributionSetTags() {
         final Collection<DistributionSet> groupA = testdataFactory.createDistributionSets(20);
         final Collection<DistributionSet> groupB = testdataFactory.createDistributionSets("unassigned", 20);
 
@@ -176,9 +178,10 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(distributionSetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent()).isEmpty();
     }
 
-    @Test
-    @Description("Verifies that tagging of set containing missing DS throws meaningful and correct exception.")
-    void failOnMissingDs() {
+    /**
+     * Verifies that tagging of set containing missing DS throws meaningful and correct exception.
+     */
+    @Test    void failOnMissingDs() {
         final Collection<Long> group = testdataFactory.createDistributionSets(5).stream().map(DistributionSet::getId).toList();
         final DistributionSetTag tag = distributionSetTagManagement.create(entityFactory.tag().create().name("tag1").description("tagdesc1"));
         final List<Long> missing = new ArrayList<>();
@@ -204,9 +207,10 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
                 });
     }
 
-    @Test
-    @Description("Ensures that a created tag is persisted in the repository as defined.")
-    void createDistributionSetTag() {
+    /**
+     * Ensures that a created tag is persisted in the repository as defined.
+     */
+    @Test    void createDistributionSetTag() {
         final Tag tag = distributionSetTagManagement
                 .create(entityFactory.tag().create().name("kai1").description("kai2").colour("colour"));
 
@@ -218,9 +222,10 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
                 .isEqualTo("colour");
     }
 
-    @Test
-    @Description("Ensures that a deleted tag is removed from the repository as defined.")
-    void deleteDistributionSetTag() {
+    /**
+     * Ensures that a deleted tag is removed from the repository as defined.
+     */
+    @Test    void deleteDistributionSetTag() {
         // create test data
         final Iterable<DistributionSetTag> tags = createDsSetsWithTags();
         final DistributionSetTag toDelete = tags.iterator().next();
@@ -245,9 +250,10 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
         }
     }
 
-    @Test
-    @Description("Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).")
-    void failedDuplicateDsTagNameException() {
+    /**
+     * Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).
+     */
+    @Test    void failedDuplicateDsTagNameException() {
         final TagCreate tag = entityFactory.tag().create().name("A");
         distributionSetTagManagement.create(tag);
 
@@ -255,9 +261,10 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
                 .isThrownBy(() -> distributionSetTagManagement.create(tag));
     }
 
-    @Test
-    @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).")
-    void failedDuplicateDsTagNameExceptionAfterUpdate() {
+    /**
+     * Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).
+     */
+    @Test    void failedDuplicateDsTagNameExceptionAfterUpdate() {
         distributionSetTagManagement.create(entityFactory.tag().create().name("A"));
         final DistributionSetTag tag = distributionSetTagManagement.create(entityFactory.tag().create().name("B"));
 
@@ -266,9 +273,10 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
                 .isThrownBy(() -> distributionSetTagManagement.update(tagUpdate));
     }
 
-    @Test
-    @Description("Tests the name update of a target tag.")
-    void updateDistributionSetTag() {
+    /**
+     * Tests the name update of a target tag.
+     */
+    @Test    void updateDistributionSetTag() {
         // create test data
         final List<DistributionSetTag> tags = createDsSetsWithTags();
         // change data
@@ -282,9 +290,10 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
                 .as("Wrong ds tag found").isEqualTo("test123");
     }
 
-    @Test
-    @Description("Ensures that all tags are retrieved through repository.")
-    void findDistributionSetTagsAll() {
+    /**
+     * Ensures that all tags are retrieved through repository.
+     */
+    @Test    void findDistributionSetTagsAll() {
         final List<DistributionSetTag> tags = createDsSetsWithTags();
 
         // test
@@ -293,14 +302,14 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(distributionSetTagRepository.findAll()).as("Wrong size of tags").hasSize(20);
     }
 
-    @Test
-    @Description("Ensures that a created tags are persisted in the repository as defined.")
-    void createDistributionSetTags() {
+    /**
+     * Ensures that a created tags are persisted in the repository as defined.
+     */
+    @Test    void createDistributionSetTags() {
         final List<DistributionSetTag> tags = createDsSetsWithTags();
         assertThat(distributionSetTagRepository.findAll()).as("Wrong size of tags created").hasSize(tags.size());
     }
 
-    @Step
     private void verifyExpectedFilteredDistributionSets(final DistributionSetFilter.DistributionSetFilterBuilder distributionSetFilterBuilder,
             final Stream<Collection<DistributionSet>> expectedFilteredDistributionSets) {
         final Collection<Long> retrievedFilteredDsIds = distributionSetManagement

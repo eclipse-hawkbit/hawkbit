@@ -17,21 +17,23 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Description;
 
-@Story("Retrieve all open action ids")
-@Description("Tests for the MgmtTargetAssignmentResponseBody")
+/**
+ * Feature: Tests for the MgmtTargetAssignmentResponseBody<br/>
+ * Story: Retrieve all open action ids
+ */
 class MgmtTargetAssignmentResponseBodyTest {
 
     private static final List<Long> ASSIGNED_ACTIONS = Arrays.asList(4L, 5L, 6L);
     private static final int ALREADY_ASSIGNED_COUNT = 3;
     private static final String CONTROLLER_ID = "target";
 
-    @Test
-    @Description("Tests that the ActionIds are serialized correctly in MgmtTargetAssignmentResponseBody")
-    void testActionIdsSerialization() throws IOException {
+    /**
+     * Tests that the ActionIds are serialized correctly in MgmtTargetAssignmentResponseBody
+     */
+    @Test    void testActionIdsSerialization() throws IOException {
         final MgmtTargetAssignmentResponseBody responseBody = generateResponseBody();
         final ObjectMapper objectMapper = new ObjectMapper();
         final String responseBodyAsString = objectMapper.writeValueAsString(responseBody);

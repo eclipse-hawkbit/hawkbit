@@ -12,9 +12,6 @@ package org.eclipse.hawkbit.app.mgmt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.TestPropertySource;
@@ -22,25 +19,30 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = {
         "hawkbit.server.security.allowedHostNames=localhost",
         "hawkbit.server.security.httpFirewallIgnoredPaths=/index.html" })
-@Feature("Integration Test - Security")
-@Story("Allowed Host Names")
+/**
+ * Feature: Integration Test - Security<br/>
+ * Story: Allowed Host Names
+ */
 class AllowedHostNamesTest extends AbstractSecurityTest {
 
-    @Test
-    @Description("Tests whether a RequestRejectedException is thrown when not allowed host is used")
-    void allowedHostNameWithNotAllowedHost() throws Exception {
+    /**
+     * Tests whether a RequestRejectedException is thrown when not allowed host is used
+     */
+    @Test    void allowedHostNameWithNotAllowedHost() throws Exception {
         mvc.perform(get("/").header(HttpHeaders.HOST, "www.google.com")).andExpect(status().isBadRequest());
     }
 
-    @Test
-    @Description("Tests whether request is redirected when allowed host is used")
-    void allowedHostNameWithAllowedHost() throws Exception {
+    /**
+     * Tests whether request is redirected when allowed host is used
+     */
+    @Test    void allowedHostNameWithAllowedHost() throws Exception {
         mvc.perform(get("/").header(HttpHeaders.HOST, "localhost")).andExpect(status().is3xxRedirection());
     }
 
-    @Test
-    @Description("Tests whether request without allowed host name and with ignored path end up with a client error")
-    void notAllowedHostnameWithIgnoredPath() throws Exception {
+    /**
+     * Tests whether request without allowed host name and with ignored path end up with a client error
+     */
+    @Test    void notAllowedHostnameWithIgnoredPath() throws Exception {
         mvc.perform(get("/index.html").header(HttpHeaders.HOST, "www.google.com"))
                 .andExpect(status().is4xxClientError());
     }
