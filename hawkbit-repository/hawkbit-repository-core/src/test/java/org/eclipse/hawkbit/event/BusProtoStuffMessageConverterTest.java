@@ -15,7 +15,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 
-import io.qameta.allure.Description;
 import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -45,9 +44,10 @@ class BusProtoStuffMessageConverterTest {
         when(targetMock.getId()).thenReturn(1L);
     }
 
-    @Test
-    @Description("Verifies that the TargetCreatedEvent can be successfully serialized and deserialized")
-    void successfullySerializeAndDeserializeEvent() {
+    /**
+     * Verifies that the TargetCreatedEvent can be successfully serialized and deserialized
+     */
+    @Test    void successfullySerializeAndDeserializeEvent() {
         final TargetCreatedEvent targetCreatedEvent = new TargetCreatedEvent(targetMock, "1");
         // serialize
         final Object serializedEvent = underTest.convertToInternal(targetCreatedEvent,
@@ -62,9 +62,10 @@ class BusProtoStuffMessageConverterTest {
                 .isEqualTo(targetCreatedEvent);
     }
 
-    @Test
-    @Description("Verifies that a MessageConversationException is thrown on missing event-type information encoding")
-    void missingEventTypeMappingThrowsMessageConversationException() {
+    /**
+     * Verifies that a MessageConversationException is thrown on missing event-type information encoding
+     */
+    @Test    void missingEventTypeMappingThrowsMessageConversationException() {
         final DummyRemoteEntityEvent dummyEvent = new DummyRemoteEntityEvent(targetMock, "applicationId");
         final MessageHeaders messageHeaders = new MessageHeaders(new HashMap<>());
 

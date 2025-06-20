@@ -20,9 +20,6 @@ import java.util.Map;
 
 import jakarta.persistence.criteria.Predicate;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -41,13 +38,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-@Feature("Component Tests - Access Control")
-@Story("Test Distribution Set Access Controller")
+/**
+ * Feature: Component Tests - Access Control<br/>
+ * Story: Test Distribution Set Access Controller
+ */
 class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
 
-    @Test
-    @Description("Verifies read access rules for distribution sets")
-    void verifyDistributionSetReadOperations() {
+    /**
+     * Verifies read access rules for distribution sets
+     */
+    @Test    void verifyDistributionSetReadOperations() {
         permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
         permitAllOperations(AccessController.Operation.UPDATE);
@@ -116,9 +116,10 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
                 .as("Action is hidden.").isInstanceOf(InsufficientPermissionException.class);
     }
 
-    @Test
-    @Description("Verifies read access rules for distribution sets")
-    void verifyDistributionSetUpdates() {
+    /**
+     * Verifies read access rules for distribution sets
+     */
+    @Test    void verifyDistributionSetUpdates() {
         // permit all operations first to prepare test setup
         permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);

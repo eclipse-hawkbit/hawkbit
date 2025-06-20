@@ -15,15 +15,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEventTest;
 
 /**
  * Test the remote entity events.
+  * <p/>
+ * Feature: Component Tests - Repository<br/>
+ * Story: Entity Events
  */
-@Feature("Component Tests - Repository")
-@Story("Entity Events")
 public abstract class AbstractRemoteEntityEventTest<E> extends AbstractRemoteEventTest {
 
     protected RemoteEntityEvent<?> assertAndCreateRemoteEvent(final Class<? extends RemoteEntityEvent<?>> eventType) {

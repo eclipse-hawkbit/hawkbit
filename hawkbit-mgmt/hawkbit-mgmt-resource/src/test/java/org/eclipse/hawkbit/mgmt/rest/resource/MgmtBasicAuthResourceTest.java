@@ -19,9 +19,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Base64;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
@@ -74,8 +71,10 @@ import org.springframework.web.context.WebApplicationContext;
 @ContextConfiguration(classes = { MgmtApiConfiguration.class, RestConfiguration.class,
         RepositoryApplicationConfiguration.class, TestConfiguration.class })
 @Import(TestChannelBinderConfiguration.class)
-@Feature("Component Tests - Management API")
-@Story("Basic auth Userinfo Resource")
+/**
+ * Feature: Component Tests - Management API<br/>
+ * Story: Basic auth Userinfo Resource
+ */
 class MgmtBasicAuthResourceTest {
 
     @Autowired
@@ -85,9 +84,10 @@ class MgmtBasicAuthResourceTest {
     private static final String DEFAULT_TENANT = "DEFAULT";
     private static final String TEST_USER = "testUser";
 
-    @Test
-    @Description("Test of userinfo api with basic auth validation")
-    @WithUser(principal = TEST_USER, authorities = {"READ", "WRITE", "DELETE"})
+    /**
+     * Test of userinfo api with basic auth validation
+     */
+    @Test    @WithUser(principal = TEST_USER, authorities = {"READ", "WRITE", "DELETE"})
     void validateBasicAuthWithUserDetails() throws Exception {
         withSecurityMock().perform(get(MgmtRestConstants.AUTH_V1_REQUEST_MAPPING))
                 .andDo(MockMvcResultPrinter.print())
@@ -100,9 +100,10 @@ class MgmtBasicAuthResourceTest {
                 .andExpect(jsonPath("$.permissions", hasItems("READ", "WRITE", "DELETE")));
     }
 
-    @Test
-    @Description("Test of userinfo api with invalid basic auth fails")
-    void validateBasicAuthFailsWithInvalidCredentials() throws Exception {
+    /**
+     * Test of userinfo api with invalid basic auth fails
+     */
+    @Test    void validateBasicAuthFailsWithInvalidCredentials() throws Exception {
         defaultMock.perform(get(MgmtRestConstants.AUTH_V1_REQUEST_MAPPING)
                         .header(HttpHeaders.AUTHORIZATION, getBasicAuth("wrongUser", "wrongSecret")))
                 .andDo(MockMvcResultPrinter.print())

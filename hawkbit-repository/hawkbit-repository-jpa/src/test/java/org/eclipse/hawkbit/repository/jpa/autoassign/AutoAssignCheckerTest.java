@@ -21,9 +21,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -42,8 +39,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.transaction.PlatformTransactionManager;
 
-@Feature("Unit Tests - Repository")
-@Story("Auto assign checker")
+/**
+ * Feature: Unit Tests - Repository<br/>
+ * Story: Auto assign checker
+ */
 @ExtendWith(MockitoExtension.class)
 class AutoAssignCheckerTest {
 
@@ -66,9 +65,10 @@ class AutoAssignCheckerTest {
                 transactionManager, contextAware);
     }
 
-    @Test
-    @Description("Single device check triggers update for matching auto assignment filter.")
-    void checkForDevice() {
+    /**
+     * Single device check triggers update for matching auto assignment filter.
+     */
+    @Test    void checkForDevice() {
         mockRunningAsNonSystem();
         final String target = getRandomString();
         final long ds = getRandomLong();

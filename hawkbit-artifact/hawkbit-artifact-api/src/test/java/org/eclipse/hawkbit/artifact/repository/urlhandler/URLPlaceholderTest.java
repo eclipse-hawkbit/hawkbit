@@ -11,13 +11,12 @@ package org.eclipse.hawkbit.artifact.repository.urlhandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 
-@Feature("Unit Tests - Artifact URL Handler")
-@Story("URL placeholder tests")
+/**
+ * Feature: Unit Tests - Artifact URL Handler<br/>
+ * Story: URL placeholder tests
+ */
 class URLPlaceholderTest {
 
     private final URLPlaceholder.SoftwareData softwareData;
@@ -28,9 +27,10 @@ class URLPlaceholderTest {
         this.placeholder = new URLPlaceholder("SuperCorp", 123L, "Super-1", 1L, softwareData);
     }
 
-    @Test
-    @Description("Same object should be equal")
-    // Exception squid:S5785 - JUnit assertTrue/assertFalse should be simplified to the corresponding dedicated assertion
+    /**
+     * Same object should be equal
+     */
+    @Test    // Exception squid:S5785 - JUnit assertTrue/assertFalse should be simplified to the corresponding dedicated assertion
     // Need to test the equals method and need to bypass magic logic in utility classes
     @SuppressWarnings({ "squid:S5838" })
     void sameObjectShouldBeEqual() {
@@ -38,9 +38,10 @@ class URLPlaceholderTest {
         assertThat(placeholder.equals(placeholder)).isTrue();
     }
 
-    @Test
-    @Description("Different object should not be equal")
-    @SuppressWarnings({ "squid:S5838" })
+    /**
+     * Different object should not be equal
+     */
+    @Test    @SuppressWarnings({ "squid:S5838" })
     void differentObjectShouldNotBeEqual() {
         final URLPlaceholder.SoftwareData softwareData2 = new URLPlaceholder.SoftwareData(2L, "file.txt", 123L, "someHash123");
         final URLPlaceholder placeholder2 = new URLPlaceholder("SuperCorp", 123L, "Super-2", 2L, softwareData2);
@@ -53,18 +54,20 @@ class URLPlaceholderTest {
         assertThat(placeholder.equals(placeholderWithOtherSoftwareData)).isFalse();
     }
 
-    @Test
-    @Description("Different objects with same properties should be equal")
-    void differentObjectsWithSamePropertiesShouldBeEqual() {
+    /**
+     * Different objects with same properties should be equal
+     */
+    @Test    void differentObjectsWithSamePropertiesShouldBeEqual() {
         final URLPlaceholder placeholderWithSameProperties = new URLPlaceholder(placeholder.getTenant(), placeholder.getTenantId(),
                 placeholder.getControllerId(), placeholder.getTargetId(), softwareData);
         assertThat(placeholder).isEqualTo(placeholderWithSameProperties);
         assertThat(placeholderWithSameProperties).isEqualTo(placeholder);
     }
 
-    @Test
-    @Description("Should not equal null")
-    // Exception squid:S5785 - JUnit assertTrue/assertFalse should be simplified to
+    /**
+     * Should not equal null
+     */
+    @Test    // Exception squid:S5785 - JUnit assertTrue/assertFalse should be simplified to
     // the corresponding dedicated assertion
     // Need to test the equals method and need to bypass magic logic in utility
     // classes
@@ -74,9 +77,10 @@ class URLPlaceholderTest {
         assertThat(softwareData.equals(null)).isFalse();
     }
 
-    @Test
-    @Description("HashCode should not change")
-    void hashCodeShouldNotChange() {
+    /**
+     * HashCode should not change
+     */
+    @Test    void hashCodeShouldNotChange() {
         final URLPlaceholder placeholderWithSameProperties = new URLPlaceholder(placeholder.getTenant(), placeholder.getTenantId(),
                 placeholder.getControllerId(), placeholder.getTargetId(), softwareData);
         assertThat(placeholder).hasSameHashCodeAs(placeholder).hasSameHashCodeAs(placeholderWithSameProperties);

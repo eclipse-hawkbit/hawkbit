@@ -27,26 +27,27 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.jpa.domain.Specification;
 
-@Feature("Unit Tests - Repository")
-@Story("Specifications builder")
+/**
+ * Feature: Unit Tests - Repository<br/>
+ * Story: Specifications builder
+ */
 class SpecificationsBuilderTest {
 
-    @Test
-    @Description("Test the combination of specs on an empty list which returns null")
-    void combineWithAndEmptyList() {
+    /**
+     * Test the combination of specs on an empty list which returns null
+     */
+    @Test    void combineWithAndEmptyList() {
         final List<Specification<Object>> specList = Collections.emptyList();
         assertThat(SpecificationsBuilder.combineWithAnd(specList)).isNull();
     }
 
-    @Test
-    @Description("Test the combination of specs on an immutable list with one entry")
-    void combineWithAndSingleImmutableList() {
+    /**
+     * Test the combination of specs on an immutable list with one entry
+     */
+    @Test    void combineWithAndSingleImmutableList() {
         final Specification<Object> spec = (root, query, cb) -> cb.equal(root.get("field1"), "testValue");
         final List<Specification<Object>> specList = Collections.singletonList(spec);
         final Specification<Object> specifications = SpecificationsBuilder.combineWithAnd(specList);
@@ -68,9 +69,10 @@ class SpecificationsBuilderTest {
 
     }
 
-    @Test
-    @Description("Test the combination of specs on a list with multiple entries")
-    void combineWithAndList() {
+    /**
+     * Test the combination of specs on a list with multiple entries
+     */
+    @Test    void combineWithAndList() {
         final Specification<Object> spec1 = (root, query, cb) -> cb.equal(root.get("field1"), "testValue1");
         final Specification<Object> spec2 = (root, query, cb) -> cb.equal(root.get("field2"), "testValue2");
 

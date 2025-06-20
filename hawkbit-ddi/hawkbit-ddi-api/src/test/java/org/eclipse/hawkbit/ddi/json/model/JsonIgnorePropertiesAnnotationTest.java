@@ -18,21 +18,20 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 
 /**
  * Check DDI api model classes for '@JsonIgnoreProperties' annotation
+  * <p/>
+ * Feature: Unit Tests - Direct Device Integration API<br/>
+ * Story: Serialization of DDI api Models
  */
-@Feature("Unit Tests - Direct Device Integration API")
-@Story("Serialization of DDI api Models")
 class JsonIgnorePropertiesAnnotationTest {
 
-    @Test
-    @Description("This test verifies that all model classes within the 'org.eclipse.hawkbit.ddi.json.model' package are annotated with '@JsonIgnoreProperties(ignoreUnknown = true)'")
-    void shouldCheckAnnotationsForAllModelClasses() {
+    /**
+     * This test verifies that all model classes within the 'org.eclipse.hawkbit.ddi.json.model' package are annotated with '@JsonIgnoreProperties(ignoreUnknown = true)'
+     */
+    @Test    void shouldCheckAnnotationsForAllModelClasses() {
         final String packageName = getClass().getPackage().getName();
         try (final ScanResult scanResult = new ClassGraph().acceptPackages(packageName).scan()) {
             final List<? extends Class<?>> matchingClasses = scanResult.getAllClasses()

@@ -15,13 +15,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 
-@Feature("Component Tests - TotalTargetCountStatus")
-@Story("TotalTargetCountStatus should correctly present finished DOWNLOAD_ONLY actions")
+/**
+ * Feature: Component Tests - TotalTargetCountStatus<br/>
+ * Story: TotalTargetCountStatus should correctly present finished DOWNLOAD_ONLY actions
+ */
 class TotalTargetCountStatusTest {
 
     private final List<TotalTargetCountActionStatus> targetCountActionStatuses = Arrays.asList(
@@ -36,9 +35,10 @@ class TotalTargetCountStatusTest {
             new TotalTargetCountActionStatus(Action.Status.CANCELING, 9L),
             new TotalTargetCountActionStatus(Action.Status.DOWNLOADED, 10L));
 
+    /**
+     * Different Action Statuses should be correctly mapped to the corresponding TotalTargetCountStatus.Status
+     */
     @Test
-    @Description("Different Action Statuses should be correctly mapped to the corresponding " +
-            "TotalTargetCountStatus.Status")
     void shouldCorrectlyMapActionStatuses() {
         TotalTargetCountStatus status = new TotalTargetCountStatus(targetCountActionStatuses, 55L,
                 Action.ActionType.FORCED);
@@ -51,9 +51,11 @@ class TotalTargetCountStatusTest {
         assertThat(status.getFinishedPercent()).isEqualTo((float) 100 * 3 / 55);
     }
 
+    /**
+     * When an empty list is passed to the TotalTargetCountStatus, all actions should be displayed as 
+     * NOTSTARTED
+     */
     @Test
-    @Description("When an empty list is passed to the TotalTargetCountStatus, all actions should be displayed as " +
-            "NOTSTARTED")
     void shouldCorrectlyMapActionStatusesToNotStarted() {
         TotalTargetCountStatus status = new TotalTargetCountStatus(Collections.emptyList(), 55L,
                 Action.ActionType.FORCED);
@@ -66,9 +68,10 @@ class TotalTargetCountStatusTest {
         assertThat(status.getFinishedPercent()).isZero();
     }
 
-    @Test
-    @Description("DownloadOnly actions should be displayed as FINISHED when they have ActionStatus.DOWNLOADED")
-    void shouldCorrectlyMapActionStatusesInDownloadOnlyCase() {
+    /**
+     * DownloadOnly actions should be displayed as FINISHED when they have ActionStatus.DOWNLOADED
+     */
+    @Test    void shouldCorrectlyMapActionStatusesInDownloadOnlyCase() {
         TotalTargetCountStatus status = new TotalTargetCountStatus(targetCountActionStatuses, 55L,
                 Action.ActionType.DOWNLOAD_ONLY);
         assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED)).isEqualTo(1L);

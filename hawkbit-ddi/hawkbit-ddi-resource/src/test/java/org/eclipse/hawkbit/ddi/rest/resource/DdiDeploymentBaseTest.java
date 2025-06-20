@@ -26,9 +26,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import com.jayway.jsonpath.JsonPath;
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.assertj.core.api.Condition;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
@@ -70,9 +67,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 /**
  * Test deployment base from the controller.
+  * <p/>
+ * Feature: Component Tests - Direct Device Integration API<br/>
+ * Story: Deployment Action Resource
  */
-@Feature("Component Tests - Direct Device Integration API")
-@Story("Deployment Action Resource")
 class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
     private static final String DEFAULT_CONTROLLER_ID = "4712";
@@ -82,9 +80,10 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     @Autowired
     private ActionStatusRepository actionStatusRepository;
 
-    @Test
-    @Description("Ensure that the deployment resource is available as CBOR")
-    void deploymentResourceCbor() throws Exception {
+    /**
+     * Ensure that the deployment resource is available as CBOR
+     */
+    @Test    void deploymentResourceCbor() throws Exception {
         final Target target = testdataFactory.createTarget();
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("");
 
@@ -109,17 +108,19 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 status().isOk());
     }
 
-    @Test
-    @Description("Ensures that artifacts are not found, when software module does not exists.")
-    void artifactsNotFound() throws Exception {
+    /**
+     * Ensures that artifacts are not found, when software module does not exists.
+     */
+    @Test    void artifactsNotFound() throws Exception {
         final Target target = testdataFactory.createTarget();
         performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.APPLICATION_JSON, status().isNotFound(), tenantAware.getCurrentTenant(),
                 target.getControllerId(), "1");
     }
 
-    @Test
-    @Description("Ensures that artifacts are found, when software module exists.")
-    void artifactsExists() throws Exception {
+    /**
+     * Ensures that artifacts are found, when software module exists.
+     */
+    @Test    void artifactsExists() throws Exception {
         final Target target = testdataFactory.createTarget();
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("");
 
@@ -136,9 +137,10 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.[?(@.filename=='filename2')]", hasSize(1)));
     }
 
-    @Test
-    @Description("Forced deployment to a controller. Checks if the resource response payload for a given deployment is as expected.")
-    void deploymentForceAction() throws Exception {
+    /**
+     * Forced deployment to a controller. Checks if the resource response payload for a given deployment is as expected.
+     */
+    @Test    void deploymentForceAction() throws Exception {
         // Prepare test data
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
@@ -193,9 +195,10 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(actionStatusMessage.getStatus()).isEqualTo(Status.RETRIEVED);
     }
 
-    @Test
-    @Description("Checks that the deploymentBase URL changes when the action is switched from soft to forced in TIMEFORCED case.")
-    void changeEtagIfActionSwitchesFromSoftToForced() throws Exception {
+    /**
+     * Checks that the deploymentBase URL changes when the action is switched from soft to forced in TIMEFORCED case.
+     */
+    @Test    void changeEtagIfActionSwitchesFromSoftToForced() throws Exception {
         // Prepare test data
         final Target target = testdataFactory.createTarget(DEFAULT_CONTROLLER_ID);
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
@@ -229,9 +232,10 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .toString()).isNotEqualTo(urlBeforeSwitch);
     }
 
-    @Test
-    @Description("Attempt/soft deployment to a controller. Checks if the resource response payload for a given deployment is as expected.")
-    void deploymentAttemptAction() throws Exception {
+    /**
+     * Attempt/soft deployment to a controller. Checks if the resource response payload for a given deployment is as expected.
+     */
+    @Test    void deploymentAttemptAction() throws Exception {
         // Prepare test data
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
@@ -292,9 +296,10 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(actionStatusMessage.getStatus()).isEqualTo(Status.RETRIEVED);
     }
 
-    @Test
-    @Description("Attempt/soft deployment to a controller including automated switch to hard. Checks if the resource response payload for a given deployment is as expected.")
-    void deploymentAutoForceAction() throws Exception {
+    /**
+     * Attempt/soft deployment to a controller including automated switch to hard. Checks if the resource response payload for a given deployment is as expected.
+     */
+    @Test    void deploymentAutoForceAction() throws Exception {
         // Prepare test data
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
@@ -350,9 +355,10 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(actionStatusMessage.getStatus()).isEqualTo(Status.RETRIEVED);
     }
 
-    @Test
-    @Description("Test download-only (forced + skip) deployment to a controller. Checks if the resource response payload for a given deployment is as expected.")
-    void deploymentDownloadOnlyAction() throws Exception {
+    /**
+     * Test download-only (forced + skip) deployment to a controller. Checks if the resource response payload for a given deployment is as expected.
+     */
+    @Test    void deploymentDownloadOnlyAction() throws Exception {
         // Prepare test data
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
@@ -411,9 +417,10 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(actionStatusMessage.getStatus()).isEqualTo(Status.RETRIEVED);
     }
 
-    @Test
-    @Description("Test various invalid access attempts to the deployment resource und the expected behaviour of the server.")
-    void badDeploymentAction() throws Exception {
+    /**
+     * Test various invalid access attempts to the deployment resource und the expected behaviour of the server.
+     */
+    @Test    void badDeploymentAction() throws Exception {
         final Target target = testdataFactory.createTarget(DEFAULT_CONTROLLER_ID);
 
         // not allowed methods
@@ -455,9 +462,11 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(status().isNotAcceptable());
     }
 
+    /**
+     * The server protects itself against to many feedback upload attempts. The test verifies that
+     * it is not possible to exceed the configured maximum number of feedback uploads.
+     */
     @Test
-    @Description("The server protects itself against to many feedback upload attempts. The test verifies that " +
-            "it is not possible to exceed the configured maximum number of feedback uploads.")
     void tooMuchDeploymentActionFeedback() throws Exception {
         final Target target = testdataFactory.createTarget(DEFAULT_CONTROLLER_ID);
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -474,9 +483,11 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action.getId(), feedback, status().isForbidden());
     }
 
+    /**
+     * The server protects itself against too large feedback bodies. The test verifies that 
+     * it is not possible to exceed the configured maximum number of feedback details.
+     */
     @Test
-    @Description("The server protects itself against too large feedback bodies. The test verifies that " +
-            "it is not possible to exceed the configured maximum number of feedback details.")
     void tooMuchDeploymentActionMessagesInFeedback() throws Exception {
         final Target target = testdataFactory.createTarget(DEFAULT_CONTROLLER_ID);
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -493,9 +504,10 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action.getId(), feedback, status().isForbidden());
     }
 
-    @Test
-    @Description("Multiple uploads of deployment status feedback to the server.")
-    void multipleDeploymentActionFeedback() throws Exception {
+    /**
+     * Multiple uploads of deployment status feedback to the server.
+     */
+    @Test    void multipleDeploymentActionFeedback() throws Exception {
         testdataFactory.createTarget(DEFAULT_CONTROLLER_ID);
         testdataFactory.createTarget("4713");
         testdataFactory.createTarget("4714");
@@ -533,9 +545,10 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertStatusMessagesCount(6);
     }
 
-    @Test
-    @Description("Verifies that an update action is correctly set to error if the controller provides error feedback.")
-    void rootRsSingleDeploymentActionWithErrorFeedback() throws Exception {
+    /**
+     * Verifies that an update action is correctly set to error if the controller provides error feedback.
+     */
+    @Test    void rootRsSingleDeploymentActionWithErrorFeedback() throws Exception {
         DistributionSet ds = testdataFactory.createDistributionSet("");
         final Target savedTarget = testdataFactory.createTarget(DEFAULT_CONTROLLER_ID);
 
@@ -569,9 +582,10 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .haveAtLeast(1, new ActionStatusCondition(Status.FINISHED));
     }
 
-    @Test
-    @Description("Verifies that the controller can provided as much feedback entries as necessary as long as it is in the configured limits.")
-    void rootRsSingleDeploymentActionFeedback() throws Exception {
+    /**
+     * Verifies that the controller can provided as much feedback entries as necessary as long as it is in the configured limits.
+     */
+    @Test    void rootRsSingleDeploymentActionFeedback() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         final Long actionId = getFirstAssignedActionId(
                 assignDistributionSet(ds,
@@ -609,9 +623,10 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(targetManagement.findByAssignedDistributionSet(ds.getId(), PAGE)).hasSize(1);
     }
 
-    @Test
-    @Description("Various forbidden request attempts on the feedback resource. Ensures correct answering behaviour as expected to these kind of errors.")
-    void badDeploymentActionFeedback() throws Exception {
+    /**
+     * Various forbidden request attempts on the feedback resource. Ensures correct answering behaviour as expected to these kind of errors.
+     */
+    @Test    void badDeploymentActionFeedback() throws Exception {
         final DistributionSet savedSet = testdataFactory.createDistributionSet("");
         final DistributionSet savedSet2 = testdataFactory.createDistributionSet("1");
 
@@ -647,9 +662,10 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(status().isMethodNotAllowed());
     }
 
-    @Test
-    @Description("Ensures that an invalid id in feedback body returns a bad request.")
-    @ExpectEvents({
+    /**
+     * Ensures that an invalid id in feedback body returns a bad request.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -668,9 +684,10 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         postDeploymentFeedback("1080", action.getId(), invalidFeedback, status().isBadRequest());
     }
 
-    @Test
-    @Description("Ensures that a missing feedback result in feedback body returns a bad request.")
-    @ExpectEvents({
+    /**
+     * Ensures that a missing feedback result in feedback body returns a bad request.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -693,9 +710,10 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.exceptionClass", equalTo(MessageNotReadableException.class.getName())));
     }
 
-    @Test
-    @Description("Ensures that a missing finished result in feedback body returns a bad request.")
-    @ExpectEvents({
+    /**
+     * Ensures that a missing finished result in feedback body returns a bad request.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),

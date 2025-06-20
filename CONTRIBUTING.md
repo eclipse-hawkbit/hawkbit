@@ -42,15 +42,13 @@ So we kindly ask contributors:
 
 ### Test documentation
 
-Please document the test cases that you contribute by means of [Allure](https://docs.qameta.io/allure/) annotations and
-proper test method naming.
-
-All test classes are documented with [Allure's](https://docs.qameta.io/allure/#_behaviours_mapping) **@Feature** and *
-*@Story** annotations in the following format:
+You could document the test cases using the following format:
 
 ```java
-@Feature("TEST_TYPE - HAWKBIT_COMPONENT")
-@Story("Test class description")
+/**
+ * Feature: TEST_TYPE - HAWKBIT_COMPONENT<br/>
+ * Story: Test class description
+ */
 ```
 
 Test types are:
@@ -68,14 +66,6 @@ Examples for hawkBit components:
 * Device Management Federation API
 * Repository
 * Security
-
-```java
-@Feature("Component Tests - Management API")
-@Story("Distribution Set Type Resource")
-```
-
-In addition all test method's name describes in **camel case** what the test is all about and has in addition a long
-description in Allures **@Description** annotation.
 
 ## Legal considerations for your contribution
 

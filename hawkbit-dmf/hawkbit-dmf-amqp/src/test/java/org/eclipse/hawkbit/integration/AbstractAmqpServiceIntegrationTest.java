@@ -22,7 +22,6 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import com.cronutils.utils.StringUtils;
-import io.qameta.allure.Step;
 import org.assertj.core.api.HamcrestCondition;
 import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
@@ -254,7 +253,6 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
         return replyMessage;
     }
 
-    @Step
     protected void registerAndAssertTargetWithExistingTenant(final String controllerId) {
         registerAndAssertTargetWithExistingTenant(controllerId, 1);
     }
@@ -372,7 +370,6 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
 
     }
 
-    @Step
     protected void assertUpdateAttributes(final String controllerId, final Map<String, String> attributes) {
         waitUntilIsPresent(() -> controllerManagement.getByControllerId(controllerId));
 
@@ -393,7 +390,6 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
         return AmqpSettings.DMF_EXCHANGE;
     }
 
-    @Step
     protected DistributionSet createTargetAndDistributionSetAndAssign(final String controllerId, final Action.ActionType actionType) {
         registerAndAssertTargetWithExistingTenant(controllerId);
 

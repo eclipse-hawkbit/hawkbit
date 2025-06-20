@@ -12,9 +12,6 @@ package org.eclipse.hawkbit.security.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.security.SecurityContextSerializer;
@@ -28,8 +25,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@Feature("Unit Tests - Security")
-@Story("Security header authenticator")
+/**
+ * Feature: Unit Tests - Security<br/>
+ * Story: Security header authenticator
+ */
 @ExtendWith(MockitoExtension.class)
 class SecurityHeaderAuthenticatorTest {
 
@@ -72,9 +71,10 @@ class SecurityHeaderAuthenticatorTest {
         );
     }
 
-    @Test
-    @Description("Tests successful authentication with multiple a single hashes")
-    void testWithSingleKnownHash() {
+    /**
+     * Tests successful authentication with multiple a single hashes
+     */
+    @Test    void testWithSingleKnownHash() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(SINGLE_HASH);
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class))
@@ -88,9 +88,10 @@ class SecurityHeaderAuthenticatorTest {
                 .hasFieldOrPropertyWithValue("principal", CA_COMMON_NAME_VALUE);
     }
 
-    @Test
-    @Description("Tests successful authentication with multiple hashes")
-    void testWithMultipleKnownHashes() {
+    /**
+     * Tests successful authentication with multiple hashes
+     */
+    @Test    void testWithMultipleKnownHashes() {
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class))
                 .thenReturn(CONFIG_VALUE_MULTI_HASH);
@@ -109,9 +110,10 @@ class SecurityHeaderAuthenticatorTest {
                 .hasFieldOrPropertyWithValue("principal", CA_COMMON_NAME_VALUE);
     }
 
-    @Test
-    @Description("Tests that if the hash is unknown, the authentication fails")
-    void testWithUnknownHash() {
+    /**
+     * Tests that if the hash is unknown, the authentication fails
+     */
+    @Test    void testWithUnknownHash() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(UNKNOWN_HASH);
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class))
@@ -123,9 +125,10 @@ class SecurityHeaderAuthenticatorTest {
         assertThat(authenticator.authenticate(securityToken)).isNull();
     }
 
-    @Test
-    @Description("Tests that if CN doesn't match the CN in the security token, the authentication fails")
-    void testWithNonMatchingCN() {
+    /**
+     * Tests that if CN doesn't match the CN in the security token, the authentication fails
+     */
+    @Test    void testWithNonMatchingCN() {
         final ControllerSecurityToken securityToken = new ControllerSecurityToken("DEFAULT", "otherControllerID");
         securityToken.putHeader(CA_COMMON_NAME, CA_COMMON_NAME_VALUE);
         securityToken.putHeader(X_SSL_ISSUER_HASH_1, SINGLE_HASH);
@@ -133,15 +136,17 @@ class SecurityHeaderAuthenticatorTest {
         assertThat(authenticator.authenticate(securityToken)).isNull();
     }
 
-    @Test
-    @Description("Tests that if the hash miss, the authentication fails")
-    void testWithoutHash() {
+    /**
+     * Tests that if the hash miss, the authentication fails
+     */
+    @Test    void testWithoutHash() {
         assertThat(authenticator.authenticate(new ControllerSecurityToken("DEFAULT", CA_COMMON_NAME_VALUE))).isNull();
     }
 
-    @Test
-    @Description("Tests that if disabled, the authentication fails")
-    void testWithSingleKnownHashButDisabled() {
+    /**
+     * Tests that if disabled, the authentication fails
+     */
+    @Test    void testWithSingleKnownHashButDisabled() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(SINGLE_HASH);
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED, Boolean.class))

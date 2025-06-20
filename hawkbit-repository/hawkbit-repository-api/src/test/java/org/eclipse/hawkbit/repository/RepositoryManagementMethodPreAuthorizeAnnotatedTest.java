@@ -20,22 +20,22 @@ import java.util.Set;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.prepost.PreAuthorize;
 
-@Feature("Unit Tests - Repository")
-@Story("Security Test")
+/**
+ * Feature: Unit Tests - Repository<br/>
+ * Story: Security Test
+ */
 class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
 
     // if some methods are to be excluded
     private static final Set<Method> METHOD_SECURITY_EXCLUSION = new HashSet<>();
 
-    @Test
-    @Description("Verifies that repository methods are @PreAuthorize annotated")
-    void repositoryManagementMethodsArePreAuthorizedAnnotated() {
+    /**
+     * Verifies that repository methods are @PreAuthorize annotated
+     */
+    @Test    void repositoryManagementMethodsArePreAuthorizedAnnotated() {
         final String packageName = getClass().getPackage().getName();
         try (final ScanResult scanResult = new ClassGraph().acceptPackages(packageName).scan()) {
             final List<? extends Class<?>> matchingClasses = scanResult.getAllClasses()

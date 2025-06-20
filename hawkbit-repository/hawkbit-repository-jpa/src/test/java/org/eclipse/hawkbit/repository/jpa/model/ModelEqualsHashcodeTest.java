@@ -11,20 +11,20 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.junit.jupiter.api.Test;
 
-@Feature("Unit Tests - Repository")
-@Story("Repository Model")
+/**
+ * Feature: Unit Tests - Repository<br/>
+ * Story: Repository Model
+ */
 class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
 
-    @Test
-    @Description("Verifies that different objects even with identical primary key, version and tenant return different hash codes.")
-    void differentEntitiesReturnDifferentHashCodes() {
+    /**
+     * Verifies that different objects even with identical primary key, version and tenant return different hash codes.
+     */
+    @Test    void differentEntitiesReturnDifferentHashCodes() {
         assertThat(new JpaAction().hashCode()).as("action should have different hashcode than action status")
                 .isNotEqualTo(new JpaActionStatus().hashCode());
         assertThat(new JpaDistributionSet().hashCode())
@@ -38,9 +38,10 @@ class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
                 .isNotEqualTo(new JpaActionStatus().hashCode());
     }
 
-    @Test
-    @Description("Verifies that different object even with identical primary key, version and tenant are not equal.")
-    void differentEntitiesAreNotEqual() {
+    /**
+     * Verifies that different object even with identical primary key, version and tenant are not equal.
+     */
+    @Test    void differentEntitiesAreNotEqual() {
         assertThat(new JpaAction().equals(new JpaActionStatus())).as("action equals action status").isFalse();
         assertThat(new JpaDistributionSet().equals(new JpaSoftwareModule()))
                 .as("Distribution set equals software module").isFalse();
@@ -50,9 +51,10 @@ class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
                 .as("Distribution set type equals action status").isFalse();
     }
 
-    @Test
-    @Description("Verifies that updated entities are not equal.")
-    void changedEntitiesAreNotEqual() {
+    /**
+     * Verifies that updated entities are not equal.
+     */
+    @Test    void changedEntitiesAreNotEqual() {
         final SoftwareModuleType type = softwareModuleTypeManagement
                 .create(entityFactory.softwareModuleType().create().key("test").name("test"));
         assertThat(type).as("persited entity is not equal to regular object")
@@ -63,9 +65,10 @@ class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
         assertThat(type).as("Changed entity is not equal to the previous version").isNotEqualTo(updated);
     }
 
-    @Test
-    @Description("Verify that no proxy of the entity manager has an influence on the equals or hashcode result.")
-    void managedEntityIsEqualToUnamangedObjectWithSameKey() {
+    /**
+     * Verify that no proxy of the entity manager has an influence on the equals or hashcode result.
+     */
+    @Test    void managedEntityIsEqualToUnamangedObjectWithSameKey() {
         final SoftwareModuleType type = softwareModuleTypeManagement.create(
                 entityFactory.softwareModuleType().create().key("test").name("test").description("test"));
 

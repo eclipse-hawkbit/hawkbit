@@ -28,10 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
@@ -48,8 +44,10 @@ import org.springframework.test.context.ActiveProfiles;
  * Test config data from the controller.
  */
 @ActiveProfiles({ "im", "test" })
-@Feature("Component Tests - Direct Device Integration API")
-@Story("Config Data Resource")
+/**
+ * Feature: Component Tests - Direct Device Integration API<br/>
+ * Story: Config Data Resource
+ */
 class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
     private static final String TARGET1_ID = "4717";
@@ -57,9 +55,10 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
     private static final String TARGET2_ID = "4718";
     private static final String TARGET2_CONFIG_DATA_PATH = "/{tenant}/controller/v1/" + TARGET2_ID + "/configData";
 
-    @Test
-    @Description("Verify that config data can be uploaded as CBOR")
-    void putConfigDataAsCbor() throws Exception {
+    /**
+     * Verify that config data can be uploaded as CBOR
+     */
+    @Test    void putConfigDataAsCbor() throws Exception {
         testdataFactory.createTarget(TARGET1_ID);
 
         final Map<String, String> attributes = new HashMap<>();
@@ -73,9 +72,11 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         assertThat(targetManagement.getControllerAttributes(TARGET1_ID)).isEqualTo(attributes);
     }
 
+
     @Test
-    @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) " +
-            "are requested only once from the device.")
+    /**
+     * We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) are requested only once from the device.")
+     */
     @SuppressWarnings("squid:S2925")
     void requestConfigDataIfEmpty() throws Exception {
         final Target savedTarget = testdataFactory.createTarget("4712");
@@ -111,9 +112,11 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$._links.configData.href").doesNotExist());
     }
 
+    /**
+     * We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) 
+     * can be uploaded correctly by the controller.
+     */
     @Test
-    @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) " +
-            "can be uploaded correctly by the controller.")
     void putConfigData() throws Exception {
         testdataFactory.createTarget(TARGET1_ID);
 
@@ -136,10 +139,11 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         assertThat(targetManagement.getControllerAttributes(TARGET1_ID)).isEqualTo(attributes);
     }
 
+    /**
+     * We verify that the config data (i.e. device attributes like serial number, hardware revision etc.)
+     * upload quota is enforced to protect the server from malicious attempts.""")
+     */
     @Test
-    @Description("""
-            We verify that the config data (i.e. device attributes like serial number, hardware revision etc.)
-            upload quota is enforced to protect the server from malicious attempts.""")
     void putTooMuchConfigData() throws Exception {
         testdataFactory.createTarget(TARGET1_ID);
 
@@ -161,9 +165,11 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
     }
 
+    /**
+     * We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) 
+     * resource behaves as expected in case of invalid request attempts.
+     */
     @Test
-    @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) "
-            + "resource behaves as expected in case of invalid request attempts.")
     void badConfigData() throws Exception {
         testdataFactory.createTarget("4712");
 
@@ -200,18 +206,20 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @Test
-    @Description("Verifies that invalid config data attributes are handled correctly.")
-    void putConfigDataWithInvalidAttributes() throws Exception {
+    /**
+     * Verifies that invalid config data attributes are handled correctly.
+     */
+    @Test    void putConfigDataWithInvalidAttributes() throws Exception {
         // create a target
         testdataFactory.createTarget(TARGET2_ID);
         putAndVerifyConfigDataWithKeyTooLong();
         putAndVerifyConfigDataWithValueTooLong();
     }
 
-    @Test
-    @Description("Verify that config data (device attributes) can be updated by the controller using different update modes (merge, replace, remove).")
-    void putConfigDataWithDifferentUpdateModes() throws Exception {
+    /**
+     * Verify that config data (device attributes) can be updated by the controller using different update modes (merge, replace, remove).
+     */
+    @Test    void putConfigDataWithDifferentUpdateModes() throws Exception {
         // create a target
         testdataFactory.createTarget(TARGET1_ID);
 
@@ -231,7 +239,6 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         putConfigDataWithInvalidUpdateMode();
     }
 
-    @Step
     private void putAndVerifyConfigDataWithKeyTooLong() throws Exception {
         final Map<String, String> attributes = Collections.singletonMap(ATTRIBUTE_KEY_TOO_LONG, ATTRIBUTE_VALUE_VALID);
         mvc.perform(put(DdiConfigDataTest.TARGET2_CONFIG_DATA_PATH, tenantAware.getCurrentTenant())
@@ -241,7 +248,6 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_TARGET_ATTRIBUTES_INVALID.getKey())));
     }
 
-    @Step
     private void putAndVerifyConfigDataWithValueTooLong() throws Exception {
         final Map<String, String> attributes = Collections.singletonMap(ATTRIBUTE_KEY_VALID, ATTRIBUTE_VALUE_TOO_LONG);
         mvc.perform(put(DdiConfigDataTest.TARGET2_CONFIG_DATA_PATH, tenantAware.getCurrentTenant())
@@ -251,7 +257,6 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_TARGET_ATTRIBUTES_INVALID.getKey())));
     }
 
-    @Step
     private void putConfigDataWithInvalidUpdateMode() throws Exception {
         // create some attriutes
         final Map<String, String> attributes = Map.of(
@@ -266,7 +271,6 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @Step
     private void putConfigDataWithUpdateModeRemove() throws Exception {
         // get the current attributes
         final int previousSize = targetManagement.getControllerAttributes(DdiConfigDataTest.TARGET1_ID).size();
@@ -290,7 +294,6 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
     }
 
-    @Step
     private void putConfigDataWithUpdateModeMerge() throws Exception {
         // get the current attributes
         final Map<String, String> attributes = new HashMap<>(targetManagement.getControllerAttributes(DdiConfigDataTest.TARGET1_ID));
@@ -313,7 +316,6 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         attributes.keySet().forEach(assertThat(updatedAttributes)::containsKey);
     }
 
-    @Step
     private void putConfigDataWithUpdateModeReplace() throws Exception {
         // get the current attributes
         final Map<String, String> attributes = new HashMap<>(targetManagement.getControllerAttributes(DdiConfigDataTest.TARGET1_ID));
@@ -337,7 +339,6 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         attributes.entrySet().forEach(assertThat(updatedAttributes)::doesNotContain);
     }
 
-    @Step
     private void putConfigDataWithoutUpdateMode() throws Exception {
         // create some attributes
         final Map<String, String> attributes = Map.of(

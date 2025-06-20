@@ -11,9 +11,6 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -24,20 +21,23 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test the remote entity events.
+  * <p/>
+ * Feature: Component Tests - Repository<br/>
+ * Story: Test ActionCreatedEvent and ActionUpdatedEvent
  */
-@Feature("Component Tests - Repository")
-@Story("Test ActionCreatedEvent and ActionUpdatedEvent")
 class ActionEventTest extends AbstractRemoteEntityEventTest<Action> {
 
-    @Test
-    @Description("Verifies that the action entity reloading by remote created works")
-    void testActionCreatedEvent() {
+    /**
+     * Verifies that the action entity reloading by remote created works
+     */
+    @Test    void testActionCreatedEvent() {
         assertAndCreateRemoteEvent(ActionCreatedEvent.class);
     }
 
-    @Test
-    @Description("Verifies that the action entity reloading by remote updated works")
-    void testActionUpdatedEvent() {
+    /**
+     * Verifies that the action entity reloading by remote updated works
+     */
+    @Test    void testActionUpdatedEvent() {
         assertAndCreateRemoteEvent(ActionUpdatedEvent.class);
     }
 

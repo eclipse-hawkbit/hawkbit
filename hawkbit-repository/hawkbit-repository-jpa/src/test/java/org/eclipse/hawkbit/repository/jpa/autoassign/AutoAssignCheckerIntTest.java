@@ -20,10 +20,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
@@ -49,9 +45,10 @@ import org.springframework.data.domain.Slice;
 
 /**
  * Test class for {@link AutoAssignChecker}.
+  * <p/>
+ * Feature: Component Tests - Repository<br/>
+ * Story: Auto assign checker
  */
-@Feature("Component Tests - Repository")
-@Story("Auto assign checker")
 @SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
@@ -62,9 +59,10 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
     @Autowired
     private DeploymentManagement deploymentManagement;
 
-    @Test
-    @Description("Verifies that a running action is auto canceled by a AutoAssignment which assigns another distribution-set.")
-    void autoAssignDistributionSetAndAutoCloseOldActions() {
+    /**
+     * Verifies that a running action is auto canceled by a AutoAssignment which assigns another distribution-set.
+     */
+    @Test    void autoAssignDistributionSetAndAutoCloseOldActions() {
 
         tenantConfigurationManagement
                 .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
@@ -106,9 +104,10 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         }
     }
 
-    @Test
-    @Description("Test auto assignment of a DS to filtered targets")
-    void checkAutoAssign() {
+    /**
+     * Test auto assignment of a DS to filtered targets
+     */
+    @Test    void checkAutoAssign() {
         // will be auto assigned
         final DistributionSet setA = testdataFactory.createDistributionSet("dsA");
         final DistributionSet setB = testdataFactory.createDistributionSet("dsB");
@@ -158,9 +157,10 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         verifyThatCreatedActionsAreInitiatedByCurrentUser(targetFilterQuery, setA, targets);
     }
 
-    @Test
-    @Description("Test auto assignment of a DS for a specific device")
-    void checkAutoAssignmentForDevice() {
+    /**
+     * Test auto assignment of a DS for a specific device
+     */
+    @Test    void checkAutoAssignmentForDevice() {
 
         final DistributionSet toAssignDs = testdataFactory.createDistributionSet();
 
@@ -182,9 +182,11 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsNotHaveDistributionSetAssignment(toAssignDs, targets.subList(1, 25));
     }
 
+    /**
+     * Test auto assignment of a DS to filtered targets with different confirmation options
+     */
     @ParameterizedTest
     @MethodSource("confirmationOptions")
-    @Description("Test auto assignment of a DS to filtered targets with different confirmation options")
     void checkAutoAssignWithConfirmationOptions(final boolean confirmationFlowActive, final boolean confirmationRequired,
             final Action.Status expectedStatus) {
 
@@ -210,9 +212,11 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveDistributionSetAssignedAndActionStatus(distributionSet, targets, expectedStatus);
     }
 
+    /**
+     * Test auto assignment of a DS for a specific device with different confirmation options
+     */
     @ParameterizedTest
     @MethodSource("confirmationOptions")
-    @Description("Test auto assignment of a DS for a specific device with different confirmation options")
     void checkAutoAssignmentForDeviceWithConfirmationRequired(final boolean confirmationFlowActive,
             final boolean confirmationRequired, final Action.Status expectedStatus) {
 
@@ -237,9 +241,10 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsNotHaveDistributionSetAssignment(toAssignDs, targets.subList(1, 25));
     }
 
-    @Test
-    @Description("Test auto assignment of an incomplete DS to filtered targets, that causes failures")
-    void checkAutoAssignWithFailures() {
+    /**
+     * Test auto assignment of an incomplete DS to filtered targets, that causes failures
+     */
+    @Test    void checkAutoAssignWithFailures() {
 
         // incomplete distribution set that will be assigned
         final DistributionSet setF = distributionSetManagement.create(entityFactory.distributionSet().create()
@@ -286,9 +291,10 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
     }
 
-    @Test
-    @Description("Test auto assignment of a distribution set with FORCED, SOFT and DOWNLOAD_ONLY action types")
-    void checkAutoAssignWithDifferentActionTypes() {
+    /**
+     * Test auto assignment of a distribution set with FORCED, SOFT and DOWNLOAD_ONLY action types
+     */
+    @Test    void checkAutoAssignWithDifferentActionTypes() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final String targetDsAIdPref = "A";
         final String targetDsBIdPref = "B";
@@ -315,9 +321,10 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveAssignmentActionType(ActionType.DOWNLOAD_ONLY, targetsC);
     }
 
-    @Test
-    @Description("An auto assignment target filter with weight creates actions with weights")
-    void actionsWithWeightAreCreated() {
+    /**
+     * An auto assignment target filter with weight creates actions with weights
+     */
+    @Test    void actionsWithWeightAreCreated() {
         final int amountOfTargets = 5;
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final int weight = 32;
@@ -334,9 +341,10 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
                 .allMatch(action -> action.getWeight().get() == weight);
     }
 
-    @Test
-    @Description("An auto assignment target filter without weight still works after multi assignment is enabled")
-    void filterWithoutWeightWorksInMultiAssignmentMode() {
+    /**
+     * An auto assignment target filter without weight still works after multi assignment is enabled
+     */
+    @Test    void filterWithoutWeightWorksInMultiAssignmentMode() {
         final int amountOfTargets = 5;
         final DistributionSet ds = testdataFactory.createDistributionSet();
         targetFilterQueryManagement.create(
@@ -352,9 +360,10 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
                 .allMatch(action -> action.getWeight().isPresent());
     }
 
-    @Test
-    @Description("Verifies an auto assignment only creates actions for compatible targets")
-    void checkAutoAssignmentWithIncompatibleTargets() {
+    /**
+     * Verifies an auto assignment only creates actions for compatible targets
+     */
+    @Test    void checkAutoAssignmentWithIncompatibleTargets() {
         final int TARGET_COUNT = 5;
 
         final DistributionSet testDs = testdataFactory.createDistributionSet();
@@ -414,7 +423,6 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
      * @param set the expected distribution set
      * @param targets the targets that should have it
      */
-    @Step
     private void verifyThatTargetsHaveDistributionSetAssignment(
             final DistributionSet set, final List<Target> targets, final int count) {
         final List<Long> targetIds = targets.stream().map(Target::getId).toList();
@@ -430,7 +438,6 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         }
     }
 
-    @Step
     private void verifyThatTargetsHaveDistributionSetAssignedAndActionStatus(final DistributionSet set,
             final List<Target> targets, final Action.Status status) {
         final List<String> targetIds = targets.stream().map(Target::getControllerId).toList();
@@ -445,7 +452,6 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         assertThat(actionsByDs).allMatch(action -> action.getStatus() == status);
     }
 
-    @Step
     private void verifyThatTargetsNotHaveDistributionSetAssignment(final DistributionSet set,
             final List<Target> targets) {
         final List<Long> targetIds = targets.stream().map(Target::getId).toList();
@@ -460,7 +466,6 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
     }
 
-    @Step
     private void verifyThatCreatedActionsAreInitiatedByCurrentUser(final TargetFilterQuery targetFilterQuery,
             final DistributionSet distributionSet, final List<Target> targets) {
         final Set<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toSet());
@@ -472,7 +477,6 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
                         .isEqualTo(targetFilterQuery.getAutoAssignInitiatedBy()));
     }
 
-    @Step
     private List<Target> createTargetsAndAutoAssignDistSet(final String prefix, final int targetCount,
             final DistributionSet distributionSet, final ActionType actionType) {
 
@@ -485,7 +489,6 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         return targets;
     }
 
-    @Step
     private void verifyThatTargetsHaveAssignmentActionType(final ActionType actionType, final List<Target> targets) {
         final List<Action> actions = targets.stream()
                 .map(Target::getControllerId)

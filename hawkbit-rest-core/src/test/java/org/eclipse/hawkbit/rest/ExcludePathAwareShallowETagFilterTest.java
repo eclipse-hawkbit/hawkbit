@@ -22,8 +22,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -31,8 +29,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@Feature("Unit Tests - Security")
-@Story("Exclude path aware shallow ETag filter")
+/**
+ * Feature: Unit Tests - Security<br/>
+ * Story: Exclude path aware shallow ETag filter
+ */
 @ExtendWith(MockitoExtension.class)
 class ExcludePathAwareShallowETagFilterTest {
 

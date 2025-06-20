@@ -19,23 +19,22 @@ import java.util.Collections;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 
 /**
  * Test serialization of DDI api model 'DdiActionFeedback'
+  * <p/>
+ * Feature: Unit Tests - Direct Device Integration API<br/>
+ * Story: Serialization of DDI api Models
  */
-@Feature("Unit Tests - Direct Device Integration API")
-@Story("Serialization of DDI api Models")
 class DdiActionFeedbackTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    @Test
-    @Description("Verify the correct serialization and deserialization of the model with minimal payload")
-    void shouldSerializeAndDeserializeObjectWithoutOptionalValues() throws IOException {
+    /**
+     * Verify the correct serialization and deserialization of the model with minimal payload
+     */
+    @Test    void shouldSerializeAndDeserializeObjectWithoutOptionalValues() throws IOException {
         // Setup
         final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, null, null, Collections.emptyList());
         final DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(ddiStatus);
@@ -48,9 +47,10 @@ class DdiActionFeedbackTest {
         assertThat(deserializedDdiActionFeedback.getStatus()).hasToString(ddiStatus.toString());
     }
 
-    @Test
-    @Description("Verify the correct serialization and deserialization of the model with all values provided")
-    void shouldSerializeAndDeserializeObjectWithOptionalValues() throws IOException {
+    /**
+     * Verify the correct serialization and deserialization of the model with all values provided
+     */
+    @Test    void shouldSerializeAndDeserializeObjectWithOptionalValues() throws IOException {
         // Setup
         final Long timestamp = System.currentTimeMillis();
         final DdiResult ddiResult = new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(10, 10));
@@ -65,9 +65,10 @@ class DdiActionFeedbackTest {
         assertThat(deserializedDdiActionFeedback.getStatus()).hasToString(ddiStatus.toString());
     }
 
-    @Test
-    @Description("Verify that deserialization fails for known properties with a wrong datatype")
-    void shouldFailForObjectWithWrongDataTypes() {
+    /**
+     * Verify that deserialization fails for known properties with a wrong datatype
+     */
+    @Test    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiActionFeedback = """
             {
@@ -83,9 +84,10 @@ class DdiActionFeedbackTest {
                 () -> mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class));
     }
 
-    @Test
-    @Description("Verify that deserialization works if optional fields are not parsed")
-    void shouldConvertItWithoutOptionalFieldTimestamp() throws JsonProcessingException {
+    /**
+     * Verify that deserialization works if optional fields are not parsed
+     */
+    @Test    void shouldConvertItWithoutOptionalFieldTimestamp() throws JsonProcessingException {
         // Setup
         final String serializedDdiActionFeedback = """
             {

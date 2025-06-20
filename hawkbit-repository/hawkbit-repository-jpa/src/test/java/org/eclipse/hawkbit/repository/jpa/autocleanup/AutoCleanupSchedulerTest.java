@@ -14,9 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,9 +22,10 @@ import org.springframework.integration.support.locks.LockRegistry;
 
 /**
  * Test class for {@link AutoCleanupScheduler}.
+  * <p/>
+ * Feature: Component Tests - Repository<br/>
+ * Story: Auto cleanup scheduler
  */
-@Feature("Component Tests - Repository")
-@Story("Auto cleanup scheduler")
 @SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 class AutoCleanupSchedulerTest extends AbstractJpaIntegrationTest {
 
@@ -41,9 +39,10 @@ class AutoCleanupSchedulerTest extends AbstractJpaIntegrationTest {
         counter.set(0);
     }
 
-    @Test
-    @Description("Verifies that all cleanup handlers are executed regardless if one of them throws an error")
-    void executeHandlerChain() {
+    /**
+     * Verifies that all cleanup handlers are executed regardless if one of them throws an error
+     */
+    @Test    void executeHandlerChain() {
 
         new AutoCleanupScheduler(systemManagement, systemSecurityContext, lockRegistry, Arrays.asList(
                 new SuccessfulCleanup(), new SuccessfulCleanup(), new FailingCleanup(), new SuccessfulCleanup())).run();

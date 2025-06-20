@@ -11,9 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
@@ -31,22 +28,28 @@ import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.jupiter.api.Test;
 
-@Feature("Component Tests - Repository")
-@Story("Rollout Management")
+/**
+ * Feature: Component Tests - Repository<br/>
+ * Story: Rollout Management
+ */
 class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
 
+    /**
+     * Verifies that management get access reacts as specified on calls for non existing entities by means 
+     * of Optional not present.
+     */
     @Test
-    @Description("Verifies that management get access reacts as specified on calls for non existing entities by means " +
-            "of Optional not present.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(rolloutGroupManagement.get(NOT_EXIST_IDL)).isNotPresent();
         assertThat(rolloutGroupManagement.getWithDetailedStatus(NOT_EXIST_IDL)).isNotPresent();
     }
 
+    /**
+     * Verifies that management queries react as specified on calls for non existing entities 
+     *  by means of throwing EntityNotFoundException.
+     */
     @Test
-    @Description("Verifies that management queries react as specified on calls for non existing entities " +
-            " by means of throwing EntityNotFoundException.")
     @ExpectEvents({
             @Expect(type = RolloutCreatedEvent.class, count = 1),
             @Expect(type = RolloutUpdatedEvent.class, count = 1),
@@ -70,9 +73,10 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(NOT_EXIST_IDL, "name==*", PAGE), "RolloutGroup");
     }
 
-    @Test
-    @Description("Tests the rollout group status mapping.")
-    void testRolloutGroupStatusConvert() {
+    /**
+     * Tests the rollout group status mapping.
+     */
+    @Test    void testRolloutGroupStatusConvert() {
         final long id = rolloutGroupRepository.findByRolloutId(
                         testdataFactory.createAndStartRollout(1, 0, 1, "100", "80").getId(), PAGE).getContent()
                 .get(0).getId();

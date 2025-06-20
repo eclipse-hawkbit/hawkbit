@@ -33,10 +33,6 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
 import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
@@ -78,9 +74,10 @@ import org.springframework.test.web.servlet.ResultMatcher;
 
 /**
  * Tests for covering the {@link MgmtRolloutResource}.
+  * <p/>
+ * Feature: Component Tests - Management API<br/>
+ * Story: Rollout Resource
  */
-@Feature("Component Tests - Management API")
-@Story("Rollout Resource")
 @TestPropertySource(locations = "classpath:/mgmt-test.properties", properties = {
         "hawkbit.server.repository.dynamicRolloutsMinInvolvePeriodMS=-1" })
 class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
@@ -94,9 +91,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     @Autowired
     private RolloutTestApprovalStrategy approvalStrategy;
 
-    @Test
-    @Description("Handles the GET request of retrieving a single rollout.")
-    public void getRollout() throws Exception {
+    /**
+     * Handles the GET request of retrieving a single rollout.
+     */
+    @Test    public void getRollout() throws Exception {
         enableMultiAssignments();
         approvalStrategy.setApprovalNeeded(true);
         try {
@@ -129,9 +127,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         }
     }
 
-    @Test
-    @Description("Handles the GET request of retrieving a all targets of a specific deploy group of a rollout.")
-    public void getRolloutDeployGroupTargetsWithParameters() throws Exception {
+    /**
+     * Handles the GET request of retrieving a all targets of a specific deploy group of a rollout.
+     */
+    @Test    public void getRolloutDeployGroupTargetsWithParameters() throws Exception {
         testdataFactory.createTargets(4, "rollout", "description");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
@@ -147,9 +146,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(content().contentType(MediaTypes.HAL_JSON));
     }
 
-    @Test
-    @Description("Handles the POST request of approving a rollout.")
-    public void approveRollout() throws Exception {
+    /**
+     * Handles the POST request of approving a rollout.
+     */
+    @Test    public void approveRollout() throws Exception {
         approvalStrategy.setApprovalNeeded(true);
         try {
             testdataFactory.createTargets(4, "rollout", "description");
@@ -164,8 +164,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         }
     }
 
+    /**
+     * Handles the POST request of denying a rollout. Required Permission: APPROVE_ROLLOUT
+     */
     @Test
-    @Description("Handles the POST request of denying a rollout. Required Permission: " + SpPermission.APPROVE_ROLLOUT)
     public void denyRollout() throws Exception {
         approvalStrategy.setApprovalNeeded(true);
         try {
@@ -181,9 +183,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         }
     }
 
-    @Test
-    @Description("Check if approvalDecidedBy and approvalRemark are present when rollout is approved")
-    public void validateIfApprovalFieldsArePresentAfterApproval() throws Exception {
+    /**
+     * Check if approvalDecidedBy and approvalRemark are present when rollout is approved
+     */
+    @Test    public void validateIfApprovalFieldsArePresentAfterApproval() throws Exception {
         approvalStrategy.setApprovalNeeded(true);
         approvalStrategy.setApproveDecidedBy("testUser");
         final int amountTargets = 2;
@@ -212,9 +215,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         approvalStrategy.setApprovalNeeded(false);
     }
 
-    @Test
-    @Description("Retry rollout test scenario")
-    public void retryRolloutTest() throws Exception {
+    /**
+     * Retry rollout test scenario
+     */
+    @Test    public void retryRolloutTest() throws Exception {
 
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final List<Target> successTargets = testdataFactory.createTargets("retryRolloutTargetSuccess-", 6);
@@ -281,9 +285,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         }
     }
 
-    @Test
-    @Description("Retrying a running rollout should not be allowed.")
-    public void retryNotFinishedRolloutShouldNotBeAllowed() throws Exception {
+    /**
+     * Retrying a running rollout should not be allowed.
+     */
+    @Test    public void retryNotFinishedRolloutShouldNotBeAllowed() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         testdataFactory.createTargets("retryRolloutTarget-", 10);
         postRollout("rolloutToBeRetried", 1, dsA.getId(), "id==retryRolloutTarget*", 10, Action.ActionType.FORCED);
@@ -299,17 +304,19 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @Test
-    @Description("Retrying a non-existing rollout should lead to NOT FOUND.")
-    public void retryNonExistingRolloutShouldLeadToNotFound() throws Exception {
+    /**
+     * Retrying a non-existing rollout should lead to NOT FOUND.
+     */
+    @Test    public void retryNonExistingRolloutShouldLeadToNotFound() throws Exception {
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/retry", 6782623))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
     }
 
-    @Test
-    @Description("Testing that creating rollout with wrong body returns bad request")
-    void createRolloutWithInvalidBodyReturnsBadRequest() throws Exception {
+    /**
+     * Testing that creating rollout with wrong body returns bad request
+     */
+    @Test    void createRolloutWithInvalidBodyReturnsBadRequest() throws Exception {
         mvc.perform(post("/rest/v1/rollouts").content("invalid body").contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -317,9 +324,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("errorCode", equalTo("hawkbit.server.error.rest.body.notReadable")));
     }
 
-    @Test
-    @Description("Testing that creating rollout with insufficient permission returns forbidden")
-    @WithUser(allSpPermissions = true, removeFromAllPermission = "CREATE_ROLLOUT")
+    /**
+     * Testing that creating rollout with insufficient permission returns forbidden
+     */
+    @Test    @WithUser(allSpPermissions = true, removeFromAllPermission = "CREATE_ROLLOUT")
     void createRolloutWithInsufficientPermissionReturnsForbidden() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         mvc.perform(post("/rest/v1/rollouts")
@@ -330,9 +338,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andReturn();
     }
 
-    @Test
-    @Description("Testing that creating rollout with not existing distribution set returns not found")
-    void createRolloutWithNotExistingDistributionSetReturnsNotFound() throws Exception {
+    /**
+     * Testing that creating rollout with not existing distribution set returns not found
+     */
+    @Test    void createRolloutWithNotExistingDistributionSetReturnsNotFound() throws Exception {
         mvc.perform(post("/rest/v1/rollouts").content(JsonBuilder.rollout("name", "desc", 10, 1234, "name==test", null))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -340,9 +349,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andReturn();
     }
 
-    @Test
-    @Description("Testing that creating rollout with not valid formed target filter query returns bad request")
-    void createRolloutWithNotWellFormedFilterReturnsBadRequest() throws Exception {
+    /**
+     * Testing that creating rollout with not valid formed target filter query returns bad request
+     */
+    @Test    void createRolloutWithNotWellFormedFilterReturnsBadRequest() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         mvc.perform(post("/rest/v1/rollouts")
                         .content(JsonBuilder.rollout("name", "desc", 5, dsA.getId(), "name=test", null))
@@ -353,9 +363,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andReturn();
     }
 
-    @Test
-    @Description("Ensures that the repository refuses to create rollout without a defined target filter set.")
-    void missingTargetFilterQueryInRollout() throws Exception {
+    /**
+     * Ensures that the repository refuses to create rollout without a defined target filter set.
+     */
+    @Test    void missingTargetFilterQueryInRollout() throws Exception {
 
         final String targetFilterQuery = null;
 
@@ -370,18 +381,20 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     }
 
-    @Test
-    @Description("Testing that rollout can be created")
-    void createRollout() throws Exception {
+    /**
+     * Testing that rollout can be created
+     */
+    @Test    void createRollout() throws Exception {
         testdataFactory.createTargets(20, "target", "rollout");
 
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         postRollout("rollout1", 5, dsA.getId(), "id==target*", 20, Action.ActionType.FORCED);
     }
 
-    @Test
-    @Description("Verifies that rollout cannot be created if too many rollout groups are specified.")
-    void createRolloutWithTooManyRolloutGroups() throws Exception {
+    /**
+     * Verifies that rollout cannot be created if too many rollout groups are specified.
+     */
+    @Test    void createRolloutWithTooManyRolloutGroups() throws Exception {
 
         final int maxGroups = quotaManagement.getMaxRolloutGroupsPerRollout();
         testdataFactory.createTargets(20, "target", "rollout");
@@ -398,9 +411,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     }
 
-    @Test
-    @Description("Verifies that rollout cannot be created if the 'max targets per rollout group' quota would be violated for one of the groups.")
-    void createRolloutFailsIfRolloutGroupQuotaIsViolated() throws Exception {
+    /**
+     * Verifies that rollout cannot be created if the 'max targets per rollout group' quota would be violated for one of the groups.
+     */
+    @Test    void createRolloutFailsIfRolloutGroupQuotaIsViolated() throws Exception {
 
         final int maxTargets = quotaManagement.getMaxTargetsPerRolloutGroup();
         testdataFactory.createTargets(maxTargets + 1, "target", "rollout");
@@ -417,9 +431,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     }
 
-    @Test
-    @Description("Testing that rollout can be created with groups")
-    void createRolloutWithGroupDefinitions() throws Exception {
+    /**
+     * Testing that rollout can be created with groups
+     */
+    @Test    void createRolloutWithGroupDefinitions() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro");
 
         final int amountTargets = 10;
@@ -446,9 +461,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     }
 
-    @Test
-    @Description("Testing dynamic rollouts with default dynamic group definition")
-    void createDynamicRolloutWithDefaultDynamicGroupDefinition() throws Exception {
+    /**
+     * Testing dynamic rollouts with default dynamic group definition
+     */
+    @Test    void createDynamicRolloutWithDefaultDynamicGroupDefinition() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro");
 
         final int amountTargets = 10;
@@ -529,9 +545,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("content[0]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)));
     }
 
-    @Test
-    @Description("Testing that no rollout with groups that have illegal percentages can be created")
-    void createRolloutWithTooLowPercentage() throws Exception {
+    /**
+     * Testing that no rollout with groups that have illegal percentages can be created
+     */
+    @Test    void createRolloutWithTooLowPercentage() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro2");
 
         final int amountTargets = 10;
@@ -555,9 +572,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     }
 
-    @Test
-    @Description("Testing that no rollout with groups that have illegal percentages can be created")
-    void createRolloutWithTooHighPercentage() throws Exception {
+    /**
+     * Testing that no rollout with groups that have illegal percentages can be created
+     */
+    @Test    void createRolloutWithTooHighPercentage() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro2");
 
         final int amountTargets = 10;
@@ -581,9 +599,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     }
 
-    @Test
-    @Description("Testing that rollout can be updated")
-    void updateRollout() throws Exception {
+    /**
+     * Testing that rollout can be updated
+     */
+    @Test    void updateRollout() throws Exception {
         testdataFactory.createTargets(4, "rollout", "description");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         // create a running rollout for the created targets
@@ -607,9 +626,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.description", equalTo("newDesc")));
     }
 
-    @Test
-    @Description("Testing the empty list is returned if no rollout exists")
-    void noRolloutReturnsEmptyList() throws Exception {
+    /**
+     * Testing the empty list is returned if no rollout exists
+     */
+    @Test    void noRolloutReturnsEmptyList() throws Exception {
         mvc.perform(get("/rest/v1/rollouts").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -618,9 +638,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.total", equalTo(0)));
     }
 
-    @Test
-    @Description("Retrieves single rollout from management API including extra data that is delivered only for single rollout access.")
-    void retrieveSingleRollout() throws Exception {
+    /**
+     * Retrieves single rollout from management API including extra data that is delivered only for single rollout access.
+     */
+    @Test    void retrieveSingleRollout() throws Exception {
         testdataFactory.createTargets(20, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
@@ -637,9 +658,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         retrieveAndVerifyRolloutInRunning(rollout);
     }
 
-    @Test
-    @Description("Retrieves the list of rollouts with representation mode 'full'.")
-    void retrieveRolloutListFullRepresentation() throws Exception {
+    /**
+     * Retrieves the list of rollouts with representation mode 'full'.
+     */
+    @Test    void retrieveRolloutListFullRepresentation() throws Exception {
         testdataFactory.createTargets(20, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
@@ -679,9 +701,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("content[0]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)));
     }
 
-    @Test
-    @Description("Retrieves the list of rollouts with representation mode 'full'.")
-    void retrieveRolloutListFullRepresentationWithFilter() throws Exception {
+    /**
+     * Retrieves the list of rollouts with representation mode 'full'.
+     */
+    @Test    void retrieveRolloutListFullRepresentationWithFilter() throws Exception {
         testdataFactory.createTargets(20, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
@@ -727,9 +750,11 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("content[0]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)));
     }
 
+    /**
+     * Verify the confirmation required flag is not part of the rollout parent entity
+     */
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    @Description("Verify the confirmation required flag is not part of the rollout parent entity")
     void verifyConfirmationFlagIsNeverPartOfRolloutEntity(final boolean confirmationFlowActive) throws Exception {
         testdataFactory.createTargets(20, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
@@ -753,9 +778,11 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.confirmationRequired").doesNotExist());
     }
 
+    /**
+     * Verify the confirmation required flag will be set based on the feature state
+     */
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    @Description("Verify the confirmation required flag will be set based on the feature state")
     void verifyConfirmationStateIfNotProvided(final boolean confirmationFlowActive) throws Exception {
         if (confirmationFlowActive) {
             enableConfirmationFlow();
@@ -774,9 +801,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         });
     }
 
-    @Test
-    @Description("Confirmation required flag will be read from the Rollout, if specified.")
-    void verifyRolloutGroupWillUseRolloutPropertyFirst() throws Exception {
+    /**
+     * Confirmation required flag will be read from the Rollout, if specified.
+     */
+    @Test    void verifyRolloutGroupWillUseRolloutPropertyFirst() throws Exception {
         enableConfirmationFlow();
 
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro");
@@ -817,9 +845,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         });
     }
 
-    @Test
-    @Description("Confirmation required flag will be read from the tenant config (confirmation flow state), if never specified.")
-    void verifyRolloutGroupWillUseConfigIfNotProvidedWithRollout() throws Exception {
+    /**
+     * Confirmation required flag will be read from the tenant config (confirmation flow state), if never specified.
+     */
+    @Test    void verifyRolloutGroupWillUseConfigIfNotProvidedWithRollout() throws Exception {
         enableConfirmationFlow();
 
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro");
@@ -860,9 +889,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         });
     }
 
-    @Test
-    @Description("Testing that rollout paged list contains rollouts")
-    void rolloutPagedListContainsAllRollouts() throws Exception {
+    /**
+     * Testing that rollout paged list contains rollouts
+     */
+    @Test    void rolloutPagedListContainsAllRollouts() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         testdataFactory.createTargets(20, "target", "rollout");
@@ -922,9 +952,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         retrieveAndCompareRolloutsContent(dsA, "/rest/v1/rollouts?representation=full", true, true, startAt, forcetime);
     }
 
-    @Test
-    @Description("Testing representation mode of rollout paged list")
-    void rolloutPagedListRepresentationMode() throws Exception {
+    /**
+     * Testing representation mode of rollout paged list
+     */
+    @Test    void rolloutPagedListRepresentationMode() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         testdataFactory.createTargets(20, "target", "rollout");
@@ -940,9 +971,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         retrieveAndCompareRolloutsContent(dsA, "/rest/v1/rollouts?representation=full", true);
     }
 
-    @Test
-    @Description("Testing that rollout paged list is limited by the query param limit")
-    void rolloutPagedListIsLimitedToQueryParam() throws Exception {
+    /**
+     * Testing that rollout paged list is limited by the query param limit
+     */
+    @Test    void rolloutPagedListIsLimitedToQueryParam() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         testdataFactory.createTargets(20, "target", "rollout");
@@ -962,9 +994,11 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.total", equalTo(2)));
     }
 
+    /**
+     * Testing that rollout paged list is limited by the query param limit
+     */
     @ParameterizedTest
     @MethodSource("confirmationOptions")
-    @Description("Testing that rollout paged list is limited by the query param limit")
     void retrieveRolloutGroupsForSpecificRollout(final boolean confirmationFlowEnabled,
             final boolean confirmationRequired) throws Exception {
         // setup
@@ -1006,9 +1040,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                         : jsonPath("confirmationRequired").doesNotExist());
     }
 
-    @Test
-    @Description("The relation between deploy group and rollout should be validated.")
-    void deployGroupsShouldValidateRelationWithRollout() throws Exception {
+    /**
+     * The relation between deploy group and rollout should be validated.
+     */
+    @Test    void deployGroupsShouldValidateRelationWithRollout() throws Exception {
         // setup
         final int amountTargets = 8;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -1035,9 +1070,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
-    @Test
-    @Description("Testing that starting the rollout switches the state to starting and then to running")
-    void startingRolloutSwitchesIntoRunningState() throws Exception {
+    /**
+     * Testing that starting the rollout switches the state to starting and then to running
+     */
+    @Test    void startingRolloutSwitchesIntoRunningState() throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -1071,9 +1107,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("status", equalTo("running")));
     }
 
-    @Test
-    @Description("Testing that pausing the rollout switches the state to paused")
-    void pausingRolloutSwitchesIntoPausedState() throws Exception {
+    /**
+     * Testing that pausing the rollout switches the state to paused
+     */
+    @Test    void pausingRolloutSwitchesIntoPausedState() throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -1104,9 +1141,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("status", equalTo("paused")));
     }
 
-    @Test
-    @Description("Testing that resuming the rollout switches the state to running")
-    void resumingRolloutSwitchesIntoRunningState() throws Exception {
+    /**
+     * Testing that resuming the rollout switches the state to running
+     */
+    @Test    void resumingRolloutSwitchesIntoRunningState() throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -1142,9 +1180,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("status", equalTo("running")));
     }
 
-    @Test
-    @Description("Testing that an already started rollout cannot be started again and returns bad request")
-    void startingAlreadyStartedRolloutReturnsBadRequest() throws Exception {
+    /**
+     * Testing that an already started rollout cannot be started again and returns bad request
+     */
+    @Test    void startingAlreadyStartedRolloutReturnsBadRequest() throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -1168,9 +1207,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("errorCode", equalTo(SpServerError.SP_ROLLOUT_ILLEGAL_STATE.getKey())));
     }
 
-    @Test
-    @Description("Testing that resuming a rollout which is not started leads to bad request")
-    void resumingNotStartedRolloutReturnsBadRequest() throws Exception {
+    /**
+     * Testing that resuming a rollout which is not started leads to bad request
+     */
+    @Test    void resumingNotStartedRolloutReturnsBadRequest() throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -1186,9 +1226,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("errorCode", equalTo(SpServerError.SP_ROLLOUT_ILLEGAL_STATE.getKey())));
     }
 
-    @Test
-    @Description("Testing that starting rollout the first rollout group is in running state")
-    void startingRolloutFirstRolloutGroupIsInRunningState() throws Exception {
+    /**
+     * Testing that starting rollout the first rollout group is in running state
+     */
+    @Test    void startingRolloutFirstRolloutGroupIsInRunningState() throws Exception {
         // setup
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -1218,9 +1259,11 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.content[1].status", equalTo("scheduled")));
     }
 
+    /**
+     * Testing that a single rollout group can be retrieved
+     */
     @ParameterizedTest
     @MethodSource("confirmationOptions")
-    @Description("Testing that a single rollout group can be retrieved")
     void retrieveSingleRolloutGroup(final boolean confirmationFlowEnabled, final boolean confirmationRequired)
             throws Exception {
         // setup
@@ -1250,9 +1293,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 confirmationRequired);
     }
 
-    @Test
-    @Description("Testing that the targets of rollout group can be retrieved")
-    void retrieveTargetsFromRolloutGroup() throws Exception {
+    /**
+     * Testing that the targets of rollout group can be retrieved
+     */
+    @Test    void retrieveTargetsFromRolloutGroup() throws Exception {
         // setup
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -1275,9 +1319,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.total", equalTo(5)));
     }
 
-    @Test
-    @Description("Testing that the targets of rollout group can be retrieved with rsql query param")
-    void retrieveTargetsFromRolloutGroupWithQuery() throws Exception {
+    /**
+     * Testing that the targets of rollout group can be retrieved with rsql query param
+     */
+    @Test    void retrieveTargetsFromRolloutGroupWithQuery() throws Exception {
         // setup
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -1303,9 +1348,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.total", equalTo(1)));
     }
 
-    @Test
-    @Description("Testing that the targets of rollout group can be retrieved after the rollout has been started")
-    void retrieveTargetsFromRolloutGroupAfterRolloutIsStarted() throws Exception {
+    /**
+     * Testing that the targets of rollout group can be retrieved after the rollout has been started
+     */
+    @Test    void retrieveTargetsFromRolloutGroupAfterRolloutIsStarted() throws Exception {
         // setup
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -1333,9 +1379,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.total", equalTo(5)));
     }
 
-    @Test
-    @Description("Start the rollout in async mode")
-    void startingRolloutSwitchesIntoRunningStateAsync() throws Exception {
+    /**
+     * Start the rollout in async mode
+     */
+    @Test    void startingRolloutSwitchesIntoRunningStateAsync() throws Exception {
 
         final int amountTargets = 50;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -1356,9 +1403,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         awaitRunningState(rollout.getId());
     }
 
-    @Test
-    @Description("Deletion of a rollout")
-    void deleteRollout() throws Exception {
+    /**
+     * Deletion of a rollout
+     */
+    @Test    void deleteRollout() throws Exception {
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "rolloutDelete", "rolloutDelete");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
@@ -1373,9 +1421,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         assertStatusIs(rollout, RolloutStatus.DELETING);
     }
 
-    @Test
-    @Description("Soft deletion of a rollout: soft deletion appears when already running rollout is being deleted")
-    void deleteRunningRollout() throws Exception {
+    /**
+     * Soft deletion of a rollout: soft deletion appears when already running rollout is being deleted
+     */
+    @Test    void deleteRunningRollout() throws Exception {
         final Rollout rollout = testdataFactory.createSoftDeletedRollout("softDeletedRollout");
 
         mvc.perform(get("/rest/v1/rollouts/{rolloutid}", rollout.getId()))
@@ -1386,9 +1435,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         assertStatusIs(rollout, RolloutStatus.DELETED);
     }
 
-    @Test
-    @Description("Testing that rollout paged list with rsql parameter")
-    void getRolloutWithRSQLParam() throws Exception {
+    /**
+     * Testing that rollout paged list with rsql parameter
+     */
+    @Test    void getRolloutWithRSQLParam() throws Exception {
 
         final int amountTargetsRollout1 = 25;
         final int amountTargetsRollout2 = 25;
@@ -1432,9 +1482,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     }
 
-    @Test
-    @Description("Testing that rolloutgroup paged list with rsql parameter")
-    void retrieveRolloutGroupsForSpecificRolloutWithRSQLParam() throws Exception {
+    /**
+     * Testing that rolloutgroup paged list with rsql parameter
+     */
+    @Test    void retrieveRolloutGroupsForSpecificRolloutWithRSQLParam() throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -1475,9 +1526,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     }
 
-    @Test
-    @Description("Testing that the list of rollout groups can be requested with representation mode 'full'.")
-    void retrieveRolloutGroupsFullRepresentation() throws Exception {
+    /**
+     * Testing that the list of rollout groups can be requested with representation mode 'full'.
+     */
+    @Test    void retrieveRolloutGroupsFullRepresentation() throws Exception {
 
         testdataFactory.createTargets(20, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
@@ -1513,18 +1565,20 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("content[0].totalTargetsPerStatus.error", equalTo(0)));
     }
 
-    @Test
-    @Description("Verifies that a DOWNLOAD_ONLY rollout is possible")
-    void createDownloadOnlyRollout() throws Exception {
+    /**
+     * Verifies that a DOWNLOAD_ONLY rollout is possible
+     */
+    @Test    void createDownloadOnlyRollout() throws Exception {
         testdataFactory.createTargets(20, "target", "rollout");
 
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         postRollout("rollout1", 5, dsA.getId(), "id==target*", 20, Action.ActionType.DOWNLOAD_ONLY);
     }
 
-    @Test
-    @Description("A rollout create request containing a weight is always accepted when weight is valid.")
-    void weightValidation() throws Exception {
+    /**
+     * A rollout create request containing a weight is always accepted when weight is valid.
+     */
+    @Test    void weightValidation() throws Exception {
         testdataFactory.createTargets(4, "rollout", "description");
         final Long dsId = testdataFactory.createDistributionSet().getId();
         final int weight = 66;
@@ -1557,9 +1611,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         assertThat(rollouts.get(0).getWeight()).get().isEqualTo(weight);
     }
 
-    @Test
-    @Description("Trigger next rollout group")
-    void triggeringNextGroupRollout() throws Exception {
+    /**
+     * Trigger next rollout group
+     */
+    @Test    void triggeringNextGroupRollout() throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -1579,9 +1634,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 RolloutGroupStatus.SCHEDULED, RolloutGroupStatus.SCHEDULED);
     }
 
-    @Test
-    @Description("Trigger next rollout group if rollout is in wrong state")
-    void triggeringNextGroupRolloutWrongState() throws Exception {
+    /**
+     * Trigger next rollout group if rollout is in wrong state
+     */
+    @Test    void triggeringNextGroupRolloutWrongState() throws Exception {
         final int amountTargets = 3;
         final List<Target> targets = testdataFactory.createTargets(amountTargets, "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
@@ -1623,7 +1679,6 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         return Stream.of(Arguments.of(true, false), Arguments.of(true, true), Arguments.of(false, true));
     }
 
-    @Step
     private void retrieveAndVerifyRolloutInRunning(final Rollout rollout) throws Exception {
         rolloutHandler.handleAll();
 
@@ -1644,7 +1699,6 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.totalGroups", equalTo(4)));
     }
 
-    @Step
     private void retrieveAndVerifyRolloutInStarting(final Rollout rollout) throws Exception {
         rolloutManagement.start(rollout.getId());
 
@@ -1665,7 +1719,6 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.totalGroups", equalTo(4)));
     }
 
-    @Step
     private void retrieveAndVerifyRolloutInReady(final Rollout rollout) throws Exception {
         rolloutHandler.handleAll();
 
@@ -1688,7 +1741,6 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.totalGroups", equalTo(4)));
     }
 
-    @Step
     private void retrieveAndVerifyRolloutInCreating(final DistributionSet dsA, final Rollout rollout) throws Exception {
         mvc.perform(get("/rest/v1/rollouts/" + rollout.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -1723,7 +1775,6 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.totalGroups", equalTo(4)));
     }
 
-    @Step
     private void retrieveAndVerifyRolloutGroupInRunningAndScheduled(final Rollout rollout,
             final RolloutGroup firstGroup, final RolloutGroup secondGroup, final boolean confirmationFlowEnabled,
             final boolean confirmationRequired) throws Exception {
@@ -1760,7 +1811,6 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                         : jsonPath("confirmationRequired").doesNotExist());
     }
 
-    @Step
     private void retrieveAndVerifyRolloutGroupInReady(final Rollout rollout, final RolloutGroup firstGroup)
             throws Exception {
         rolloutHandler.handleAll();
@@ -1783,7 +1833,6 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                         : jsonPath("confirmationRequired").doesNotExist());
     }
 
-    @Step
     private void retrieveAndVerifyRolloutGroupInCreating(final Rollout rollout, final RolloutGroup firstGroup)
             throws Exception {
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}", rollout.getId(), firstGroup.getId())

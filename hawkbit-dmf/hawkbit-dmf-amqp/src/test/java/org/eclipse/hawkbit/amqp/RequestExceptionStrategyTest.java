@@ -13,45 +13,48 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.listener.FatalExceptionStrategy;
 import org.springframework.amqp.support.converter.MessageConversionException;
 
-@Feature("Unit Tests - Requeue Exception Strategy")
-@Story("Requeue Exception Strategy")
+/**
+ * Feature: Unit Tests - Requeue Exception Strategy<br/>
+ * Story: Requeue Exception Strategy
+ */
 class RequestExceptionStrategyTest {
 
     private final FatalExceptionStrategy requeueExceptionStrategy = new RequeueExceptionStrategy(
             List.of(new RequeueExceptionStrategy.TypeBasedFatalExceptionStrategy(
                     IllegalArgumentException.class, IndexOutOfBoundsException.class)), null);
 
-    @Test
-    @Description("Verifies that default handler is used if no handlers are defined for the specific exception.")
-    void verifyDefaultFatal() {
+    /**
+     * Verifies that default handler is used if no handlers are defined for the specific exception.
+     */
+    @Test    void verifyDefaultFatal() {
         assertThat(requeueExceptionStrategy.isFatal(new MessageConversionException("t"))).as("Non Fatal error").isTrue();
         assertThat(requeueExceptionStrategy.isFatal(new Throwable(new MessageConversionException("t")))).as("Non Fatal error").isTrue();
     }
 
-    @Test
-    @Description("Verifies additional fatal exception types are fatal.")
-    void verifyAdditionalFatal() {
+    /**
+     * Verifies additional fatal exception types are fatal.
+     */
+    @Test    void verifyAdditionalFatal() {
         assertThat(requeueExceptionStrategy.isFatal(new IllegalArgumentException())).isTrue();
         assertThat(requeueExceptionStrategy.isFatal(new IndexOutOfBoundsException())).isTrue();
     }
 
-    @Test
-    @Description("Verifies additional fatal exception types are fatal.")
-    void verifyAdditionalWrappedFatal() {
+    /**
+     * Verifies additional fatal exception types are fatal.
+     */
+    @Test    void verifyAdditionalWrappedFatal() {
         assertThat(requeueExceptionStrategy.isFatal(new Throwable(new IllegalArgumentException()))).isTrue();
         assertThat(requeueExceptionStrategy.isFatal(new Throwable(new IndexOutOfBoundsException()))).isTrue();
     }
 
-    @Test
-    @Description("Verifies that default handler is used if no handlers are defined for the specific exception.")
-    void verifyNonFatal() {
+    /**
+     * Verifies that default handler is used if no handlers are defined for the specific exception.
+     */
+    @Test    void verifyNonFatal() {
         assertThat(requeueExceptionStrategy.isFatal(new NullPointerException())).isFalse();
         assertThat(requeueExceptionStrategy.isFatal(new Throwable(new NullPointerException()))).isFalse();
     }

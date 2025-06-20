@@ -11,133 +11,150 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.util.List;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.junit.jupiter.api.Test;
 
-@Feature("SecurityTests - TargetFilterQueryManagement")
-@Story("SecurityTests TargetFilterQueryManagement")
+/**
+ * Feature: SecurityTests - TargetFilterQueryManagement<br/>
+ * Story: SecurityTests TargetFilterQueryManagement
+ */
 class TargetFilterQueryManagementSecurityTest extends AbstractJpaIntegrationTest {
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void createPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void createPermissionsCheck() {
         assertPermissions(
                 () -> targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("name").query("controllerId==id")),
                 List.of(SpPermission.CREATE_TARGET));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void deletePermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void deletePermissionsCheck() {
         assertPermissions(() -> {
             targetFilterQueryManagement.delete(1L);
             return null;
         }, List.of(SpPermission.DELETE_TARGET));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void verifyTargetFilterQuerySyntaxPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void verifyTargetFilterQuerySyntaxPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.verifyTargetFilterQuerySyntax("controllerId==id"),
                 List.of(SpPermission.READ_TARGET));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findAllPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findAllPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.findAll(PAGE), List.of(SpPermission.READ_TARGET));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void countPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void countPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.count(), List.of(SpPermission.READ_TARGET));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void countByAutoAssignDistributionSetIdPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void countByAutoAssignDistributionSetIdPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.countByAutoAssignDistributionSetId(1L), List.of(SpPermission.READ_TARGET));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findByNamePermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findByNamePermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.findByName("filterName", PAGE), List.of(SpPermission.READ_TARGET));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void countByNamePermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void countByNamePermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.countByName("filterName"), List.of(SpPermission.READ_TARGET));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findByRsqlPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findByRsqlPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.findByRsql("name==id", PAGE), List.of(SpPermission.READ_TARGET));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findByQueryPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findByQueryPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.findByQuery("controllerId==id", PAGE), List.of(SpPermission.READ_TARGET));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findByAutoAssignDistributionSetIdPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findByAutoAssignDistributionSetIdPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.findByAutoAssignDistributionSetId(1L, PAGE),
                 List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findByAutoAssignDSAndRsqlPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findByAutoAssignDSAndRsqlPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.findByAutoAssignDSAndRsql(1L, "rsqlParam", PAGE),
                 List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findWithAutoAssignDSPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findWithAutoAssignDSPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.findWithAutoAssignDS(PAGE), List.of(SpPermission.READ_TARGET));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void getTargetFilterQueryByIdPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void getTargetFilterQueryByIdPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.get(1L), List.of(SpPermission.READ_TARGET));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void getTargetFilterQueryByNamePermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void getTargetFilterQueryByNamePermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.getByName("filterName"), List.of(SpPermission.READ_TARGET));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void updatePermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void updatePermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.update(entityFactory.targetFilterQuery().update(1L)),
                 List.of(SpPermission.UPDATE_TARGET));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void updateAutoAssignDSPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void updateAutoAssignDSPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(1L).weight(1)),
                 List.of(SpPermission.UPDATE_TARGET));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void cancelAutoAssignmentForDistributionSetPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void cancelAutoAssignmentForDistributionSetPermissionsCheck() {
         assertPermissions(() -> {
             targetFilterQueryManagement.cancelAutoAssignmentForDistributionSet(1L);
             return null;

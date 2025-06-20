@@ -30,9 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.ddi.rest.resource.DdiArtifactDownloadTest.DownloadTestConfiguration;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -53,9 +50,10 @@ import org.springframework.test.web.servlet.MvcResult;
 
 /**
  * Test artifact downloads from the controller.
+  * <p/>
+ * Feature: Component Tests - Direct Device Integration API<br/>
+ * Story: Artifact Download Resource
  */
-@Feature("Component Tests - Direct Device Integration API")
-@Story("Artifact Download Resource")
 @SpringBootTest(classes = { DownloadTestConfiguration.class })
 class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
@@ -69,9 +67,10 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    @Test
-    @Description("Tests non allowed requests on the artifact ressource, e.g. invalid URI, wrong if-match, wrong command.")
-    void invalidRequestsOnArtifactResource() throws Exception {
+    /**
+     * Tests non allowed requests on the artifact ressource, e.g. invalid URI, wrong if-match, wrong command.
+     */
+    @Test    void invalidRequestsOnArtifactResource() throws Exception {
         // create target
         final Target target = testdataFactory.createTarget();
         final List<Target> targets = Collections.singletonList(target);
@@ -157,9 +156,11 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(status().isMethodNotAllowed());
     }
 
+    /**
+     * Tests valid downloads through the artifact resource by identifying the artifact not by ID but file name.
+     */
     @Test
     @WithUser(principal = "4712", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
-    @Description("Tests valid downloads through the artifact resource by identifying the artifact not by ID but file name.")
     void downloadArtifactThroughFileName() throws Exception {
         downloadProgress = 1;
         shippedBytes = 0;
@@ -203,9 +204,10 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         assertThat(shippedBytes).isEqualTo(artifactSize);
     }
 
-    @Test
-    @Description("Tests valid MD5SUm file downloads through the artifact resource by identifying the artifact by ID.")
-    void downloadMd5sumThroughControllerApi() throws Exception {
+    /**
+     * Tests valid MD5SUm file downloads through the artifact resource by identifying the artifact by ID.
+     */
+    @Test    void downloadMd5sumThroughControllerApi() throws Exception {
         // create target
         final Target target = testdataFactory.createTarget();
 
@@ -233,9 +235,11 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 .isEqualTo((artifact.getMd5Hash() + "  " + artifact.getFilename()).getBytes(StandardCharsets.US_ASCII));
     }
 
+    /**
+     * Test various HTTP range requests for artifact download, e.g. chunk download or download resume.
+     */
     @Test
     @WithUser(principal = TestdataFactory.DEFAULT_CONTROLLER_ID, authorities = "ROLE_CONTROLLER", allSpPermissions = true)
-    @Description("Test various HTTP range requests for artifact download, e.g. chunk download or download resume.")
     void rangeDownloadArtifact() throws Exception {
         // create target
         final Target target = testdataFactory.createTarget();

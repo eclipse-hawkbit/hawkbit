@@ -22,10 +22,6 @@ import java.util.Random;
 
 import jakarta.validation.ConstraintViolationException;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
@@ -47,16 +43,18 @@ import org.springframework.data.domain.Pageable;
 
 /**
  * Test class for {@link TargetTagManagement}.
+  * <p/>
+ * Feature: Component Tests - Repository<br/>
+ * Story: Target Tag Management
  */
-@Feature("Component Tests - Repository")
-@Story("Target Tag Management")
 class TargetTagManagementTest extends AbstractJpaIntegrationTest {
 
     private static final Random RND = new Random();
 
-    @Test
-    @Description("Verifies that tagging of set containing missing DS throws meaningful and correct exception.")
-    void failOnMissingDs() {
+    /**
+     * Verifies that tagging of set containing missing DS throws meaningful and correct exception.
+     */
+    @Test    void failOnMissingDs() {
         final Collection<String> group = testdataFactory.createTargets(5).stream()
                 .map(Target::getControllerId)
                 .toList();
@@ -85,18 +83,22 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
                 });
     }
 
+    /**
+     * Verifies that management get access reacts as specfied on calls for non existing entities by means 
+     * of Optional not present.
+     */
     @Test
-    @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means " +
-            "of Optional not present.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(targetTagManagement.getByName(NOT_EXIST_ID)).isNotPresent();
         assertThat(targetTagManagement.get(NOT_EXIST_IDL)).isNotPresent();
     }
 
+    /**
+     * Verifies that management queries react as specfied on calls for non existing entities 
+     *  by means of throwing EntityNotFoundException.
+     */
     @Test
-    @Description("Verifies that management queries react as specfied on calls for non existing entities " +
-            " by means of throwing EntityNotFoundException.")
     @ExpectEvents({
             @Expect(type = DistributionSetTagUpdatedEvent.class),
             @Expect(type = TargetTagUpdatedEvent.class) })
@@ -106,18 +108,20 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> getTargetTags(NOT_EXIST_ID), "Target");
     }
 
-    @Test
-    @Description("Verify that a tag with with invalid properties cannot be created or updated")
-    void createAndUpdateTagWithInvalidFields() {
+    /**
+     * Verify that a tag with with invalid properties cannot be created or updated
+     */
+    @Test    void createAndUpdateTagWithInvalidFields() {
         final TargetTag tag = targetTagManagement.create(entityFactory.tag().create().name("tag1").description("tagdesc1"));
         createAndUpdateTagWithInvalidDescription(tag);
         createAndUpdateTagWithInvalidColour(tag);
         createAndUpdateTagWithInvalidName(tag);
     }
 
-    @Test
-    @Description("Verifies assign/unassign.")
-    void assignAndUnassignTargetTags() {
+    /**
+     * Verifies assign/unassign.
+     */
+    @Test    void assignAndUnassignTargetTags() {
         final List<Target> groupA = testdataFactory.createTargets(20);
         final List<Target> groupB = testdataFactory.createTargets(20, "groupb", "groupb");
 
@@ -152,18 +156,20 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent()).isEmpty();
     }
 
-    @Test
-    @Description("Ensures that all tags are retrieved through repository.")
-    void findAllTargetTags() {
+    /**
+     * Ensures that all tags are retrieved through repository.
+     */
+    @Test    void findAllTargetTags() {
         final List<JpaTargetTag> tags = createTargetsWithTags();
 
         assertThat(targetTagRepository.findAll()).isEqualTo(targetTagRepository.findAll()).isEqualTo(tags)
                 .as("Wrong tag size").hasSize(20);
     }
 
-    @Test
-    @Description("Ensures that a created tag is persisted in the repository as defined.")
-    void createTargetTag() {
+    /**
+     * Ensures that a created tag is persisted in the repository as defined.
+     */
+    @Test    void createTargetTag() {
         final Tag tag = targetTagManagement
                 .create(entityFactory.tag().create().name("kai1").description("kai2").colour("colour"));
 
@@ -173,9 +179,10 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetTagManagement.get(tag.getId()).get().getColour()).as("wrong tag found").isEqualTo("colour");
     }
 
-    @Test
-    @Description("Ensures that a deleted tag is removed from the repository as defined.")
-    void deleteTargetTags() {
+    /**
+     * Ensures that a deleted tag is removed from the repository as defined.
+     */
+    @Test    void deleteTargetTags() {
         // create test data
         final Iterable<JpaTargetTag> tags = createTargetsWithTags();
         final TargetTag toDelete = tags.iterator().next();
@@ -196,9 +203,10 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetTagRepository.findAll()).as("Wrong target tag size").hasSize(19);
     }
 
-    @Test
-    @Description("Tests the name update of a target tag.")
-    void updateTargetTag() {
+    /**
+     * Tests the name update of a target tag.
+     */
+    @Test    void updateTargetTag() {
         final List<JpaTargetTag> tags = createTargetsWithTags();
 
         // change data
@@ -216,17 +224,19 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
                 .isEqualTo(2);
     }
 
-    @Test
-    @Description("Ensures that a tag cannot be created if one exists already with that name (expects EntityAlreadyExistsException).")
-    void failedDuplicateTargetTagNameException() {
+    /**
+     * Ensures that a tag cannot be created if one exists already with that name (expects EntityAlreadyExistsException).
+     */
+    @Test    void failedDuplicateTargetTagNameException() {
         final TagCreate tagCreate = entityFactory.tag().create().name("A");
         targetTagManagement.create(tagCreate);
         assertThatExceptionOfType(EntityAlreadyExistsException.class).isThrownBy(() -> targetTagManagement.create(tagCreate));
     }
 
-    @Test
-    @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (expects EntityAlreadyExistsException).")
-    void failedDuplicateTargetTagNameExceptionAfterUpdate() {
+    /**
+     * Ensures that a tag cannot be updated to a name that already exists on another tag (expects EntityAlreadyExistsException).
+     */
+    @Test    void failedDuplicateTargetTagNameExceptionAfterUpdate() {
         targetTagManagement.create(entityFactory.tag().create().name("A"));
         final TargetTag tag = targetTagManagement.create(entityFactory.tag().create().name("B"));
 
@@ -234,7 +244,6 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(EntityAlreadyExistsException.class).isThrownBy(() -> targetTagManagement.update(tagUpdate));
     }
 
-    @Step
     private void createAndUpdateTagWithInvalidDescription(final Tag tag) {
         final TagCreate tagCraeteTooLong = entityFactory.tag().create().name("a").description(randomString(513));
         assertThatExceptionOfType(ConstraintViolationException.class)
@@ -254,7 +263,6 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
                 .isThrownBy(() -> targetTagManagement.update(tagUpdateInvalidHtml));
     }
 
-    @Step
     private void createAndUpdateTagWithInvalidColour(final Tag tag) {
         final TagCreate tagCreateTooLong = entityFactory.tag().create().name("a").colour(randomString(17));
         assertThatExceptionOfType(ConstraintViolationException.class)
@@ -275,7 +283,6 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
                         .update(tagUpdateInvalidHtml));
     }
 
-    @Step
     private void createAndUpdateTagWithInvalidName(final Tag tag) {
         final TagCreate tagCreateTooLong = entityFactory.tag().create().name(randomString(NamedEntity.NAME_MAX_SIZE + 1));
         assertThatExceptionOfType(ConstraintViolationException.class)

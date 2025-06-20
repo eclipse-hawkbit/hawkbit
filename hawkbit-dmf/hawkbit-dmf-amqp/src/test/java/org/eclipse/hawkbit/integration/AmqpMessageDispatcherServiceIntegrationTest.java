@@ -30,9 +30,6 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
@@ -83,15 +80,18 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
 
-@Feature("Component Tests - Device Management Federation API")
-@Story("Amqp Message Dispatcher Service")
+/**
+ * Feature: Component Tests - Device Management Federation API<br/>
+ * Story: Amqp Message Dispatcher Service
+ */
 class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceIntegrationTest {
 
     private static final String TARGET_PREFIX = "Dmf_disp_";
 
-    @Test
-    @Description("Verify that a distribution assignment send a download and install message.")
-    @ExpectEvents({
+    /**
+     * Verify that a distribution assignment send a download and install message.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1),
@@ -109,9 +109,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         assertDownloadAndInstallMessage(getDistributionSet().getModules(), controllerId);
     }
 
-    @Test
-    @Description("Verify that a distribution assignment sends a download message with window configured but before maintenance window start time.")
-    @ExpectEvents({
+    /**
+     * Verify that a distribution assignment sends a download message with window configured but before maintenance window start time.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1),
@@ -134,9 +135,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         assertDownloadMessage(distributionSet.getModules(), controllerId);
     }
 
-    @Test
-    @Description("Verify that a distribution assignment sends a download and install message with window configured and during maintenance window start time.")
-    @ExpectEvents({
+    /**
+     * Verify that a distribution assignment sends a download and install message with window configured and during maintenance window start time.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1),
@@ -159,9 +161,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         assertDownloadAndInstallMessage(distributionSet.getModules(), controllerId);
     }
 
-    @Test
-    @Description("Verify that a distribution assignment multiple times send cancel and assign events with right softwaremodules")
-    @ExpectEvents({
+    /**
+     * Verify that a distribution assignment multiple times send cancel and assign events with right softwaremodules
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
@@ -205,9 +208,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
     }
 
-    @Test
-    @Description("If multi assignment is enabled multi-action messages are sent.")
-    @ExpectEvents({
+    /**
+     * If multi assignment is enabled multi-action messages are sent.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = MultiActionAssignEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
@@ -237,9 +241,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install, action2Install));
     }
 
-    @Test
-    @Description("Verify payload of multi action messages.")
-    void assertMultiActionMessagePayloads() {
+    /**
+     * Verify payload of multi action messages.
+     */
+    @Test    void assertMultiActionMessagePayloads() {
         final int expectedWeightIfNotSet = 1000;
         final int weight1 = 600;
         final String controllerId = UUID.randomUUID().toString();
@@ -286,9 +291,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
                 controllerId);
     }
 
-    @Test
-    @Description("Handle cancelation process of an action in multi assignment mode.")
-    @ExpectEvents({
+    /**
+     * Handle cancelation process of an action in multi assignment mode.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetPollEvent.class, count = 1),
@@ -325,9 +331,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         assertLatestMultiActionMessage(controllerId, Collections.singletonList(action2Install));
     }
 
-    @Test
-    @Description("Handle finishing an action in multi assignment mode.")
-    @ExpectEvents({
+    /**
+     * Handle finishing an action in multi assignment mode.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = MultiActionAssignEvent.class, count = 2),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
@@ -358,9 +365,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         assertLatestMultiActionMessage(controllerId, Collections.singletonList(action2Install));
     }
 
-    @Test
-    @Description("If multi assignment is enabled assigning a DS multiple times creates a new action every time.")
-    @ExpectEvents({
+    /**
+     * If multi assignment is enabled assigning a DS multiple times creates a new action every time.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = MultiActionAssignEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
@@ -390,9 +398,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install, action2Install));
     }
 
-    @Test
-    @Description("If multi assignment is enabled multiple rollouts with the same DS lead to multiple actions.")
-    @ExpectEvents({
+    /**
+     * If multi assignment is enabled multiple rollouts with the same DS lead to multiple actions.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = MultiActionAssignEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
@@ -428,9 +437,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds, smIds));
     }
 
-    @Test
-    @Description("If multi assignment is enabled finishing one rollout does not affect other rollouts of the target.")
-    @ExpectEvents({
+    /**
+     * If multi assignment is enabled finishing one rollout does not affect other rollouts of the target.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = MultiActionAssignEvent.class, count = 3),
             @Expect(type = ActionCreatedEvent.class, count = 3),
@@ -479,9 +489,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         assertLatestMultiActionMessageContainsInstallMessages(controllerId, Collections.singletonList(smIds1));
     }
 
-    @Test
-    @Description("Verify that a cancel assignment send a cancel message.")
-    @ExpectEvents({
+    /**
+     * Verify that a cancel assignment send a cancel message.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
@@ -503,9 +514,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         assertCancelActionMessage(actionId, controllerId);
     }
 
-    @Test
-    @Description("Verify that when a target is deleted a target delete message is send.")
-    @ExpectEvents({
+    /**
+     * Verify that when a target is deleted a target delete message is send.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TargetDeletedEvent.class, count = 1) })
@@ -517,9 +529,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         assertDeleteMessage(controllerId);
     }
 
-    @Test
-    @Description("Verify that attribute update is requested after device successfully closed software update.")
-    @ExpectEvents({
+    /**
+     * Verify that attribute update is requested after device successfully closed software update.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = ActionUpdatedEvent.class, count = 2),
@@ -546,9 +559,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         assertRequestAttributesUpdateMessage(controllerId);
     }
 
-    @Test
-    @Description("Tests the download_only assignment: asserts correct dmf Message topic, and assigned DS")
-    @ExpectEvents({
+    /**
+     * Tests the download_only assignment: asserts correct dmf Message topic, and assigned DS
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1),
@@ -580,15 +594,17 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         assertThat(assignedDistributionSet.getId()).isEqualTo(distributionSet.getId());
     }
 
-    @Test
-    @Description("Verify payload of batch assignment download and install message.")
-    void assertBatchAssignmentsDownloadAndInstall() {
+    /**
+     * Verify payload of batch assignment download and install message.
+     */
+    @Test    void assertBatchAssignmentsDownloadAndInstall() {
         assertBatchAssignmentsMessagePayload(BATCH_DOWNLOAD_AND_INSTALL);
     }
 
-    @Test
-    @Description("Verify payload of batch assignments download only message.")
-    void assertBatchAssignmentsDownloadOnly() {
+    /**
+     * Verify payload of batch assignments download only message.
+     */
+    @Test    void assertBatchAssignmentsDownloadOnly() {
         assertBatchAssignmentsMessagePayload(BATCH_DOWNLOAD);
     }
 
@@ -616,9 +632,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         assertThat(replyToListener.getLatestEventMessage(eventTopic)).isNull();
     }
 
-    @Test
-    @Description("Verify that batch and multi-assignments can't be activated at the same time.")
-    void assertBatchAndMultiAssignmentsNotCompatible() {
+    /**
+     * Verify that batch and multi-assignments can't be activated at the same time.
+     */
+    @Test    void assertBatchAndMultiAssignmentsNotCompatible() {
         enableBatchAssignments();
         assertThatExceptionOfType(TenantConfigurationValueChangeNotAllowedException.class)
                 .isThrownBy(() -> enableMultiAssignments());
@@ -629,9 +646,11 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
                 .isThrownBy(() -> enableBatchAssignments());
     }
 
+    /**
+     * Verify payload of batch assignments.
+     */
     @ParameterizedTest
     @EnumSource(names = { "BATCH_DOWNLOAD_AND_INSTALL", "BATCH_DOWNLOAD" })
-    @Description("Verify payload of batch assignments.")
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 3),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
@@ -672,9 +691,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         assertDmfBatchDownloadAndUpdateRequest(batchRequest, ds.getModules(), targets);
     }
 
-    @Test
-    @Description("Verify that a distribution assignment send a confirm message.")
-    @ExpectEvents({
+    /**
+     * Verify that a distribution assignment send a confirm message.
+     */
+    @Test    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1),

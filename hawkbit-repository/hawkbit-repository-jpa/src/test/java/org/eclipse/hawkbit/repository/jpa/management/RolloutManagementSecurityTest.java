@@ -13,9 +13,6 @@ import java.util.List;
 
 import jakarta.validation.ConstraintDeclarationException;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
@@ -29,63 +26,73 @@ import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-@Feature("SecurityTests - RolloutManagement")
-@Story("SecurityTests RolloutManagement")
+/**
+ * Feature: SecurityTests - RolloutManagement<br/>
+ * Story: SecurityTests RolloutManagement
+ */
 class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void getPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void getPermissionsCheck() {
         assertPermissions(() -> rolloutManagement.get(1L), List.of(SpPermission.READ_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void getByNamePermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void getByNamePermissionsCheck() {
         assertPermissions(() -> rolloutManagement.getByName("name"), List.of(SpPermission.READ_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void getWithDetailedStatusPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void getWithDetailedStatusPermissionsCheck() {
         assertPermissions(() -> rolloutManagement.getWithDetailedStatus(1L), List.of(SpPermission.READ_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void approveOrDenyPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void approveOrDenyPermissionsCheck() {
         assertPermissions(() -> rolloutManagement.approveOrDeny(1L, Rollout.ApprovalDecision.APPROVED), List.of(SpPermission.APPROVE_ROLLOUT));
         assertPermissions(() -> rolloutManagement.approveOrDeny(1L, Rollout.ApprovalDecision.APPROVED, "comment"),
                 List.of(SpPermission.APPROVE_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void pauseRolloutPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void pauseRolloutPermissionsCheck() {
         assertPermissions(() -> {
             rolloutManagement.pauseRollout(1L);
             return null;
         }, List.of(SpPermission.HANDLE_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void resumeRolloutPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void resumeRolloutPermissionsCheck() {
         assertPermissions(() -> {
             rolloutManagement.resumeRollout(1L);
             return null;
         }, List.of(SpPermission.HANDLE_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findActiveRolloutsPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findActiveRolloutsPermissionsCheck() {
         assertPermissions(() -> rolloutManagement.findActiveRollouts(), List.of(SpPermission.READ_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void cancelRolloutsForDistributionSetPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void cancelRolloutsForDistributionSetPermissionsCheck() {
         final DistributionSetTypeCreate key = entityFactory.distributionSetType().create().name("type").key("type");
         distributionSetTypeManagement.create(key);
         final DistributionSetCreate dsCreate = entityFactory.distributionSet().create().name("name").version("1.0.0").type("type");
@@ -96,21 +103,24 @@ class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
         }, List.of(SpPermission.UPDATE_ROLLOUT, SpPermission.READ_REPOSITORY, SpPermission.CREATE_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void countPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void countPermissionsCheck() {
         assertPermissions(() -> rolloutManagement.count(), List.of(SpPermission.READ_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void countByDistributionSetIdAndRolloutIsStoppablePermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void countByDistributionSetIdAndRolloutIsStoppablePermissionsCheck() {
         assertPermissions(() -> rolloutManagement.countByDistributionSetIdAndRolloutIsStoppable(1L), List.of(SpPermission.READ_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void createPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void createPermissionsCheck() {
         assertPermissions(() -> rolloutManagement.create(entityFactory.rollout().create().distributionSetId(1L), 1, false,
                 new RolloutGroupConditionBuilder().withDefaults().build()), List.of(SpPermission.CREATE_ROLLOUT, SpPermission.READ_REPOSITORY));
         assertPermissions(() -> rolloutManagement.create(entityFactory.rollout().create().distributionSetId(1L), 1, false,
@@ -123,64 +133,73 @@ class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
                 List.of(SpPermission.CREATE_ROLLOUT, SpPermission.READ_REPOSITORY));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findAllPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findAllPermissionsCheck() {
         assertPermissions(() -> rolloutManagement.findAll(false, PAGE), List.of(SpPermission.READ_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findByRsqlPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findByRsqlPermissionsCheck() {
         assertPermissions(() -> rolloutManagement.findByRsql("id==1", false, PAGE), List.of(SpPermission.READ_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findAllWithDetailedStatusPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findAllWithDetailedStatusPermissionsCheck() {
         assertPermissions(() -> rolloutManagement.findAllWithDetailedStatus(false, PAGE), List.of(SpPermission.READ_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findByRsqlWithDetailedStatusPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findByRsqlWithDetailedStatusPermissionsCheck() {
         assertPermissions(() ->
                 rolloutManagement.findByRsqlWithDetailedStatus("name==*", false, PAGE), List.of(SpPermission.READ_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void startPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void startPermissionsCheck() {
         assertPermissions(() -> rolloutManagement.start(1L), List.of(SpPermission.HANDLE_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void updatePermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void updatePermissionsCheck() {
         assertPermissions(() -> rolloutManagement.update(entityFactory.rollout().update(1L)), List.of(SpPermission.UPDATE_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void deletePermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void deletePermissionsCheck() {
         assertPermissions(() -> {
             rolloutManagement.delete(1L);
             return null;
         }, List.of(SpPermission.DELETE_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void triggerNextGroupPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void triggerNextGroupPermissionsCheck() {
         assertPermissions(() -> {
             rolloutManagement.triggerNextGroup(1L);
             return null;
         }, List.of(SpPermission.UPDATE_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-//    @WithUser(principal = "user", authorities = { SpPermission.CREATE_TARGET, SpPermission.CREATE_ROLLOUT, SpPermission.READ_ROLLOUT,
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test//    @WithUser(principal = "user", authorities = { SpPermission.CREATE_TARGET, SpPermission.CREATE_ROLLOUT, SpPermission.READ_ROLLOUT,
 //            SpPermission.READ_TARGET })
     void validateTargetsInGroupsPermissionsCheck() {
         try {
@@ -196,17 +215,19 @@ class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
         }
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    @WithUser(principal = "user", authorities = { SpPermission.READ_ROLLOUT })
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    @WithUser(principal = "user", authorities = { SpPermission.READ_ROLLOUT })
     void findByRolloutAndRsqlWithDetailedStatusPermissionsCheck() {
         assertPermissions(() -> rolloutGroupManagement.findByRolloutAndRsqlWithDetailedStatus(1L, "name==*", PAGE),
                 List.of(SpPermission.READ_ROLLOUT));
     }
 
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findByRolloutWithDetailedStatusPermissionsCheck() {
+    /**
+     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
+     */
+    @Test    void findByRolloutWithDetailedStatusPermissionsCheck() {
         assertPermissions(() -> rolloutGroupManagement.findByRolloutWithDetailedStatus(1L, PAGE), List.of(SpPermission.READ_ROLLOUT));
     }
 }

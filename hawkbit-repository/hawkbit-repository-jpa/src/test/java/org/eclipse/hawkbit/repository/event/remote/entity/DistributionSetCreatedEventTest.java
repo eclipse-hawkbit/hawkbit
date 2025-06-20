@@ -9,22 +9,21 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.junit.jupiter.api.Test;
 
 /**
  * Test the remote entity events.
+  * <p/>
+ * Feature: Component Tests - Repository<br/>
+ * Story: Test DistributionSetCreatedEvent
  */
-@Feature("Component Tests - Repository")
-@Story("Test DistributionSetCreatedEvent")
 class DistributionSetCreatedEventTest extends AbstractRemoteEntityEventTest<DistributionSet> {
 
-    @Test
-    @Description("Verifies that the distribution set entity reloading by remote created event works")
-    void testDistributionSetCreatedEvent() {
+    /**
+     * Verifies that the distribution set entity reloading by remote created event works
+     */
+    @Test    void testDistributionSetCreatedEvent() {
         assertAndCreateRemoteEvent(DistributionSetCreatedEvent.class);
     }
 
