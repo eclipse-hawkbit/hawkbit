@@ -2,7 +2,7 @@ maven/mavencentral/ch.qos.logback/logback-classic/1.5.18, EPL-1.0 AND LGPL-2.1-o
 maven/mavencentral/ch.qos.logback/logback-core/1.5.18, EPL-1.0 AND LGPL-2.1-only, approved, #15210
 maven/mavencentral/com.cronutils/cron-utils/9.2.1, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.19.0, Apache-2.0, approved, #21911
-maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.19.0, MIT AND Apache-2.0 AND (Apache-2.0 AND LicenseRef-scancode-free-unknown AND MIT), restricted, #21917
+maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.19.0, MIT AND Apache-2.0, approved, #21917
 maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.19.0, Apache-2.0, approved, #21909
 maven/mavencentral/com.fasterxml.jackson.dataformat/jackson-dataformat-cbor/2.19.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.fasterxml.jackson.dataformat/jackson-dataformat-toml/2.19.0, Apache-2.0, approved, #20928
@@ -23,7 +23,7 @@ maven/mavencentral/com.google.guava/guava/33.4.0-jre, Apache-2.0 AND CC0-1.0 AND
 maven/mavencentral/com.google.guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava, Apache-2.0, approved, CQ22657
 maven/mavencentral/com.google.j2objc/j2objc-annotations/3.0.0, Apache-2.0, approved, #13676
 maven/mavencentral/com.h2database/h2/2.3.232, (MPL-2.0 AND EPL-1.0) AND (MPL-2.0 AND EPL-1.0 AND LGPL-3.0-or-later) AND BSD-3-Clause, approved, #15708
-maven/mavencentral/com.helger.commons/ph-commons/11.2.0, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause) AND (AGPL-3.0-only AND AGPL-3.0-or-later AND Apache-1.0 AND Apache-2.0 AND BSD-2-Clause AND BSD-2-Clause-Views AND BSD-3-Clause AND CC-BY-1.0 AND CC-BY-2.0 AND CC-BY-2.5 AND CC-BY-3.0 AND CC-BY-4.0 AND EPL-1.0 AND EPL-2.0 AND EUPL-1.2 AND GFDL-1.1-or-later AND GPL-1.0-only AND (GPL-2.0-only WITH Classpath-exception-2.0) AND GPL-3.0-only AND LGPL-2.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MIT AND MPL-1.0 AND MPL-2.0), restricted, #21949
+maven/mavencentral/com.helger.commons/ph-commons/11.2.0, Apache-2.0 AND BSD-3-Clause, approved, #21949
 maven/mavencentral/com.helger/ph-css/7.0.4, Apache-2.0, approved, #12134
 maven/mavencentral/com.jayway.jsonpath/json-path/2.9.0, Apache-2.0, approved, #20009
 maven/mavencentral/com.nimbusds/content-type/2.2, Apache-2.0, approved, clearlydefined
@@ -45,7 +45,7 @@ maven/mavencentral/com.vaadin/flow-html-components/24.7.6, Apache-2.0, approved,
 maven/mavencentral/com.vaadin/flow-lit-template/24.7.6, Apache-2.0, approved, #22011
 maven/mavencentral/com.vaadin/flow-push/24.7.6, Apache-2.0, approved, #21948
 maven/mavencentral/com.vaadin/flow-react/24.7.6, Apache-2.0, approved, #21995
-maven/mavencentral/com.vaadin/flow-server/24.7.6, Apache-2.0 AND (Apache-2.0 AND LicenseRef-scancode-proprietary-license) AND MIT, restricted, #21969
+maven/mavencentral/com.vaadin/flow-server/24.7.6, Apache-2.0 AND MIT, approved, #21969
 maven/mavencentral/com.vaadin/hilla-endpoint/24.7.5, Apache-2.0, approved, #21994
 maven/mavencentral/com.vaadin/hilla-engine-core/24.7.5, Apache-2.0, approved, #21991
 maven/mavencentral/com.vaadin/hilla-engine-runtime/24.7.5, Apache-2.0, approved, #21961
@@ -182,10 +182,6 @@ maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.80, MIT AND CC0-1.0, approv
 maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.81, MIT AND CC0-1.0, approved, #21819
 maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.81, MIT, approved, #21820
 maven/mavencentral/org.checkerframework/checker-qual/3.43.0, MIT, approved, clearlydefined
-maven/mavencentral/org.eclipse.persistence/org.eclipse.persistence.asm/9.8.0, EPL-2.0 OR BSD-3-Clause, approved, ee4j.eclipselink
-maven/mavencentral/org.eclipse.persistence/org.eclipse.persistence.core/4.0.6, EPL-2.0 OR BSD-3-Clause, approved, ee4j.eclipselink
-maven/mavencentral/org.eclipse.persistence/org.eclipse.persistence.jpa.jpql/4.0.6, EPL-2.0 OR BSD-3-Clause, approved, ee4j.eclipselink
-maven/mavencentral/org.eclipse.persistence/org.eclipse.persistence.jpa/4.0.6, EPL-2.0 OR BSD-3-Clause, approved, ee4j.eclipselink
 maven/mavencentral/org.flywaydb/flyway-core/11.7.2, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.flywaydb/flyway-database-postgresql/11.7.2, Apache-2.0, approved, #21919
 maven/mavencentral/org.flywaydb/flyway-mysql/11.7.2, Apache-2.0, approved, #21980
