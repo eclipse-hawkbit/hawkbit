@@ -344,6 +344,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private final TextField lastModifiedBy = Utils.textField(Constants.LAST_MODIFIED_BY);
         private final TextField lastModifiedAt = Utils.textField(Constants.LAST_MODIFIED_AT);
         private final TextField securityToken = Utils.textField(Constants.SECURITY_TOKEN);
+        private final TextField lastPoll = Utils.textField(Constants.LAST_POLL);
         private final TextArea targetAttributes = new TextArea(Constants.ATTRIBUTES);
         private transient MgmtTarget target;
 
@@ -354,7 +355,8 @@ public class TargetView extends TableView<MgmtTarget, String> {
                             description,
                             createdBy, createdAt,
                             lastModifiedBy, lastModifiedAt,
-                            securityToken, targetAttributes)
+                            securityToken, lastPoll, targetAttributes
+                    )
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
@@ -376,6 +378,9 @@ public class TargetView extends TableView<MgmtTarget, String> {
             lastModifiedBy.setValue(target.getLastModifiedBy());
             lastModifiedAt.setValue(new Date(target.getLastModifiedAt()).toString());
             securityToken.setValue(target.getSecurityToken());
+
+            MgmtPollStatus pollStatus = target.getPollStatus();
+            lastPoll.setValue(new Date(pollStatus.getLastRequestAt()).toString());
             final ResponseEntity<MgmtTargetAttributes> response = hawkbitClient.getTargetRestApi().getAttributes(target.getControllerId());
             if (response.getStatusCode().is2xxSuccessful()) {
                 targetAttributes.setValue(Objects.requireNonNullElse(response.getBody(), Collections.emptyMap()).entrySet().stream()
