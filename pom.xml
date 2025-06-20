@@ -121,8 +121,8 @@
             **/src/main/java/org/eclipse/hawkbit/ui/**
         </sonar.coverage.exclusions>
         <sonar.coverage.jacoco.xmlReportPaths>
-            ${project.basedir}/../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml,
-            ${project.basedir}/../../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml
+            ${project.basedir}/../target/jacoco-aggregate/jacoco.xml,
+            ${project.basedir}/../../target/jacoco-aggregate/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
         <!-- Sonar - END -->
 
