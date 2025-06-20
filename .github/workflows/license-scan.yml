@@ -33,11 +33,11 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Check file license headers
-        run: mvn license:check -Plicense --batch-mode
+        run: mvn license:check -PcheckLicense --batch-mode
       - name: Check dependency licenses with dash tool
         run: |
           mvn clean install -DskipTests -DskipJavadoc --batch-mode
-          mvn license-tool:license-check -Ddash.fail=false -Plicense -Ddash.iplab.token=${GITLAB_API_TOKEN} --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test'
+          mvn license-tool:license-check -Ddash.fail=false -PcheckLicense -Ddash.iplab.token=${GITLAB_API_TOKEN} --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test'
           CHANGED_FILES_COUNT=$(git status --short | wc -l)
           CHANGED_FILES_COUNT=${CHANGED_FILES_COUNT//[[:space:]]/}
           echo "Number of changed files: ${CHANGED_FILES_COUNT}"

@@ -48,7 +48,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Check file license headers
-        run: mvn license:check -Plicense --batch-mode
+        run: mvn license:check -PcheckLicense --batch-mode
 
       - name: Run tests & javadoc
         run: mvn clean verify javadoc:javadoc --batch-mode -Djpa.vendor=hibernate -Dlogging.level.org.hibernate.collection.spi.AbstractPersistentCollection=ERROR

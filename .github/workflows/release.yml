@@ -50,7 +50,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Check file license headers
-        run: mvn clean license:check -Plicense --batch-mode
+        run: mvn clean license:check -PcheckLicense --batch-mode
       - name: Check dependency licenses with dash tool
         run: |
           if [ "${REVISION}" = "0-SNAPSHOT" ]; then
@@ -59,7 +59,7 @@ jobs:
               DASH_FAIL=true
           fi
           mvn install -DskipTests -DskipJavadoc --batch-mode
-          mvn license-tool:license-check -Plicense -Ddash.fail=${DASH_FAIL} -Ddash.iplab.token=${GITLAB_API_TOKEN} --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test' --batch-mode
+          mvn license-tool:license-check -PcheckLicense -Ddash.fail=${DASH_FAIL} -Ddash.iplab.token=${GITLAB_API_TOKEN} --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test' --batch-mode
           CHANGED_FILES_COUNT=$(git status --short | wc -l)
           CHANGED_FILES_COUNT=${CHANGED_FILES_COUNT//[[:space:]]/}
           echo "Number of changed files: ${CHANGED_FILES_COUNT}"

@@ -98,7 +98,7 @@
         <!-- Test - START -->
         <surefire.forkcount>1</surefire.forkcount>
         <surefire.jvm.args/>
-        <failsafe.forkcount>1</failsafe.forkcount>
+        <failsafe.forkcount>${surefire.forkcount}</failsafe.forkcount>
         <failsafe.jvm.args>-Xmx1024m</failsafe.jvm.args>
         <!-- Test - END -->
 
@@ -110,14 +110,14 @@
         <sonar.links.homepage>https://www.eclipse.org/hawkbit</sonar.links.homepage>
         <sonar.links.ci>https://github.com/eclipse-hawkbit/hawkbit/actions</sonar.links.ci>
         <sonar.exclusions>
-            **/target/generated-sources/apt/**,
-            **/src/test/**,
-            **/src/main/java/org/eclipse/hawkbit/repository/test/**
-        </sonar.exclusions>
-        <sonar.coverage.exclusions>
-            **/target/generated-sources/apt/**,
             **/src/test/**,
             **/src/main/java/org/eclipse/hawkbit/repository/test/**,
+            **/src/main/java/org/eclipse/hawkbit/rabbitmq/test/**
+        </sonar.exclusions>
+        <sonar.coverage.exclusions>
+            **/src/test/**,
+            **/src/main/java/org/eclipse/hawkbit/repository/test/**,
+            **/src/main/java/org/eclipse/hawkbit/rabbitmq/test/**,
             **/src/main/java/org/eclipse/hawkbit/ui/**
         </sonar.coverage.exclusions>
         <sonar.coverage.jacoco.xmlReportPaths>
@@ -220,7 +220,9 @@
         <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-junit5</artifactId>
-            <scope>test</scope>
+            <version>${allure.version}</version>
+            <scope>runtime</scope>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 
@@ -352,12 +354,6 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>io.qameta.allure</groupId>
-                <artifactId>allure-junit5</artifactId>
-                <version>${allure.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.awaitility</groupId>
                 <artifactId>awaitility</artifactId>
                 <version>${awaitility.version}</version>
@@ -385,11 +381,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>versions-maven-plugin</artifactId>
-            </plugin>
-
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -510,65 +501,6 @@
                 </plugin>
 
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>${maven.surefire.plugin.version}</version>
-                    <configuration>
-                        <systemPropertyVariables>
-                            <!-- Set output directory according to allure-framework recommendation -->
-                            <allure.results.directory>
-                                ${project.build.directory}/allure-results
-                            </allure.results.directory>
-                            <!-- Bugfix for timeout. See https://github.com/allure-framework/allure-maven/issues/59 -->
-                            <allure.serve.timeout>650</allure.serve.timeout>
-                        </systemPropertyVariables>
-                        <!-- Bugfix for OpenJDK 8u181, see https://issues.apache.org/jira/browse/SUREFIRE-1588 -->
-                        <useSystemClassLoader>false</useSystemClassLoader>
-                        <reuseForks>true</reuseForks>
-                        <forkCount>${surefire.forkcount}</forkCount>
-                        <argLine>${jacoco.agent.args} ${surefire.jvm.args}</argLine>
-                        <properties>
-                            <property>
-                                <name>listener</name>
-                                <value>io.qameta.allure.junit5.AllureJunit5</value>
-                            </property>
-                        </properties>
-                        <includes>
-                            <include>**/*Tests.java</include>
-                            <include>**/*Test.java</include>
-                            <include>**/*IT.java</include>
-                        </includes>
-                        <excludes>
-                            <exclude>**/Abstract*.java</exclude>
-                        </excludes>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>${maven.failsafe.plugin.version}</version>
-                    <configuration>
-                        <reuseForks>false</reuseForks>
-                        <forkCount>${failsafe.forkcount}</forkCount>
-                        <argLine>${jacoco.agent.integration.args} ${failsafe.jvm.args}</argLine>
-                        <properties>
-                            <property>
-                                <name>listener</name>
-                                <value>io.qameta.allure.junit5.AllureJunit5</value>
-                            </property>
-                        </properties>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>integration-test</id>
-                            <phase>integration-test</phase>
-                            <goals>
-                                <goal>integration-test</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco.maven.plugin.version}</version>
@@ -609,18 +541,52 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven.surefire.plugin.version}</version>
+                    <configuration>
+                        <!-- Bugfix for OpenJDK 8u181, see https://issues.apache.org/jira/browse/SUREFIRE-1588 -->
+                        <useSystemClassLoader>false</useSystemClassLoader>
+                        <reuseForks>true</reuseForks>
+                        <forkCount>${surefire.forkcount}</forkCount>
+                        <argLine>${jacoco.agent.args} ${surefire.jvm.args}</argLine>
+                        <includes>
+                            <include>**/*Tests.java</include>
+                            <include>**/*Test.java</include>
+                            <include>**/*IT.java</include>
+                        </includes>
+                        <excludes>
+                            <exclude>**/Abstract*.java</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${maven.failsafe.plugin.version}</version>
+                    <configuration>
+                        <reuseForks>false</reuseForks>
+                        <forkCount>${failsafe.forkcount}</forkCount>
+                        <argLine>${jacoco.agent.integration.args} ${failsafe.jvm.args}</argLine>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>integration-test</id>
+                            <phase>integration-test</phase>
+                            <goals>
+                                <goal>integration-test</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
 
     <profiles>
         <profile>
-            <id>license</id>
-            <activation>
-                <property>
-                    <name>license</name>
-                </property>
-            </activation>
+            <id>checkLicense</id>
             <build>
                 <plugins>
                     <plugin>
@@ -734,6 +700,46 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>generateTestReport</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-report-plugin</artifactId>
+                    </plugin>
+                </plugins>
+
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-surefire-report-plugin</artifactId>
+                            <version>${maven.surefire.plugin.version}</version>
+                            <executions>
+                                <execution>
+                                    <id>generate-surefire-report</id>
+                                    <phase>package</phase>
+                                    <goals>
+                                        <goal>report</goal>
+                                    </goals>
+                                    <inherited>false</inherited>
+                                    <configuration>
+                                        <outputDirectory>${project.build.directory}/surefire-reports</outputDirectory>
+                                        <aggregate>true</aggregate>
+                                        <linkXRef>true</linkXRef>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+
+            <modules>
+                <module>hawkbit-test-report</module>
+            </modules>
+        </profile>
     </profiles>
 
     <modules>
@@ -751,7 +757,5 @@
 
         <module>hawkbit-simple-ui</module>
         <module>hawkbit-sdk</module>
-
-        <module>hawkbit-test-report</module>
     </modules>
 </project>
