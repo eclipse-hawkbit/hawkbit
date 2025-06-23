@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>hawkbit-ddi-security</artifactId>
-    <name>hawkBit :: Security :: Controller</name>
+    <name>hawkBit :: DDI :: Security</name>
 
     <dependencies>
         <dependency>
