@@ -35,7 +35,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-ddi-security</artifactId>
+            <artifactId>hawkbit-artifact-repository-filesystem</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -55,11 +55,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-artifact-repository-filesystem</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-autoconfigure</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -71,6 +66,11 @@
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-ddi-resource</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-ddi-security</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

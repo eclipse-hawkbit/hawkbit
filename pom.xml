@@ -85,7 +85,6 @@
         <maven.site.plugin.version>3.21.0</maven.site.plugin.version>
 
         <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
-        <maven.failsafe.plugin.version>3.5.3</maven.failsafe.plugin.version>
         <jacoco.maven.plugin.version>0.8.13</jacoco.maven.plugin.version>
 
         <license.tool.plugin.version>1.1.0</license.tool.plugin.version>
@@ -97,8 +96,6 @@
         <!-- Test - START -->
         <surefire.forkcount>1</surefire.forkcount>
         <surefire.jvm.args/>
-        <failsafe.forkcount>${surefire.forkcount}</failsafe.forkcount>
-        <failsafe.jvm.args>-Xmx1024m</failsafe.jvm.args>
         <!-- Test - END -->
 
         <!-- Sonar - START -->
@@ -538,39 +535,13 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.plugin.version}</version>
                     <configuration>
-                        <!-- Bugfix for OpenJDK 8u181, see https://issues.apache.org/jira/browse/SUREFIRE-1588 -->
-                        <useSystemClassLoader>false</useSystemClassLoader>
                         <reuseForks>true</reuseForks>
                         <forkCount>${surefire.forkcount}</forkCount>
                         <argLine>${jacoco.agent.args} ${surefire.jvm.args}</argLine>
-                        <includes>
-                            <include>**/*Tests.java</include>
-                            <include>**/*Test.java</include>
-                            <include>**/*IT.java</include>
-                        </includes>
                         <excludes>
                             <exclude>**/Abstract*.java</exclude>
                         </excludes>
                     </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>${maven.failsafe.plugin.version}</version>
-                    <configuration>
-                        <reuseForks>false</reuseForks>
-                        <forkCount>${failsafe.forkcount}</forkCount>
-                        <argLine>${jacoco.agent.integration.args} ${failsafe.jvm.args}</argLine>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>integration-test</id>
-                            <phase>integration-test</phase>
-                            <goals>
-                                <goal>integration-test</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -711,7 +682,7 @@
                             <executions>
                                 <execution>
                                     <id>generate-surefire-report</id>
-                                    <phase>package</phase>
+                                    <phase>verify</phase>
                                     <goals>
                                         <goal>report</goal>
                                     </goals>
