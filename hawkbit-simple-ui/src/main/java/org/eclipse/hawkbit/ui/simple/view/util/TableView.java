@@ -45,7 +45,7 @@ public class TableView<T, ID> extends Div implements Constants {
     private final VerticalLayout gridLayout;
     protected final HorizontalLayout controlsLayout;
     private final SplitLayout splitLayout;
-    private final Div detailsPanel = new Div();
+    private final Div detailsPanel;
     private Button currentSelectionButton;
 
     public TableView(
@@ -66,8 +66,6 @@ public class TableView<T, ID> extends Div implements Constants {
             final Function<T, Component> detailsButtonHandler) {
         selectionGrid = new SelectionGrid<>(entityRepresentation, queryFn);
         selectionGrid.setSizeFull();
-        filter = new Filter(selectionGrid::setRsqlFilter, rsql, alternativeRsql);
-
         setSizeFull();
 
         splitLayout = new SplitLayout();
@@ -76,12 +74,19 @@ public class TableView<T, ID> extends Div implements Constants {
         splitLayout.addThemeVariants(SplitLayoutVariant.LUMO_SMALL);
         splitLayout.setSplitterPosition(100);
         splitLayout.addToPrimary(selectionGrid);
+        detailsPanel = new Div();
 
         if (detailsButtonHandler != null) {
             ComponentRenderer<Button, T> renderer = new ComponentRenderer<>(renderDetailsButton(detailsButtonHandler));
             selectionGrid.addColumn(renderer).setHeader("Details").setAutoWidth(true).setFlexGrow(0);
         }
 
+        filter = new Filter(
+                (rsqlFilter) -> {
+                    selectionGrid.setRsqlFilter(rsqlFilter);
+                    closeDetailsPanel();
+                }, rsql, alternativeRsql
+        );
         gridLayout = new VerticalLayout(filter, splitLayout);
         gridLayout.setSizeFull();
         gridLayout.setPadding(false);
@@ -91,11 +96,21 @@ public class TableView<T, ID> extends Div implements Constants {
         } else {
             controlsLayout = new HorizontalLayout();
             controlsLayout.setWidthFull();
-            controlsLayout.addClassNames(LumoUtility.Padding.Horizontal.XLARGE, LumoUtility.Padding.Vertical.SMALL, LumoUtility.BoxSizing.BORDER);
+            controlsLayout.addClassNames(
+                    LumoUtility.Padding.Horizontal.XLARGE, LumoUtility.Padding.Vertical.SMALL, LumoUtility.BoxSizing.BORDER);
             controlsLayout.setAlignItems(FlexComponent.Alignment.BASELINE);
         }
         gridLayout.add(controlsLayout);
         add(gridLayout);
+    }
+
+    private void closeDetailsPanel() {
+        detailsPanel.removeAll();
+        if (splitLayout.getSecondaryComponent() != null) {
+            splitLayout.remove(detailsPanel);
+        }
+        splitLayout.setSplitterPosition(100);
+        currentSelectionButton = null;
     }
 
     private SerializableFunction<T, Button> renderDetailsButton(final Function<T, Component> selectionHandler) {
@@ -110,10 +125,7 @@ public class TableView<T, ID> extends Div implements Constants {
                 if (button == currentSelectionButton) {
                     button.setIcon(eyeIcon);
                     button.getStyle().set(COLOR, VAR_LUMO_SECONDARY_TEXT_COLOR);
-                    detailsPanel.removeAll();
-                    splitLayout.remove(detailsPanel);
-                    splitLayout.setSplitterPosition(100);
-                    currentSelectionButton = null;
+                    closeDetailsPanel();
                 } else {
                     button.setIcon(closeIcon);
                     button.getStyle().set(COLOR, VAR_LUMO_PRIMARY_COLOR);
