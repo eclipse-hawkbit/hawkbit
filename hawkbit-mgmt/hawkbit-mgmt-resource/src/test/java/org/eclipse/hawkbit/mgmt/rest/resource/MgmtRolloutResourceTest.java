@@ -1325,8 +1325,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         retrieveAndVerifyRolloutGroupInCreating(rollout, firstGroup);
         retrieveAndVerifyRolloutGroupInReady(rollout, firstGroup);
-        retrieveAndVerifyRolloutGroupInRunningAndScheduled(rollout, firstGroup, secondGroup, confirmationFlowEnabled,
-                confirmationRequired);
+        retrieveAndVerifyRolloutGroupInRunningAndScheduled(rollout, firstGroup, secondGroup, confirmationRequired);
     }
 
     /**
@@ -1825,8 +1824,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     private void retrieveAndVerifyRolloutGroupInRunningAndScheduled(final Rollout rollout,
-            final RolloutGroup firstGroup, final RolloutGroup secondGroup, final boolean confirmationFlowEnabled,
-            final boolean confirmationRequired) throws Exception {
+            final RolloutGroup firstGroup, final RolloutGroup secondGroup, final boolean confirmationRequired) throws Exception {
         rolloutManagement.start(rollout.getId());
         rolloutHandler.handleAll();
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}", rollout.getId(), firstGroup.getId())

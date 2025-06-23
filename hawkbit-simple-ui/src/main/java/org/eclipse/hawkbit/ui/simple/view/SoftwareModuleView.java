@@ -40,10 +40,11 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.streams.UploadEvent;
+import com.vaadin.flow.server.streams.UploadHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
@@ -351,21 +352,19 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             });
             artifactGrid.setSelectionMode(Grid.SelectionMode.NONE);
 
-            final FileBuffer fileBuffer = new FileBuffer();
-            final Upload uploadBtn = new Upload(fileBuffer);
-            uploadBtn.setMaxFiles(10);
-            uploadBtn.setWidthFull();
-            uploadBtn.setDropAllowed(true);
-            uploadBtn.addSucceededListener(e -> {
+            final Upload uploadBtn = new Upload(uploadEvent -> {
                 final MgmtArtifact artifact = hawkbitClient.getSoftwareModuleRestApi()
                         .uploadArtifact(
                                 softwareModuleId,
-                                new MultipartFileImpl(fileBuffer, e.getContentLength(), e.getMIMEType()),
-                                fileBuffer.getFileName(), null, null, null)
+                                new MultipartFileImpl(uploadEvent),
+                                uploadEvent.getFileName(), null, null, null)
                         .getBody();
                 artifacts.add(artifact);
                 artifactGrid.refreshGrid(false);
             });
+            uploadBtn.setMaxFiles(10);
+            uploadBtn.setWidthFull();
+            uploadBtn.setDropAllowed(true);
 
             final Button finishBtn = Utils.tooltip(new Button("Finish"), "Finish (Enter)");
             finishBtn.addClickListener(e -> close());
@@ -382,19 +381,15 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
 
         private static class MultipartFileImpl implements MultipartFile {
 
-            private final FileBuffer fileBuffer;
-            private final String mimeType;
-            private final long contentLength;
+            private final UploadEvent uploadEvent;
 
-            public MultipartFileImpl(final FileBuffer fileBuffer, final long contentLength, final String mimeType) {
-                this.fileBuffer = fileBuffer;
-                this.contentLength = contentLength;
-                this.mimeType = mimeType;
+            public MultipartFileImpl(final UploadEvent uploadEvent) {
+                this.uploadEvent = uploadEvent;
             }
 
             @Override
             public String getName() {
-                return fileBuffer.getFileName();
+                return uploadEvent.getFileName();
             }
 
             @Override
@@ -404,17 +399,17 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
 
             @Override
             public String getContentType() {
-                return mimeType;
+                return uploadEvent.getContentType();
             }
 
             @Override
             public boolean isEmpty() {
-                return contentLength == 0;
+                return uploadEvent.getFileSize() == 0;
             }
 
             @Override
             public long getSize() {
-                return contentLength;
+                return uploadEvent.getFileSize();
             }
 
             @Override
@@ -427,7 +422,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
 
             @Override
             public InputStream getInputStream() {
-                return fileBuffer.getInputStream();
+                return uploadEvent.getInputStream();
             }
 
             @Override
