@@ -25,6 +25,7 @@ public interface Constants {
     String CREATED_AT = "Created at";
     String LAST_MODIFIED_BY = "Last modified by";
     String LAST_MODIFIED_AT = "Last modified at";
+    String LAST_POLL = "Last Poll";
     String SECURITY_TOKEN = "Security Token";
     String ATTRIBUTES = "Attributes";
 
