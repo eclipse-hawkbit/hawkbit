@@ -182,7 +182,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
         verifyThatTargetsHaveDistributionSetAssignment(toAssignDs, targets.subList(0, 1), targetsCount);
 
-        verifyThatTargetsNotHaveDistributionSetAssignment(toAssignDs, targets.subList(1, 25));
+        verifyThatTargetsNotHaveDistributionSetAssignment(targets.subList(1, 25));
     }
 
     /**
@@ -241,7 +241,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         autoAssignChecker.checkSingleTarget(targets.get(0).getControllerId());
         verifyThatTargetsHaveDistributionSetAssignedAndActionStatus(toAssignDs, targets.subList(0, 1), expectedStatus);
 
-        verifyThatTargetsNotHaveDistributionSetAssignment(toAssignDs, targets.subList(1, 25));
+        verifyThatTargetsNotHaveDistributionSetAssignment(targets.subList(1, 25));
     }
 
     /**
@@ -460,8 +460,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         assertThat(actionsByDs).allMatch(action -> action.getStatus() == status);
     }
 
-    private void verifyThatTargetsNotHaveDistributionSetAssignment(final DistributionSet set,
-            final List<Target> targets) {
+    private void verifyThatTargetsNotHaveDistributionSetAssignment(final List<Target> targets) {
         final List<Long> targetIds = targets.stream().map(Target::getId).toList();
 
         final Slice<Target> targetsAll = targetManagement.findAll(PAGE);
@@ -471,7 +470,6 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
                 assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId())).isEmpty();
             }
         }
-
     }
 
     private void verifyThatCreatedActionsAreInitiatedByCurrentUser(final TargetFilterQuery targetFilterQuery,
