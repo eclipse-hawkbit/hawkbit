@@ -81,7 +81,7 @@
 
         <!-- Maven Plugin versions - START -->
         <maven.enforcer.plugin.version>3.5.0</maven.enforcer.plugin.version>
-        <flatten.maven.plugin.version>1.7.0</flatten.maven.plugin.version>
+        <flatten.maven.plugin.version>1.7.1</flatten.maven.plugin.version>
         <maven.site.plugin.version>3.21.0</maven.site.plugin.version>
 
         <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
