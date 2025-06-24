@@ -675,8 +675,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                 }
 
                 public String getDistributionSetName() {
-                    return Optional.ofNullable(distributionSet).map(d -> d.getName() + ":" + d.getVersion())
-                            .orElse("Distribution Set not found");
+                    return Optional.ofNullable(distributionSet).map(d -> d.getName() + ":" + d.getVersion()).orElse("Distribution Set not found");
                 }
 
                 public Long getLastModifiedAt() {
@@ -954,7 +953,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                     this::readyToAssign,
                     Optional.ofNullable(
                                     hawkbitClient.getDistributionSetRestApi()
-                                            .getDistributionSets(null, 0, 30, Constants.NAME_ASC)
+                                            .getDistributionSets(null, 0, 500, Constants.NAME_DESC)
                                             .getBody())
                             .map(body -> body.getContent().toArray(new MgmtDistributionSet[0]))
                             .orElseGet(() -> new MgmtDistributionSet[0])
