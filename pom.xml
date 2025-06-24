@@ -75,7 +75,7 @@
         <io-protostuff.version>1.8.0</io-protostuff.version>
         <!-- test -->
         <rabbitmq.http-client.version>5.4.0</rabbitmq.http-client.version>
-        <classgraph.version>4.8.179</classgraph.version>
+        <classgraph.version>4.8.180</classgraph.version>
         <awaitility.version>4.3.0</awaitility.version>
         <!-- Misc libraries versions - END -->
 
