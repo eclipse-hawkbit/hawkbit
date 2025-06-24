@@ -10,7 +10,7 @@
 package org.eclipse.hawkbit.ui.simple.view;
 
 // java:S1214 - implementations of Constants interface extends other classes, so if make this class we shall go for static imports
-//              which is not not better
+// which is not not better
 @SuppressWarnings("java:S1214")
 public interface Constants {
 
@@ -55,6 +55,7 @@ public interface Constants {
     String CANCEL_ESC = "Cancel (Esc)";
 
     String NAME_ASC = "name:asc";
+    String NAME_DESC = "name:desc";
 
     String NOT_AVAILABLE_NULL = "n/a (null)";
 }

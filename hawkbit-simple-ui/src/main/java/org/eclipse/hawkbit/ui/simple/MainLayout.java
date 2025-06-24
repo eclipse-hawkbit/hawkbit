@@ -81,7 +81,7 @@ public class MainLayout extends AppLayout {
     }
 
     private void addDrawerContent() {
-        final H1 appName = new H1("hawkBit UI (Experimental!)");
+        final H1 appName = new H1("hawkBit UI");
         final HorizontalLayout layout = new HorizontalLayout();
         layout.setPadding(true);
         layout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
