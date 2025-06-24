@@ -92,7 +92,7 @@ jobs:
           REVISION: ${{ github.event.inputs.revision }}
 
       - name: Deploy
-        run: mvn deploy -Ppublish -DskipTests -DskipJavadoc -Drevision=${REVISION} -B --batch-mode
+        run: mvn deploy -Ppublish -DskipTests -Drevision=${REVISION} --batch-mode javadoc:jar
         env:
           REVISION: ${{ github.event.inputs.revision }}
           MAVEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
