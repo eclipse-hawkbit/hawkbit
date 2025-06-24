@@ -4,7 +4,7 @@ tmp
 .settings
 .classpath
 target
-!hawkbit-rest/hawkbit-mgmt-api/src/main/java/org/eclipse/hawkbit/mgmt/json/model/target
+!hawkbit-mgmt/hawkbit-mgmt-api/src/main/java/org/eclipse/hawkbit/mgmt/json/model/target
 .vscode
 .springbeans
 .metadata
