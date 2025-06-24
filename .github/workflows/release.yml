@@ -63,24 +63,26 @@ jobs:
           CHANGED_FILES_COUNT=$(git status --short | wc -l)
           CHANGED_FILES_COUNT=${CHANGED_FILES_COUNT//[[:space:]]/}
           echo "Number of changed files: ${CHANGED_FILES_COUNT}"
-          if [ "$CHANGED_FILES_COUNT" -eq 1 ]; then
-              DEPENDENCY_FILE=".3rd-party/DEPENDENCIES"
-              DEPENDENCIES_MODIFIED=$(git status --short | grep ".3rd-party/DEPENDENCIES")
-              # Check if the file is modified
-              if [[ -n "$DEPENDENCIES_MODIFIED" ]]; then
-                  echo "${DEPENDENCY_FILE} changed - commit it"
-                  git config --local user.name "github-actions[bot]"
-                  git config --local user.email "github-actions[bot]@users.noreply.github.com"
-                  git add ${DEPENDENCY_FILE} && git commit -m "[Release] Automated commit of ${DEPENDENCY_FILE} changes" && git push
-              else
-                  echo "Unexpected changes:"
-                  git status --short
-                  exit 1
-              fi
-          else
-              echo "More than one file has changed:"
-              git status --short
-              exit 1
+          if [ "${CHANGED_FILES_COUNT}" -ne 0 ]; then
+            if [ "${CHANGED_FILES_COUNT}" -eq 1 ]; then
+                DEPENDENCY_FILE=".3rd-party/DEPENDENCIES"
+                DEPENDENCIES_MODIFIED=$(git status --short | grep ".3rd-party/DEPENDENCIES")
+                # Check if the file is modified
+                if [[ -n "$DEPENDENCIES_MODIFIED" ]]; then
+                    echo "${DEPENDENCY_FILE} changed - commit it"
+                    git config --local user.name "github-actions[bot]"
+                    git config --local user.email "github-actions[bot]@users.noreply.github.com"
+                    git add ${DEPENDENCY_FILE} && git commit -m "[Release] Automated commit of ${DEPENDENCY_FILE} changes" && git push
+                else
+                    echo "Unexpected changes:"
+                    git status --short
+                    exit 1
+                fi
+            else
+                echo "More than one file has changed:"
+                git status --short
+                exit 1
+            fi
           fi
         env:
           REVISION: ${{ github.event.inputs.revision }}
