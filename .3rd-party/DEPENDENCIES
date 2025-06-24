@@ -204,7 +204,7 @@ maven/mavencentral/org.jline/jline-native/3.26.3, BSD-3-Clause AND Apache-2.0, a
 maven/mavencentral/org.jline/jline-reader/3.26.3, BSD-3-Clause, approved, clearlydefined
 maven/mavencentral/org.jline/jline-style/3.26.3, BSD-3-Clause, approved, clearlydefined
 maven/mavencentral/org.jline/jline-terminal/3.26.3, BSD-3-Clause AND Apache-2.0, approved, #19811
-maven/mavencentral/org.jsoup/jsoup/1.20.1, MIT AND Apache-2.0, approved, #20896
+maven/mavencentral/org.jsoup/jsoup/1.21.1, MIT AND Apache-2.0, approved, #22199
 maven/mavencentral/org.jspecify/jspecify/1.0.0, Apache-2.0, approved, #21897
 maven/mavencentral/org.mariadb.jdbc/mariadb-java-client/3.5.3, LGPL-2.1-only AND LGPL-2.1-or-later, approved, clearlydefined
 maven/mavencentral/org.ow2.asm/asm/9.8, BSD-3-Clause, approved, #20388
