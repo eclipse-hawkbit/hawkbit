@@ -108,6 +108,7 @@
         <sonar.coverage.exclusions>
             **/*Configuration.java,
             **/*Properties.java,
+            **/*Exception.java,
             **/src/test/**,
             **/src/main/java/org/eclipse/hawkbit/repository/test/**,
             **/src/main/java/org/eclipse/hawkbit/rabbitmq/test/**,
