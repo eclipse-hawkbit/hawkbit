@@ -9,6 +9,8 @@ on:
 
 jobs:
   trivy-scan:
+    # only on original eclipse-hawkbit/hawkbit repo or when manually triggered
+    if: github.repository == 'eclipse-hawkbit/hawkbit' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     permissions:

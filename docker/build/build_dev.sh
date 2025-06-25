@@ -46,7 +46,7 @@ function build() {
   fi
   echo "docker file          : ${DOCKER_FILE}"
 
-  docker build -t hawkbit/$1:${TAG} --build-arg HAWKBIT_APP=$1 --build-arg HAWKBIT_VERSION=${VERSION} -f ${DOCKER_FILE} "${MVN_REPO}"
+  docker buildx build -t hawkbit/$1:${TAG} --build-arg HAWKBIT_APP=$1 --build-arg HAWKBIT_VERSION=${VERSION} -f ${DOCKER_FILE} "${MVN_REPO}"
 }
 
 if [ -z "$1" ]; then

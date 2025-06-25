@@ -1,0 +1,58 @@
+# This workflow builds and releases Docker images for Hawkbit applications.
+# It should be run from personal forks of the hawkbit repository with set .
+# personal DOCKERHUB_USERNAME var and DOCKERHUB_TOKEN secret.
+name: Release Docker Image
+
+on:
+  # enable running the workflow manually
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: 'Release version'
+        default: '0-SNAPSHOT'
+
+jobs:
+  build:
+    # only on fork of eclipse-hawkbit/hawkbit repo - see the note above
+    if: github.repository != 'eclipse-hawkbit/hawkbit'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Release ${{ github.event.inputs.revision }}"
+        run: echo "Releasing ${{ github.event.inputs.revision }}"
+
+      - name: Log into Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Setup
+        run: |
+          ALL_APPS=(
+            # microservices
+            "hawkbit-ddi-server",  "hawkbit-dmf-server", "hawkbit-mgmt-server", "hawkbit-simple-ui", 
+            # monolith
+            "hawkbit-update-server"
+            # db init
+            build "hawkbit-repository-jpa-init")
+          echo "ALL_APPS=${ALL_APPS[*]}" >> $GITHUB_ENV
+          echo "REVISION=${{ github.event.inputs.revision }}" >> $GITHUB_ENV
+
+      - name: Build Docker Images
+        run: |
+          cd docker/build
+          for app in "${ALL_APPS[@]}"; do
+            docker buildx build -t hawkbit/${APP}:${REVISION} --build-arg HAWKBIT_APP=${APP} --build-arg HAWKBIT_VERSION=${REVISION} .
+          done
+
+      - name: Push Docker Images
+        run: |
+          cd docker/build
+          for app in "${ALL_APPS[@]}"; do
+            docker push hawkbit/${APP}:${REVISION}
+            docker tag hawkbit/${APP}:${REVISION} hawkbit/${APP}:latest
+            docker push hawkbit/${APP}:latest
+          done
