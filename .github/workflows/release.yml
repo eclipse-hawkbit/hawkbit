@@ -29,6 +29,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: "Release ${{ github.event.inputs.revision }}"
+        run: echo "Releasing ${{ github.event.inputs.revision }}"
+
       - name: Set up JDK & Maven Central credentials
         uses: actions/setup-java@v4
         with:
@@ -93,8 +96,8 @@ jobs:
         env:
           REVISION: ${{ github.event.inputs.revision }}
 
-      - name: Deploy
-        run: mvn deploy -Ppublish -DskipTests -Drevision=${REVISION} --batch-mode javadoc:jar
+      - name: "Deploy ${{ github.event.inputs.revision }}"
+        run: mvn deploy -Ppublish -Drevision=${REVISION} --batch-mode
         env:
           REVISION: ${{ github.event.inputs.revision }}
           MAVEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
