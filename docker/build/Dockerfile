@@ -18,13 +18,12 @@ RUN set -x &&\
  wget -O ${APP}.jar --no-verbose https://repo1.maven.org/maven2/org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar &&\
  wget -O ${APP}.jar.asc --no-verbose https://repo1.maven.org/maven2/org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar.asc &&\
  gpg --batch --verify ${APP}.jar.asc ${APP}.jar &&\
- rm /${APP}.jar.asc /KEY &&\
+ rm ${APP}.jar.asc KEY &&\
  apk del build-dependencies &&\
  mkdir -p ${BUILD_DIR} &&\
  cd ${BUILD_DIR} &&\
  java -Djarmode=tools -jar /${APP}.jar extract --layers --launcher --destination . &&\
- rm /${APP}.jar &&\
- rm /${APP}.jar.asc
+ rm /${APP}.jar
 
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
 

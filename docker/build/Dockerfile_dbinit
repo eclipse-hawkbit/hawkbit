@@ -16,7 +16,7 @@ RUN set -x &&\
  wget -O ${APP}-${VERSION}.jar --no-verbose https://repo1.maven.org/maven2/org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar &&\
  wget -O ${APP}-${VERSION}.asc --no-verbose https://repo1.maven.org/maven2/org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar.asc &&\
  gpg --batch --verify ${APP}-${VERSION}.jar.asc ${APP}-${VERSION}.jar &&\
- rm /${APP}-${VERSION}.jar.asc /KEY &&\
+ rm ${APP}-${VERSION}.jar.asc KEY &&\
  apk del build-dependencies
 
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
