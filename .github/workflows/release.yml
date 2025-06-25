@@ -97,7 +97,7 @@ jobs:
           REVISION: ${{ github.event.inputs.revision }}
 
       - name: "Deploy ${{ github.event.inputs.revision }}"
-        run: mvn deploy -DskipTest -Ppublish -Drevision=${REVISION} --batch-mode
+        run: mvn deploy -DskipTests -Ppublish -Drevision=${REVISION} --batch-mode
         env:
           REVISION: ${{ github.event.inputs.revision }}
           MAVEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
