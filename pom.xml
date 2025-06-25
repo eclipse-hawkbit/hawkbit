@@ -670,7 +670,6 @@
                             <publishingServerId>central</publishingServerId>
                             <autoPublish>true</autoPublish>
                             <waitUntil>published</waitUntil>
-                            <skipPublishing>true</skipPublishing>
                         </configuration>
                     </plugin>
                 </plugins>
