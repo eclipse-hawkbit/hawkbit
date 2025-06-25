@@ -675,6 +675,10 @@
                     </plugin>
                 </plugins>
             </build>
+
+            <modules>
+                <module>hawkbit-test-report</module>
+            </modules>
         </profile>
         <profile>
             <id>generateTestReport</id>
