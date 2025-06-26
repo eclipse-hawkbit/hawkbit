@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.annotation.security.RolesAllowed;
@@ -157,6 +158,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
         private final TextField createdAt = Utils.textField("Created at");
         private final TextField lastModifiedBy = Utils.textField("Last modified by");
         private final TextField lastModifiedAt = Utils.textField("Last modified at");
+        private final TextArea metadata = new TextArea("Metadata");
         private final SelectionGrid<MgmtSoftwareModule, Long> softwareModulesGrid = selectSoftwareModuleGrid();
 
         private DistributionSetDetails(final HawkbitMgmtClient hawkbitClient) {
@@ -166,7 +168,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             Stream.of(
                             description,
                             createdBy, createdAt,
-                            lastModifiedBy, lastModifiedAt)
+                            lastModifiedBy, lastModifiedAt, metadata)
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
@@ -184,6 +186,11 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             createdAt.setValue(new Date(distributionSet.getCreatedAt()).toString());
             lastModifiedBy.setValue(distributionSet.getLastModifiedBy());
             lastModifiedAt.setValue(new Date(distributionSet.getLastModifiedAt()).toString());
+            metadata.setValue(Optional.ofNullable(
+                            hawkbitClient.getDistributionSetRestApi().getMetadata(distributionSet.getId()).getBody())
+                    .map(body->body.getContent().stream()
+                            .map(b->String.format("%s: %s\n",b.getKey(),b.getValue())).collect(
+                                    Collectors.joining())).orElse(""));
 
             softwareModulesGrid.setItems(query -> Optional.ofNullable(
                     hawkbitClient.getDistributionSetRestApi()
