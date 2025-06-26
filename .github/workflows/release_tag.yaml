@@ -1,0 +1,39 @@
+name: Release Start
+
+on:
+  # enable running the workflow manually
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: 'Release version'
+        default: '0-SNAPSHOT'
+      override_tag:
+        description: 'If to move the tag if already exists'
+        default: false
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    # only on original eclipse-hawkbit/hawkbit repo
+    if: github.repository == 'eclipse-hawkbit/hawkbit'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Release ${{ inputs.revision }}"
+        run: echo "Releasing ${{ inputs.revision }}"
+
+  # tag with release version if not already tagged
+  # if already tagged - it will release from there
+  tag:
+    # only on original eclipse-hawkbit/hawkbit repo and when release fixed version
+    if: github.repository == 'eclipse-hawkbit/hawkbit' && inputs.revision != '0-SNAPSHOT'
+    uses: ./.github/workflows/reusable_workflow_tag@${{ github.sha }}
+    permissions:
+      contents: write
+    with:
+      tag_name: ${{ inputs.revision }}
+      tag_message: "Release version ${{ inputs.revision }}"
+      override_tag: ${{ github.event.inputs.override_tag }}

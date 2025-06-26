@@ -1,0 +1,25 @@
+name: Verify
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '.3rd-party/**'
+      - 'site/**'
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '.3rd-party/**'
+      - 'site/**'
+      - '**.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    uses: ./.github/workflows/reusable_workflow_verify.yaml
+    with:
+      ref: ${{ github.event_name == 'push' && github.ref || github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.event_name == 'workflow_dispatch' && github.ref }}

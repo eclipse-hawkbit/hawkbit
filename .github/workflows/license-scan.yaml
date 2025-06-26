@@ -1,0 +1,24 @@
+name: License Scan
+
+on:
+  # enable running the workflow manually
+  workflow_dispatch:
+  schedule:
+    # run every night at 2:00 AM (UTC)
+    - cron: '0 2 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  license-scan:
+    # only on original eclipse-hawkbit/hawkbit repo or when manually triggered
+    if: github.repository == 'eclipse-hawkbit/hawkbit' || github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/reusable_workflow_license-scan.yaml
+    permissions:
+      contents: write
+    with:
+        ref: ${{ github.ref }}
+        open_tickets: true
+    secrets:
+      inherit: true
