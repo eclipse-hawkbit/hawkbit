@@ -50,7 +50,7 @@ jobs:
           cd docker/build
           
           for APP in "${ALL_APPS[@]}"; do
-            if [ "${APP}" == "sp-repository-jpa-init" ]; then
+            if [ "${APP}" == "hawkbit-repository-jpa-init" ]; then
                 DOCKER_FILE="Dockerfile_dbinit"
             else
                 DOCKER_FILE="Dockerfile"
