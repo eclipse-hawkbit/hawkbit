@@ -1,7 +1,7 @@
-# This workflow builds and releases Docker images for Hawkbit applications.
+# This workflow builds and releases Docker images for Hawkbit applications to DockerHub.
 # It should be run from personal forks of the hawkbit repository with set .
 # personal DOCKERHUB_USERNAME var and DOCKERHUB_TOKEN secret.
-name: Release Docker Image
+name: Release Docker Images
 
 on:
   # enable running the workflow manually
