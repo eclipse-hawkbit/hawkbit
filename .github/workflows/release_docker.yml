@@ -47,6 +47,7 @@ jobs:
           for APP in $(echo "${ALL_APPS_STRING}" | tr ',' '\n' | xargs); do
             ALL_APPS+=("${APP}")  # Add trimmed app
           done
+          cd docker/build
           
           for APP in "${ALL_APPS[@]}"; do
             if [ "${APP}" == "sp-repository-jpa-init" ]; then
@@ -55,7 +56,7 @@ jobs:
                 DOCKER_FILE="Dockerfile"
             fi
             echo "Build ${APP}, docker file : ${DOCKER_FILE}"
-            docker buildx build -t hawkbit/${APP}:${REVISION} --build-arg HAWKBIT_APP=${APP} --build-arg HAWKBIT_VERSION=${REVISION} -f ${DOCKER_FILE} docker/build
+            docker buildx build -t hawkbit/${APP}:${REVISION} --build-arg HAWKBIT_APP=${APP} --build-arg HAWKBIT_VERSION=${REVISION} -f ${DOCKER_FILE} .
           done
 
       - name: Push Docker Images
