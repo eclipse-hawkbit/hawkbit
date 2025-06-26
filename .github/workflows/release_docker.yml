@@ -35,26 +35,35 @@ jobs:
             # microservices
             "hawkbit-ddi-server",  "hawkbit-dmf-server", "hawkbit-mgmt-server", "hawkbit-simple-ui", 
             # monolith
-            "hawkbit-update-server"
+            "hawkbit-update-server",
             # db init
-            build "hawkbit-repository-jpa-init")
-          echo "ALL_APPS=${ALL_APPS[*]}" >> $GITHUB_ENV
-          echo ${ALL_APPS}
+            "hawkbit-repository-jpa-init")
+          echo "ALL_APPS_STRING=${ALL_APPS[*]}" >> $GITHUB_ENV
           echo "REVISION=${{ github.event.inputs.revision }}" >> $GITHUB_ENV
 
       - name: Build Docker Images
         run: |
-          echo "all apps ${ALL_APPS}"
-          echo "revision ${REVISION}"
           cd docker/build
-          for app in "${ALL_APPS[@]}"; do
+          ALL_APPS=()  # Initialize an empty
+          for APP in $(echo "${ALL_APPS_STRING}" | tr ',' '\n' | xargs); do
+            ALL_APPS+=("${APP}")  # Add trimmed app
+          done
+          
+          for APP in "${ALL_APPS[@]}"; do
+            echo "Build ${APP}"
             docker buildx build -t hawkbit/${APP}:${REVISION} --build-arg HAWKBIT_APP=${APP} --build-arg HAWKBIT_VERSION=${REVISION} .
           done
 
       - name: Push Docker Images
         run: |
           cd docker/build
-          for app in "${ALL_APPS[@]}"; do
+          ALL_APPS=()  # Initialize an empty
+          for APP in $(echo "${ALL_APPS_STRING}" | tr ',' '\n' | xargs); do
+            ALL_APPS+=("${APP}")  # Add trimmed app
+          done
+          
+          for APP in "${ALL_APPS[@]}"; do
+            echo "Deploy ${APP}"
             docker push hawkbit/${APP}:${REVISION}
             docker tag hawkbit/${APP}:${REVISION} hawkbit/${APP}:latest
             docker push hawkbit/${APP}:latest
