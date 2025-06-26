@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.annotation.security.RolesAllowed;
@@ -80,9 +81,9 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                     }
                 },
                 (query, rsqlFilter) -> Optional.ofNullable(
-                                hawkbitClient.getDistributionSetRestApi()
-                                        .getDistributionSets(rsqlFilter, query.getOffset(), query.getPageSize(), Constants.NAME_ASC)
-                                        .getBody())
+                        hawkbitClient.getDistributionSetRestApi()
+                                .getDistributionSets(rsqlFilter, query.getOffset(), query.getPageSize(), Constants.NAME_ASC)
+                                .getBody())
                         .stream().flatMap(body -> body.getContent().stream()),
                 e -> new CreateDialog(hawkbitClient).result(),
                 selectionGrid -> {
@@ -119,16 +120,16 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             name.setPlaceholder("<name filter>");
             type.setItemLabelGenerator(MgmtDistributionSetType::getName);
             type.setItems(Optional.ofNullable(
-                            hawkbitClient.getDistributionSetTypeRestApi()
-                                    .getDistributionSetTypes(null, 0, 20, Constants.NAME_ASC)
-                                    .getBody())
+                    hawkbitClient.getDistributionSetTypeRestApi()
+                            .getDistributionSetTypes(null, 0, 20, Constants.NAME_ASC)
+                            .getBody())
                     .map(PagedList::getContent)
                     .orElseGet(Collections::emptyList));
             tag.setItemLabelGenerator(MgmtTag::getName);
             tag.setItems(Optional.ofNullable(
-                            hawkbitClient.getDistributionSetTagRestApi()
-                                    .getDistributionSetTags(null, 0, 20, Constants.NAME_ASC)
-                                    .getBody())
+                    hawkbitClient.getDistributionSetTagRestApi()
+                            .getDistributionSetTags(null, 0, 20, Constants.NAME_ASC)
+                            .getBody())
                     .map(PagedList::getContent)
                     .orElseGet(Collections::emptyList));
         }
@@ -157,6 +158,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
         private final TextField createdAt = Utils.textField("Created at");
         private final TextField lastModifiedBy = Utils.textField("Last modified by");
         private final TextField lastModifiedAt = Utils.textField("Last modified at");
+        private final TextArea metadata = new TextArea("Metadata");
         private final SelectionGrid<MgmtSoftwareModule, Long> softwareModulesGrid = selectSoftwareModuleGrid();
 
         private DistributionSetDetails(final HawkbitMgmtClient hawkbitClient) {
@@ -164,9 +166,9 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
             description.setMinLength(2);
             Stream.of(
-                            description,
-                            createdBy, createdAt,
-                            lastModifiedBy, lastModifiedAt)
+                    description,
+                    createdBy, createdAt,
+                    lastModifiedBy, lastModifiedAt, metadata)
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
@@ -184,6 +186,11 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             createdAt.setValue(new Date(distributionSet.getCreatedAt()).toString());
             lastModifiedBy.setValue(distributionSet.getLastModifiedBy());
             lastModifiedAt.setValue(new Date(distributionSet.getLastModifiedAt()).toString());
+            metadata.setValue(Optional.ofNullable(
+                    hawkbitClient.getDistributionSetRestApi().getMetadata(distributionSet.getId()).getBody())
+                    .map(body -> body.getContent().stream()
+                            .map(b -> String.format("%s: %s\n", b.getKey(), b.getValue())).collect(
+                                    Collectors.joining())).orElse(""));
 
             softwareModulesGrid.setItems(query -> Optional.ofNullable(
                     hawkbitClient.getDistributionSetRestApi()
@@ -214,9 +221,9 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                     "Type",
                     this::readyToCreate,
                     Optional.ofNullable(
-                                    hawkbitClient.getDistributionSetTypeRestApi()
-                                            .getDistributionSetTypes(null, 0, 30, Constants.NAME_ASC)
-                                            .getBody())
+                            hawkbitClient.getDistributionSetTypeRestApi()
+                                    .getDistributionSetTypes(null, 0, 30, Constants.NAME_ASC)
+                                    .getBody())
                             .map(body -> body.getContent().toArray(new MgmtDistributionSetType[0]))
                             .orElseGet(() -> new MgmtDistributionSetType[0]));
             type.focus();
@@ -262,15 +269,15 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             create.addClickListener(e -> {
                 close();
                 final long distributionSetId = Optional.ofNullable(
-                                hawkbitClient.getDistributionSetRestApi()
-                                        .createDistributionSets(
-                                                List.of((MgmtDistributionSetRequestBodyPost) new MgmtDistributionSetRequestBodyPost()
-                                                        .setType(type.getValue().getKey())
-                                                        .setName(name.getValue())
-                                                        .setVersion(version.getValue())
-                                                        .setDescription(description.getValue())
-                                                        .setRequiredMigrationStep(requiredMigrationStep.getValue())))
-                                        .getBody())
+                        hawkbitClient.getDistributionSetRestApi()
+                                .createDistributionSets(
+                                        List.of((MgmtDistributionSetRequestBodyPost) new MgmtDistributionSetRequestBodyPost()
+                                                .setType(type.getValue().getKey())
+                                                .setName(name.getValue())
+                                                .setVersion(version.getValue())
+                                                .setDescription(description.getValue())
+                                                .setRequiredMigrationStep(requiredMigrationStep.getValue())))
+                                .getBody())
                         .stream()
                         .flatMap(Collection::stream)
                         .findFirst()
@@ -281,7 +288,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
         }
     }
 
-    @SuppressWarnings({"java:S1171", "java:S3599"})
+    @SuppressWarnings({ "java:S1171", "java:S3599" })
     private static class AddSoftwareModulesDialog extends Utils.BaseDialog<Void> {
 
         private final transient Set<MgmtSoftwareModule> softwareModules = Collections.synchronizedSet(new HashSet<>());
@@ -296,19 +303,22 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             });
 
             final Component addRemoveControls = Utils.addRemoveControls(
-                    v -> new Utils.BaseDialog<Void>("Add Software Modules") {{
-                        final SoftwareModuleView softwareModulesView = new SoftwareModuleView(false, hawkbitClient);
-                        add(softwareModulesView);
-                        final Button addBtn = new Button("Add");
-                        addBtn.addClickListener(e -> {
-                            softwareModules.addAll(softwareModulesView.getSelection());
-                            softwareModulesGrid.refreshGrid(false);
-                            close();
-                        });
-                        addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-                        getFooter().add(addBtn);
-                        open();
-                    }}.result(),
+                    v -> new Utils.BaseDialog<Void>("Add Software Modules") {
+
+                        {
+                            final SoftwareModuleView softwareModulesView = new SoftwareModuleView(false, hawkbitClient);
+                            add(softwareModulesView);
+                            final Button addBtn = new Button("Add");
+                            addBtn.addClickListener(e -> {
+                                softwareModules.addAll(softwareModulesView.getSelection());
+                                softwareModulesGrid.refreshGrid(false);
+                                close();
+                            });
+                            addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+                            getFooter().add(addBtn);
+                            open();
+                        }
+                    }.result(),
                     v -> {
                         Utils.remove(softwareModulesGrid.getSelectedItems(), softwareModules, MgmtSoftwareModule::getId);
                         softwareModulesGrid.refreshGrid(false);
