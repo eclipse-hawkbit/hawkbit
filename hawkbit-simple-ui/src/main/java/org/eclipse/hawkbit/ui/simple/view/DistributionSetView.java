@@ -73,7 +73,6 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
                     @Override
                     protected void addColumns(Grid<MgmtDistributionSet> grid) {
-                        grid.addColumn(MgmtDistributionSet::getId).setHeader(Constants.ID).setAutoWidth(true).setKey("id").setSortable(true);
                         var createdAtCol = grid.addColumn(Utils.localDateTimeRenderer(MgmtDistributionSet::getCreatedAt)).setHeader(
                                 Constants.CREATED_AT).setAutoWidth(true).setKey("createdAt").setSortable(true);
                         grid.addColumn(MgmtDistributionSet::getName).setHeader(Constants.NAME).setAutoWidth(true).setKey("name").setSortable(
