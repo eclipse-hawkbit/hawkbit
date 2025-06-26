@@ -30,9 +30,8 @@ jobs:
             "hawkbit-ddi-server",  "hawkbit-dmf-server", "hawkbit-mgmt-server", "hawkbit-simple-ui", 
             # monolith
             "hawkbit-update-server",
-            # db init, not released yet
-            #"hawkbit-repository-jpa-init"
-          )
+            # db init
+            "hawkbit-repository-jpa-init")
           echo "ALL_APPS_STRING=${ALL_APPS[*]}" >> $GITHUB_ENV
           echo "REVISION=${{ github.event.inputs.revision }}" >> $GITHUB_ENV
 

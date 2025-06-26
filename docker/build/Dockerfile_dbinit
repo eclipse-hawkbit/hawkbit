@@ -14,7 +14,7 @@ RUN set -x &&\
  apk add --no-cache --virtual build-dependencies gnupg unzip libressl wget &&\
  gpg --import KEY &&\
  wget -O ${APP}-${VERSION}.jar --no-verbose https://repo1.maven.org/maven2/org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar &&\
- wget -O ${APP}-${VERSION}.asc --no-verbose https://repo1.maven.org/maven2/org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar.asc &&\
+ wget -O ${APP}-${VERSION}.jar.asc --no-verbose https://repo1.maven.org/maven2/org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar.asc &&\
  gpg --batch --verify ${APP}-${VERSION}.jar.asc ${APP}-${VERSION}.jar &&\
  rm ${APP}-${VERSION}.jar.asc KEY &&\
  apk del build-dependencies
@@ -24,7 +24,12 @@ FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
 RUN addgroup -S hawkbit_group && adduser -D hawkbit -G hawkbit_group
 USER hawkbit
 
-ENV BUILD_DIR=/opt/hawkbit_build
+ARG HAWKBIT_APP=hawkbit-repository-jpa-init
+ARG HAWKBIT_VERSION=pass_as_buils_arg
+
+ENV APP=${HAWKBIT_APP}
+ENV VERSION=${HAWKBIT_VERSION}
+
 COPY --from=build /${APP}-${VERSION}.jar ./
 
 ARG X_MS=256m
