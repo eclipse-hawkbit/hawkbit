@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -28,6 +29,8 @@ import java.util.function.ToLongFunction;
 
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IconFactory;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
@@ -276,5 +279,14 @@ public class Utils {
                 () -> DateTimeFormatter.ofLocalizedDateTime(
                         FormatStyle.SHORT,
                         FormatStyle.MEDIUM).withLocale(UI.getCurrent().getLocale()));
+    }
+
+    public static String getSortParam(List<QuerySortOrder> querySortOrders) {
+        if (!querySortOrders.isEmpty()) {
+            QuerySortOrder firstSort = querySortOrders.get(0);
+            String order = firstSort.getDirection() == SortDirection.ASCENDING ? "asc" : "desc";
+            return String.format("%s:%s", firstSort.getSorted(), order);
+        }
+        return null;
     }
 }

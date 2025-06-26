@@ -71,10 +71,13 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
                     @Override
                     protected void addColumns(Grid<MgmtDistributionSet> grid) {
-                        grid.addColumn(MgmtDistributionSet::getId).setHeader(Constants.ID).setAutoWidth(true);
-                        grid.addColumn(MgmtDistributionSet::getName).setHeader(Constants.NAME).setAutoWidth(true);
-                        grid.addColumn(MgmtDistributionSet::getVersion).setHeader(Constants.VERSION).setAutoWidth(true);
-                        grid.addColumn(MgmtDistributionSet::getTypeName).setHeader(Constants.TYPE).setAutoWidth(true);
+                        grid.addColumn(MgmtDistributionSet::getId).setHeader(Constants.ID).setAutoWidth(true).setKey("id").setSortable(true);
+                        grid.addColumn(MgmtDistributionSet::getName).setHeader(Constants.NAME).setAutoWidth(true).setKey("name").setSortable(
+                                true);
+                        grid.addColumn(MgmtDistributionSet::getVersion).setHeader(Constants.VERSION).setAutoWidth(true).setKey("version")
+                                .setSortable(true);
+                        grid.addColumn(MgmtDistributionSet::getTypeName).setHeader(Constants.TYPE).setAutoWidth(true).setKey("typename")
+                                .setSortable(true);
 
                         grid.setItemDetailsRenderer(new ComponentRenderer<>(
                                 () -> details, DistributionSetDetails::setItem));
@@ -82,7 +85,8 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                 },
                 (query, rsqlFilter) -> Optional.ofNullable(
                         hawkbitClient.getDistributionSetRestApi()
-                                .getDistributionSets(rsqlFilter, query.getOffset(), query.getPageSize(), Constants.NAME_ASC)
+                                .getDistributionSets(rsqlFilter, query.getOffset(), query.getPageSize(), Utils.getSortParam(query
+                                        .getSortOrders()))
                                 .getBody())
                         .stream().flatMap(body -> body.getContent().stream()),
                 e -> new CreateDialog(hawkbitClient).result(),
