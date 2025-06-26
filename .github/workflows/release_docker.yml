@@ -39,10 +39,13 @@ jobs:
             # db init
             build "hawkbit-repository-jpa-init")
           echo "ALL_APPS=${ALL_APPS[*]}" >> $GITHUB_ENV
+          echo ${ALL_APPS}
           echo "REVISION=${{ github.event.inputs.revision }}" >> $GITHUB_ENV
 
       - name: Build Docker Images
         run: |
+          echo "all apps ${ALL_APPS}"
+          echo "revision ${REVISION}"
           cd docker/build
           for app in "${ALL_APPS[@]}"; do
             docker buildx build -t hawkbit/${APP}:${REVISION} --build-arg HAWKBIT_APP=${APP} --build-arg HAWKBIT_VERSION=${REVISION} .
