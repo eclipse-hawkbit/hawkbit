@@ -1,7 +1,7 @@
-# This workflow builds and releases Docker images for Hawkbit applications.
+# This workflow builds and releases Docker images for Hawkbit applications to DockerHub.
 # It should be run from personal forks of the hawkbit repository with set .
 # personal DOCKERHUB_USERNAME var and DOCKERHUB_TOKEN secret.
-name: Release Docker Image
+name: Release Docker Images
 
 on:
   # enable running the workflow manually
@@ -12,7 +12,7 @@ on:
         default: '0-SNAPSHOT'
 
 jobs:
-  build:
+  release_docker:
     # only on fork of eclipse-hawkbit/hawkbit repo - see the note above
     if: github.repository != 'eclipse-hawkbit/hawkbit'
     runs-on: ubuntu-latest
@@ -23,35 +23,52 @@ jobs:
       - name: "Release ${{ github.event.inputs.revision }}"
         run: echo "Releasing ${{ github.event.inputs.revision }}"
 
-      - name: Log into Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Setup
         run: |
           ALL_APPS=(
             # microservices
             "hawkbit-ddi-server",  "hawkbit-dmf-server", "hawkbit-mgmt-server", "hawkbit-simple-ui", 
             # monolith
-            "hawkbit-update-server"
-            # db init
-            build "hawkbit-repository-jpa-init")
-          echo "ALL_APPS=${ALL_APPS[*]}" >> $GITHUB_ENV
+            "hawkbit-update-server",
+            # db init, not released yet
+            #"hawkbit-repository-jpa-init"
+          )
+          echo "ALL_APPS_STRING=${ALL_APPS[*]}" >> $GITHUB_ENV
           echo "REVISION=${{ github.event.inputs.revision }}" >> $GITHUB_ENV
 
       - name: Build Docker Images
         run: |
-          cd docker/build
-          for app in "${ALL_APPS[@]}"; do
-            docker buildx build -t hawkbit/${APP}:${REVISION} --build-arg HAWKBIT_APP=${APP} --build-arg HAWKBIT_VERSION=${REVISION} .
+          ALL_APPS=()  # Initialize an empty
+          for APP in $(echo "${ALL_APPS_STRING}" | tr ',' '\n' | xargs); do
+            ALL_APPS+=("${APP}")  # Add trimmed app
           done
+          cd docker/build
+          
+          for APP in "${ALL_APPS[@]}"; do
+            if [ "${APP}" == "hawkbit-repository-jpa-init" ]; then
+                DOCKER_FILE="Dockerfile_dbinit"
+            else
+                DOCKER_FILE="Dockerfile"
+            fi
+            echo "Build ${APP}, docker file : ${DOCKER_FILE}"
+            docker buildx build -t hawkbit/${APP}:${REVISION} --build-arg HAWKBIT_APP=${APP} --build-arg HAWKBIT_VERSION=${REVISION} -f ${DOCKER_FILE} .
+          done
+
+      - name: Log into Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Push Docker Images
         run: |
-          cd docker/build
-          for app in "${ALL_APPS[@]}"; do
+          ALL_APPS=()  # Initialize an empty
+          for APP in $(echo "${ALL_APPS_STRING}" | tr ',' '\n' | xargs); do
+            ALL_APPS+=("${APP}")  # Add trimmed app
+          done
+          
+          for APP in "${ALL_APPS[@]}"; do
+            echo "Deploy ${APP}"
             docker push hawkbit/${APP}:${REVISION}
             docker tag hawkbit/${APP}:${REVISION} hawkbit/${APP}:latest
             docker push hawkbit/${APP}:latest
