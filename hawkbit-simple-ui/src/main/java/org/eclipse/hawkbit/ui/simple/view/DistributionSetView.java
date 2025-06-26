@@ -21,6 +21,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.grid.GridSortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
 import jakarta.annotation.security.RolesAllowed;
 
 import com.vaadin.flow.component.Component;
@@ -72,12 +74,15 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                     @Override
                     protected void addColumns(Grid<MgmtDistributionSet> grid) {
                         grid.addColumn(MgmtDistributionSet::getId).setHeader(Constants.ID).setAutoWidth(true).setKey("id").setSortable(true);
+                        var createdAtCol = grid.addColumn(Utils.localDateTimeRenderer(MgmtDistributionSet::getCreatedAt)).setHeader(
+                                Constants.CREATED_AT).setAutoWidth(true).setKey("createdAt").setSortable(true);
                         grid.addColumn(MgmtDistributionSet::getName).setHeader(Constants.NAME).setAutoWidth(true).setKey("name").setSortable(
                                 true);
                         grid.addColumn(MgmtDistributionSet::getVersion).setHeader(Constants.VERSION).setAutoWidth(true).setKey("version")
                                 .setSortable(true);
                         grid.addColumn(MgmtDistributionSet::getTypeName).setHeader(Constants.TYPE).setAutoWidth(true).setKey("typename")
                                 .setSortable(true);
+                        grid.sort(List.of(new GridSortOrder<>(createdAtCol, SortDirection.DESCENDING)));
 
                         grid.setItemDetailsRenderer(new ComponentRenderer<>(
                                 () -> details, DistributionSetDetails::setItem));
