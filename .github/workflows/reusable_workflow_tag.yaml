@@ -9,12 +9,11 @@ on:
         required: true
       tag_message:
         type: string
-        description: ''
-        required: false
+        description: 'Tag message (optional), e.g. "Release version 1.0.0"'
+        default: ''
       override_tag:
         type: boolean
         description: 'If to override the tag if already exists'
-        required: false
         default: false
 
 jobs:

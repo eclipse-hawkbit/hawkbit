@@ -5,13 +5,16 @@ on:
   workflow_dispatch:
     inputs:
       revision:
+        type: string
         description: 'Release version'
         default: '0-SNAPSHOT'
       override_tag:
+        type: boolean
         description: 'If to move the tag if already exists'
         default: false
         required: false
       dry_run:
+        type: boolean
         description: 'If to skip publishing the release to central repository'
         default: false
         required: false
