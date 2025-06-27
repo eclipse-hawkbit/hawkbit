@@ -11,6 +11,9 @@ on:
         description: 'Release version'
         default: '0-SNAPSHOT'
 
+permissions:
+  contents: read
+
 jobs:
   release_docker:
     # only on fork of eclipse-hawkbit/hawkbit repo - see the note above
@@ -20,8 +23,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: "Release ${{ github.event.inputs.revision }}"
-        run: echo "Releasing ${{ github.event.inputs.revision }}"
+      - name: "Release ${{ inputs.revision }}"
+        run: echo "Releasing ${{ inputs.revision }}"
 
       - name: Setup
         run: |
@@ -45,9 +48,9 @@ jobs:
           
           for APP in "${ALL_APPS[@]}"; do
             if [ "${APP}" == "hawkbit-repository-jpa-init" ]; then
-                DOCKER_FILE="Dockerfile_dbinit"
+              DOCKER_FILE="Dockerfile_dbinit"
             else
-                DOCKER_FILE="Dockerfile"
+              DOCKER_FILE="Dockerfile"
             fi
             echo "Build ${APP}, docker file : ${DOCKER_FILE}"
             docker buildx build -t hawkbit/${APP}:${REVISION} --build-arg HAWKBIT_APP=${APP} --build-arg HAWKBIT_VERSION=${REVISION} -f ${DOCKER_FILE} .
@@ -61,14 +64,15 @@ jobs:
 
       - name: Push Docker Images
         run: |
-          ALL_APPS=()  # Initialize an empty
+          ALL_APPS=()
           for APP in $(echo "${ALL_APPS_STRING}" | tr ',' '\n' | xargs); do
-            ALL_APPS+=("${APP}")  # Add trimmed app
+            ALL_APPS+=("${APP}")  # trims chunk to fully qualified app name
           done
           
           for APP in "${ALL_APPS[@]}"; do
-            echo "Deploy ${APP}"
+            echo "Deploying ${APP}..."
             docker push hawkbit/${APP}:${REVISION}
             docker tag hawkbit/${APP}:${REVISION} hawkbit/${APP}:latest
             docker push hawkbit/${APP}:latest
+            echo "${APP} deployed."
           done

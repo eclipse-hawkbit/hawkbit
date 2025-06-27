@@ -129,6 +129,8 @@
         <dash.review.summary>${project.build.directory}/.3rd-party/DEPENDENCIES_REVIEW</dash.review.summary>
         <excludeGroupIds>org.eclipse,org.junit</excludeGroupIds>
         <!-- Dash tool integration - END -->
+
+        <skipPublishing>false</skipPublishing>
     </properties>
 
     <developers>
@@ -670,6 +672,7 @@
                             <publishingServerId>central</publishingServerId>
                             <autoPublish>true</autoPublish>
                             <waitUntil>published</waitUntil>
+                            <skipPublishing>${skipPublishing}</skipPublishing>
                         </configuration>
                     </plugin>
                 </plugins>
