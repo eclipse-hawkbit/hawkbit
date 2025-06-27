@@ -2,7 +2,7 @@ name: Trivy Scan (Reusable Workflow)
 
 on:
   workflow_call:
-    variables:
+    inputs:
       ref:
         description: 'The branch, tag or SHA to checkout, e.g. master'
         type: string
