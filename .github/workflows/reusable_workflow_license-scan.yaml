@@ -11,6 +11,10 @@ on:
         description: 'If to open tickets for license issues to Dash IP lab, e.g. true or false'
         type: boolean
         default: false
+    secrets:
+      GITLAB_API_TOKEN:
+        description: 'GitLab API token for Dash IP lab (needed only if open_tickets is true)'
+        required: false
 
 jobs:
   reusable_workflow_license-scan:
