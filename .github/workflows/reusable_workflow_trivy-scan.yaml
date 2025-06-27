@@ -99,4 +99,4 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'scans/eclipse-hawkbit/hawkbit/hawkbit-repository-jpa-init:latest.sarif'
-          category: "Container Images (hawkbit-update-server)"
+          category: "Container Images (hawkbit-repository-jpa-init)"
