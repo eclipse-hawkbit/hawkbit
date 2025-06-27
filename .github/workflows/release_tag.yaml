@@ -30,7 +30,7 @@ jobs:
   tag:
     # only on original eclipse-hawkbit/hawkbit repo and when release fixed version
     if: github.repository == 'eclipse-hawkbit/hawkbit' && inputs.revision != '0-SNAPSHOT'
-    uses: ./.github/workflows/reusable_workflow_tag@${{ github.sha }}
+    uses: ./.github/workflows/reusable_workflow_tag
     permissions:
       contents: write
     with:
