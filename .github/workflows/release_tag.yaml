@@ -5,12 +5,13 @@ on:
   workflow_dispatch:
     inputs:
       revision:
+        type: string
         description: 'Release version'
         default: '0-SNAPSHOT'
       override_tag:
+        type: boolean
         description: 'If to move the tag if already exists'
         default: false
-        required: false
 
 permissions:
   contents: write
@@ -36,4 +37,4 @@ jobs:
     with:
       tag_name: ${{ inputs.revision }}
       tag_message: "Release version ${{ inputs.revision }}"
-      override_tag: ${{ github.event.inputs.override_tag }}
+      override_tag: ${{ inputs.override_tag }}
