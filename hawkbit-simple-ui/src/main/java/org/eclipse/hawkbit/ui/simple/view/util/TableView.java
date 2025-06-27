@@ -15,6 +15,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -28,17 +29,21 @@ import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import org.eclipse.hawkbit.ui.simple.view.Constants;
 
 @SuppressWarnings("java:S119") // better readability
-public class TableView<T, ID> extends Div implements Constants {
+public class TableView<T, ID> extends Div implements Constants, BeforeEnterObserver {
 
     private static final String COLOR = "color";
     private static final String VAR_LUMO_SECONDARY_TEXT_COLOR = "var(--lumo-secondary-text-color)";
     private static final String VAR_LUMO_PRIMARY_COLOR = "var(--lumo-primary-color)";
     private static final int DEFAULT_OPEN_POSITION_SIZE = 50;
+    private static final String QUERY_PARAM_FILTER = "q";
 
     protected SelectionGrid<T, ID> selectionGrid;
     private final Filter filter;
@@ -83,8 +88,14 @@ public class TableView<T, ID> extends Div implements Constants {
 
         filter = new Filter(
                 (rsqlFilter) -> {
-                    selectionGrid.setRsqlFilter(rsqlFilter);
                     closeDetailsPanel();
+                    if (rsqlFilter != null) {
+                        var queryParameters = UI.getCurrent().getActiveViewLocation()
+                                .getQueryParameters()
+                                .merging(QUERY_PARAM_FILTER, rsqlFilter);
+                        UI.getCurrent().navigate(this.getClass(), queryParameters);
+                    }
+                    selectionGrid.setRsqlFilter(rsqlFilter, true);
                 }, rsql, alternativeRsql
         );
         gridLayout = new VerticalLayout(filter, splitLayout);
@@ -146,5 +157,17 @@ public class TableView<T, ID> extends Div implements Constants {
             button.addThemeVariants(ButtonVariant.LUMO_SMALL);
             return button;
         };
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        var params = event.getLocation().getQueryParameters();
+        params.getSingleParameter(QUERY_PARAM_FILTER)
+                .ifPresent(f -> {
+                    var newPage = event.getTrigger() == NavigationTrigger.UI_NAVIGATE;
+                    selectionGrid.setRsqlFilter(f, newPage);
+                    filter.setFilter(f, newPage);
+                });
+
     }
 }

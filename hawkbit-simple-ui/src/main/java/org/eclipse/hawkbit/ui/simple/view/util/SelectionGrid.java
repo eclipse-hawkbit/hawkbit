@@ -61,10 +61,11 @@ public class SelectionGrid<T, ID> extends Grid<T> {
         } // else externally managed
     }
 
-    public void setRsqlFilter(final String rsqlFilter) {
+    public void setRsqlFilter(final String rsqlFilter, boolean refreshGrid) {
         if (!Objects.equals(this.rsqlFilter, rsqlFilter)) {
             this.rsqlFilter = rsqlFilter;
-            refreshGrid(true);
+            if (refreshGrid)
+                refreshGrid(true);
         }
     }
 
