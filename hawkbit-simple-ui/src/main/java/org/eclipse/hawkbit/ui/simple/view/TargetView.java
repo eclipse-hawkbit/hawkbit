@@ -184,7 +184,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
     }
 
     @SuppressWarnings({ "java:S1171", "java:S3599" })
-    private static class RawFilter implements Filter.Rsql {
+    private static class RawFilter implements Filter.Rsql, Filter.RsqlRw {
 
         private final TextField textFilter = new TextField("Raw Filter", "<raw filter>");
         private final VerticalLayout layout = new VerticalLayout();
@@ -309,6 +309,11 @@ public class TargetView extends TableView<MgmtTarget, String> {
         @Override
         public String filter() {
             return textFilter.getOptionalValue().orElse(null);
+        }
+
+        @Override
+        public void setFilter(String filter) {
+            textFilter.setValue(filter);
         }
     }
 
