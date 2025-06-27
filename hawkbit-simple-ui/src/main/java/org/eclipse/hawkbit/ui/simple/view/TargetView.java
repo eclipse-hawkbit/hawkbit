@@ -79,6 +79,7 @@ import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetType;
 import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
 import org.eclipse.hawkbit.ui.simple.MainLayout;
 import org.eclipse.hawkbit.ui.simple.view.util.Filter;
+import org.eclipse.hawkbit.ui.simple.view.util.LinkedTextArea;
 import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
 import org.eclipse.hawkbit.ui.simple.view.util.TableView;
 import org.eclipse.hawkbit.ui.simple.view.util.Utils;
@@ -407,14 +408,12 @@ public class TargetView extends TableView<MgmtTarget, String> {
     private static class TargetAssignedInstalled extends FormLayout {
 
         private final transient HawkbitMgmtClient hawkbitClient;
-        private final TextArea assigned = new TextArea("Assigned Distribution Set");
-        private final TextArea installed = new TextArea("Installed Distribution Set");
+        private final LinkedTextArea assigned = new LinkedTextArea("Assigned Distribution Set", "/distribution_sets?");
+        private final LinkedTextArea installed = new LinkedTextArea("Installed Distribution Set", "/distribution_sets?");
         private transient MgmtTarget target;
 
         private TargetAssignedInstalled(HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
-            assigned.setReadOnly(true);
-            installed.setReadOnly(true);
             assigned.setWidthFull();
             installed.setWidthFull();
             add(assigned, installed);
@@ -431,22 +430,23 @@ public class TargetView extends TableView<MgmtTarget, String> {
             updateDistributionSetInfo(() -> hawkbitClient.getTargetRestApi().getAssignedDistributionSet(target.getControllerId()), assigned);
         }
 
-        private void updateDistributionSetInfo(Supplier<ResponseEntity<MgmtDistributionSet>> supplier, TextArea textArea) {
+        private void updateDistributionSetInfo(Supplier<ResponseEntity<MgmtDistributionSet>> supplier, LinkedTextArea textArea) {
             Optional.ofNullable(supplier.get())
                     .map(ResponseEntity<MgmtDistributionSet>::getBody)
-                    .ifPresent(value -> {
+                    .ifPresentOrElse(value -> {
                         final String description = """
                                 Name:  %s
                                 Version: %s
                                 %s
                                 """.replace("\n", System.lineSeparator());
-                        textArea.setValue(description.formatted(
+                        textArea.setValueWithLink(description.formatted(
                                 value.getName(),
                                 value.getVersion(),
                                 value.getModules().stream().map(module -> module.getTypeName() + ": " + module.getVersion())
                                         .collect(Collectors.joining(System.lineSeparator()))
-                        ));
-                    });
+                        ), "q=id%3D%3D" + value.getId().toString());
+                    },
+                            () -> textArea.setValueWithLink("", null));
         }
     }
 
