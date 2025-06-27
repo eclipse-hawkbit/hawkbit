@@ -32,9 +32,14 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 public class Filter extends Div {
 
     private transient Rsql rsql;
+    private final transient Rsql secondaryRsql;
+    private final transient Rsql primaryRsql;
+    private final transient Div filtersDiv;
 
     public Filter(final Consumer<String> changeListener, final Rsql primaryRsql, final Rsql secondaryOptionalRsql) {
         rsql = primaryRsql;
+        this.primaryRsql = primaryRsql;
+        secondaryRsql = secondaryOptionalRsql;
 
         final HorizontalLayout layout = new HorizontalLayout();
 
@@ -42,7 +47,7 @@ public class Filter extends Div {
         addClassNames(LumoUtility.Padding.Horizontal.NONE, LumoUtility.Padding.Vertical.SMALL,
                 LumoUtility.BoxSizing.BORDER);
 
-        final Div filtersDiv = new Div();
+        filtersDiv = new Div();
         filtersDiv.setWidthFull();
         filtersDiv.add(primaryRsql.components());
         filtersDiv.addClassName(LumoUtility.Gap.SMALL);
@@ -70,11 +75,7 @@ public class Filter extends Div {
             final Button toggleBtn = Utils.tooltip(new Button(VaadinIcon.FLIP_V.create()), "Toggle Search");
             toggleBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
             toggleBtn.addClickListener(e -> {
-                filtersDiv.removeAll();
-                synchronized (this) { // toggle
-                    rsql = rsql == primaryRsql ? secondaryOptionalRsql : primaryRsql;
-                }
-                filtersDiv.add(rsql.components());
+                toggle();
                 changeListener.accept(primaryRsql.filter());
             });
             layout.add(toggleBtn);
@@ -82,6 +83,32 @@ public class Filter extends Div {
         add(layout);
 
         changeListener.accept(primaryRsql.filter());
+    }
+
+    private void toggle(){
+        // toggle
+        filtersDiv.removeAll();
+        synchronized (this) {
+            rsql = rsql == primaryRsql ? secondaryRsql : primaryRsql;
+        }
+        filtersDiv.add(rsql.components());
+    }
+
+    public void setFilter(String string, boolean allowToggle){
+        var otherFilter =  rsql == primaryRsql ? secondaryRsql : primaryRsql;
+        Stream<Filter.Rsql> rsqlFIlter;
+        // logic to find the filter to use
+        if(allowToggle){
+            rsqlFIlter = Stream.of(this.rsql);
+        } else {
+            rsqlFIlter = Stream.of(this.rsql,otherFilter);
+        }
+        rsqlFIlter.filter(RsqlRw.class::isInstance).findFirst().map(RsqlRw.class::cast).ifPresent(f->{
+            if (f == otherFilter) {
+              toggle();
+            }
+            f.setFilter(string);
+        });
     }
 
     public static String filter(final Map<String, Object> keyToValues) {
@@ -157,5 +184,9 @@ public class Filter extends Div {
         List<Component> components();
 
         String filter();
+    }
+
+    public interface RsqlRw {
+        void setFilter(String filter);
     }
 }

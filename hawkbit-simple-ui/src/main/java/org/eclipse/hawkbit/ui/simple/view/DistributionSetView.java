@@ -67,6 +67,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
     public DistributionSetView(final HawkbitMgmtClient hawkbitClient) {
         super(
                 new DistributionSetFilter(hawkbitClient),
+                new DistributionSetRawFilter(),
                 new SelectionGrid.EntityRepresentation<>(MgmtDistributionSet.class, MgmtDistributionSet::getId) {
 
                     private final DistributionSetDetails details = new DistributionSetDetails(hawkbitClient);
@@ -94,7 +95,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                             distributionSet -> hawkbitClient.getDistributionSetRestApi()
                                     .deleteDistributionSet(distributionSet.getId()));
                     return CompletableFuture.completedFuture(null);
-                });
+                },null);
     }
 
     private static SelectionGrid<MgmtSoftwareModule, Long> selectSoftwareModuleGrid() {
@@ -111,6 +112,30 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                         grid.addColumn(MgmtSoftwareModule::getVendor).setHeader(Constants.VENDOR).setAutoWidth(true);
                     }
                 });
+    }
+
+    private static class DistributionSetRawFilter implements Filter.Rsql,Filter.RsqlRw {
+
+        private final TextField name = Utils.textField("Name");
+
+        private DistributionSetRawFilter() {
+            name.setPlaceholder("<rsql filter>");
+        }
+
+        @Override
+        public List<Component> components() {
+            return List.of(name);
+        }
+
+        @Override
+        public String filter() {
+            return name.getOptionalValue().orElse(null);
+        }
+
+        @Override
+        public void setFilter(String filter) {
+            name.setValue(filter);
+        }
     }
 
     private static class DistributionSetFilter implements Filter.Rsql {
