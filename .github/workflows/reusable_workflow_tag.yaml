@@ -32,15 +32,6 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           
           if git rev-parse "${TAG_NAME}" >/dev/null 2>&1; then
-            echo "Creating a tag ${TAG_NAME} ..."
-            if [ -n "${TAG_MESSAGE}" ]; then
-              git tag -a ${TAG_NAME} -m "${TAG_MESSAGE}"
-            else
-              git tag -a ${TAG_NAME}
-            fi
-            git push origin ${TAG_NAME}
-            echo "Tag ${TAG_NAME} created."
-          else
             if [ "${{ inputs.override_tag }}" == "true" ]; then
               echo "Tag ${TAG_NAME} already exists, but override is set to true, so moving it ..."
               git tag -d ${TAG_NAME}
@@ -54,6 +45,15 @@ jobs:
             else
               echo "Tag ${TAG_NAME} already exists, do nothing."
             fi
+          else
+            echo "Creating a tag ${TAG_NAME} ..."
+            if [ -n "${TAG_MESSAGE}" ]; then
+              git tag -a ${TAG_NAME} -m "${TAG_MESSAGE}"
+            else
+              git tag -a ${TAG_NAME}
+            fi
+            git push origin ${TAG_NAME}
+            echo "Tag ${TAG_NAME} created."
           fi
         env:
           TAG_NAME: ${{ inputs.tag_name }}
