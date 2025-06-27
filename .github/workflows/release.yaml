@@ -38,6 +38,7 @@ jobs:
   tag:
     # only on original eclipse-hawkbit/hawkbit repo and when release fixed version
     if: github.repository == 'eclipse-hawkbit/hawkbit' && inputs.revision != '0-SNAPSHOT'
+    needs: audit
     uses: ./.github/workflows/reusable_workflow_tag.yaml
     permissions:
       contents: write
@@ -49,7 +50,8 @@ jobs:
   license-scan:
     # only on original eclipse-hawkbit/hawkbit repo
     if: github.repository == 'eclipse-hawkbit/hawkbit'
-    uses: ./.github/workflows/reusable_license-scan.yaml
+    needs: tag
+    uses: ./.github/workflows/reusable_workflow_license-scan.yaml
     permissions:
       contents: read
     with:
@@ -58,6 +60,7 @@ jobs:
   trivy-scan:
     # only on original eclipse-hawkbit/hawkbit repo or when manually triggered
     if: github.repository == 'eclipse-hawkbit/hawkbit'
+    needs: tag
     uses: ./.github/workflows/reusable_workflow_trivy-scan.yaml
     permissions:
       contents: read
@@ -69,6 +72,9 @@ jobs:
   deploy:
     # only on original eclipse-hawkbit/hawkbit repo
     if: github.repository == 'eclipse-hawkbit/hawkbit'
+    needs:
+    - license-scan
+    - trivy-scan
     runs-on: ubuntu-latest
 
     permissions:
