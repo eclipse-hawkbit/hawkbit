@@ -1,4 +1,4 @@
-name: Release Start
+name: Release Tag
 
 on:
   # enable running the workflow manually
@@ -30,7 +30,7 @@ jobs:
   tag:
     # only on original eclipse-hawkbit/hawkbit repo and when release fixed version
     if: github.repository == 'eclipse-hawkbit/hawkbit' && inputs.revision != '0-SNAPSHOT'
-    uses: ./.github/workflows/reusable_workflow_tag
+    uses: ./.github/workflows/reusable_workflow_tag.yaml
     permissions:
       contents: write
     with:
