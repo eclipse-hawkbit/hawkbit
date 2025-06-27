@@ -25,8 +25,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-tags: 'true'
+
+      # should work with actions/checkout@v4 with fetch-tags: true, BUT it doesn't work as expected!
+      # See https://github.com/actions/checkout/issues/1471.
+      # So we do workaround by manually fetching tags.
+      - name: Workaround of actions/checkout@v4 fetch-tags true doesn't work
+        run: git fetch --tags
 
       - name: Create Tag ${{ inputs.tag_name }}
         run: |
@@ -34,9 +38,13 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           
           if git rev-parse ${TAG_NAME} >/dev/null 2>&1; then
+            echo "Tag ${TAG_NAME} already exists"
             if [ "${{ inputs.override_tag }}" == "true" ]; then
-              echo "Tag ${TAG_NAME} already exists, but override is set to true, so moving it ..."
+              echo "Override is set to true, so moving the tag ..."
+              # delete the existing tag locally and remotely
               git tag -d ${TAG_NAME}
+              git push origin :refs/tags/${TAG_NAME}
+              # create a new tag with the same name
               if [ -n "${TAG_MESSAGE}" ]; then
                 git tag -a ${TAG_NAME} -m "${TAG_MESSAGE}"
               else
@@ -45,7 +53,7 @@ jobs:
               git push origin ${TAG_NAME}
               echo "Tag ${TAG_NAME} moved." 
             else
-              echo "Tag ${TAG_NAME} already exists and no override, do nothing."
+              echo "Override is set to false, so do nothing."
             fi
           else
             echo "Creating a tag ${TAG_NAME} ..."
