@@ -28,12 +28,15 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.exception.InvalidTenantConfigurationKeyException;
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValueChangeNotAllowedException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
+import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.repository.TenantConfigurationRepository;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -49,6 +52,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -63,7 +67,8 @@ import org.springframework.validation.annotation.Validated;
 @Slf4j
 @Transactional(readOnly = true)
 @Validated
-public class JpaTenantConfigurationManagement implements TenantConfigurationManagement {
+public class JpaTenantConfigurationManagement
+        implements TenantConfigurationManagement, ApplicationListener<RemoteEntityEvent<TenantConfiguration>> {
 
     private static final ConfigurableConversionService CONVERSION_SERVICE = new DefaultConversionService();
 
@@ -324,5 +329,30 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
                 throw new TenantConfigurationValueChangeNotAllowedException();
             }
         }
+    }
+
+    /**
+     * Ensures that cache eviction takes place in microservice mode.
+     *
+     * @param event The event indicating that a configuration value has been updated.
+     * @throws InvalidTenantConfigurationKeyException if the configuration key cannot be found.
+     */
+    @Override
+    public void onApplicationEvent(RemoteEntityEvent<TenantConfiguration> event) {
+        if (!TenantAwareHolder.getInstance().getTenantAware().getCurrentTenant().equals(event.getTenant())) {
+            return;
+        }
+
+        final Long entityId = event.getEntityId();
+
+        tenantConfigurationRepository.findById(entityId).ifPresentOrElse(tenantConfiguration -> {
+            final Cache cache = cacheManager.getCache("tenantConfiguration");
+            if (cache != null) {
+                cache.evict(tenantConfiguration.getKey());
+            }
+        }, () -> {
+            throw new InvalidTenantConfigurationKeyException(String.format(
+                    "Cannot find tenant configuration key with ID %d.", entityId));
+        });
     }
 }
