@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Tag release
+      - name: Create Tag ${{ inputs.tag_name }}
         run: |
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
@@ -54,7 +54,7 @@ jobs:
             else
               echo "Tag ${TAG_NAME} already exists, do nothing."
             fi
-          fi`
+          fi
         env:
           TAG_NAME: ${{ inputs.tag_name }}
           TAG_MESSAGE: ${{ inputs.tag_message }}

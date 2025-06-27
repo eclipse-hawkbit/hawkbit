@@ -1,4 +1,4 @@
-name: Release Tag
+name: Release - Tag
 
 on:
   # enable running the workflow manually
@@ -17,17 +17,6 @@ permissions:
   contents: write
 
 jobs:
-  audit:
-    # only on original eclipse-hawkbit/hawkbit repo
-    if: github.repository == 'eclipse-hawkbit/hawkbit'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: "Release ${{ inputs.revision }}"
-        run: echo "Releasing ${{ inputs.revision }}"
-
-  # tag with release version if not already tagged
-  # if already tagged - it will release from there
   tag:
     # only on original eclipse-hawkbit/hawkbit repo and when release fixed version
     if: github.repository == 'eclipse-hawkbit/hawkbit' && inputs.revision != '0-SNAPSHOT'
