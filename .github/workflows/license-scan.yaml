@@ -21,4 +21,4 @@ jobs:
         ref: ${{ github.ref }}
         open_tickets: true
     secrets:
-      inherit: true
+      GITLAB_API_TOKEN: ${{ secrets.GITLAB_API_TOKEN }}
