@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.ui.simple.view.util;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -288,5 +289,17 @@ public class Utils {
             return String.format("%s:%s", firstSort.getSorted(), order);
         }
         return null;
+    }
+
+    public static String durationFromMillis(Long time) {
+        var duration = Duration.between(Instant.ofEpochMilli(time), Instant.now());
+        var day = duration.toDaysPart();
+        if (day > 2) {
+            return day + "d";
+        }
+        return duration.withNanos(0).toString()
+                .substring(2)
+                .replaceFirst("(^\\d+[HMS]\\d*M*)", "$1")
+                .toLowerCase();
     }
 }

@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.security.RolesAllowed;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -59,6 +60,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtPollStatus;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
@@ -90,33 +92,42 @@ import org.springframework.util.ObjectUtils;
 @Route(value = "targets", layout = MainLayout.class)
 @RolesAllowed({ "TARGET_READ" })
 @Uses(Icon.class)
-public class TargetView extends TableView<MgmtTarget, String> {
+public class TargetView extends TableView<TargetView.TargetWithDs, String> {
 
     public static final String STATUS = "Status";
+    public static final String UPDATE = "Sync";
     public static final String CONTROLLER_ID = "Controller Id";
     public static final String TAG = "Tag";
 
     public TargetView(final HawkbitMgmtClient hawkbitClient) {
         super(
                 new RawFilter(hawkbitClient), new SimpleFilter(hawkbitClient),
-                new SelectionGrid.EntityRepresentation<>(MgmtTarget.class, MgmtTarget::getControllerId) {
+                new SelectionGrid.EntityRepresentation<>(TargetWithDs.class, TargetWithDs::getControllerId) {
 
                     @Override
-                    protected void addColumns(final Grid<MgmtTarget> grid) {
+                    protected void addColumns(final Grid<TargetWithDs> grid) {
                         grid.addColumn(new ComponentRenderer<>(TargetStatusCell::new))
                                 .setHeader(STATUS)
                                 .setAutoWidth(true)
-                                .setFlexGrow(0);
-                        grid.addColumn(MgmtTarget::getControllerId).setHeader(CONTROLLER_ID).setAutoWidth(true);
-                        grid.addColumn(MgmtTarget::getName).setHeader(Constants.NAME).setAutoWidth(true);
-                        grid.addColumn(MgmtTarget::getTargetTypeName).setHeader(Constants.TYPE).setAutoWidth(true);
+                                .setFlexGrow(0).setKey("lastControllerRequestAt").setSortable(true);
+                        grid.addColumn(new ComponentRenderer<>(TargetUpdateStatusCell::new))
+                                .setHeader(UPDATE)
+                                .setAutoWidth(true)
+                                .setFlexGrow(0).setKey("updateStatus").setSortable(true);
+                        grid.addColumn(MgmtTarget::getControllerId).setHeader(CONTROLLER_ID).setAutoWidth(true).setKey("id").setSortable(true);
+                        grid.addColumn(MgmtTarget::getName).setHeader(Constants.NAME).setAutoWidth(true).setKey("name").setSortable(true);
+                        grid.addColumn(MgmtTarget::getTargetTypeName).setHeader(Constants.TYPE).setAutoWidth(true).setKey("targetType")
+                                .setSortable(true);
+                        grid.addColumn(TargetWithDs::getDsName).setHeader(Constants.DISTRIBUTION_SET).setAutoWidth(true);
+                        grid.addColumn(TargetWithDs::getDsVersion).setHeader(Constants.VERSION).setAutoWidth(true).setKey("installedds")
+                                .setSortable(true);
                     }
                 },
                 (query, filter) -> hawkbitClient.getTargetRestApi()
-                        .getTargets(filter, query.getOffset(), query.getPageSize(), Constants.NAME_ASC)
+                        .getTargets(filter, query.getOffset(), query.getPageSize(), Utils.getSortParam(query.getSortOrders()))
                         .getBody()
                         .getContent()
-                        .stream(),
+                        .stream().map(m -> TargetWithDs.from(hawkbitClient, m)),
                 source -> new RegisterDialog(hawkbitClient).result(),
                 selectionGrid -> {
                     selectionGrid.getSelectedItems()
@@ -130,8 +141,8 @@ public class TargetView extends TableView<MgmtTarget, String> {
                 }
         );
 
-        final Function<SelectionGrid<MgmtTarget, String>, CompletionStage<Void>> assignHandler = source -> new AssignDialog(hawkbitClient,
-                source.getSelectedItems()).result();
+        final Function<SelectionGrid<TargetWithDs, String>, CompletionStage<Void>> assignHandler = source -> new AssignDialog(
+                hawkbitClient, source.getSelectedItems()).result();
 
         final Button assignBtn = Utils.tooltip(new Button(VaadinIcon.LINK.create()), "Assign");
         assignBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -958,7 +969,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private final DateTimePicker forceTime = new DateTimePicker("Force Time");
         private final Button assign = new Button("Assign");
 
-        private AssignDialog(final HawkbitMgmtClient hawkbitClient, Set<MgmtTarget> selectedTargets) {
+        private AssignDialog(final HawkbitMgmtClient hawkbitClient, Set<TargetWithDs> selectedTargets) {
             super("Assign Distribution Set");
 
             distributionSet = new Select<>(
@@ -1001,7 +1012,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
             }
         }
 
-        private void addAssignClickListener(final HawkbitMgmtClient hawkbitClient, final Set<MgmtTarget> selectedTargets) {
+        private void addAssignClickListener(final HawkbitMgmtClient hawkbitClient, final Set<TargetWithDs> selectedTargets) {
             assign.addClickListener(e -> {
                 close();
 
@@ -1070,9 +1081,31 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
         private TargetStatusCell(final MgmtTarget target) {
             final MgmtPollStatus pollStatus = target.getPollStatus();
+            add(pollStatusIconMapper(pollStatus));
+            setWidth(25, Unit.PIXELS);
+        }
+
+        private Icon pollStatusIconMapper(MgmtPollStatus pollStatus) {
+            final Icon pollIcon;
+            if (pollStatus == null) {
+                pollIcon = Utils.tooltip(VaadinIcon.QUESTION_CIRCLE.create(), "No Poll Status");
+            } else if (pollStatus.isOverdue()) {
+                pollIcon = Utils.tooltip(VaadinIcon.EXCLAMATION_CIRCLE.create(), "Overdue " + Utils.durationFromMillis(pollStatus
+                        .getLastRequestAt()));
+            } else {
+                pollIcon = Utils.tooltip(VaadinIcon.CLOCK.create(), "In Time " + Utils.durationFromMillis(pollStatus.getLastRequestAt()));
+            }
+            pollIcon.addClassNames(LumoUtility.IconSize.SMALL);
+            return pollIcon;
+        }
+    }
+
+    private static class TargetUpdateStatusCell extends HorizontalLayout {
+
+        private TargetUpdateStatusCell(final MgmtTarget target) {
             final String targetUpdateStatus = Optional.ofNullable(target.getUpdateStatus()).orElse("unknown");
-            add(pollStatusIconMapper(pollStatus), targetUpdateStatusMapper(targetUpdateStatus));
-            setWidth(50, Unit.PIXELS);
+            add(targetUpdateStatusMapper(targetUpdateStatus));
+            setWidth(25, Unit.PIXELS);
         }
 
         private Icon targetUpdateStatusMapper(final String targetUpdateStatus) {
@@ -1092,23 +1125,39 @@ public class TargetView extends TableView<MgmtTarget, String> {
                 default -> "blue";
             };
 
-            final Icon statusIcon = Utils.tooltip(icon.create(), targetUpdateStatus);
+            final Icon statusIcon = Utils.tooltip(icon.create(), targetUpdateStatus.replace("_", " "));
             statusIcon.setColor(color);
             statusIcon.addClassNames(LumoUtility.IconSize.SMALL);
             return statusIcon;
         }
+    }
 
-        private Icon pollStatusIconMapper(MgmtPollStatus pollStatus) {
-            final Icon pollIcon;
-            if (pollStatus == null) {
-                pollIcon = Utils.tooltip(VaadinIcon.QUESTION_CIRCLE.create(), "No Poll Status");
-            } else if (pollStatus.isOverdue()) {
-                pollIcon = Utils.tooltip(VaadinIcon.EXCLAMATION_CIRCLE.create(), "Overdue");
-            } else {
-                pollIcon = Utils.tooltip(VaadinIcon.CLOCK.create(), "In Time");
-            }
-            pollIcon.addClassNames(LumoUtility.IconSize.SMALL);
-            return pollIcon;
+    // todo change /targets api to reduce api calls ?
+    @EqualsAndHashCode(callSuper = true)
+    public static class TargetWithDs extends MgmtTarget {
+
+        TargetWithDs() {
+            super();
+        }
+
+        Optional<MgmtDistributionSet> ds;
+        static ObjectMapper objectMapper = new ObjectMapper();
+
+        public static TargetWithDs from(final HawkbitMgmtClient hawkbitClient, MgmtTarget target) {
+            TargetWithDs targetWithDs = objectMapper.convertValue(target, TargetWithDs.class);
+
+            targetWithDs.ds = Optional.ofNullable(hawkbitClient.getTargetRestApi().getInstalledDistributionSet(targetWithDs
+                    .getControllerId())
+                    .getBody());
+            return targetWithDs;
+        }
+
+        public String getDsVersion() {
+            return ds.map(MgmtDistributionSet::getVersion).orElse("");
+        }
+
+        public String getDsName() {
+            return ds.map(MgmtDistributionSet::getName).orElse("");
         }
     }
 }
