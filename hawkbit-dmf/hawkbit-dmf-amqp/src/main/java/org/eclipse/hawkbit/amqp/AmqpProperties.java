@@ -26,11 +26,6 @@ public class AmqpProperties {
     private static final int DEFAULT_QUEUE_DECLARATION_RETRIES = 50;
 
     /**
-     * Enable DMF API based on AMQP 0.9
-     */
-    private boolean enabled = true;
-
-    /**
      * DMF API dead letter queue.
      */
     private String deadLetterQueue = "dmf_connector_deadletter_ttl";

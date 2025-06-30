@@ -4,7 +4,7 @@ parent: Guides
 weight: 31
 ---
 
-In this guide we describe how to run a full featured hawkBit setup based on a production ready infrastructure. It is
+In this guide we describe how to run a full-featured hawkBit setup based on a production ready infrastructure. It is
 based on the hawkBit example modules and update server.
 
 <!--more-->
@@ -20,7 +20,7 @@ This guide describes a target architecture that you will probably expect in a pr
 
 - hawkBit [Update Server](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-monolith/hawkbit-update-server).
 - [MariaDB](https://mariadb.org) for the repository.
-- [RabbitMQ](https://www.rabbitmq.com) for DMF communication.
+- [RabbitMQ](https://www.rabbitmq.com) for DMF communication (optional for monolith / single host deployment).
 
 For testing, demonstration or integrations purposes you could also use hawkBit SDK:
 - [hawkBit SDK Management API client](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-sdk/hawkbit-sdk-commons/src/main/java/org/eclipse/hawkbit/sdk/HawkbitClient.java).
@@ -50,17 +50,17 @@ spring.datasource.username=<YOUR_USER>
 spring.datasource.password=<YOUR_PWD>
 ```
 
-### Configure RabbitMQ connection settings for update server and device simulator (optional).
+### Configure RabbitMQ connection settings for services (optional for monolith single host deployments).
 
-We provide already defaults that should work with a standard Rabbit installation. Otherwise configure the following in
-the `application.properties` of the two services:
+We provide already defaults that should work with a standard Rabbit installation (spring boot RabbitProperties defaults). 
+Otherwise, configure the following in the `application.properties` of the services:
 
 ```properties
-spring.rabbitmq.host=localhost
-spring.rabbitmq.port=5672
-spring.rabbitmq.virtualHost=/
-spring.rabbitmq.username=guest
-spring.rabbitmq.password=guest
+spring.rabbitmq.host=<Rabbit MQ host>
+spring.rabbitmq.port=<Rabbit MQ port>
+spring.rabbitmq.virtualHost=<virtual host to be used>
+spring.rabbitmq.username=<YOUR_USER>
+spring.rabbitmq.password=<YOUR_PWD>
 ```
 
 ### Adapt hostnames of demo simulator

@@ -32,6 +32,12 @@ jobs:
           - 5672:5672
 
     steps:
+      - name: Parameters
+        run: |
+          echo "Repository: ${{ inputs.repository }},"
+          echo "Ref: ${{ inputs.ref }},"
+          echo "Maven Properties: ${{ inputs.maven_properties }}"
+
       - uses: actions/checkout@v4
         with:
           repository: ${{ inputs.repository }}

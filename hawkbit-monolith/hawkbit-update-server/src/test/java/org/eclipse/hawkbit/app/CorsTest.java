@@ -22,19 +22,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.ResultActions;
 
+/**
+ * Feature: Integration Test - Security<br/>
+ * Story: CORS
+ */
 @SpringBootTest(
         properties = {
-                "hawkbit.dmf.rabbitmq.enabled=false",
                 "hawkbit.server.security.cors.enabled=true",
                 "hawkbit.server.security.cors.allowedOrigins=" +
                         CorsTest.ALLOWED_ORIGIN_FIRST + "," +
                         CorsTest.ALLOWED_ORIGIN_SECOND,
                 "hawkbit.server.security.cors.exposedHeaders=" +
                         HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN })
-/**
- * Feature: Integration Test - Security<br/>
- * Story: CORS
- */
 class CorsTest extends AbstractSecurityTest {
 
     static final String ALLOWED_ORIGIN_FIRST = "http://test.first.origin";

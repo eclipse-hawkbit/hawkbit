@@ -22,5 +22,5 @@ jobs:
   verify:
     uses: ./.github/workflows/reusable_workflow_verify.yaml
     with:
-      repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repository || github.repositor }}
+      repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
       ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
