@@ -8,6 +8,8 @@ on:
 
 jobs:
   stale:
+    # only on original eclipse-hawkbit/hawkbit repo
+    if: github.repository == 'eclipse-hawkbit/hawkbit'
     runs-on: ubuntu-latest
 
     steps:
