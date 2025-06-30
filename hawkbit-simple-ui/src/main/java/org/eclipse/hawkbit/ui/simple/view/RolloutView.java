@@ -292,7 +292,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                     this::readyToCreate,
                     Optional.ofNullable(
                                     hawkbitClient.getDistributionSetRestApi()
-                                            .getDistributionSets(null, 0, 30, Constants.NAME_ASC)
+                                            .getDistributionSets(null, 0, 30, Constants.CREATED_AT_DESC)
                                             .getBody())
                             .map(body -> body.getContent().toArray(new MgmtDistributionSet[0]))
                             .orElseGet(() -> new MgmtDistributionSet[0]));
