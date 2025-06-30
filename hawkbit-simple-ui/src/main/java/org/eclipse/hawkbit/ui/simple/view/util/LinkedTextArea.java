@@ -9,26 +9,35 @@
  */
 package org.eclipse.hawkbit.ui.simple.view.util;
 
-import com.vaadin.flow.component.ClickNotifier;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.card.Card;
+import com.vaadin.flow.component.card.CardVariant;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 
-public class LinkedTextArea extends TextArea implements ClickNotifier<LinkedTextArea> {
+public class LinkedTextArea extends Div {
 
-    String query;
+    String queryPrefix;
+    Card card;
 
     public LinkedTextArea(String title, String queryPrefix) {
-        super(title);
-        super.setReadOnly(true);
-        this.addClickListener((event) -> {
-            if (query != null) {
-                UI.getCurrent().navigate(queryPrefix + query);
-            }
-        });
+        super();
+        card = new Card();
+        card.setTitle(title);
+        this.queryPrefix = queryPrefix;
     }
 
     public void setValueWithLink(String value, String query) {
-        super.setValue(value);
-        this.query = query;
+        var span = new Span(value);
+        span.setWhiteSpace(WhiteSpace.PRE_WRAP);
+        card.add(span);
+        card.addThemeVariants(CardVariant.LUMO_ELEVATED);
+        if (query != null) {
+            var a = new Anchor(queryPrefix + query, card);
+            a.addClassName("nocolor");
+            add(a);
+        } else {
+            add(card);
+        }
     }
 }
