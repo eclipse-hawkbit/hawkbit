@@ -368,6 +368,7 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
         private final TextField securityToken = Utils.textField(Constants.SECURITY_TOKEN);
         private final TextField lastPoll = Utils.textField(Constants.LAST_POLL);
         private final TextField group = Utils.textField(Constants.GROUP);
+        private final TextField targetAddress = Utils.textField(Constants.ADDRESS);
         private final TextArea targetAttributes = new TextArea(Constants.ATTRIBUTES);
         private transient MgmtTarget target;
 
@@ -378,7 +379,7 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
                     description,
                     createdBy, createdAt,
                     lastModifiedBy, lastModifiedAt,
-                    securityToken, lastPoll, targetAttributes, group
+                    securityToken, lastPoll, group, targetAddress, targetAttributes
             )
                     .forEach(field -> {
                         field.setReadOnly(true);
@@ -402,6 +403,7 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
             lastModifiedAt.setValue(new Date(target.getLastModifiedAt()).toString());
             securityToken.setValue(target.getSecurityToken());
             group.setValue(target.getGroup() != null ? target.getGroup() : "");
+            targetAddress.setValue(target.getAddress() != null ? target.getAddress() : "");
 
             final MgmtPollStatus pollStatus = target.getPollStatus();
             lastPoll.setValue(pollStatus == null ? NOT_AVAILABLE_NULL : new Date(pollStatus.getLastRequestAt()).toString());

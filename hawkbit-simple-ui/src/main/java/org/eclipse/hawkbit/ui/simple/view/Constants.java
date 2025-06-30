@@ -16,6 +16,7 @@ public interface Constants {
 
     // properties
     String ID = "Id";
+    String ADDRESS = "Address";
     String NAME = "Name";
     String DESCRIPTION = "Description";
     String VERSION = "Version";
