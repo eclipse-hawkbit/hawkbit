@@ -9,8 +9,11 @@
  */
 package org.eclipse.hawkbit.ui.simple;
 
+import java.util.List;
 import java.util.Optional;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -46,10 +49,12 @@ import org.eclipse.hawkbit.ui.simple.view.TargetView;
  * The main view is a top-level placeholder for other views.
  */
 public class MainLayout extends AppLayout {
-
+    static final List<Class<? extends Component>> defaultViewPriority =
+            List.of(TargetView.class, DistributionSetView.class, SoftwareModuleView.class, RolloutView.class);
     private final transient AuthenticatedUser authenticatedUser;
     private final AccessAnnotationChecker accessChecker;
     private H2 viewTitle;
+    private transient Optional<Class<? extends Component>> defaultView;
 
     public MainLayout(final AuthenticatedUser authenticatedUser, final AccessAnnotationChecker accessChecker) {
         this.authenticatedUser = authenticatedUser;
@@ -68,6 +73,9 @@ public class MainLayout extends AppLayout {
                 Optional.ofNullable(getContent().getClass().getAnnotation(PageTitle.class))
                         .map(PageTitle::value)
                         .orElse(""));
+        if(UI.getCurrent().getActiveViewLocation().getPath().isEmpty()){
+            defaultView.ifPresent(c-> UI.getCurrent().navigate(c));
+        }
     }
 
     private void addHeaderContent() {
@@ -117,6 +125,7 @@ public class MainLayout extends AppLayout {
         if (accessChecker.hasAccess(AboutView.class)) {
             nav.addItem(new SideNavItem("About", AboutView.class, VaadinIcon.INFO_CIRCLE.create()));
         }
+        defaultView = defaultViewPriority.stream().filter(accessChecker::hasAccess).findFirst();
         return nav;
     }
 
