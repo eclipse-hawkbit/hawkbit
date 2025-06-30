@@ -255,7 +255,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                     this::readyToCreate,
                     Optional.ofNullable(
                             hawkbitClient.getDistributionSetTypeRestApi()
-                                    .getDistributionSetTypes(null, 0, 30, Constants.NAME_ASC)
+                                    .getDistributionSetTypes(null, 0, 30, Constants.CREATED_AT_DESC)
                                     .getBody())
                             .map(body -> body.getContent().toArray(new MgmtDistributionSetType[0]))
                             .orElseGet(() -> new MgmtDistributionSetType[0]));
