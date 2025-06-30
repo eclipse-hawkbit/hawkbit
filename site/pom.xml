@@ -129,7 +129,12 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-starter</artifactId>
+            <artifactId>hawkbit-ddi-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-mgmt-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
 

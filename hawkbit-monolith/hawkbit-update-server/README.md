@@ -26,12 +26,6 @@ The Management API can be accessed via http://localhost:8080/rest/v1
 
 Clustering in hawkBit is based on _Spring Cloud Bus_. It is not enabled in the example app by default.
 
-Add to your `application.properties` :
-
-```properties
-spring.cloud.bus.enabled=true
-```
-
 Add to your `pom.xml` :
 
 ```xml
