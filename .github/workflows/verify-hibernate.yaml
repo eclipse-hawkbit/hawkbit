@@ -22,5 +22,6 @@ jobs:
   verify-hibernate:
     uses: ./.github/workflows/reusable_workflow_verify.yaml
     with:
-      ref: ${{ github.event_name == 'push' && github.ref || github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.event_name == 'workflow_dispatch' && github.ref }}
+      repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repository || github.repositor }}
+      ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
       maven_properties: '-Djpa.vendor=hibernate -Dlogging.level.org.hibernate.collection.spi.AbstractPersistentCollection=ERROR'

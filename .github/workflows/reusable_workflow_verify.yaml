@@ -3,6 +3,10 @@ name: Verify (Reusable Workflow)
 on:
   workflow_call:
     inputs:
+      repository:
+        description: 'The repository to checkout, e.g. eclipse-hawkbit/hawkbit'
+        type: string
+        default: 'eclipse-hawkbit/hawkbit'
       ref:
         description: 'The branch, tag or SHA to checkout, e.g. master'
         type: string
@@ -30,6 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          repository: ${{ inputs.repository }}
           ref: ${{ inputs.ref }}
 
       - name: Set up JDK
