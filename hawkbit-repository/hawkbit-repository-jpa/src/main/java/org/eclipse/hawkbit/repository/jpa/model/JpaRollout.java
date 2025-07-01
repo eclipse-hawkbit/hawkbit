@@ -41,6 +41,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
@@ -52,7 +53,6 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 
 /**
  * JPA implementation of a {@link Rollout}.
@@ -204,25 +204,21 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     @Override
     public void fireCreateEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new RolloutCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutCreatedEvent(this));
     }
 
     @Override
     public void fireUpdateEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new RolloutUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutUpdatedEvent(this));
 
         if (deleted) {
-            EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutDeletedEvent(getTenant(),
-                    getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
+            EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutDeletedEvent(getTenant(), getId(), getClass()));
         }
     }
 
     @Override
     public void fireDeleteEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutDeletedEvent(getTenant(),
-                getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutDeletedEvent(getTenant(), getId(), getClass()));
     }
 
     @Converter

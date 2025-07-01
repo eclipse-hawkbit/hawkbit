@@ -38,14 +38,13 @@ public abstract class AbstractAssignmentEvent extends RemoteTenantAwareEvent {
 
     private final Map<String, ActionProperties> actions = new HashMap<>();
 
-    protected AbstractAssignmentEvent(final Object source, final Action a, final String applicationId) {
-        super(source, a.getTenant(), applicationId);
+    protected AbstractAssignmentEvent(final Action a) {
+        super(a.getTenant(), null);
         actions.put(a.getTarget().getControllerId(), new ActionProperties(a));
     }
 
-    protected AbstractAssignmentEvent(final Object source, final String tenant, final List<Action> a,
-            final String applicationId) {
-        super(source, tenant, applicationId);
+    protected AbstractAssignmentEvent(final String tenant, final Object source, final List<Action> a) {
+        super(tenant, source);
         actions.putAll(a.stream()
                 .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), ActionProperties::new)));
     }

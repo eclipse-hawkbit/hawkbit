@@ -29,10 +29,8 @@ class DistributionSetUpdatedEventTest extends AbstractRemoteEntityEventTest<Dist
     }
 
     @Override
-    protected RemoteEntityEvent<?> createRemoteEvent(final DistributionSet baseEntity,
-            final Class<? extends RemoteEntityEvent<?>> eventType) {
-
-        return new DistributionSetUpdatedEvent(baseEntity, "1", true);
+    protected RemoteEntityEvent<?> createRemoteEvent(final DistributionSet baseEntity, final Class<? extends RemoteEntityEvent<?>> eventType) {
+        return new DistributionSetUpdatedEvent(baseEntity, true);
     }
 
     @Override
@@ -40,5 +38,4 @@ class DistributionSetUpdatedEventTest extends AbstractRemoteEntityEventTest<Dist
         return distributionSetManagement.create(entityFactory.distributionSet().create()
                 .name("incomplete").version("2").description("incomplete").type("os"));
     }
-
 }

@@ -24,13 +24,7 @@ public class RolloutCreatedEvent extends RemoteEntityEvent<Rollout> implements E
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor.
-     *
-     * @param baseEntity the Rollout
-     * @param applicationId the origin application id
-     */
-    public RolloutCreatedEvent(final Rollout baseEntity, final String applicationId) {
-        super(baseEntity, applicationId);
+    public RolloutCreatedEvent(final Rollout rollout) {
+        super(rollout);
     }
 }

@@ -24,13 +24,7 @@ public class TargetTagUpdatedEvent extends RemoteEntityEvent<TargetTag> implemen
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor.
-     *
-     * @param tag the tag which is updated
-     * @param applicationId the origin application id
-     */
-    public TargetTagUpdatedEvent(final TargetTag tag, final String applicationId) {
-        super(tag, applicationId);
+    public TargetTagUpdatedEvent(final TargetTag targetTag) {
+        super(targetTag);
     }
 }

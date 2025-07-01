@@ -82,7 +82,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     private Target testTarget;
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         testTarget = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID)
                 .securityToken(TEST_TOKEN).address(AMQP_URI.toString()));
 
@@ -126,8 +126,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
         final Action action = createAction(createDistributionSet);
 
-        final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                action, serviceMatcher.getBusId());
+        final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(action);
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = getCaptureAddressEvent(targetAssignDistributionSetEvent);
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage,
@@ -175,8 +174,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
         Mockito.when(rabbitTemplate.convertSendAndReceive(any())).thenReturn(receivedList);
 
-        final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
-                action, serviceMatcher.getBusId());
+        final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(action);
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
         final Message sendMessage = getCaptureAddressEvent(targetAssignDistributionSetEvent);
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage,
@@ -215,8 +213,8 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     @Test
     void sendUpdateAttributesRequest() {
         final String amqpUri = "amqp://anyhost";
-        final TargetAttributesRequestedEvent targetAttributesRequestedEvent = new TargetAttributesRequestedEvent(TENANT,
-                1L, CONTROLLER_ID, amqpUri, Target.class, serviceMatcher.getBusId());
+        final TargetAttributesRequestedEvent targetAttributesRequestedEvent = new TargetAttributesRequestedEvent(
+                TENANT,1L, Target.class, CONTROLLER_ID, amqpUri);
 
         amqpMessageDispatcherService.targetTriggerUpdateAttributes(targetAttributesRequestedEvent);
 
@@ -233,10 +231,8 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         when(action.getId()).thenReturn(1L);
         when(action.getTenant()).thenReturn(TENANT);
         when(action.getTarget()).thenReturn(testTarget);
-        final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent = new CancelTargetAssignmentEvent(
-                action, serviceMatcher.getBusId());
-        amqpMessageDispatcherService
-                .targetCancelAssignmentToDistributionSet(cancelTargetAssignmentDistributionSetEvent);
+        final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent = new CancelTargetAssignmentEvent(action);
+        amqpMessageDispatcherService.targetCancelAssignmentToDistributionSet(cancelTargetAssignmentDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(AMQP_URI);
         assertCancelMessage(sendMessage);
 
@@ -250,8 +246,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
         // setup
         final String amqpUri = "amqp://anyhost";
-        final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, amqpUri,
-                Target.class, serviceMatcher.getBusId());
+        final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, Target.class, CONTROLLER_ID, amqpUri);
 
         // test
         amqpMessageDispatcherService.targetDelete(targetDeletedEvent);
@@ -269,8 +264,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
         // setup
         final String noAmqpUri = "http://anyhost";
-        final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, noAmqpUri,
-                Target.class, serviceMatcher.getBusId());
+        final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, Target.class, CONTROLLER_ID, noAmqpUri);
 
         // test
         amqpMessageDispatcherService.targetDelete(targetDeletedEvent);
@@ -287,8 +281,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
         // setup
         final String noAmqpUri = null;
-        final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, noAmqpUri,
-                Target.class, serviceMatcher.getBusId());
+        final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, Target.class, CONTROLLER_ID, noAmqpUri);
 
         // test
         amqpMessageDispatcherService.targetDelete(targetDeletedEvent);

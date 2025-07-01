@@ -14,8 +14,8 @@ import java.util.concurrent.Executor;
 import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.Schema;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -61,8 +61,7 @@ public class EventPublisherConfiguration {
     }
 
     /**
-     * Bean for creating a singleton instance of the
-     * {@link EventPublisherHolder}
+     * Bean for creating a singleton instance of the {@link EventPublisherHolder}
      *
      * @return the singleton instance of the {@link EventPublisherHolder}
      */

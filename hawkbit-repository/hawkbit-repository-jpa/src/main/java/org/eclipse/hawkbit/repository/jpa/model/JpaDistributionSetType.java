@@ -10,10 +10,8 @@
 package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serial;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,7 +20,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -30,6 +27,7 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeUpdatedEvent;
@@ -37,9 +35,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.TargetType;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.springframework.util.CollectionUtils;
 
 /**
  * A distribution set type defines which software module types can or have to be {@link DistributionSet}.
@@ -126,20 +121,18 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
 
     @Override
     public void fireCreateEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
-                new DistributionSetTypeCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new DistributionSetTypeCreatedEvent(this));
     }
 
     @Override
     public void fireUpdateEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
-                new DistributionSetTypeUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new DistributionSetTypeUpdatedEvent(this));
     }
 
     @Override
     public void fireDeleteEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new DistributionSetTypeDeletedEvent(
-                getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new DistributionSetTypeDeletedEvent(getTenant(), getId(), getClass()));
     }
 
     private JpaDistributionSetType setModuleType(final SoftwareModuleType smType, final boolean mandatory) {

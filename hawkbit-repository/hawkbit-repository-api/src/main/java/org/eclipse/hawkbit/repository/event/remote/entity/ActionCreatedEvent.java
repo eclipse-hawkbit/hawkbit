@@ -24,17 +24,7 @@ public class ActionCreatedEvent extends AbstractActionEvent implements EntityCre
     @Serial
     private static final long serialVersionUID = 2L;
 
-    /**
-     * Constructor
-     *
-     * @param action the created action
-     * @param targetId targetId identifier (optional)
-     * @param rolloutId rollout identifier (optional)
-     * @param rolloutGroupId rollout group identifier (optional)
-     * @param applicationId the origin application id
-     */
-    public ActionCreatedEvent(
-            final Action action, final Long targetId, final Long rolloutId, final Long rolloutGroupId, final String applicationId) {
-        super(action, targetId, rolloutId, rolloutGroupId, applicationId);
+    public ActionCreatedEvent(final Action action, final Long targetId, final Long rolloutId, final Long rolloutGroupId) {
+        super(action, targetId, rolloutId, rolloutGroupId);
     }
 }

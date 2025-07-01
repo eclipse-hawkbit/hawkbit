@@ -36,14 +36,8 @@ public class RemoteEntityEvent<E extends TenantAwareBaseEntity> extends RemoteId
 
     private transient E entity;
 
-    /**
-     * Constructor.
-     *
-     * @param baseEntity the base entity
-     * @param applicationId the origin application id
-     */
-    protected RemoteEntityEvent(final E baseEntity, final String applicationId) {
-        super(baseEntity.getId(), baseEntity.getTenant(), baseEntity.getClass(), applicationId);
+    protected RemoteEntityEvent(final E baseEntity) {
+        super(baseEntity.getTenant(), baseEntity.getId(), baseEntity.getClass());
         this.entity = baseEntity;
     }
 

@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutHelper;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.RolloutStoppedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
@@ -62,7 +63,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondit
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.data.domain.PageRequest;
@@ -113,7 +113,6 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private final EntityManager entityManager;
     private final PlatformTransactionManager txManager;
     private final AfterTransactionCommitExecutor afterCommit;
-    private final EventPublisherHolder eventPublisherHolder;
     private final TenantAware tenantAware;
     private final RepositoryProperties repositoryProperties;
     private final Map<Long, AtomicLong> lastDynamicGroupFill = new ConcurrentHashMap<>();
@@ -127,7 +126,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final RolloutManagement rolloutManagement, final QuotaManagement quotaManagement,
             final RolloutGroupEvaluationManager evaluationManager, final RolloutApprovalStrategy rolloutApprovalStrategy,
             final EntityManager entityManager, final PlatformTransactionManager txManager,
-            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final AfterTransactionCommitExecutor afterCommit,
             final TenantAware tenantAware, final RepositoryProperties repositoryProperties) {
         this.actionRepository = actionRepository;
         this.rolloutGroupRepository = rolloutGroupRepository;
@@ -143,7 +142,6 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         this.entityManager = entityManager;
         this.txManager = txManager;
         this.afterCommit = afterCommit;
-        this.eventPublisherHolder = eventPublisherHolder;
         this.tenantAware = tenantAware;
         this.repositoryProperties = repositoryProperties;
     }
@@ -309,8 +307,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         rolloutRepository.save(rollout);
 
         final List<Long> groupIds = rollout.getRolloutGroups().stream().map(RolloutGroup::getId).toList();
-        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(new RolloutStoppedEvent(
-                tenantAware.getCurrentTenant(), eventPublisherHolder.getApplicationId(), rollout.getId(), groupIds)));
+        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutStoppedEvent(
+                tenantAware.getCurrentTenant(), rollout.getId(), groupIds)));
     }
 
     private void handleReadyRollout(final Rollout rollout) {
@@ -374,8 +372,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                         .map(Action::getId)
                         .toList();
                 actionRepository.deleteByIdIn(actionIds);
-                afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
-                        .publishEvent(new RolloutUpdatedEvent(rollout, eventPublisherHolder.getApplicationId())));
+                afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
+                        .publishEvent(new RolloutUpdatedEvent(rollout)));
             } catch (final RuntimeException e) {
                 log.error("Exception during deletion of actions of rollout {}", rollout, e);
             }

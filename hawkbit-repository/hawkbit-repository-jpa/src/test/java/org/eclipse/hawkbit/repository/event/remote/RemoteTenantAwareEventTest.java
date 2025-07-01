@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
 
     private static final String TENANT_DEFAULT = "DEFAULT";
-    private static final String APPLICATION_ID_DEFAULT = "Node";
 
     /**
      * Verifies that a testMultiActionAssignEvent can be properly serialized and deserialized
@@ -38,8 +37,7 @@ class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         final List<String> controllerIds = List.of("id0", "id1", "id2", "id3", "id4loooooooooooooooooooooooooooooooooooonnnnnnnnnnnnnnnnnng");
         final List<Action> actions = controllerIds.stream().map(this::createAction).toList();
 
-        final MultiActionAssignEvent assignEvent = new MultiActionAssignEvent(TENANT_DEFAULT, APPLICATION_ID_DEFAULT,
-                actions);
+        final MultiActionAssignEvent assignEvent = new MultiActionAssignEvent(TENANT_DEFAULT, actions);
 
         final MultiActionAssignEvent remoteAssignEventProtoStuff = createProtoStuffEvent(assignEvent);
         assertThat(assignEvent).isEqualTo(remoteAssignEventProtoStuff);
@@ -58,8 +56,7 @@ class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         final List<String> controllerIds = List.of("id0", "id1", "id2", "id3", "id4loooooooooooooooooooooooooooooooooooonnnnnnnnnnnnnnnnnng");
         final List<Action> actions = controllerIds.stream().map(this::createAction).toList();
 
-        final MultiActionCancelEvent cancelEvent = new MultiActionCancelEvent(TENANT_DEFAULT, APPLICATION_ID_DEFAULT,
-                actions);
+        final MultiActionCancelEvent cancelEvent = new MultiActionCancelEvent(TENANT_DEFAULT, actions);
 
         final MultiActionCancelEvent remoteCancelEventProtoStuff = createProtoStuffEvent(cancelEvent);
         assertThat(cancelEvent).isEqualTo(remoteCancelEventProtoStuff);
@@ -75,8 +72,7 @@ class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
      */
     @Test
     void reloadDownloadProgressByRemoteEvent() {
-        final DownloadProgressEvent downloadProgressEvent = new DownloadProgressEvent(TENANT_DEFAULT, 1L, 3L,
-                APPLICATION_ID_DEFAULT);
+        final DownloadProgressEvent downloadProgressEvent = new DownloadProgressEvent(TENANT_DEFAULT, 1L, 3L);
 
         final DownloadProgressEvent remoteEventProtoStuff = createProtoStuffEvent(downloadProgressEvent);
         assertThat(downloadProgressEvent).isEqualTo(remoteEventProtoStuff);
@@ -104,8 +100,7 @@ class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         final Action action = actionRepository.save(generateAction);
 
         final TargetAssignDistributionSetEvent assignmentEvent = new TargetAssignDistributionSetEvent(
-                action.getTenant(), dsA.getId(), List.of(action), serviceMatcher.getBusId(),
-                action.isMaintenanceWindowAvailable());
+                action.getTenant(), dsA.getId(), List.of(action), action.isMaintenanceWindowAvailable());
 
         final TargetAssignDistributionSetEvent remoteEventProtoStuff = createProtoStuffEvent(assignmentEvent);
         assertTargetAssignDistributionSetEvent(action, remoteEventProtoStuff);
@@ -132,8 +127,7 @@ class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
 
         final Action action = actionRepository.save(generateAction);
 
-        final CancelTargetAssignmentEvent cancelEvent = new CancelTargetAssignmentEvent(action,
-                serviceMatcher.getBusId());
+        final CancelTargetAssignmentEvent cancelEvent = new CancelTargetAssignmentEvent(action);
 
         final CancelTargetAssignmentEvent remoteEventProtoStuff = createProtoStuffEvent(cancelEvent);
         assertCancelTargetAssignmentEvent(action, remoteEventProtoStuff);

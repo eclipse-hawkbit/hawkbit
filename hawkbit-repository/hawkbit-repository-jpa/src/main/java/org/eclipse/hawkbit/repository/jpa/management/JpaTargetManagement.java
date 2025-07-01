@@ -42,6 +42,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TimestampCalculator;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -73,7 +74,6 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -103,7 +103,6 @@ public class JpaTargetManagement implements TargetManagement {
     private final RolloutGroupRepository rolloutGroupRepository;
     private final TargetFilterQueryRepository targetFilterQueryRepository;
     private final TargetTagRepository targetTagRepository;
-    private final EventPublisherHolder eventPublisherHolder;
     private final TenantAware tenantAware;
     private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final Database database;
@@ -114,7 +113,7 @@ public class JpaTargetManagement implements TargetManagement {
             final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository,
             final RolloutGroupRepository rolloutGroupRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
-            final TargetTagRepository targetTagRepository, final EventPublisherHolder eventPublisherHolder,
+            final TargetTagRepository targetTagRepository,
             final TenantAware tenantAware, final VirtualPropertyReplacer virtualPropertyReplacer,
             final Database database) {
         this.entityManager = entityManager;
@@ -125,7 +124,6 @@ public class JpaTargetManagement implements TargetManagement {
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.targetTagRepository = targetTagRepository;
-        this.eventPublisherHolder = eventPublisherHolder;
         this.tenantAware = tenantAware;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.database = database;
@@ -649,11 +647,11 @@ public class JpaTargetManagement implements TargetManagement {
                 .ifPresent(acm -> acm.assertOperationAllowed(AccessController.Operation.UPDATE, target));
         target.setRequestControllerAttributes(true);
         AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() ->
-                eventPublisherHolder.getEventPublisher()
+                EventPublisherHolder.getInstance().getEventPublisher()
                         .publishEvent(new TargetAttributesRequestedEvent(
-                                tenantAware.getCurrentTenant(), target.getId(), target.getControllerId(),
-                                target.getAddress() != null ? target.getAddress().toString() : null,
-                                JpaTarget.class, eventPublisherHolder.getApplicationId())));
+                                tenantAware.getCurrentTenant(), target.getId(), JpaTarget.class, target.getControllerId(),
+                                target.getAddress() != null ? target.getAddress().toString() : null
+                        )));
     }
 
     @Override

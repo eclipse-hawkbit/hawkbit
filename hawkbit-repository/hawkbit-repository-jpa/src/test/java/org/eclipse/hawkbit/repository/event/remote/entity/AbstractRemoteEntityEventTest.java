@@ -32,9 +32,7 @@ public abstract class AbstractRemoteEntityEventTest<E> extends AbstractRemoteEve
         return event;
     }
 
-    protected RemoteEntityEvent<?> createRemoteEvent(final E baseEntity,
-            final Class<? extends RemoteEntityEvent<?>> eventType) {
-
+    protected RemoteEntityEvent<?> createRemoteEvent(final E baseEntity, final Class<? extends RemoteEntityEvent<?>> eventType) {
         final int constructorParamCount = getConstructorParamCount();
         final Constructor<?> eventConstructor = findEventConstructorByParamCount(eventType, constructorParamCount);
         final Object[] eventConstructorParams = getConstructorParams(baseEntity);
@@ -47,18 +45,17 @@ public abstract class AbstractRemoteEntityEventTest<E> extends AbstractRemoteEve
     }
 
     protected int getConstructorParamCount() {
-        return 2;
+        return 1;
     }
 
-    protected Constructor<?> findEventConstructorByParamCount(final Class<? extends RemoteEntityEvent<?>> eventType,
-            final int paramCount) {
+    protected Constructor<?> findEventConstructorByParamCount(final Class<? extends RemoteEntityEvent<?>> eventType, final int paramCount) {
         return Arrays.stream(eventType.getDeclaredConstructors())
                 .filter(constructor -> constructor.getParameterCount() == paramCount).findAny()
-                .orElseThrow(() -> new IllegalArgumentException("No suitable constructor founded"));
+                .orElseThrow(() -> new IllegalArgumentException("No suitable constructor found"));
     }
 
     protected Object[] getConstructorParams(final E baseEntity) {
-        return new Object[] { baseEntity, "Node" };
+        return new Object[] { baseEntity };
     }
 
     protected RemoteEntityEvent<?> assertEntity(final E baseEntity, final RemoteEntityEvent<?> event) {

@@ -24,13 +24,7 @@ public class DistributionSetCreatedEvent extends RemoteEntityEvent<DistributionS
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor.
-     *
-     * @param distributionSet the created distributionSet
-     * @param applicationId the origin application id
-     */
-    public DistributionSetCreatedEvent(final DistributionSet distributionSet, final String applicationId) {
-        super(distributionSet, applicationId);
+    public DistributionSetCreatedEvent(final DistributionSet distributionSet) {
+        super(distributionSet);
     }
 }

@@ -40,6 +40,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
@@ -51,7 +52,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.springframework.context.ApplicationEvent;
 
 /**
@@ -240,24 +240,22 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @Override
     public void fireCreateEvent() {
         publishEventWithEventPublisher(
-                new DistributionSetCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+                new DistributionSetCreatedEvent(this));
     }
 
     @Override
     public void fireUpdateEvent() {
         publishEventWithEventPublisher(
-                new DistributionSetUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId(), complete));
+                new DistributionSetUpdatedEvent(this, complete));
 
         if (deleted) {
-            publishEventWithEventPublisher(new DistributionSetDeletedEvent(getTenant(), getId(), getClass(),
-                    EventPublisherHolder.getInstance().getApplicationId()));
+            publishEventWithEventPublisher(new DistributionSetDeletedEvent(getTenant(), getId(), getClass()));
         }
     }
 
     @Override
     public void fireDeleteEvent() {
-        publishEventWithEventPublisher(new DistributionSetDeletedEvent(getTenant(), getId(), getClass(),
-                EventPublisherHolder.getInstance().getApplicationId()));
+        publishEventWithEventPublisher(new DistributionSetDeletedEvent(getTenant(), getId(), getClass()));
     }
 
     private static void publishEventWithEventPublisher(final ApplicationEvent event) {

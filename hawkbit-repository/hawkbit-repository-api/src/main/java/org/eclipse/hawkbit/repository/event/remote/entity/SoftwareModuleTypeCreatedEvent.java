@@ -24,13 +24,7 @@ public class SoftwareModuleTypeCreatedEvent extends RemoteEntityEvent<SoftwareMo
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor.
-     *
-     * @param baseEntity the SoftwareModuleType
-     * @param applicationId the origin application id
-     */
-    public SoftwareModuleTypeCreatedEvent(final SoftwareModuleType baseEntity, final String applicationId) {
-        super(baseEntity, applicationId);
+    public SoftwareModuleTypeCreatedEvent(final SoftwareModuleType softwareModuleType) {
+        super(softwareModuleType);
     }
 }

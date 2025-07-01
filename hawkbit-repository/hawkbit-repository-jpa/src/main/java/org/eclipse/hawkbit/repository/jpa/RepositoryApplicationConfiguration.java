@@ -152,7 +152,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetType;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
@@ -623,12 +622,12 @@ public class RepositoryApplicationConfiguration {
             final RolloutGroupRepository rolloutGroupRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
             final TargetTypeRepository targetTypeRepository, final TargetTagRepository targetTagRepository,
-            final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
+            final TenantAware tenantAware,
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final JpaProperties properties, final DistributionSetManagement distributionSetManagement) {
         return new JpaTargetManagement(entityManager, distributionSetManagement, quotaManagement, targetRepository,
                 targetTypeRepository, rolloutGroupRepository, targetFilterQueryRepository,
-                targetTagRepository, eventPublisherHolder, tenantAware, virtualPropertyReplacer,
+                targetTagRepository, tenantAware, virtualPropertyReplacer,
                 properties.getDatabase());
     }
 
@@ -743,12 +742,12 @@ public class RepositoryApplicationConfiguration {
             final RolloutManagement rolloutManagement, final QuotaManagement quotaManagement,
             final RolloutGroupEvaluationManager evaluationManager, final RolloutApprovalStrategy rolloutApprovalStrategy,
             final EntityManager entityManager, final PlatformTransactionManager txManager,
-            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final AfterTransactionCommitExecutor afterCommit,
             final TenantAware tenantAware, final RepositoryProperties repositoryProperties) {
         return new JpaRolloutExecutor(actionRepository, rolloutGroupRepository, rolloutTargetGroupRepository,
                 rolloutRepository, targetManagement, deploymentManagement, rolloutGroupManagement, rolloutManagement,
                 quotaManagement, evaluationManager, rolloutApprovalStrategy, entityManager, txManager, afterCommit,
-                eventPublisherHolder, tenantAware, repositoryProperties);
+                tenantAware, repositoryProperties);
     }
 
     @Bean
@@ -764,14 +763,14 @@ public class RepositoryApplicationConfiguration {
             final DistributionSetManagement distributionSetManagement,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final QuotaManagement quotaManagement,
-            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final JpaProperties properties,
             final RepositoryProperties repositoryProperties) {
         return new JpaRolloutManagement(rolloutRepository, rolloutGroupRepository, rolloutApprovalStrategy,
                 startNextRolloutGroupAction, rolloutStatusCache, actionRepository, targetManagement,
                 distributionSetManagement, tenantConfigurationManagement, quotaManagement, afterCommit,
-                eventPublisherHolder, virtualPropertyReplacer, systemSecurityContext, contextAware, properties.getDatabase(),
+                virtualPropertyReplacer, systemSecurityContext, contextAware, properties.getDatabase(),
                 repositoryProperties);
     }
 
@@ -816,14 +815,14 @@ public class RepositoryApplicationConfiguration {
             final ActionRepository actionRepository,
             final DistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
             final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
-            final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
+            final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final AuditorAware<String> auditorAware,
             final JpaProperties properties, final RepositoryProperties repositoryProperties) {
         return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetManagement, targetRepository, actionStatusRepository,
                 auditorProvider,
-                eventPublisherHolder, afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement,
+                afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement,
                 quotaManagement, systemSecurityContext, tenantAware, auditorAware, properties.getDatabase(), repositoryProperties);
     }
 
@@ -853,13 +852,13 @@ public class RepositoryApplicationConfiguration {
             final DistributionSetManagement distributionSetManagement,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final PlatformTransactionManager txManager, final EntityFactory entityFactory, final EntityManager entityManager,
-            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final AfterTransactionCommitExecutor afterCommit,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
             final ScheduledExecutorService executorService) {
         return new JpaControllerManagement(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties,
                 targetRepository, targetTypeManagement, deploymentManagement, confirmationManagement, softwareModuleRepository,
                 softwareModuleMetadataRepository, distributionSetManagement, tenantConfigurationManagement, txManager,
-                entityFactory, entityManager, afterCommit, eventPublisherHolder, systemSecurityContext, tenantAware,
+                entityFactory, entityManager, afterCommit, systemSecurityContext, tenantAware,
                 executorService);
     }
 

@@ -149,8 +149,6 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected ArtifactManagement artifactManagement;
     @Autowired
-    protected AuditingHandler auditingHandler;
-    @Autowired
     protected TenantAware tenantAware;
     @Autowired
     protected SystemManagement systemManagement;
@@ -166,8 +164,6 @@ public abstract class AbstractIntegrationTest {
     protected SystemSecurityContext systemSecurityContext;
     @Autowired
     protected ArtifactRepository binaryArtifactRepository;
-    @Autowired
-    protected TenantAwareCacheManager cacheManager;
     @Autowired
     protected QuotaManagement quotaManagement;
 

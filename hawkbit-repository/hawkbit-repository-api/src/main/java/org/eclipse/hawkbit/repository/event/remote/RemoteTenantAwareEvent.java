@@ -11,12 +11,12 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import java.io.Serial;
 
-import com.cronutils.utils.StringUtils;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 
@@ -25,10 +25,10 @@ import org.springframework.cloud.bus.event.RemoteApplicationEvent;
  * distributed events. All the necessary information of distributing events to
  * other nodes.
  */
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // for serialization libs like jackson
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@NoArgsConstructor(access = AccessLevel.PROTECTED) // for serialization libs like jackson
 public class RemoteTenantAwareEvent extends RemoteApplicationEvent implements TenantAwareEvent {
 
     @Serial
@@ -36,16 +36,12 @@ public class RemoteTenantAwareEvent extends RemoteApplicationEvent implements Te
 
     private String tenant;
 
-    /**
-     * Constructor.
-     *
-     * @param source the for the remote event.
-     * @param tenant the tenant
-     * @param applicationId the applicationId
-     */
-    public RemoteTenantAwareEvent(final Object source, final String tenant, final String applicationId) {
-        // due to a bug in Spring Cloud, we cannot pass null for applicationId
-        super(source, applicationId != null ? applicationId : StringUtils.EMPTY, DEFAULT_DESTINATION_FACTORY.getDestination(null));
+    public RemoteTenantAwareEvent(final String tenant, final Object source) {
+        super(source == null ? getApplicationId() : source, getApplicationId(), DEFAULT_DESTINATION_FACTORY.getDestination(null));
         this.tenant = tenant;
+    }
+
+    private static String getApplicationId() {
+        return EventPublisherHolder.getInstance().getApplicationId();
     }
 }

@@ -27,10 +27,10 @@ import org.eclipse.hawkbit.repository.model.Target;
  * Generic deployment event for the Multi-Assignments feature. The event payload holds a list of controller IDs identifying the targets which
  * are affected by a deployment action (e.g. a software assignment (update) or a cancellation of an update).
  */
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // for serialization libs like jackson
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@NoArgsConstructor(access = AccessLevel.PROTECTED) // for serialization libs like jackson
 public abstract class MultiActionEvent extends RemoteTenantAwareEvent implements Iterable<String> {
 
     @Serial
@@ -39,15 +39,8 @@ public abstract class MultiActionEvent extends RemoteTenantAwareEvent implements
     private final List<String> controllerIds = new ArrayList<>();
     private final List<Long> actionIds = new ArrayList<>();
 
-    /**
-     * Constructor.
-     *
-     * @param tenant tenant the event is scoped to
-     * @param applicationId the application id
-     * @param actions the actions involved
-     */
-    protected MultiActionEvent(String tenant, String applicationId, List<Action> actions) {
-        super(applicationId, tenant, applicationId);
+    protected MultiActionEvent(final String tenant, final List<Action> actions) {
+        super(tenant, null);
         this.controllerIds.addAll(getControllerIdsFromActions(actions));
         this.actionIds.addAll(getIdsFromActions(actions));
     }

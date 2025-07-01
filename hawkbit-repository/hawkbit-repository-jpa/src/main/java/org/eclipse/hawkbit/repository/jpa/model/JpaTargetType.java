@@ -26,13 +26,13 @@ import jakarta.persistence.UniqueConstraint;
 
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetType;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 
 /**
  * A target type defines which distribution set types can or have to be {@link Target}.
@@ -98,19 +98,16 @@ public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, 
 
     @Override
     public void fireCreateEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
-                new TargetTypeCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetTypeCreatedEvent(this));
     }
 
     @Override
     public void fireUpdateEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
-                new TargetTypeUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetTypeUpdatedEvent(this));
     }
 
     @Override
     public void fireDeleteEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetTypeDeletedEvent(
-                getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetTypeDeletedEvent(getTenant(), getId(), getClass()));
     }
 }

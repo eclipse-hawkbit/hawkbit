@@ -24,17 +24,7 @@ public class ActionUpdatedEvent extends AbstractActionEvent implements EntityUpd
     @Serial
     private static final long serialVersionUID = 2L;
 
-    /**
-     * Constructor
-     *
-     * @param action the updated action
-     * @param targetId targetId identifier (optional)
-     * @param rolloutId rollout identifier (optional)
-     * @param rolloutGroupId rollout group identifier (optional)
-     * @param applicationId the origin application id
-     */
-    public ActionUpdatedEvent(
-            final Action action, final Long targetId, final Long rolloutId, final Long rolloutGroupId, final String applicationId) {
-        super(action, targetId, rolloutId, rolloutGroupId, applicationId);
+    public ActionUpdatedEvent(final Action action, final Long targetId, final Long rolloutId, final Long rolloutGroupId) {
+        super(action, targetId, rolloutId, rolloutGroupId);
     }
 }

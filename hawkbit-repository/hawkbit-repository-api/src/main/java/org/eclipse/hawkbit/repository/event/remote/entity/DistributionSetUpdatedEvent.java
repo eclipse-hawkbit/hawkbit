@@ -31,12 +31,11 @@ public class DistributionSetUpdatedEvent extends RemoteEntityEvent<DistributionS
     /**
      * Constructor.
      *
-     * @param ds Distribution Set
-     * @param applicationId the origin application id
+     * @param distributionSet Distribution Set
      * @param complete <code>true</code> if {@link DistributionSet} is after the update {@link DistributionSet#isComplete()}
      */
-    public DistributionSetUpdatedEvent(final DistributionSet ds, final String applicationId, final boolean complete) {
-        super(ds, applicationId);
+    public DistributionSetUpdatedEvent(final DistributionSet distributionSet, final boolean complete) {
+        super(distributionSet);
         this.complete = complete;
     }
 

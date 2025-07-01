@@ -24,13 +24,7 @@ public class SoftwareModuleUpdatedEvent extends RemoteEntityEvent<SoftwareModule
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor.
-     *
-     * @param baseEntity the software module
-     * @param applicationId the origin application id
-     */
-    public SoftwareModuleUpdatedEvent(final SoftwareModule baseEntity, final String applicationId) {
-        super(baseEntity, applicationId);
+    public SoftwareModuleUpdatedEvent(final SoftwareModule softwareModule) {
+        super(softwareModule);
     }
 }

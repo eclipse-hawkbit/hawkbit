@@ -24,13 +24,7 @@ public class RolloutUpdatedEvent extends RemoteEntityEvent<Rollout> implements E
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor
-     *
-     * @param rollout the updated rollout
-     * @param applicationId the origin application id
-     */
-    public RolloutUpdatedEvent(final Rollout rollout, final String applicationId) {
-        super(rollout, applicationId);
+    public RolloutUpdatedEvent(final Rollout rollout) {
+        super(rollout);
     }
 }

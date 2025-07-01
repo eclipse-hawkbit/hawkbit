@@ -28,14 +28,7 @@ public class MultiActionCancelEvent extends MultiActionEvent {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor.
-     *
-     * @param tenant tenant the event is scoped to
-     * @param applicationId the application id
-     * @param actions the actions to be canceled
-     */
-    public MultiActionCancelEvent(String tenant, String applicationId, List<Action> actions) {
-        super(tenant, applicationId, actions);
+    public MultiActionCancelEvent(String tenant, List<Action> actions) {
+        super(tenant, actions);
     }
 }

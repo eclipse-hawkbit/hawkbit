@@ -34,18 +34,10 @@ public class TargetDeletedEvent extends RemoteIdEvent implements EntityDeletedEv
     private String controllerId;
     private String targetAddress;
 
-    /**
-     * @param tenant the tenant
-     * @param entityId the entity id
-     * @param controllerId the controllerId of the target
-     * @param targetAddress the target address
-     * @param entityClass the entity class
-     * @param applicationId the origin application id
-     */
-    public TargetDeletedEvent(final String tenant, final Long entityId, final String controllerId,
-            final String targetAddress, final Class<? extends TenantAwareBaseEntity> entityClass,
-            final String applicationId) {
-        super(entityId, tenant, entityClass, applicationId);
+    public TargetDeletedEvent(
+            final String tenant, final Long entityId, final Class<? extends TenantAwareBaseEntity> entityClass,
+            final String controllerId, final String targetAddress) {
+        super(tenant, entityId, entityClass);
         this.controllerId = controllerId;
         this.targetAddress = targetAddress;
     }

@@ -21,11 +21,11 @@ import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleTypeCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 
 /**
  * Type of software modules.
@@ -69,19 +69,17 @@ public class JpaSoftwareModuleType extends AbstractJpaTypeEntity implements Soft
 
     @Override
     public void fireCreateEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
-                new SoftwareModuleTypeCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new SoftwareModuleTypeCreatedEvent(this));
     }
 
     @Override
     public void fireUpdateEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
-                new SoftwareModuleTypeUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new SoftwareModuleTypeUpdatedEvent(this));
     }
 
     @Override
     public void fireDeleteEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new SoftwareModuleTypeDeletedEvent(
-                getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new SoftwareModuleTypeDeletedEvent(getTenant(), getId(), getClass()));
     }
 }

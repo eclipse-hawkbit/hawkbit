@@ -28,24 +28,16 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 public class TenantConfigurationDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
 
     @Serial
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 1L;
 
     private String configKey;
     @ToString.Exclude
     private String configValue;
 
-    /**
-     * @param tenant the tenant
-     * @param entityId the entity id
-     * @param configKey the config key
-     * @param configValue the config value
-     * @param entityClass the entity class
-     * @param applicationId the origin application id
-     */
-    public TenantConfigurationDeletedEvent(final String tenant, final Long entityId, final String configKey,
-            final String configValue, final Class<? extends TenantAwareBaseEntity> entityClass,
-            final String applicationId) {
-        super(entityId, tenant, entityClass, applicationId);
+    public TenantConfigurationDeletedEvent(
+            final String tenant, final Long entityId, final Class<? extends TenantAwareBaseEntity> entityClass,
+            final String configKey, final String configValue) {
+        super(tenant, entityId, entityClass);
         this.configKey = configKey;
         this.configValue = configValue;
     }

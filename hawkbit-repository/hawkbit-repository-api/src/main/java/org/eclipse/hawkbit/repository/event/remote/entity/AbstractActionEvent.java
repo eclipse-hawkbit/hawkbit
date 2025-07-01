@@ -15,6 +15,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.springframework.lang.Nullable;
 
 /**
  * Defines the remote event of creating a new {@link Action}.
@@ -32,28 +33,17 @@ public abstract class AbstractActionEvent extends RemoteEntityEvent<Action> {
     private final Long rolloutGroupId;
 
     /**
-     * Default constructor.
+     * Default constructor for serialization libs like jackson.
      */
     protected AbstractActionEvent() {
-        // for serialization libs like jackson
         this.targetId = null;
         this.rolloutId = null;
         this.rolloutGroupId = null;
     }
 
-    /**
-     * Constructor
-     *
-     * @param action the created action
-     * @param targetId targetId identifier (optional)
-     * @param rolloutId rollout identifier (optional)
-     * @param rolloutGroupId rollout group identifier (optional)
-     * @param applicationId the origin application id
-     */
     protected AbstractActionEvent(
-            final Action action, final Long targetId, final Long rolloutId,
-            final Long rolloutGroupId, final String applicationId) {
-        super(action, applicationId);
+            final Action action, @Nullable final Long targetId, @Nullable final Long rolloutId, @Nullable final Long rolloutGroupId) {
+        super(action);
         this.targetId = targetId;
         this.rolloutId = rolloutId;
         this.rolloutGroupId = rolloutGroupId;

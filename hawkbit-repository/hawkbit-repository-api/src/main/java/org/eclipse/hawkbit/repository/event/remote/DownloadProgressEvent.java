@@ -34,11 +34,9 @@ public class DownloadProgressEvent extends RemoteTenantAwareEvent {
      * @param tenant the tenant
      * @param actionStatusId of the {@link ActionStatus} the download belongs to
      * @param shippedBytesSinceLast the shippedBytesSinceLast
-     * @param applicationId the application id.
      */
-    public DownloadProgressEvent(final String tenant, final Long actionStatusId, final long shippedBytesSinceLast,
-            final String applicationId) {
-        super(actionStatusId, tenant, applicationId);
+    public DownloadProgressEvent(final String tenant, final Long actionStatusId, final long shippedBytesSinceLast) {
+        super(tenant, actionStatusId);
         this.shippedBytesSinceLast = shippedBytesSinceLast;
     }
 

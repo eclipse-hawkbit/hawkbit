@@ -28,6 +28,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetFilterQueryDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryUpdatedEvent;
@@ -35,7 +36,6 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 
 /**
  * Stored target filter.
@@ -115,19 +115,17 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
 
     @Override
     public void fireCreateEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
-                new TargetFilterQueryCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetFilterQueryCreatedEvent(this));
     }
 
     @Override
     public void fireUpdateEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
-                new TargetFilterQueryUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent( new TargetFilterQueryUpdatedEvent(this));
     }
 
     @Override
     public void fireDeleteEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetFilterQueryDeletedEvent(
-                getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new TargetFilterQueryDeletedEvent(getTenant(), getId(), getClass()));
     }
 }

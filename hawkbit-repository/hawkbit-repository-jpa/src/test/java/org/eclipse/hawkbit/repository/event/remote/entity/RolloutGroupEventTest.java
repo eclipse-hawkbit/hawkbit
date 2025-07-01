@@ -35,8 +35,7 @@ class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<RolloutGroup> 
      */
     @Test
     void testRolloutGroupCreatedEvent() {
-        final RolloutGroupCreatedEvent createdEvent = (RolloutGroupCreatedEvent) assertAndCreateRemoteEvent(
-                RolloutGroupCreatedEvent.class);
+        final RolloutGroupCreatedEvent createdEvent = (RolloutGroupCreatedEvent) assertAndCreateRemoteEvent(RolloutGroupCreatedEvent.class);
         assertThat(createdEvent.getRolloutId()).isNotNull();
     }
 
@@ -50,12 +49,12 @@ class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<RolloutGroup> 
 
     @Override
     protected int getConstructorParamCount() {
-        return 3;
+        return 2;
     }
 
     @Override
     protected Object[] getConstructorParams(final RolloutGroup baseEntity) {
-        return new Object[] { baseEntity, 1L, "Node" };
+        return new Object[] { baseEntity, 1L };
     }
 
     @Override

@@ -24,13 +24,7 @@ public class TargetCreatedEvent extends RemoteEntityEvent<Target> implements Ent
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor.
-     *
-     * @param baseEntity the target
-     * @param applicationId the origin application id
-     */
-    public TargetCreatedEvent(final Target baseEntity, final String applicationId) {
-        super(baseEntity, applicationId);
+    public TargetCreatedEvent(final Target target) {
+        super(target);
     }
 }

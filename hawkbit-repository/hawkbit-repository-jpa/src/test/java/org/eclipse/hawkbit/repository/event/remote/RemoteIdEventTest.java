@@ -30,7 +30,6 @@ class RemoteIdEventTest extends AbstractRemoteEventTest {
     private static final long ENTITY_ID = 1L;
     private static final String TENANT = "tenant";
     private static final Class<? extends TenantAwareBaseEntity> ENTITY_CLASS = JpaAction.class;
-    private static final String NODE = "Node";
     private static final String CONTROLLER_ID = "controller911";
     private static final String ADDRESS = "amqp://anyhost";
 
@@ -55,8 +54,7 @@ class RemoteIdEventTest extends AbstractRemoteEventTest {
      */
     @Test
     void testTargetDeletedEvent() {
-        final TargetDeletedEvent deletedEvent = new TargetDeletedEvent(TENANT, ENTITY_ID, CONTROLLER_ID, ADDRESS,
-                ENTITY_CLASS, NODE);
+        final TargetDeletedEvent deletedEvent = new TargetDeletedEvent(TENANT, ENTITY_ID, ENTITY_CLASS, CONTROLLER_ID, ADDRESS);
         assertEntity(deletedEvent);
     }
 
@@ -85,13 +83,12 @@ class RemoteIdEventTest extends AbstractRemoteEventTest {
     }
 
     protected void assertAndCreateRemoteEvent(final Class<? extends RemoteIdEvent> eventType) {
-
         final Constructor<?> constructor = Arrays.stream(eventType.getDeclaredConstructors())
-                .filter(con -> con.getParameterCount() == 4).findAny()
+                .filter(con -> con.getParameterCount() == 3).findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Given event is not RemoteIdEvent compatible"));
 
         try {
-            final RemoteIdEvent event = (RemoteIdEvent) constructor.newInstance(TENANT, ENTITY_ID, ENTITY_CLASS, NODE);
+            final RemoteIdEvent event = (RemoteIdEvent) constructor.newInstance(TENANT, ENTITY_ID, ENTITY_CLASS);
             assertEntity(event);
         } catch (final ReflectiveOperationException e) {
             fail("Exception should not happen " + e.getMessage());

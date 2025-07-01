@@ -25,16 +25,14 @@ public abstract class AbstractRolloutGroupEvent extends RemoteEntityEvent<Rollou
     private final Long rolloutId;
 
     /**
-     * Default constructor.
+     * Default constructor for serialization libs like jackson.
      */
     protected AbstractRolloutGroupEvent() {
-        // for serialization libs like jackson
         this.rolloutId = null;
     }
 
-    protected AbstractRolloutGroupEvent(final RolloutGroup rolloutGroup, final Long rolloutId,
-            final String applicationId) {
-        super(rolloutGroup, applicationId);
+    protected AbstractRolloutGroupEvent(final RolloutGroup rolloutGroup, final Long rolloutId) {
+        super(rolloutGroup);
         this.rolloutId = rolloutId;
     }
 
@@ -49,12 +47,15 @@ public abstract class AbstractRolloutGroupEvent extends RemoteEntityEvent<Rollou
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
-        if (!super.equals(o))
+        }
+        if (!super.equals(o)) {
             return false;
+        }
         final AbstractRolloutGroupEvent that = (AbstractRolloutGroupEvent) o;
         return Objects.equals(rolloutId, that.rolloutId);
     }

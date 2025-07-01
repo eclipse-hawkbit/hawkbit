@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
 
+import java.io.Serial;
 import java.util.HashMap;
 
 import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
@@ -49,7 +50,7 @@ class BusProtoStuffMessageConverterTest {
      */
     @Test
     void successfullySerializeAndDeserializeEvent() {
-        final TargetCreatedEvent targetCreatedEvent = new TargetCreatedEvent(targetMock, "1");
+        final TargetCreatedEvent targetCreatedEvent = new TargetCreatedEvent(targetMock);
         // serialize
         final Object serializedEvent = underTest.convertToInternal(targetCreatedEvent,
                 new MessageHeaders(new HashMap<>()), null);
@@ -68,7 +69,7 @@ class BusProtoStuffMessageConverterTest {
      */
     @Test
     void missingEventTypeMappingThrowsMessageConversationException() {
-        final DummyRemoteEntityEvent dummyEvent = new DummyRemoteEntityEvent(targetMock, "applicationId");
+        final DummyRemoteEntityEvent dummyEvent = new DummyRemoteEntityEvent(targetMock);
         final MessageHeaders messageHeaders = new MessageHeaders(new HashMap<>());
 
         assertThatExceptionOfType(MessageConversionException.class)
@@ -79,13 +80,13 @@ class BusProtoStuffMessageConverterTest {
     /**
      * Test event with which non-existing mapping to serialize.
      */
-    private final class DummyRemoteEntityEvent extends RemoteEntityEvent<Target> {
+    private static final class DummyRemoteEntityEvent extends RemoteEntityEvent<Target> {
 
+        @Serial
         private static final long serialVersionUID = 1L;
 
-        private DummyRemoteEntityEvent(final Target target, final String applicationId) {
-            super(target, applicationId);
+        private DummyRemoteEntityEvent(final Target target) {
+            super(target);
         }
-
     }
 }

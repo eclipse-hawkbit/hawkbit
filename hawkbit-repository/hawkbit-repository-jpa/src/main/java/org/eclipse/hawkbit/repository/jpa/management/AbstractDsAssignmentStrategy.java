@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -33,7 +34,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
@@ -46,7 +46,6 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -59,7 +58,6 @@ public abstract class AbstractDsAssignmentStrategy {
 
     protected final TargetRepository targetRepository;
     protected final AfterTransactionCommitExecutor afterCommit;
-    protected final EventPublisherHolder eventPublisherHolder;
     protected final ActionRepository actionRepository;
 
     private final ActionStatusRepository actionStatusRepository;
@@ -71,13 +69,12 @@ public abstract class AbstractDsAssignmentStrategy {
     @SuppressWarnings("java:S107")
     AbstractDsAssignmentStrategy(
             final TargetRepository targetRepository,
-            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final AfterTransactionCommitExecutor afterCommit,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
             final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
         this.targetRepository = targetRepository;
         this.afterCommit = afterCommit;
-        this.eventPublisherHolder = eventPublisherHolder;
         this.actionRepository = actionRepository;
         this.actionStatusRepository = actionStatusRepository;
         this.quotaManagement = quotaManagement;
@@ -131,8 +128,7 @@ public abstract class AbstractDsAssignmentStrategy {
     }
 
     protected void sendTargetUpdatedEvent(final JpaTarget target) {
-        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
-                .publishEvent(new TargetUpdatedEvent(target, eventPublisherHolder.getApplicationId())));
+        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetUpdatedEvent(target)));
     }
 
     /**
@@ -215,8 +211,8 @@ public abstract class AbstractDsAssignmentStrategy {
      * @param action the action of the assignment
      */
     protected void cancelAssignDistributionSetEvent(final Action action) {
-        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
-                new CancelTargetAssignmentEvent(action, eventPublisherHolder.getApplicationId())));
+        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new CancelTargetAssignmentEvent(action)));
     }
 
     protected boolean isMultiAssignmentsEnabled() {
@@ -292,9 +288,8 @@ public abstract class AbstractDsAssignmentStrategy {
             return;
         }
         final String tenant = actions.get(0).getTenant();
-        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
-                .publishEvent(new CancelTargetAssignmentEvent(tenant,
-                        actions, eventPublisherHolder.getApplicationId())));
+        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new CancelTargetAssignmentEvent(tenant, actions)));
     }
 
     private void assertActionsPerTargetQuota(final Target target, final int requested) {
