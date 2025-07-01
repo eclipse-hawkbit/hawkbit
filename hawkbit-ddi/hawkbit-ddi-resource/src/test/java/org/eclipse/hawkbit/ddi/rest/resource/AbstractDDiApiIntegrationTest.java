@@ -47,8 +47,6 @@ import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.RestConfiguration;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
-import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -58,7 +56,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @ContextConfiguration(
         classes = { DdiApiConfiguration.class, RestConfiguration.class, RepositoryApplicationConfiguration.class, TestConfiguration.class })
-@Import(TestChannelBinderConfiguration.class)
 @TestPropertySource(locations = "classpath:/ddi-test.properties")
 public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrationTest {
 

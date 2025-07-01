@@ -34,8 +34,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
-import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.annotation.DirtiesContext;
@@ -70,7 +68,6 @@ import org.springframework.web.context.WebApplicationContext;
 @AutoConfigureMockMvc
 @ContextConfiguration(classes = { MgmtApiConfiguration.class, RestConfiguration.class,
         RepositoryApplicationConfiguration.class, TestConfiguration.class })
-@Import(TestChannelBinderConfiguration.class)
 /**
  * Feature: Component Tests - Management API<br/>
  * Story: Basic auth Userinfo Resource

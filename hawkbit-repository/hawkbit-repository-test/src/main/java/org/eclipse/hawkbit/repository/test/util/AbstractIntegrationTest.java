@@ -73,9 +73,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.bus.ServiceMatcher;
-import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -95,7 +93,7 @@ import org.springframework.test.context.TestPropertySource;
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ContextConfiguration(classes = { TestConfiguration.class })
-@Import(TestChannelBinderConfiguration.class)
+//@Import(TestChannelBinderConfiguration.class)
 // destroy the context after each test class because otherwise we get problem when context is
 // refreshed we e.g. get two instances of CacheManager which leads to very strange test failures.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
