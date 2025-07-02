@@ -24,13 +24,7 @@ public class TargetFilterQueryUpdatedEvent extends RemoteEntityEvent<TargetFilte
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor.
-     *
-     * @param baseEntity TargetFilterQuery entity
-     * @param applicationId the origin application id
-     */
-    public TargetFilterQueryUpdatedEvent(final TargetFilterQuery baseEntity, final String applicationId) {
-        super(baseEntity, applicationId);
+    public TargetFilterQueryUpdatedEvent(final TargetFilterQuery targetFilterQuery) {
+        super(targetFilterQuery);
     }
 }

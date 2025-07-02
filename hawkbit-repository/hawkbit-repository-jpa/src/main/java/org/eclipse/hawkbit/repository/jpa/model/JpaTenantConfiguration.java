@@ -22,11 +22,11 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.TenantConfigurationDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 
 /**
  * A JPA entity which stores the tenant specific configuration.
@@ -63,20 +63,17 @@ public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity imp
 
     @Override
     public void fireCreateEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
-                new TenantConfigurationCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TenantConfigurationCreatedEvent(this));
     }
 
     @Override
     public void fireUpdateEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
-                new TenantConfigurationUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TenantConfigurationUpdatedEvent(this));
     }
 
     @Override
     public void fireDeleteEvent() {
         EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new TenantConfigurationDeletedEvent(getTenant(), getId(), getKey(), getValue(),
-                        getClass(), EventPublisherHolder.getInstance().getApplicationId()));
+                .publishEvent(new TenantConfigurationDeletedEvent(getTenant(), getId(), getClass(), getKey(), getValue()));
     }
 }

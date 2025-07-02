@@ -25,13 +25,7 @@ public class DistributionSetTagCreatedEvent extends RemoteEntityEvent<Distributi
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor.
-     *
-     * @param tag the tag which is deleted
-     * @param applicationId the origin application id
-     */
-    public DistributionSetTagCreatedEvent(final DistributionSetTag tag, final String applicationId) {
-        super(tag, applicationId);
+    public DistributionSetTagCreatedEvent(final DistributionSetTag distributionSetTag) {
+        super(distributionSetTag);
     }
 }

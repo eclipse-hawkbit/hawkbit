@@ -32,10 +32,9 @@ public class MultiActionAssignEvent extends MultiActionEvent {
      * Constructor.
      *
      * @param tenant tenant the event is scoped to
-     * @param applicationId the application id
      * @param actions the actions of the deployment action
      */
-    public MultiActionAssignEvent(String tenant, String applicationId, List<Action> actions) {
-        super(tenant, applicationId, actions);
+    public MultiActionAssignEvent(String tenant, List<Action> actions) {
+        super(tenant, actions);
     }
 }

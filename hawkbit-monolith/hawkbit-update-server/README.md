@@ -24,28 +24,25 @@ The Management API can be accessed via http://localhost:8080/rest/v1
 
 ## Enable Clustering (experimental)
 
-Clustering in hawkBit is based on _Spring Cloud Bus_. It is not enabled in the example app by default.
+Clustering in hawkBit is based on _Spring Cloud Bus_. It is enabled by default in microservice apps and disabled (by default) in the 
+monolith app. To enable it for monolith app you should set (via environment, system properties or properties files) the following:
 
 Add to your `pom.xml` :
 
-```xml
-<dependency>
-  <groupId>org.springframework.cloud</groupId>
-  <artifactId>spring-cloud-stream-binder-rabbit</artifactId>
-</dependency>
+```properties
+spring.autoconfigure.exclude=
+spring.cloud.bus.enabled=true
 ```
 
 Optional as well is the addition of [Protostuff](https://github.com/protostuff/protostuff) based message payload
-serialization for improved performance.
-
-Add to your `application.properties` :
+serialization for improved performance. To enable it set (via environment, system properties or properties files):
 
 ```properties
 spring.cloud.stream.bindings.springCloudBusInput.content-type=application/binary+protostuff
 spring.cloud.stream.bindings.springCloudBusOutput.content-type=application/binary+protostuff
 ```
 
-Add to your `pom.xml` :
+and add to your `pom.xml` :
 
 ```xml
 <dependency>

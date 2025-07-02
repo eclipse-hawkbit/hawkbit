@@ -66,8 +66,6 @@ import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
-import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.test.context.ContextConfiguration;
@@ -76,7 +74,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @ContextConfiguration(classes = { RepositoryApplicationConfiguration.class, TestConfiguration.class })
-@Import(TestChannelBinderConfiguration.class)
 @TestPropertySource(locations = "classpath:/jpa-test.properties")
 @SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {

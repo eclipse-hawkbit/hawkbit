@@ -86,7 +86,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -167,7 +166,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final EntityManager entityManager, final ActionRepository actionRepository,
             final DistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
             final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
-            final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
+            final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final AuditorAware<String> auditorAware,
@@ -179,11 +178,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         this.auditorProvider = auditorProvider;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.txManager = txManager;
-        onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisherHolder,
+        onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit,
                 actionRepository, actionStatusRepository, quotaManagement, this::isMultiAssignmentsEnabled,
                 this::isConfirmationFlowEnabled, repositoryProperties);
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, afterCommit,
-                eventPublisherHolder, actionRepository, actionStatusRepository, quotaManagement,
+                actionRepository, actionStatusRepository, quotaManagement,
                 this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties);
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;

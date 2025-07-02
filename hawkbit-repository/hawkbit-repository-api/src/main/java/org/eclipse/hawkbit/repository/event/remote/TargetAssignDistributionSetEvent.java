@@ -40,26 +40,17 @@ public class TargetAssignDistributionSetEvent extends AbstractAssignmentEvent {
      * @param tenant of the event
      * @param distributionSetId of the set that was assigned
      * @param a the actions and the targets
-     * @param applicationId the application id.
      * @param maintenanceWindowAvailable see {@link Action#isMaintenanceWindowAvailable()}
      */
-    public TargetAssignDistributionSetEvent(final String tenant, final long distributionSetId, final List<Action> a,
-            final String applicationId, final boolean maintenanceWindowAvailable) {
-        super(distributionSetId, tenant,
-                a.stream().filter(action -> action.getDistributionSet().getId().longValue() == distributionSetId).toList(),
-                applicationId);
+    public TargetAssignDistributionSetEvent(
+            final String tenant, final long distributionSetId, final List<Action> a, final boolean maintenanceWindowAvailable) {
+        super(tenant, distributionSetId,
+                a.stream().filter(action -> action.getDistributionSet().getId().longValue() == distributionSetId).toList());
         this.distributionSetId = distributionSetId;
         this.maintenanceWindowAvailable = maintenanceWindowAvailable;
     }
 
-    /**
-     * Constructor.
-     *
-     * @param action the action created for this assignment
-     * @param applicationId the application id
-     */
-    public TargetAssignDistributionSetEvent(final Action action, final String applicationId) {
-        this(action.getTenant(), action.getDistributionSet().getId(), Collections.singletonList(action), applicationId,
-                action.isMaintenanceWindowAvailable());
+    public TargetAssignDistributionSetEvent(final Action action) {
+        this(action.getTenant(), action.getDistributionSet().getId(), Collections.singletonList(action), action.isMaintenanceWindowAvailable());
     }
 }

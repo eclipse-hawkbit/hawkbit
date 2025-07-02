@@ -32,31 +32,18 @@ public class RemoteIdEvent extends RemoteTenantAwareEvent {
     private static final long serialVersionUID = 1L;
 
     private Long entityId;
-
     private String entityClass;
-
     private String interfaceClass;
 
-    /**
-     * Constructor for json serialization.
-     *
-     * @param entityId the entity Id
-     * @param tenant the tenant
-     * @param entityClass the entity class
-     * @param applicationId the origin application id
-     */
-    protected RemoteIdEvent(final Long entityId, final String tenant,
-            final Class<? extends TenantAwareBaseEntity> entityClass, final String applicationId) {
-        super(entityId, tenant, applicationId);
+    protected RemoteIdEvent(final String tenant, final Long entityId, final Class<? extends TenantAwareBaseEntity> entityClass) {
+        super(tenant, entityId);
         this.entityClass = entityClass.getName();
-        this.interfaceClass = entityClass.isInterface() ? entityClass.getName()
-                : getInterfaceEntity(entityClass).getName();
+        this.interfaceClass = entityClass.isInterface() ? entityClass.getName() : getInterfaceEntity(entityClass).getName();
         this.entityId = entityId;
     }
 
     private static Class<?> getInterfaceEntity(final Class<? extends TenantAwareBaseEntity> baseEntity) {
         final Class<?>[] interfaces = baseEntity.getInterfaces();
-        return Arrays.stream(interfaces).filter(TenantAwareBaseEntity.class::isAssignableFrom).findFirst()
-                .orElse(baseEntity);
+        return Arrays.stream(interfaces).filter(TenantAwareBaseEntity.class::isAssignableFrom).findFirst().orElse(baseEntity);
     }
 }

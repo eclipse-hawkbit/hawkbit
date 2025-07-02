@@ -24,13 +24,7 @@ public class TenantConfigurationCreatedEvent extends RemoteEntityEvent<TenantCon
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor.
-     *
-     * @param baseEntity the tenantConfiguration
-     * @param applicationId the origin application id
-     */
-    public TenantConfigurationCreatedEvent(final TenantConfiguration baseEntity, final String applicationId) {
-        super(baseEntity, applicationId);
+    public TenantConfigurationCreatedEvent(final TenantConfiguration tenantConfiguration) {
+        super(tenantConfiguration);
     }
 }

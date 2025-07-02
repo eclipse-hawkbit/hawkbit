@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -42,7 +43,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -51,11 +51,11 @@ import org.springframework.util.CollectionUtils;
 public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     OnlineDsAssignmentStrategy(final TargetRepository targetRepository,
-            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final AfterTransactionCommitExecutor afterCommit,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
             final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
-        super(targetRepository, afterCommit, eventPublisherHolder, actionRepository, actionStatusRepository,
+        super(targetRepository, afterCommit, actionRepository, actionStatusRepository,
                 quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties);
     }
 
@@ -225,9 +225,10 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             return;
         }
 
-        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
-                .publishEvent(new TargetAssignDistributionSetEvent(tenant, distributionSetId, actions,
-                        eventPublisherHolder.getApplicationId(), actions.get(0).isMaintenanceWindowAvailable())));
+        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new TargetAssignDistributionSetEvent(
+                        tenant, distributionSetId, actions,
+                        actions.get(0).isMaintenanceWindowAvailable())));
     }
 
     /**
@@ -238,20 +239,18 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
      * @param actions assigned to the targets
      */
     private void sendMultiActionCancelEvent(final String tenant, final List<Action> actions) {
-        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
-                .publishEvent(new MultiActionCancelEvent(tenant, eventPublisherHolder.getApplicationId(), actions)));
+        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new MultiActionCancelEvent(tenant, actions)));
     }
 
     /**
-     * Helper to fire a {@link MultiActionAssignEvent}. This method may only be
-     * called if the Multi-Assignments feature is enabled.
+     * Helper to fire a {@link MultiActionAssignEvent}. This method may only be called if the Multi-Assignments feature is enabled.
      *
      * @param tenant the event is scoped to
      * @param actions assigned to the targets
      */
     private void sendMultiActionAssignEvent(final String tenant, final List<Action> actions) {
-        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
-                .publishEvent(new MultiActionAssignEvent(tenant, eventPublisherHolder.getApplicationId(), actions)));
+        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new MultiActionAssignEvent(tenant, actions)));
     }
-
 }

@@ -25,8 +25,6 @@ import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -37,7 +35,6 @@ import org.springframework.test.context.ContextConfiguration;
         "spring.main.banner-mode=off",
         "logging.level.root=ERROR" })
 @ContextConfiguration(classes = { RepositoryApplicationConfiguration.class, TestConfiguration.class })
-@Import(TestChannelBinderConfiguration.class)
 @Disabled("For manual run only, while playing around with RSQL to SQL")
 @SuppressWarnings("java:S2699") // java:S2699 - manual test, don't actually does assertions
 class RSQLToSQLTest {

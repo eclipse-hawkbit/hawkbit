@@ -40,5 +40,4 @@ class DistributionSetTagEventTest extends AbstractRemoteEntityEventTest<Distribu
     protected DistributionSetTag createEntity() {
         return distributionSetTagManagement.create(entityFactory.tag().create().name("tag1"));
     }
-
 }

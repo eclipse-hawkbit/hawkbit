@@ -58,8 +58,6 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.test.RabbitListenerTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.CollectionUtils;
 
@@ -69,7 +67,6 @@ import org.springframework.util.CollectionUtils;
 @ContextConfiguration(classes = {
         DmfApiConfiguration.class, DmfTestConfiguration.class,
         RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class })
-@Import(TestChannelBinderConfiguration.class)
 abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
 
     protected static final String TENANT_EXIST = "DEFAULT";

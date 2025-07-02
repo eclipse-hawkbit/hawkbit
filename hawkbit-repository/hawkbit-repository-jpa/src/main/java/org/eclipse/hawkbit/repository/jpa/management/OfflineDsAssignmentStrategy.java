@@ -38,7 +38,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 
 /**
  * AbstractDsAssignmentStrategy for offline assignments, i.e. not managed by
@@ -48,11 +47,11 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     OfflineDsAssignmentStrategy(
             final TargetRepository targetRepository,
-            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final AfterTransactionCommitExecutor afterCommit,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
             final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
-        super(targetRepository, afterCommit, eventPublisherHolder, actionRepository, actionStatusRepository,
+        super(targetRepository, afterCommit, actionRepository, actionStatusRepository,
                 quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties);
     }
 

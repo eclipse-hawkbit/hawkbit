@@ -25,13 +25,7 @@ public class DistributionSetTypeUpdatedEvent extends RemoteEntityEvent<Distribut
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor.
-     *
-     * @param baseEntity DistributionSetType
-     * @param applicationId the origin application id
-     */
-    public DistributionSetTypeUpdatedEvent(final DistributionSetType baseEntity, final String applicationId) {
-        super(baseEntity, applicationId);
+    public DistributionSetTypeUpdatedEvent(final DistributionSetType distributionSetType) {
+        super(distributionSetType);
     }
 }

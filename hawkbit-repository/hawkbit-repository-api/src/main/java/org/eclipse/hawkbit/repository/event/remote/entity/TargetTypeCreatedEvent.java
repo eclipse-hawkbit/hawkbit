@@ -24,13 +24,7 @@ public class TargetTypeCreatedEvent extends RemoteEntityEvent<TargetType> implem
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor.
-     *
-     * @param baseEntity the TargetType
-     * @param applicationId the origin application id
-     */
-    public TargetTypeCreatedEvent(final TargetType baseEntity, final String applicationId) {
-        super(baseEntity, applicationId);
+    public TargetTypeCreatedEvent(final TargetType targetType) {
+        super(targetType);
     }
 }

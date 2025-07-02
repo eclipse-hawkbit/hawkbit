@@ -24,13 +24,7 @@ public class TargetTypeUpdatedEvent extends RemoteEntityEvent<TargetType> implem
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor.
-     *
-     * @param baseEntity TargetType
-     * @param applicationId the origin application id
-     */
-    public TargetTypeUpdatedEvent(final TargetType baseEntity, final String applicationId) {
-        super(baseEntity, applicationId);
+    public TargetTypeUpdatedEvent(final TargetType targetType) {
+        super(targetType);
     }
 }

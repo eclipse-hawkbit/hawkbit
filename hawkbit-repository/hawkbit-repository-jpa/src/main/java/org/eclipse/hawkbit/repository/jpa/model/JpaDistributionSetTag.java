@@ -20,12 +20,12 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 
 /**
  * A {@link DistributionSetTag} is used to describe DistributionSet attributes and use them also for filtering the DistributionSet list.
@@ -60,20 +60,18 @@ public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag,
 
     @Override
     public void fireCreateEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
-                new DistributionSetTagCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new DistributionSetTagCreatedEvent(this));
     }
 
     @Override
     public void fireUpdateEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
-                new DistributionSetTagUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new DistributionSetTagUpdatedEvent(this));
     }
 
     @Override
     public void fireDeleteEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new DistributionSetTagDeletedEvent(
-                getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new DistributionSetTagDeletedEvent(getTenant(), getId(), getClass()));
 
     }
 }

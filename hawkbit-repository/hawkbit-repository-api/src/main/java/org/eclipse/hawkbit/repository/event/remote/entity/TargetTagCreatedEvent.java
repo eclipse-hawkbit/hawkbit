@@ -24,13 +24,7 @@ public class TargetTagCreatedEvent extends RemoteEntityEvent<TargetTag> implemen
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor.
-     *
-     * @param tag the tag which is deleted
-     * @param applicationId the origin application id
-     */
-    public TargetTagCreatedEvent(final TargetTag tag, final String applicationId) {
-        super(tag, applicationId);
+    public TargetTagCreatedEvent(final TargetTag targetTag) {
+        super(targetTag);
     }
 }

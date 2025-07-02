@@ -24,11 +24,11 @@ public class CancelTargetAssignmentEvent extends AbstractAssignmentEvent {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public CancelTargetAssignmentEvent(final Action a, final String applicationId) {
-        super(applicationId, a, applicationId);
+    public CancelTargetAssignmentEvent(final Action a) {
+        super(a);
     }
 
-    public CancelTargetAssignmentEvent(final String tenant, final List<Action> a, final String applicationId) {
-        super(applicationId, tenant, a, applicationId);
+    public CancelTargetAssignmentEvent(final String tenant, final List<Action> a) {
+        super(tenant, null, a);
     }
 }

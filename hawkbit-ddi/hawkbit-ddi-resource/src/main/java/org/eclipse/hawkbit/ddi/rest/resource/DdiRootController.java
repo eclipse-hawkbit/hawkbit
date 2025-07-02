@@ -212,8 +212,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                         (length, shippedSinceLastEvent, total) -> {
                             if (actionStatus != null) {
                                 eventPublisher.publishEvent(new DownloadProgressEvent(
-                                        tenantAware.getCurrentTenant(), actionStatus.getId(), shippedSinceLastEvent,
-                                        serviceMatcher != null ? serviceMatcher.getBusId() : bus.getId()));
+                                        tenantAware.getCurrentTenant(), actionStatus.getId(), shippedSinceLastEvent));
                             }
                         });
             }

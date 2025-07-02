@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import static org.eclipse.hawkbit.repository.model.BaseEntity.getIdOrNull;
+
 import java.io.Serial;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -43,6 +45,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.utils.MapAttributeConverter;
@@ -53,7 +56,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 
 /**
  * JPA implementation of {@link Action}.
@@ -262,17 +264,13 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Override
     public void fireCreateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new ActionCreatedEvent(this, BaseEntity.getIdOrNull(target),
-                        BaseEntity.getIdOrNull(rollout), BaseEntity.getIdOrNull(rolloutGroup),
-                        EventPublisherHolder.getInstance().getApplicationId()));
+                .publishEvent(new ActionCreatedEvent(this, getIdOrNull(target), getIdOrNull(rollout), getIdOrNull(rolloutGroup)));
     }
 
     @Override
     public void fireUpdateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new ActionUpdatedEvent(this, BaseEntity.getIdOrNull(target),
-                        BaseEntity.getIdOrNull(rollout), BaseEntity.getIdOrNull(rolloutGroup),
-                        EventPublisherHolder.getInstance().getApplicationId()));
+                .publishEvent(new ActionUpdatedEvent(this, getIdOrNull(target), getIdOrNull(rollout), getIdOrNull(rolloutGroup)));
     }
 
     @Override

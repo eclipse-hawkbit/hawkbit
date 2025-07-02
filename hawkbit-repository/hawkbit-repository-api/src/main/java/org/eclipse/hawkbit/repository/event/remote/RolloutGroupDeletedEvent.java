@@ -25,16 +25,7 @@ public class RolloutGroupDeletedEvent extends RemoteIdEvent implements EntityDel
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor for json serialization.
-     *
-     * @param tenant the tenant
-     * @param entityId the entity id
-     * @param entityClass the entity class
-     * @param applicationId the origin application id
-     */
-    public RolloutGroupDeletedEvent(final String tenant, final Long entityId,
-            final Class<? extends TenantAwareBaseEntity> entityClass, final String applicationId) {
-        super(entityId, tenant, entityClass, applicationId);
+    public RolloutGroupDeletedEvent(final String tenant, final Long entityId, final Class<? extends TenantAwareBaseEntity> entityClass) {
+        super(tenant, entityId, entityClass);
     }
 }

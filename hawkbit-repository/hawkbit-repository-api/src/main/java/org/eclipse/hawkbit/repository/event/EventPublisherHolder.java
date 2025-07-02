@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.model.helper;
+package org.eclipse.hawkbit.repository.event;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -55,17 +55,17 @@ public final class EventPublisherHolder {
     }
 
     /**
-     * @return the service origin Id coming either from {@link ServiceMatcher} when available or {@link BusProperties}
-     *         otherwise.
+     * @return the service origin Id coming either from {@link ServiceMatcher} when available or {@link BusProperties} otherwise.
      */
     public String getApplicationId() {
         String id = null;
         if (serviceMatcher != null) {
             id = serviceMatcher.getBusId();
         }
-        if (id == null) {
+        if (id == null && bus != null) {
             id = bus.getId();
         }
-        return id;
+        // due to a bug (?) in Spring Cloud, we cannot pass null for applicationId
+        return id == null ? "" : id;
     }
 }

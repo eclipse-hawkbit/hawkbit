@@ -32,14 +32,13 @@ public class TargetPollEvent extends RemoteTenantAwareEvent {
     private String controllerId;
     private String targetAddress;
 
-    public TargetPollEvent(final String controllerId, final String tenant, final String applicationId) {
-        super(controllerId, tenant, applicationId);
+    public TargetPollEvent(final String controllerId, final String tenant) {
+        super(tenant, controllerId);
         this.controllerId = controllerId;
     }
 
-    public TargetPollEvent(final Target target, final String applicationId) {
-        super(target.getControllerId(), target.getTenant(), applicationId);
-        this.controllerId = target.getControllerId();
+    public TargetPollEvent(final Target target) {
+        this(target.getControllerId(), target.getTenant());
         this.targetAddress = target.getAddress().toString();
     }
 }

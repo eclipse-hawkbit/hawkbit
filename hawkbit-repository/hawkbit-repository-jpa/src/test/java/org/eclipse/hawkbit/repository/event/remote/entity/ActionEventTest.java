@@ -45,12 +45,12 @@ class ActionEventTest extends AbstractRemoteEntityEventTest<Action> {
 
     @Override
     protected int getConstructorParamCount() {
-        return 5;
+        return 4;
     }
 
     @Override
     protected Object[] getConstructorParams(final Action baseEntity) {
-        return new Object[] { baseEntity, 1L, 1L, 2L, "Node" };
+        return new Object[] { baseEntity, 1L, 1L, 2L };
     }
 
     @Override

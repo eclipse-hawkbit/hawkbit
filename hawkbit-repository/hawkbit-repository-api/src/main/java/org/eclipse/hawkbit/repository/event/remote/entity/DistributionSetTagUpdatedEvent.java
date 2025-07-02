@@ -24,13 +24,7 @@ public class DistributionSetTagUpdatedEvent extends RemoteEntityEvent<Distributi
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor.
-     *
-     * @param tag tag the tag which is updated
-     * @param applicationId the applicationID
-     */
-    public DistributionSetTagUpdatedEvent(final DistributionSetTag tag, final String applicationId) {
-        super(tag, applicationId);
+    public DistributionSetTagUpdatedEvent(final DistributionSetTag distributionSetTag) {
+        super(distributionSetTag);
     }
 }

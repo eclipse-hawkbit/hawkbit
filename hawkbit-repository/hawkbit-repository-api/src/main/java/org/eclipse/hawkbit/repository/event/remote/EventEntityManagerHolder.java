@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.event.remote;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * A singleton bean which holds the event entity manager to have autowiring in the events.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
 @SuppressWarnings("java:S6548") // java:S6548 - singleton holder ensures static access to spring resources in some places
 public final class EventEntityManagerHolder {
 
@@ -34,12 +36,5 @@ public final class EventEntityManagerHolder {
     @Autowired // spring setter injection
     public void setEventEntityManager(final EventEntityManager eventEntityManager) {
         this.eventEntityManager = eventEntityManager;
-    }
-
-    /**
-     * @return the eventEntityManager
-     */
-    public EventEntityManager getEventEntityManager() {
-        return eventEntityManager;
     }
 }

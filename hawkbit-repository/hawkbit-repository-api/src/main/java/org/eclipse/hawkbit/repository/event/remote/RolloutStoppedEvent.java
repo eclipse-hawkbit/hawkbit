@@ -34,18 +34,8 @@ public class RolloutStoppedEvent extends RemoteTenantAwareEvent {
     private Collection<Long> rolloutGroupIds;
     private long rolloutId;
 
-    /**
-     * Constructor for json serialization.
-     *
-     * @param tenant the tenant
-     * @param applicationId the entity id
-     * @param rolloutId the entity class (and source)
-     * @param rolloutGroupIds the rollouts group ids
-     */
-    public RolloutStoppedEvent(
-            final String tenant, final String applicationId, final long rolloutId,
-            final Collection<Long> rolloutGroupIds) {
-        super(rolloutId, tenant, applicationId);
+    public RolloutStoppedEvent(final String tenant, final long rolloutId, final Collection<Long> rolloutGroupIds) {
+        super(tenant, rolloutId);
         this.rolloutId = rolloutId;
         this.rolloutGroupIds = rolloutGroupIds;
     }

@@ -44,6 +44,7 @@ import org.eclipse.hawkbit.repository.builder.GenericRolloutUpdate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
@@ -77,7 +78,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -120,7 +120,6 @@ public class JpaRolloutManagement implements RolloutManagement {
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final QuotaManagement quotaManagement;
     private final AfterTransactionCommitExecutor afterCommit;
-    private final EventPublisherHolder eventPublisherHolder;
     private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final SystemSecurityContext systemSecurityContext;
     private final ContextAware contextAware;
@@ -139,7 +138,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             final DistributionSetManagement distributionSetManagement,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final QuotaManagement quotaManagement,
-            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final Database database,
             final RepositoryProperties repositoryProperties) {
@@ -154,7 +153,6 @@ public class JpaRolloutManagement implements RolloutManagement {
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.quotaManagement = quotaManagement;
         this.afterCommit = afterCommit;
-        this.eventPublisherHolder = eventPublisherHolder;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.systemSecurityContext = systemSecurityContext;
         this.contextAware = contextAware;
@@ -167,8 +165,8 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     public void publishRolloutGroupCreatedEventAfterCommit(final RolloutGroup group, final Rollout rollout) {
-        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
-                new RolloutGroupCreatedEvent(group, rollout.getId(), eventPublisherHolder.getApplicationId())));
+        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new RolloutGroupCreatedEvent(group, rollout.getId())));
     }
 
     @Override

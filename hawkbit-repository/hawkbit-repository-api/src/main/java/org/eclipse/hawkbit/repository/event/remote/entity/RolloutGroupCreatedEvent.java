@@ -25,14 +25,7 @@ public class RolloutGroupCreatedEvent extends AbstractRolloutGroupEvent implemen
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor
-     *
-     * @param rolloutGroup the updated rolloutGroup
-     * @param rolloutId of the related rollout
-     * @param applicationId the origin application id
-     */
-    public RolloutGroupCreatedEvent(final RolloutGroup rolloutGroup, final Long rolloutId, final String applicationId) {
-        super(rolloutGroup, rolloutId, applicationId);
+    public RolloutGroupCreatedEvent(final RolloutGroup rolloutGroup, final Long rolloutId) {
+        super(rolloutGroup, rolloutId);
     }
 }

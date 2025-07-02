@@ -58,6 +58,7 @@ import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
@@ -98,7 +99,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
@@ -144,7 +144,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private final EntityFactory entityFactory;
     private final EntityManager entityManager;
     private final AfterTransactionCommitExecutor afterCommit;
-    private final EventPublisherHolder eventPublisherHolder;
     private final SystemSecurityContext systemSecurityContext;
     private final TenantAware tenantAware;
 
@@ -158,7 +157,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             final DistributionSetManagement distributionSetManagement,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final PlatformTransactionManager txManager, final EntityFactory entityFactory, final EntityManager entityManager,
-            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final AfterTransactionCommitExecutor afterCommit,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
             final ScheduledExecutorService executorService) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
@@ -175,7 +174,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         this.entityFactory = entityFactory;
         this.entityManager = entityManager;
         this.afterCommit = afterCommit;
-        this.eventPublisherHolder = eventPublisherHolder;
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;
 
@@ -678,8 +676,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
         final Target result = targetRepository.save(jpaTarget);
 
-        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
-                .publishEvent(new TargetPollEvent(result, eventPublisherHolder.getApplicationId())));
+        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetPollEvent(result)));
 
         return result;
     }
@@ -728,8 +725,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
         pollChunks.forEach(chunk -> {
             setLastTargetQuery(tenant, System.currentTimeMillis(), chunk);
-            chunk.forEach(controllerId -> afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
-                    .publishEvent(new TargetPollEvent(controllerId, tenant, eventPublisherHolder.getApplicationId()))));
+            chunk.forEach(controllerId -> afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
+                    .publishEvent(new TargetPollEvent(controllerId, tenant))));
         });
 
         return null;
@@ -788,8 +785,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
             }
             toUpdate.setLastTargetQuery(System.currentTimeMillis());
-            afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
-                    .publishEvent(new TargetPollEvent(toUpdate, eventPublisherHolder.getApplicationId())));
+            afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetPollEvent(toUpdate)));
             return targetRepository.save(toUpdate);
         }
         return toUpdate;
@@ -835,10 +831,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private void requestControllerAttributes(final JpaTarget target) {
         target.setRequestControllerAttributes(true);
 
-        eventPublisherHolder.getEventPublisher()
+        EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new TargetAttributesRequestedEvent(tenantAware.getCurrentTenant(), target.getId(),
-                        target.getControllerId(), target.getAddress() != null ? target.getAddress().toString() : null,
-                        JpaTarget.class, eventPublisherHolder.getApplicationId()));
+                        JpaTarget.class, target.getControllerId(), target.getAddress() != null ? target.getAddress().toString() : null
+                ));
     }
 
     private void handleErrorOnAction(final JpaAction mergedAction, final JpaTarget mergedTarget) {
@@ -937,8 +933,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     private void cancelAssignDistributionSetEvent(final Action action) {
-        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
-                .publishEvent(new CancelTargetAssignmentEvent(action, eventPublisherHolder.getApplicationId())));
+        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new CancelTargetAssignmentEvent(action)));
     }
 
     /**
