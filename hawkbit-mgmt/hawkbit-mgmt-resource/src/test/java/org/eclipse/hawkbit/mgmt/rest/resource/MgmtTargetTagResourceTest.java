@@ -50,7 +50,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 /**
  * Spring MVC Tests against the MgmtTargetTagResource.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Management API<br/>
  * Story: Target Tag Resource
  */

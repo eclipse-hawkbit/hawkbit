@@ -32,7 +32,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 
 /**
  * Spring MVC Tests against the MgmtTenantManagementResource.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Management API<br/>
  * Story: Tenant Management Resource
  */

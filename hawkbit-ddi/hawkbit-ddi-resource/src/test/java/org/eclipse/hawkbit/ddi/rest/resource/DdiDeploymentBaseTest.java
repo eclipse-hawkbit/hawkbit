@@ -67,7 +67,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 /**
  * Test deployment base from the controller.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Direct Device Integration API<br/>
  * Story: Deployment Action Resource
  */

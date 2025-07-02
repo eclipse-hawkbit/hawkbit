@@ -35,7 +35,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 /**
  * Test class testing the functionality of triggering a deployment of
  * {@link DistributionSet}s to {@link Target}s with AutoConfirmation active.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Confirmation Management
  */

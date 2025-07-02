@@ -56,7 +56,7 @@ import org.springframework.data.domain.Slice;
 
 /**
  * Test class for {@link TargetFilterQueryManagement}.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Target Filter Query Management
  */

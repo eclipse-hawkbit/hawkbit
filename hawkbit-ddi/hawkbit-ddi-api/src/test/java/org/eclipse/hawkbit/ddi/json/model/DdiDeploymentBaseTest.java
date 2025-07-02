@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test serializability of DDI api model 'DdiDeploymentBase'
-  * <p/>
+ * <p/>
  * Feature: Unit Tests - Direct Device Integration API<br/>
  * Story: Serializability of DDI api Models
  */

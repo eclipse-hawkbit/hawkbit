@@ -59,7 +59,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 /**
  * Test confirmation base from the controller.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Direct Device Integration API<br/>
  * Story: Confirmation Action Resource
  */

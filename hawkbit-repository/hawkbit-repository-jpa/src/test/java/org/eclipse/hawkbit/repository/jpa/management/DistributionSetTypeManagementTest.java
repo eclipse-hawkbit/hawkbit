@@ -44,7 +44,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * {@link DistributionSetManagement} tests.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: DistributionSet Management
  */

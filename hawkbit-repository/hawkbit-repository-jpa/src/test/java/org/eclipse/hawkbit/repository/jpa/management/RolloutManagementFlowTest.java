@@ -32,7 +32,7 @@ import org.springframework.test.context.TestPropertySource;
 
 /**
  * Junit tests for RolloutManagement.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Rollout Management (Flow)
  */

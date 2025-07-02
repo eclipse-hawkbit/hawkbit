@@ -43,7 +43,7 @@ import org.springframework.test.context.TestPropertySource;
 /**
  * Test class testing the invalidation of a {@link DistributionSet} while the
  * handle rollouts is ongoing.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Concurrent Distribution Set invalidation
  */
@@ -67,12 +67,14 @@ class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTe
             return 0;
         }, tenant)).start();
 
-        // wait until at least one RolloutGroup is created, as this means that
-        // the thread has started and has acquired the lock
-        Awaitility.await().atMost(Duration.ofSeconds(5))
+        // wait until at least one RolloutGroup is created, as this means that the thread has started and has acquired the lock
+        Awaitility.await()
                 .pollInterval(Duration.ofMillis(100))
-                .until(() -> tenantAware.runAsTenant(tenant, () -> systemSecurityContext
-                        .runAsSystem(() -> rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getSize() > 0)));
+                .atMost(Duration.ofSeconds(5))
+                .until(() -> tenantAware.runAsTenant(
+                        tenant,
+                        () -> systemSecurityContext.runAsSystem(
+                                () -> rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getSize() > 0)));
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
                 Collections.singletonList(distributionSet.getId()), CancelationType.SOFT, true);

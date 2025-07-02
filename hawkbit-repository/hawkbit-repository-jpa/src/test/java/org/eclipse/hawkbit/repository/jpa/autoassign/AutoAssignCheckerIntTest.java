@@ -45,7 +45,7 @@ import org.springframework.data.domain.Slice;
 
 /**
  * Test class for {@link AutoAssignChecker}.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Auto assign checker
  */

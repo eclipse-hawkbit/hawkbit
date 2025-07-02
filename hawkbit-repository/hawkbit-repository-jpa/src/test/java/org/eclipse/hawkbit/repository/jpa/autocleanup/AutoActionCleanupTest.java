@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Test class for {@link AutoActionCleanup}.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Action cleanup handler
  */

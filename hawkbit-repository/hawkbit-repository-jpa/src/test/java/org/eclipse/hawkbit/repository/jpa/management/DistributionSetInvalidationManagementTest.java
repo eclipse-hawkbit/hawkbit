@@ -38,7 +38,7 @@ import org.springframework.data.repository.query.Param;
 /**
  * Test class testing the functionality of invalidating a
  * {@link DistributionSet}
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Distribution set invalidation management
  */

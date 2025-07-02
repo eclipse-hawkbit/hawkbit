@@ -30,7 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,14 +39,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import jakarta.validation.ConstraintViolationException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
-import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionConfirmationRequestBodyPut;
@@ -102,7 +99,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 /**
  * Spring MVC Tests against the MgmtTargetResource.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Management API<br/>
  * Story: Target Resource
  */
@@ -2971,9 +2968,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                     .getAssignedEntity().stream().map(Action::getTarget).toList();
             // 2nd update
             // sleep 10ms to ensure that we can sort by reportedAt
-            Awaitility.await().atMost(Duration.ofMillis(100)).atLeast(5, TimeUnit.MILLISECONDS)
-                    .pollInterval(10, TimeUnit.MILLISECONDS)
-                    .until(() -> updatedTargets.stream().allMatch(t -> t.getLastModifiedAt() > 0L));
+            await().until(() -> updatedTargets.stream().allMatch(t -> t.getLastModifiedAt() > 0L));
             assignDistributionSet(two, updatedTargets);
         } else {
             final List<Target> updatedTargets = assignDistributionSetWithMaintenanceWindow(one.getId(),
@@ -2981,9 +2976,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                     .map(Action::getTarget).toList();
             // 2nd update
             // sleep 10ms to ensure that we can sort by reportedAt
-            Awaitility.await().atMost(Duration.ofMillis(100)).atLeast(5, TimeUnit.MILLISECONDS)
-                    .pollInterval(10, TimeUnit.MILLISECONDS)
-                    .until(() -> updatedTargets.stream().allMatch(t -> t.getLastModifiedAt() > 0L));
+            await().until(() -> updatedTargets.stream().allMatch(t -> t.getLastModifiedAt() > 0L));
             assignDistributionSetWithMaintenanceWindow(two.getId(), updatedTargets.get(0).getControllerId(), schedule,
                     duration, timezone);
         }

@@ -40,8 +40,6 @@ import org.springframework.test.context.ContextConfiguration;
 @SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTest {
 
-    private static final Duration TIMEOUT = Duration.ofSeconds(5);
-
     @Autowired
     private ConnectionFactory connectionFactory;
     @Autowired
@@ -60,8 +58,11 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
         return dmfClient;
     }
 
-    protected ConditionFactory createConditionFactory() {
-        return Awaitility.await().atMost(TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+    private static final Duration AT_LEAST = Duration.ofMillis(Integer.getInteger("hawkbit.it.amqp.await.atLeastMs", 100));
+    private static final Duration POLL_INTERVAL = Duration.ofMillis(Integer.getInteger("hawkbit.it.amqp.await.pollIntervalMs", 200));
+    private static final Duration TIMEOUT = Duration.ofMillis(Integer.getInteger("hawkbit.it.amqp.await.timeoutMs", 5000));
+    protected ConditionFactory await() {
+        return Awaitility.await().atLeast(AT_LEAST).pollInterval(POLL_INTERVAL).atMost(TIMEOUT);
     }
 
     protected Message createMessage(final Object payload, final MessageProperties messageProperties) {

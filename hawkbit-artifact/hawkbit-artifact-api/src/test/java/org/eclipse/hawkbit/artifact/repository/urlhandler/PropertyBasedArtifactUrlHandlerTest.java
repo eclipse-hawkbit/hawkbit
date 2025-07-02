@@ -24,7 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Tests for creating urls to download artifacts.
-  * <p/>
+ * <p/>
  * Feature: Unit Tests - Artifact URL Handler<br/>
  * Story: Test to generate the artifact download URL
  */

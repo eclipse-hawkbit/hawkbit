@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Test class to verify that no {@link ArtifactEncryptionService} required beans
  * are loaded and therefore the encryption support is not given.
-  * <p/>
+ * <p/>
  * Feature: Unit Tests - Repository<br/>
  * Story: Artifact Encryption Service
  */

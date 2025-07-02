@@ -93,7 +93,7 @@ import org.springframework.data.domain.Sort.Direction;
 
 /**
  * Test class testing the functionality of triggering a deployment of {@link DistributionSet}s to {@link Target}s.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Deployment Management
  */

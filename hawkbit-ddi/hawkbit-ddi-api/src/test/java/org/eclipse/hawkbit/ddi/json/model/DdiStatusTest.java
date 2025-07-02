@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Test serializability of DDI api model 'DdiStatus'
-  * <p/>
+ * <p/>
  * Feature: Unit Tests - Direct Device Integration API<br/>
  * Story: Serializability of DDI api Models
  */

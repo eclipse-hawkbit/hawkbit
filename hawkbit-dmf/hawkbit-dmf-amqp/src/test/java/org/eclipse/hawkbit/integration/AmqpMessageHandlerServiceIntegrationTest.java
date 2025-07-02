@@ -1229,26 +1229,22 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     }
 
     private void assertAction(final Long actionId, final int messages, final Status... expectedActionStates) {
-        createConditionFactory().await().untilAsserted(() -> {
+        await().untilAsserted(() -> {
             try {
                 SecurityContextSwitch.runAsPrivileged(() -> {
-                    final List<ActionStatus> actionStatusList = deploymentManagement
-                            .findActionStatusByAction(actionId, PAGE).getContent();
+                    final List<ActionStatus> actionStatusList = deploymentManagement.findActionStatusByAction(actionId, PAGE).getContent();
 
                     // Check correlation ID
                     final List<String> messagesFromServer = actionStatusList.stream()
                             .flatMap(actionStatus -> deploymentManagement
                                     .findMessagesByActionStatusId(actionStatus.getId(), PAGE).getContent().stream())
                             .filter(Objects::nonNull)
-                            .filter(message -> message
-                                    .startsWith(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message"))
+                            .filter(message -> message.startsWith(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message"))
                             .toList();
 
-                    assertThat(messagesFromServer).hasSize(messages)
-                            .allMatch(message -> message.endsWith(CORRELATION_ID));
+                    assertThat(messagesFromServer).hasSize(messages).allMatch(message -> message.endsWith(CORRELATION_ID));
 
-                    final List<Status> status = actionStatusList.stream().map(ActionStatus::getStatus)
-                            .toList();
+                    final List<Status> status = actionStatusList.stream().map(ActionStatus::getStatus).toList();
                     assertThat(status).containsOnly(expectedActionStates);
 
                     return null;
@@ -1267,7 +1263,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
     private void assertActionStatusList(final Long actionId, final int statusListCount,
             final Status... expectedActionStates) {
-        createConditionFactory().await().untilAsserted(() -> {
+        await().untilAsserted(() -> {
             try {
                 SecurityContextSwitch.runAsPrivileged(() -> {
                     final List<ActionStatus> actionStatusList = deploymentManagement
@@ -1302,8 +1298,8 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
     private void verifyNumberOfDeadLetterMessages(final int numberOfInvocations) {
         assertEmptyReceiverQueueCount();
-        createConditionFactory().untilAsserted(() -> Mockito
-                .verify(getDeadletterListener(), Mockito.times(numberOfInvocations)).handleMessage(Mockito.any()));
+        await().untilAsserted(
+                () -> Mockito.verify(getDeadletterListener(), Mockito.times(numberOfInvocations)).handleMessage(Mockito.any()));
         Mockito.reset(getDeadletterListener());
     }
 }

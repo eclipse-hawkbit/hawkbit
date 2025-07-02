@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test the entity listener interceptor.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Entity Listener Interceptor
  */

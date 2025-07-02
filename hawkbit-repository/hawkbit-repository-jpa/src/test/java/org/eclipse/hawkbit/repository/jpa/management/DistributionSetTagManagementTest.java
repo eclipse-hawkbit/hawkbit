@@ -41,7 +41,7 @@ import org.springframework.data.domain.Pageable;
 
 /**
  * {@link DistributionSetTagManagement} tests.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: DistributionSet Tag Management
  */

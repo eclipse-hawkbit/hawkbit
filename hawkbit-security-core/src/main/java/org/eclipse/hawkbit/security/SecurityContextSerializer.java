@@ -30,7 +30,7 @@ public interface SecurityContextSerializer {
     SecurityContextSerializer NOP = new Nop();
     /**
      * Serializer the uses Java serialization of {@link java.io.Serializable} objects.
-     * <p/>
+    * <p/>
      * Note that serialized via java serialization context might become unreadable if incompatible
      * changes are made to the object classes.
      */
