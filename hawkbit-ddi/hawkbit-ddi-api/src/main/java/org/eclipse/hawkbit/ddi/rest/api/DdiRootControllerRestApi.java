@@ -197,7 +197,7 @@ public interface DdiRootControllerRestApi {
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}" +
-            DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX, produces = MediaType.TEXT_PLAIN_VALUE)
+            DdiRestConstants.ARTIFACT_MD5_DOWNLOAD_SUFFIX, produces = MediaType.TEXT_PLAIN_VALUE)
     ResponseEntity<Void> downloadArtifactMd5(
             @PathVariable("tenant") String tenant,
             @PathVariable("controllerId") String controllerId,
