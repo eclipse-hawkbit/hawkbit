@@ -72,9 +72,6 @@ import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.util.IpUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.bus.BusProperties;
-import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpHeaders;
@@ -89,7 +86,7 @@ import org.springframework.web.context.WebApplicationContext;
  * The {@link DdiRootController} of the hawkBit server DDI API that is queried by the hawkBit
  * controller in order to pull {@link Action}s that have to be fulfilled and report status updates concerning
  * the {@link Action} processing.
- *
+ * <p/>
  * Transactional (read-write) as all queries at least update the last poll time.
  */
 @Slf4j
@@ -99,10 +96,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     private static final String GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET = "given action ({}) is not assigned to given target ({}).";
     private static final String FALLBACK_REMARK = "Initiated using the Device Direct Integration API without providing a remark.";
-    /**
-     * File suffix for MDH hash download (see Linux md5sum).
-     */
-    private static final String ARTIFACT_MD5_DWNL_SUFFIX = ".MD5SUM";
 
     private final ControllerManagement controllerManagement;
     private final ConfirmationManagement confirmationManagement;
@@ -110,18 +103,16 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private final ArtifactUrlHandler artifactUrlHandler;
     private final SystemManagement systemManagement;
     private final ApplicationEventPublisher eventPublisher;
-    private final BusProperties bus;
     private final HawkbitSecurityProperties securityProperties;
     private final TenantAware tenantAware;
     private final EntityFactory entityFactory;
-    private ServiceMatcher serviceMatcher;
 
     @SuppressWarnings("java:S107")
     public DdiRootController(
             final ControllerManagement controllerManagement, final ConfirmationManagement confirmationManagement,
             final ArtifactManagement artifactManagement, final ArtifactUrlHandler artifactUrlHandler,
             final SystemManagement systemManagement,
-            final ApplicationEventPublisher eventPublisher, final BusProperties bus,
+            final ApplicationEventPublisher eventPublisher,
             final HawkbitSecurityProperties securityProperties, final TenantAware tenantAware, final EntityFactory entityFactory) {
         this.controllerManagement = controllerManagement;
         this.confirmationManagement = confirmationManagement;
@@ -129,15 +120,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
         this.artifactUrlHandler = artifactUrlHandler;
         this.systemManagement = systemManagement;
         this.eventPublisher = eventPublisher;
-        this.bus = bus;
         this.securityProperties = securityProperties;
         this.tenantAware = tenantAware;
         this.entityFactory = entityFactory;
-    }
-
-    @Autowired(required = false)
-    public void setServiceMatcher(final ServiceMatcher serviceMatcher) {
-        this.serviceMatcher = serviceMatcher;
     }
 
     @Override
@@ -609,7 +594,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final byte[] content = (md5Hash + "  " + filename).getBytes(StandardCharsets.US_ASCII);
         response.setContentType("text/plain");
         response.setContentLength(content.length);
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + filename + ARTIFACT_MD5_DWNL_SUFFIX);
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + filename + DdiRestConstants.ARTIFACT_MD5_DOWNLOAD_SUFFIX);
         response.getOutputStream().write(content);
     }
 
@@ -766,10 +751,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     private Optional<DdiActionHistory> generateDdiActionHistory(final Action action, final Integer actionHistoryMessageCount) {
-        final List<String> actionHistoryMsgs = controllerManagement.getActionHistoryMessages(action.getId(),
-                actionHistoryMessageCount == null
-                        ? Integer.parseInt(DdiRestConstants.NO_ACTION_HISTORY)
-                        : actionHistoryMessageCount);
+        final List<String> actionHistoryMsgs = controllerManagement.getActionHistoryMessages(
+                action.getId(),
+                actionHistoryMessageCount == null ? Integer.parseInt(DdiRestConstants.NO_ACTION_HISTORY) : actionHistoryMessageCount);
         return actionHistoryMsgs.isEmpty()
                 ? Optional.empty()
                 : Optional.of(new DdiActionHistory(action.getStatus().name(), actionHistoryMsgs));

@@ -53,7 +53,7 @@ public final class DdiRestConstants {
     /**
      * File suffix for MDH hash download (see Linux md5sum).
      */
-    public static final String ARTIFACT_MD5_DWNL_SUFFIX = ".MD5SUM";
+    public static final String ARTIFACT_MD5_DOWNLOAD_SUFFIX = ".MD5SUM";
     /**
      * Config data action resources.
      */
