@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Comparator;
@@ -25,9 +26,10 @@ import java.util.NoSuchElementException;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.awaitility.Awaitility;
+import org.awaitility.core.ConditionFactory;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.ArtifactStoreException;
-import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -74,7 +76,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -261,6 +262,14 @@ public abstract class AbstractIntegrationTest {
     protected static String getTestTimeZone() {
         final ZonedDateTime currentTime = ZonedDateTime.now();
         return currentTime.getOffset().getId().replace("Z", "+00:00");
+    }
+
+    private static final Duration AT_LEAST = Duration.ofMillis(Integer.getInteger("hawkbit.it.rest.await.atLeastMs", 5));
+    private static final Duration POLL_INTERVAL = Duration.ofMillis(Integer.getInteger("hawkbit.it.rest.await.pollIntervalMs", 10));
+    private static final Duration TIMEOUT = Duration.ofMillis(Integer.getInteger("hawkbit.it.rest.await.timeoutMs", 200));
+    // default wait condition factory
+    protected ConditionFactory await() {
+        return Awaitility.await().atLeast(AT_LEAST).pollInterval(POLL_INTERVAL).atMost(TIMEOUT);
     }
 
     protected static Action getFirstAssignedAction(

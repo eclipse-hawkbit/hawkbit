@@ -43,7 +43,7 @@ import org.springframework.integration.json.JsonPathUtils;
 
 /**
  * Test cancel action from the controller.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Direct Device Integration API<br/>
  * Story: Cancel Action Resource
  */

@@ -34,8 +34,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.awaitility.Awaitility;
+import org.awaitility.core.ConditionFactory;
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtRestModelMapper;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -74,7 +74,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 
 /**
  * Tests for covering the {@link MgmtRolloutResource}.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Management API<br/>
  * Story: Rollout Resource
  */
@@ -95,7 +95,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
      * Handles the GET request of retrieving a single rollout.
      */
     @Test
-     void getRollout() throws Exception {
+    void getRollout() throws Exception {
         enableMultiAssignments();
         approvalStrategy.setApprovalNeeded(true);
         try {
@@ -132,7 +132,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
      * Handles the GET request of retrieving a all targets of a specific deploy group of a rollout.
      */
     @Test
-     void getRolloutDeployGroupTargetsWithParameters() throws Exception {
+    void getRolloutDeployGroupTargetsWithParameters() throws Exception {
         testdataFactory.createTargets(4, "rollout", "description");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
@@ -152,7 +152,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
      * Handles the POST request of approving a rollout.
      */
     @Test
-     void approveRollout() throws Exception {
+    void approveRollout() throws Exception {
         approvalStrategy.setApprovalNeeded(true);
         try {
             testdataFactory.createTargets(4, "rollout", "description");
@@ -190,7 +190,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
      * Check if approvalDecidedBy and approvalRemark are present when rollout is approved
      */
     @Test
-     void validateIfApprovalFieldsArePresentAfterApproval() throws Exception {
+    void validateIfApprovalFieldsArePresentAfterApproval() throws Exception {
         approvalStrategy.setApprovalNeeded(true);
         approvalStrategy.setApproveDecidedBy("testUser");
         final int amountTargets = 2;
@@ -223,7 +223,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
      * Retry rollout test scenario
      */
     @Test
-     void retryRolloutTest() throws Exception {
+    void retryRolloutTest() throws Exception {
 
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final List<Target> successTargets = testdataFactory.createTargets("retryRolloutTargetSuccess-", 6);
@@ -294,7 +294,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
      * Retrying a running rollout should not be allowed.
      */
     @Test
-     void retryNotFinishedRolloutShouldNotBeAllowed() throws Exception {
+    void retryNotFinishedRolloutShouldNotBeAllowed() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         testdataFactory.createTargets("retryRolloutTarget-", 10);
         postRollout("rolloutToBeRetried", 1, dsA.getId(), "id==retryRolloutTarget*", 10, Action.ActionType.FORCED);
@@ -314,7 +314,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
      * Retrying a non-existing rollout should lead to NOT FOUND.
      */
     @Test
-     void retryNonExistingRolloutShouldLeadToNotFound() throws Exception {
+    void retryNonExistingRolloutShouldLeadToNotFound() throws Exception {
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/retry", 6782623))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
@@ -1911,19 +1911,22 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     private void awaitRunningState(final Long rolloutId) {
-        Awaitility.await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofMillis(100)).with()
-                .until(() -> SecurityContextSwitch
-                        .runAsPrivileged(
-                                () -> rolloutManagement.get(rolloutId).orElseThrow(NoSuchElementException::new))
-                        .getStatus().equals(RolloutStatus.RUNNING));
+        awaitRollout().until(() -> SecurityContextSwitch
+                .runAsPrivileged(() -> rolloutManagement.get(rolloutId).orElseThrow(NoSuchElementException::new))
+                .getStatus().equals(RolloutStatus.RUNNING));
     }
 
     private void awaitActionStatus(final Long actionId, final Status status) {
-        Awaitility.await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofMillis(100)).with()
-                .until(() -> SecurityContextSwitch
-                        .runAsPrivileged(
-                                () -> deploymentManagement.findAction(actionId).orElseThrow(NoSuchElementException::new))
-                        .getStatus().equals(status));
+        awaitRollout().until(() -> SecurityContextSwitch
+                .runAsPrivileged(() -> deploymentManagement.findAction(actionId).orElseThrow(NoSuchElementException::new))
+                .getStatus().equals(status));
+    }
+
+    private static final Duration ROLLOUT_AT_LEAST = Duration.ofMillis(Integer.getInteger("hawkbit.it.rest.await.rolloutAtLeastMs", 50));
+    private static final Duration ROLLOUT_POLL_INTERVAL = Duration.ofMillis(Integer.getInteger("hawkbit.it.rest.await.rolloutPollIntervalMs", 100));
+    private static final Duration ROLLOUT_TIMEOUT = Duration.ofMillis(Integer.getInteger("hawkbit.it.rest.await.rolloutTimeoutMs", 60_000));
+    private ConditionFactory awaitRollout() {
+        return Awaitility.await().atLeast(ROLLOUT_AT_LEAST).pollInterval(ROLLOUT_POLL_INTERVAL).atMost(ROLLOUT_TIMEOUT);
     }
 
     private void assertStatusIs(final Rollout rollout, final RolloutStatus expected) {

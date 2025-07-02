@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test the remote entity events.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Entity Id Events
  */

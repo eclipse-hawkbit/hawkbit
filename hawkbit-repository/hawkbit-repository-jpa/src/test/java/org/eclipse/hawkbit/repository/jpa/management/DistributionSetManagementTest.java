@@ -69,7 +69,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * {@link DistributionSetManagement} tests.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: DistributionSet Management
  */

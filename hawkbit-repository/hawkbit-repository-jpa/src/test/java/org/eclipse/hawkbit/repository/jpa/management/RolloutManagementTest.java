@@ -99,7 +99,7 @@ import org.springframework.data.domain.Sort.Direction;
 
 /**
  * Junit tests for RolloutManagement.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Rollout Management
  */
@@ -2497,7 +2497,9 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void awaitRunningState(final Long myRolloutId) {
-        Awaitility.await().atMost(Duration.ofSeconds(10)).pollInterval(Duration.ofMillis(500)).with()
+        Awaitility.await()
+                .pollInterval(Duration.ofMillis(500))
+                .atMost(Duration.ofSeconds(10))
                 .until(() -> SecurityContextSwitch
                         .runAsPrivileged(
                                 () -> rolloutManagement.get(myRolloutId).orElseThrow(NoSuchElementException::new))

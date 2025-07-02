@@ -54,7 +54,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test class for {@link ArtifactManagement}.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Artifact Management
  */

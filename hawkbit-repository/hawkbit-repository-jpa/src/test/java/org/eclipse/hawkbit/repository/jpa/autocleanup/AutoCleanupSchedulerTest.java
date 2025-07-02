@@ -22,7 +22,7 @@ import org.springframework.integration.support.locks.LockRegistry;
 
 /**
  * Test class for {@link AutoCleanupScheduler}.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Auto cleanup scheduler
  */

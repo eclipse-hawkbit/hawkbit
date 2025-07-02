@@ -46,7 +46,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 /**
  * Test for {@link MgmtDistributionSetTypeResource}.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Management API<br/>
  * Story: Distribution Set Type Resource
  */

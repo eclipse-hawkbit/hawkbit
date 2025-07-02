@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test serialization of DDI api model 'DdiActionFeedback'
-  * <p/>
+ * <p/>
  * Feature: Unit Tests - Direct Device Integration API<br/>
  * Story: Serialization of DDI api Models
  */

@@ -48,7 +48,10 @@ class ActionTest extends AbstractJpaIntegrationTest {
         assertThat(timeforcedAction.isForcedOrTimeForced()).isFalse();
 
         // wait until timeforce time is hit
-        Awaitility.await().atMost(Duration.ofSeconds(2)).pollInterval(Duration.ofMillis(100)).until(timeforcedAction::isForcedOrTimeForced);
+        Awaitility.await()
+                .pollInterval(Duration.ofMillis(100))
+                .atMost(Duration.ofSeconds(2))
+                .until(timeforcedAction::isForcedOrTimeForced);
     }
 
     /**

@@ -49,7 +49,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 /**
  * Spring MVC Tests against the MgmtTargetTypeResource.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Management API<br/>
  * Story: Target Type Resource
  */

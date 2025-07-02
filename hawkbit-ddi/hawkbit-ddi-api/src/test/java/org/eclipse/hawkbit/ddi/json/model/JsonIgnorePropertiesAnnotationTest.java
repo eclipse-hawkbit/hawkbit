@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Check DDI api model classes for '@JsonIgnoreProperties' annotation
-  * <p/>
+ * <p/>
  * Feature: Unit Tests - Direct Device Integration API<br/>
  * Story: Serialization of DDI api Models
  */

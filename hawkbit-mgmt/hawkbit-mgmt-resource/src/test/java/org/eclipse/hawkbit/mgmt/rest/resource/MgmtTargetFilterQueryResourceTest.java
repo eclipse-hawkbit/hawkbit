@@ -55,7 +55,7 @@ import org.springframework.web.util.UriUtils;
 
 /**
  * Spring MVC Tests against the MgmtTargetResource.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Management API<br/>
  * Story: Target Filter Query Resource
  */

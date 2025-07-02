@@ -69,7 +69,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 /**
  * Test the root controller resources.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Direct Device Integration API<br/>
  * Story: Root Poll Resource
  */

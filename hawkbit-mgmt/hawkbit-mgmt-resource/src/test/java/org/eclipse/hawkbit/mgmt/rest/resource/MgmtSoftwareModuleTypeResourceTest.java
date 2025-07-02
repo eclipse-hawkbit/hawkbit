@@ -41,7 +41,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 /**
  * Test for {@link MgmtSoftwareModuleTypeResource}.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Management API<br/>
  * Story: Software Module Type Resource
  */

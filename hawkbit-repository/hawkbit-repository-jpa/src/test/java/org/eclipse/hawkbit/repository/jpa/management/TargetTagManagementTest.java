@@ -43,7 +43,7 @@ import org.springframework.data.domain.Pageable;
 
 /**
  * Test class for {@link TargetTagManagement}.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Target Tag Management
  */

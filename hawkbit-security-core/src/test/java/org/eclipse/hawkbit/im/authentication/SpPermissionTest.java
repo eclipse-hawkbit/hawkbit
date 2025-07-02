@@ -20,7 +20,7 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Test {@link SpPermission}.
-  * <p/>
+ * <p/>
  * Feature: Unit Tests - Security<br/>
  * Story: Permission Test
  */

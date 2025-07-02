@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.rest;
 
+import java.time.Duration;
+
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;

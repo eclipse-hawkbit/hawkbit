@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEventTest;
 
 /**
  * Test the remote entity events.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Entity Events
  */

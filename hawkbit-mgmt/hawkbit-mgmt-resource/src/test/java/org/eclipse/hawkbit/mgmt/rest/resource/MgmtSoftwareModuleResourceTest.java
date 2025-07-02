@@ -32,16 +32,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import com.jayway.jsonpath.JsonPath;
 import org.apache.commons.io.IOUtils;
-import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
@@ -83,7 +80,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Tests for {@link MgmtSoftwareModuleResource} {@link RestController}.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Management API<br/>
  * Story: Software Module Resource
  */
@@ -249,10 +246,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .toString();
 
         // ensures that we are not to fast so that last modified is not set correctly
-        Awaitility.await()
-                .atMost(Duration.ofMillis(100))
-                .pollInterval(10L, TimeUnit.MILLISECONDS)
-                .until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
+        await().until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
 
         mvc.perform(put("/rest/v1/softwaremodules/{smId}", sm.getId()).content(body)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -292,10 +286,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final String body = new JSONObject().put("deleted", true).toString();
 
         // ensures that we are not to fast so that last modified is not set correctly
-        Awaitility.await()
-                .atMost(Duration.ofMillis(100))
-                .pollInterval(10L, TimeUnit.MILLISECONDS)
-                .until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
+        await().until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
 
         mvc.perform(put("/rest/v1/softwaremodules/{smId}", sm.getId()).content(body)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -323,10 +314,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 entityFactory.softwareModule().create().type(osType).name("name1").version("version1"));
         assertThat(sm.isLocked()).as("Created software module should not be locked").isFalse();
         // ensures that we are not to fast so that last modified is not set correctly
-        Awaitility.await()
-                .atMost(Duration.ofMillis(100))
-                .pollInterval(10L, TimeUnit.MILLISECONDS)
-                .until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
+        await().until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
 
         // lock
         final String body = new JSONObject().put("locked", true).toString();
@@ -361,10 +349,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .as("Software module is locked")
                 .isTrue();
         // ensures that we are not to fast so that last modified is not set correctly
-        Awaitility.await()
-                .atMost(Duration.ofMillis(100))
-                .pollInterval(10L, TimeUnit.MILLISECONDS)
-                .until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
+        await().until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
 
         // unlock
         final String body = new JSONObject().put("locked", false).toString();

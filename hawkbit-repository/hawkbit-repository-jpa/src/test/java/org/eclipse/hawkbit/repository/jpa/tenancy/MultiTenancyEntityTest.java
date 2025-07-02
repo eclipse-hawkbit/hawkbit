@@ -31,7 +31,7 @@ import org.springframework.data.domain.Slice;
  * Multi-Tenancy tests which testing the CRUD operations of entities that all
  * CRUD-Operations are tenant aware and cannot access or delete entities not
  * belonging to the current tenant.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Multi Tenancy
  */

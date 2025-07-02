@@ -19,14 +19,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -42,7 +39,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 /**
  * Integration test for the {@link MgmtActionRestApi}.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Management API<br/>
  * Story: Action Resource
  */
@@ -65,7 +62,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
      * Handles the GET request of retrieving a specific action.
      */
     @Test
-     void getAction() throws Exception {
+    void getAction() throws Exception {
         getAction(false);
     }
 
@@ -73,7 +70,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
      * Handles the GET request of retrieving a specific action with external reference.
      */
     @Test
-     void getActionExtRef() throws Exception {
+    void getActionExtRef() throws Exception {
         getAction(true);
     }
 
@@ -82,7 +79,6 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
      */
     @Test
     void filterActionsByStatus() throws Exception {
-
         // prepare test
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         assignDistributionSet(dsA, Collections.singletonList(testdataFactory.createTarget("knownTargetId")));
@@ -217,8 +213,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).code(200)
                 .message("Update succeeded").status(Status.FINISHED));
 
-        // verify that one result is returned if the actions are filtered for
-        // status code 200
+        // verify that one result is returned if the actions are filtered for status code 200
         final String rsqlStatusCode = "lastStatusCode==200";
         mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlStatusCode))
                 .andDo(MockMvcResultPrinter.print())
@@ -227,8 +222,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("size", equalTo(1)))
                 .andExpect(jsonPath("content[0].status", equalTo("finished")));
 
-        // verify no result is returned if we filter for a non-existing status
-        // code
+        // verify no result is returned if we filter for a non-existing status code
         final String rsqlWrongStatusCode = "lastStatusCode==999";
         mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlWrongStatusCode))
                 .andDo(MockMvcResultPrinter.print())
@@ -298,8 +292,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
 
         // rollout
         final Target target1 = testdataFactory.createTarget("t1");
-        final Rollout rollout = testdataFactory.createRolloutByVariables("TestRollout", "TestDesc", 1,
-                "name==" + target1.getName(), ds, "50", "5");
+        final Rollout rollout = testdataFactory.createRolloutByVariables(
+                "TestRollout", "TestDesc", 1, "name==" + target1.getName(), ds, "50", "5");
         rolloutManagement.start(rollout.getId());
         rolloutHandler.handleAll();
 
@@ -517,8 +511,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     private static String generateActionLink(final String targetId, final Long actionId) {
-        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetId + "/" +
-                MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId;
+        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING +
+                "/" + targetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId;
     }
 
     private static String generateTargetLink(final String targetId) {
@@ -526,8 +520,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     private static String generateDistributionSetLink(final Action action) {
-        return "http://localhost" + MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/"
-                + action.getDistributionSet().getId();
+        return "http://localhost" + MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + action.getDistributionSet().getId();
     }
 
     private void verifyResultsByTargetPropertyFilter(final Target target, final DistributionSet ds, final String rsqlTargetFilter)
@@ -598,13 +591,12 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet();
         // rollout
         final Target target = testdataFactory.createTarget(knownTargetId);
-        final Rollout rollout = testdataFactory.createRolloutByVariables("TestRollout", "TestDesc", 1,
-                "name==" + target.getName(), ds, "50", "5");
+        final Rollout rollout = testdataFactory.createRolloutByVariables(
+                "TestRollout", "TestDesc", 1, "name==" + target.getName(), ds, "50", "5");
         rolloutManagement.start(rollout.getId());
         rolloutHandler.handleAll();
 
-        final List<Action> actions = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE)
-                .getContent();
+        final List<Action> actions = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent();
         assertThat(actions).hasSize(1);
         final String externalRef = "externalRef#123";
         if (withExternalRef) {
@@ -625,8 +617,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         return generateTargetWithTwoUpdatesWithOneOverrideWithMaintenanceWindow(knownTargetId, null, null, null);
     }
 
-    private List<Action> generateTargetWithTwoUpdatesWithOneOverrideWithMaintenanceWindow(final String knownTargetId,
-            final String schedule, final String duration, final String timezone) {
+    private List<Action> generateTargetWithTwoUpdatesWithOneOverrideWithMaintenanceWindow(
+            final String knownTargetId, final String schedule, final String duration, final String timezone) {
         final Target target = testdataFactory.createTarget(knownTargetId);
 
         final Iterator<DistributionSet> sets = testdataFactory.createDistributionSets(2).iterator();
@@ -639,26 +631,22 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
                     .getAssignedEntity().stream().map(Action::getTarget).toList();
             // 2nd update
             // sleep 10ms to ensure that we can sort by reportedAt
-            Awaitility.await().atMost(Duration.ofMillis(100)).atLeast(5, TimeUnit.MILLISECONDS)
-                    .pollInterval(10, TimeUnit.MILLISECONDS)
-                    .until(() -> updatedTargets.stream().allMatch(t -> t.getLastModifiedAt() > 0L));
+            await().until(() -> updatedTargets.stream().allMatch(t -> t.getLastModifiedAt() > 0L));
             assignDistributionSet(two, updatedTargets);
         } else {
-            final List<Target> updatedTargets = assignDistributionSetWithMaintenanceWindow(one.getId(),
-                    target.getControllerId(), schedule, duration, timezone).getAssignedEntity().stream()
-                    .map(Action::getTarget).toList();
+            final List<Target> updatedTargets =
+                    assignDistributionSetWithMaintenanceWindow(one.getId(), target.getControllerId(), schedule, duration, timezone)
+                            .getAssignedEntity().stream()
+                            .map(Action::getTarget)
+                            .toList();
             // 2nd update
             // sleep 10ms to ensure that we can sort by reportedAt
-            Awaitility.await().atMost(Duration.ofMillis(100)).atLeast(5, TimeUnit.MILLISECONDS)
-                    .pollInterval(10, TimeUnit.MILLISECONDS)
-                    .until(() -> updatedTargets.stream().allMatch(t -> t.getLastModifiedAt() > 0L));
-            assignDistributionSetWithMaintenanceWindow(two.getId(), updatedTargets.get(0).getControllerId(), schedule,
-                    duration, timezone);
+            await().until(() -> updatedTargets.stream().allMatch(t -> t.getLastModifiedAt() > 0L));
+            assignDistributionSetWithMaintenanceWindow(two.getId(), updatedTargets.get(0).getControllerId(), schedule, duration, timezone);
         }
 
         // two updates, one cancellation
-        final List<Action> actions = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE)
-                .getContent();
+        final List<Action> actions = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent();
 
         assertThat(actions).hasSize(2);
         return actions;

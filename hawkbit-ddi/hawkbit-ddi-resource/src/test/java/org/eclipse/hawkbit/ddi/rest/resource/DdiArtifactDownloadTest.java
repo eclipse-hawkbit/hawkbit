@@ -50,7 +50,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 /**
  * Test artifact downloads from the controller.
-  * <p/>
+ * <p/>
  * Feature: Component Tests - Direct Device Integration API<br/>
  * Story: Artifact Download Resource
  */
