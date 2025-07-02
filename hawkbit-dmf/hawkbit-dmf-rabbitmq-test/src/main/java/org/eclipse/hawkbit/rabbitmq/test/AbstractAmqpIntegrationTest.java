@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.rabbitmq.test;
 
 import java.time.Duration;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +60,7 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
     private static final Duration AT_LEAST = Duration.ofMillis(Integer.getInteger("hawkbit.it.amqp.await.atLeastMs", 100));
     private static final Duration POLL_INTERVAL = Duration.ofMillis(Integer.getInteger("hawkbit.it.amqp.await.pollIntervalMs", 200));
     private static final Duration TIMEOUT = Duration.ofMillis(Integer.getInteger("hawkbit.it.amqp.await.timeoutMs", 5000));
+    @Override
     protected ConditionFactory await() {
         return Awaitility.await().atLeast(AT_LEAST).pollInterval(POLL_INTERVAL).atMost(TIMEOUT);
     }
@@ -73,28 +73,12 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
         return getDmfClient().getMessageConverter().toMessage(payload, messageProperties);
     }
 
-    protected int getQueueMessageCount(final String queueName) {
-        final Properties queueProps = rabbitAdmin.getQueueProperties(queueName);
-        if (queueProps != null && queueProps.containsKey(RabbitAdmin.QUEUE_MESSAGE_COUNT)) {
-            return Integer.parseInt(queueProps.get(RabbitAdmin.QUEUE_MESSAGE_COUNT).toString());
-        }
-        final int fallbackCount = 0;
-        log.warn(
-                "Cannot determine the queue message count for queue '{}' (queue properties {}). Returning queue message count {}.",
-                queueName, queueProps, fallbackCount);
-        return fallbackCount;
-    }
-
     protected RabbitAdmin getRabbitAdmin() {
         return rabbitAdmin;
     }
 
     protected String getVirtualHost() {
         return connectionFactory.getVirtualHost();
-    }
-
-    protected int getPort() {
-        return connectionFactory.getPort();
     }
 
     private RabbitTemplate createDmfClient() {
