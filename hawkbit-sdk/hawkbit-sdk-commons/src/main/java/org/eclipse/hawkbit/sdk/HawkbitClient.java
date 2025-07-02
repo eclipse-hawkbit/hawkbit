@@ -58,15 +58,20 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.client5.http.HttpRequestRetryStrategy;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
+import org.apache.hc.client5.http.ssl.TlsSocketStrategy;
 import org.apache.hc.client5.http.ssl.TrustAllStrategy;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
+import org.apache.hc.core5.util.TimeValue;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -93,7 +98,7 @@ public class HawkbitClient {
                                     "Basic " + Base64.getEncoder().encodeToString(
                                             (Objects.requireNonNull(tenant.getUsername(), "User is null!") +
                                                     ":" +
-                                                    Objects.requireNonNull(tenant.getPassword(),"Password is not available!"))
+                                                    Objects.requireNonNull(tenant.getPassword(), "Password is not available!"))
                                             .getBytes(StandardCharsets.ISO_8859_1)))
                     : template -> {
                         if (!ObjectUtils.isEmpty(tenant.getGatewayToken())) {
@@ -108,6 +113,12 @@ public class HawkbitClient {
         log.trace("REST API call failed!", e);
         return e;
     };
+
+    private static final HttpRequestRetryStrategy DEFAULT_HTTP_REQUEST_RETRY_STRATEGY =
+            new DefaultHttpRequestRetryStrategy(
+                    Integer.getInteger("hawkbit.sdk.http.maxRetry", 3),
+                    TimeValue.ofSeconds(Integer.getInteger("hawkbit.sdk.http.defaultRetryIntervalSec", 10)));
+
     private final HawkbitServer hawkBitServer;
 
     private final Encoder encoder;
@@ -117,18 +128,23 @@ public class HawkbitClient {
     private final ErrorDecoder errorDecoder;
     private final BiFunction<Tenant, Controller, RequestInterceptor> requestInterceptorFn;
 
+    private final HttpRequestRetryStrategy httpRequestRetryStrategy;
+
     public HawkbitClient(
             final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract) {
         this(hawkBitServer, encoder, decoder, contract, null, null);
     }
 
-    /**
-     * Customizers gets default ones and could
-     */
     public HawkbitClient(
             final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract,
-            final ErrorDecoder errorDecoder,
-            final BiFunction<Tenant, Controller, RequestInterceptor> requestInterceptorFn) {
+            final ErrorDecoder errorDecoder, final BiFunction<Tenant, Controller, RequestInterceptor> requestInterceptorFn) {
+        this(hawkBitServer, encoder, decoder, contract, errorDecoder, requestInterceptorFn, null);
+    }
+
+    public HawkbitClient(
+            final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract,
+            final ErrorDecoder errorDecoder, final BiFunction<Tenant, Controller, RequestInterceptor> requestInterceptorFn,
+            final HttpRequestRetryStrategy httpRequestRetryStrategy) {
         this.hawkBitServer = hawkBitServer;
         this.encoder = encoder;
         this.decoder = decoder;
@@ -136,6 +152,8 @@ public class HawkbitClient {
 
         this.errorDecoder = errorDecoder == null ? DEFAULT_ERROR_DECODER : errorDecoder;
         this.requestInterceptorFn = requestInterceptorFn == null ? DEFAULT_REQUEST_INTERCEPTOR_FN : requestInterceptorFn;
+
+        this.httpRequestRetryStrategy = httpRequestRetryStrategy == null ? DEFAULT_HTTP_REQUEST_RETRY_STRATEGY : httpRequestRetryStrategy;
     }
 
     public <T> T mgmtService(final Class<T> serviceType, final Tenant tenantProperties) {
@@ -176,9 +194,9 @@ public class HawkbitClient {
 
                 final T result;
                 if (linkType.isAssignableFrom(ClassicHttpResponse.class)) {
-                    result = (T)response;
+                    result = (T) response;
                 } else if (linkType == InputStream.class) {
-                    result = (T)response.getEntity().getContent();
+                    result = (T) response.getEntity().getContent();
                 } else {
                     result = new ObjectMapper().readValue(response.getEntity().getContent(), linkType);
                 }
@@ -294,7 +312,7 @@ public class HawkbitClient {
             throw toFeignException(responseCode, conn, Request.create(
                     Request.HttpMethod.POST, conn.getURL().toString(),
                     conn.getHeaderFields().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
-                    (Request.Body)null, null));
+                    (Request.Body) null, null));
         }
 
         return method.getReturnType() == ResponseEntity.class
@@ -307,7 +325,8 @@ public class HawkbitClient {
                 : deserialize(conn.getInputStream(), method.getReturnType(), objectMapper);
     }
 
-    private static FeignException toFeignException(final int responseCode, final HttpURLConnection conn, final Request request) throws IOException {
+    private static FeignException toFeignException(final int responseCode, final HttpURLConnection conn, final Request request)
+            throws IOException {
         if (responseCode >= 500 && responseCode < 600) {
             // server error
             return switch (responseCode) {
@@ -395,19 +414,23 @@ public class HawkbitClient {
             final HttpClientWrapper httpClientWrapper = HTTP_CLIENTS.get(key);
             HttpClient client = httpClientWrapper == null ? null : httpClientWrapper.get();
             if (client == null) { // create
-                final CloseableHttpClient newClient;
+                final HttpClientBuilder builder = HttpClients.custom().setRetryStrategy(DEFAULT_HTTP_REQUEST_RETRY_STRATEGY);
+
                 if (key.isHttps()) {
-                    // mTLS could be requested
+                    // mTLS could be used / setup
                     try {
-                        newClient = tlsClient(key.getClientCertificate(), key.getServerCertificates());
+                        builder.setConnectionManager(
+                                PoolingHttpClientConnectionManagerBuilder.create()
+                                        .setTlsSocketStrategy(getTlsSocketStragegy(key.getClientCertificate(), key.getServerCertificates()))
+                                        .build());
                     } catch (final RuntimeException e) {
                         throw e;
                     } catch (final Exception e) {
                         throw new IllegalStateException("Failed to create mTLS client", e);
                     }
-                } else {
-                    newClient = HttpClients.createDefault();
                 }
+
+                final CloseableHttpClient newClient = builder.build();
                 HTTP_CLIENTS.put(key, new HttpClientWrapper(key, newClient));
                 return newClient;
             } else {
@@ -415,7 +438,8 @@ public class HawkbitClient {
             }
         }
     }
-    private static CloseableHttpClient tlsClient(final Certificate clientCertificate, final X509Certificate[] serverCertificates)
+
+    private static TlsSocketStrategy getTlsSocketStragegy(final Certificate clientCertificate, final X509Certificate[] serverCertificates)
             throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, KeyManagementException, CertificateException,
             IOException {
         final SSLContextBuilder sslContextBuilder = SSLContextBuilder.create();
@@ -433,13 +457,7 @@ public class HawkbitClient {
             }
             sslContextBuilder.loadTrustMaterial(trustStore, null);
         }
-        return HttpClients
-                .custom()
-                .setConnectionManager(
-                        PoolingHttpClientConnectionManagerBuilder.create()
-                                .setTlsSocketStrategy(new DefaultClientTlsStrategy(sslContextBuilder.build()))
-                                .build())
-                .build();
+        return new DefaultClientTlsStrategy(sslContextBuilder.build());
     }
 
     @AllArgsConstructor
