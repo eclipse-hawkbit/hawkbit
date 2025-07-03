@@ -379,8 +379,8 @@ public class TargetView extends TableView<MgmtTarget, String> {
             lastModifiedAt.setValue(new Date(target.getLastModifiedAt()).toString());
             securityToken.setValue(target.getSecurityToken());
 
-            MgmtPollStatus pollStatus = target.getPollStatus();
-            lastPoll.setValue(new Date(pollStatus.getLastRequestAt()).toString());
+            final MgmtPollStatus pollStatus = target.getPollStatus();
+            lastPoll.setValue(pollStatus == null ? NOT_AVAILABLE_NULL : new Date(pollStatus.getLastRequestAt()).toString());
             final ResponseEntity<MgmtTargetAttributes> response = hawkbitClient.getTargetRestApi().getAttributes(target.getControllerId());
             if (response.getStatusCode().is2xxSuccessful()) {
                 targetAttributes.setValue(Objects.requireNonNullElse(response.getBody(), Collections.emptyMap()).entrySet().stream()

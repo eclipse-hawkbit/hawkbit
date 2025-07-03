@@ -54,4 +54,6 @@ public interface Constants {
     String CANCEL_ESC = "Cancel (Esc)";
 
     String NAME_ASC = "name:asc";
+
+    String NOT_AVAILABLE_NULL = "n/a (null)";
 }
