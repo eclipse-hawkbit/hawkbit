@@ -29,7 +29,7 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-repository-ql</artifactId>
+            <artifactId>hawkbit-repository-jpa-ql</artifactId>
             <version>${project.version}</version>
         </dependency>
 

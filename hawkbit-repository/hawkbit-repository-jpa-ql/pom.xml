@@ -18,7 +18,7 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>hawkbit-repository-ql</artifactId>
+    <artifactId>hawkbit-repository-jpa-ql</artifactId>
     <name>hawkBit :: Query Language</name>
 
     <profiles>
