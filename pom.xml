@@ -67,7 +67,6 @@
         <!-- Misc libraries versions - START -->
         <cron-utils.version>9.2.1</cron-utils.version>
         <jsoup.version>1.21.1</jsoup.version>
-        <javax.el-api.version>3.0.0</javax.el-api.version>
         <rsql-parser.version>2.1.0</rsql-parser.version>
         <commons-io.version>2.19.0</commons-io.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
@@ -232,11 +231,6 @@
                 <groupId>org.jsoup</groupId>
                 <artifactId>jsoup</artifactId>
                 <version>${jsoup.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.el</groupId>
-                <artifactId>javax.el-api</artifactId>
-                <version>${javax.el-api.version}</version>
             </dependency>
 
             <!-- Spring -->

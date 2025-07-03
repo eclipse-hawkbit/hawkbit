@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.eclipse.hawkbit.repository.jpa.ql.Node;
 import org.junit.jupiter.api.Test;
 
 class NodeTest {

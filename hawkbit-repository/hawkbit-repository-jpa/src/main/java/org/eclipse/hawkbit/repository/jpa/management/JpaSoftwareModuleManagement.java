@@ -50,7 +50,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleMetadataRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleTypeRepository;
-import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -261,7 +261,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Override
     public Page<SoftwareModule> findByRsql(final String rsql, final Pageable pageable) {
         return JpaManagementHelper.findAllWithCountBySpec(softwareModuleRepository, List.of(
-                RSQLUtility.buildRsqlSpecification(rsql, SoftwareModuleFields.class, virtualPropertyReplacer,
+                RsqlUtility.buildRsqlSpecification(rsql, SoftwareModuleFields.class, virtualPropertyReplacer,
                         database),
                 SoftwareModuleSpecification.isNotDeleted()), pageable);
     }

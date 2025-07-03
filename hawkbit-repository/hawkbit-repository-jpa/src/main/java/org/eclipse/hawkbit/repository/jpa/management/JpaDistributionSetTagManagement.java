@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
-import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTagSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.TagSpecification;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -155,7 +155,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     @Override
     public Page<DistributionSetTag> findByRsql(final String rsql, final Pageable pageable) {
-        final Specification<JpaDistributionSetTag> spec = RSQLUtility.buildRsqlSpecification(
+        final Specification<JpaDistributionSetTag> spec = RsqlUtility.buildRsqlSpecification(
                 rsql, DistributionSetTagFields.class, virtualPropertyReplacer, database);
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, Collections.singletonList(spec), pageable);
     }

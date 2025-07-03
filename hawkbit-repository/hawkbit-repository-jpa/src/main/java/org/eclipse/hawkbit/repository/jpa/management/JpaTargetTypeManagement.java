@@ -33,7 +33,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
-import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -146,7 +146,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     @Override
     public Page<TargetType> findByRsql(final String rsql, final Pageable pageable) {
         return JpaManagementHelper.findAllWithCountBySpec(targetTypeRepository, List.of(
-                RSQLUtility.buildRsqlSpecification(
+                RsqlUtility.buildRsqlSpecification(
                         rsql, TargetTypeFields.class, virtualPropertyReplacer, database)), pageable
         );
     }

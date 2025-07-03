@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleTypeRepository;
-import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleTypeSpecification;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -144,7 +144,7 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Override
     public Page<SoftwareModuleType> findByRsql(final String rsql, final Pageable pageable) {
         return JpaManagementHelper.findAllWithCountBySpec(softwareModuleTypeRepository, List.of(
-                RSQLUtility.buildRsqlSpecification(rsql, SoftwareModuleTypeFields.class,
+                RsqlUtility.buildRsqlSpecification(rsql, SoftwareModuleTypeFields.class,
                         virtualPropertyReplacer, database),
                 SoftwareModuleTypeSpecification.isNotDeleted()), pageable
         );

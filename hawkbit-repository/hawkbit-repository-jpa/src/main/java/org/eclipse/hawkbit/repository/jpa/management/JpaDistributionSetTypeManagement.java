@@ -39,7 +39,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
-import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTypeSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -198,7 +198,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Override
     public Page<DistributionSetType> findByRsql(final String rsql, final Pageable pageable) {
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetTypeRepository, List.of(
-                RSQLUtility.buildRsqlSpecification(rsql, DistributionSetTypeFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.buildRsqlSpecification(rsql, DistributionSetTypeFields.class, virtualPropertyReplacer, database),
                 DistributionSetTypeSpecification.isNotDeleted()), pageable);
     }
 

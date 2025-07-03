@@ -25,6 +25,7 @@
     <modules>
         <module>hawkbit-repository-api</module>
         <module>hawkbit-repository-core</module>
+        <module>hawkbit-repository-ql</module>
         <module>hawkbit-repository-jpa-api</module>
         <module>hawkbit-repository-jpa-eclipselink</module>
         <module>hawkbit-repository-jpa-hibernate</module>
