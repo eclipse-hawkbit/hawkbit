@@ -62,7 +62,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepositor
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
-import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
@@ -282,7 +282,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public Page<DistributionSet> findByRsql(final String rsql, final Pageable pageable) {
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, List.of(
-                RSQLUtility.buildRsqlSpecification(rsql, DistributionSetFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.buildRsqlSpecification(rsql, DistributionSetFields.class, virtualPropertyReplacer, database),
                 DistributionSetSpecification.isNotDeleted()), pageable);
     }
 
@@ -551,7 +551,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         assertDsTagExists(tagId);
 
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, List.of(
-                RSQLUtility.buildRsqlSpecification(rsql, DistributionSetFields.class, virtualPropertyReplacer,
+                RsqlUtility.buildRsqlSpecification(rsql, DistributionSetFields.class, virtualPropertyReplacer,
                         database),
                 DistributionSetSpecification.hasTag(tagId), DistributionSetSpecification.isNotDeleted()), pageable);
     }

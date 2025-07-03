@@ -40,7 +40,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
-import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -122,7 +122,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
 
         final List<Specification<JpaRolloutGroup>> specList = Arrays.asList(
-                RSQLUtility.buildRsqlSpecification(rsql, RolloutGroupFields.class, virtualPropertyReplacer,
+                RsqlUtility.buildRsqlSpecification(rsql, RolloutGroupFields.class, virtualPropertyReplacer,
                         database),
                 (root, query, cb) -> cb.equal(root.get(JpaRolloutGroup_.rollout).get(AbstractJpaBaseEntity_.id), rolloutId));
 
@@ -189,7 +189,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         throwExceptionIfRolloutGroupDoesNotExist(rolloutGroupId);
 
         final List<Specification<JpaTarget>> specList = Arrays.asList(
-                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                 (root, query, cb) -> {
                     final ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = root.join(JpaTarget_.rolloutTargetGroup);
                     return cb.equal(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup).get(AbstractJpaBaseEntity_.id), rolloutGroupId);

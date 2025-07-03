@@ -43,7 +43,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
-import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
@@ -119,7 +119,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
         create.getQuery().ifPresent(query -> {
             // validate the RSQL query syntax
-            RSQLUtility.validateRsqlFor(query, TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
+            RsqlUtility.validateRsqlFor(query, TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
 
             // enforce the 'max targets per auto assign' quota right here even
             // if the result of the filter query can vary over time
@@ -148,7 +148,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Override
     public boolean verifyTargetFilterQuerySyntax(final String query) {
         try {
-            RSQLUtility.validateRsqlFor(query, TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
+            RsqlUtility.validateRsqlFor(query, TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
             return true;
         } catch (final RSQLParserException | RSQLParameterUnsupportedFieldException e) {
             log.debug("The RSQL query '{}}' is invalid.", query, e);
@@ -195,7 +195,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Override
     public Page<TargetFilterQuery> findByRsql(final String rsqlFilter, final Pageable pageable) {
         final List<Specification<JpaTargetFilterQuery>> specList = !ObjectUtils.isEmpty(rsqlFilter)
-                ? Collections.singletonList(RSQLUtility.buildRsqlSpecification(rsqlFilter,
+                ? Collections.singletonList(RsqlUtility.buildRsqlSpecification(rsqlFilter,
                 TargetFilterQueryFields.class, virtualPropertyReplacer, database))
                 : Collections.emptyList();
 
@@ -227,7 +227,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>(2);
         specList.add(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet));
         if (!ObjectUtils.isEmpty(rsql)) {
-            specList.add(RSQLUtility.buildRsqlSpecification(rsql, TargetFilterQueryFields.class,
+            specList.add(RsqlUtility.buildRsqlSpecification(rsql, TargetFilterQueryFields.class,
                     virtualPropertyReplacer, database));
         }
 

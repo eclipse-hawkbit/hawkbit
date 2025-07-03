@@ -1,0 +1,133 @@
+<!--
+
+    Copyright (c) 2015 Bosch Software Innovations GmbH and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+-->
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.eclipse.hawkbit</groupId>
+        <artifactId>hawkbit-repository</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>hawkbit-repository-ql</artifactId>
+    <name>hawkBit :: Query Language</name>
+
+    <profiles>
+        <profile>
+            <id>eclipselink</id>
+            <activation>
+                <property>
+                    <!-- default, if not set (or not hibernate) - eclipse link -->
+                    <name>jpa.vendor</name>
+                    <value>!hibernate</value>
+                </property>
+            </activation>
+
+            <dependencies>
+                <dependency>
+                    <groupId>org.eclipse.hawkbit</groupId>
+                    <artifactId>hawkbit-repository-jpa-eclipselink</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+
+            <build>
+                <plugins>
+                    <!-- Static weaver for EclipseLink -->
+                    <plugin>
+                        <groupId>com.ethlo.persistence.tools</groupId>
+                        <artifactId>eclipselink-maven-plugin</artifactId>
+                        <version>${eclipselink.maven.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>process-classes</phase>
+                                <goals>
+                                    <goal>weave</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <basePackage>org.eclipse.hawkbit.repository.jpa.model</basePackage>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.eclipse.persistence</groupId>
+                                <artifactId>org.eclipse.persistence.jpa</artifactId>
+                                <version>${eclipselink.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>hibernate</id>
+            <activation>
+                <property>
+                    <name>jpa.vendor</name>
+                    <value>hibernate</value>
+                </property>
+            </activation>
+
+            <dependencies>
+                <dependency>
+                    <groupId>org.eclipse.hawkbit</groupId>
+                    <artifactId>hawkbit-repository-jpa-hibernate</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-repository-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hibernate.orm</groupId>
+                    <artifactId>hibernate-core</artifactId>
+                </exclusion>
+            </exclusions>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>cz.jirutka.rsql</groupId>
+            <artifactId>rsql-parser</artifactId>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-repository-test</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

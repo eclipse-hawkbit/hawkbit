@@ -61,7 +61,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
-import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
@@ -157,13 +157,13 @@ public class JpaTargetManagement implements TargetManagement {
     public long countByRsql(final String rsql) {
         return JpaManagementHelper.countBySpec(
                 targetRepository,
-                List.of(RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database)));
+                List.of(RsqlUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database)));
     }
 
     @Override
     public long countByRsqlAndUpdatable(String rsql) {
         final List<Specification<JpaTarget>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database));
+                RsqlUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database));
         return targetRepository.count(
                 AccessController.Operation.UPDATE,
                 combineWithAnd(specList));
@@ -172,7 +172,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public long countByRsqlAndCompatible(final String rsql, final Long distributionSetIdTypeId) {
         final List<Specification<JpaTarget>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetIdTypeId));
         return JpaManagementHelper.countBySpec(targetRepository, specList);
     }
@@ -180,7 +180,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public long countByRsqlAndCompatibleAndUpdatable(String rsql, Long distributionSetIdTypeId) {
         final List<Specification<JpaTarget>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetIdTypeId));
         return targetRepository.count(AccessController.Operation.UPDATE, combineWithAnd(specList));
     }
@@ -253,7 +253,7 @@ public class JpaTargetManagement implements TargetManagement {
                 .findAllWithoutCount(
                         AccessController.Operation.UPDATE,
                         combineWithAnd(List.of(
-                                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
+                                RsqlUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                                 TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
                                 TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId))),
                         pageable)
@@ -268,7 +268,7 @@ public class JpaTargetManagement implements TargetManagement {
         return targetRepository.count(
                 AccessController.Operation.UPDATE,
                 combineWithAnd(List.of(
-                        RSQLUtility.buildRsqlSpecification(
+                        RsqlUtility.buildRsqlSpecification(
                                 rsql, TargetFields.class, virtualPropertyReplacer, database),
                         TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
                         TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId))));
@@ -280,7 +280,7 @@ public class JpaTargetManagement implements TargetManagement {
         return targetRepository
                 .findAllWithoutCount(AccessController.Operation.UPDATE,
                         combineWithAnd(List.of(
-                                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
+                                RsqlUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                                 TargetSpecifications.isNotInRolloutGroups(groups),
                                 TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()))),
                         pageable)
@@ -292,7 +292,7 @@ public class JpaTargetManagement implements TargetManagement {
             final String rsql, final Collection<Long> groups, final DistributionSetType dsType) {
         return targetRepository.count(AccessController.Operation.UPDATE,
                 combineWithAnd(List.of(
-                        RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
+                        RsqlUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                         TargetSpecifications.isNotInRolloutGroups(groups),
                         TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()))));
     }
@@ -319,7 +319,7 @@ public class JpaTargetManagement implements TargetManagement {
         return targetRepository
                 .findAllWithoutCount(AccessController.Operation.UPDATE,
                         combineWithAnd(List.of(
-                                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
+                                RsqlUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                                 TargetSpecifications.hasNoOverridingActionsAndNotInRollout(rolloutId),
                                 TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetType.getId()))),
                         pageable)
@@ -355,7 +355,7 @@ public class JpaTargetManagement implements TargetManagement {
         final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
 
         final List<Specification<JpaTarget>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.hasAssignedDistributionSet(validDistSet.getId()));
 
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageable);
@@ -395,7 +395,7 @@ public class JpaTargetManagement implements TargetManagement {
         final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
 
         final List<Specification<JpaTarget>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.hasInstalledDistributionSet(validDistSet.getId()));
 
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageable);
@@ -416,7 +416,7 @@ public class JpaTargetManagement implements TargetManagement {
     public Slice<Target> findByRsql(final String rsql, final Pageable pageable) {
         return JpaManagementHelper.findAllWithoutCountBySpec(
                 targetRepository,
-                List.of(RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database)), pageable
+                List.of(RsqlUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database)), pageable
         );
     }
 
@@ -426,7 +426,7 @@ public class JpaTargetManagement implements TargetManagement {
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
         return JpaManagementHelper.findAllWithoutCountBySpec(
-                targetRepository, List.of(RSQLUtility.buildRsqlSpecification(
+                targetRepository, List.of(RsqlUtility.buildRsqlSpecification(
                         targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyReplacer, database)), pageable
         );
     }
@@ -442,7 +442,7 @@ public class JpaTargetManagement implements TargetManagement {
         throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
 
         final List<Specification<JpaTarget>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.hasTag(tagId));
 
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageable);
@@ -611,12 +611,12 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public boolean isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(
             final String controllerId, final long distributionSetId, final String targetFilterQuery) {
-        RSQLUtility.validateRsqlFor(targetFilterQuery, TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
+        RsqlUtility.validateRsqlFor(targetFilterQuery, TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
         final DistributionSet ds = distributionSetManagement.get(distributionSetId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, distributionSetId));
         final Long distSetTypeId = ds.getType().getId();
         final List<Specification<JpaTarget>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
                 TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId),
                 TargetSpecifications.hasControllerId(controllerId));

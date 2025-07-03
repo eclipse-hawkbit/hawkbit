@@ -66,7 +66,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
-import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
@@ -274,7 +274,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         assertTargetReadAllowed(controllerId);
 
         final List<Specification<JpaAction>> specList = Arrays.asList(
-                RSQLUtility.buildRsqlSpecification(rsql, ActionFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.buildRsqlSpecification(rsql, ActionFields.class, virtualPropertyReplacer, database),
                 ActionSpecifications.byTargetControllerId(controllerId));
 
         return JpaManagementHelper.countBySpec(actionRepository, specList);
@@ -288,7 +288,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Override
     public long countActions(final String rsql) {
         final List<Specification<JpaAction>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(rsql, ActionFields.class, virtualPropertyReplacer, database));
+                RsqlUtility.buildRsqlSpecification(rsql, ActionFields.class, virtualPropertyReplacer, database));
         return JpaManagementHelper.countBySpec(actionRepository, specList);
     }
 
@@ -313,7 +313,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Override
     public Slice<Action> findActions(final String rsql, final Pageable pageable) {
         final List<Specification<JpaAction>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(rsql, ActionFields.class, virtualPropertyReplacer, database));
+                RsqlUtility.buildRsqlSpecification(rsql, ActionFields.class, virtualPropertyReplacer, database));
         return JpaManagementHelper.findAllWithoutCountBySpec(actionRepository, specList, pageable);
     }
 
@@ -322,7 +322,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         assertTargetReadAllowed(controllerId);
 
         final List<Specification<JpaAction>> specList = Arrays.asList(
-                RSQLUtility.buildRsqlSpecification(rsql, ActionFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.buildRsqlSpecification(rsql, ActionFields.class, virtualPropertyReplacer, database),
                 ActionSpecifications.byTargetControllerId(controllerId));
 
         return JpaManagementHelper.findAllWithCountBySpec(actionRepository, specList, pageable);
