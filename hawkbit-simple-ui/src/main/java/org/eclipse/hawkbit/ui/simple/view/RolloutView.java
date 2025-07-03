@@ -225,11 +225,9 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
             targetFilter.setValue(rollout.getTargetFilterQuery());
             final MgmtDistributionSet distributionSetMgmt = hawkbitClient.getDistributionSetRestApi()
                     .getDistributionSet(rollout.getDistributionSetId()).getBody();
-            if (distributionSetMgmt == null) { // should not be here
-                distributionSet.setValue("n/a (null)");
-            } else {
-                distributionSet.setValue(distributionSetMgmt.getName() + ":" + distributionSetMgmt.getVersion());
-            }
+            distributionSet.setValue(distributionSetMgmt == null
+                    ? NOT_AVAILABLE_NULL // should not be the case
+                    : distributionSetMgmt.getName() + ":" + distributionSetMgmt.getVersion());
             actonType.setValue(switch (rollout.getType()) {
                 case SOFT -> Constants.SOFT;
                 case FORCED -> Constants.FORCED;
