@@ -90,12 +90,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-repository-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
             <optional>true</optional>
