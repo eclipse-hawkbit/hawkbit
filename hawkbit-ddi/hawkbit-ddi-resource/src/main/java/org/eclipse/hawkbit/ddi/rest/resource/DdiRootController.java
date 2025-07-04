@@ -157,7 +157,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         // activeAction
         return new ResponseEntity<>(DataConversionHelper.fromTarget(target, installedAction, activeAction,
                 activeAction == null
-                        ? controllerManagement.getPollingTime()
+                        ? controllerManagement.getPollingTime(target)
                         : controllerManagement.getPollingTimeForAction(activeAction), tenantAware),
                 HttpStatus.OK);
     }

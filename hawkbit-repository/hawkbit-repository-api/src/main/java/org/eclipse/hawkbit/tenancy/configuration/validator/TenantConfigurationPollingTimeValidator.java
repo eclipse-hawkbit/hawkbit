@@ -9,17 +9,20 @@
  */
 package org.eclipse.hawkbit.tenancy.configuration.validator;
 
+import static org.eclipse.hawkbit.tenancy.configuration.DurationHelper.durationToFormattedString;
+
 import java.time.Duration;
-import java.time.format.DateTimeParseException;
 
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
 import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
+import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
+import org.eclipse.hawkbit.tenancy.configuration.PollingTime.PollingInterval;
 
 /**
- * This class is used to validate, that the property is a String and that it is in the correct duration format.
+ * This class is used to validate, that the property is a String and that it is in the correct polling time format.
  */
-public class TenantConfigurationPollingDurationValidator implements TenantConfigurationValidator {
+public class TenantConfigurationPollingTimeValidator implements TenantConfigurationValidator {
 
     private final Duration minDuration;
     private final Duration maxDuration;
@@ -31,32 +34,32 @@ public class TenantConfigurationPollingDurationValidator implements TenantConfig
      *
      * @param properties property accessor for poll configuration
      */
-    public TenantConfigurationPollingDurationValidator(final ControllerPollProperties properties) {
+    public TenantConfigurationPollingTimeValidator(final ControllerPollProperties properties) {
         minDuration = DurationHelper.formattedStringToDuration(properties.getMinPollingTime());
         maxDuration = DurationHelper.formattedStringToDuration(properties.getMaxPollingTime());
     }
 
-    @Override
     // Exception squid:S1166 - Hide origin exception
     @SuppressWarnings({ "squid:S1166" })
+    @Override
     public void validate(final Object tenantConfigurationObject) {
         TenantConfigurationValidator.super.validate(tenantConfigurationObject);
         final String tenantConfigurationString = (String) tenantConfigurationObject;
 
-        final Duration tenantConfigurationValue;
-        try {
-            tenantConfigurationValue = DurationHelper.formattedStringToDuration(tenantConfigurationString);
-        } catch (final DateTimeParseException ex) {
-            throw new TenantConfigurationValidatorException(
-                    String.format("The given configuration value is expected as a string in the format %s.",
-                            DurationHelper.DURATION_FORMAT));
+        final PollingTime pollingTime = new PollingTime(tenantConfigurationString);
+
+        if (!DurationHelper.durationRangeValidator(minDuration, maxDuration).isWithinRange(pollingTime.getPollingInterval().getInterval())) {
+            throw new TenantConfigurationValidatorException(String.format(
+                    "The given configuration value is not in the allowed range from %s to %s.",
+                    durationToFormattedString(minDuration), durationToFormattedString(maxDuration)));
         }
 
-        if (!DurationHelper.durationRangeValidator(minDuration, maxDuration).isWithinRange(tenantConfigurationValue)) {
-            throw new TenantConfigurationValidatorException(
-                    String.format("The given configuration value is not in the allowed range from %s to %s.",
-                            DurationHelper.durationToFormattedString(minDuration),
-                            DurationHelper.durationToFormattedString(maxDuration)));
+        for (final PollingTime.Override override : pollingTime.getOverrides()) {
+            if (!DurationHelper.durationRangeValidator(minDuration, maxDuration).isWithinRange(override.pollingInterval().getInterval())) {
+                throw new TenantConfigurationValidatorException(String.format(
+                        "An override configuration value is not in the allowed range from %s to %s.",
+                        durationToFormattedString(minDuration), durationToFormattedString(maxDuration)));
+            }
         }
     }
 

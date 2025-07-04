@@ -188,10 +188,11 @@ public interface ControllerManagement {
     /**
      * Returns configured polling interval at which the controller polls hawkBit server.
      *
+     * @param target {@link Target} for which polling time is calculated (it could be overridden for a specific targets).
      * @return current {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    String getPollingTime();
+    String getPollingTime(Target target);
 
     /**
      * Returns the configured minimum polling interval.

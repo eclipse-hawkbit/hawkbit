@@ -79,6 +79,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
+import org.eclipse.hawkbit.repository.jpa.ql.EntityMatcher;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleMetadataRepository;
@@ -101,6 +102,7 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -116,6 +118,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
@@ -373,9 +376,24 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    public String getPollingTime() {
-        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
-                .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
+    public String getPollingTime(final Target target) {
+        return systemSecurityContext.runAsSystem(() -> {
+            final PollingTime pollingTime = new PollingTime(
+                    tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
+            if (!ObjectUtils.isEmpty(pollingTime.getOverrides()) && target instanceof JpaTarget jpaTarget) {
+                for (final PollingTime.Override override : pollingTime.getOverrides()) {
+                    try {
+                        if (EntityMatcher.forRsql(override.qlStr()).match(jpaTarget)) {
+                            return override.pollingInterval().getFormattedIntervalWithDeviation();
+                        }
+                    } catch (final Exception e) {
+                        log.warn("Error while evaluating polling override for target {}: {}", jpaTarget.getId(), e.getMessage());
+                    }
+                }
+            }
+            // returns default - no overrides or not applicable for the target
+            return pollingTime.getPollingInterval().getFormattedIntervalWithDeviation();
+        });
     }
 
     /**
@@ -404,11 +422,11 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Override
     public String getPollingTimeForAction(final Action action) {
         if (!action.hasMaintenanceSchedule() || action.isMaintenanceScheduleLapsed()) {
-            return getPollingTime();
+            return getPollingTime(action.getTarget());
+        } else {
+            return new EventTimer(getPollingTime(action.getTarget()), getMinPollingTime(), ChronoUnit.SECONDS)
+                    .timeToNextEvent(getMaintenanceWindowPollCount(), action.getMaintenanceWindowStartTime().orElse(null));
         }
-
-        return new EventTimer(getPollingTime(), getMinPollingTime(), ChronoUnit.SECONDS)
-                .timeToNextEvent(getMaintenanceWindowPollCount(), action.getMaintenanceWindowStartTime().orElse(null));
     }
 
     @Override

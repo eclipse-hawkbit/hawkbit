@@ -15,27 +15,25 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
 
+import lombok.NoArgsConstructor;
+
 /**
- * This class is a helper for converting a duration into a string and for the
- * other way. The string is in the format expected in configuration and database
- * {@link #DURATION_FORMAT}.
+ * This class is a helper for converting a duration into a string and for the other way. The string is in the format expected in configuration
+ * and database {@link #DURATION_FORMAT}.
  */
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public final class DurationHelper {
 
     /**
      * Format of the String expected in configuration file and in the database.
      */
-    public static final String DURATION_FORMAT = "HH:mm:ss";
-
-    private DurationHelper() {
-        // utility class
-    }
+    private static final String DURATION_FORMAT = "HH:mm:ss";
 
     /**
      * Creates a {@link DurationRangeValidator}.
      *
-     * @param min imum of range.
-     * @param max imum of range.
+     * @param min minimum of range.
+     * @param max maximum of range.
      * @return {@link DurationRangeValidator} range.
      */
     public static DurationRangeValidator durationRangeValidator(final Duration min, final Duration max) {
@@ -46,8 +44,7 @@ public final class DurationHelper {
      * Converts a Duration into a formatted String
      *
      * @param duration duration, which will be converted into a formatted String
-     * @return String in the duration format, specified at
-     *         {@link #DURATION_FORMAT}
+     * @return String in the duration format, specified at {@link #DURATION_FORMAT}
      */
     public static String durationToFormattedString(final Duration duration) {
         if (duration == null) {
@@ -86,8 +83,7 @@ public final class DurationHelper {
     }
 
     /**
-     * Duration validation utility class. Checks if the requested duration is in
-     * the defined min/max range.
+     * Duration validation utility class. Checks if the requested duration is in the defined min/max range.
      */
     public static final class DurationRangeValidator {
 
@@ -109,5 +105,4 @@ public final class DurationHelper {
             return duration.compareTo(min) >= 0 && duration.compareTo(max) <= 0;
         }
     }
-
 }

@@ -139,7 +139,7 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void getPollingTimePermissionsCheck() {
-        assertPermissions(() -> controllerManagement.getPollingTime(), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
+        assertPermissions(() -> controllerManagement.getPollingTime(null), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
 
     /**

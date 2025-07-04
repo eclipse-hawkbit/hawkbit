@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,8 @@ import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
+import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
+import org.eclipse.hawkbit.tenancy.configuration.PollingTime.PollingInterval;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 
 /**
@@ -29,19 +31,26 @@ public final class TimestampCalculator {
 
     /**
      * Calculates the overdue timestamp (<em>overdue_ts</em>) based on the current timestamp and the intervals for polling and poll-overdue:
-     * <p>
+     * <p/>
      * <em>overdue_ts = now_ts - pollingInterval - pollingOverdueInterval</em>;<br>
      * <em>pollingInterval</em> and <em>pollingOverdueInterval</em> are retrieved from tenant-specific system configuration.
+     * <p/>
+     * Note: this method checks against the default polling time interval. I.e. overrides are not considered.
      *
      * @return <em>overdue_ts</em> in milliseconds since Unix epoch as long value
      */
     public static long calculateOverdueTimestamp() {
-        return System.currentTimeMillis() - getDurationForKey(TenantConfigurationKey.POLLING_TIME_INTERVAL).toMillis()
-                - getDurationForKey(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL).toMillis();
+        return calculateOverdueTimestamp(
+                new PollingTime(getRawStringForKey(TenantConfigurationKey.POLLING_TIME_INTERVAL)).getPollingInterval(),
+                DurationHelper.formattedStringToDuration(getRawStringForKey(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL)));
     }
 
-    private static Duration getDurationForKey(final String key) {
-        return DurationHelper.formattedStringToDuration(getRawStringForKey(key));
+    private static long calculateOverdueTimestamp(final PollingInterval pollingInterval, final Duration pollingOverdueTime) {
+        return System.currentTimeMillis()
+                - (pollingInterval.getDeviationPercent() == 0
+                    ? pollingInterval.getInterval().toMillis()
+                    : pollingInterval.getInterval().toMillis() * (100 + pollingInterval.getDeviationPercent()) / 100)
+                - pollingOverdueTime.toMillis();
     }
 
     private static String getRawStringForKey(final String key) {
