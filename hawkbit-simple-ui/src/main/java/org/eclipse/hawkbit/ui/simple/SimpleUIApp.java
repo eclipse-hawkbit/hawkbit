@@ -41,6 +41,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,9 +59,9 @@ public class SimpleUIApp implements AppShellConfigurator {
 
     private static final Function<OAuth2TokenManager, RequestInterceptor> AUTHORIZATION = oAuth2TokenManager -> requestTemplate -> {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (oAuth2TokenManager != null && authentication instanceof OAuth2AuthenticationToken oAuth2AuthenticationToken) {
-            String bearerToken = oAuth2TokenManager.getToken(oAuth2AuthenticationToken);
-            requestTemplate.header("Authorization", "Bearer " + bearerToken);
+        if (authentication.getPrincipal() instanceof OidcUser) {
+            var token = oAuth2TokenManager.getToken((OAuth2AuthenticationToken) authentication);
+            requestTemplate.header("Authorization", "Bearer " + token);
         } else {
             requestTemplate.header(
                     "Authorization", "Basic " + Base64.getEncoder().encodeToString(
@@ -108,16 +109,30 @@ public class SimpleUIApp implements AppShellConfigurator {
     @Bean
     OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(final HawkbitMgmtClient hawkbitClient) {
         final OidcUserService delegate = new OidcUserService();
-        return userRequest -> {
-            OidcUser oidcUser = delegate.loadUser(userRequest);
+        return (userRequest) -> {
+            // fetch the previous oidc user to re-use the same granted authorities and avoid too many requests
+            // when the token refreshes (and potential looping, as the refresh will most certainly go through the oidc user service)
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            OidcUser existingUser = authentication != null && authentication.getPrincipal() instanceof OidcUser existing
+                    ? existing
+                    : null;
 
-            final OAuth2AuthenticationToken tempToken = new OAuth2AuthenticationToken(
-                    oidcUser,
-                    emptyList(),
-                    userRequest.getClientRegistration().getRegistrationId()
-            );
-            final List<SimpleGrantedAuthority> grantedAuthorities =
-                    getGrantedAuthorities(hawkbitClient, tempToken);
+            OidcUser oidcUser = delegate.loadUser(userRequest);
+            final List<SimpleGrantedAuthority> grantedAuthorities = new ArrayList<>();
+            if (existingUser == null) {
+                final OAuth2AuthenticationToken tempToken = new OAuth2AuthenticationToken(
+                        oidcUser,
+                        emptyList(),
+                        userRequest.getClientRegistration().getRegistrationId()
+                );
+                grantedAuthorities.addAll(getGrantedAuthorities(hawkbitClient, tempToken));
+            } else {
+                grantedAuthorities.addAll(existingUser.getAuthorities()
+                        .stream()
+                        .map(authority -> new SimpleGrantedAuthority(authority.getAuthority()))
+                        .toList()
+                );
+            }
             return new DefaultOidcUser(
                     grantedAuthorities,
                     oidcUser.getIdToken(),
