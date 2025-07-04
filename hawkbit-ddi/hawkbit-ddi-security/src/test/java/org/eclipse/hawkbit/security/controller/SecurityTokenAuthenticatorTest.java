@@ -72,7 +72,7 @@ class SecurityTokenAuthenticatorTest {
     void testWithSecToken() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(SECURITY_TOKEN);
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))
+                TenantConfigurationKey.AUTHENTICATION_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))
                 .thenReturn(CONFIG_VALUE_ENABLED);
 
         final Target target = Mockito.mock(Target.class);
@@ -92,7 +92,7 @@ class SecurityTokenAuthenticatorTest {
     void testWithBadSecToken() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(UNKNOWN_TOKEN);
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))
+                TenantConfigurationKey.AUTHENTICATION_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))
                 .thenReturn(CONFIG_VALUE_ENABLED);
 
         assertThat(authenticator.authenticate(securityToken)).isNull();
@@ -113,7 +113,7 @@ class SecurityTokenAuthenticatorTest {
     void testWithSecTokenButDisabled() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(SECURITY_TOKEN);
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))
+                TenantConfigurationKey.AUTHENTICATION_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))
                 .thenReturn(CONFIG_VALUE_DISABLED);
 
         assertThat(authenticator.authenticate(securityToken)).isNull();

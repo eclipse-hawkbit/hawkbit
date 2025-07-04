@@ -161,6 +161,7 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
+import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.beans.BeansException;
@@ -850,16 +851,15 @@ public class RepositoryApplicationConfiguration {
             final DeploymentManagement deploymentManagement, final ConfirmationManagement confirmationManagement,
             final SoftwareModuleRepository softwareModuleRepository, final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
             final DistributionSetManagement distributionSetManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement,
+            final TenantConfigurationManagement tenantConfigurationManagement, final ControllerPollProperties controllerPollProperties,
             final PlatformTransactionManager txManager, final EntityFactory entityFactory, final EntityManager entityManager,
             final AfterTransactionCommitExecutor afterCommit,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
             final ScheduledExecutorService executorService) {
         return new JpaControllerManagement(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties,
                 targetRepository, targetTypeManagement, deploymentManagement, confirmationManagement, softwareModuleRepository,
-                softwareModuleMetadataRepository, distributionSetManagement, tenantConfigurationManagement, txManager,
-                entityFactory, entityManager, afterCommit, systemSecurityContext, tenantAware,
-                executorService);
+                softwareModuleMetadataRepository, distributionSetManagement, tenantConfigurationManagement, controllerPollProperties,
+                txManager,entityFactory, entityManager, afterCommit, systemSecurityContext, tenantAware, executorService);
     }
 
     @Bean

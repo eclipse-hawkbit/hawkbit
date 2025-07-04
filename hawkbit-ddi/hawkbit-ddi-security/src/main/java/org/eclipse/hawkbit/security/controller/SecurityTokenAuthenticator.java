@@ -77,6 +77,6 @@ public class SecurityTokenAuthenticator extends Authenticator.AbstractAuthentica
 
     @Override
     protected String getTenantConfigurationKey() {
-        return TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED;
+        return TenantConfigurationKey.AUTHENTICATION_TARGET_SECURITY_TOKEN_ENABLED;
     }
 }

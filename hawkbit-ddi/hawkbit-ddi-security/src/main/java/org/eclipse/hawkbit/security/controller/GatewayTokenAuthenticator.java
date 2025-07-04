@@ -38,11 +38,11 @@ public class GatewayTokenAuthenticator extends Authenticator.AbstractAuthenticat
         super(tenantConfigurationManagement, tenantAware, systemSecurityContext);
         gatewaySecurityTokenKeyConfigRunner = () -> {
             log.trace("retrieving configuration value for configuration key {}",
-                    TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY);
+                    TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY);
 
             return systemSecurityContext
                     .runAsSystem(() -> tenantConfigurationManagement
-                            .getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class)
+                            .getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, String.class)
                             .getValue());
         };
     }
@@ -78,6 +78,6 @@ public class GatewayTokenAuthenticator extends Authenticator.AbstractAuthenticat
 
     @Override
     protected String getTenantConfigurationKey() {
-        return TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED;
+        return TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED;
     }
 }

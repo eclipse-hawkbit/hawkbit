@@ -69,7 +69,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      void getTenantConfiguration() throws Exception {
         //Test TenantConfiguration property
         mvc.perform(get(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
-                        TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY))
+                        TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
     }
@@ -98,7 +98,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         final String json = mapper.writeValueAsString(bodyPut);
 
         mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
-                        TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY).content(json)
+                        TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY).content(json)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
@@ -282,7 +282,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     @Test
      void deleteTenantConfiguration() throws Exception {
         mvc.perform(delete(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
-                        TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY))
+                        TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
     }
@@ -305,7 +305,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     void getTenantConfigurationReadGWToken() throws Exception {
         SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("tenant_admin", SpPermission.TENANT_CONFIGURATION), () -> {
             tenantConfigurationManagement.addOrUpdateConfiguration(
-                    TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY,
+                    TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY,
                     "123");
             return null;
         });

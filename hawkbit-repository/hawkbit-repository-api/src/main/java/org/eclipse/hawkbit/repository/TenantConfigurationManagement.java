@@ -31,11 +31,10 @@ public interface TenantConfigurationManagement {
      * Adds or updates a specific configuration for a specific tenant.
      *
      * @param configurationKeyName the key of the configuration
-     * @param value the configuration value which will be written into the
-     *         database.
+     * @param value the configuration value which will be written into the database.
      * @return the configuration value which was just written into the database.
-     * @throws TenantConfigurationValidatorException if the {@code propertyType} and the value in general does not
-     *         match the expected type and format defined by the Key
+     * @throws TenantConfigurationValidatorException if the {@code propertyType} and the value in general does not match the expected type and
+     *         format defined by the Key
      * @throws ConversionFailedException if the property cannot be converted to the given
      */
     @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)

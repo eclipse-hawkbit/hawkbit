@@ -411,9 +411,9 @@ class RsqlUtilityTest {
     VirtualPropertyReplacer setupMacroLookup() {
         when(securityContext.runAsSystem(Mockito.any())).thenAnswer(a -> ((Callable<?>) a.getArgument(0)).call());
 
-        when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class))
+        when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_TIME, String.class))
                 .thenReturn(TEST_POLLING_TIME_INTERVAL);
-        when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class))
+        when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME, String.class))
                 .thenReturn(TEST_POLLING_OVERDUE_TIME_INTERVAL);
 
         return macroResolver;
