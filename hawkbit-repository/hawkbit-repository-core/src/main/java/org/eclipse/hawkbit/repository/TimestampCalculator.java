@@ -42,7 +42,7 @@ public final class TimestampCalculator {
     public static long calculateOverdueTimestamp() {
         return calculateOverdueTimestamp(
                 new PollingTime(getRawStringForKey(TenantConfigurationKey.POLLING_TIME)).getPollingInterval(),
-                DurationHelper.formattedStringToDuration(getRawStringForKey(TenantConfigurationKey.POLLING_OVERDUE_TIME)));
+                DurationHelper.fromString(getRawStringForKey(TenantConfigurationKey.POLLING_OVERDUE_TIME)));
     }
 
     private static long calculateOverdueTimestamp(final PollingInterval pollingInterval, final Duration pollingOverdueTime) {

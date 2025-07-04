@@ -9,13 +9,13 @@
  */
 package org.eclipse.hawkbit.tenancy.configuration.validator;
 
-import static org.eclipse.hawkbit.tenancy.configuration.DurationHelper.durationToFormattedString;
-import static org.eclipse.hawkbit.tenancy.configuration.DurationHelper.formattedStringToDuration;
+import static org.eclipse.hawkbit.tenancy.configuration.DurationHelper.fromString;
+
+import java.time.Duration;
 
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
 import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
-import org.eclipse.hawkbit.tenancy.configuration.DurationHelper.DurationRangeValidator;
 import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
 
 /**
@@ -23,7 +23,8 @@ import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
  */
 public class TenantConfigurationPollingTimeValidator implements TenantConfigurationValidator {
 
-    private final DurationRangeValidator rangeValidator;
+    private final Duration minPollingInterval;
+    private final Duration maxPollingInterval;
 
     /**
      * This constructor is called by {@link org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties} using
@@ -33,8 +34,8 @@ public class TenantConfigurationPollingTimeValidator implements TenantConfigurat
      * @param properties property accessor for poll configuration
      */
     public TenantConfigurationPollingTimeValidator(final ControllerPollProperties properties) {
-        rangeValidator = DurationHelper.durationRangeValidator(
-                formattedStringToDuration(properties.getMinPollingTime()), formattedStringToDuration(properties.getMaxPollingTime()));
+        this.minPollingInterval = fromString(properties.getMinPollingTime());
+        this.maxPollingInterval = fromString(properties.getMaxPollingTime());
     }
 
     @Override
@@ -42,25 +43,28 @@ public class TenantConfigurationPollingTimeValidator implements TenantConfigurat
         TenantConfigurationValidator.super.validate(tenantConfigurationObject);
         final String tenantConfigurationString = (String) tenantConfigurationObject;
 
+        // validate parsable
         final PollingTime pollingTime = new PollingTime(tenantConfigurationString);
-
-        if (!rangeValidator.isWithinRange(pollingTime.getPollingInterval().getInterval())) {
-            throw new TenantConfigurationValidatorException(String.format(
-                    "The given poling interval is not in the allowed range from %s to %s.",
-                    durationToFormattedString(rangeValidator.getMin()), durationToFormattedString(rangeValidator.getMax())));
-        }
-
+        // validate polling interval in range
+        validateInRange(pollingTime.getPollingInterval().getInterval());
         for (final PollingTime.Override override : pollingTime.getOverrides()) {
-            if (!rangeValidator.isWithinRange(override.pollingInterval().getInterval())) {
-                throw new TenantConfigurationValidatorException(String.format(
-                        "An override polling interval is not in the allowed range from %s to %s.",
-                        durationToFormattedString(rangeValidator.getMin()), durationToFormattedString(rangeValidator.getMax())));
-            }
+            validateInRange(override.pollingInterval().getInterval());
         }
     }
 
     @Override
     public Class<?> validateToClass() {
         return String.class;
+    }
+
+    private void validateInRange(final Duration pollingInterval) {
+        if (pollingInterval.compareTo(minPollingInterval) < 0) {
+            throw new TenantConfigurationValidatorException(String.format(
+                    "The polling interval is smaller then minimum %s.", DurationHelper.toString(minPollingInterval)));
+        }
+        if (pollingInterval.compareTo(maxPollingInterval) > 0) {
+            throw new TenantConfigurationValidatorException(String.format(
+                    "The polling interval is bigger the  maximum %s.", DurationHelper.toString(maxPollingInterval)));
+        }
     }
 }

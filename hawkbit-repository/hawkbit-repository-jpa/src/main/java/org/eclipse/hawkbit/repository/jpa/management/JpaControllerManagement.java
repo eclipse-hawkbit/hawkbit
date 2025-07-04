@@ -180,10 +180,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         this.controllerPollProperties = controllerPollProperties;
         minPollingTime = controllerPollProperties.getMinPollingTime() == null
                 ? Duration.of(0, ChronoUnit.SECONDS)
-                : DurationHelper.formattedStringToDuration(controllerPollProperties.getMinPollingTime());
+                : DurationHelper.fromString(controllerPollProperties.getMinPollingTime());
         maxPollingTime = controllerPollProperties.getMaxPollingTime() == null
                 ? Duration.of(100, ChronoUnit.YEARS)
-                : DurationHelper.formattedStringToDuration(controllerPollProperties.getMaxPollingTime());
+                : DurationHelper.fromString(controllerPollProperties.getMaxPollingTime());
         this.txManager = txManager;
         this.entityFactory = entityFactory;
         this.entityManager = entityManager;

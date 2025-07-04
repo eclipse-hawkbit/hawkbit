@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.tenancy.configuration.validator;
 
-import static org.eclipse.hawkbit.tenancy.configuration.DurationHelper.formattedStringToDuration;
+import static org.eclipse.hawkbit.tenancy.configuration.DurationHelper.fromString;
 
 import java.time.Duration;
 
@@ -27,7 +27,7 @@ public class TenantConfigurationDurationValidator implements TenantConfiguration
         TenantConfigurationValidator.super.validate(tenantConfigurationObject);
 
         final String tenantConfigurationString = (String) tenantConfigurationObject;
-        final Duration duration = formattedStringToDuration(tenantConfigurationString);
+        final Duration duration = fromString(tenantConfigurationString);
         if (duration.isNegative()) {
             throw new TenantConfigurationValidatorException("The given configuration value is not in the allowed to be negative.");
         }
