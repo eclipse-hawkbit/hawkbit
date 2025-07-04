@@ -58,7 +58,7 @@ public class SecurityHeaderAuthenticator extends Authenticator.AbstractAuthentic
         this.sslIssuerHashBasicHeader = caAuthorityNameHeader;
         sslIssuerNameConfigTenantRunner = () -> systemSecurityContext.runAsSystem(
                 () -> tenantConfigurationManagement.getConfigurationValue(
-                        TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class).getValue());
+                        TenantConfigurationKey.AUTHENTICATION_HEADER_AUTHORITY_NAME, String.class).getValue());
     }
 
     @Override
@@ -95,7 +95,7 @@ public class SecurityHeaderAuthenticator extends Authenticator.AbstractAuthentic
 
     @Override
     protected String getTenantConfigurationKey() {
-        return TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED;
+        return TenantConfigurationKey.AUTHENTICATION_HEADER_ENABLED;
     }
 
     @Override

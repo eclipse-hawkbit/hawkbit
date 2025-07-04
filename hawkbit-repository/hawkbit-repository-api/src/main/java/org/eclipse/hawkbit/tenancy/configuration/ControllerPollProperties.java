@@ -17,7 +17,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Defines global configuration for the controllers/clients on the provisioning targets/devices.
- *
+ * <p/>
  * Note: many of the controller related properties can be overridden on tenant level.
  */
 @Data
@@ -38,7 +38,9 @@ public class ControllerPollProperties implements Serializable {
     private String minPollingTime = "00:00:30";
 
     /**
-     * Controller polling time that can be configured system-wide and by tenant in HH:mm:ss notation.
+     * Controller polling time that can be configured system-wide and by tenant in HH:mm:ss(~\d{1,2}%)? notation, plus
+     * followed (optionally and ordered) by a comma separated @lt;QL filter@gt; -@gt; polling time that overrides the
+     * default polling time for the targets that match the filter.
      */
     private String pollingTime = "00:05:00";
 

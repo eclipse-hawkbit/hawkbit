@@ -32,7 +32,7 @@ class PollingTimeTest {
         final PollingTime pollingTime = new PollingTime("01:00:00~10%");
         final long maxDeviation = (Duration.ofHours(1).toMillis() / 10);
         final long deviation = Duration.ofHours(1).toMillis()
-                - DurationHelper.formattedStringToDuration(pollingTime.getPollingInterval().getFormattedIntervalWithDeviation()).toMillis();
+                - DurationHelper.formattedStringToDuration(pollingTime.getPollingInterval().getFormattedIntervalWithDeviation(null, null)).toMillis();
         assertThat(deviation)
                 .isGreaterThanOrEqualTo(-maxDeviation)
                 .isLessThanOrEqualTo(maxDeviation);

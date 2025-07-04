@@ -189,18 +189,10 @@ public interface ControllerManagement {
      * Returns configured polling interval at which the controller polls hawkBit server.
      *
      * @param target {@link Target} for which polling time is calculated (it could be overridden for a specific targets).
-     * @return current {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
+     * @return current {@link TenantConfigurationKey#POLLING_TIME}.
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     String getPollingTime(Target target);
-
-    /**
-     * Returns the configured minimum polling interval.
-     *
-     * @return current {@link TenantConfigurationKey#MIN_POLLING_TIME_INTERVAL}.
-     */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    String getMinPollingTime();
 
     /**
      * Returns the count to be used for reducing polling interval while calling {@link ControllerManagement#getPollingTimeForAction(Action)}.
@@ -213,11 +205,11 @@ public interface ControllerManagement {
     /**
      * Returns polling time based on the maintenance window for an action. Server will reduce the polling interval as the start time for
      * maintenance window approaches, so that at least these many attempts are made between current polling until start of maintenance window.
-     * Poll time keeps reducing with MinPollingTime as lower limit {@link TenantConfigurationKey#MIN_POLLING_TIME_INTERVAL}. After the start
-     * of maintenance window, it resets to default {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
+     * Poll time keeps reducing with MinPollingTime as lower limit {@link TenantConfigurationKey#MIN_POLLING_TIME}. After the start
+     * of maintenance window, it resets to default {@link TenantConfigurationKey#POLLING_TIME}.
      *
      * @param action {@link Action} for which polling time is calculated based on it having maintenance window or not
-     * @return current {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
+     * @return current {@link TenantConfigurationKey#POLLING_TIME}.
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     String getPollingTimeForAction(Action action);

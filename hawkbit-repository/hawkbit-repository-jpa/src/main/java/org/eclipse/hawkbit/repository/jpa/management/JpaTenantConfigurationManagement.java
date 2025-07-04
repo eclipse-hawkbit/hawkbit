@@ -9,10 +9,10 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.POLLING_TIME_INTERVAL;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.POLLING_TIME;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED;
 
 import java.io.Serializable;
@@ -165,9 +165,9 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     @Override
     public Function<Target, PollStatus> pollStatusResolver() {
         final PollingTime pollingTime = new PollingTime(
-                getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
+                getConfigurationValue(TenantConfigurationKey.POLLING_TIME, String.class).getValue());
         final Duration pollingOverdueTime = DurationHelper.formattedStringToDuration(
-                getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class).getValue());
+                getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME, String.class).getValue());
         return target -> {
             final Long lastTargetQuery = target.getLastTargetQuery();
             if (lastTargetQuery == null) {
@@ -218,7 +218,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     }
 
     private void checkAccess(final String configurationKeyName) {
-        if (AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY.equalsIgnoreCase(configurationKeyName)) {
+        if (AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY.equalsIgnoreCase(configurationKeyName)) {
             final SystemSecurityContext systemSecurityContext = SystemSecurityContextHolder.getInstance().getSystemSecurityContext();
             if (!systemSecurityContext.isCurrentThreadSystemCode() &&
                     !systemSecurityContext.hasPermission(SpPermission.READ_GATEWAY_SEC_TOKEN)) {
@@ -239,7 +239,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
             }
             configurationKey.validate(value, applicationContext);
             // additional validation for specific configuration keys
-            if (POLLING_TIME_INTERVAL.equals(configurationKey.getKeyName())) {
+            if (POLLING_TIME.equals(configurationKey.getKeyName())) {
                 final PollingTime pollingTime = new PollingTime(value.toString());
                 if (!ObjectUtils.isEmpty(pollingTime.getOverrides())) {
                     // validate that the QL strings are valid RSQL queries,

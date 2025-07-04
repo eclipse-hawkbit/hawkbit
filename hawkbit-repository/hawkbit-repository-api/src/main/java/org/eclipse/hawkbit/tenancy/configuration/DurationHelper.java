@@ -16,6 +16,7 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
 
 import lombok.NoArgsConstructor;
+import lombok.Value;
 
 /**
  * This class is a helper for converting a duration into a string and for the other way. The string is in the format expected in configuration
@@ -85,10 +86,11 @@ public final class DurationHelper {
     /**
      * Duration validation utility class. Checks if the requested duration is in the defined min/max range.
      */
-    public static final class DurationRangeValidator {
+    @Value
+    public static class DurationRangeValidator {
 
-        private final Duration min;
-        private final Duration max;
+        Duration min;
+        Duration max;
 
         private DurationRangeValidator(final Duration min, final Duration max) {
             this.min = min;

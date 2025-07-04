@@ -584,8 +584,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
         SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("tenantadmin", TENANT_CONFIGURATION),
                 () -> {
-                    tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL, "00:05:00");
-                    tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MIN_POLLING_TIME_INTERVAL, "00:01:00");
+                    tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME, "00:05:00");
                     return null;
                 });
 
@@ -754,7 +753,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     private void withPollingTime(final String pollingTime, final Callable<Void> runnable) throws Exception {
         SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("tenantadmin", TENANT_CONFIGURATION),
                 () -> {
-                    tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL, pollingTime);
+                    tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME, pollingTime);
                     return null;
                 });
         try {
@@ -762,7 +761,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         } finally {
             SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("tenantadmin", TENANT_CONFIGURATION),
                     () -> {
-                        tenantConfigurationManagement.deleteConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL);
+                        tenantConfigurationManagement.deleteConfiguration(TenantConfigurationKey.POLLING_TIME);
                         return null;
                     });
         }

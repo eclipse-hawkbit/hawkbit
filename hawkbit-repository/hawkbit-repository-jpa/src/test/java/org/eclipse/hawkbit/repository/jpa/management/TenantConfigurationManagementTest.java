@@ -51,7 +51,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
 
         // get the configuration from the system management
         final TenantConfigurationValue<String> defaultConfigValue = tenantConfigurationManagement.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class);
+                TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, String.class);
 
         assertThat(defaultConfigValue.isGlobal()).isTrue();
         assertThat(defaultConfigValue.getValue()).isEqualTo(envPropertyDefault);
@@ -60,11 +60,11 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
         final String newConfigurationValue = "thisIsAnotherTokenName";
         assertThat(newConfigurationValue).isNotEqualTo(defaultConfigValue.getValue());
         tenantConfigurationManagement.addOrUpdateConfiguration(
-                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, newConfigurationValue);
+                TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, newConfigurationValue);
 
         // verify that new configuration value is used
         final TenantConfigurationValue<String> updatedConfigurationValue = tenantConfigurationManagement
-                .getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class);
+                .getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, String.class);
 
         assertThat(updatedConfigurationValue.isGlobal()).isFalse();
         assertThat(updatedConfigurationValue.getValue()).isEqualTo(newConfigurationValue);
@@ -76,7 +76,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
      */
     @Test
     void updateTenantSpecificConfiguration() {
-        final String configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY;
+        final String configKey = TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY;
         final String value1 = "firstValue";
         final String value2 = "secondValue";
 
@@ -95,14 +95,14 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
     @Test
     void batchUpdateTenantSpecificConfiguration() {
         Map<String, Serializable> configuration = new HashMap<>() {{
-            put(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, "token_123");
+            put(TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, "token_123");
             put(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, true);
         }};
 
         // add value first
         tenantConfigurationManagement.addOrUpdateConfiguration(configuration);
         assertThat(tenantConfigurationManagement.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class).getValue())
+                TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, String.class).getValue())
                 .isEqualTo("token_123");
         assertThat(
                 tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue())
@@ -114,7 +114,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
      */
     @Test
     void storeAndUpdateTenantSpecificConfigurationAsBoolean() {
-        final String configKey = TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED;
+        final String configKey = TenantConfigurationKey.AUTHENTICATION_HEADER_ENABLED;
         final Boolean value1 = true;
         tenantConfigurationManagement.addOrUpdateConfiguration(configKey, value1);
         assertThat(tenantConfigurationManagement.getConfigurationValue(configKey, Boolean.class).getValue()).isEqualTo(value1);
@@ -128,7 +128,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
      */
     @Test
     void wrongTenantConfigurationValueTypeThrowsException() {
-        final String configKey = TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED;
+        final String configKey = TenantConfigurationKey.AUTHENTICATION_HEADER_ENABLED;
         final String value1 = "thisIsNotABoolean";
 
         // add value as String
@@ -143,9 +143,9 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
     @Test
     void batchWrongTenantConfigurationValueTypeThrowsException() {
         final Map<String, Serializable> configuration = new HashMap<>() {{
-            put(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, "token_123");
+            put(TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, "token_123");
             put(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, true);
-            put(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, "wrong");
+            put(TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED, "wrong");
         }};
 
         try {
@@ -154,7 +154,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
         } catch (final TenantConfigurationValidatorException e) {
             assertThat(
                     tenantConfigurationManagement.getConfigurationValue(
-                            TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class).getValue())
+                            TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, String.class).getValue())
                     .isNotEqualTo("token_123");
             assertThat(
                     tenantConfigurationManagement.getConfigurationValue(
@@ -168,7 +168,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
      */
     @Test
     void deleteConfigurationReturnNullConfiguration() {
-        final String configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY;
+        final String configKey = TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY;
 
         // gateway token does not have default value so no configuration value should be available
         final String defaultConfigValue = tenantConfigurationManagement.getConfigurationValue(configKey, String.class).getValue();
@@ -195,7 +195,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
      */
     @Test
     void storesIntegerWhenStringIsExpected() {
-        final String configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY;
+        final String configKey = TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY;
         final Integer wrongDatType = 123;
         assertThatThrownBy(() -> tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongDatType))
                 .as("Should not have worked as integer is not a string")
@@ -207,7 +207,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
      */
     @Test
     void storesIntegerWhenBooleanIsExpected() {
-        final String configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED;
+        final String configKey = TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED;
         final Integer wrongDataType = 123;
         assertThatThrownBy(() -> tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongDataType))
                 .as("Should not have worked as integer is not a boolean")
@@ -219,7 +219,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
      */
     @Test
     void storesIntegerWhenPollingIntervalIsExpected() {
-        final String configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
+        final String configKey = TenantConfigurationKey.POLLING_TIME;
         final Integer wrongDataType = 123;
         assertThatThrownBy(() -> tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongDataType))
                 .as("Should not have worked as integer is not a time field")
@@ -231,7 +231,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
      */
     @Test
     void storesWrongFormattedStringAsPollingInterval() {
-        final String configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
+        final String configKey = TenantConfigurationKey.POLLING_TIME;
         final String wrongFormatted = "wrongFormatted";
         assertThatThrownBy(() -> tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongFormatted))
                 .as("should not have worked as string is not a time field")
@@ -243,7 +243,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
      */
     @Test
     void storesTooSmallDurationAsPollingInterval() {
-        final String configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
+        final String configKey = TenantConfigurationKey.POLLING_TIME;
 
         final String tooSmallDuration = DurationHelper
                 .durationToFormattedString(DurationHelper.getDurationByTimeValues(0, 0, 1));
@@ -257,7 +257,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
      */
     @Test
     void storesCorrectDurationAsPollingInterval() {
-        final String configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
+        final String configKey = TenantConfigurationKey.POLLING_TIME;
 
         final Duration duration = DurationHelper.getDurationByTimeValues(1, 2, 0);
         assertThat(duration).isEqualTo(Duration.ofHours(1).plusMinutes(2));
@@ -274,7 +274,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
     @Test
     void requestConfigValueWithWrongType() {
         assertThatThrownBy(() -> tenantConfigurationManagement.getConfigurationValue(
-                TenantConfigurationKey.POLLING_TIME_INTERVAL, Serializable.class))
+                TenantConfigurationKey.POLLING_TIME, Serializable.class))
                 .isInstanceOf(TenantConfigurationValidatorException.class);
     }
 
@@ -297,7 +297,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
      */
     @Test
     void getTenantConfigurationKeyByName() {
-        final String configKey = TenantConfigurationKey.POLLING_TIME_INTERVAL;
+        final String configKey = TenantConfigurationKey.POLLING_TIME;
         assertThat(tenantConfigurationProperties.fromKeyName(configKey).getKeyName()).isEqualTo(configKey);
     }
 

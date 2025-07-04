@@ -67,35 +67,31 @@ public class TenantConfigurationProperties {
         /**
          * Header based authentication enabled.
          */
-        public static final String AUTHENTICATION_MODE_HEADER_ENABLED = "authentication.header.enabled";
+        public static final String AUTHENTICATION_HEADER_ENABLED = "authentication.header.enabled";
         /**
          * Header based authentication authority name.
          */
-        public static final String AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME = "authentication.header.authority";
+        public static final String AUTHENTICATION_HEADER_AUTHORITY_NAME = "authentication.header.authority";
         /**
          * Target token based authentication enabled.
          */
-        public static final String AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED = "authentication.targettoken.enabled";
+        public static final String AUTHENTICATION_TARGET_SECURITY_TOKEN_ENABLED = "authentication.targettoken.enabled";
         /**
          * Gateway token based authentication enabled.
          */
-        public static final String AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED = "authentication.gatewaytoken.enabled";
+        public static final String AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED = "authentication.gatewaytoken.enabled";
         /**
          * Gateway token value.
          */
-        public static final String AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY = "authentication.gatewaytoken.key";
-        /**
-         * See system default in {@link ControllerPollProperties#getMinPollingTime()}.
-         */
-        public static final String MIN_POLLING_TIME_INTERVAL = "minPollingTime";
+        public static final String AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY = "authentication.gatewaytoken.key";
         /**
          * See system default in {@link ControllerPollProperties#getPollingTime()}.
          */
-        public static final String POLLING_TIME_INTERVAL = "pollingTime";
+        public static final String POLLING_TIME = "pollingTime";
         /**
          * See system default in {@link ControllerPollProperties#getPollingOverdueTime()}.
          */
-        public static final String POLLING_OVERDUE_TIME_INTERVAL = "pollingOverdueTime";
+        public static final String POLLING_OVERDUE_TIME = "pollingOverdueTime";
         /**
          * See system default in {@link ControllerPollProperties#getMaintenanceWindowPollCount()}.
          */

@@ -83,13 +83,20 @@ public class PollingTime {
             }
         }
 
-        public String getFormattedIntervalWithDeviation() {
+        public String getFormattedIntervalWithDeviation(final Duration minPollingTime, final Duration maxPollingTime) {
             if (deviationPercent > 0) {
                 final long millis = interval.toMillis();
                 final long maxDeviationMillis = (millis * deviationPercent) / 100;
                 final long deviation = RANDOM.nextLong(-maxDeviationMillis, maxDeviationMillis + 1);
                 if (deviation != 0) {
-                    return DurationHelper.durationToFormattedString(Duration.ofMillis(millis + deviation));
+                    final Duration intervalWithDeviation = Duration.ofMillis(millis + deviation);
+                    if (minPollingTime != null && intervalWithDeviation.compareTo(minPollingTime) < 0) {
+                        return DurationHelper.durationToFormattedString(minPollingTime);
+                    } else if (maxPollingTime != null && intervalWithDeviation.compareTo(maxPollingTime) > 0) {
+                        return DurationHelper.durationToFormattedString(maxPollingTime);
+                    } else {
+                        return DurationHelper.durationToFormattedString(intervalWithDeviation);
+                    }
                 }
             }
 

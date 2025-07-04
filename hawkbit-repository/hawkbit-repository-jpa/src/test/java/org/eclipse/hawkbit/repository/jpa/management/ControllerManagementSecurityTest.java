@@ -143,14 +143,6 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Tests ControllerManagement#getMinPollingTime() method
-     */
-    @Test
-    void getMinPollingTimePermissionsCheck() {
-        assertPermissions(() -> controllerManagement.getMinPollingTime(), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
-    }
-
-    /**
      * Tests ControllerManagement#getMaxPollingTime() method
      */
     @Test

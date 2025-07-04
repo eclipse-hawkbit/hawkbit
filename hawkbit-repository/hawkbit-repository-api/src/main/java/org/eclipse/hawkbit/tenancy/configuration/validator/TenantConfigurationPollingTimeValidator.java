@@ -10,22 +10,20 @@
 package org.eclipse.hawkbit.tenancy.configuration.validator;
 
 import static org.eclipse.hawkbit.tenancy.configuration.DurationHelper.durationToFormattedString;
-
-import java.time.Duration;
+import static org.eclipse.hawkbit.tenancy.configuration.DurationHelper.formattedStringToDuration;
 
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
 import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
+import org.eclipse.hawkbit.tenancy.configuration.DurationHelper.DurationRangeValidator;
 import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
-import org.eclipse.hawkbit.tenancy.configuration.PollingTime.PollingInterval;
 
 /**
  * This class is used to validate, that the property is a String and that it is in the correct polling time format.
  */
 public class TenantConfigurationPollingTimeValidator implements TenantConfigurationValidator {
 
-    private final Duration minDuration;
-    private final Duration maxDuration;
+    private final DurationRangeValidator rangeValidator;
 
     /**
      * This constructor is called by {@link org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties} using
@@ -35,12 +33,10 @@ public class TenantConfigurationPollingTimeValidator implements TenantConfigurat
      * @param properties property accessor for poll configuration
      */
     public TenantConfigurationPollingTimeValidator(final ControllerPollProperties properties) {
-        minDuration = DurationHelper.formattedStringToDuration(properties.getMinPollingTime());
-        maxDuration = DurationHelper.formattedStringToDuration(properties.getMaxPollingTime());
+        rangeValidator = DurationHelper.durationRangeValidator(
+                formattedStringToDuration(properties.getMinPollingTime()), formattedStringToDuration(properties.getMaxPollingTime()));
     }
 
-    // Exception squid:S1166 - Hide origin exception
-    @SuppressWarnings({ "squid:S1166" })
     @Override
     public void validate(final Object tenantConfigurationObject) {
         TenantConfigurationValidator.super.validate(tenantConfigurationObject);
@@ -48,17 +44,17 @@ public class TenantConfigurationPollingTimeValidator implements TenantConfigurat
 
         final PollingTime pollingTime = new PollingTime(tenantConfigurationString);
 
-        if (!DurationHelper.durationRangeValidator(minDuration, maxDuration).isWithinRange(pollingTime.getPollingInterval().getInterval())) {
+        if (!rangeValidator.isWithinRange(pollingTime.getPollingInterval().getInterval())) {
             throw new TenantConfigurationValidatorException(String.format(
-                    "The given configuration value is not in the allowed range from %s to %s.",
-                    durationToFormattedString(minDuration), durationToFormattedString(maxDuration)));
+                    "The given poling interval is not in the allowed range from %s to %s.",
+                    durationToFormattedString(rangeValidator.getMin()), durationToFormattedString(rangeValidator.getMax())));
         }
 
         for (final PollingTime.Override override : pollingTime.getOverrides()) {
-            if (!DurationHelper.durationRangeValidator(minDuration, maxDuration).isWithinRange(override.pollingInterval().getInterval())) {
+            if (!rangeValidator.isWithinRange(override.pollingInterval().getInterval())) {
                 throw new TenantConfigurationValidatorException(String.format(
-                        "An override configuration value is not in the allowed range from %s to %s.",
-                        durationToFormattedString(minDuration), durationToFormattedString(maxDuration)));
+                        "An override polling interval is not in the allowed range from %s to %s.",
+                        durationToFormattedString(rangeValidator.getMin()), durationToFormattedString(rangeValidator.getMax())));
             }
         }
     }
