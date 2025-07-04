@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -195,24 +196,17 @@ public interface ControllerManagement {
     String getPollingTime(Target target);
 
     /**
-     * Returns the count to be used for reducing polling interval while calling {@link ControllerManagement#getPollingTimeForAction(Action)}.
-     *
-     * @return configured value of {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}.
-     */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    int getMaintenanceWindowPollCount();
-
-    /**
      * Returns polling time based on the maintenance window for an action. Server will reduce the polling interval as the start time for
      * maintenance window approaches, so that at least these many attempts are made between current polling until start of maintenance window.
-     * Poll time keeps reducing with MinPollingTime as lower limit {@link TenantConfigurationKey#MIN_POLLING_TIME}. After the start
+     * Poll time keeps reducing with MinPollingTime as lower limit {@link ControllerPollProperties#getMinPollingTime()}. After the start
      * of maintenance window, it resets to default {@link TenantConfigurationKey#POLLING_TIME}.
      *
+     * @param target {@link Target} for which polling time is calculated
      * @param action {@link Action} for which polling time is calculated based on it having maintenance window or not
      * @return current {@link TenantConfigurationKey#POLLING_TIME}.
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    String getPollingTimeForAction(Action action);
+    String getPollingTimeForAction(Target target, Action action);
 
     /**
      * Checks if a given target has currently or has even been assigned to the given artifact through the action history list. This can e.g.

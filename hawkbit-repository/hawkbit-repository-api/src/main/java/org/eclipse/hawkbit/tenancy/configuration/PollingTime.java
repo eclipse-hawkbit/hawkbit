@@ -13,9 +13,7 @@ import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -72,7 +70,7 @@ public class PollingTime {
             final Matcher matcher = POLLING_INTERVAL_PATTERN.matcher(pollingInterval);
             if (matcher.matches()) {
                 try {
-                    this.interval = DurationHelper.formattedStringToDuration(matcher.group("pollingInterval"));
+                    this.interval = DurationHelper.fromString(matcher.group("pollingInterval"));
                 } catch (final DateTimeParseException ex) {
                     throw new TenantConfigurationValidatorException(
                             "The given configuration value is expected as a string in the format HH:mm:ss(~\\d{1,2})?.");
@@ -91,16 +89,16 @@ public class PollingTime {
                 if (deviation != 0) {
                     final Duration intervalWithDeviation = Duration.ofMillis(millis + deviation);
                     if (minPollingTime != null && intervalWithDeviation.compareTo(minPollingTime) < 0) {
-                        return DurationHelper.durationToFormattedString(minPollingTime);
+                        return DurationHelper.toString(minPollingTime);
                     } else if (maxPollingTime != null && intervalWithDeviation.compareTo(maxPollingTime) > 0) {
-                        return DurationHelper.durationToFormattedString(maxPollingTime);
+                        return DurationHelper.toString(maxPollingTime);
                     } else {
-                        return DurationHelper.durationToFormattedString(intervalWithDeviation);
+                        return DurationHelper.toString(intervalWithDeviation);
                     }
                 }
             }
 
-            return DurationHelper.durationToFormattedString(interval);
+            return DurationHelper.toString(interval);
         }
     }
 

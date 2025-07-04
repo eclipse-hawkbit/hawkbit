@@ -245,8 +245,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
     void storesTooSmallDurationAsPollingInterval() {
         final String configKey = TenantConfigurationKey.POLLING_TIME;
 
-        final String tooSmallDuration = DurationHelper
-                .durationToFormattedString(DurationHelper.getDurationByTimeValues(0, 0, 1));
+        final String tooSmallDuration = DurationHelper.toString(getDurationByTimeValues(0, 0, 1));
         assertThatThrownBy(() -> tenantConfigurationManagement.addOrUpdateConfiguration(configKey, tooSmallDuration))
                 .as("Should not have worked as string has an invalid format")
                 .isInstanceOf(TenantConfigurationValidatorException.class);
@@ -259,13 +258,13 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
     void storesCorrectDurationAsPollingInterval() {
         final String configKey = TenantConfigurationKey.POLLING_TIME;
 
-        final Duration duration = DurationHelper.getDurationByTimeValues(1, 2, 0);
+        final Duration duration = getDurationByTimeValues(1, 2, 0);
         assertThat(duration).isEqualTo(Duration.ofHours(1).plusMinutes(2));
 
-        tenantConfigurationManagement.addOrUpdateConfiguration(configKey, DurationHelper.durationToFormattedString(duration));
+        tenantConfigurationManagement.addOrUpdateConfiguration(configKey, DurationHelper.toString(duration));
 
         final String storedDurationString = tenantConfigurationManagement.getConfigurationValue(configKey, String.class).getValue();
-        assertThat(duration).isEqualTo(DurationHelper.formattedStringToDuration(storedDurationString));
+        assertThat(duration).isEqualTo(DurationHelper.fromString(storedDurationString));
     }
 
     /**
@@ -310,5 +309,9 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
         assertThatThrownBy(() -> tenantConfigurationManagement.addOrUpdateConfiguration(configKeyWhichDoesNotExists, "value"))
                 .as("Expected InvalidTenantConfigurationKeyException for tenant configuration key which is not declared")
                 .isInstanceOf(InvalidTenantConfigurationKeyException.class);
+    }
+
+    private static Duration getDurationByTimeValues(final long hours, final long minutes, final long seconds) {
+        return Duration.ofHours(hours).plusMinutes(minutes).plusSeconds(seconds);
     }
 }

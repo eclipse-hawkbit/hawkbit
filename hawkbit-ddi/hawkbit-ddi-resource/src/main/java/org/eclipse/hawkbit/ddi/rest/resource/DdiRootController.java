@@ -155,10 +155,12 @@ public class DdiRootController implements DdiRootControllerRestApi {
         checkAndCancelExpiredAction(activeAction);
 
         // activeAction
-        return new ResponseEntity<>(DataConversionHelper.fromTarget(target, installedAction, activeAction,
+        return new ResponseEntity<>(DataConversionHelper.fromTarget(
+                target,
+                installedAction, activeAction,
                 activeAction == null
                         ? controllerManagement.getPollingTime(target)
-                        : controllerManagement.getPollingTimeForAction(activeAction), tenantAware),
+                        : controllerManagement.getPollingTimeForAction(target, activeAction), tenantAware),
                 HttpStatus.OK);
     }
 

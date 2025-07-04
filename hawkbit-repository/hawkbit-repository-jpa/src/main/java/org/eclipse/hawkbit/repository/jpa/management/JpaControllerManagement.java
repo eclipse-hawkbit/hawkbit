@@ -180,10 +180,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         this.controllerPollProperties = controllerPollProperties;
         minPollingTime = controllerPollProperties.getMinPollingTime() == null
                 ? Duration.of(0, ChronoUnit.SECONDS)
-                : DurationHelper.formattedStringToDuration(controllerPollProperties.getMinPollingTime());
+                : DurationHelper.fromString(controllerPollProperties.getMinPollingTime());
         maxPollingTime = controllerPollProperties.getMaxPollingTime() == null
                 ? Duration.of(100, ChronoUnit.YEARS)
-                : DurationHelper.formattedStringToDuration(controllerPollProperties.getMaxPollingTime());
+                : DurationHelper.fromString(controllerPollProperties.getMaxPollingTime());
         this.txManager = txManager;
         this.entityFactory = entityFactory;
         this.entityManager = entityManager;
@@ -359,6 +359,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address, final String name, final String type) {
         return findOrRegisterTargetIfItDoesNotExist0(controllerId, address, name, type);
     }
+
     private Target findOrRegisterTargetIfItDoesNotExist0(final String controllerId, final URI address, final String name, final String type) {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
         return targetRepository.findOne(spec)
@@ -407,24 +408,18 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         });
     }
 
-    /**
-     * Returns the count to be used for reducing polling interval while calling {@link ControllerManagement#getPollingTimeForAction(Action)}.
-     *
-     * @return configured value of {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}.
-     */
     @Override
-    public int getMaintenanceWindowPollCount() {
-        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
-                .getConfigurationValue(TenantConfigurationKey.MAINTENANCE_WINDOW_POLL_COUNT, Integer.class).getValue());
-    }
-
-    @Override
-    public String getPollingTimeForAction(final Action action) {
+    public String getPollingTimeForAction(final Target target, final Action action) {
+        final String pollingTime = getPollingTime(target);
         if (!action.hasMaintenanceSchedule() || action.isMaintenanceScheduleLapsed()) {
-            return getPollingTime(action.getTarget());
+            return pollingTime;
         } else {
-            return new EventTimer(getPollingTime(action.getTarget()), controllerPollProperties.getMinPollingTime(), ChronoUnit.SECONDS)
-                    .timeToNextEvent(getMaintenanceWindowPollCount(), action.getMaintenanceWindowStartTime().orElse(null));
+            // the count to be used for reducing polling interval -> the configured value of {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}
+            final int maintenanceWindowPollCount = systemSecurityContext.runAsSystem(
+                    () -> tenantConfigurationManagement.getConfigurationValue(
+                            TenantConfigurationKey.MAINTENANCE_WINDOW_POLL_COUNT, Integer.class).getValue());
+            return new EventTimer(pollingTime, controllerPollProperties.getMinPollingTime(), ChronoUnit.SECONDS)
+                    .timeToNextEvent(maintenanceWindowPollCount, action.getMaintenanceWindowStartTime().orElse(null));
         }
     }
 

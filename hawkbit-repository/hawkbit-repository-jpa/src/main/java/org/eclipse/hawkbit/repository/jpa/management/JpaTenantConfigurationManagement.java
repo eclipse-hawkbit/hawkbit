@@ -166,7 +166,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     public Function<Target, PollStatus> pollStatusResolver() {
         final PollingTime pollingTime = new PollingTime(
                 getConfigurationValue(TenantConfigurationKey.POLLING_TIME, String.class).getValue());
-        final Duration pollingOverdueTime = DurationHelper.formattedStringToDuration(
+        final Duration pollingOverdueTime = DurationHelper.fromString(
                 getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME, String.class).getValue());
         return target -> {
             final Long lastTargetQuery = target.getLastTargetQuery();
