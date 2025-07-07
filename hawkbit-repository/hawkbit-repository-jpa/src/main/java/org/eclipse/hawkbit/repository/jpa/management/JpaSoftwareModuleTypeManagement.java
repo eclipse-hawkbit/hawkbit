@@ -31,12 +31,10 @@ import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleTypeRepositor
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleTypeSpecification;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,20 +49,15 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
 
     private final DistributionSetTypeRepository distributionSetTypeRepository;
     private final SoftwareModuleTypeRepository softwareModuleTypeRepository;
-    private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final SoftwareModuleRepository softwareModuleRepository;
-    private final Database database;
 
-    public JpaSoftwareModuleTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
+    public JpaSoftwareModuleTypeManagement(
+            final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer,
-            final SoftwareModuleRepository softwareModuleRepository,
-            final Database database) {
+            final SoftwareModuleRepository softwareModuleRepository) {
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
-        this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.softwareModuleRepository = softwareModuleRepository;
-        this.database = database;
     }
 
     @Override
@@ -144,8 +137,7 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Override
     public Page<SoftwareModuleType> findByRsql(final String rsql, final Pageable pageable) {
         return JpaManagementHelper.findAllWithCountBySpec(softwareModuleTypeRepository, List.of(
-                RsqlUtility.buildRsqlSpecification(rsql, SoftwareModuleTypeFields.class,
-                        virtualPropertyReplacer, database),
+                RsqlUtility.getInstance().buildRsqlSpecification(rsql, SoftwareModuleTypeFields.class),
                 SoftwareModuleTypeSpecification.isNotDeleted()), pageable
         );
     }

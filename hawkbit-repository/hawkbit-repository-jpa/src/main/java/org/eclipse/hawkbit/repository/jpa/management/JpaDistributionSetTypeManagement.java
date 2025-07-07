@@ -44,12 +44,10 @@ import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTypeSpec
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,22 +65,17 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     private final SoftwareModuleTypeRepository softwareModuleTypeRepository;
     private final DistributionSetRepository distributionSetRepository;
     private final TargetTypeRepository targetTypeRepository;
-    private final VirtualPropertyReplacer virtualPropertyReplacer;
-    private final Database database;
     private final QuotaManagement quotaManagement;
 
     public JpaDistributionSetTypeManagement(
             final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository, final TargetTypeRepository targetTypeRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
             final QuotaManagement quotaManagement) {
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
         this.distributionSetRepository = distributionSetRepository;
         this.targetTypeRepository = targetTypeRepository;
-        this.virtualPropertyReplacer = virtualPropertyReplacer;
-        this.database = database;
         this.quotaManagement = quotaManagement;
     }
 
@@ -198,7 +191,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Override
     public Page<DistributionSetType> findByRsql(final String rsql, final Pageable pageable) {
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetTypeRepository, List.of(
-                RsqlUtility.buildRsqlSpecification(rsql, DistributionSetTypeFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.getInstance().buildRsqlSpecification(rsql, DistributionSetTypeFields.class),
                 DistributionSetTypeSpecification.isNotDeleted()), pageable);
     }
 

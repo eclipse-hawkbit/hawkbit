@@ -33,13 +33,11 @@ import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTagSpeci
 import org.eclipse.hawkbit.repository.jpa.specifications.TagSpecification;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,17 +52,12 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     private final DistributionSetTagRepository distributionSetTagRepository;
     private final DistributionSetRepository distributionSetRepository;
-    private final VirtualPropertyReplacer virtualPropertyReplacer;
-    private final Database database;
 
     public JpaDistributionSetTagManagement(
             final DistributionSetTagRepository distributionSetTagRepository,
-            final DistributionSetRepository distributionSetRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
+            final DistributionSetRepository distributionSetRepository) {
         this.distributionSetTagRepository = distributionSetTagRepository;
         this.distributionSetRepository = distributionSetRepository;
-        this.virtualPropertyReplacer = virtualPropertyReplacer;
-        this.database = database;
     }
 
     @Override
@@ -155,8 +148,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     @Override
     public Page<DistributionSetTag> findByRsql(final String rsql, final Pageable pageable) {
-        final Specification<JpaDistributionSetTag> spec = RsqlUtility.buildRsqlSpecification(
-                rsql, DistributionSetTagFields.class, virtualPropertyReplacer, database);
+        final Specification<JpaDistributionSetTag> spec = RsqlUtility.getInstance().buildRsqlSpecification(rsql, DistributionSetTagFields.class);
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, Collections.singletonList(spec), pageable);
     }
 

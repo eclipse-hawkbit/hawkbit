@@ -58,7 +58,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
@@ -66,7 +65,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,8 +87,6 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     private final AuditorAware<String> auditorProvider;
     private final ArtifactManagement artifactManagement;
     private final QuotaManagement quotaManagement;
-    private final VirtualPropertyReplacer virtualPropertyReplacer;
-    private final Database database;
 
     @SuppressWarnings("java:S107")
     public JpaSoftwareModuleManagement(final EntityManager entityManager,
@@ -98,9 +94,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             final SoftwareModuleRepository softwareModuleRepository,
             final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository, final AuditorAware<String> auditorProvider,
-            final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
-            final VirtualPropertyReplacer virtualPropertyReplacer,
-            final Database database) {
+            final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement) {
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
         this.softwareModuleRepository = softwareModuleRepository;
@@ -109,8 +103,6 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         this.auditorProvider = auditorProvider;
         this.artifactManagement = artifactManagement;
         this.quotaManagement = quotaManagement;
-        this.virtualPropertyReplacer = virtualPropertyReplacer;
-        this.database = database;
     }
 
     @Override
@@ -261,8 +253,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Override
     public Page<SoftwareModule> findByRsql(final String rsql, final Pageable pageable) {
         return JpaManagementHelper.findAllWithCountBySpec(softwareModuleRepository, List.of(
-                RsqlUtility.buildRsqlSpecification(rsql, SoftwareModuleFields.class, virtualPropertyReplacer,
-                        database),
+                RsqlUtility.getInstance().buildRsqlSpecification(rsql, SoftwareModuleFields.class),
                 SoftwareModuleSpecification.isNotDeleted()), pageable);
     }
 

@@ -38,12 +38,10 @@ import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,9 +58,6 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     private final TargetRepository targetRepository;
     private final DistributionSetTypeRepository distributionSetTypeRepository;
 
-    private final VirtualPropertyReplacer virtualPropertyReplacer;
-
-    private final Database database;
     private final QuotaManagement quotaManagement;
 
     /**
@@ -70,18 +65,13 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
      *
      * @param targetTypeRepository Target type repository
      * @param targetRepository Target repository
-     * @param virtualPropertyReplacer replacer
-     * @param database database
      */
     public JpaTargetTypeManagement(final TargetTypeRepository targetTypeRepository,
             final TargetRepository targetRepository, final DistributionSetTypeRepository distributionSetTypeRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
             final QuotaManagement quotaManagement) {
         this.targetTypeRepository = targetTypeRepository;
         this.targetRepository = targetRepository;
         this.distributionSetTypeRepository = distributionSetTypeRepository;
-        this.virtualPropertyReplacer = virtualPropertyReplacer;
-        this.database = database;
         this.quotaManagement = quotaManagement;
     }
 
@@ -145,10 +135,10 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     @Override
     public Page<TargetType> findByRsql(final String rsql, final Pageable pageable) {
-        return JpaManagementHelper.findAllWithCountBySpec(targetTypeRepository, List.of(
-                RsqlUtility.buildRsqlSpecification(
-                        rsql, TargetTypeFields.class, virtualPropertyReplacer, database)), pageable
-        );
+        return JpaManagementHelper.findAllWithCountBySpec(
+                targetTypeRepository,
+                List.of(RsqlUtility.getInstance().buildRsqlSpecification(rsql, TargetTypeFields.class)),
+                pageable);
     }
 
     @Override

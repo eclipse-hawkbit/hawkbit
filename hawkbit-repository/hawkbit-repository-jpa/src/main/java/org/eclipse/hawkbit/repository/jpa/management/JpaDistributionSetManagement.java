@@ -73,14 +73,12 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Statistic;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -105,10 +103,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     private final TargetFilterQueryRepository targetFilterQueryRepository;
     private final ActionRepository actionRepository;
     private final TenantConfigHelper tenantConfigHelper;
-    private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final SoftwareModuleRepository softwareModuleRepository;
     private final DistributionSetTagRepository distributionSetTagRepository;
-    private final Database database;
     private final RepositoryProperties repositoryProperties;
 
     @SuppressWarnings("java:S107")
@@ -120,10 +116,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final TargetRepository targetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
             final TenantConfigHelper tenantConfigHelper,
-            final VirtualPropertyReplacer virtualPropertyReplacer,
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
-            final Database database,
             final RepositoryProperties repositoryProperties) {
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
@@ -135,10 +129,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.actionRepository = actionRepository;
         this.tenantConfigHelper = tenantConfigHelper;
-        this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.softwareModuleRepository = softwareModuleRepository;
         this.distributionSetTagRepository = distributionSetTagRepository;
-        this.database = database;
         this.repositoryProperties = repositoryProperties;
     }
 
@@ -282,7 +274,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public Page<DistributionSet> findByRsql(final String rsql, final Pageable pageable) {
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, List.of(
-                RsqlUtility.buildRsqlSpecification(rsql, DistributionSetFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.getInstance().buildRsqlSpecification(rsql, DistributionSetFields.class),
                 DistributionSetSpecification.isNotDeleted()), pageable);
     }
 
@@ -551,8 +543,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         assertDsTagExists(tagId);
 
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, List.of(
-                RsqlUtility.buildRsqlSpecification(rsql, DistributionSetFields.class, virtualPropertyReplacer,
-                        database),
+                RsqlUtility.getInstance().buildRsqlSpecification(rsql, DistributionSetFields.class),
                 DistributionSetSpecification.hasTag(tagId), DistributionSetSpecification.isNotDeleted()), pageable);
     }
 

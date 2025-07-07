@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.rsql.sa;
+package org.eclipse.hawkbit.repository.jpa.ql;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

@@ -7,12 +7,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.rsql.sa;
+package org.eclipse.hawkbit.repository.jpa.ql;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlConfigHolder.RsqlToSpecBuilder.G3;
-import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlConfigHolder.RsqlToSpecBuilder.LEGACY_G1;
-import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlConfigHolder.RsqlToSpecBuilder.LEGACY_G2;
+import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility.RsqlToSpecBuilder.G3;
+import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility.RsqlToSpecBuilder.LEGACY_G1;
+import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility.RsqlToSpecBuilder.LEGACY_G2;
 
 import java.util.List;
 import java.util.Map;
@@ -22,11 +22,9 @@ import java.util.stream.StreamSupport;
 import jakarta.persistence.EntityManager;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.jpa.ql.EntityMatcher;
 import org.eclipse.hawkbit.repository.jpa.ql.utils.HawkbitQlToSql;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParser;
-import org.eclipse.hawkbit.repository.jpa.ql.SpecificationBuilder;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlConfigHolder;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -491,8 +489,8 @@ class SpecificationBuilderTest {
         return builder.specification(RsqlParser.parse(rsql));
     }
 
-    private static RsqlConfigHolder.RsqlToSpecBuilder getRsqlToSpecBuilder() {
-        return RsqlConfigHolder.getInstance().getRsqlToSpecBuilder();
+    private static RsqlUtility.RsqlToSpecBuilder getRsqlToSpecBuilder() {
+        return RsqlUtility.getInstance().getRsqlToSpecBuilder();
     }
 
     @SpringBootConfiguration

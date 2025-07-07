@@ -19,13 +19,10 @@ import jakarta.persistence.criteria.CriteriaQuery;
 
 import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlConfigHolder;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlConfigHolder.RsqlToSpecBuilder;
-import org.springframework.orm.jpa.vendor.Database;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility.RsqlToSpecBuilder;
 
 public class HawkbitQlToSql {
 
-    private static final Database DATABASE = Database.H2;
     private final EntityManager entityManager;
     private final boolean isEclipselink;
 
@@ -61,16 +58,16 @@ public class HawkbitQlToSql {
             final Class<T> domainClass, final Class<A> fieldsClass, final String rsql, final RsqlToSpecBuilder rsqlToSpecBuilder) {
         final CriteriaQuery<T> query = entityManager.getCriteriaBuilder().createQuery(domainClass);
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        final RsqlToSpecBuilder defaultRsqlToSpecBuilder = RsqlConfigHolder.getInstance().getRsqlToSpecBuilder();
+        final RsqlToSpecBuilder defaultRsqlToSpecBuilder = RsqlUtility.getInstance().getRsqlToSpecBuilder();
         if (defaultRsqlToSpecBuilder != rsqlToSpecBuilder) {
-            RsqlConfigHolder.getInstance().setRsqlToSpecBuilder(rsqlToSpecBuilder);
+            RsqlUtility.getInstance().setRsqlToSpecBuilder(rsqlToSpecBuilder);
         }
         try {
-            return query.where(RsqlUtility.<A, T> buildRsqlSpecification(rsql, fieldsClass, null, DATABASE)
+            return query.where(RsqlUtility.getInstance().<A, T> buildRsqlSpecification(rsql, fieldsClass)
                     .toPredicate(query.from(domainClass), cb.createQuery(domainClass), cb));
         } finally {
             if (defaultRsqlToSpecBuilder != rsqlToSpecBuilder) {
-                RsqlConfigHolder.getInstance().setRsqlToSpecBuilder(defaultRsqlToSpecBuilder);
+                RsqlUtility.getInstance().setRsqlToSpecBuilder(defaultRsqlToSpecBuilder);
             }
         }
     }
