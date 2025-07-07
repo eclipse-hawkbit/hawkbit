@@ -78,10 +78,10 @@ class SecurityHeaderAuthenticatorTest {
     void testWithSingleKnownHash() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(SINGLE_HASH);
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class))
+                TenantConfigurationKey.AUTHENTICATION_HEADER_AUTHORITY_NAME, String.class))
                 .thenReturn(CONFIG_VALUE_SINGLE_HASH);
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED, Boolean.class))
+                TenantConfigurationKey.AUTHENTICATION_HEADER_ENABLED, Boolean.class))
                 .thenReturn(CONFIG_VALUE_ENABLED);
 
         assertThat(authenticator.authenticate(securityToken))
@@ -95,10 +95,10 @@ class SecurityHeaderAuthenticatorTest {
     @Test
     void testWithMultipleKnownHashes() {
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class))
+                TenantConfigurationKey.AUTHENTICATION_HEADER_AUTHORITY_NAME, String.class))
                 .thenReturn(CONFIG_VALUE_MULTI_HASH);
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED, Boolean.class))
+                TenantConfigurationKey.AUTHENTICATION_HEADER_ENABLED, Boolean.class))
                 .thenReturn(CONFIG_VALUE_ENABLED);
 
         assertThat(authenticator.authenticate(prepareSecurityToken(SINGLE_HASH)))
@@ -119,10 +119,10 @@ class SecurityHeaderAuthenticatorTest {
     void testWithUnknownHash() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(UNKNOWN_HASH);
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class))
+                TenantConfigurationKey.AUTHENTICATION_HEADER_AUTHORITY_NAME, String.class))
                 .thenReturn(CONFIG_VALUE_MULTI_HASH);
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED, Boolean.class))
+                TenantConfigurationKey.AUTHENTICATION_HEADER_ENABLED, Boolean.class))
                 .thenReturn(CONFIG_VALUE_ENABLED);
 
         assertThat(authenticator.authenticate(securityToken)).isNull();
@@ -155,7 +155,7 @@ class SecurityHeaderAuthenticatorTest {
     void testWithSingleKnownHashButDisabled() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(SINGLE_HASH);
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED, Boolean.class))
+                TenantConfigurationKey.AUTHENTICATION_HEADER_ENABLED, Boolean.class))
                 .thenReturn(CONFIG_VALUE_DISABLED);
 
         assertThat(authenticator.authenticate(securityToken)).isNull();

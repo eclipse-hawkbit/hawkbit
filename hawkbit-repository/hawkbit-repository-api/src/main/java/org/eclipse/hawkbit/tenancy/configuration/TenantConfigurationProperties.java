@@ -67,50 +67,41 @@ public class TenantConfigurationProperties {
         /**
          * Header based authentication enabled.
          */
-        public static final String AUTHENTICATION_MODE_HEADER_ENABLED = "authentication.header.enabled";
+        public static final String AUTHENTICATION_HEADER_ENABLED = "authentication.header.enabled";
         /**
          * Header based authentication authority name.
          */
-        public static final String AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME = "authentication.header.authority";
+        public static final String AUTHENTICATION_HEADER_AUTHORITY_NAME = "authentication.header.authority";
         /**
          * Target token based authentication enabled.
          */
-        public static final String AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED = "authentication.targettoken.enabled";
+        public static final String AUTHENTICATION_TARGET_SECURITY_TOKEN_ENABLED = "authentication.targettoken.enabled";
         /**
          * Gateway token based authentication enabled.
          */
-        public static final String AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED = "authentication.gatewaytoken.enabled";
+        public static final String AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED = "authentication.gatewaytoken.enabled";
         /**
          * Gateway token value.
          */
-        public static final String AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY = "authentication.gatewaytoken.key";
+        public static final String AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY = "authentication.gatewaytoken.key";
         /**
-         * See system default in
-         * {@link ControllerPollProperties#getPollingTime()}.
+         * See system default in {@link ControllerPollProperties#getPollingTime()}.
          */
-        public static final String POLLING_TIME_INTERVAL = "pollingTime";
+        public static final String POLLING_TIME = "pollingTime";
         /**
-         * See system default in
-         * {@link ControllerPollProperties#getMinPollingTime()}.
+         * See system default in {@link ControllerPollProperties#getPollingOverdueTime()}.
          */
-        public static final String MIN_POLLING_TIME_INTERVAL = "minPollingTime";
+        public static final String POLLING_OVERDUE_TIME = "pollingOverdueTime";
         /**
-         * See system default in
-         * {@link ControllerPollProperties#getMaintenanceWindowPollCount()}.
+         * See system default in {@link ControllerPollProperties#getMaintenanceWindowPollCount()}.
          */
         public static final String MAINTENANCE_WINDOW_POLL_COUNT = "maintenanceWindowPollCount";
-        /**
-         * See system default in
-         * {@link ControllerPollProperties#getPollingOverdueTime()}.
-         */
-        public static final String POLLING_OVERDUE_TIME_INTERVAL = "pollingOverdueTime";
         /**
          * Represents setting if approval for a rollout is needed.
          */
         public static final String ROLLOUT_APPROVAL_ENABLED = "rollout.approval.enabled";
         /**
-         * Repository on autoclose mode instead of canceling in case of new DS
-         * assignment over active actions.
+         * Repository on autoclose mode instead of canceling in case of new Distribution Set assignment over active actions.
          */
         public static final String REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED = "repository.actions.autoclose.enabled";
         /**
@@ -118,7 +109,7 @@ public class TenantConfigurationProperties {
          */
         public static final String ACTION_CLEANUP_ENABLED = "action.cleanup.enabled";
         /**
-         * Specifies the action expiry in milli-seconds.
+         * Specifies the action expiry in milliseconds.
          */
         public static final String ACTION_CLEANUP_ACTION_EXPIRY = "action.cleanup.actionExpiry";
         /**
@@ -156,11 +147,11 @@ public class TenantConfigurationProperties {
         /**
          * Validates if an object matches the allowed data format of the corresponding key
          *
-         * @param context application context
          * @param value which will be validated
+         * @param context application context
          * @throws TenantConfigurationValidatorException is thrown, when object is invalid
          */
-        public void validate(final ApplicationContext context, final Object value) {
+        public void validate(final Object value, final ApplicationContext context) {
             if (validator == null) {
                 Objects.requireNonNull(DEFAULT_TYPE_VALIDATORS.get(dataType), "No validator defined for " + keyName).validate(value);
             } else {

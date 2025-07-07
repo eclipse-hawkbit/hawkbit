@@ -12,12 +12,12 @@ package org.eclipse.hawkbit.tenancy.configuration.validator;
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
 
 /**
- * base interface for clases which can validate tenant configuration values.
+ * base interface for classes which can validate tenant configuration values.
  */
 public interface TenantConfigurationValidator {
 
     /**
-     * validates the tenant configuration value
+     * Validates the tenant configuration value
      *
      * @param tenantConfigurationValue value which will be validated.
      * @throws TenantConfigurationValidatorException is thrown, when parameter is invalid.

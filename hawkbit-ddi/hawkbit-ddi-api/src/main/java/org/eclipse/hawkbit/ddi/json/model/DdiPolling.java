@@ -26,7 +26,7 @@ import lombok.Data;
 @Schema(description = "Suggested sleep time between polls")
 public class DdiPolling {
 
-    @Schema(description = "Sleep time in HH:MM:SS notation", pattern = "HH:MM:SS", example = "12:00:00")
+    @Schema(description = "Sleep time in HH:mm:ss notation", pattern = "HH:mm:ss", example = "12:00:00")
     private final String sleep;
 
     /**

@@ -67,10 +67,10 @@ class GatewayTokenAuthenticatorTest {
     void testWithGwToken() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(GATEWAY_TOKEN);
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class))
+                TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, String.class))
                 .thenReturn(CONFIG_VALUE_GW_TOKEN);
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, Boolean.class))
+                TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED, Boolean.class))
                 .thenReturn(CONFIG_VALUE_ENABLED);
 
         assertThat(authenticator.authenticate(securityToken))
@@ -85,10 +85,10 @@ class GatewayTokenAuthenticatorTest {
     void testWithBadGwToken() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(UNKNOWN_TOKEN);
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class))
+                TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, String.class))
                 .thenReturn(CONFIG_VALUE_GW_TOKEN);
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, Boolean.class))
+                TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED, Boolean.class))
                 .thenReturn(CONFIG_VALUE_ENABLED);
 
         assertThat(authenticator.authenticate(securityToken)).isNull();
@@ -109,7 +109,7 @@ class GatewayTokenAuthenticatorTest {
     void testWithGwTokenButDisabled() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(GATEWAY_TOKEN);
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, Boolean.class))
+                TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED, Boolean.class))
                 .thenReturn(CONFIG_VALUE_DISABLED);
 
         assertThat(authenticator.authenticate(securityToken)).isNull();

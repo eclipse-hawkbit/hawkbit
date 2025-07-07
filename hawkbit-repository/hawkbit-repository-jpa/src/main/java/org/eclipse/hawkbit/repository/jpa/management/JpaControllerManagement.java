@@ -79,6 +79,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
+import org.eclipse.hawkbit.repository.jpa.ql.EntityMatcher;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleMetadataRepository;
@@ -101,6 +102,9 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
+import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
+import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -116,6 +120,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
@@ -140,6 +145,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private final SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
     private final DistributionSetManagement distributionSetManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
+    private final ControllerPollProperties controllerPollProperties;
+    private final Duration minPollingTime, maxPollingTime;
     private final PlatformTransactionManager txManager;
     private final EntityFactory entityFactory;
     private final EntityManager entityManager;
@@ -155,7 +162,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             final DeploymentManagement deploymentManagement, final ConfirmationManagement confirmationManagement,
             final SoftwareModuleRepository softwareModuleRepository, final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
             final DistributionSetManagement distributionSetManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement,
+            final TenantConfigurationManagement tenantConfigurationManagement, final ControllerPollProperties controllerPollProperties,
             final PlatformTransactionManager txManager, final EntityFactory entityFactory, final EntityManager entityManager,
             final AfterTransactionCommitExecutor afterCommit,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
@@ -170,6 +177,13 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         this.softwareModuleMetadataRepository = softwareModuleMetadataRepository;
         this.distributionSetManagement = distributionSetManagement;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
+        this.controllerPollProperties = controllerPollProperties;
+        minPollingTime = controllerPollProperties.getMinPollingTime() == null
+                ? Duration.of(0, ChronoUnit.SECONDS)
+                : DurationHelper.fromString(controllerPollProperties.getMinPollingTime());
+        maxPollingTime = controllerPollProperties.getMaxPollingTime() == null
+                ? Duration.of(100, ChronoUnit.YEARS)
+                : DurationHelper.fromString(controllerPollProperties.getMaxPollingTime());
         this.txManager = txManager;
         this.entityFactory = entityFactory;
         this.entityManager = entityManager;
@@ -345,6 +359,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address, final String name, final String type) {
         return findOrRegisterTargetIfItDoesNotExist0(controllerId, address, name, type);
     }
+
     private Target findOrRegisterTargetIfItDoesNotExist0(final String controllerId, final URI address, final String name, final String type) {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
         return targetRepository.findOne(spec)
@@ -373,42 +388,39 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    public String getPollingTime() {
-        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
-                .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
-    }
-
-    /**
-     * Returns the configured minimum polling interval.
-     *
-     * @return current {@link TenantConfigurationKey#MIN_POLLING_TIME_INTERVAL}.
-     */
-    @Override
-    public String getMinPollingTime() {
-        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
-                .getConfigurationValue(TenantConfigurationKey.MIN_POLLING_TIME_INTERVAL, String.class).getValue());
-    }
-
-    /**
-     * Returns the count to be used for reducing polling interval while calling {@link ControllerManagement#getPollingTimeForAction(Action)}.
-     *
-     * @return configured value of
-     *         {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}.
-     */
-    @Override
-    public int getMaintenanceWindowPollCount() {
-        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
-                .getConfigurationValue(TenantConfigurationKey.MAINTENANCE_WINDOW_POLL_COUNT, Integer.class).getValue());
+    public String getPollingTime(final Target target) {
+        return systemSecurityContext.runAsSystem(() -> {
+            final PollingTime pollingTime = new PollingTime(
+                    tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.POLLING_TIME, String.class).getValue());
+            if (!ObjectUtils.isEmpty(pollingTime.getOverrides()) && target instanceof JpaTarget jpaTarget) {
+                for (final PollingTime.Override override : pollingTime.getOverrides()) {
+                    try {
+                        if (EntityMatcher.forRsql(override.qlStr()).match(jpaTarget)) {
+                            return override.pollingInterval().getFormattedIntervalWithDeviation(minPollingTime, maxPollingTime);
+                        }
+                    } catch (final Exception e) {
+                        log.warn("Error while evaluating polling override for target {}: {}", jpaTarget.getId(), e.getMessage());
+                    }
+                }
+            }
+            // returns default - no overrides or not applicable for the target
+            return pollingTime.getPollingInterval().getFormattedIntervalWithDeviation(minPollingTime, maxPollingTime);
+        });
     }
 
     @Override
-    public String getPollingTimeForAction(final Action action) {
+    public String getPollingTimeForAction(final Target target, final Action action) {
+        final String pollingTime = getPollingTime(target);
         if (!action.hasMaintenanceSchedule() || action.isMaintenanceScheduleLapsed()) {
-            return getPollingTime();
+            return pollingTime;
+        } else {
+            // the count to be used for reducing polling interval -> the configured value of {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}
+            final int maintenanceWindowPollCount = systemSecurityContext.runAsSystem(
+                    () -> tenantConfigurationManagement.getConfigurationValue(
+                            TenantConfigurationKey.MAINTENANCE_WINDOW_POLL_COUNT, Integer.class).getValue());
+            return new EventTimer(pollingTime, controllerPollProperties.getMinPollingTime(), ChronoUnit.SECONDS)
+                    .timeToNextEvent(maintenanceWindowPollCount, action.getMaintenanceWindowStartTime().orElse(null));
         }
-
-        return new EventTimer(getPollingTime(), getMinPollingTime(), ChronoUnit.SECONDS)
-                .timeToNextEvent(getMaintenanceWindowPollCount(), action.getMaintenanceWindowStartTime().orElse(null));
     }
 
     @Override

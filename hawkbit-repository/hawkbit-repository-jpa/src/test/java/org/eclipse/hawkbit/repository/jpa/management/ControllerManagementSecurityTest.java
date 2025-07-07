@@ -139,24 +139,7 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void getPollingTimePermissionsCheck() {
-        assertPermissions(() -> controllerManagement.getPollingTime(), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
-    }
-
-    /**
-     * Tests ControllerManagement#getMinPollingTime() method
-     */
-    @Test
-    void getMinPollingTimePermissionsCheck() {
-        assertPermissions(() -> controllerManagement.getMinPollingTime(), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
-    }
-
-    /**
-     * Tests ControllerManagement#getMaxPollingTime() method
-     */
-    @Test
-    void getMaintenanceWindowPollCountPermissionsCheck() {
-        assertPermissions(() -> controllerManagement.getMaintenanceWindowPollCount(),
-                List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
+        assertPermissions(() -> controllerManagement.getPollingTime(null), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
 
     /**
@@ -168,7 +151,7 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
         action.setId(1L);
         assertPermissions(() -> {
             try {
-                controllerManagement.getPollingTimeForAction(action);
+                controllerManagement.getPollingTimeForAction(action.getTarget(), action);
             } catch (final CancelActionNotAllowedException e) {
                 // expected since action is not found
             }
