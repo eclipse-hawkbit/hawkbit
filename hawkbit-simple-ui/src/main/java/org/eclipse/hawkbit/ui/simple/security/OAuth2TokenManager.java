@@ -37,25 +37,18 @@ public class OAuth2TokenManager {
 
     public String getToken(final OAuth2AuthenticationToken authentication) {
         final String currentToken = ((DefaultOidcUser) authentication.getPrincipal()).getIdToken().getTokenValue();
-        return refreshToken(authentication, currentToken);
-    }
-
-    /**
-     * Tries to refresh the id token if it is expired and adds it to the request.
-     */
-    private String refreshToken(final OAuth2AuthenticationToken authentication, String previousToken) {
         String registrationId = authentication.getAuthorizedClientRegistrationId();
 
         // This ensures that there is a client already, otherwise we won't be able to call the manager for authorization
         OAuth2AuthorizedClient authorizedClient = clientService.loadAuthorizedClient(registrationId, authentication.getName());
-        if (authorizedClient == null) return previousToken;
+        if (authorizedClient == null) return currentToken;
 
         // Will ensure that the token is refreshed if needed; do not rely on it being not null as it won't be available
         // during the first calls made to get the rights and generate the authorities
         OAuth2AuthorizeRequest request = OAuth2AuthorizeRequest.withClientRegistrationId(registrationId).principal(authentication).build();
         // since Spring Security 6.5 this will trigger a refresh of the id token
         authorizedClient = clientManager.authorize(request);
-        if (authorizedClient == null) return previousToken;
+        if (authorizedClient == null) return currentToken;
 
         // we need to fetch the newly created context containing the matching token
         SecurityContext securityContext = SecurityContextHolder.getContext();
