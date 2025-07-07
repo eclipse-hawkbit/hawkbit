@@ -49,7 +49,7 @@ public final class EventPublisherHolder {
         this.serviceMatcher = serviceMatcher;
     }
 
-    @Autowired // spring setter injection
+    @Autowired(required = false) // spring setter injection
     public void setBusProperties(final BusProperties bus) {
         this.bus = bus;
     }

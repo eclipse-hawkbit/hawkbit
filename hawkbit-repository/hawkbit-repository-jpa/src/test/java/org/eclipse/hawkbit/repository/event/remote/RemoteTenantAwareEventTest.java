@@ -86,7 +86,6 @@ class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
      */
     @Test
     void testTargetAssignDistributionSetEvent() {
-
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         final JpaAction generateAction = new JpaAction();
@@ -114,7 +113,6 @@ class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
      */
     @Test
     void testCancelTargetAssignmentEvent() {
-
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         final JpaAction generateAction = new JpaAction();
@@ -145,9 +143,7 @@ class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         return generateAction;
     }
 
-    private void assertTargetAssignDistributionSetEvent(final Action action,
-            final TargetAssignDistributionSetEvent underTest) {
-
+    private void assertTargetAssignDistributionSetEvent(final Action action, final TargetAssignDistributionSetEvent underTest) {
         assertThat(underTest.getActions()).hasSize(1);
         final ActionProperties actionProperties = underTest.getActions().get(action.getTarget().getControllerId());
         assertThat(actionProperties).isNotNull();

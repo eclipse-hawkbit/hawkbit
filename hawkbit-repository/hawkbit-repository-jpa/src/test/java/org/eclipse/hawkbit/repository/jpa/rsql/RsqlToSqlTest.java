@@ -19,7 +19,7 @@ import jakarta.persistence.PersistenceContext;
 
 import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.TargetFields;
-import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
+import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.ql.utils.HawkbitQlToSql;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
@@ -35,7 +35,7 @@ import org.springframework.test.context.ContextConfiguration;
         "spring.main.allow-bean-definition-overriding=true",
         "spring.main.banner-mode=off",
         "logging.level.root=ERROR" })
-@ContextConfiguration(classes = { RepositoryApplicationConfiguration.class, TestConfiguration.class })
+@ContextConfiguration(classes = { JpaRepositoryConfiguration.class, TestConfiguration.class })
 @Disabled("For manual run only, while playing around with RSQL to SQL")
 @SuppressWarnings("java:S2699") // java:S2699 - manual test, don't actually does assertions
 class RsqlToSqlTest {

@@ -38,7 +38,7 @@ import org.eclipse.hawkbit.ddi.json.model.DdiConfirmationFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiProgress;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
-import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
+import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -55,7 +55,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @ContextConfiguration(
-        classes = { DdiApiConfiguration.class, RestConfiguration.class, RepositoryApplicationConfiguration.class, TestConfiguration.class })
+        classes = { DdiApiConfiguration.class, RestConfiguration.class, JpaRepositoryConfiguration.class, TestConfiguration.class })
 @TestPropertySource(locations = "classpath:/ddi-test.properties")
 public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrationTest {
 

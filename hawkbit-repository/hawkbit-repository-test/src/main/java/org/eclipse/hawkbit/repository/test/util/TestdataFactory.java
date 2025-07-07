@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.test.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -1018,7 +1019,7 @@ public class TestdataFactory {
                 groupSize, confirmationRequired, conditions, dynamicRolloutGroupTemplate);
 
         // Run here, because Scheduler is disabled during tests
-        rolloutHandler.handleAll();
+        rolloutHandleAll();
 
         return rolloutManagement.get(rollout.getId()).get();
     }
@@ -1127,9 +1128,9 @@ public class TestdataFactory {
     public Rollout createSoftDeletedRollout(final String prefix) {
         final Rollout newRollout = createRollout(prefix);
         rolloutManagement.start(newRollout.getId());
-        rolloutHandler.handleAll();
+        rolloutHandleAll();
         rolloutManagement.delete(newRollout.getId());
-        rolloutHandler.handleAll();
+        rolloutHandleAll();
         return newRollout;
     }
 
@@ -1247,15 +1248,18 @@ public class TestdataFactory {
     }
 
     private Action sendUpdateActionStatusToTarget(final Status status, final Action updActA, final Collection<String> msgs) {
-        return controllerManagement.addUpdateActionStatus(
-                entityFactory.actionStatus().create(updActA.getId()).status(status).messages(msgs));
+        return controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(updActA.getId()).status(status).messages(msgs));
     }
 
     private Rollout startAndReloadRollout(final Rollout rollout) {
         rolloutManagement.start(rollout.getId());
         // Run here, because scheduler is disabled during tests
-        rolloutHandler.handleAll();
+        rolloutHandleAll();
         return reloadRollout(rollout);
+    }
+
+    private void rolloutHandleAll() {
+        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("system", SYSTEM_ROLE), rolloutHandler::handleAll);
     }
 
     private Rollout reloadRollout(final Rollout rollout) {

@@ -48,6 +48,26 @@ class PreAuthorizeEnabledTest extends AbstractSecurityTest {
     }
 
     /**
+     * Tests whether request succeed if a role with scope is granted for the user
+     */
+    @Test
+    @WithUser(authorities = { SpPermission.READ_REPOSITORY + "/type==1" }, autoCreateTenant = false)
+    void successIfHasRoleWithScope() throws Exception {
+        mvc.perform(get("/rest/v1/distributionsets")).andExpect(result ->
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value()));
+    }
+
+    /**
+     * Tests whether request succeed if a role with scope is granted for the user
+     */
+    @Test
+    @WithUser(authorities = { SpPermission.READ_REPOSITORY + "/type==2" }, autoCreateTenant = false)
+    void failIfHasNoForbiddingScope() throws Exception {
+        mvc.perform(get("/rest/v1/distributionsets")).andExpect(result ->
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value()));
+    }
+
+    /**
      * Tests whether request succeed if a role is granted for the user
      */
     @Test

@@ -1912,13 +1912,13 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     private void awaitRunningState(final Long rolloutId) {
         awaitRollout().until(() -> SecurityContextSwitch
-                .runAsPrivileged(() -> rolloutManagement.get(rolloutId).orElseThrow(NoSuchElementException::new))
+                .callAsPrivileged(() -> rolloutManagement.get(rolloutId).orElseThrow(NoSuchElementException::new))
                 .getStatus().equals(RolloutStatus.RUNNING));
     }
 
     private void awaitActionStatus(final Long actionId, final Status status) {
         awaitRollout().until(() -> SecurityContextSwitch
-                .runAsPrivileged(() -> deploymentManagement.findAction(actionId).orElseThrow(NoSuchElementException::new))
+                .callAsPrivileged(() -> deploymentManagement.findAction(actionId).orElseThrow(NoSuchElementException::new))
                 .getStatus().equals(status));
     }
 

@@ -210,7 +210,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @PropertySource("classpath:/hawkbit-jpa-defaults.properties")
 @Import({ JpaConfiguration.class, RepositoryDefaultConfiguration.class, LockProperties.class, DataSourceAutoConfiguration.class, SystemManagementCacheKeyGenerator.class })
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
-public class RepositoryApplicationConfiguration {
+public class JpaRepositoryConfiguration {
 
     /**
      * Defines the validation processor bean.

@@ -9,9 +9,7 @@
  */
 package org.eclipse.hawkbit.rest;
 
-import java.time.Duration;
-
-import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
+import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +29,7 @@ import org.springframework.web.filter.CharacterEncodingFilter;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ContextConfiguration(classes = {
-        RestConfiguration.class, RepositoryApplicationConfiguration.class, TestConfiguration.class })
+        RestConfiguration.class, JpaRepositoryConfiguration.class, TestConfiguration.class })
 @WebAppConfiguration
 @AutoConfigureMockMvc
 public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTest {

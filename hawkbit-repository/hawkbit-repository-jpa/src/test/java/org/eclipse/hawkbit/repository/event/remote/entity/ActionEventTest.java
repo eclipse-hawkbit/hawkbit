@@ -90,5 +90,4 @@ class ActionEventTest extends AbstractRemoteEntityEventTest<Action> {
         generateAction.setWeight(1000);
         return actionRepository.save(generateAction);
     }
-
 }

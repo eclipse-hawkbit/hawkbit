@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -303,7 +304,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      */
     @Test
     void getTenantConfigurationReadGWToken() throws Exception {
-        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("tenant_admin", SpPermission.TENANT_CONFIGURATION), () -> {
+        getAs(withUser("tenant_admin", SpPermission.TENANT_CONFIGURATION), () -> {
             tenantConfigurationManagement.addOrUpdateConfiguration(
                     TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY,
                     "123");
@@ -312,9 +313,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
 
         // TODO - should be able to read with TENANT_CONFIGURATION but somehow here the role hierarchy doesn't play
         // checked in mgmt / update server runtime PreAuthorizeEnabledTest
-        SecurityContextSwitch.runAs(
-                SecurityContextSwitch.withUser("tenant_admin", SpPermission.READ_TENANT_CONFIGURATION, SpPermission.READ_GATEWAY_SEC_TOKEN),
-                () -> {
+        callAs(withUser("tenant_admin", SpPermission.READ_TENANT_CONFIGURATION, SpPermission.READ_GATEWAY_SEC_TOKEN), () -> {
                     mvc.perform(get(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs"))
                             .andDo(MockMvcResultPrinter.print())
                             .andDo(m -> System.out.println("-> 1: " + m.getResponse().getContentAsString()))
@@ -324,7 +323,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
                     return null;
                 });
 
-        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("tenant_read", SpPermission.READ_TENANT_CONFIGURATION), () -> {
+        callAs(withUser("tenant_read", SpPermission.READ_TENANT_CONFIGURATION), () -> {
             mvc.perform(get(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs"))
                     .andDo(MockMvcResultPrinter.print())
                     .andDo(m -> System.out.println("-> 2: " + m.getResponse().getContentAsString()))
