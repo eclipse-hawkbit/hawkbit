@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.persistence.EntityManager;
 import jakarta.validation.constraints.NotNull;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
@@ -51,7 +50,6 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -60,7 +58,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,7 +74,6 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     private final TargetFilterQueryRepository targetFilterQueryRepository;
     private final TargetManagement targetManagement;
-    private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final DistributionSetManagement distributionSetManagement;
     private final QuotaManagement quotaManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
@@ -85,29 +81,23 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     private final SystemSecurityContext systemSecurityContext;
     private final ContextAware contextAware;
     private final AuditorAware<String> auditorAware;
-    private final EntityManager entityManager;
-    private final Database database;
 
     @SuppressWarnings("java:S107")
-    public JpaTargetFilterQueryManagement(final TargetFilterQueryRepository targetFilterQueryRepository,
-            final TargetManagement targetManagement, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
-            final Database database, final TenantConfigurationManagement tenantConfigurationManagement,
+    public JpaTargetFilterQueryManagement(
+            final TargetFilterQueryRepository targetFilterQueryRepository,
+            final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement,
+            final QuotaManagement quotaManagement, final TenantConfigurationManagement tenantConfigurationManagement,
             final RepositoryProperties repositoryProperties,
-            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final AuditorAware<String> auditorAware,
-            final EntityManager entityManager) {
+            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final AuditorAware<String> auditorAware) {
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.targetManagement = targetManagement;
-        this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.distributionSetManagement = distributionSetManagement;
         this.quotaManagement = quotaManagement;
-        this.database = database;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.repositoryProperties = repositoryProperties;
         this.systemSecurityContext = systemSecurityContext;
         this.contextAware = contextAware;
         this.auditorAware = auditorAware;
-        this.entityManager = entityManager;
     }
 
     @Override
@@ -119,7 +109,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
         create.getQuery().ifPresent(query -> {
             // validate the RSQL query syntax
-            RsqlUtility.validateRsqlFor(query, TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
+            RsqlUtility.getInstance().validateRsqlFor(query, TargetFields.class, JpaTarget.class);
 
             // enforce the 'max targets per auto assign' quota right here even
             // if the result of the filter query can vary over time
@@ -148,7 +138,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Override
     public boolean verifyTargetFilterQuerySyntax(final String query) {
         try {
-            RsqlUtility.validateRsqlFor(query, TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
+            RsqlUtility.getInstance().validateRsqlFor(query, TargetFields.class, JpaTarget.class);
             return true;
         } catch (final RSQLParserException | RSQLParameterUnsupportedFieldException e) {
             log.debug("The RSQL query '{}}' is invalid.", query, e);
@@ -195,8 +185,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Override
     public Page<TargetFilterQuery> findByRsql(final String rsqlFilter, final Pageable pageable) {
         final List<Specification<JpaTargetFilterQuery>> specList = !ObjectUtils.isEmpty(rsqlFilter)
-                ? Collections.singletonList(RsqlUtility.buildRsqlSpecification(rsqlFilter,
-                TargetFilterQueryFields.class, virtualPropertyReplacer, database))
+                ? Collections.singletonList(RsqlUtility.getInstance().buildRsqlSpecification(rsqlFilter, TargetFilterQueryFields.class))
                 : Collections.emptyList();
 
         return JpaManagementHelper.findAllWithCountBySpec(targetFilterQueryRepository, specList, pageable);
@@ -227,8 +216,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>(2);
         specList.add(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet));
         if (!ObjectUtils.isEmpty(rsql)) {
-            specList.add(RsqlUtility.buildRsqlSpecification(rsql, TargetFilterQueryFields.class,
-                    virtualPropertyReplacer, database));
+            specList.add(RsqlUtility.getInstance().buildRsqlSpecification(rsql, TargetFilterQueryFields.class));
         }
 
         return JpaManagementHelper.findAllWithCountBySpec(targetFilterQueryRepository, specList, pageable);

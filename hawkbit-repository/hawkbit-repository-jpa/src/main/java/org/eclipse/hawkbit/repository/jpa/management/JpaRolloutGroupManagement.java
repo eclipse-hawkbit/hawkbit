@@ -48,12 +48,10 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
@@ -70,24 +68,18 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     private final ActionRepository actionRepository;
     private final TargetRepository targetRepository;
     private final EntityManager entityManager;
-    private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final RolloutStatusCache rolloutStatusCache;
-    private final Database database;
 
     @SuppressWarnings("java:S107")
     public JpaRolloutGroupManagement(final RolloutGroupRepository rolloutGroupRepository,
             final RolloutRepository rolloutRepository, final ActionRepository actionRepository,
-            final TargetRepository targetRepository, final EntityManager entityManager,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final RolloutStatusCache rolloutStatusCache,
-            final Database database) {
+            final TargetRepository targetRepository, final EntityManager entityManager, final RolloutStatusCache rolloutStatusCache) {
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.rolloutRepository = rolloutRepository;
         this.actionRepository = actionRepository;
         this.targetRepository = targetRepository;
         this.entityManager = entityManager;
-        this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.rolloutStatusCache = rolloutStatusCache;
-        this.database = database;
     }
 
     @Override
@@ -122,8 +114,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
 
         final List<Specification<JpaRolloutGroup>> specList = Arrays.asList(
-                RsqlUtility.buildRsqlSpecification(rsql, RolloutGroupFields.class, virtualPropertyReplacer,
-                        database),
+                RsqlUtility.getInstance().buildRsqlSpecification(rsql, RolloutGroupFields.class),
                 (root, query, cb) -> cb.equal(root.get(JpaRolloutGroup_.rollout).get(AbstractJpaBaseEntity_.id), rolloutId));
 
         return JpaManagementHelper.findAllWithCountBySpec(rolloutGroupRepository, specList, pageable);
@@ -189,7 +180,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         throwExceptionIfRolloutGroupDoesNotExist(rolloutGroupId);
 
         final List<Specification<JpaTarget>> specList = Arrays.asList(
-                RsqlUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.getInstance().buildRsqlSpecification(rsql, TargetFields.class),
                 (root, query, cb) -> {
                     final ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = root.join(JpaTarget_.rolloutTargetGroup);
                     return cb.equal(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup).get(AbstractJpaBaseEntity_.id), rolloutGroupId);

@@ -7,11 +7,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.rsql.sa;
+package org.eclipse.hawkbit.repository.jpa.ql;
 
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface RootRepository extends CrudRepository<Root, Long>, JpaSpecificationExecutor<Root> {}
+public interface SubSubRepository extends CrudRepository<SubSub, Long>, JpaSpecificationExecutor<SubSub> {}

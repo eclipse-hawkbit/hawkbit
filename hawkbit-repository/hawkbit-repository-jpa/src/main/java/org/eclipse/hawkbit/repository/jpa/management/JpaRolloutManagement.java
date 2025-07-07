@@ -78,7 +78,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -86,7 +85,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
@@ -120,10 +118,8 @@ public class JpaRolloutManagement implements RolloutManagement {
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final QuotaManagement quotaManagement;
     private final AfterTransactionCommitExecutor afterCommit;
-    private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final SystemSecurityContext systemSecurityContext;
     private final ContextAware contextAware;
-    private final Database database;
     private final RepositoryProperties repositoryProperties;
 
     @SuppressWarnings("java:S107")
@@ -139,8 +135,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             final TenantConfigurationManagement tenantConfigurationManagement,
             final QuotaManagement quotaManagement,
             final AfterTransactionCommitExecutor afterCommit,
-            final VirtualPropertyReplacer virtualPropertyReplacer,
-            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final Database database,
+            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware,
             final RepositoryProperties repositoryProperties) {
         this.rolloutRepository = rolloutRepository;
         this.rolloutGroupRepository = rolloutGroupRepository;
@@ -153,10 +148,8 @@ public class JpaRolloutManagement implements RolloutManagement {
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.quotaManagement = quotaManagement;
         this.afterCommit = afterCommit;
-        this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.systemSecurityContext = systemSecurityContext;
         this.contextAware = contextAware;
-        this.database = database;
         this.repositoryProperties = repositoryProperties;
     }
 
@@ -273,7 +266,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     public Page<Rollout> findByRsql(final String rsql, final boolean deleted, final Pageable pageable) {
         final List<Specification<JpaRollout>> specList = List.of(
-                RsqlUtility.buildRsqlSpecification(rsql, RolloutFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.getInstance().buildRsqlSpecification(rsql, RolloutFields.class),
                 RolloutSpecification.isDeleted(deleted, pageable.getSort()));
         return JpaManagementHelper.convertPage(rolloutRepository.findAll(JpaManagementHelper.combineWithAnd(specList), pageable), pageable);
     }
@@ -281,7 +274,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     public Page<Rollout> findByRsqlWithDetailedStatus(final String rsql, final boolean deleted, final Pageable pageable) {
         final List<Specification<JpaRollout>> specList = List.of(
-                RsqlUtility.buildRsqlSpecification(rsql, RolloutFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.getInstance().buildRsqlSpecification(rsql, RolloutFields.class),
                 RolloutSpecification.isDeleted(deleted, pageable.getSort()));
         return appendStatusDetails(JpaManagementHelper.convertPage(
                 rolloutRepository.findAll(JpaManagementHelper.combineWithAnd(specList), JpaRollout_.GRAPH_ROLLOUT_DS, pageable), pageable));

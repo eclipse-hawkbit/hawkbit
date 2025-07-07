@@ -11,13 +11,11 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlConfigHolder.RsqlToSpecBuilder.LEGACY_G2;
-import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlConfigHolder.RsqlToSpecBuilder.LEGACY_G1;
+import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility.RsqlToSpecBuilder.LEGACY_G2;
+import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility.RsqlToSpecBuilder.LEGACY_G1;
 
 import java.util.Arrays;
 import java.util.Map;
-
-import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetTypeFields;
@@ -28,11 +26,9 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 
 /**
@@ -44,11 +40,6 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
 
     private static final String OR = ",";
     private static final String AND = ";";
-
-    @Autowired
-    protected VirtualPropertyReplacer virtualPropertyReplacer;
-    @Autowired
-    protected EntityManager entityManager;
 
     private Target target;
     private Target target2;
@@ -189,7 +180,7 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null==null", 1); // "null" check
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.n/a==null", 0); // "null" check
 
-        if (RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() != LEGACY_G1) {
+        if (RsqlUtility.getInstance().getRsqlToSpecBuilder() != LEGACY_G1) {
             assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.dot=is=value.dot", 1);
             assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null=is=null", 5); // null check
             assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.n/a=is=null", 1 + 5); // null check
@@ -203,22 +194,22 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null!=null2", 1); // value check
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.n/a!=null", 0); // "null" check
 
-        if (RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() != LEGACY_G1) {
+        if (RsqlUtility.getInstance().getRsqlToSpecBuilder() != LEGACY_G1) {
             assertRSQLQuery(
                     TargetFields.ATTRIBUTE.name() + ".test.dot=not=value.dot",
-                    RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 5 : 0);
+                    RsqlUtility.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 5 : 0);
             assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null=not=null", 1); // null check
             assertRSQLQuery(
                     TargetFields.ATTRIBUTE.name() + ".test.null=not=null2",
-                    1 + (RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 5 : 0)); // value check
+                    1 + (RsqlUtility.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 5 : 0)); // value check
             assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.n/a=not=null", 0); // null check
             assertRSQLQuery(
                     TargetFields.ATTRIBUTE.name() + ".test.dot=ne=value.dot",
-                    RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 5 : 0);
+                    RsqlUtility.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 5 : 0);
             assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null=ne=null", 1); // null check
             assertRSQLQuery(
                     TargetFields.ATTRIBUTE.name() + ".test.null=ne=null2",
-                    1 + (RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 5 : 0)); // value check
+                    1 + (RsqlUtility.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 5 : 0)); // value check
             assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.n/a=ne=null", 0); // null check
         }
 
@@ -315,7 +306,7 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey==noExist*", 0);
         assertRSQLQuery(TargetFields.METADATA.name() + ".notExist==metaValue", 0);
 
-        if (RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() != LEGACY_G1) {
+        if (RsqlUtility.getInstance().getRsqlToSpecBuilder() != LEGACY_G1) {
             assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=is=metaValue", 1);
             assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=is=null", 4); // null check (1 of the initial five has)
             assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=is=*v*", 2);
@@ -333,27 +324,27 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.METADATA.name() + ".notExist!=metaValue", 0);
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey!=notExist", 2);
 
-        if (RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() != LEGACY_G1) {
+        if (RsqlUtility.getInstance().getRsqlToSpecBuilder() != LEGACY_G1) {
             assertRSQLQuery(
                     TargetFields.METADATA.name() + ".metaKey=not=metaValue",
-                    RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 1 + 4 : 1);
+                    RsqlUtility.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 1 + 4 : 1);
             assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=not=null", 2); // null check (2 of the initial five)
             assertRSQLQuery(
                     TargetFields.METADATA.name() + ".notExist=not=metaValue",
-                    RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 1 + 5 : 0);
+                    RsqlUtility.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 1 + 5 : 0);
             assertRSQLQuery(
                     TargetFields.METADATA.name() + ".metaKey=not=notExist",
-                    RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 2 + 4 : 2);
+                    RsqlUtility.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 2 + 4 : 2);
             assertRSQLQuery(
                     TargetFields.METADATA.name() + ".metaKey=ne=metaValue",
-                    RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 1 + 4 : 1);
+                    RsqlUtility.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 1 + 4 : 1);
             assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=ne=null", 2); // null check (2 of the initial five)
             assertRSQLQuery(
                     TargetFields.METADATA.name() + ".notExist=ne=metaValue",
-                    RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 1 + 5 : 0);
+                    RsqlUtility.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 1 + 5 : 0);
             assertRSQLQuery(
                     TargetFields.METADATA.name() + ".metaKey=ne=notExist",
-                    RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 2 + 4 : 2);
+                    RsqlUtility.getInstance().getRsqlToSpecBuilder() == LEGACY_G2 ? 2 + 4 : 2);
         }
 
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=in=(metaValue,notexist)", 1);
@@ -386,28 +377,26 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void rsqlValidTargetFields() {
-        RsqlUtility.validateRsqlFor(
+        RsqlUtility.getInstance().validateRsqlFor(
                 "ID == '0123' and NAME == abcd and DESCRIPTION == absd and CREATEDAT =lt= 0123 and LASTMODIFIEDAT =gt= 0123" +
                         " and CONTROLLERID == 0123 and UPDATESTATUS == PENDING and IPADDRESS == 0123 and LASTCONTROLLERREQUESTAT == 0123" +
                         " and tag == beta",
-                TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
-        RsqlUtility.validateRsqlFor(
+                TargetFields.class, JpaTarget.class);
+        RsqlUtility.getInstance().validateRsqlFor(
                 "ASSIGNEDDS.name == abcd and ASSIGNEDDS.version == 0123 and INSTALLEDDS.name == abcd and INSTALLEDDS.version == 0123",
-                TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
-        RsqlUtility.validateRsqlFor(
+                TargetFields.class, JpaTarget.class);
+        RsqlUtility.getInstance().validateRsqlFor(
                 "ATTRIBUTE.subkey1 == test and ATTRIBUTE.subkey2 == test and METADATA.metakey1 == abcd and METADATA.metavalue2 == asdfg",
-                TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
-        RsqlUtility.validateRsqlFor(
+                TargetFields.class, JpaTarget.class);
+        RsqlUtility.getInstance().validateRsqlFor(
                 "CREATEDAT =lt= ${NOW_TS} and LASTMODIFIEDAT =ge= ${OVERDUE_TS}",
-                TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
-        RsqlUtility.validateRsqlFor(
+                TargetFields.class, JpaTarget.class);
+        RsqlUtility.getInstance().validateRsqlFor(
                 "ATTRIBUTE.test.dot == test and ATTRIBUTE.subkey2 == test and METADATA.test.dot == abcd and METADATA.metavalue2 == asdfg",
-                TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
+                TargetFields.class, JpaTarget.class);
 
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> RsqlUtility.validateRsqlFor(
-                        "wrongfield == abcd",
-                        TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager));
+                .isThrownBy(() -> RsqlUtility.getInstance().validateRsqlFor("wrongfield == abcd", TargetFields.class, JpaTarget.class));
     }
 
     /**
@@ -452,7 +441,6 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
 
     private void assertRSQLQueryThrowsException(final String rsql) {
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> RsqlUtility.validateRsqlFor(
-                        rsql, TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager));
+                .isThrownBy(() -> RsqlUtility.getInstance().validateRsqlFor(rsql, TargetFields.class, JpaTarget.class));
     }
 }

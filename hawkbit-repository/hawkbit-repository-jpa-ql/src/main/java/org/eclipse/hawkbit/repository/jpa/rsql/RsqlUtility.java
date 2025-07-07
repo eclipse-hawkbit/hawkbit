@@ -9,15 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
-import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlConfigHolder.RsqlToSpecBuilder.G3;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.text.StrLookup;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
@@ -27,6 +27,9 @@ import org.eclipse.hawkbit.repository.jpa.ql.SpecificationBuilder;
 import org.eclipse.hawkbit.repository.jpa.rsql.legacy.SpecificationBuilderLegacy;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 
@@ -64,8 +67,66 @@ import org.springframework.orm.jpa.vendor.Database;
  * $${OVERDUE_TS} would prevent the ${OVERDUE_TS} token from being expanded.
  */
 @Slf4j
+@Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class RsqlUtility {
+public class RsqlUtility {
+
+    private static final RsqlUtility SINGLETON = new RsqlUtility();
+
+    public enum RsqlToSpecBuilder {
+        LEGACY_G1, // legacy RSQL visitor
+        LEGACY_G2, // G2 RSQL visitor
+        G3 // G3 RSQL visitor - still experimental / yet default
+    }
+
+    /**
+     * If RSQL comparison operators shall ignore the case. If ignore case is <code>true</code> "x == ax" will match "x == aX"
+     */
+    @Value("${hawkbit.rsql.ignore-case:true}")
+    private boolean ignoreCase;
+    /**
+     * Declares if the database is case-insensitive, by default assumes <code>false</code>. In case it is case-sensitive and,
+     * {@link #ignoreCase} is set to <code>true</code> the SQL queries use upper case comparisons to ignore case.
+     * <p/>
+     * If the database is declared as case-sensitive and ignoreCase is set to <code>false</code> the RSQL queries shall use strict
+     * syntax - i.e. 'and' instead of 'AND' / 'aND'. Otherwise, the queries would be case-insensitive regarding operators.
+     */
+    @Value("${hawkbit.rsql.case-insensitive-db:false}")
+    private boolean caseInsensitiveDB;
+
+    /**
+     * @deprecated in favour fixed final visitor / spec builder of G2 RSQL visitor / G3 spec builder. since 0.6.0
+     */
+    @Setter // for tests only
+    @Deprecated(forRemoval = true, since = "0.6.0")
+    @Value("${hawkbit.rsql.rsql-to-spec-builder:G3}") //
+    private RsqlToSpecBuilder rsqlToSpecBuilder;
+
+    private VirtualPropertyReplacer virtualPropertyReplacer;
+    private Database database;
+    private EntityManager entityManager;
+
+    /**
+     * @return The holder singleton instance.
+     */
+    public static RsqlUtility getInstance() {
+        return SINGLETON;
+    }
+
+    @Autowired(required = false)
+    void setVirtualPropertyReplacer(final VirtualPropertyReplacer virtualPropertyReplacer) {
+        this.virtualPropertyReplacer = virtualPropertyReplacer;
+    }
+
+    @Autowired
+    void setDatabase(final JpaProperties jpaProperties) {
+        database = jpaProperties.getDatabase();
+    }
+
+    @Autowired
+    void setEntityManager(final EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
 
     /**
      * Builds a JPA {@link Specification} which corresponds with the given RSQL query. The specification can be used to filter for JPA entities
@@ -73,25 +134,16 @@ public final class RsqlUtility {
      *
      * @param rsql the rsql query to be parsed
      * @param rsqlQueryFieldType the enum class type which implements the {@link RsqlQueryField}
-     * @param virtualPropertyReplacer holds the logic how the known macros have to be resolved; may be <code>null</code>
-     * @param database database in use
      * @return a specification which can be used with JPA
      * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
      *         given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
-    public static <A extends Enum<A> & RsqlQueryField, T> Specification<T> buildRsqlSpecification(
-            final String rsql, final Class<A> rsqlQueryFieldType,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
-        if (RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() == G3) {
-            return new SpecificationBuilder<T>(
-                    virtualPropertyReplacer,
-                    !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance().isIgnoreCase(),
-                    database)
-                    .specification(RsqlParser.parse(
-                            RsqlConfigHolder.getInstance().isCaseInsensitiveDB() || RsqlConfigHolder.getInstance().isIgnoreCase()
-                                    ? rsql.toLowerCase() : rsql,
-                            rsqlQueryFieldType));
+    public <A extends Enum<A> & RsqlQueryField, T> Specification<T> buildRsqlSpecification(
+            final String rsql, final Class<A> rsqlQueryFieldType) {
+        if (rsqlToSpecBuilder == RsqlToSpecBuilder.G3) {
+            return new SpecificationBuilder<T>(virtualPropertyReplacer, !caseInsensitiveDB && ignoreCase, database)
+                    .specification(RsqlParser.parse(caseInsensitiveDB || ignoreCase ? rsql.toLowerCase() : rsql, rsqlQueryFieldType));
         } else {
             return new SpecificationBuilderLegacy<A, T>(rsqlQueryFieldType, virtualPropertyReplacer, database).specification(rsql);
         }
@@ -101,18 +153,16 @@ public final class RsqlUtility {
      * Validates the RSQL string
      *
      * @param rsql RSQL string to validate
-     * @param rsqlQueryFieldType
+     * @param rsqlQueryFieldType the enum class type which implements the {@link RsqlQueryField}
+     * @param jpaType the JPA entity type to validate against
      * @throws RSQLParserException if RSQL syntax is invalid
      * @throws RSQLParameterUnsupportedFieldException if RSQL key is not allowed
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static <A extends Enum<A> & RsqlQueryField> void validateRsqlFor(
-            final String rsql, final Class<A> rsqlQueryFieldType,
-            final Class<?> jpaType,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final EntityManager entityManager) {
+    public <A extends Enum<A> & RsqlQueryField> void validateRsqlFor(
+            final String rsql, final Class<A> rsqlQueryFieldType, final Class<?> jpaType) {
         final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         final CriteriaQuery<?> criteriaQuery = criteriaBuilder.createQuery(jpaType);
-        buildRsqlSpecification(rsql, rsqlQueryFieldType, virtualPropertyReplacer, null)
-                .toPredicate(criteriaQuery.from((Class) jpaType), criteriaQuery, criteriaBuilder);
+        buildRsqlSpecification(rsql, rsqlQueryFieldType).toPredicate(criteriaQuery.from((Class) jpaType), criteriaQuery, criteriaBuilder);
     }
 }

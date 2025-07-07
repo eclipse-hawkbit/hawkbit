@@ -7,10 +7,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.rsql.sa;
+package org.eclipse.hawkbit.repository.jpa.ql;
 
-import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlConfigHolder.RsqlToSpecBuilder.LEGACY_G1;
-import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlConfigHolder.RsqlToSpecBuilder.LEGACY_G2;
+import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility.RsqlToSpecBuilder.LEGACY_G1;
+import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility.RsqlToSpecBuilder.LEGACY_G2;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,9 +18,9 @@ import java.util.List;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility.RsqlToSpecBuilder;
 import org.eclipse.hawkbit.repository.jpa.rsql.legacy.SpecificationBuilderLegacy;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlConfigHolder;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlConfigHolder.RsqlToSpecBuilder;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
@@ -32,12 +32,12 @@ class SpecificationBuilderLegacyTest extends SpecificationBuilderTest {
     private final SpecificationBuilderLegacy<RootField, Root> builder = new SpecificationBuilderLegacy<>(RootField.class, null, Database.H2);
 
     private static void runWithRsqlToSpecBuilder(final Runnable runnable, final RsqlToSpecBuilder rsqlToSpecBuilder) {
-        final RsqlToSpecBuilder defaultBuilder = RsqlConfigHolder.getInstance().getRsqlToSpecBuilder();
-        RsqlConfigHolder.getInstance().setRsqlToSpecBuilder(rsqlToSpecBuilder);
+        final RsqlToSpecBuilder defaultBuilder = RsqlUtility.getInstance().getRsqlToSpecBuilder();
+        RsqlUtility.getInstance().setRsqlToSpecBuilder(rsqlToSpecBuilder);
         try {
             runnable.run();
         } finally {
-            RsqlConfigHolder.getInstance().setRsqlToSpecBuilder(defaultBuilder);
+            RsqlUtility.getInstance().setRsqlToSpecBuilder(defaultBuilder);
         }
     }
 

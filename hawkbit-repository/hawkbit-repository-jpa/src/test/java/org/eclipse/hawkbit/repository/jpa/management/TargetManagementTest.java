@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
-import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlConfigHolder.RsqlToSpecBuilder.LEGACY_G1;
+import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility.RsqlToSpecBuilder.LEGACY_G1;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -69,7 +69,7 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlConfigHolder;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
@@ -1091,7 +1091,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void findTargetsByRsqlWithTypeAndMetadata() {
-        if (RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() == LEGACY_G1) {
+        if (RsqlUtility.getInstance().getRsqlToSpecBuilder() == LEGACY_G1) {
             // legacy visitor fail with that
             return;
         }

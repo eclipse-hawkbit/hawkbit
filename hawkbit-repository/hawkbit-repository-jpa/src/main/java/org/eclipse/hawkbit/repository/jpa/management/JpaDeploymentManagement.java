@@ -86,7 +86,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
@@ -150,7 +149,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final DistributionSetManagement distributionSetManagement;
     private final TargetRepository targetRepository;
     private final AuditorAware<String> auditorProvider;
-    private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final PlatformTransactionManager txManager;
     private final OnlineDsAssignmentStrategy onlineDsAssignmentStrategy;
     private final OfflineDsAssignmentStrategy offlineDsAssignmentStrategy;
@@ -166,8 +164,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final EntityManager entityManager, final ActionRepository actionRepository,
             final DistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
             final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
-            final AfterTransactionCommitExecutor afterCommit,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
+            final AfterTransactionCommitExecutor afterCommit, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final AuditorAware<String> auditorAware,
             final Database database, final RepositoryProperties repositoryProperties) {
@@ -176,7 +173,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         this.distributionSetManagement = distributionSetManagement;
         this.targetRepository = targetRepository;
         this.auditorProvider = auditorProvider;
-        this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.txManager = txManager;
         onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit,
                 actionRepository, actionStatusRepository, quotaManagement, this::isMultiAssignmentsEnabled,
@@ -274,7 +270,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         assertTargetReadAllowed(controllerId);
 
         final List<Specification<JpaAction>> specList = Arrays.asList(
-                RsqlUtility.buildRsqlSpecification(rsql, ActionFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.getInstance().buildRsqlSpecification(rsql, ActionFields.class),
                 ActionSpecifications.byTargetControllerId(controllerId));
 
         return JpaManagementHelper.countBySpec(actionRepository, specList);
@@ -287,8 +283,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public long countActions(final String rsql) {
-        final List<Specification<JpaAction>> specList = List.of(
-                RsqlUtility.buildRsqlSpecification(rsql, ActionFields.class, virtualPropertyReplacer, database));
+        final List<Specification<JpaAction>> specList = List.of(RsqlUtility.getInstance().buildRsqlSpecification(rsql, ActionFields.class));
         return JpaManagementHelper.countBySpec(actionRepository, specList);
     }
 
@@ -312,8 +307,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public Slice<Action> findActions(final String rsql, final Pageable pageable) {
-        final List<Specification<JpaAction>> specList = List.of(
-                RsqlUtility.buildRsqlSpecification(rsql, ActionFields.class, virtualPropertyReplacer, database));
+        final List<Specification<JpaAction>> specList = List.of(RsqlUtility.getInstance().buildRsqlSpecification(rsql, ActionFields.class));
         return JpaManagementHelper.findAllWithoutCountBySpec(actionRepository, specList, pageable);
     }
 
@@ -322,7 +316,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         assertTargetReadAllowed(controllerId);
 
         final List<Specification<JpaAction>> specList = Arrays.asList(
-                RsqlUtility.buildRsqlSpecification(rsql, ActionFields.class, virtualPropertyReplacer, database),
+                RsqlUtility.getInstance().buildRsqlSpecification(rsql, ActionFields.class),
                 ActionSpecifications.byTargetControllerId(controllerId));
 
         return JpaManagementHelper.findAllWithCountBySpec(actionRepository, specList, pageable);

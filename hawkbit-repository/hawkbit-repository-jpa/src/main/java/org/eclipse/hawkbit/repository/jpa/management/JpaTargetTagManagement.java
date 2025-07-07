@@ -29,11 +29,9 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,16 +46,8 @@ public class JpaTargetTagManagement implements TargetTagManagement {
 
     private final TargetTagRepository targetTagRepository;
 
-    private final VirtualPropertyReplacer virtualPropertyReplacer;
-    private final Database database;
-
-    public JpaTargetTagManagement(
-            final TargetTagRepository targetTagRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer,
-            final Database database) {
-        this.targetTagRepository = targetTagRepository;
-        this.virtualPropertyReplacer = virtualPropertyReplacer;
-        this.database = database;
+    public JpaTargetTagManagement(final TargetTagRepository targetTagRepository) {
+        this.targetTagRepository = targetTagRepository;;
     }
 
     @Override
@@ -105,7 +95,7 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     @Override
     public Page<TargetTag> findByRsql(final String rsql, final Pageable pageable) {
         return JpaManagementHelper.findAllWithCountBySpec(targetTagRepository, Collections.singletonList(
-                RsqlUtility.buildRsqlSpecification(rsql, TargetTagFields.class, virtualPropertyReplacer, database)), pageable);
+                RsqlUtility.getInstance().buildRsqlSpecification(rsql, TargetTagFields.class)), pageable);
     }
 
     @Override
