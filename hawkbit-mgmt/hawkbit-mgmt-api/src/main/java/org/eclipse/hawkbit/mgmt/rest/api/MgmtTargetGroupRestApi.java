@@ -296,8 +296,9 @@ public interface MgmtTargetGroupRestApi {
     ResponseEntity<Void> assignTargetToGroup(
             @PathVariable
             @Schema(description = "Target controllerId") final String controllerId,
-            @RequestParam
-            @Schema(description = "The new target group for the update") final String targetGroup);
+            @RequestParam(name = "group")
+            @Schema(description = "The new target group for the update")
+            final String targetGroup);
 
 
     /**
@@ -326,7 +327,7 @@ public interface MgmtTargetGroupRestApi {
     })
     @PutMapping(value = MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING)
     ResponseEntity<Void> assignTargetsToGroup(
-            @RequestParam
+            @RequestParam(name = "group")
             @Schema(description = "The target group to be set. Sub-grouping is allowed here - '/' could be used for subgroups")
             final String targetGroup,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH)
