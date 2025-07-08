@@ -103,10 +103,7 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
 
     @Override
     public ResponseEntity<Void> assignTargetToGroup(String controllerId, String targetGroup) {
-
-        log.info("Updating target group invoked...");
         targetManagement.updateTargetGroup(controllerId, targetGroup);
-
         return ResponseEntity.ok().build();
     }
 
