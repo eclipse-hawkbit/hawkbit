@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
@@ -63,8 +65,7 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
             String groupFilterRegex = "^[^*%]*\\*?$";
             Matcher matcher = Pattern.compile(groupFilterRegex).matcher(groupFilter);
             if (!matcher.matches()) {
-                log.error("Provided group filter {} contains wildcard in different place than in the end", groupFilter);
-                return ResponseEntity.badRequest().build();
+                throw new ValidationException("Provided group filter contains wildcard in different place than in the end");
             }
             groupFilter = groupFilter.replace("*", "%");
 
