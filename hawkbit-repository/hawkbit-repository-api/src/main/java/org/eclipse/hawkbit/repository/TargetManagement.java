@@ -602,6 +602,61 @@ public interface TargetManagement {
     Target assignType(@NotEmpty String controllerId, @NotNull Long targetTypeId);
 
     /**
+     * Updates the target group of given {@link Target}.
+     *
+     * @param controllerId to be updated
+     * @param targetGroup - to be assigned to target
+     * @return updated target
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    void updateTargetGroup(@NotEmpty String controllerId, @NotNull String targetGroup);
+
+    /**
+     * Find targets associated with the provided group - direct eq operation
+     *
+     * @param targetGroup to be filtered for
+     * @param pageable page parameter
+     * @return targets associated with provided targetGroup
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<Target> findTargetsByGroup(@NotEmpty String targetGroup, @NotNull Pageable pageable);
+
+    /**
+     * Find targets by provided group "filter". Which basically translates to a sql like operation
+     *
+     * @param groupFilter filter for target group based on sql like
+     * @param pageable page param
+     * @return targets associated with provided group filter
+     */
+    Page<Target> findTargetsByGroupFilter(@NotEmpty String groupFilter, @NotNull Pageable pageable);
+
+    /**
+     * Finds all the distinct target groups in the scope of a tenant
+     *
+     * @return list of all distinct target groups
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    List<String> findGroups();
+
+    /**
+     * Update the target group of the targets matching the provided rsql filter.
+     *
+     * @param group target group parameter
+     * @param rsql rsql filter for {@link Target}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    void updateTargetGroupsWithRsql(@NotEmpty String group, @NotNull String rsql);
+
+    /**
+     * Updates the groups of targets which are in the provided list of controllerIds.
+     *
+     * @param group target group parameter
+     * @param controllerIds list of targets
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    void updateTargetsWithGroup(String group, @NotEmpty List<String> controllerIds);
+
+    /**
      * updates the {@link Target}.
      *
      * @param update to be updated

@@ -127,4 +127,7 @@ public class MgmtTarget extends MgmtNamedEntity {
 
     @Schema(description = "Present if user consent flow active. Indicates if auto-confirm is active", example = "false")
     private Boolean autoConfirmActive;
+
+    @Schema(description = "Target group", example = "Europe/East")
+    private String group;
 }

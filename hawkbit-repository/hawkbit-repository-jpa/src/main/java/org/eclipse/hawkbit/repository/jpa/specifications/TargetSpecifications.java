@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.List;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.ListJoin;
@@ -45,6 +46,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.persistence.jpa.jpql.tools.spi.IQuery;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
@@ -189,6 +191,20 @@ public final class TargetSpecifications {
             return cb.or(
                     cb.like(cb.lower(targetRoot.get(JpaTarget_.controllerId)), searchTextToLower),
                     cb.like(cb.lower(targetRoot.get(AbstractJpaNamedEntity_.name)), searchTextToLower));
+        };
+    }
+
+    public  static Specification<JpaTarget> eqTargetGroup(final String targetGroup) {
+        return (targetRoot, query, criteriaBuilder) -> {
+            final String groupTextToLower = targetGroup.toLowerCase();
+            return criteriaBuilder.equal(criteriaBuilder.lower(targetRoot.get(JpaTarget_.targetGroup)), groupTextToLower);
+        };
+    }
+
+    public static Specification<JpaTarget> likeTargetGroup(final String targetGroupSearch) {
+        return (targetRoot, query, criteriaBuilder) ->  {
+            final String searchTextToLower = targetGroupSearch.toLowerCase();
+            return criteriaBuilder.like(criteriaBuilder.lower(targetRoot.get(JpaTarget_.targetGroup)), searchTextToLower);
         };
     }
 

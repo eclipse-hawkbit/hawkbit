@@ -47,6 +47,10 @@ public final class MgmtRestConstants {
      */
     public static final String TARGETTYPE_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targettypes";
     /**
+     * The target group URL mapping rest resource.
+     */
+    public static final String TARGET_GROUP_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targetgroups";
+    /**
      * The tag URL mapping rest resource.
      */
     public static final String DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING
@@ -163,6 +167,10 @@ public final class MgmtRestConstants {
      */
     public static final String DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING = "/{distributionsetTagId}/assigned";
     /**
+     * Target group URL mapping rest resource
+     */
+    public static final String TARGET_GROUP_TARGETS_REQUEST_MAPPING = "/{targetGroup}/assigned";
+    /**
      * The default offset parameter in case the offset parameter is not present in the request.
      *
      * @see #REQUEST_PARAMETER_PAGING_OFFSET
@@ -233,6 +241,7 @@ public final class MgmtRestConstants {
     public static final String TARGET_TAG_ORDER = "2000";
     public static final String TARGET_TYPE_ORDER = "3000";
     public static final String TARGET_FILTER_ORDER = "4000";
+    public static final String TARGET_GROUP_ORDER = "4500";
     public static final String ACTION_ORDER = "5000";
     public static final String ROLLOUT_ORDER = "6000";
     public static final String DISTRIBUTION_SET_ORDER = "7000";

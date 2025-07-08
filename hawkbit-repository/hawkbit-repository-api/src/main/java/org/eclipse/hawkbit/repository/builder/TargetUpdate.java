@@ -70,4 +70,11 @@ public interface TargetUpdate {
      * @return updated builder instance
      */
     TargetUpdate requestAttributes(Boolean requestAttributes);
+
+    /**
+     *
+     * @param group for {@link Target#getTargetGroup()}
+     * @return updated builder instance
+     */
+    TargetUpdate targetGroup(String group);
 }
