@@ -9,7 +9,9 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.*;
+import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.callAs;
+import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.getAs;
+import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withUser;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -23,7 +25,6 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValueRequest;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.json.JSONObject;
@@ -133,7 +134,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      * Update DefaultDistributionSetType Fails if given DistributionSetType ID does not exist.
      */
     @Test
-     void putTenantMetadataFails() throws Exception {
+    void putTenantMetadataFails() throws Exception {
         long oldDefaultDsType = getActualDefaultDsType();
         //try an invalid input
         String newDefaultDsType = new JSONObject().put("value", true).toString();
@@ -150,7 +151,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      * The 'multi.assignments.enabled' property must not be changed to false.
      */
     @Test
-     void deactivateMultiAssignment() throws Exception {
+    void deactivateMultiAssignment() throws Exception {
         final String bodyActivate = new JSONObject().put("value", true).toString();
         final String bodyDeactivate = new JSONObject().put("value", false).toString();
 
@@ -169,7 +170,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      * The Batch configuration should not be applied, because of invalid TenantConfiguration props
      */
     @Test
-     void changeBatchConfigurationShouldFailOnInvalidTenantConfiguration() throws Exception {
+    void changeBatchConfigurationShouldFailOnInvalidTenantConfiguration() throws Exception {
         //in this scenario
         //  some TenantConfiguration are not valid,
         //  TenantMetadata - DefaultDSType ID is valid,
@@ -186,7 +187,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      * The Batch configuration should not be applied, because of invalid TenantMetadata (DefaultDistributionSetType)
      */
     @Test
-     void changeBatchConfigurationShouldOnInvalidTenantMetadata() throws Exception {
+    void changeBatchConfigurationShouldOnInvalidTenantMetadata() throws Exception {
         //in this scenario
         //  all TenantConfiguration have valid and new values - using old values, inverted
         //  TenantMetadata - DefaultDSType ID is invalid
@@ -219,7 +220,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      * The Batch configuration should be applied
      */
     @Test
-     void changeBatchConfiguration() throws Exception {
+    void changeBatchConfiguration() throws Exception {
         long updatedDistributionSetType = createTestDistributionSetType();
         boolean updatedRolloutApprovalEnabled = true;
         boolean updatedAuthGatewayTokenEnabled = true;
@@ -254,7 +255,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      * The 'repository.actions.autoclose.enabled' property must not be modified if Multi-Assignments is enabled.
      */
     @Test
-     void autoCloseCannotBeModifiedIfMultiAssignmentIsEnabled() throws Exception {
+    void autoCloseCannotBeModifiedIfMultiAssignmentIsEnabled() throws Exception {
         final String bodyActivate = new JSONObject().put("value", true).toString();
         final String bodyDeactivate = new JSONObject().put("value", false).toString();
 
@@ -281,7 +282,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      * Handles DELETE request deleting a tenant specific configuration.
      */
     @Test
-     void deleteTenantConfiguration() throws Exception {
+    void deleteTenantConfiguration() throws Exception {
         mvc.perform(delete(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
                         TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY))
                 .andDo(MockMvcResultPrinter.print())
@@ -292,7 +293,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      * Tests DELETE request must Fail for TenantMetadata properties.
      */
     @Test
-     void deleteTenantMetadataFail() throws Exception {
+    void deleteTenantMetadataFail() throws Exception {
         mvc.perform(delete(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
                         DEFAULT_DISTRIBUTION_SET_TYPE_KEY))
                 .andDo(MockMvcResultPrinter.print())
@@ -306,8 +307,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     void getTenantConfigurationReadGWToken() throws Exception {
         getAs(withUser("tenant_admin", SpPermission.TENANT_CONFIGURATION), () -> {
             tenantConfigurationManagement.addOrUpdateConfiguration(
-                    TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY,
-                    "123");
+                    TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, "123");
             return null;
         });
 

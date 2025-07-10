@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.audit.AuditContextProvider;
 import org.eclipse.hawkbit.audit.AuditLoggingAspect;
-import org.eclipse.hawkbit.im.authentication.SpRole;
+import org.eclipse.hawkbit.repository.RepositoryConfiguration;
 import org.eclipse.hawkbit.tenancy.TenantAware.DefaultTenantResolver;
 import org.eclipse.hawkbit.tenancy.TenantAware.TenantResolver;
 import org.eclipse.hawkbit.tenancy.TenantAwareUserProperties;
@@ -39,11 +39,9 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.AuditorAware;
-import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
-import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -57,6 +55,7 @@ import org.springframework.util.CollectionUtils;
  */
 @Configuration
 @EnableConfigurationProperties({ SecurityProperties.class, HawkbitSecurityProperties.class, TenantAwareUserProperties.class })
+@Import(RepositoryConfiguration.class)
 public class SecurityAutoConfiguration {
 
     @Bean
@@ -169,20 +168,5 @@ public class SecurityAutoConfiguration {
         final SimpleUrlLogoutSuccessHandler simpleUrlLogoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
         simpleUrlLogoutSuccessHandler.setTargetUrlParameter("login");
         return simpleUrlLogoutSuccessHandler;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    static RoleHierarchy roleHierarchy() {
-        return RoleHierarchyImpl.fromHierarchy(SpRole.DEFAULT_ROLE_HIERARCHY);
-    }
-
-    // and, if using method security also add
-    @Bean
-    @ConditionalOnMissingBean
-    static MethodSecurityExpressionHandler methodSecurityExpressionHandler(final RoleHierarchy roleHierarchy) {
-        final DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
-        expressionHandler.setRoleHierarchy(roleHierarchy);
-        return expressionHandler;
     }
 }

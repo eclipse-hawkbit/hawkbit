@@ -65,7 +65,7 @@ public class DefaultAccessController<A extends Enum<A> & RsqlQueryField, T> impl
     }
 
     @Autowired(required = false)
-    void setContextAware(final RoleHierarchy roleHierarchy) {
+    void setRoleHierarchy(final RoleHierarchy roleHierarchy) {
         this.roleHierarchy = roleHierarchy;
     }
 

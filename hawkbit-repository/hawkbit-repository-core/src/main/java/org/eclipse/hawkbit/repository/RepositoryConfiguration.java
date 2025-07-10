@@ -15,8 +15,10 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +30,7 @@ import org.springframework.security.access.expression.method.DefaultMethodSecuri
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -41,7 +44,13 @@ import org.springframework.util.function.SingletonSupplier;
 @EnableMethodSecurity(proxyTargetClass = true, securedEnabled = true)
 @EnableConfigurationProperties({ RepositoryProperties.class, ControllerPollProperties.class, TenantConfigurationProperties.class })
 @PropertySource("classpath:/hawkbit-repository-defaults.properties")
-public class RepositoryDefaultConfiguration {
+public class RepositoryConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    static RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.fromHierarchy(SpRole.DEFAULT_ROLE_HIERARCHY);
+    }
 
     @Bean
     @Primary
