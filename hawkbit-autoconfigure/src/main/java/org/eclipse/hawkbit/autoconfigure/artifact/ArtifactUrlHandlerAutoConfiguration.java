@@ -9,9 +9,9 @@
  */
 package org.eclipse.hawkbit.autoconfigure.artifact;
 
-import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandlerProperties;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.PropertyBasedArtifactUrlHandler;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandlerProperties;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.PropertyBasedArtifactUrlHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

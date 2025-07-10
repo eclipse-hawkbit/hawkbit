@@ -17,13 +17,13 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
-import org.eclipse.hawkbit.artifact.repository.ArtifactStoreException;
-import org.eclipse.hawkbit.artifact.repository.HashNotMatchException;
-import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
-import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
+import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
+import org.eclipse.hawkbit.repository.artifact.exception.ArtifactStoreException;
+import org.eclipse.hawkbit.repository.artifact.exception.HashNotMatchException;
+import org.eclipse.hawkbit.repository.artifact.model.AbstractDbArtifact;
+import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
+import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
+import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
@@ -275,7 +275,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     private InputStream wrapInEncryptionStream(final long smId, final InputStream stream) {
-        return ArtifactEncryptionService.getInstance().encryptSoftwareModuleArtifact(smId, stream);
+        return ArtifactEncryptionService.getInstance().encryptArtifact(smId, stream);
     }
 
     private void assertArtifactQuota(final long moduleId, final int requested) {
@@ -303,7 +303,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         }
         final ArtifactEncryptionService encryptionService = ArtifactEncryptionService.getInstance();
         return new EncryptionAwareDbArtifact(dbArtifact,
-                stream -> encryptionService.decryptSoftwareModuleArtifact(softwareModuleId, stream),
+                stream -> encryptionService.decryptArtifact(softwareModuleId, stream),
                 encryptionService.encryptionSizeOverhead());
     }
 

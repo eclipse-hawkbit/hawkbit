@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystem;
-import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrl;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
+import org.eclipse.hawkbit.repository.artifact.ArtifactFilesystem;
+import org.eclipse.hawkbit.repository.artifact.model.AbstractDbArtifact;
+import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrl;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;

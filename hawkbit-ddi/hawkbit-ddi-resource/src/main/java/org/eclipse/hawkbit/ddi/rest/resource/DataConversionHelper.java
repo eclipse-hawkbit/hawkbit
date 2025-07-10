@@ -14,10 +14,10 @@ import java.util.Map;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.ApiType;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.URLPlaceholder;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.URLPlaceholder.SoftwareData;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ApiType;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder.SoftwareData;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifactHash;
 import org.eclipse.hawkbit.ddi.json.model.DdiAutoConfirmationState;

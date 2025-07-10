@@ -18,10 +18,10 @@ import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.ApiType;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrl;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.URLPlaceholder;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ApiType;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrl;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifactHash;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;

@@ -20,11 +20,11 @@ import jakarta.validation.Validation;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import org.eclipse.hawkbit.ContextAware;
-import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
+import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
-import org.eclipse.hawkbit.repository.ArtifactEncryption;
-import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
-import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
+import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryption;
+import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryptionSecretsStore;
+import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.BaseRepositoryTypeProvider;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
@@ -155,7 +155,6 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -1010,9 +1009,8 @@ public class RepositoryApplicationConfiguration {
     }
 
     /**
-     * Default artifact encryption service bean that internally uses
-     * {@link ArtifactEncryption} and {@link ArtifactEncryptionSecretsStore} beans
-     * for {@link SoftwareModule} artifacts encryption/decryption
+     * Default artifact encryption service bean that internally uses {@link ArtifactEncryption} and
+     * {@link ArtifactEncryptionSecretsStore} beans for {@link SoftwareModule} artifacts encryption/decryption
      *
      * @return a {@link ArtifactEncryptionService} bean
      */

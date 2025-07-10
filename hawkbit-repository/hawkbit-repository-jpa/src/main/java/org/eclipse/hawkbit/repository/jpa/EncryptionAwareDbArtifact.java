@@ -12,8 +12,8 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.io.InputStream;
 import java.util.function.UnaryOperator;
 
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
+import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
+import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
 
 /**
  * {@link DbArtifact} implementation that decrypts the underlying artifact

@@ -9,9 +9,9 @@
  */
 package org.eclipse.hawkbit.autoconfigure.artifact.repository.filesystem;
 
-import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemProperties;
-import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemRepository;
-import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
+import org.eclipse.hawkbit.repository.artifact.ArtifactFilesystemProperties;
+import org.eclipse.hawkbit.repository.artifact.ArtifactFilesystemRepository;
+import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
