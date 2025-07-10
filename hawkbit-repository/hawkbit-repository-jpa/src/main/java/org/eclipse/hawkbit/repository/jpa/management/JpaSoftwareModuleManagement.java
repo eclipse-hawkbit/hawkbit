@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
 
-import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
+import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -120,7 +120,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             entityManager.flush();
             createdModules.stream().filter(SoftwareModule::isEncrypted).map(SoftwareModule::getId)
                     .forEach(encryptedModuleId -> ArtifactEncryptionService.getInstance()
-                            .addSoftwareModuleEncryptionSecrets(encryptedModuleId));
+                            .addEncryptionSecrets(encryptedModuleId));
         }
         return createdModules;
     }
@@ -136,7 +136,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         if (create.isEncrypted()) {
             // flush sm creation in order to get an Id
             entityManager.flush();
-            ArtifactEncryptionService.getInstance().addSoftwareModuleEncryptionSecrets(sm.getId());
+            ArtifactEncryptionService.getInstance().addEncryptionSecrets(sm.getId());
         }
 
         return sm;

@@ -17,11 +17,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.eclipse.hawkbit.ContextAware;
-import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemProperties;
-import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemRepository;
-import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandlerProperties;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.PropertyBasedArtifactUrlHandler;
+import org.eclipse.hawkbit.repository.artifact.ArtifactFilesystemProperties;
+import org.eclipse.hawkbit.repository.artifact.ArtifactFilesystemRepository;
+import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandlerProperties;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.PropertyBasedArtifactUrlHandler;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
 import org.eclipse.hawkbit.im.authentication.SpRole;

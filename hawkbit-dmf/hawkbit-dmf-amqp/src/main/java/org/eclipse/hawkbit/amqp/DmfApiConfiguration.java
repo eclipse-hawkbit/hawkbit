@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
