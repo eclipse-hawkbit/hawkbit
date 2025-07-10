@@ -78,8 +78,9 @@ import org.springframework.test.web.servlet.ResultMatcher;
  * Feature: Component Tests - Management API<br/>
  * Story: Rollout Resource
  */
-@TestPropertySource(locations = "classpath:/mgmt-test.properties", properties = {
-        "hawkbit.server.repository.dynamicRolloutsMinInvolvePeriodMS=-1" })
+@TestPropertySource(
+        locations = "classpath:/mgmt-test.properties",
+        properties = { "hawkbit.server.repository.dynamicRolloutsMinInvolvePeriodMS=-1" })
 class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String HREF_ROLLOUT_PREFIX = "http://localhost/rest/v1/rollouts/";
