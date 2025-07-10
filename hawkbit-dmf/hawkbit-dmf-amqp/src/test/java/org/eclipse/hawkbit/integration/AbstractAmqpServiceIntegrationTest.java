@@ -42,7 +42,7 @@ import org.eclipse.hawkbit.integration.listener.ReplyToListener;
 import org.eclipse.hawkbit.matcher.SoftwareModuleJsonMatcher;
 import org.eclipse.hawkbit.rabbitmq.test.AbstractAmqpIntegrationTest;
 import org.eclipse.hawkbit.rabbitmq.test.AmqpTestConfiguration;
-import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
+import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
@@ -66,7 +66,7 @@ import org.springframework.util.CollectionUtils;
  */
 @ContextConfiguration(classes = {
         DmfApiConfiguration.class, DmfTestConfiguration.class,
-        RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class })
+        JpaRepositoryConfiguration.class, AmqpTestConfiguration.class })
 abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
 
     protected static final String TENANT_EXIST = "DEFAULT";
@@ -93,9 +93,9 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
     }
 
     protected <T> T waitUntilIsPresent(final Callable<Optional<T>> callable) {
-        await().until(() -> SecurityContextSwitch.runAsPrivileged(() -> callable.call().isPresent()));
+        await().until(() -> SecurityContextSwitch.callAsPrivileged(() -> callable.call().isPresent()));
         try {
-            return SecurityContextSwitch.runAsPrivileged(() -> callable.call().get());
+            return SecurityContextSwitch.callAsPrivileged(() -> callable.call().get());
         } catch (final Exception e) {
             return null;
         }
@@ -367,7 +367,7 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
         waitUntilIsPresent(() -> controllerManagement.getByControllerId(controllerId));
         await().untilAsserted(() -> {
             try {
-                final Map<String, String> controllerAttributes = SecurityContextSwitch.runAsPrivileged(
+                final Map<String, String> controllerAttributes = SecurityContextSwitch.callAsPrivileged(
                         () -> targetManagement.getControllerAttributes(controllerId));
                 assertThat(controllerAttributes).hasSameSizeAs(attributes);
                 assertThat(controllerAttributes).containsAllEntriesOf(attributes);

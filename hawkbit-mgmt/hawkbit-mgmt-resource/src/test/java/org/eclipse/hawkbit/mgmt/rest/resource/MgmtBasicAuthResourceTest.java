@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Base64;
 
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
+import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
 import org.eclipse.hawkbit.repository.test.util.CleanupTestExecutionListener;
@@ -67,7 +67,7 @@ import org.springframework.web.context.WebApplicationContext;
 @WebAppConfiguration
 @AutoConfigureMockMvc
 @ContextConfiguration(classes = { MgmtApiConfiguration.class, RestConfiguration.class,
-        RepositoryApplicationConfiguration.class, TestConfiguration.class })
+        JpaRepositoryConfiguration.class, TestConfiguration.class })
 /**
  * Feature: Component Tests - Management API<br/>
  * Story: Basic auth Userinfo Resource

@@ -40,5 +40,4 @@ class TargetTagEventTest extends AbstractRemoteEntityEventTest<TargetTag> {
     protected TargetTag createEntity() {
         return targetTagManagement.create(entityFactory.tag().create().name("tag1"));
     }
-
 }

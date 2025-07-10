@@ -408,7 +408,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
             try {
                 payload.put(new JSONObject().put("id", trg.getId()));
             } catch (final JSONException e) {
-                e.printStackTrace();
+                throw new IllegalStateException(e);
             }
         });
 
@@ -459,7 +459,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
             try {
                 list.put(new JSONObject().put("id", target.getControllerId()));
             } catch (final JSONException e) {
-                e.printStackTrace();
+                throw new IllegalStateException(e);
             }
         });
 

@@ -400,8 +400,7 @@ public final class SpPermission {
          * context contains the anonymous role or the controller specific role
          * {@link SpringEvalExpressions#CONTROLLER_ROLE}.
          */
-        public static final String IS_CONTROLLER = "hasAnyRole('" + CONTROLLER_ROLE_ANONYMOUS + "', '" + CONTROLLER_ROLE
-                + "')";
+        public static final String IS_CONTROLLER = "hasAnyRole('" + CONTROLLER_ROLE_ANONYMOUS + "', '" + CONTROLLER_ROLE + "')";
         /**
          * Spring security eval hasAuthority expression to check if spring
          * context contains {@link #IS_CONTROLLER} or

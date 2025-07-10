@@ -167,15 +167,15 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .create(entityFactory.target().create().controllerId("targetWithSecurityToken").securityToken("token"));
 
         // retrieve security token only with READ_TARGET_SEC_TOKEN permission
-        final String securityTokenWithReadPermission = SecurityContextSwitch.runAs(
+        final String securityTokenWithReadPermission = SecurityContextSwitch.getAs(
                 SecurityContextSwitch.withUser("OnlyTargetReadPermission", SpPermission.READ_TARGET_SEC_TOKEN),
                 createdTarget::getSecurityToken);
         // retrieve security token only with ROLE_TARGET_ADMIN permission
-        final String securityTokenWithTargetAdminPermission = SecurityContextSwitch.runAs(
+        final String securityTokenWithTargetAdminPermission = SecurityContextSwitch.getAs(
                 SecurityContextSwitch.withUser("OnlyTargetAdminPermission", SpRole.TARGET_ADMIN),
                 createdTarget::getSecurityToken);
         // retrieve security token only with ROLE_TENANT_ADMIN permission
-        final String securityTokenWithTenantAdminPermission = SecurityContextSwitch.runAs(
+        final String securityTokenWithTenantAdminPermission = SecurityContextSwitch.getAs(
                 SecurityContextSwitch.withUser("OnlyTenantAdminPermission", SpRole.TENANT_ADMIN),
                 createdTarget::getSecurityToken);
 
@@ -184,7 +184,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         // retrieve security token without any permissions
         final String securityTokenWithoutPermission = SecurityContextSwitch
-                .runAs(SecurityContextSwitch.withUser("NoPermission"), createdTarget::getSecurityToken);
+                .getAs(SecurityContextSwitch.withUser("NoPermission"), createdTarget::getSecurityToken);
 
         assertThat(createdTarget.getSecurityToken()).isEqualTo("token");
         assertThat(securityTokenWithReadPermission).isNotNull();
@@ -705,7 +705,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final String knownTargetControllerId = "readTarget";
         controllerManagement.findOrRegisterTargetIfItDoesNotExist(knownTargetControllerId, new URI("http://127.0.0.1"));
 
-        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("bumlux", "READ_TARGET"), () -> {
+        SecurityContextSwitch.getAs(SecurityContextSwitch.withUser("bumlux", "READ_TARGET"), () -> {
             final Target findTargetByControllerID = targetManagement.getByControllerID(knownTargetControllerId)
                     .orElseThrow(IllegalStateException::new);
             assertThat(findTargetByControllerID).isNotNull();

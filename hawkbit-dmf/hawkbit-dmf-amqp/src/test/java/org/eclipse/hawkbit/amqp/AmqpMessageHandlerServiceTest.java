@@ -71,15 +71,14 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.amqp.support.converter.MessageConverter;
 
-@ExtendWith(MockitoExtension.class)
 /**
  * Feature: Component Tests - Device Management Federation API<br/>
  * Story: AmqpMessage Handler Service Test
  */
+@ExtendWith(MockitoExtension.class)
 class AmqpMessageHandlerServiceTest {
 
-    private static final String FAIL_MESSAGE_AMQP_REJECT_REASON = AmqpRejectAndDontRequeueException.class
-            .getSimpleName() + " was expected, ";
+    private static final String FAIL_MESSAGE_AMQP_REJECT_REASON = AmqpRejectAndDontRequeueException.class.getSimpleName() + " was expected, ";
 
     private static final String VIRTUAL_HOST = "vHost";
     private static final String TENANT = "DEFAULT";

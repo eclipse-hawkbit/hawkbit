@@ -63,7 +63,7 @@ public class EntityMatcher {
                 fieldGetter.setAccessible(true);
                 final Object fieldValue = fieldGetter.invoke(t);
                 final Operator op = comparison.getOp();
-                if (Map.class.isAssignableFrom(fieldGetter.getReturnType())) {
+                if (Map.class.isAssignableFrom(getReturnType(fieldGetter))) {
                     if ((op == NE || op == NOT_IN || op == NOT_LIKE)
                             && (fieldValue == null || !((Map<?, ?>) fieldValue).containsKey(split[1]))) {
                         // TODO / recheck - when missing entity shall it be included or not in != or =out=? - now it's not
@@ -75,19 +75,19 @@ public class EntityMatcher {
                             map(
                                     comparison.getValue(),
                                     (Class<?>) ((ParameterizedType) fieldGetter.getGenericReturnType()).getActualTypeArguments()[1]));
-                } else if (Collection.class.isAssignableFrom(fieldGetter.getReturnType())) { // Set / List
+                } else if (Collection.class.isAssignableFrom(getReturnType(fieldGetter))) { // Set / List
                     final Object value;
                     final BiFunction<Object, Operator, Boolean> compare;
                     if (split.length == 1) {
-                        value = map(comparison.getValue(), fieldGetter.getReturnType());
+                        value = map(comparison.getValue(), getReturnType(fieldGetter));
                         compare = (e, operator) -> compare(e, operator, value);
                     } else {
                         final Method valueGetter = getGetter(
                                 (Class<?>) ((ParameterizedType) fieldGetter.getGenericReturnType()).getActualTypeArguments()[0], split[1]);
-                        value = map(comparison.getValue(), valueGetter.getReturnType());
+                        value = map(comparison.getValue(), getReturnType(valueGetter));
                         compare = (e, operator) -> {
                             try {
-                                return compare(map(e == null ? null : valueGetter.invoke(e), valueGetter.getReturnType()), operator, value);
+                                return compare(map(e == null ? null : valueGetter.invoke(e), getReturnType(valueGetter)), operator, value);
                             } catch (final IllegalAccessException | InvocationTargetException ex) {
                                 throw new IllegalArgumentException(ex);
                             }
@@ -104,23 +104,23 @@ public class EntityMatcher {
                     };
                 } else {
                     if (split.length == 1) {
-                        return compare(fieldValue, op, map(comparison.getValue(), fieldGetter.getReturnType()));
+                        return compare(fieldValue, op, map(comparison.getValue(), getReturnType(fieldGetter)));
                     } else {
                         if (split[1].contains(".")) {
                             // nested field access
                             final String[] nestedSplit = split[1].split("\\.", 2);
-                            final Method nestedFieldGetter = getGetter(fieldGetter.getReturnType(), nestedSplit[0]);
+                            final Method nestedFieldGetter = getGetter(getReturnType(fieldGetter), nestedSplit[0]);
                             nestedFieldGetter.setAccessible(true);
-                            final Method valueGetter = getGetter(nestedFieldGetter.getReturnType(), nestedSplit[1]);
+                            final Method valueGetter = getGetter(getReturnType(nestedFieldGetter), nestedSplit[1]);
                             final Object nestedFieldValue = fieldValue == null ? null : nestedFieldGetter.invoke(fieldValue);
                             return compare(
                                     nestedFieldValue == null ? null : valueGetter.invoke(nestedFieldValue),
                                     op,
-                                    map(comparison.getValue(), valueGetter.getReturnType()));
+                                    map(comparison.getValue(), getReturnType(valueGetter)));
                         } else {
-                            final Method valueGetter = getGetter(fieldGetter.getReturnType(), split[1]);
+                            final Method valueGetter = getGetter(getReturnType(fieldGetter), split[1]);
                             return compare(fieldValue == null ? null : valueGetter.invoke(fieldValue), op,
-                                    map(comparison.getValue(), valueGetter.getReturnType()));
+                                    map(comparison.getValue(), getReturnType(valueGetter)));
                         }
                     }
                 }
@@ -142,10 +142,22 @@ public class EntityMatcher {
         return Arrays.stream(t.getMethods())
                 .filter(method -> getterLowercase.equals(method.getName().toLowerCase()))
                 .findFirst()
-                .map(method -> {
-                    method.setAccessible(true);
-                    return method;
+                .map(Method::getName)
+                .map(getterName -> {
+                    try {
+                        // gets method via Class.getMethod(String, Class<?>...) because in listing it might has no the
+                        // correct return type, but the type got from a declaring generic type
+                        final Method getter = t.getMethod(getterName);
+                        getter.setAccessible(true);
+                        return getter;
+                    } catch (final NoSuchMethodException e) {
+                        throw new IllegalStateException("Unexpected: No getter found for field: " + fieldName + " in class: " + t.getName(), e);
+                    }
                 }).orElseThrow(() -> new NoSuchMethodException("No getter found for field: " + fieldName + " in class: " + t.getName()));
+    }
+
+    private static Class<?> getReturnType(final Method valueGetter) {
+        return valueGetter.getReturnType();
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })

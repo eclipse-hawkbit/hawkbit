@@ -12,6 +12,10 @@ package org.eclipse.hawkbit.ddi.rest.resource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.TENANT_CONFIGURATION;
+import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.callAs;
+import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.getAs;
+import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withController;
+import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withUser;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -55,7 +59,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
-import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
@@ -126,7 +129,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final Target findTargetByControllerID = targetManagement.getByControllerID(knownTargetControllerId).get();
         assertThat(findTargetByControllerID.getCreatedBy()).isEqualTo(knownCreatedBy);
         // make a poll, audit information should not be changed, run as controller principal!
-        SecurityContextSwitch.runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS),
+        callAs(withController("controller", CONTROLLER_ROLE_ANONYMOUS),
                 () -> {
                     mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), knownTargetControllerId))
                             .andDo(MockMvcResultPrinter.print())
@@ -198,8 +201,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1),
             @Expect(type = TenantConfigurationDeletedEvent.class, count = 1) })
     void pollWithModifiedGlobalPollingTime() throws Exception {
-        withPollingTime("00:02:00", () -> SecurityContextSwitch.runAs(
-                SecurityContextSwitch.withUser("controller", CONTROLLER_ROLE_ANONYMOUS),
+        withPollingTime("00:02:00", () -> callAs(
+                withUser("controller", CONTROLLER_ROLE_ANONYMOUS),
                 () -> {
                     mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), 4711))
                             .andDo(MockMvcResultPrinter.print())
@@ -221,8 +224,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1),
             @Expect(type = TenantConfigurationDeletedEvent.class, count = 1) })
     void pollWithModifiedWithOverridesGlobalPollingTime() throws Exception {
-        withPollingTime("00:02:00, controllerid == 4711 -> 00:01:00", () -> SecurityContextSwitch.runAs(
-                SecurityContextSwitch.withUser("controller", CONTROLLER_ROLE_ANONYMOUS),
+        withPollingTime("00:02:00, controllerid == 4711 -> 00:01:00", () -> callAs(
+                withUser("controller", CONTROLLER_ROLE_ANONYMOUS),
                 () -> {
                     mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), 4711))
                             .andDo(MockMvcResultPrinter.print())
@@ -363,7 +366,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final String knownControllerId1 = "0815";
         final long create = System.currentTimeMillis();
         // make a poll, audit information should be set on plug and play
-        SecurityContextSwitch.runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS),
+        callAs(withController("controller", CONTROLLER_ROLE_ANONYMOUS),
                 () -> {
                     mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), knownControllerId1))
                             .andDo(MockMvcResultPrinter.print())
@@ -582,7 +585,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     void sleepTimeResponseForDifferentMaintenanceWindowParameters() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
-        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("tenantadmin", TENANT_CONFIGURATION),
+        getAs(withUser("tenantadmin", TENANT_CONFIGURATION),
                 () -> {
                     tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME, "00:05:00");
                     return null;
@@ -751,7 +754,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     }
 
     private void withPollingTime(final String pollingTime, final Callable<Void> runnable) throws Exception {
-        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("tenantadmin", TENANT_CONFIGURATION),
+        getAs(withUser("tenantadmin", TENANT_CONFIGURATION),
                 () -> {
                     tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME, pollingTime);
                     return null;
@@ -759,7 +762,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         try {
             runnable.call();
         } finally {
-            SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("tenantadmin", TENANT_CONFIGURATION),
+            getAs(withUser("tenantadmin", TENANT_CONFIGURATION),
                     () -> {
                         tenantConfigurationManagement.deleteConfiguration(TenantConfigurationKey.POLLING_TIME);
                         return null;

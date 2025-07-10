@@ -253,8 +253,6 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     /**
      * Test method for {@link org.eclipse.hawkbit.repository.ArtifactManagement#delete(long)}.
-     */
-    /**
      * Tests the deletion of a local artifact including metadata.
      */
     @Test
@@ -585,7 +583,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private <T> T runAsTenant(final String tenant, final Callable<T> callable) throws Exception {
-        return SecurityContextSwitch.runAs(SecurityContextSwitch.withUserAndTenantAllSpPermissions("user", tenant), callable);
+        return SecurityContextSwitch.callAs(SecurityContextSwitch.withUserAndTenantAllSpPermissions("user", tenant), callable);
     }
 
     private SoftwareModule createSoftwareModuleForTenant(final String tenant) throws Exception {

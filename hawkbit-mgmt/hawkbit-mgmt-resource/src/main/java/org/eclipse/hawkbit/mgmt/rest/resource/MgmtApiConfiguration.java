@@ -19,9 +19,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.stereotype.Controller;
 
 /**
- * Enable {@link ComponentScan} in the resource package to setup all
- * {@link Controller} annotated classes and setup the REST-Resources for the
- * Management API.
+ * Enable {@link ComponentScan} in the resource package to set up all {@link Controller} annotated classes and set up the REST-Resources
+ * for the Management API.
  */
 @Configuration
 @EnableMethodSecurity(proxyTargetClass = true, securedEnabled = true)

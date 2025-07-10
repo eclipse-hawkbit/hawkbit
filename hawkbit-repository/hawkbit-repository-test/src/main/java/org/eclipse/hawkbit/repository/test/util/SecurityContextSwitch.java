@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -35,12 +36,12 @@ public class SecurityContextSwitch {
     private static final WithUser PRIVILEDGED_USER =
             createWithUser("bumlux", DEFAULT_TENANT, false, true, false, "ROLE_CONTROLLER", "ROLE_SYSTEM_CODE");
 
-    public static <T> T runAsPrivileged(final Callable<T> callable) throws Exception {
+    public static <T> T callAsPrivileged(final Callable<T> callable) throws Exception {
         createTenant(DEFAULT_TENANT);
-        return runAs(PRIVILEDGED_USER, callable);
+        return callAs(PRIVILEDGED_USER, callable);
     }
 
-    public static <T> T runAs(final WithUser withUser, final Callable<T> callable) throws Exception {
+    public static <T> T callAs(final WithUser withUser, final Callable<T> callable) throws Exception {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         setSecurityContext(withUser);
         if (withUser.autoCreateTenant()) {
@@ -51,6 +52,23 @@ public class SecurityContextSwitch {
         } finally {
             SecurityContextHolder.setContext(oldContext);
         }
+    }
+
+    public static <T> T getAs(final WithUser withUser, final Supplier<T> supplier) {
+        try {
+            return callAs(withUser, supplier::get);
+        } catch (final RuntimeException e) {
+            throw e;
+        } catch (final Exception e) {
+            throw new IllegalStateException("Failed to handle all rollouts", e);
+        }
+    }
+
+    public static void runAs(final WithUser withUser, final Runnable runnable) {
+        getAs(withUser, (Supplier<? extends Object>) () -> {
+            runnable.run();
+            return null;
+        });
     }
 
     public static WithUser withController(final String principal, final String... authorities) {

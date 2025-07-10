@@ -50,7 +50,7 @@ public class ExecutorAutoConfiguration {
     /**
      * @return ExecutorService with security context availability in thread execution.
      */
-    @Bean(destroyMethod = "shutdown")
+    @Bean(name = "asyncExecutor", destroyMethod = "shutdown")
     @ConditionalOnMissingBean
     public ExecutorService asyncExecutor() {
         return new DelegatingSecurityContextExecutorService(threadPoolExecutor());

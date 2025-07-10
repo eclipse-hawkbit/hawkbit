@@ -29,6 +29,7 @@ import org.springframework.integration.support.MutableMessageHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.AbstractMessageConverter;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
@@ -37,28 +38,22 @@ import org.springframework.util.MimeTypeUtils;
 /**
  * Test the remote entity events.
  */
+@TestPropertySource(properties = { "spring.cloud.bus.enabled=true" })
 @SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
  public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     private BusProtoStuffMessageConverter busProtoStuffMessageConverter;
-
     private AbstractMessageConverter jacksonMessageConverter;
 
     @BeforeEach
     public void setup() throws Exception {
         final BusJacksonAutoConfiguration autoConfiguration = new BusJacksonAutoConfiguration();
         this.jacksonMessageConverter = autoConfiguration.busJsonConverter(null);
-        ReflectionTestUtils.setField(jacksonMessageConverter, "packagesToScan",
-                new String[] { "org.eclipse.hawkbit.repository.event.remote",
-                        ClassUtils.getPackageName(RemoteApplicationEvent.class) });
+        ReflectionTestUtils.setField(
+                jacksonMessageConverter, "packagesToScan",
+                new String[] { "org.eclipse.hawkbit.repository.event.remote", ClassUtils.getPackageName(RemoteApplicationEvent.class) });
         ((InitializingBean) jacksonMessageConverter).afterPropertiesSet();
-
-    }
-
-    protected Message<?> createMessageWithImmutableHeader(final TenantAwareEvent event) {
-        final Map<String, Object> headers = new LinkedHashMap<>();
-        return busProtoStuffMessageConverter.toMessage(event, new MessageHeaders(headers));
     }
 
     @SuppressWarnings("unchecked")

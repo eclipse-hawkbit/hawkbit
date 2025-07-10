@@ -40,5 +40,4 @@ class TargetEventTest extends AbstractRemoteEntityEventTest<Target> {
     protected Target createEntity() {
         return testdataFactory.createTarget("12345");
     }
-
 }

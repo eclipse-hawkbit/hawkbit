@@ -10,6 +10,8 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
+import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withUser;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -62,7 +64,6 @@ import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
-import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
@@ -73,7 +74,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
-@ContextConfiguration(classes = { RepositoryApplicationConfiguration.class, TestConfiguration.class })
+@ContextConfiguration(classes = { JpaRepositoryConfiguration.class, TestConfiguration.class })
 @TestPropertySource(locations = "classpath:/jpa-test.properties")
 @SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {
@@ -82,7 +83,9 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     protected static final String NOT_EXIST_ID = "12345678990";
     protected static final long NOT_EXIST_IDL = Long.parseLong(NOT_EXIST_ID);
 
-    private static final List<String> REPOSITORY_AND_TARGET_PERMISSIONS = List.of(SpPermission.READ_REPOSITORY, SpPermission.CREATE_REPOSITORY, SpPermission.UPDATE_REPOSITORY, SpPermission.DELETE_REPOSITORY, SpPermission.READ_TARGET, SpPermission.CREATE_TARGET, SpPermission.UPDATE_TARGET, SpPermission.DELETE_TARGET);
+    private static final List<String> REPOSITORY_AND_TARGET_PERMISSIONS = List.of(SpPermission.READ_REPOSITORY, SpPermission.CREATE_REPOSITORY,
+            SpPermission.UPDATE_REPOSITORY, SpPermission.DELETE_REPOSITORY, SpPermission.READ_TARGET, SpPermission.CREATE_TARGET,
+            SpPermission.UPDATE_TARGET, SpPermission.DELETE_TARGET);
 
     @PersistenceContext
     protected EntityManager entityManager;
@@ -230,32 +233,32 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     /**
      * Asserts that the given callable throws an InsufficientPermissionException.
+     *
      * @param callable the callable to call
      * @param requiredPermissions required permissions for the callable
      * @param insufficientPermissions can be null, if null, it will be resolved automatically. But in some cases (e.g. @PreAuthorized Permissions with OR, it is safer to pass directly the insufficient permissions)
      */
     @SneakyThrows
-    protected void assertPermissions(final Callable<?> callable, final List<String> requiredPermissions, final List<String> insufficientPermissions) {
+    protected void assertPermissions(final Callable<?> callable, final List<String> requiredPermissions,
+            final List<String> insufficientPermissions) {
         // if READ_PERMISSION is required and required permissions are multiple, give only READ_PERMISSION to eliminate internal read_permission check failure that would confuse the actual test
-        final List<String> resolvedInsufficientPermissions = insufficientPermissions != null ? insufficientPermissions :
-                requiredPermissions.contains(SpPermission.READ_REPOSITORY) && requiredPermissions.size() > 1 ?
-                List.of(SpPermission.READ_REPOSITORY) : REPOSITORY_AND_TARGET_PERMISSIONS.stream()
-                .filter(p -> !requiredPermissions.contains(p)).toList();
+        final List<String> resolvedInsufficientPermissions = insufficientPermissions != null
+                ? insufficientPermissions
+                : requiredPermissions.contains(SpPermission.READ_REPOSITORY) && requiredPermissions.size() > 1
+                        ? List.of(SpPermission.READ_REPOSITORY)
+                        : REPOSITORY_AND_TARGET_PERMISSIONS.stream().filter(p -> !requiredPermissions.contains(p)).toList();
         // check if the user has the correct permissions
-        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("user_with_permissions", requiredPermissions.toArray(new String[0])), () -> {
+        runAs(withUser("user_with_permissions", requiredPermissions.toArray(new String[0])), () -> {
             assertPermissionWorks(callable);
             log.info("assertPermissionWorks Passed");
-            return null;
         });
 
         // check if the user has the insufficient permissions
-        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("user_without_permissions", resolvedInsufficientPermissions.toArray(new String[0])), () -> {
+        runAs(withUser("user_without_permissions", resolvedInsufficientPermissions.toArray(new String[0])), () -> {
             assertInsufficientPermission(callable);
             log.info("assertInsufficientPermission Passed");
-            return null;
         });
     }
-
 
     /**
      * Asserts that the given callable throws an InsufficientPermissionException.

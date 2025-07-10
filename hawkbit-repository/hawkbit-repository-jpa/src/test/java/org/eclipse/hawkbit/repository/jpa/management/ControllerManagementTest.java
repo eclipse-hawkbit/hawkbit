@@ -16,6 +16,7 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpre
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
 import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
+import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
 import static org.eclipse.hawkbit.repository.test.util.TestdataFactory.DEFAULT_CONTROLLER_ID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -107,11 +108,9 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testdataFactory.createTarget(controllerId);
 
         final WithUser withController = SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS);
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> SecurityContextSwitch
-                .runAs(withController, () -> {
-                    writeAttributes(controllerId, allowedAttributes + 1, "key", "value");
-                    return null;
-                })).withMessageContaining("" + allowedAttributes);
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+                .isThrownBy(() -> runAs(withController, () -> writeAttributes(controllerId, allowedAttributes + 1, "key", "value")))
+                .withMessageContaining("" + allowedAttributes);
 
         // verify that no attributes have been written
         assertThat(targetManagement.getControllerAttributes(controllerId)).isEmpty();
@@ -121,13 +120,12 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         SecurityContextSwitch.runAs(withController, () -> {
             writeAttributes(controllerId, allowedAttributes, "key", "value1");
             writeAttributes(controllerId, allowedAttributes, "key", "value2");
-            return null;
         });
         assertThat(targetManagement.getControllerAttributes(controllerId)).hasSize(10);
 
         // Now rite one more
         assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> SecurityContextSwitch
-                .runAs(withController, () -> {
+                .getAs(withController, () -> {
                     writeAttributes(controllerId, 1, "additional", "value1");
                     return null;
                 })).withMessageContaining("" + allowedAttributes);
@@ -185,7 +183,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createTargetAndAssignDs();
 
         SecurityContextSwitch
-                .runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+                .getAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
                     // Fails as one entry is already in there from the assignment
                     assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                             .isThrownBy(() -> writeStatus(actionId, allowStatusEntries))
@@ -345,8 +343,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Verifies that management queries react as specified on calls for non existing entities 
-     *  by means of throwing EntityNotFoundException.
+     * Verifies that management queries react as specified on calls for non existing entities
+     * by means of throwing EntityNotFoundException.
      */
     @Test
     @ExpectEvents({
@@ -571,7 +569,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Controller rejects action cancellation with CANCEL_REJECTED status. Action goes back to RUNNING status as it expects 
+     * Controller rejects action cancellation with CANCEL_REJECTED status. Action goes back to RUNNING status as it expects
      * that the controller will continue the original update.
      */
     @Test
@@ -639,8 +637,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Verifies that assignment verification works based on SHA1 hash. By design it is not important which artifact 
-     * is actually used for the check as long as they have an identical binary, i.e. same SHA1 hash. 
+     * Verifies that assignment verification works based on SHA1 hash. By design it is not important which artifact
+     * is actually used for the check as long as they have an identical binary, i.e. same SHA1 hash.
      */
     @Test
     @ExpectEvents({
@@ -878,7 +876,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Register a controller which does not exist, when a ConcurrencyFailureException is raised, the 
+     * Register a controller which does not exist, when a ConcurrencyFailureException is raised, the
      * exception is not rethrown when the max retries are not yet reached
      */
     @Test
@@ -957,7 +955,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Retry is aborted when an unchecked exception is thrown and the exception should also be 
+     * Retry is aborted when an unchecked exception is thrown and the exception should also be
      * rethrown
      */
     @Test
@@ -1004,7 +1002,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
     @SuppressWarnings("java:S2699")
-        // java:S2699 - test tests the fired events, no need for assert
+    // java:S2699 - test tests the fired events, no need for assert
     void targetPollEventNotSendIfDisabled() {
         repositoryProperties.setPublishTargetPollEvent(false);
         controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
@@ -1121,7 +1119,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Controller tries to send an update feedback after it has been finished which is accepted as the repository is 
+     * Controller tries to send an update feedback after it has been finished which is accepted as the repository is
      * configured to accept them.
      */
     @Test
@@ -1160,7 +1158,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final String controllerId = "test123";
         final Target target = testdataFactory.createTarget(controllerId);
 
-        SecurityContextSwitch.runAs(SecurityContextSwitch.withController(
+        SecurityContextSwitch.getAs(SecurityContextSwitch.withController(
                 "controller",
                 CONTROLLER_ROLE_ANONYMOUS, SpPermission.READ_TARGET), () -> {
             addAttributeAndVerify(controllerId);
@@ -1289,7 +1287,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Verifies that quota is asserted when a controller reports too many DOWNLOADED events for a 
+     * Verifies that quota is asserted when a controller reports too many DOWNLOADED events for a
      * DOWNLOAD_ONLY action.
      */
     @Test
@@ -1516,7 +1514,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Verifies that a target can report FINISHED/ERROR updates for DOWNLOAD_ONLY assignments regardless of 
+     * Verifies that a target can report FINISHED/ERROR updates for DOWNLOAD_ONLY assignments regardless of
      * repositoryProperties.rejectActionStatusForClosedAction value.
      */
     @Test
@@ -1565,7 +1563,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     /**
      * Verifies that a controller can report a FINISHED event for a DOWNLOAD_ONLY action after having
-     *  installed an intermediate update.
+     * installed an intermediate update.
      */
     @Test
     @ExpectEvents({
