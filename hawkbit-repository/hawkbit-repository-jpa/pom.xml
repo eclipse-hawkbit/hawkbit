@@ -26,7 +26,75 @@
         <jpa.vendor>eclipselink</jpa.vendor>
     </properties>
 
+    <profiles>
+        <profile>
+            <id>eclipselink</id>
+            <activation>
+                <property>
+                    <!-- default, if not set (or not hibernate) - eclipse link -->
+                    <name>jpa.vendor</name>
+                    <value>!hibernate</value>
+                </property>
+            </activation>
+
+            <dependencies>
+                <dependency>
+                    <groupId>org.eclipse.hawkbit</groupId>
+                    <artifactId>hawkbit-repository-jpa-eclipselink</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+
+            <build>
+                <plugins>
+                    <!-- Static weaver for EclipseLink, needs to be in the module where the entity classes are -->
+                    <plugin>
+                        <groupId>com.ethlo.persistence.tools</groupId>
+                        <artifactId>eclipselink-maven-plugin</artifactId>
+                        <version>${eclipselink.maven.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>process-classes</phase>
+                                <goals>
+                                    <goal>weave</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <basePackage>org.eclipse.hawkbit.repository.jpa.model</basePackage>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.eclipse.persistence</groupId>
+                                <artifactId>org.eclipse.persistence.jpa</artifactId>
+                                <version>${eclipselink.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>hibernate</id>
+            <activation>
+                <property>
+                    <name>jpa.vendor</name>
+                    <value>hibernate</value>
+                </property>
+            </activation>
+
+            <dependencies>
+                <dependency>
+                    <groupId>org.eclipse.hawkbit</groupId>
+                    <artifactId>hawkbit-repository-jpa-hibernate</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+
     <dependencies>
+        <!-- Hawkbit -->
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-repository-jpa-ql</artifactId>

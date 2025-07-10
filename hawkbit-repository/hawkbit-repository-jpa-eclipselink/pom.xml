@@ -55,7 +55,7 @@
 
     <build>
         <plugins>
-            <!-- Static weaver for EclipseLink -->
+            <!-- Static weaver for EclipseLink, needs to be in the module where the entity classes are -->
             <plugin>
                 <groupId>com.ethlo.persistence.tools</groupId>
                 <artifactId>eclipselink-maven-plugin</artifactId>
