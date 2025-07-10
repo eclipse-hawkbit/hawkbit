@@ -1,1 +1,1 @@
-org.eclipse.hawkbit.autoconfigure.artifact.repository.filesystem.ArtifactFilesystemConfiguration
+org.eclipse.hawkbit.autoconfigure.repository.artifact.filesystem.ArtifactFilesystemConfiguration
