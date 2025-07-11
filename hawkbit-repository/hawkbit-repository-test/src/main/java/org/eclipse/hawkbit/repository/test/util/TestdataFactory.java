@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.repository.test.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
+import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
+import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withUserAndTenant;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -78,6 +80,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.ObjectUtils;
@@ -156,6 +159,7 @@ public class TestdataFactory {
     private final RolloutHandler rolloutHandler;
     private final QuotaManagement quotaManagement;
     private final EntityFactory entityFactory;
+    private final TenantAware tenantAware;
 
     public TestdataFactory(
             final ControllerManagement controllerManagement, final ArtifactManagement artifactManagement,
@@ -168,7 +172,7 @@ public class TestdataFactory {
             final DeploymentManagement deploymentManagement, final DistributionSetTagManagement distributionSetTagManagement,
             final RolloutManagement rolloutManagement, final RolloutHandler rolloutHandler,
             final QuotaManagement quotaManagement,
-            final EntityFactory entityFactory) {
+            final EntityFactory entityFactory, final TenantAware tenantAware) {
         this.controllerManagement = controllerManagement;
         this.softwareModuleManagement = softwareModuleManagement;
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
@@ -186,6 +190,7 @@ public class TestdataFactory {
         this.rolloutManagement = rolloutManagement;
         this.rolloutHandler = rolloutHandler;
         this.quotaManagement = quotaManagement;
+        this.tenantAware = tenantAware;
     }
 
     public static String randomString(final int len) {
@@ -1259,7 +1264,11 @@ public class TestdataFactory {
     }
 
     private void rolloutHandleAll() {
-        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("system", SYSTEM_ROLE), rolloutHandler::handleAll);
+        final String tenant = tenantAware.getCurrentTenant();
+        if (tenant == null) {
+            throw new IllegalStateException("Tenant is null");
+        }
+        runAs(withUserAndTenant("system", tenant, false, false, false, SYSTEM_ROLE), rolloutHandler::handleAll);
     }
 
     private Rollout reloadRollout(final Rollout rollout) {
