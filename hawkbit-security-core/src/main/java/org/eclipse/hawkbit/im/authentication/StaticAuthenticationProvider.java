@@ -40,7 +40,7 @@ public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
 
     public StaticAuthenticationProvider(
             final TenantAwareUserProperties tenantAwareUserProperties, final SecurityProperties securityProperties) {
-        setUserDetailsService(userDetailsService(tenantAwareUserProperties, securityProperties));
+        super(userDetailsService(tenantAwareUserProperties, securityProperties));
     }
 
     @Override

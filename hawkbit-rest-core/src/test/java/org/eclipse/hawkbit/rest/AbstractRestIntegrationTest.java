@@ -28,8 +28,7 @@ import org.springframework.web.filter.CharacterEncodingFilter;
  * Abstract Test for Rest tests.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@ContextConfiguration(classes = {
-        RestConfiguration.class, JpaRepositoryConfiguration.class, TestConfiguration.class })
+@ContextConfiguration(classes = { RestConfiguration.class, JpaRepositoryConfiguration.class, TestConfiguration.class })
 @WebAppConfiguration
 @AutoConfigureMockMvc
 public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTest {

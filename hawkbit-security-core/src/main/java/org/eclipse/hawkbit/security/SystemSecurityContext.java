@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.security;
 
 import java.io.Serial;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -42,62 +41,35 @@ public class SystemSecurityContext {
     private final TenantAware tenantAware;
     private final RoleHierarchy roleHierarchy;
 
-    /**
-     * Autowired constructor.
-     *
-     * @param tenantAware the tenant aware bean to retrieve the current tenant
-     */
     public SystemSecurityContext(final TenantAware tenantAware) {
         this(tenantAware, null);
     }
 
-    /**
-     * Autowired constructor.
-     *
-     * @param tenantAware the tenant aware bean to retrieve the current tenant
-     * @param roleHierarchy the roleHierarchy that is applied
-     */
     public SystemSecurityContext(final TenantAware tenantAware, final RoleHierarchy roleHierarchy) {
         this.tenantAware = tenantAware;
         this.roleHierarchy = roleHierarchy;
     }
 
     /**
-     * Runs a given {@link Callable} within a system security context, which is
-     * permitted to call secured system code. Often the system needs to call
-     * secured methods by its own without relying on the current security
-     * context e.g. if the current security context does not contain the
-     * necessary permission it's necessary to execute code as system code to
-     * execute necessary methods and functionality.
-     * <br/>
-     * The security context will be switched to the system code and back after
-     * the callable is called.
-     * <br/>
-     * The system code is executed for a current tenant by using the
-     * {@link TenantAware#getCurrentTenant()}.
+     * Runs a given {@link Callable} within a system security context, which is permitted to call secured system code. Often the system needs
+     * to call secured methods by its own without relying on the current security context e.g. if the current security context does not contain
+     * the necessary permission it's necessary to execute code as system code to execute necessary methods and functionality. <br/>
+     * The security context will be switched to the system code and back after the callable is called. <br/>
+     * The system code is executed for a current tenant by using the {@link TenantAware#getCurrentTenant()}.
      *
      * @param callable the callable to call within the system security context
      * @return the return value of the {@link Callable#call()} method.
      */
-    // Exception squid:S2221 - Callable declares Exception
-    @SuppressWarnings("squid:S2221")
     public <T> T runAsSystem(final Callable<T> callable) {
         return runAsSystemAsTenant(callable, tenantAware.getCurrentTenant());
     }
 
     /**
-     * Runs a given {@link Callable} within a system security context, which is
-     * permitted to call secured system code. Often the system needs to call
-     * secured methods by its own without relying on the current security
-     * context e.g. if the current security context does not contain the
-     * necessary permission it's necessary to execute code as system code to
-     * execute necessary methods and functionality.
-     *
-     * The security context will be switched to the system code and back after
-     * the callable is called.
-     *
-     * The system code is executed for a specific given tenant by using the
-     * {@link TenantAware}.
+     * Runs a given {@link Callable} within a system security context, which is permitted to call secured system code. Often the system needs
+     * to call secured methods by its own without relying on the current security context e.g. if the current security context does not contain
+     * the necessary permission it's necessary to execute code as system code to execute necessary methods and functionality.<br/>
+     * The security context will be switched to the system code and back after the callable is called.<br/>
+     * The system code is executed for a specific given tenant by using the {@link TenantAware}.
      *
      * @param callable the callable to call within the system security context
      * @param tenant the tenant to act as system code
@@ -121,20 +93,16 @@ public class SystemSecurityContext {
 
     /**
      * Runs a given {@link Callable} within a system security context, which has the provided {@link GrantedAuthority}s to successfully
-     * run the {@link Callable}.
-     * <br/>
+     * run the {@link Callable}.<br/>
      * The security context will be switched to a new {@link SecurityContext} and back after the callable is called.
      *
      * @param tenant under which the {@link Callable#call()} must be executed.
      * @param callable to call within the security context
      * @return the return value of the {@link Callable#call()} method.
      */
-    // The callable API throws a Exception and not a specific one
-    @SuppressWarnings({ "squid:S2221", "squid:S00112" })
     public <T> T runAsControllerAsTenant(@NotEmpty final String tenant, @NotNull final Callable<T> callable) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
-        List<SimpleGrantedAuthority> authorities = Collections
-                .singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS));
+        final List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS));
         try {
             return tenantAware.runAsTenant(tenant, () -> {
                 setCustomSecurityContext(tenant, oldContext.getAuthentication().getPrincipal(), authorities);
@@ -152,6 +120,7 @@ public class SystemSecurityContext {
         return SecurityContextHolder.getContext().getAuthentication() instanceof SystemCodeAuthentication;
     }
 
+    @SuppressWarnings("java:S3776") // java:S3776 - better in one place for better readability
     public boolean hasPermission(final String permission) {
         final SecurityContext context = SecurityContextHolder.getContext();
         if (context != null) {
@@ -180,8 +149,8 @@ public class SystemSecurityContext {
         SecurityContextHolder.setContext(securityContextImpl);
     }
 
-    private void setCustomSecurityContext(final String tenantId, final Object principal,
-            final Collection<? extends GrantedAuthority> authorities) {
+    private void setCustomSecurityContext(
+            final String tenantId, final Object principal, final Collection<? extends GrantedAuthority> authorities) {
         final AnonymousAuthenticationToken authenticationToken = new AnonymousAuthenticationToken(
                 UUID.randomUUID().toString(), principal, authorities);
         authenticationToken.setDetails(new TenantAwareAuthenticationDetails(tenantId, true));
@@ -200,8 +169,7 @@ public class SystemSecurityContext {
         @Serial
         private static final long serialVersionUID = 1L;
 
-        private static final List<SimpleGrantedAuthority> AUTHORITIES =
-                Collections.singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
+        private static final List<SimpleGrantedAuthority> AUTHORITIES = List.of(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
         private final Authentication oldAuthentication;
 
         private SystemCodeAuthentication(final Authentication oldAuthentication) {
@@ -240,7 +208,7 @@ public class SystemSecurityContext {
 
         @Override
         public void setAuthenticated(final boolean isAuthenticated) {
-            // not needed
+            throw new UnsupportedOperationException();
         }
     }
 }
