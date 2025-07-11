@@ -114,7 +114,10 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
                                 .setHeader(UPDATE)
                                 .setAutoWidth(true)
                                 .setFlexGrow(0).setKey("updateStatus").setSortable(true);
+                        // todo remove controller id and filter by name instead ?
                         grid.addColumn(MgmtTarget::getControllerId).setHeader(CONTROLLER_ID).setAutoWidth(true).setKey("id").setSortable(true);
+                        grid.addColumn(Utils.localDateTimeRenderer(MgmtTarget::getLastModifiedAt)).setHeader(LAST_MODIFIED_AT).setAutoWidth(
+                                true).setKey("lastModifiedAt").setSortable(true);
                         grid.addColumn(MgmtTarget::getName).setHeader(Constants.NAME).setAutoWidth(true).setKey("name").setSortable(true);
                         grid.addColumn(MgmtTarget::getTargetTypeName).setHeader(Constants.TYPE).setAutoWidth(true).setKey("targetType")
                                 .setSortable(true);
@@ -124,7 +127,8 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
                     }
                 },
                 (query, filter) -> hawkbitClient.getTargetRestApi()
-                        .getTargets(filter, query.getOffset(), query.getPageSize(), Utils.getSortParam(query.getSortOrders()))
+                        .getTargets(filter, query.getOffset(), query.getPageSize(), Utils.getSortParam(query.getSortOrders(),
+                                "lastModifiedAt:desc"))
                         .getBody()
                         .getContent()
                         .stream().map(m -> TargetWithDs.from(hawkbitClient, m)),

@@ -283,12 +283,16 @@ public class Utils {
     }
 
     public static String getSortParam(List<QuerySortOrder> querySortOrders) {
+        return getSortParam(querySortOrders, null);
+    }
+
+    public static String getSortParam(List<QuerySortOrder> querySortOrders, String defaultSort) {
         if (!querySortOrders.isEmpty()) {
             QuerySortOrder firstSort = querySortOrders.get(0);
             String order = firstSort.getDirection() == SortDirection.ASCENDING ? "asc" : "desc";
             return String.format("%s:%s", firstSort.getSorted(), order);
         }
-        return null;
+        return defaultSort;
     }
 
     public static String durationFromMillis(Long time) {
