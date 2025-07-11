@@ -45,10 +45,10 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(String targetGroup, int pagingOffsetParam, int pagingLimitParam, String sortParam) {
+    public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(String group, int pagingOffsetParam, int pagingLimitParam, String sortParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeTargetSortParam(sortParam));
 
-        final Page<Target> targets = targetManagement.findTargetsByGroup(targetGroup, false, pageable);
+        final Page<Target> targets = targetManagement.findTargetsByGroup(group, false, pageable);
 
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(targets.getContent(), tenantConfigHelper);
         return ResponseEntity.ok(new PagedList<>(rest, targets.getTotalElements()));
@@ -65,15 +65,21 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> assignTargetsToGroup(String targetGroup, List<String> controllerIds) {
-        targetManagement.assignTargetsWithGroup(targetGroup, controllerIds);
+    public ResponseEntity<Void> assignTargetsToGroup(String group, List<String> controllerIds) {
+        targetManagement.assignTargetsWithGroup(group, controllerIds);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> assignTargetsToGroupWithSubgroups(String targetGroup, List<String> controllerIds) {
-        targetManagement.assignTargetsWithGroup(targetGroup, controllerIds);
+    public ResponseEntity<Void> assignTargetsToGroupWithSubgroups(String group, List<String> controllerIds) {
+        targetManagement.assignTargetsWithGroup(group, controllerIds);
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> assignTargetsToGroupWithRsql(String group, String rsql) {
+        targetManagement.assignTargetGroupWithRsql(group, rsql);
+        return null;
     }
 
     @Override
@@ -97,12 +103,6 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
         return ResponseEntity.ok().build();
     }
 
-//    @Override
-//    public ResponseEntity<Void> unassignTargetGroupWithRsql(String rsql) {
-//        targetManagement.assignTargetGroupWithRsql(null, rsql);
-//        return ResponseEntity.ok().build();
-//    }
-
     @Override
     public ResponseEntity<List<String>> getTargetGroups() {
         final List<String> groups = targetManagement.findGroups();
@@ -110,14 +110,8 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> assignTargetToGroup(String controllerId, String targetGroup) {
-        targetManagement.assignTargetGroup(controllerId, targetGroup);
-        return ResponseEntity.ok().build();
-    }
-
-    @Override
-    public ResponseEntity<Void> assignTargetsToGroup(final String targetGroup, final String rsql) {
-        targetManagement.assignTargetGroupWithRsql(targetGroup, rsql);
+    public ResponseEntity<Void> assignTargetsToGroup(final String group, final String rsql) {
+        targetManagement.assignTargetGroupWithRsql(group, rsql);
         return ResponseEntity.ok().build();
     }
 }

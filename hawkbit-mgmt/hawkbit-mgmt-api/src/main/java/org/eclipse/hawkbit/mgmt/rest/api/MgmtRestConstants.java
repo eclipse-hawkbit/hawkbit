@@ -169,7 +169,7 @@ public final class MgmtRestConstants {
     /**
      * Target group URL mapping rest resource
      */
-    public static final String TARGET_GROUP_TARGETS_REQUEST_MAPPING = "/{targetGroup}/assigned";
+    public static final String TARGET_GROUP_TARGETS_REQUEST_MAPPING = "/{group}/assigned";
     /**
      * The default offset parameter in case the offset parameter is not present in the request.
      *

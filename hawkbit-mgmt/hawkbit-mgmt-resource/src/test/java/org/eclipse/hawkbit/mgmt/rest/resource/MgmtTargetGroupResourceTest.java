@@ -223,23 +223,6 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
     }
 
     @Test
-    void shouldUpdateSingleTargetGroup() throws Exception {
-        targetManagement.create(entityFactory.target().create().controllerId("target1").group("Europe"));
-
-        mvc.perform(put(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/target1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("group", "Asia"))
-                .andExpect(status().isOk());
-
-        mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/asia/assigned")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("content", Matchers.hasSize(1)))
-                .andExpect(jsonPath("content.[0].controllerId", Matchers.equalTo("target1")));
-    }
-
-    @Test
     void shouldUpdateTargetGroupsOfTargetsMatchingTheRsqlFilter() throws Exception {
         targetManagement.create(entityFactory.target().create().controllerId("target1").group("Europe"));
         targetManagement.create(entityFactory.target().create().controllerId("target2").group("Europe"));

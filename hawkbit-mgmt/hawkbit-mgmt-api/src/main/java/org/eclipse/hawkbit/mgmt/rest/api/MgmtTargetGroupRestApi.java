@@ -45,7 +45,7 @@ public interface MgmtTargetGroupRestApi {
      * Handles the GET request of retrieving a list of assigned targets for a specific group. Complex grouping (subgroups) not supported here.
      * For complex grouping use the analogical resource with query parameter for target group.
      *
-     * @param targetGroup - target group
+     * @param group - target group
      * @param pagingOffsetParam the offset of list of targets for pagination, might not be present in the rest request then default value will
      *         be applied
      * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
@@ -73,7 +73,7 @@ public interface MgmtTargetGroupRestApi {
     ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(
             @PathVariable
             @Schema(description = "The target group of the targets")
-            String targetGroup,
+            String group,
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
@@ -152,7 +152,7 @@ public interface MgmtTargetGroupRestApi {
      * Assigns targets to a given group.
      * For complex groups use analogical method with query parameters.
      *
-     * @param targetGroup - target group to be assigned
+     * @param group - target group to be assigned
      * @param controllerIds - list of controllerIds for targets to be assigned
      *
      */
@@ -177,9 +177,9 @@ public interface MgmtTargetGroupRestApi {
     })
     @PutMapping(value = MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_GROUP_TARGETS_REQUEST_MAPPING)
     ResponseEntity<Void> assignTargetsToGroup(
-            @PathVariable(value = "targetGroup")
+            @PathVariable(value = "group")
             @Schema(description = "The target group to be set. Sub-grouping not allowed here, for sub-grouping use the analogical method with query parameter.")
-            String targetGroup,
+            String group,
             @Schema(description = "List of controller ids to be assigned", example = "[\"controllerId1\", \"controllerId2\"]")
             @RequestBody List<String> controllerIds
     );
@@ -188,12 +188,12 @@ public interface MgmtTargetGroupRestApi {
      * Assigns targets to a given group.
      * Complex (subgroups) are allowed - e.g. Parent/Child
      *
-     * @param targetGroup - target group to be assigned
+     * @param group - target group to be assigned
      * @param controllerIds - list of controllerIds for targets to be assigned
      *
      */
     @Operation(summary = "Assign target(s) to given group",
-            description = "Handles the POST request of target assignment. Already assigned target will be ignored. " +
+            description = "Handles the PUT request of assign target group." +
                     "Subgroups are allowed - e.g. Parent/Child")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully assigned"),
@@ -215,9 +215,46 @@ public interface MgmtTargetGroupRestApi {
     ResponseEntity<Void> assignTargetsToGroupWithSubgroups(
             @RequestParam("group")
             @Schema(description = "The target group to be set. Sub-grouping is allowed here - '/' could be used for subgroups")
-            final String targetGroup,
+            final String group,
             @Schema(description = "List of controller ids to be assigned", example = "[\"controllerId1\", \"controllerId2\"]")
             @RequestBody List<String> controllerIds
+    );
+
+    /**
+     * Assigns targets to a given group.
+     * Complex (subgroups) are allowed - e.g. Parent/Child
+     *
+     * @param group - target group to be assigned
+     * @param rsql - filter to match desired targets
+     *
+     */
+    @Operation(summary = "Assign target(s) to given group by rsql",
+            description = "Handles the PUT request of target group assignment." +
+                    "Subgroups are NOT allowed here - e.g. Parent/Child")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully assigned"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
+                    "changed (i.e. read-only) or data volume restriction applies."),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
+                    "user in another request at the same time. You may retry your modification request."),
+            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
+                    "supported by the server for this resource."),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.")
+    })
+    @PutMapping(value = MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/{group}")
+    ResponseEntity<Void> assignTargetsToGroupWithRsql(
+            @PathVariable final String group,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH)
+            @Schema(description = """
+                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
+                    available fields.""")
+            final String rsql
     );
 
     /**
@@ -299,44 +336,10 @@ public interface MgmtTargetGroupRestApi {
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<String>> getTargetGroups();
 
-    /**
-     * Assign single target to a provided target group
-     *
-     * @param controllerId - controllerId of the target
-     * @param targetGroup - target group to be assigned
-     *
-     */
-    @Operation(summary = "Assign single target to provided target group",
-            description = "Handles the GET request of assigning single target to a provided target group" +
-                    "Subgroups are allowed - e.g. Parent/Child")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully assigned"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
-            @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
-                    "changed (i.e. read-only) or data volume restriction applies."),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
-            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
-                    "user in another request at the same time. You may retry your modification request."),
-            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
-                    "supported by the server for this resource."),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.")
-    })
-    @PutMapping(value = MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/{controllerId}")
-    ResponseEntity<Void> assignTargetToGroup(
-            @PathVariable
-            @Schema(description = "Target controllerId") final String controllerId,
-            @RequestParam(name = "group")
-            @Schema(description = "The new target group for the update")
-            final String targetGroup);
-
 
     /**
      * Assign targets matching a rsql filter to a provided target group
-     * @param targetGroup - target group to be assigned
+     * @param group - target group to be assigned
      * @param rsqlParam - rsql filter based on Target fields
      */
     @Operation(summary = "Assign targets matching a rsql filter to provided target group",
@@ -362,7 +365,7 @@ public interface MgmtTargetGroupRestApi {
     ResponseEntity<Void> assignTargetsToGroup(
             @RequestParam(name = "group")
             @Schema(description = "The target group to be set. Sub-grouping is allowed here - '/' could be used for subgroups")
-            final String targetGroup,
+            final String group,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH)
             @Schema(description = """
                     Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
