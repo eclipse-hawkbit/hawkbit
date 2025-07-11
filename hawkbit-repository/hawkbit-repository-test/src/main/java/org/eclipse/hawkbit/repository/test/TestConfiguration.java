@@ -169,11 +169,11 @@ public class TestConfiguration implements AsyncConfigurer {
             final DeploymentManagement deploymentManagement, final DistributionSetTagManagement distributionSetTagManagement,
             final RolloutManagement rolloutManagement, final RolloutHandler rolloutHandler,
             final QuotaManagement quotaManagement,
-            final EntityFactory entityFactory) {
+            final EntityFactory entityFactory, final TenantAware tenantAware) {
         return new TestdataFactory(controllerManagement, artifactManagement, softwareModuleManagement, softwareModuleTypeManagement,
                 distributionSetManagement, distributionSetInvalidationManagement, distributionSetTypeManagement, targetManagement,
                 targetFilterQueryManagement, targetTypeManagement, targetTagManagement, deploymentManagement,
-                distributionSetTagManagement, rolloutManagement, rolloutHandler, quotaManagement, entityFactory);
+                distributionSetTagManagement, rolloutManagement, rolloutHandler, quotaManagement, entityFactory, tenantAware);
     }
 
     @Bean
