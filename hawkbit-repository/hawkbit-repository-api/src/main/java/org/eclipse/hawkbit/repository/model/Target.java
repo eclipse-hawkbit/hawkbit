@@ -129,5 +129,5 @@ public interface Target extends NamedEntity {
      *
      * @return the group of the target
      */
-    String getTargetGroup();
+    String getGroup();
 }

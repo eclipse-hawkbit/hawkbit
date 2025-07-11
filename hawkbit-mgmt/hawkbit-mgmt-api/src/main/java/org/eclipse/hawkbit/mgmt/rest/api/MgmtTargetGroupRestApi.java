@@ -223,7 +223,8 @@ public interface MgmtTargetGroupRestApi {
     /**
      * Unassigns targets from their groups
      *
-     * @param controllerIds - list of targets to be unassigned
+     * @param controllerIds - list of targets to be unassigned.
+     * @param rsql - if no list of targets provided, an option by rsql filter is provided
      */
     @Operation(summary = "Unassign targets from their target groups",
             description = "Handles the DELETE request to unassign the given target(s).")
@@ -241,9 +242,41 @@ public interface MgmtTargetGroupRestApi {
     })
     @DeleteMapping(value = MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
     ResponseEntity<Void> unassignTargetsFromGroup(
-            @RequestBody
+            @RequestBody(required = false)
             @Schema(description = "List of controller ids to be unassigned from their groups", example = "[\"controllerId1\", \"controllerId2\"]")
-            List<String> controllerIds
+            List<String> controllerIds,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
+            @Schema(description = """
+                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
+                    available fields.""")
+            final String rsql
+
+    );
+
+    /**
+     * Unassign provided target from its group
+     *
+     * @param controllerId - target controllerId
+     */
+    @Operation(summary = "Unassign target from its group",
+            description = "Handles the DELETE request to unassign the given target(s).")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
+                    "changed (i.e. read-only) or data volume restriction applies."),
+            @ApiResponse(responseCode = "404", description = "Target not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.")
+    })
+    @DeleteMapping(value = MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/{controllerId}/assigned")
+    ResponseEntity<Void> unnasignTargetFromGroup(
+            @PathVariable final String controllerId
     );
 
     /**

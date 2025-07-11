@@ -98,6 +98,10 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget> {
     @Query("DELETE FROM JpaTarget t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
 
-    @Query("SELECT DISTINCT t.targetGroup FROM JpaTarget t WHERE t.targetGroup IS NOT NULL")
+    /**
+     * Finds all available distinct target groups
+     * @return all target groups
+     */
+    @Query(value = "SELECT DISTINCT target_group FROM sp_target WHERE target_group IS NOT NULL", nativeQuery = true)
     List<String> findDistinctGroups();
 }

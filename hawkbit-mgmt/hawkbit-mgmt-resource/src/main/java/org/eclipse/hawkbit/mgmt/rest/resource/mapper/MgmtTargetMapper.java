@@ -140,7 +140,7 @@ public final class MgmtTargetMapper {
         targetRest.setDescription(target.getDescription());
         targetRest.setName(target.getName());
         targetRest.setUpdateStatus(target.getUpdateStatus().name().toLowerCase());
-        targetRest.setGroup(target.getTargetGroup());
+        targetRest.setGroup(target.getGroup());
 
         final URI address = target.getAddress();
         if (address != null) {
@@ -326,7 +326,7 @@ public final class MgmtTargetMapper {
     private static TargetCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
         return entityFactory.target().create().controllerId(targetRest.getControllerId()).name(targetRest.getName())
                 .description(targetRest.getDescription()).securityToken(targetRest.getSecurityToken())
-                .address(targetRest.getAddress()).targetType(targetRest.getTargetType()).targetGroup(targetRest.getGroup());
+                .address(targetRest.getAddress()).targetType(targetRest.getTargetType()).group(targetRest.getGroup());
     }
 
     private static String getType(final Action action) {

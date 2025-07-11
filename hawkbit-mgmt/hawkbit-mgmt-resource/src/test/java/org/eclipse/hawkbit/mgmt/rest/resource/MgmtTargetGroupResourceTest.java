@@ -33,9 +33,9 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
     void shouldRetrieveDistinctTargetGroups() throws Exception {
 
         final List<String> expectedGroups = List.of("Europe", "Asia");
-        targetManagement.create(entityFactory.target().create().controllerId("target1").targetGroup("Europe"));
-        targetManagement.create(entityFactory.target().create().controllerId("target2").targetGroup("Asia"));
-        targetManagement.create(entityFactory.target().create().controllerId("target3").targetGroup("Europe"));
+        targetManagement.create(entityFactory.target().create().controllerId("target1").group("Europe"));
+        targetManagement.create(entityFactory.target().create().controllerId("target2").group("Asia"));
+        targetManagement.create(entityFactory.target().create().controllerId("target3").group("Europe"));
 
         mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -46,8 +46,8 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
 
     @Test
     void shouldRetrieveTargetsFilteredByGroupAndParentGroupCorrectly() throws Exception {
-        targetManagement.create(entityFactory.target().create().controllerId("target1").targetGroup("Europe/West"));
-        targetManagement.create(entityFactory.target().create().controllerId("target2").targetGroup("Europe/East"));
+        targetManagement.create(entityFactory.target().create().controllerId("target1").group("Europe/West"));
+        targetManagement.create(entityFactory.target().create().controllerId("target2").group("Europe/East"));
 
         mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
                 .param("group", "Europe/East")
@@ -81,9 +81,9 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
 
     @Test
     void shouldGetAssignedTargetsToSpecificGroup() throws Exception {
-        targetManagement.create(entityFactory.target().create().controllerId("target1").targetGroup("Europe"));
-        targetManagement.create(entityFactory.target().create().controllerId("target2").targetGroup("US"));
-        targetManagement.create(entityFactory.target().create().controllerId("target3").targetGroup("Europe"));
+        targetManagement.create(entityFactory.target().create().controllerId("target1").group("Europe"));
+        targetManagement.create(entityFactory.target().create().controllerId("target2").group("US"));
+        targetManagement.create(entityFactory.target().create().controllerId("target3").group("Europe"));
 
         mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/Europe/assigned")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
@@ -95,9 +95,9 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
 
     @Test
     void shouldAssignListOfTargetsToASpecificGroup() throws Exception {
-        targetManagement.create(entityFactory.target().create().controllerId("target1").targetGroup("Europe"));
+        targetManagement.create(entityFactory.target().create().controllerId("target1").group("Europe"));
         targetManagement.create(entityFactory.target().create().controllerId("target2"));
-        targetManagement.create(entityFactory.target().create().controllerId("target3").targetGroup("Europe"));
+        targetManagement.create(entityFactory.target().create().controllerId("target3").group("Europe"));
 
         mvc.perform(put(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/newGroup/assigned")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -125,9 +125,9 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
 
     @Test
     void shouldAssignListOfTargetsToProvidedGroupWithSubgroup() throws Exception {
-        targetManagement.create(entityFactory.target().create().controllerId("target1").targetGroup("Europe"));
+        targetManagement.create(entityFactory.target().create().controllerId("target1").group("Europe"));
         targetManagement.create(entityFactory.target().create().controllerId("target2"));
-        targetManagement.create(entityFactory.target().create().controllerId("target3").targetGroup("US"));
+        targetManagement.create(entityFactory.target().create().controllerId("target3").group("US"));
 
         mvc.perform(put(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -155,8 +155,8 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
 
     @Test
     void shouldUnassignTargetsFromGroup() throws Exception {
-        targetManagement.create(entityFactory.target().create().controllerId("target1").targetGroup("Europe"));
-        targetManagement.create(entityFactory.target().create().controllerId("target2").targetGroup("Europe"));
+        targetManagement.create(entityFactory.target().create().controllerId("target1").group("Europe"));
+        targetManagement.create(entityFactory.target().create().controllerId("target2").group("Europe"));
 
         mvc.perform(delete(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -178,8 +178,53 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
     }
 
     @Test
+    void shouldUnassignTargetsFromGroupByRsqlFilter() throws Exception {
+        targetManagement.create(entityFactory.target().create().controllerId("target1").group("Europe"));
+        targetManagement.create(entityFactory.target().create().controllerId("target2").group("Europe"));
+        targetManagement.create(entityFactory.target().create().controllerId("nonMatchingTarget").group("Europe"));
+
+        mvc.perform(delete(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("q", "controllerId==target*"))
+                .andExpect(status().isOk());
+
+        mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
+                        .param("group", "Europe")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("content", Matchers.hasSize(1)))
+                .andExpect(jsonPath("content.[0].controllerId", Matchers.equalTo("nonMatchingTarget")));
+    }
+
+    @Test
+    void shouldUnassignSingleTargetFromGroup() throws Exception {
+        targetManagement.create(entityFactory.target().create().controllerId("target1").group("Europe"));
+
+        mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
+                        .param("group", "Europe")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("content", Matchers.hasSize(1)))
+                .andExpect(jsonPath("content.[0].controllerId", Matchers.equalTo("target1")));
+
+        mvc.perform(delete(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/target1/assigned")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
+                        .param("group", "Europe")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("content", Matchers.hasSize(0)));
+
+    }
+
+    @Test
     void shouldUpdateSingleTargetGroup() throws Exception {
-        targetManagement.create(entityFactory.target().create().controllerId("target1").targetGroup("Europe"));
+        targetManagement.create(entityFactory.target().create().controllerId("target1").group("Europe"));
 
         mvc.perform(put(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/target1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -196,11 +241,11 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
 
     @Test
     void shouldUpdateTargetGroupsOfTargetsMatchingTheRsqlFilter() throws Exception {
-        targetManagement.create(entityFactory.target().create().controllerId("target1").targetGroup("Europe"));
-        targetManagement.create(entityFactory.target().create().controllerId("target2").targetGroup("Europe"));
-        targetManagement.create(entityFactory.target().create().controllerId("target3").targetGroup("Europe"));
-        targetManagement.create(entityFactory.target().create().controllerId("shouldNotBeUpdated1").targetGroup("Europe"));
-        targetManagement.create(entityFactory.target().create().controllerId("shouldNotBeUpdated2").targetGroup("Europe"));
+        targetManagement.create(entityFactory.target().create().controllerId("target1").group("Europe"));
+        targetManagement.create(entityFactory.target().create().controllerId("target2").group("Europe"));
+        targetManagement.create(entityFactory.target().create().controllerId("target3").group("Europe"));
+        targetManagement.create(entityFactory.target().create().controllerId("shouldNotBeUpdated1").group("Europe"));
+        targetManagement.create(entityFactory.target().create().controllerId("shouldNotBeUpdated2").group("Europe"));
 
         mvc.perform(put(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING)
                         .contentType(MediaType.APPLICATION_JSON)

@@ -602,34 +602,24 @@ public interface TargetManagement {
     Target assignType(@NotEmpty String controllerId, @NotNull Long targetTypeId);
 
     /**
-     * Updates the target group of given {@link Target}.
+     * Assigns the target group to a given {@link Target}.
      *
      * @param controllerId to be updated
-     * @param targetGroup - to be assigned to target
+     * @param group - to be assigned to target
      * @return updated target
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    void updateTargetGroup(@NotEmpty String controllerId, @NotNull String targetGroup);
+    void assignTargetGroup(@NotEmpty String controllerId, String group);
 
     /**
-     * Find targets associated with the provided group - direct eq operation
-     *
-     * @param targetGroup to be filtered for
-     * @param pageable page parameter
-     * @return targets associated with provided targetGroup
+     * Finds targets by group or subgroup.
+     * @param group - provided group/subgroup to filter for
+     * @param withSubgroups - whether is a subgroup or not e.g. x/y/z
+     * @param pageable - page parameter
+     * @return all matching targets to provided group/subgroup
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findTargetsByGroup(@NotEmpty String targetGroup, @NotNull Pageable pageable);
-
-    /**
-     * Find targets by provided group "filter". Which basically translates to a sql like operation
-     *
-     * @param groupFilter filter for target group based on sql like
-     * @param pageable page param
-     * @return targets associated with provided group filter
-     */
-    Page<Target> findTargetsByGroupFilter(@NotEmpty String groupFilter, @NotNull Pageable pageable);
-
+    Page<Target> findTargetsByGroup(@NotEmpty String group, boolean withSubgroups, @NotNull Pageable pageable);
     /**
      * Finds all the distinct target groups in the scope of a tenant
      *
@@ -639,22 +629,22 @@ public interface TargetManagement {
     List<String> findGroups();
 
     /**
-     * Update the target group of the targets matching the provided rsql filter.
+     * Assigns the target group of the targets matching the provided rsql filter.
      *
      * @param group target group parameter
      * @param rsql rsql filter for {@link Target}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    void updateTargetGroupsWithRsql(@NotEmpty String group, @NotNull String rsql);
+    void assignTargetGroupWithRsql(String group, @NotNull String rsql);
 
     /**
-     * Updates the groups of targets which are in the provided list of controllerIds.
+     * Assigns the provided group to the targets which are in the provided list of controllerIds.
      *
      * @param group target group parameter
      * @param controllerIds list of targets
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    void updateTargetsWithGroup(String group, @NotEmpty List<String> controllerIds);
+    void assignTargetsWithGroup(String group, @NotEmpty List<String> controllerIds);
 
     /**
      * updates the {@link Target}.

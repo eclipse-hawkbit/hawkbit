@@ -73,8 +73,8 @@ public interface TargetUpdate {
 
     /**
      *
-     * @param group for {@link Target#getTargetGroup()}
+     * @param group for {@link Target#getGroup()}
      * @return updated builder instance
      */
-    TargetUpdate targetGroup(String group);
+    TargetUpdate group(String group);
 }

@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
@@ -25,11 +24,10 @@ import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitizeTargetSortParam;
 
@@ -50,7 +48,7 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
     public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(String targetGroup, int pagingOffsetParam, int pagingLimitParam, String sortParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeTargetSortParam(sortParam));
 
-        final Page<Target> targets = targetManagement.findTargetsByGroup(targetGroup, pageable);
+        final Page<Target> targets = targetManagement.findTargetsByGroup(targetGroup, false, pageable);
 
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(targets.getContent(), tenantConfigHelper);
         return ResponseEntity.ok(new PagedList<>(rest, targets.getTotalElements()));
@@ -60,19 +58,7 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
     public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargetsWithSubgroups(String groupFilter, boolean subgroups, int pagingOffsetParam, int pagingLimitParam, String sortParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeTargetSortParam(sortParam));
 
-        Page<Target> targets;
-        if (subgroups) {
-            String groupFilterRegex = "^[^*%]*\\*?$";
-            Matcher matcher = Pattern.compile(groupFilterRegex).matcher(groupFilter);
-            if (!matcher.matches()) {
-                throw new ValidationException("Provided group filter contains wildcard in different place than in the end");
-            }
-            groupFilter = groupFilter.replace("*", "%");
-
-            targets = targetManagement.findTargetsByGroupFilter(groupFilter, pageable);
-        } else {
-            targets = targetManagement.findTargetsByGroup(groupFilter, pageable);
-        }
+        final Page<Target> targets = targetManagement.findTargetsByGroup(groupFilter, subgroups, pageable);
 
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(targets.getContent(), tenantConfigHelper);
         return ResponseEntity.ok(new PagedList<>(rest, targets.getTotalElements()));
@@ -80,21 +66,42 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
 
     @Override
     public ResponseEntity<Void> assignTargetsToGroup(String targetGroup, List<String> controllerIds) {
-        targetManagement.updateTargetsWithGroup(targetGroup, controllerIds);
+        targetManagement.assignTargetsWithGroup(targetGroup, controllerIds);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Void> assignTargetsToGroupWithSubgroups(String targetGroup, List<String> controllerIds) {
-        targetManagement.updateTargetsWithGroup(targetGroup, controllerIds);
+        targetManagement.assignTargetsWithGroup(targetGroup, controllerIds);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> unassignTargetsFromGroup(List<String> controllerIds) {
-        targetManagement.updateTargetsWithGroup(null, controllerIds);
+    public ResponseEntity<Void> unassignTargetsFromGroup(List<String> controllerIds, String rsql) {
+        if (!ObjectUtils.isEmpty(controllerIds)) {
+            log.debug("Unassigning group from list of controllerIds {}", controllerIds);
+            targetManagement.assignTargetsWithGroup(null, controllerIds);
+        } else if (!ObjectUtils.isEmpty(rsql)) {
+            log.debug("Unassigning group from target rsql filter {} .", rsql);
+            targetManagement.assignTargetGroupWithRsql(null, rsql);
+        } else {
+            throw new ValidationException("Parameters controllerIds & rsql cannot be both null or empty.");
+        }
+
         return ResponseEntity.ok().build();
     }
+
+    @Override
+    public ResponseEntity<Void> unnasignTargetFromGroup(String controllerId) {
+        targetManagement.assignTargetGroup(controllerId, null);
+        return ResponseEntity.ok().build();
+    }
+
+//    @Override
+//    public ResponseEntity<Void> unassignTargetGroupWithRsql(String rsql) {
+//        targetManagement.assignTargetGroupWithRsql(null, rsql);
+//        return ResponseEntity.ok().build();
+//    }
 
     @Override
     public ResponseEntity<List<String>> getTargetGroups() {
@@ -104,13 +111,13 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
 
     @Override
     public ResponseEntity<Void> assignTargetToGroup(String controllerId, String targetGroup) {
-        targetManagement.updateTargetGroup(controllerId, targetGroup);
+        targetManagement.assignTargetGroup(controllerId, targetGroup);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Void> assignTargetsToGroup(final String targetGroup, final String rsql) {
-        targetManagement.updateTargetGroupsWithRsql(targetGroup, rsql);
+        targetManagement.assignTargetGroupWithRsql(targetGroup, rsql);
         return ResponseEntity.ok().build();
     }
 }

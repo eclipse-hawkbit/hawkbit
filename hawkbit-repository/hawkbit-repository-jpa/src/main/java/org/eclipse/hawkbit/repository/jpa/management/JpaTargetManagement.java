@@ -23,6 +23,8 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
@@ -33,6 +35,7 @@ import jakarta.persistence.criteria.MapJoin;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.metamodel.MapAttribute;
+import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotEmpty;
 
 import org.apache.commons.collections4.ListUtils;
@@ -568,20 +571,30 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void updateTargetGroup(String controllerId, String targetGroup) {
+    public void assignTargetGroup(final String controllerId, final String group) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
-        target.setTargetGroup(targetGroup);
+        target.setGroup(group);
         targetRepository.save(target);
     }
 
     @Override
-    public Page<Target> findTargetsByGroup(String group, Pageable pageable) {
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, List.of(TargetSpecifications.eqTargetGroup(group)), pageable);
-    }
+    public Page<Target> findTargetsByGroup(String group, final boolean withSubgroups, final Pageable pageable) {
+        if (withSubgroups) {
+            // should have wildcard only in the end - still do not support */y search
+            // should not have %
+            final String groupFilterRegex = "^[^*%]*\\*?$";
+            Matcher matcher = Pattern.compile(groupFilterRegex).matcher(group);
+            if (!matcher.matches()) {
+                throw new ValidationException("Provided group filter contains wildcard in different place than in the end");
+            }
+            group = group.replace("*", "%");
 
-    @Override
-    public Page<Target> findTargetsByGroupFilter(String groupFilter, Pageable pageable) {
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, List.of(TargetSpecifications.likeTargetGroup(groupFilter)), pageable);
+            return JpaManagementHelper
+                    .findAllWithCountBySpec(targetRepository, List.of(TargetSpecifications.likeTargetGroup(group)), pageable);
+        } else {
+            return JpaManagementHelper
+                    .findAllWithCountBySpec(targetRepository, List.of(TargetSpecifications.eqTargetGroup(group)), pageable);
+        }
     }
 
     @Override
@@ -594,13 +607,13 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void updateTargetGroupsWithRsql(String group, String rsql) {
+    public void assignTargetGroupWithRsql(String group, String rsql) {
         final Specification<JpaTarget> rsqlSpecification = RsqlUtility.getInstance().buildRsqlSpecification(rsql, TargetFields.class);
 
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaUpdate<JpaTarget> criteriaUpdateQuery = cb.createCriteriaUpdate(JpaTarget.class);
         final Root<JpaTarget> root = criteriaUpdateQuery.getRoot();
-        criteriaUpdateQuery.set("targetGroup", group);
+        criteriaUpdateQuery.set("group", group);
         // get predicate from rsql specification using a dummy query in order to execute batch update
         final Predicate predicate = rsqlSpecification.toPredicate(root, entityManager.getCriteriaBuilder().createQuery(JpaTarget.class), cb);
         criteriaUpdateQuery.where(predicate);
@@ -612,14 +625,14 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void updateTargetsWithGroup(String group, List<String> controllerIds) {
+    public void assignTargetsWithGroup(String group, List<String> controllerIds) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaUpdate<JpaTarget> criteriaQuery = cb.createCriteriaUpdate(JpaTarget.class);
         Root<JpaTarget> root = criteriaQuery.from(JpaTarget.class);
         CriteriaBuilder.In<String> in = cb.in(root.get("controllerId"));
         controllerIds.forEach(in::value);
 
-        entityManager.createQuery(criteriaQuery.set("targetGroup", group).where(in)).executeUpdate();
+        entityManager.createQuery(criteriaQuery.set("group", group).where(in)).executeUpdate();
 
     }
 

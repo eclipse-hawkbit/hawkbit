@@ -77,7 +77,7 @@ public interface TargetCreate {
      * @param group for setting the group of the target
      * @return updated builder instance
      */
-    TargetCreate targetGroup(String group);
+    TargetCreate group(String group);
 
     /**
      * @return peek on current state of {@link Target} in the builder

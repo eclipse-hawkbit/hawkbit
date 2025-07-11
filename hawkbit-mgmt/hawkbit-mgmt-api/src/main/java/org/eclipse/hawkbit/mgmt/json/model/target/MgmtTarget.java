@@ -90,6 +90,9 @@ public class MgmtTarget extends MgmtNamedEntity {
     @Schema(description = "Controller ID", example = "123")
     private String controllerId;
 
+    @Schema(description = "Target group", example = "Europe/East")
+    private String group;
+
     @Schema(description = "If the target is in sync", example = "in_sync")
     private String updateStatus;
 
@@ -127,7 +130,4 @@ public class MgmtTarget extends MgmtNamedEntity {
 
     @Schema(description = "Present if user consent flow active. Indicates if auto-confirm is active", example = "false")
     private Boolean autoConfirmActive;
-
-    @Schema(description = "Target group", example = "Europe/East")
-    private String group;
 }
