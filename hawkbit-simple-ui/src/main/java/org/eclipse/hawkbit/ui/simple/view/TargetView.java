@@ -405,7 +405,7 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
             createdAt.setValue(new Date(target.getCreatedAt()).toString());
             lastModifiedBy.setValue(target.getLastModifiedBy());
             lastModifiedAt.setValue(new Date(target.getLastModifiedAt()).toString());
-            securityToken.setValue(target.getSecurityToken());
+            securityToken.setValue(Objects.requireNonNullElse(target.getSecurityToken(), ""));
             group.setValue(target.getGroup() != null ? target.getGroup() : "");
             targetAddress.setValue(target.getAddress() != null ? target.getAddress() : "");
 
