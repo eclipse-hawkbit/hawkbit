@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.repository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
@@ -96,4 +97,11 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget> {
     @Transactional
     @Query("DELETE FROM JpaTarget t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
+
+    /**
+     * Finds all available distinct target groups
+     * @return all target groups
+     */
+    @Query(value = "SELECT DISTINCT target_group FROM sp_target WHERE target_group IS NOT NULL", nativeQuery = true)
+    List<String> findDistinctGroups();
 }

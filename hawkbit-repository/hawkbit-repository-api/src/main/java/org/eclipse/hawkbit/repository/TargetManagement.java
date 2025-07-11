@@ -602,6 +602,51 @@ public interface TargetManagement {
     Target assignType(@NotEmpty String controllerId, @NotNull Long targetTypeId);
 
     /**
+     * Assigns the target group to a given {@link Target}.
+     *
+     * @param controllerId to be updated
+     * @param group - to be assigned to target
+     * @return updated target
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    void assignTargetGroup(@NotEmpty String controllerId, String group);
+
+    /**
+     * Finds targets by group or subgroup.
+     * @param group - provided group/subgroup to filter for
+     * @param withSubgroups - whether is a subgroup or not e.g. x/y/z
+     * @param pageable - page parameter
+     * @return all matching targets to provided group/subgroup
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<Target> findTargetsByGroup(@NotEmpty String group, boolean withSubgroups, @NotNull Pageable pageable);
+    /**
+     * Finds all the distinct target groups in the scope of a tenant
+     *
+     * @return list of all distinct target groups
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    List<String> findGroups();
+
+    /**
+     * Assigns the target group of the targets matching the provided rsql filter.
+     *
+     * @param group target group parameter
+     * @param rsql rsql filter for {@link Target}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    void assignTargetGroupWithRsql(String group, @NotNull String rsql);
+
+    /**
+     * Assigns the provided group to the targets which are in the provided list of controllerIds.
+     *
+     * @param group target group parameter
+     * @param controllerIds list of targets
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    void assignTargetsWithGroup(String group, @NotEmpty List<String> controllerIds);
+
+    /**
      * updates the {@link Target}.
      *
      * @param update to be updated

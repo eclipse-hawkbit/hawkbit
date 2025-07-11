@@ -29,6 +29,7 @@ public enum TargetFields implements RsqlQueryField {
     UPDATESTATUS("updateStatus"),
     IPADDRESS("address"),
     ATTRIBUTE("controllerAttributes"),
+    GROUP("group"),
     ASSIGNEDDS(
             "assignedDistributionSet",
             DistributionSetFields.NAME.getJpaEntityFieldName(), DistributionSetFields.VERSION.getJpaEntityFieldName()),

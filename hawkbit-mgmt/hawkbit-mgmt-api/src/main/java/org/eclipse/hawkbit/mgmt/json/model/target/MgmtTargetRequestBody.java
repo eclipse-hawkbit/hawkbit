@@ -42,4 +42,7 @@ public class MgmtTargetRequestBody {
 
     @Schema(description = "ID of the target type", example = "10")
     private Long targetType;
+
+    @Schema(description = "Target group", example = "Asia")
+    private String group;
 }

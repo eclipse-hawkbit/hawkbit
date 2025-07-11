@@ -34,6 +34,7 @@ public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T>
     protected TargetUpdateStatus status;
     protected Boolean requestAttributes;
     protected Long targetTypeId;
+    protected String group;
 
     protected AbstractTargetUpdateCreate(final String controllerId) {
         this.controllerId = AbstractBaseEntityBuilder.strip(controllerId);
@@ -83,6 +84,11 @@ public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T>
         return (T) this;
     }
 
+    public T group(final String group) {
+        this.group = group;
+        return (T) this;
+    }
+
     public String getControllerId() {
         return controllerId;
     }
@@ -106,5 +112,7 @@ public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T>
     public Long getTargetTypeId() {
         return targetTypeId;
     }
+
+    public Optional<String> getGroup() { return Optional.ofNullable(group); }
 
 }

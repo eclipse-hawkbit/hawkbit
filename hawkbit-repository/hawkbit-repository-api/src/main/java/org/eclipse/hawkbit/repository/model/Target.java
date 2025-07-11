@@ -124,4 +124,10 @@ public interface Target extends NamedEntity {
      *         {@link #getControllerAttributes()}.
      */
     boolean isRequestControllerAttributes();
+
+    /**
+     *
+     * @return the group of the target
+     */
+    String getGroup();
 }
