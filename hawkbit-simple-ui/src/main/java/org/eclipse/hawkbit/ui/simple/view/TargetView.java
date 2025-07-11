@@ -687,8 +687,8 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
                         } else {
                             icon = Utils.tooltip(VaadinIcon.ADJUST.create(), "Pending Update");
                             icon.setColor("orange");
-                        }
-                    } else if (action.getType().equals(MgmtAction.ACTION_UPDATE)) {
+                        }// todo getDetailStatus should return an enum from src/main/java/org/eclipse/hawkbit/repository/model/Action.java
+                    } else if (action.getType().equals(MgmtAction.ACTION_UPDATE) && action.getDetailStatus().equals("finished")) {
                         icon = Utils.tooltip(VaadinIcon.CHECK_CIRCLE.create(), "Updated");
                         icon.setColor("green");
                     } else {
