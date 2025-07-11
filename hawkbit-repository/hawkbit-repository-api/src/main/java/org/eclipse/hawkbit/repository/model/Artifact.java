@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
+import org.eclipse.hawkbit.repository.artifact.model.AbstractDbArtifact;
 
 /**
  * Binaries for a {@link SoftwareModule} Note: the decision which artifacts have

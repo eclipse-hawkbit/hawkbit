@@ -21,8 +21,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
+import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionHistory;

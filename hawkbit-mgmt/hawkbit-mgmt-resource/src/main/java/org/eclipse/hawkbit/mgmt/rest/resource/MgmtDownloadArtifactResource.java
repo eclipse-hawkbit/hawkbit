@@ -13,7 +13,7 @@ import java.io.InputStream;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadArtifactRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;

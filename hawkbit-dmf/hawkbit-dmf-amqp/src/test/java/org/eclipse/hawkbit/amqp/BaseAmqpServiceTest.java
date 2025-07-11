@@ -31,11 +31,11 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConversionException;
 
-@ExtendWith(MockitoExtension.class)
 /**
  * Feature: Component Tests - Device Management Federation API<br/>
  * Story: Base Amqp Service Test
  */
+@ExtendWith(MockitoExtension.class)
 class BaseAmqpServiceTest {
 
     @Mock

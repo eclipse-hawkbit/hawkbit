@@ -1442,22 +1442,22 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // create scheduled rollout fails without handle rollout permission
         assertThatExceptionOfType(InsufficientPermissionException.class)
                 .as("Insufficient permission exception when startAt and no handle rollout permission")
-                .isThrownBy(() -> SecurityContextSwitch.runAs(
+                .isThrownBy(() -> SecurityContextSwitch.getAs(
                         userWithoutHandleRollout, () -> createRolloutWithStartAt(rolloutName, filter, distributionSet, 1L)));
         // same action succeeds with handle rollout permission
-        SecurityContextSwitch.runAs(
+        SecurityContextSwitch.getAs(
                 userWithHandleRollout,
                 () -> createRolloutWithStartAt(rolloutName + "_withStartTime", filter, distributionSet, 1L));
         // same action succeeds with system role permission
-        SecurityContextSwitch.runAs(
+        SecurityContextSwitch.getAs(
                 userWithSystemRole,
                 () -> createRolloutWithStartAt(rolloutName + "_withStartTimeSystemRole", filter, distributionSet, 1L));
         // same action succeeds without handle rollout permission but with null start at
-        SecurityContextSwitch.runAs(
+        SecurityContextSwitch.getAs(
                 userWithoutHandleRollout,
                 () -> createRolloutWithStartAt(rolloutName + "_withoutStartTime", filter, distributionSet, null));
         // same action succeeds without handle rollout permission but with Long.MAX_VALUE start at
-        SecurityContextSwitch.runAs(
+        SecurityContextSwitch.getAs(
                 userWithoutHandleRollout,
                 () -> createRolloutWithStartAt(rolloutName + "_withLongMax", filter, distributionSet, Long.MAX_VALUE));
     }
@@ -2501,7 +2501,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .pollInterval(Duration.ofMillis(500))
                 .atMost(Duration.ofSeconds(10))
                 .until(() -> SecurityContextSwitch
-                        .runAsPrivileged(
+                        .callAsPrivileged(
                                 () -> rolloutManagement.get(myRolloutId).orElseThrow(NoSuchElementException::new))
                         .getStatus().equals(RolloutStatus.RUNNING));
     }

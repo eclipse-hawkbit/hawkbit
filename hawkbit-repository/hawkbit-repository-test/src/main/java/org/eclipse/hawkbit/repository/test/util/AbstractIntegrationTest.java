@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.test.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TENANT_CONFIGURATION;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
 
@@ -28,8 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionFactory;
-import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
-import org.eclipse.hawkbit.artifact.repository.ArtifactStoreException;
+import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
+import org.eclipse.hawkbit.repository.artifact.exception.ArtifactStoreException;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -94,7 +95,6 @@ import org.springframework.test.context.TestPropertySource;
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ContextConfiguration(classes = { TestConfiguration.class })
-//@Import(TestChannelBinderConfiguration.class)
 // destroy the context after each test class because otherwise we get problem when context is
 // refreshed we e.g. get two instances of CacheManager which leads to very strange test failures.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
@@ -176,7 +176,7 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected TestdataFactory testdataFactory;
-    @Autowired
+    @Autowired(required = false)
     protected ServiceMatcher serviceMatcher;
     @Autowired
     protected ApplicationEventPublisher eventPublisher;
@@ -203,21 +203,21 @@ public abstract class AbstractIntegrationTest {
         final String description = "Updated description.";
 
         osType = SecurityContextSwitch
-                .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
-        osType = SecurityContextSwitch.runAsPrivileged(() -> softwareModuleTypeManagement
+                .callAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
+        osType = SecurityContextSwitch.callAsPrivileged(() -> softwareModuleTypeManagement
                 .update(entityFactory.softwareModuleType().update(osType.getId()).description(description)));
 
-        appType = SecurityContextSwitch.runAsPrivileged(
+        appType = SecurityContextSwitch.callAsPrivileged(
                 () -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_APP, Integer.MAX_VALUE));
-        appType = SecurityContextSwitch.runAsPrivileged(() -> softwareModuleTypeManagement
+        appType = SecurityContextSwitch.callAsPrivileged(() -> softwareModuleTypeManagement
                 .update(entityFactory.softwareModuleType().update(appType.getId()).description(description)));
 
         runtimeType = SecurityContextSwitch
-                .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_RT));
-        runtimeType = SecurityContextSwitch.runAsPrivileged(() -> softwareModuleTypeManagement
+                .callAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_RT));
+        runtimeType = SecurityContextSwitch.callAsPrivileged(() -> softwareModuleTypeManagement
                 .update(entityFactory.softwareModuleType().update(runtimeType.getId()).description(description)));
 
-        standardDsType = SecurityContextSwitch.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
+        standardDsType = SecurityContextSwitch.callAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
 
         // publish the reset counter market event to reset the counters after
         // setup. The setup is transparent by the test and its @ExpectedEvent
@@ -267,6 +267,7 @@ public abstract class AbstractIntegrationTest {
     private static final Duration AT_LEAST = Duration.ofMillis(Integer.getInteger("hawkbit.it.rest.await.atLeastMs", 5));
     private static final Duration POLL_INTERVAL = Duration.ofMillis(Integer.getInteger("hawkbit.it.rest.await.pollIntervalMs", 10));
     private static final Duration TIMEOUT = Duration.ofMillis(Integer.getInteger("hawkbit.it.rest.await.timeoutMs", 200));
+
     // default wait condition factory
     protected ConditionFactory await() {
         return Awaitility.await().atLeast(AT_LEAST).pollInterval(POLL_INTERVAL).atMost(TIMEOUT);
@@ -413,7 +414,11 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected boolean isConfirmationFlowActive() {
-        return tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, Boolean.class).getValue();
+        return SecurityContextSwitch.getAs(
+                SecurityContextSwitch.withUser("as_system", READ_TENANT_CONFIGURATION),
+                () -> tenantConfigurationManagement
+                        .getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, Boolean.class)
+                        .getValue());
     }
 
     protected Long getOsModule(final DistributionSet ds) {

@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystem;
-import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrl;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
+import org.eclipse.hawkbit.repository.artifact.ArtifactFilesystem;
+import org.eclipse.hawkbit.repository.artifact.model.AbstractDbArtifact;
+import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrl;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -39,7 +39,7 @@ import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
-import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
+import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -60,13 +60,17 @@ import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
-@ActiveProfiles({ "test" })
 /**
  * Feature: Component Tests - Device Management Federation API<br/>
  * Story: AmqpMessage Dispatcher Service Test
  */
-@SpringBootTest(classes = { RepositoryApplicationConfiguration.class }, webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@ActiveProfiles({ "test" })
+@SpringBootTest(classes = { JpaRepositoryConfiguration.class }, webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@TestPropertySource(properties = {
+        "spring.main.allow-bean-definition-overriding=true",
+        "spring.cloud.bus.enabled=true" })
 class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     private static final String TENANT = "DEFAULT";

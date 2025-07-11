@@ -25,8 +25,8 @@ import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
-import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
+import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
+import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;

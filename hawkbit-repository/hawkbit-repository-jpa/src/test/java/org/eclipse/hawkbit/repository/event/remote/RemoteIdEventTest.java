@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Test;
  */
 class RemoteIdEventTest extends AbstractRemoteEventTest {
 
-    private static final long ENTITY_ID = 1L;
     private static final String TENANT = "tenant";
+    private static final long ENTITY_ID = 1L;
     private static final Class<? extends TenantAwareBaseEntity> ENTITY_CLASS = JpaAction.class;
     private static final String CONTROLLER_ID = "controller911";
     private static final String ADDRESS = "amqp://anyhost";

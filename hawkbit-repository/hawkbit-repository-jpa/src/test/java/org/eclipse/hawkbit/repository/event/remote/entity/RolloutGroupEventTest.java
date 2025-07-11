@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -81,13 +81,16 @@ class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<RolloutGroup> 
         final SoftwareModule module = softwareModuleManagement.create(
                 entityFactory.softwareModule().create().name("swm").version("2").description("desc").type("os"));
         final DistributionSet ds = distributionSetManagement
-                .create(entityFactory.distributionSet().create().name("complete").version("2").description("complete")
-                        .type("os").modules(Collections.singletonList(module.getId())));
+                .create(entityFactory.distributionSet().create()
+                        .name("complete").version("2")
+                        .description("complete").type("os")
+                        .modules(List.of(module.getId())));
 
         final Rollout entity = rolloutManagement.create(
-                entityFactory.rollout().create().name("exampleRollout").targetFilterQuery("controllerId==*").distributionSetId(ds), 5,
-                false, new RolloutGroupConditionBuilder().withDefaults()
-                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10").build());
+                entityFactory.rollout().create().name("exampleRollout").targetFilterQuery("controllerId==*").distributionSetId(ds),
+                5,
+                false,
+                new RolloutGroupConditionBuilder().withDefaults().successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10").build());
 
         return rolloutGroupManagement.findByRollout(entity.getId(), PAGE).getContent().get(0);
     }
