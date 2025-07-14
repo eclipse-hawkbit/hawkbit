@@ -154,6 +154,11 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     // set default request controller attributes to true, because we want to request them the first time
     private boolean requestControllerAttributes = true;
 
+    @Setter
+    @Getter
+    @Column(name = "target_group")
+    private String group;
+
     // actually it is OneToOne - but lazy loading is not supported for OneToOne (at least for hibernate 6.6.2)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "target", cascade = { CascadeType.ALL }, orphanRemoval = true)
     @PrimaryKeyJoinColumn

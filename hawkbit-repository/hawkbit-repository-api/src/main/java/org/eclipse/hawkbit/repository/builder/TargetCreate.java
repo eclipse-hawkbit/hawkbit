@@ -74,6 +74,12 @@ public interface TargetCreate {
     TargetCreate status(@NotNull TargetUpdateStatus status);
 
     /**
+     * @param group for setting the group of the target
+     * @return updated builder instance
+     */
+    TargetCreate group(String group);
+
+    /**
      * @return peek on current state of {@link Target} in the builder
      */
     Target build();

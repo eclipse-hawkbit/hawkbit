@@ -28,7 +28,9 @@ import java.util.stream.Collectors;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.criteria.MapJoin;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.metamodel.MapAttribute;
 import jakarta.validation.constraints.NotEmpty;
@@ -560,6 +562,57 @@ public class JpaTargetManagement implements TargetManagement {
         final JpaTargetType targetType = getTargetTypeByIdAndThrowIfNotFound(targetTypeId);
         target.setTargetType(targetType);
         return targetRepository.save(target);
+    }
+
+    @Override
+    public Page<Target> findTargetsByGroup(String group, final boolean withSubgroups, final Pageable pageable) {
+        if (withSubgroups) {
+            // search for eq(group) and like(group%)
+            return JpaManagementHelper
+                    .findAllWithCountBySpec(targetRepository, List.of(TargetSpecifications.eqOrSubTargetGroup(group)), pageable);
+        } else {
+            return JpaManagementHelper
+                    .findAllWithCountBySpec(targetRepository, List.of(TargetSpecifications.eqTargetGroup(group)), pageable);
+        }
+    }
+
+    @Override
+    public List<String> findGroups() {
+        return targetRepository.findDistinctGroups();
+    }
+
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void assignTargetGroupWithRsql(String group, String rsql) {
+        final Specification<JpaTarget> rsqlSpecification = RsqlUtility.getInstance().buildRsqlSpecification(rsql, TargetFields.class);
+
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        final CriteriaUpdate<JpaTarget> criteriaUpdateQuery = cb.createCriteriaUpdate(JpaTarget.class);
+        final Root<JpaTarget> root = criteriaUpdateQuery.getRoot();
+        criteriaUpdateQuery.set("group", group);
+        // get predicate from rsql specification using a dummy query in order to execute batch update
+        final Predicate predicate = rsqlSpecification.toPredicate(root, entityManager.getCriteriaBuilder().createQuery(JpaTarget.class), cb);
+        criteriaUpdateQuery.where(predicate);
+
+        entityManager.createQuery(criteriaUpdateQuery).executeUpdate();
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void assignTargetsWithGroup(String group, List<String> controllerIds) {
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaUpdate<JpaTarget> criteriaQuery = cb.createCriteriaUpdate(JpaTarget.class);
+        Root<JpaTarget> root = criteriaQuery.from(JpaTarget.class);
+        CriteriaBuilder.In<String> in = cb.in(root.get("controllerId"));
+        controllerIds.forEach(in::value);
+
+        entityManager.createQuery(criteriaQuery.set("group", group).where(in)).executeUpdate();
+
     }
 
     @Override
