@@ -627,14 +627,14 @@ public interface TargetManagement {
      * @param pageable - page parameter
      * @return all matching targets to provided group/subgroup
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     Page<Target> findTargetsByGroup(@NotEmpty String group, boolean withSubgroups, @NotNull Pageable pageable);
     /**
      * Finds all the distinct target groups in the scope of a tenant
      *
      * @return list of all distinct target groups
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     List<String> findGroups();
 
     /**
@@ -643,7 +643,7 @@ public interface TargetManagement {
      * @param group target group parameter
      * @param rsql rsql filter for {@link Target}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
     void assignTargetGroupWithRsql(String group, @NotNull String rsql);
 
     /**
@@ -652,7 +652,7 @@ public interface TargetManagement {
      * @param group target group parameter
      * @param controllerIds list of targets
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
     void assignTargetsWithGroup(String group, @NotEmpty List<String> controllerIds);
 
     /**
