@@ -602,16 +602,6 @@ public interface TargetManagement {
     Target assignType(@NotEmpty String controllerId, @NotNull Long targetTypeId);
 
     /**
-     * Assigns the target group to a given {@link Target}.
-     *
-     * @param controllerId to be updated
-     * @param group - to be assigned to target
-     * @return updated target
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    void assignTargetGroup(@NotEmpty String controllerId, String group);
-
-    /**
      * Finds targets by group or subgroup.
      * @param group - provided group/subgroup to filter for
      * @param withSubgroups - whether is a subgroup or not e.g. x/y/z

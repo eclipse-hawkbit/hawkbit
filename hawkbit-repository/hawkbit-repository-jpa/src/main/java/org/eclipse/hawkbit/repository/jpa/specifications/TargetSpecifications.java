@@ -199,12 +199,12 @@ public final class TargetSpecifications {
         };
     }
 
-    public static Specification<JpaTarget> likeTargetGroup(final String targetGroupSearch) {
+    public static Specification<JpaTarget> eqOrSubTargetGroup(final String targetGroupSearch) {
         return (targetRoot, query, criteriaBuilder) ->  {
             final String searchTextToLower = targetGroupSearch.toLowerCase();
             return criteriaBuilder.or(
                     criteriaBuilder.equal(criteriaBuilder.lower(targetRoot.get(JpaTarget_.group)), searchTextToLower),
-                    criteriaBuilder.like(criteriaBuilder.lower(targetRoot.get(JpaTarget_.group)), searchTextToLower.concat("%")));
+                    criteriaBuilder.like(criteriaBuilder.lower(targetRoot.get(JpaTarget_.group)), searchTextToLower.concat("/%")));
         };
     }
 

@@ -23,8 +23,6 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
@@ -35,7 +33,6 @@ import jakarta.persistence.criteria.MapJoin;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.metamodel.MapAttribute;
-import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotEmpty;
 
 import org.apache.commons.collections4.ListUtils;
@@ -568,21 +565,11 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void assignTargetGroup(final String controllerId, final String group) {
-        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
-        target.setGroup(group);
-        targetRepository.save(target);
-    }
-
-    @Override
     public Page<Target> findTargetsByGroup(String group, final boolean withSubgroups, final Pageable pageable) {
         if (withSubgroups) {
             // search for eq(group) and like(group%)
             return JpaManagementHelper
-                    .findAllWithCountBySpec(targetRepository, List.of(TargetSpecifications.likeTargetGroup(group)), pageable);
+                    .findAllWithCountBySpec(targetRepository, List.of(TargetSpecifications.eqOrSubTargetGroup(group)), pageable);
         } else {
             return JpaManagementHelper
                     .findAllWithCountBySpec(targetRepository, List.of(TargetSpecifications.eqTargetGroup(group)), pageable);
