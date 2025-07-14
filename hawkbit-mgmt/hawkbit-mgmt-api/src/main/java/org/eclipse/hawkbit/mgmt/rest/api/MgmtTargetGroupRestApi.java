@@ -95,10 +95,10 @@ public interface MgmtTargetGroupRestApi {
 
     /**
      * Handles the GET request of retrieving a list of assigned targets for a specific group. Complex grouping (subgroups) is supported here.
-     * Group filter could be proper complex group - e.g. Parent/Child or also could be filtered with wildcard for subgroups - Parent/*
+     * Search could be for specific group, complex group e.g Parent/Child or also for groups including its subgroups
      *
-     * @param groupFilter - An Actual group or group filter - Parent/Child or Parent/*
-     * @param subgroups - If set to {@code true} enables searches with wildcard, proper equals will be used otherwise
+     * @param groupFilter - An Actual group - Parent/Child or Parent
+     * @param subgroups - If set to {@code true} enables the search in subgroups
      * @param pagingOffsetParam the offset of list of targets for pagination, might not be present in the rest request then default value will
      *         be applied
      * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
@@ -108,7 +108,7 @@ public interface MgmtTargetGroupRestApi {
      */
     @Operation(summary = "Return assigned targets for group",
             description = "Handles the GET request of retrieving a list of assigned targets for a specific group. Complex grouping (subgroups) is supported here." +
-                    "Group filter could be proper complex group - e.g. Parent/Child or also could be filtered with wildcard for subgroups - Parent/*")
+                    "Search could be for specific group, complex group e.g Parent/Child or also for groups including its subgroups")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -261,7 +261,6 @@ public interface MgmtTargetGroupRestApi {
      * Unassigns targets from their groups
      *
      * @param controllerIds - list of targets to be unassigned.
-     * @param rsql - if no list of targets provided, an option by rsql filter is provided
      */
     @Operation(summary = "Unassign targets from their target groups",
             description = "Handles the DELETE request to unassign the given target(s).")
@@ -281,21 +280,16 @@ public interface MgmtTargetGroupRestApi {
     ResponseEntity<Void> unassignTargetsFromGroup(
             @RequestBody(required = false)
             @Schema(description = "List of controller ids to be unassigned from their groups", example = "[\"controllerId1\", \"controllerId2\"]")
-            List<String> controllerIds,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
-            final String rsql
+            List<String> controllerIds
 
     );
 
     /**
-     * Unassign provided target from its group
+     * Unassigns targets from their groups
      *
-     * @param controllerId - target controllerId
+     * @param rsql - filter for the matching targets to be unassigned
      */
-    @Operation(summary = "Unassign target from its group",
+    @Operation(summary = "Unassign targets from their target groups",
             description = "Handles the DELETE request to unassign the given target(s).")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
@@ -304,16 +298,18 @@ public interface MgmtTargetGroupRestApi {
             @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
                     "changed (i.e. read-only) or data volume restriction applies."),
-            @ApiResponse(responseCode = "404", description = "Target not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
             @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
             @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
                     "and the client has to wait another second.")
     })
-    @DeleteMapping(value = MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/{controllerId}/assigned")
-    ResponseEntity<Void> unnasignTargetFromGroup(
-            @PathVariable final String controllerId
+    @DeleteMapping(value = MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING)
+    ResponseEntity<Void> unassignTargetsFromGroupByRsql(
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
+            @Schema(description = """
+                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
+                    available fields.""")
+            final String rsql
     );
 
     /**

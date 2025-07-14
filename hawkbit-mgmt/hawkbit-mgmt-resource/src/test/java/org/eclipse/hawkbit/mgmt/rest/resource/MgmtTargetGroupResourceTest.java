@@ -48,6 +48,7 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
     void shouldRetrieveTargetsFilteredByGroupAndParentGroupCorrectly() throws Exception {
         targetManagement.create(entityFactory.target().create().controllerId("target1").group("Europe/West"));
         targetManagement.create(entityFactory.target().create().controllerId("target2").group("Europe/East"));
+        targetManagement.create(entityFactory.target().create().controllerId("target3").group("Europe"));
 
         mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
                 .param("group", "Europe/East")
@@ -57,26 +58,14 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
                 .andExpect(jsonPath("content.[0].controllerId", Matchers.equalTo("target2")));
 
         mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
-                        .param("group", "Europe/*")
+                        .param("group", "Europe")
                         .param("subgroups", "true")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("content", Matchers.hasSize(2)))
+                .andExpect(jsonPath("content", Matchers.hasSize(3)))
                 .andExpect(jsonPath("content.[0].controllerId", Matchers.equalTo("target1")))
-                .andExpect(jsonPath("content.[1].controllerId", Matchers.equalTo("target2")));
-    }
-
-    @Test
-    void shouldGetBadRequestIfGroupingFilterIsNotCorrect() throws Exception {
-        mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
-                        .param("group", "*/East")
-                        .param("subgroups", "true"))
-                .andExpect(status().isBadRequest());
-
-        mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
-                        .param("group", "Europe/%") // % is banned
-                        .param("subgroups", "true"))
-                .andExpect(status().isBadRequest());
+                .andExpect(jsonPath("content.[1].controllerId", Matchers.equalTo("target2")))
+                .andExpect(jsonPath("content.[2].controllerId", Matchers.equalTo("target3")));
     }
 
     @Test
@@ -154,6 +143,27 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
     }
 
     @Test
+    void shouldAssignTargetsToProvidedGroupByRsql() throws Exception {
+        targetManagement.create(entityFactory.target().create().controllerId("target1").group("A"));
+        targetManagement.create(entityFactory.target().create().controllerId("target2"));
+        targetManagement.create(entityFactory.target().create().controllerId("shouldNotAssign").group("B"));
+
+        mvc.perform(put(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/C")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("q", "controllerId==target*"))
+                .andExpect(status().isOk());
+
+        mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
+                        .param("group", "C")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("content", Matchers.hasSize(2)))
+                .andExpect(jsonPath("content.[0].controllerId", Matchers.equalTo("target1")))
+                .andExpect(jsonPath("content.[1].controllerId", Matchers.equalTo("target2")));
+    }
+
+    @Test
     void shouldUnassignTargetsFromGroup() throws Exception {
         targetManagement.create(entityFactory.target().create().controllerId("target1").group("Europe"));
         targetManagement.create(entityFactory.target().create().controllerId("target2").group("Europe"));
@@ -183,7 +193,7 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
         targetManagement.create(entityFactory.target().create().controllerId("target2").group("Europe"));
         targetManagement.create(entityFactory.target().create().controllerId("nonMatchingTarget").group("Europe"));
 
-        mvc.perform(delete(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
+        mvc.perform(delete(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING)
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("q", "controllerId==target*"))
                 .andExpect(status().isOk());
@@ -195,31 +205,6 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("content", Matchers.hasSize(1)))
                 .andExpect(jsonPath("content.[0].controllerId", Matchers.equalTo("nonMatchingTarget")));
-    }
-
-    @Test
-    void shouldUnassignSingleTargetFromGroup() throws Exception {
-        targetManagement.create(entityFactory.target().create().controllerId("target1").group("Europe"));
-
-        mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
-                        .param("group", "Europe")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("content", Matchers.hasSize(1)))
-                .andExpect(jsonPath("content.[0].controllerId", Matchers.equalTo("target1")));
-
-        mvc.perform(delete(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/target1/assigned")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
-        mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
-                        .param("group", "Europe")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("content", Matchers.hasSize(0)));
-
     }
 
     @Test

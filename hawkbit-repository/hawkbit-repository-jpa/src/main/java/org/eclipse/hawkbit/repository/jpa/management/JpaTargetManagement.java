@@ -580,15 +580,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Page<Target> findTargetsByGroup(String group, final boolean withSubgroups, final Pageable pageable) {
         if (withSubgroups) {
-            // should have wildcard only in the end - still do not support */y search
-            // should not have %
-            final String groupFilterRegex = "^[^*%]*\\*?$";
-            Matcher matcher = Pattern.compile(groupFilterRegex).matcher(group);
-            if (!matcher.matches()) {
-                throw new ValidationException("Provided group filter contains wildcard in different place than in the end");
-            }
-            group = group.replace("*", "%");
-
+            // search for eq(group) and like(group%)
             return JpaManagementHelper
                     .findAllWithCountBySpec(targetRepository, List.of(TargetSpecifications.likeTargetGroup(group)), pageable);
         } else {

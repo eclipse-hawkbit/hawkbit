@@ -66,40 +66,29 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
 
     @Override
     public ResponseEntity<Void> assignTargetsToGroup(String group, List<String> controllerIds) {
-        targetManagement.assignTargetsWithGroup(group, controllerIds);
-        return ResponseEntity.ok().build();
+        return assignTargets(group, controllerIds);
     }
 
     @Override
     public ResponseEntity<Void> assignTargetsToGroupWithSubgroups(String group, List<String> controllerIds) {
-        targetManagement.assignTargetsWithGroup(group, controllerIds);
-        return ResponseEntity.ok().build();
+        return assignTargets(group, controllerIds);
     }
 
     @Override
     public ResponseEntity<Void> assignTargetsToGroupWithRsql(String group, String rsql) {
         targetManagement.assignTargetGroupWithRsql(group, rsql);
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<Void> unassignTargetsFromGroup(List<String> controllerIds, String rsql) {
-        if (!ObjectUtils.isEmpty(controllerIds)) {
-            log.debug("Unassigning group from list of controllerIds {}", controllerIds);
-            targetManagement.assignTargetsWithGroup(null, controllerIds);
-        } else if (!ObjectUtils.isEmpty(rsql)) {
-            log.debug("Unassigning group from target rsql filter {} .", rsql);
-            targetManagement.assignTargetGroupWithRsql(null, rsql);
-        } else {
-            throw new ValidationException("Parameters controllerIds & rsql cannot be both null or empty.");
-        }
-
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> unnasignTargetFromGroup(String controllerId) {
-        targetManagement.assignTargetGroup(controllerId, null);
+    public ResponseEntity<Void> unassignTargetsFromGroup(List<String> controllerIds) {
+        targetManagement.assignTargetsWithGroup(null, controllerIds);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> unassignTargetsFromGroupByRsql(String rsql) {
+        targetManagement.assignTargetGroupWithRsql(null, rsql);
         return ResponseEntity.ok().build();
     }
 
@@ -112,6 +101,11 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
     @Override
     public ResponseEntity<Void> assignTargetsToGroup(final String group, final String rsql) {
         targetManagement.assignTargetGroupWithRsql(group, rsql);
+        return ResponseEntity.ok().build();
+    }
+
+    private ResponseEntity<Void> assignTargets(final String group, final List<String> controllerIds) {
+        targetManagement.assignTargetsWithGroup(group, controllerIds);
         return ResponseEntity.ok().build();
     }
 }
