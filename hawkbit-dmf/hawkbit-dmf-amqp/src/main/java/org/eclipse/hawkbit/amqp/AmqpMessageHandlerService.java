@@ -36,7 +36,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfAutoConfirmation;
 import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;

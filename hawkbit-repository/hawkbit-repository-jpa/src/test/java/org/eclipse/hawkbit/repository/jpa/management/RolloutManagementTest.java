@@ -32,6 +32,7 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
@@ -1436,7 +1437,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 SpPermission.READ_REPOSITORY, SpPermission.READ_TARGET, SpPermission.CREATE_ROLLOUT, SpPermission.HANDLE_ROLLOUT);
         final WithUser userWithSystemRole = SecurityContextSwitch.withUser(
                 "user_with_system_role",
-                SpPermission.SpringEvalExpressions.SYSTEM_ROLE);
+                SpRole.SYSTEM_ROLE);
 
         final String filter = "controllerId==" + rolloutName + "-*";
         // create scheduled rollout fails without handle rollout permission

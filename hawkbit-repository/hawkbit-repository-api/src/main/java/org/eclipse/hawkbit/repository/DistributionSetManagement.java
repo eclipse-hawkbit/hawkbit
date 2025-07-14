@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_READ_DISTRIBUTION_SET;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_UPDATE_DISTRIBUTION_SET;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +20,7 @@ import java.util.Optional;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
@@ -51,7 +54,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @param id to look for.
      * @return {@link DistributionSet}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     Optional<DistributionSet> getWithDetails(long id);
 
     /**
@@ -61,7 +64,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @return the found valid {@link DistributionSet}
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     DistributionSet getOrElseThrowException(long id);
 
     /**
@@ -69,7 +72,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      *
      * @param distributionSet the ID of the {@link DistributionSet} to be set to invalid
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_UPDATE_DISTRIBUTION_SET)
     void invalidate(DistributionSet distributionSet);
 
     /**
@@ -85,7 +88,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @throws AssignmentQuotaExceededException if the maximum number of {@link SoftwareModule}s is exceeded for the addressed
      *         {@link DistributionSet}.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_UPDATE_DISTRIBUTION_SET)
     DistributionSet assignSoftwareModules(long id, @NotEmpty Collection<Long> moduleIds);
 
     /**
@@ -97,7 +100,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @throws EntityNotFoundException if given module or DS does not exist
      * @throws EntityReadOnlyException if use tries to change the {@link DistributionSet} s while the DS is already in use.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_UPDATE_DISTRIBUTION_SET)
     DistributionSet unassignSoftwareModule(long id, long moduleId);
 
     /**
@@ -108,7 +111,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @return list of assigned ds
      * @throws EntityNotFoundException if tag with given ID does not exist or (at least one) of the distribution sets.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_UPDATE_DISTRIBUTION_SET)
     List<DistributionSet> assignTag(@NotEmpty Collection<Long> ids, long tagId);
 
     /**
@@ -119,7 +122,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @return list of assigned ds
      * @throws EntityNotFoundException if tag with given ID does not exist or (at least one) of the distribution sets.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_UPDATE_DISTRIBUTION_SET)
     List<DistributionSet> unassignTag(@NotEmpty Collection<Long> ids, long tagId);
 
     /**
@@ -131,7 +134,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @throws EntityAlreadyExistsException in case one of the meta-data entry already exists for the specific key
      * @throws AssignmentQuotaExceededException if the maximum number of meta-data entries is exceeded for the addressed {@link DistributionSet}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_UPDATE_DISTRIBUTION_SET)
     void createMetadata(long id, @NotEmpty Map<String, String> metadata);
 
     /**
@@ -141,7 +144,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @return a paged result of all meta-data entries for a given distribution set id
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     Map<String, String> getMetadata(long id);
 
     /**
@@ -152,7 +155,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @param value meta data-entry to be new value
      * @throws EntityNotFoundException in case the meta-data entry does not exist and cannot be updated
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_UPDATE_DISTRIBUTION_SET)
     void updateMetadata(long id, @NotNull String key, @NotNull String value);
 
     /**
@@ -162,7 +165,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @param key of the meta-data element
      * @throws EntityNotFoundException if given set does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_UPDATE_DISTRIBUTION_SET)
     void deleteMetadata(long id, @NotEmpty String key);
 
     /**
@@ -171,7 +174,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @param id the distribution set id
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_UPDATE_DISTRIBUTION_SET)
     void lock(final long id);
 
     /**
@@ -182,7 +185,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @param id the distribution set id
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_UPDATE_DISTRIBUTION_SET)
     void unlock(final long id);
 
     /**
@@ -193,7 +196,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      * @throws InvalidDistributionSetException if distribution set with given ID is invalidated
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     DistributionSet getValid(long id);
 
     /**
@@ -205,7 +208,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @throws InvalidDistributionSetException if distribution set with given ID is invalidated
      * @throws IncompleteDistributionSetException if distribution set with given ID is incomplete
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     DistributionSet getValidAndComplete(long id);
 
     /**
@@ -215,7 +218,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @return the distribution set which is associated with the action
      * @throws EntityNotFoundException if action with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     Optional<DistributionSet> findByAction(long actionId);
 
     /**
@@ -225,7 +228,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @param version version of {@link DistributionSet}
      * @return the page with the found {@link DistributionSet}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     Optional<DistributionSet> findByNameAndVersion(@NotEmpty String distributionName, @NotEmpty String version);
 
     /**
@@ -236,7 +239,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @param pageable the pagination parameter
      * @return all found {@link DistributionSet}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     Slice<DistributionSet> findByCompleted(Boolean complete, @NotNull Pageable pageable);
 
     /**
@@ -246,7 +249,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @param pageable page parameter
      * @return the page of found {@link DistributionSet}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     Slice<DistributionSet> findByDistributionSetFilter(@NotNull DistributionSetFilter distributionSetFilter, @NotNull Pageable pageable);
 
     /**
@@ -260,7 +263,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      * @throws EntityNotFoundException of distribution set tag with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     Page<DistributionSet> findByTag(long tagId, @NotNull Pageable pageable);
 
     /**
@@ -272,7 +275,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @return the page of found {@link DistributionSet}
      * @throws EntityNotFoundException of distribution set tag with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     Page<DistributionSet> findByRsqlAndTag(@NotNull String rsql, long tagId, @NotNull Pageable pageable);
 
     /**
@@ -282,7 +285,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      *         nor <code>null</code> to count both.
      * @return count of all found {@link DistributionSet}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     long countByCompleted(Boolean complete);
 
     /**
@@ -291,7 +294,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @param distributionSetFilter has details of filters to be applied.
      * @return count of {@link DistributionSet}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     long countByDistributionSetFilter(@NotNull DistributionSetFilter distributionSetFilter);
 
     /**
@@ -302,7 +305,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @return number of {@link DistributionSet}s
      * @throws EntityNotFoundException if type with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     long countByTypeId(long typeId);
 
     /**
@@ -312,7 +315,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @param id to check
      * @return <code>true</code> if in use
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     boolean isInUse(long id);
 
     /**
@@ -322,7 +325,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @param id to look for
      * @return List of Statistics for {@link org.eclipse.hawkbit.repository.model.Rollout}s status counts
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     List<Statistic> countRolloutsByStatusForDistributionSet(@NotNull Long id);
 
     /**
@@ -332,7 +335,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @param id to look for
      * @return List of Statistics for {@link org.eclipse.hawkbit.repository.model.Action}s status counts
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     List<Statistic> countActionsByStatusForDistributionSet(@NotNull Long id);
 
     /**
@@ -342,6 +345,6 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @param id to look for
      * @return number of {@link org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET)
     Long countAutoAssignmentsForDistributionSet(@NotNull Long id);
 }

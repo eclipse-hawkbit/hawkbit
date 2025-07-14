@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
 import org.springframework.security.access.prepost.PreAuthorize;
 

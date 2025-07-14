@@ -11,15 +11,13 @@ package org.eclipse.hawkbit.repository.jpa.acm;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.DELETE_TARGET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TARGET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_TARGET;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.DELETE_TARGET_TYPE;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TARGET_TYPE;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_TARGET_TYPE;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withUser;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
 
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
@@ -27,8 +25,6 @@ import org.eclipse.hawkbit.repository.builder.TargetTypeUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
-import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
@@ -49,7 +45,7 @@ class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
         final TargetType permittedTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type1"));
         final TargetType hiddenTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type2"));
 
-        runAs(withUser("user", READ_TARGET + "/id==" + permittedTargetType.getId()), () -> {
+        runAs(withUser("user", READ_TARGET_TYPE + "/id==" + permittedTargetType.getId()), () -> {
             // verify targetTypeManagement#findAll
             assertThat(targetTypeManagement.findAll(Pageable.unpaged()).get().map(Identifiable::getId).toList())
                     .containsOnly(permittedTargetType.getId());
@@ -111,8 +107,8 @@ class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
         final TargetType readOnlyTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type2"));
 
         runAs(withUser("user",
-                        READ_TARGET + "/id==" + manageableTargetType.getId() + " or id==" + readOnlyTargetType.getId(),
-                        DELETE_TARGET + "/id==" + manageableTargetType.getId()), () -> {
+                        READ_TARGET_TYPE + "/id==" + manageableTargetType.getId() + " or id==" + readOnlyTargetType.getId(),
+                        DELETE_TARGET_TYPE + "/id==" + manageableTargetType.getId()), () -> {
             // delete the manageableTargetType
             targetTypeManagement.delete(manageableTargetType.getId());
 
@@ -132,8 +128,8 @@ class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
         final TargetType readOnlyTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type2"));
 
         runAs(withUser("user",
-                        READ_TARGET + "/id==" + manageableTargetType.getId() + " or id==" + readOnlyTargetType.getId(),
-                        UPDATE_TARGET + "/id==" + manageableTargetType.getId()), () -> {
+                        READ_TARGET_TYPE + "/id==" + manageableTargetType.getId() + " or id==" + readOnlyTargetType.getId(),
+                        UPDATE_TARGET_TYPE + "/id==" + manageableTargetType.getId()), () -> {
             // update the manageableTargetType
             targetTypeManagement.update(entityFactory.targetType().update(manageableTargetType.getId())
                     .name(manageableTargetType.getName() + "/new").description("newDesc"));
@@ -151,7 +147,7 @@ class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void verifyTargetTypeCreationBlockedByAccessController() {
-        runAs(withUser("user", READ_TARGET, UPDATE_TARGET), () -> {
+        runAs(withUser("user", READ_TARGET_TYPE, UPDATE_TARGET_TYPE), () -> {
             // verify targetTypeManagement#create for any type
             final TargetTypeCreate targetTypeCreate = entityFactory.targetType().create().name("type1");
             assertThatThrownBy(() -> targetTypeManagement.create(targetTypeCreate))

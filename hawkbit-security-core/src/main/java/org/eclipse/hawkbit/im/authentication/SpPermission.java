@@ -36,10 +36,21 @@ import org.springframework.security.core.GrantedAuthority;
 public final class SpPermission {
 
     /**
+     * Permission to add new targets including their meta information.
+     */
+    public static final String CREATE_TARGET = "CREATE_TARGET";
+    /**
      * Permission to read the targets (list and filter).
      */
     public static final String READ_TARGET = "READ_TARGET";
-
+    /**
+     * Permission to change/edit/update targets and to assign updates.
+     */
+    public static final String UPDATE_TARGET = "UPDATE_TARGET";
+    /**
+     * Permission to delete targets.
+     */
+    public static final String DELETE_TARGET = "DELETE_TARGET";
     /**
      * Permission to read the target security token. The security token is security
      * concerned and should be protected. So the combination
@@ -48,36 +59,28 @@ public final class SpPermission {
      */
     public static final String READ_TARGET_SEC_TOKEN = "READ_TARGET_SECURITY_TOKEN";
 
-    /**
-     * Permission to change/edit/update targets and to assign updates.
-     */
-    public static final String UPDATE_TARGET = "UPDATE_TARGET";
+    public static final String CREATE_TARGET_TYPE = "CREATE_TARGET_TYPE";
+    public static final String READ_TARGET_TYPE = "READ_TARGET_TYPE";
+    public static final String UPDATE_TARGET_TYPE = "UPDATE_TARGET_TYPE";
+    public static final String DELETE_TARGET_TYPE = "DELETE_TARGET_TYPE";
 
-    /**
-     * Permission to add new targets including their meta information.
-     */
-    public static final String CREATE_TARGET = "CREATE_TARGET";
-
-    /**
-     * Permission to delete targets.
-     */
-    public static final String DELETE_TARGET = "DELETE_TARGET";
+    public static final String CREATE_DISTRIBUTION_SET = "CREATE_DISTRIBUTION_SET";
+    public static final String READ_DISTRIBUTION_SET = "READ_DISTRIBUTION_SET";
+    public static final String UPDATE_DISTRIBUTION_SET = "UPDATE_DISTRIBUTION_SET";
+    public static final String DELETE_DISTRIBUTION_SET = "DELETE_DISTRIBUTION_SET";
 
     /**
      * Permission to read distributions and artifacts.
      */
     public static final String READ_REPOSITORY = "READ_REPOSITORY";
-
     /**
      * Permission to edit/update distributions and artifacts.
      */
     public static final String UPDATE_REPOSITORY = "UPDATE_REPOSITORY";
-
     /**
      * Permission to add distributions and artifacts.
      */
     public static final String CREATE_REPOSITORY = "CREATE_REPOSITORY";
-
     /**
      * Permission to delete distributions and artifacts.
      */
@@ -92,7 +95,6 @@ public final class SpPermission {
      * Permission to read the tenant settings.
      */
     public static final String READ_TENANT_CONFIGURATION = "READ_TENANT_CONFIGURATION";
-
     /**
      * Permission to read the gateway security token. The gateway security token is security
      * concerned and should be protected. So in addition to {@linkplain #READ_TENANT_CONFIGURATION},
@@ -100,46 +102,56 @@ public final class SpPermission {
      * implies both permissions - so it is sufficient to read the gateway security token.
      */
     public static final String READ_GATEWAY_SEC_TOKEN = "READ_GATEWAY_SECURITY_TOKEN";
-
     /**
      * Permission to administrate the tenant settings.
      */
     public static final String TENANT_CONFIGURATION = "TENANT_CONFIGURATION";
 
     /**
-     * Permission to read a rollout.
-     */
-    public static final String READ_ROLLOUT = "READ_ROLLOUT";
-
-    /**
      * Permission to create a rollout.
      */
     public static final String CREATE_ROLLOUT = "CREATE_ROLLOUT";
-
+    /**
+     * Permission to read a rollout.
+     */
+    public static final String READ_ROLLOUT = "READ_ROLLOUT";
     /**
      * Permission to update a rollout.
      */
     public static final String UPDATE_ROLLOUT = "UPDATE_ROLLOUT";
-
     /**
      * Permission to delete a rollout.
      */
     public static final String DELETE_ROLLOUT = "DELETE_ROLLOUT";
-
+    /**
+     * Permission to approve or deny a rollout prior to starting.
+     */
+    public static final String APPROVE_ROLLOUT = "APPROVE_ROLLOUT";
     /**
      * Permission to start/stop/resume a rollout.
      */
     public static final String HANDLE_ROLLOUT = "HANDLE_ROLLOUT";
 
     /**
-     * Permission to approve or deny a rollout prior to starting.
-     */
-    public static final String APPROVE_ROLLOUT = "APPROVE_ROLLOUT";
-
-    /**
      * Permission to administrate the system on a global, i.e. tenant independent scale. That includes the deletion of tenants.
      */
     public static final String SYSTEM_ADMIN = "SYSTEM_ADMIN";
+
+    private static final String IMPLIES = " > ";
+    private static final String LINE_BREAK = "\n";
+    public static final String TARGET_HIERARCHY =
+            CREATE_TARGET + IMPLIES + CREATE_TARGET_TYPE + LINE_BREAK +
+            READ_TARGET + IMPLIES + READ_TARGET_TYPE + LINE_BREAK +
+            UPDATE_TARGET + IMPLIES + UPDATE_TARGET_TYPE + LINE_BREAK +
+            DELETE_TARGET + IMPLIES + DELETE_TARGET_TYPE + LINE_BREAK;
+    public static final String REPOSITORY_HIERARCHY =
+            CREATE_REPOSITORY + IMPLIES + CREATE_DISTRIBUTION_SET + LINE_BREAK +
+            READ_REPOSITORY + IMPLIES + READ_DISTRIBUTION_SET + LINE_BREAK +
+            UPDATE_REPOSITORY + IMPLIES + UPDATE_DISTRIBUTION_SET + LINE_BREAK +
+            DELETE_REPOSITORY + IMPLIES + DELETE_DISTRIBUTION_SET + LINE_BREAK;
+    public static final String TENANT_CONFIGURATION_HIERARCHY =
+            TENANT_CONFIGURATION + IMPLIES + READ_TENANT_CONFIGURATION + LINE_BREAK +
+            TENANT_CONFIGURATION + IMPLIES + READ_GATEWAY_SEC_TOKEN + LINE_BREAK;
 
     /**
      * Return all permission.
@@ -150,7 +162,8 @@ public final class SpPermission {
         final List<String> allPermissions = new ArrayList<>();
         final Field[] declaredFields = SpPermission.class.getDeclaredFields();
         for (final Field field : declaredFields) {
-            if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers())) {
+            if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers()) &&
+                    String.class.equals(field.getType())) {
                 try {
                     final String role = (String) field.get(null);
                     allPermissions.add(role);
@@ -160,83 +173,5 @@ public final class SpPermission {
             }
         }
         return allPermissions;
-    }
-
-    /**
-     * <p>
-     * Contains all the spring security evaluation expressions for the {@link PreAuthorize} annotation for method security.
-     * </p>
-     * <p>
-     * Examples:
-     * {@code
-     * hasRole([role])   Returns true if the current principal has the specified role.
-     * hasAnyRole([role1,role2])  Returns true if the current principal has any of the supplied roles (given as a comma-separated list of strings)
-     * principal   Allows direct access to the principal object representing the current user
-     * authentication Allows direct access to the current Authentication object obtained from the SecurityContext
-     * permitAll   Always evaluates to true
-     * denyAll  Always evaluates to false
-     * isAnonymous()  Returns true if the current principal is an anonymous user
-     * isRememberMe() Returns true if the current principal is a remember-me user
-     * isAuthenticated() Returns true if the user is not anonymous
-     * isFullyAuthenticated()  Returns true if the user is not an anonymous or a remember-me user
-     * }
-     * </p>
-     */
-    @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    public static final class SpringEvalExpressions {
-
-        public static final String BRACKET_OPEN = "(";
-        public static final String BRACKET_CLOSE = ")";
-        public static final String HAS_AUTH_PREFIX = "hasAuthority" + BRACKET_OPEN + "'";
-        public static final String HAS_AUTH_SUFFIX = "'" + BRACKET_CLOSE;
-        public static final String HAS_AUTH_AND = " and ";
-        public static final String HAS_AUTH_OR = " or ";
-        
-        /**
-         * The role which contains the spring security context in case the system is executing code which is necessary to be privileged.
-         */
-        public static final String SYSTEM_ROLE = "ROLE_SYSTEM_CODE";
-
-        /**
-         * The role which contains in the spring security context in case ancontroller is authenticated.
-         */
-        public static final String CONTROLLER_ROLE = "ROLE_CONTROLLER";
-        /**
-         * The role which contained in the spring security context in case that a controller is authenticated, but only as 'anonymous'.
-         */
-        public static final String CONTROLLER_ROLE_ANONYMOUS = "ROLE_CONTROLLER_ANONYMOUS";
-
-        public static final String IS_SYSTEM_CODE = HAS_AUTH_PREFIX + SYSTEM_ROLE + HAS_AUTH_SUFFIX;
-
-        public static final String HAS_AUTH_UPDATE_TARGET = HAS_AUTH_PREFIX + UPDATE_TARGET + HAS_AUTH_SUFFIX;
-        public static final String HAS_AUTH_SYSTEM_ADMIN = HAS_AUTH_PREFIX + SYSTEM_ADMIN + HAS_AUTH_SUFFIX;
-        public static final String HAS_AUTH_READ_TARGET = HAS_AUTH_PREFIX + READ_TARGET + HAS_AUTH_SUFFIX;
-        public static final String HAS_AUTH_CREATE_TARGET = HAS_AUTH_PREFIX + CREATE_TARGET + HAS_AUTH_SUFFIX;
-        public static final String HAS_AUTH_DELETE_TARGET = HAS_AUTH_PREFIX + DELETE_TARGET + HAS_AUTH_SUFFIX;
-        public static final String HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET = BRACKET_OPEN + HAS_AUTH_PREFIX
-                + READ_REPOSITORY + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + UPDATE_TARGET + HAS_AUTH_SUFFIX
-                + BRACKET_CLOSE;
-        public static final String HAS_AUTH_CREATE_REPOSITORY = HAS_AUTH_PREFIX + CREATE_REPOSITORY + HAS_AUTH_SUFFIX;
-        public static final String HAS_AUTH_DELETE_REPOSITORY = HAS_AUTH_PREFIX + DELETE_REPOSITORY + HAS_AUTH_SUFFIX;
-        public static final String HAS_AUTH_READ_REPOSITORY = HAS_AUTH_PREFIX + READ_REPOSITORY + HAS_AUTH_SUFFIX;
-        public static final String HAS_AUTH_UPDATE_REPOSITORY = HAS_AUTH_PREFIX + UPDATE_REPOSITORY + HAS_AUTH_SUFFIX;
-        public static final String HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET = BRACKET_OPEN + HAS_AUTH_PREFIX
-                + READ_REPOSITORY + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + READ_TARGET + HAS_AUTH_SUFFIX
-                + BRACKET_CLOSE;
-        public static final String HAS_AUTH_DOWNLOAD_ARTIFACT = HAS_AUTH_PREFIX + DOWNLOAD_REPOSITORY_ARTIFACT + HAS_AUTH_SUFFIX;
-        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_READ = HAS_AUTH_PREFIX + READ_ROLLOUT + HAS_AUTH_SUFFIX;
-        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ = BRACKET_OPEN + HAS_AUTH_PREFIX
-                + READ_ROLLOUT + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + READ_TARGET + HAS_AUTH_SUFFIX
-                + BRACKET_CLOSE;
-        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE = HAS_AUTH_PREFIX + CREATE_ROLLOUT + HAS_AUTH_SUFFIX;
-        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE = HAS_AUTH_PREFIX + HANDLE_ROLLOUT + HAS_AUTH_SUFFIX;
-        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_APPROVE = HAS_AUTH_PREFIX + APPROVE_ROLLOUT + HAS_AUTH_SUFFIX;
-        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE = HAS_AUTH_PREFIX + UPDATE_ROLLOUT + HAS_AUTH_SUFFIX;
-        public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_DELETE = HAS_AUTH_PREFIX + DELETE_ROLLOUT + HAS_AUTH_SUFFIX;
-        public static final String HAS_AUTH_TENANT_CONFIGURATION_READ = HAS_AUTH_PREFIX + READ_TENANT_CONFIGURATION + HAS_AUTH_SUFFIX;
-        public static final String HAS_AUTH_TENANT_CONFIGURATION = HAS_AUTH_PREFIX + TENANT_CONFIGURATION + HAS_AUTH_SUFFIX;
-
-        public static final String IS_CONTROLLER = "hasAnyRole('" + CONTROLLER_ROLE_ANONYMOUS + "', '" + CONTROLLER_ROLE + "')";
-        public static final String IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET = IS_CONTROLLER + HAS_AUTH_OR + HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET;
     }
 }

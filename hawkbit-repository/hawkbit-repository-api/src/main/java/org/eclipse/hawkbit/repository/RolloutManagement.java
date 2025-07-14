@@ -18,7 +18,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;

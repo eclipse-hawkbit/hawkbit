@@ -15,7 +15,7 @@ import java.util.Optional;
 
 import jakarta.validation.constraints.NotEmpty;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -34,7 +34,7 @@ public interface ConfirmationManagement {
      * @param remark optional field to set a remark
      * @return the persisted {@link AutoConfirmationStatus}
      */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     AutoConfirmationStatus activateAutoConfirmation(@NotEmpty String controllerId, final String initiator, final String remark);
 
     /**
@@ -44,7 +44,7 @@ public interface ConfirmationManagement {
      * @param code optional value to specify a code for the created action status
      * @param messages optional value to specify message for the created action status
      */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     Action confirmAction(long actionId, Integer code, Collection<String> messages);
 
     /**
@@ -54,7 +54,7 @@ public interface ConfirmationManagement {
      * @param code optional value to specify a code for the created action status
      * @param messages optional value to specify message for the created action status
      */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     Action denyAction(long actionId, Integer code, Collection<String> messages);
 
     /**
@@ -62,7 +62,7 @@ public interface ConfirmationManagement {
      *
      * @param controllerId to disable auto confirmation for
      */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     void deactivateAutoConfirmation(@NotEmpty String controllerId);
 
     /**
@@ -71,8 +71,8 @@ public interface ConfirmationManagement {
      * @param controllerId to check the state for
      * @return instance of {@link AutoConfirmationStatus} wrapped in an {@link Optional}. Present if active and empty if disabled.
      */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.IS_CONTROLLER + SpPermission.SpringEvalExpressions.HAS_AUTH_OR +
-            SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + SpringEvalExpressions.HAS_AUTH_OR +
+            SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Optional<AutoConfirmationStatus> getStatus(@NotEmpty String controllerId);
 
     /**
@@ -81,6 +81,6 @@ public interface ConfirmationManagement {
      * @param controllerId of the target to check
      * @return a list of {@link Action}
      */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     List<Action> findActiveActionsWaitingConfirmation(@NotEmpty String controllerId);
 }

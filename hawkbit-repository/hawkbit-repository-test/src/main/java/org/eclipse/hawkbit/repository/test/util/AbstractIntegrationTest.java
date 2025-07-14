@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.repository.test.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TENANT_CONFIGURATION;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
+import static org.eclipse.hawkbit.im.authentication.SpRole.SYSTEM_ROLE;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.CONTROLLER_ROLE;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,8 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionFactory;
-import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
-import org.eclipse.hawkbit.repository.artifact.exception.ArtifactStoreException;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -53,6 +51,8 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
+import org.eclipse.hawkbit.repository.artifact.exception.ArtifactStoreException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;

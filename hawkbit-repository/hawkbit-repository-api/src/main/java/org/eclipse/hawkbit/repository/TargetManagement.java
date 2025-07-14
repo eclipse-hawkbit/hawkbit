@@ -9,6 +9,20 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.BRACKET_CLOSE;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.BRACKET_OPEN;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_AND;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_CREATE_TARGET;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_DELETE_TARGET;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_PREFIX;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_READ_TARGET;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_SUFFIX;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +35,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
@@ -53,6 +67,11 @@ public interface TargetManagement {
     String DETAILS_TAGS = "tags";
     String DETAILS_ACTIONS = "actions";
 
+    String HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET = BRACKET_OPEN +
+            HAS_AUTH_PREFIX + SpPermission.READ_DISTRIBUTION_SET + HAS_AUTH_SUFFIX +
+            HAS_AUTH_AND +
+            HAS_AUTH_PREFIX + SpPermission.READ_TARGET + HAS_AUTH_SUFFIX +
+            BRACKET_CLOSE;
     /**
      * Counts number of targets with the given distribution set assigned.
      *
@@ -60,7 +79,7 @@ public interface TargetManagement {
      * @return number of found {@link Target}s.
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
     long countByAssignedDistributionSet(long distributionSetId);
 
     /**
@@ -71,7 +90,7 @@ public interface TargetManagement {
      * @return the found number {@link Target}s
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     long countByFilters(@NotNull final FilterParams filterParams);
 
     /**
@@ -81,7 +100,7 @@ public interface TargetManagement {
      * @return number of found {@link Target}s.
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
     long countByInstalledDistributionSet(long distributionSetId);
 
     /**
@@ -92,7 +111,7 @@ public interface TargetManagement {
      * @return <code>true</code> if a {@link Target} exists.
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
     boolean existsByInstalledOrAssignedDistributionSet(long distributionSetId);
 
     /**
@@ -101,7 +120,7 @@ public interface TargetManagement {
      * @param rsql filter definition in RSQL syntax
      * @return the found number of {@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     long countByRsql(@NotEmpty String rsql);
 
     /**
@@ -110,7 +129,7 @@ public interface TargetManagement {
      * @param rsql filter definition in RSQL syntax
      * @return the found number of {@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     long countByRsqlAndUpdatable(@NotEmpty String rsql);
 
     /**
@@ -122,7 +141,7 @@ public interface TargetManagement {
      *         compatible with
      * @return the found number of{@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     long countByRsqlAndCompatible(@NotEmpty String rsql, @NotNull Long distributionSetIdTypeId);
 
     /**
@@ -134,7 +153,7 @@ public interface TargetManagement {
      *         compatible with
      * @return the found number of{@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     long countByRsqlAndCompatibleAndUpdatable(@NotEmpty String rsql, @NotNull Long distributionSetIdTypeId);
 
     /**
@@ -147,7 +166,7 @@ public interface TargetManagement {
      *         compatible with
      * @return the found number of{@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     long countByFailedInRollout(@NotEmpty String rolloutId, @NotNull Long dsTypeId);
 
     /**
@@ -157,7 +176,7 @@ public interface TargetManagement {
      * @return the found number of {@link Target}s
      * @throws EntityNotFoundException if {@link TargetFilterQuery} with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     long countByTargetFilterQuery(long targetFilterQueryId);
 
     /**
@@ -165,7 +184,7 @@ public interface TargetManagement {
      *
      * @return number of targets
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     long count();
 
     /**
@@ -176,7 +195,7 @@ public interface TargetManagement {
      * @throws EntityAlreadyExistsException given target already exists.
      * @throws ConstraintViolationException if fields are not filled as specified. Check {@link TargetCreate} for field constraints.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
+    @PreAuthorize(HAS_AUTH_CREATE_TARGET)
     Target create(@NotNull @Valid TargetCreate create);
 
     /**
@@ -190,7 +209,7 @@ public interface TargetManagement {
      * @throws ConstraintViolationException if fields are not filled as specified. Check {@link TargetCreate}
      *         for field constraints.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
+    @PreAuthorize(HAS_AUTH_CREATE_TARGET)
     List<Target> create(@NotNull @Valid Collection<TargetCreate> creates);
 
     /**
@@ -199,7 +218,7 @@ public interface TargetManagement {
      * @param ids the IDs of the targets to be deleted
      * @throws EntityNotFoundException if (at least one) of the given target IDs does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
+    @PreAuthorize(HAS_AUTH_DELETE_TARGET)
     void delete(@NotEmpty Collection<Long> ids);
 
     /**
@@ -208,7 +227,7 @@ public interface TargetManagement {
      * @param controllerId the controller ID of the target to be deleted
      * @throws EntityNotFoundException if target with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
+    @PreAuthorize(HAS_AUTH_DELETE_TARGET)
     void deleteByControllerID(@NotEmpty String controllerId);
 
     /**
@@ -222,7 +241,7 @@ public interface TargetManagement {
      * @return a page of the found {@link Target}s
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
     Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(
             long distributionSetId, @NotNull String rsql, @NotNull Pageable pageable);
 
@@ -236,7 +255,7 @@ public interface TargetManagement {
      * @return the count of found {@link Target}s
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
     long countByRsqlAndNonDSAndCompatibleAndUpdatable(long distributionSetId, @NotNull String rsql);
 
     /**
@@ -251,7 +270,7 @@ public interface TargetManagement {
      * @param pageable the pageable to enhance the query for paging and sorting
      * @return a page of the found {@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     Slice<Target> findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
             @NotEmpty Collection<Long> groups, @NotNull String rsql, @NotNull DistributionSetType distributionSetType,
             @NotNull Pageable pageable);
@@ -266,7 +285,7 @@ public interface TargetManagement {
      * @param distributionSetType type of the {@link DistributionSet} the targets must be compatible with
      * @return count of the found {@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
             @NotNull String rsql, @NotEmpty Collection<Long> groups, @NotNull DistributionSetType distributionSetType);
 
@@ -280,7 +299,7 @@ public interface TargetManagement {
      * @param pageable the pageable to enhance the query for paging and sorting
      * @return a page of the found {@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     Slice<Target> findByFailedRolloutAndNotInRolloutGroups(
             @NotNull String rolloutId, @NotEmpty Collection<Long> groups, @NotNull Pageable pageable);
 
@@ -293,14 +312,14 @@ public interface TargetManagement {
      * @param groups the list of {@link RolloutGroup}s
      * @return count of the found {@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     long countByFailedRolloutAndNotInRolloutGroups(@NotNull String rolloutId, @NotEmpty Collection<Long> groups);
 
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     Slice<Target> findByRsqlAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
             final long rolloutId, @NotNull String rsql, @NotNull DistributionSetType distributionSetType, @NotNull Pageable pageable);
 
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     long countByActionsInRolloutGroup(final long rolloutGroupId);
 
     /**
@@ -312,7 +331,7 @@ public interface TargetManagement {
      * @return the found {@link Target}s
      * @throws EntityNotFoundException if rollout group with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     Slice<Target> findByInRolloutGroupWithoutAction(long group, @NotNull Pageable pageable);
 
     /**
@@ -323,7 +342,7 @@ public interface TargetManagement {
      * @return the found {@link Target}s
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
     Page<Target> findByAssignedDistributionSet(long distributionSetId, @NotNull Pageable pageable);
 
     /**
@@ -338,7 +357,7 @@ public interface TargetManagement {
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
     Page<Target> findByAssignedDistributionSetAndRsql(long distributionSetId, @NotNull String rsql, @NotNull Pageable pageable);
 
     /**
@@ -347,7 +366,7 @@ public interface TargetManagement {
      * @param controllerIDs to look for.
      * @return List of found{@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     List<Target> getByControllerID(@NotEmpty Collection<String> controllerIDs);
 
     /**
@@ -356,7 +375,7 @@ public interface TargetManagement {
      * @param controllerId to look for.
      * @return {@link Target}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     Optional<Target> getByControllerID(@NotEmpty String controllerId);
 
     /**
@@ -366,25 +385,25 @@ public interface TargetManagement {
      * @param detailsKey the key of the details to include, e.g. {@link #DETAILS_AUTO_CONFIRMATION_STATUS}
      * @return {@link Target}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     Target getWithDetails(@NotEmpty String controllerId, String detailsKey);
 
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     default Target getWithDetails(@NotEmpty String controllerId) {
         return getWithDetails(controllerId, DETAILS_BASE);
     }
 
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     default Target getWithAutoConfigurationStatus(@NotEmpty String controllerId) {
         return getWithDetails(controllerId, DETAILS_AUTO_CONFIRMATION_STATUS);
     }
 
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     default Target getWithTags(@NotEmpty String controllerId) {
         return getWithDetails(controllerId, DETAILS_TAGS);
     }
 
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     default Target getWithActions(@NotEmpty String controllerId) {
         return getWithDetails(controllerId, DETAILS_ACTIONS);
     }
@@ -399,7 +418,7 @@ public interface TargetManagement {
      * @return the found {@link Target}s
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     Slice<Target> findByFilters(@NotNull FilterParams filterParams, @NotNull Pageable pageable);
 
     /**
@@ -410,7 +429,7 @@ public interface TargetManagement {
      * @return the found {@link Target}s
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
     Page<Target> findByInstalledDistributionSet(long distributionSetId, @NotNull Pageable pageReq);
 
     /**
@@ -426,7 +445,7 @@ public interface TargetManagement {
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
     Page<Target> findByInstalledDistributionSetAndRsql(long distributionSetId, @NotNull String rsql, @NotNull Pageable pageReq);
 
     /**
@@ -436,7 +455,7 @@ public interface TargetManagement {
      * @param pageable page parameter
      * @return the found {@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     Page<Target> findByUpdateStatus(@NotNull TargetUpdateStatus status, @NotNull Pageable pageable);
 
     /**
@@ -445,7 +464,7 @@ public interface TargetManagement {
      * @param pageable pagination parameter
      * @return the found {@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     Slice<Target> findAll(@NotNull Pageable pageable);
 
     /**
@@ -458,7 +477,7 @@ public interface TargetManagement {
      *         given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     Slice<Target> findByRsql(@NotNull String rsql, @NotNull Pageable pageable);
 
     /**
@@ -472,7 +491,7 @@ public interface TargetManagement {
      *         given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     Slice<Target> findByTargetFilterQuery(long targetFilterQueryId, @NotNull Pageable pageable);
 
     /**
@@ -483,7 +502,7 @@ public interface TargetManagement {
      * @return list of matching targets
      * @throws EntityNotFoundException if target tag with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     Page<Target> findByTag(long tagId, @NotNull Pageable pageable);
 
     /**
@@ -498,7 +517,7 @@ public interface TargetManagement {
      *         given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     Page<Target> findByRsqlAndTag(@NotNull String rsql, long tagId, @NotNull Pageable pageable);
 
     /**
@@ -510,7 +529,7 @@ public interface TargetManagement {
      * @param targetFilterQuery to execute
      * @return true if it matches
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
     boolean isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(
             @NotNull String controllerId, long distributionSetId, @NotNull String targetFilterQuery);
 
@@ -523,7 +542,7 @@ public interface TargetManagement {
      * @return {@link TargetTypeAssignmentResult} with all meta-data of the assignment outcome.
      * @throws EntityNotFoundException if target type with given id does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
     TargetTypeAssignmentResult assignType(@NotEmpty Collection<String> controllerIds, @NotNull Long typeId);
 
     /**
@@ -532,7 +551,7 @@ public interface TargetManagement {
      * @param controllerIds to remove the type from
      * @return {@link TargetTypeAssignmentResult} with all meta-data of the assignment outcome.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
     TargetTypeAssignmentResult unassignType(@NotEmpty Collection<String> controllerIds);
 
     /**
@@ -544,7 +563,7 @@ public interface TargetManagement {
      * @return list of assigned targets
      * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long targetTagId, final Consumer<Collection<String>> notFoundHandler);
 
     /**
@@ -555,7 +574,7 @@ public interface TargetManagement {
      * @return list of assigned targets
      * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long targetTagId);
 
     /**
@@ -567,7 +586,7 @@ public interface TargetManagement {
      * @return list of unassigned targets
      * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
     List<Target> unassignTag(@NotEmpty Collection<String> controllerIds, long targetTagId, final Consumer<Collection<String>> notFoundHandler);
 
     /**
@@ -578,7 +597,7 @@ public interface TargetManagement {
      * @return list of unassigned targets
      * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
     List<Target> unassignTag(@NotEmpty Collection<String> controllerIds, long targetTagId);
 
     /**
@@ -587,7 +606,7 @@ public interface TargetManagement {
      * @param controllerId to un-assign for
      * @return the unassigned target
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
     Target unassignType(@NotEmpty String controllerId);
 
     /**
@@ -598,7 +617,7 @@ public interface TargetManagement {
      * @return the unassigned target
      * @throws EntityNotFoundException if TargetType with given target ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
     Target assignType(@NotEmpty String controllerId, @NotNull Long targetTypeId);
 
     /**
@@ -610,7 +629,7 @@ public interface TargetManagement {
      * @throws ConstraintViolationException if fields are not filled as specified. Check {@link TargetUpdate}
      *         for field constraints.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
     Target update(@NotNull @Valid TargetUpdate update);
 
     /**
@@ -619,7 +638,7 @@ public interface TargetManagement {
      * @param id to look for
      * @return {@link Target}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     Optional<Target> get(long id);
 
     /**
@@ -628,7 +647,7 @@ public interface TargetManagement {
      * @param ids the ids to for
      * @return the found {@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     List<Target> get(@NotNull Collection<Long> ids);
 
     /**
@@ -637,7 +656,7 @@ public interface TargetManagement {
      * @param controllerId of target
      * @return {@code true} if target with given ID exists
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     boolean existsByControllerId(@NotEmpty String controllerId);
 
     /**
@@ -647,7 +666,7 @@ public interface TargetManagement {
      * @return the found Tag set
      * @throws EntityNotFoundException if target with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     Set<TargetTag> getTags(@NotEmpty String controllerId);
 
     /**
@@ -657,7 +676,7 @@ public interface TargetManagement {
      * @return controller attributes as key/value pairs
      * @throws EntityNotFoundException if target with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     Map<String, String> getControllerAttributes(@NotEmpty String controllerId);
 
     /**
@@ -666,7 +685,7 @@ public interface TargetManagement {
      * @param controllerId of the target
      * @throws EntityNotFoundException if target with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
     void requestControllerAttributes(@NotEmpty String controllerId);
 
     /**
@@ -676,7 +695,7 @@ public interface TargetManagement {
      * @return {@code true}: update of controller attributes triggered.
      *         {@code false}: update of controller attributes not requested.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     boolean isControllerAttributesRequested(@NotEmpty String controllerId);
 
     /**
@@ -686,7 +705,7 @@ public interface TargetManagement {
      * @param pageable page parameter
      * @return the found {@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
     Page<Target> findByControllerAttributesRequested(@NotNull Pageable pageable);
 
     /**
@@ -698,7 +717,7 @@ public interface TargetManagement {
      * @throws EntityAlreadyExistsException in case one of the metad-ata entry already exists for the specific key
      * @throws AssignmentQuotaExceededException if the maximum number of meta-data entries is exceeded for the addressed {@link Target}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_UPDATE_REPOSITORY)
     void createMetadata(@NotEmpty String controllerId, @NotEmpty Map<String, String> metadata);
 
     /**
@@ -708,7 +727,7 @@ public interface TargetManagement {
      * @return the found target meta-data
      * @throws EntityNotFoundException if target with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_READ_REPOSITORY)
     Map<String, String> getMetadata(@NotEmpty String controllerId);
 
     /**
@@ -719,7 +738,7 @@ public interface TargetManagement {
      * @param value meta data-entry to be new value
      * @throws EntityNotFoundException in case the meta-data entry does not exist and cannot be updated
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_UPDATE_REPOSITORY)
     void updateMetadata(@NotEmpty String controllerId, @NotNull String key, @NotNull String value);
 
     /**
@@ -729,6 +748,6 @@ public interface TargetManagement {
      * @param key of the meta data element
      * @throws EntityNotFoundException if given target does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_AUTH_UPDATE_REPOSITORY)
     void deleteMetadata(@NotEmpty String controllerId, @NotEmpty String key);
 }

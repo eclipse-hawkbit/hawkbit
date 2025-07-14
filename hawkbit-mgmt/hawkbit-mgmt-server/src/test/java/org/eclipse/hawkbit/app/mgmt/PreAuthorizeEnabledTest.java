@@ -52,7 +52,10 @@ class PreAuthorizeEnabledTest extends AbstractSecurityTest {
      * Tests whether request returns distribution set if a role with scope is granted for the user
      */
     @Test
-    @WithUser(authorities = { SpPermission.CREATE_REPOSITORY, SpPermission.READ_REPOSITORY + "/name==DsOne" }, autoCreateTenant = false)
+    @WithUser(authorities = {
+            SpPermission.CREATE_REPOSITORY,
+            SpPermission.READ_REPOSITORY,
+            SpPermission.READ_DISTRIBUTION_SET + "/name==DsOne" }, autoCreateTenant = false)
     void successIfHasRoleWithScope() throws Exception {
         createDsOne("successIfHasRoleWithScope");
         mvc.perform(get("/rest/v1/distributionsets")).andExpect(result -> {
@@ -65,7 +68,10 @@ class PreAuthorizeEnabledTest extends AbstractSecurityTest {
      * Tests whether request doesn't return distribution set if a role with scope doesn't grant access
      */
     @Test
-    @WithUser(authorities = { SpPermission.CREATE_REPOSITORY, SpPermission.READ_REPOSITORY + "/name==DsOne2" }, autoCreateTenant = false)
+    @WithUser(authorities = {
+            SpPermission.CREATE_REPOSITORY,
+            SpPermission.READ_REPOSITORY,
+            SpPermission.READ_DISTRIBUTION_SET + "/name==DsOne2" }, autoCreateTenant = false)
     void failIfHasNoForbiddingScope() throws Exception {
         createDsOne("failIfHasNoForbiddingScope");
         mvc.perform(get("/rest/v1/distributionsets")).andExpect(result -> {

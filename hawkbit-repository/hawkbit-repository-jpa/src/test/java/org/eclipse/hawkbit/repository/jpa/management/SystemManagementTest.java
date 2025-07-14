@@ -15,7 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Random;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -137,27 +137,27 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
 
         for (int i = 0; i < tenants; i++) {
             final String tenantname = "TENANT" + i;
-            SecurityContextSwitch.getAs(SecurityContextSwitch.withUserAndTenant("bumlux", tenantname, true, true, false,
-                    SpringEvalExpressions.SYSTEM_ROLE), () -> {
-                systemManagement.getTenantMetadataWithoutDetails();
-                if (artifactSize > 0) {
-                    createTestArtifact(random);
-                    createDeletedTestArtifact(random);
-                }
-                if (targets > 0) {
-                    final List<Target> createdTargets = createTestTargets(targets);
-                    if (updates > 0) {
-                        for (int x = 0; x < updates; x++) {
-                            final DistributionSet ds = testdataFactory
-                                    .createDistributionSet("to be deployed" + x, true);
-
-                            assignDistributionSet(ds, createdTargets);
+            SecurityContextSwitch.getAs(SecurityContextSwitch.withUserAndTenant("bumlux", tenantname, true, true, false, SpRole.SYSTEM_ROLE),
+                    () -> {
+                        systemManagement.getTenantMetadataWithoutDetails();
+                        if (artifactSize > 0) {
+                            createTestArtifact(random);
+                            createDeletedTestArtifact(random);
                         }
-                    }
-                }
+                        if (targets > 0) {
+                            final List<Target> createdTargets = createTestTargets(targets);
+                            if (updates > 0) {
+                                for (int x = 0; x < updates; x++) {
+                                    final DistributionSet ds = testdataFactory
+                                            .createDistributionSet("to be deployed" + x, true);
 
-                return null;
-            });
+                                    assignDistributionSet(ds, createdTargets);
+                                }
+                            }
+                        }
+
+                        return null;
+                    });
         }
 
         return random;

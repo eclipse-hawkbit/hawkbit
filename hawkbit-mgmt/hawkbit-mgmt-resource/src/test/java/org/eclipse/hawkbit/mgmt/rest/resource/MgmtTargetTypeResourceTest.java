@@ -69,7 +69,9 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * GET targettypes returns Forbidden when permission is missing
      */
     @Test
-    @WithUser(principal = "targetTypeTester", allSpPermissions = true, removeFromAllPermission = { SpPermission.READ_TARGET })
+    @WithUser(
+            principal = "targetTypeTester", allSpPermissions = true,
+            removeFromAllPermission = { SpPermission.READ_TARGET, SpPermission.READ_TARGET_TYPE })
     void getTargetTypesWithoutPermission() throws Exception {
         mvc.perform(get(TARGETTYPES_ENDPOINT).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())

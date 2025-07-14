@@ -13,6 +13,8 @@ import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.im.authentication.SpRole;
+import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.junit.jupiter.api.Test;
 
@@ -50,7 +52,7 @@ class SystemManagementSecurityTest extends AbstractJpaIntegrationTest {
         assertPermissions(() -> {
             systemManagement.forEachTenant(log::info);
             return null;
-        }, List.of(SpPermission.SpringEvalExpressions.SYSTEM_ROLE));
+        }, List.of(SpRole.SYSTEM_ROLE));
     }
 
     /**
@@ -77,7 +79,7 @@ class SystemManagementSecurityTest extends AbstractJpaIntegrationTest {
         assertPermissions(() -> systemManagement.getTenantMetadata(), List.of(SpPermission.READ_REPOSITORY), List.of(SpPermission.CREATE_REPOSITORY));
         assertPermissions(() -> systemManagement.getTenantMetadata(), List.of(SpPermission.READ_TARGET), List.of(SpPermission.CREATE_REPOSITORY));
         assertPermissions(() -> systemManagement.getTenantMetadata(), List.of(SpPermission.READ_TENANT_CONFIGURATION), List.of(SpPermission.CREATE_REPOSITORY));
-        assertPermissions(() -> systemManagement.getTenantMetadata(), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
+        assertPermissions(() -> systemManagement.getTenantMetadata(), List.of(SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
     }
 
     /**
@@ -88,7 +90,7 @@ class SystemManagementSecurityTest extends AbstractJpaIntegrationTest {
         assertPermissions(() -> systemManagement.getTenantMetadataWithoutDetails(), List.of(SpPermission.READ_REPOSITORY), List.of(SpPermission.CREATE_REPOSITORY));
         assertPermissions(() -> systemManagement.getTenantMetadataWithoutDetails(), List.of(SpPermission.READ_TARGET), List.of(SpPermission.CREATE_REPOSITORY));
         assertPermissions(() -> systemManagement.getTenantMetadataWithoutDetails(), List.of(SpPermission.READ_TENANT_CONFIGURATION), List.of(SpPermission.CREATE_REPOSITORY));
-        assertPermissions(() -> systemManagement.getTenantMetadataWithoutDetails(), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
+        assertPermissions(() -> systemManagement.getTenantMetadataWithoutDetails(), List.of(SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
     }
 
     /**
@@ -96,7 +98,7 @@ class SystemManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void getTenantMetadataByTenantPermissionsCheck() {
-        assertPermissions(() -> systemManagement.getTenantMetadata(1L), List.of(SpPermission.SpringEvalExpressions.SYSTEM_ROLE));
+        assertPermissions(() -> systemManagement.getTenantMetadata(1L), List.of(SpRole.SYSTEM_ROLE));
     }
 
     /**
@@ -104,7 +106,7 @@ class SystemManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void createTenantMetadataPermissionsCheck() {
-        assertPermissions(() -> systemManagement.createTenantMetadata("tenant"), List.of(SpPermission.SpringEvalExpressions.SYSTEM_ROLE));
+        assertPermissions(() -> systemManagement.createTenantMetadata("tenant"), List.of(SpRole.SYSTEM_ROLE));
     }
 
     /**

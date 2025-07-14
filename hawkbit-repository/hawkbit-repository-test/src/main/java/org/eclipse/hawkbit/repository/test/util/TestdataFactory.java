@@ -10,7 +10,7 @@
 package org.eclipse.hawkbit.repository.test.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
+import static org.eclipse.hawkbit.im.authentication.SpRole.SYSTEM_ROLE;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withUserAndTenant;
 
