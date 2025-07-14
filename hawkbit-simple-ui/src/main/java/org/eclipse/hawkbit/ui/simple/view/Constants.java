@@ -21,6 +21,7 @@ public interface Constants {
     String VERSION = "Version";
     String VENDOR = "Vendor";
     String TYPE = "Type";
+    String GROUP = "Group";
     String CREATED_BY = "Created by";
     String CREATED_AT = "Created at";
     String LAST_MODIFIED_BY = "Last modified by";

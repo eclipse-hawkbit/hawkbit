@@ -192,6 +192,22 @@ public final class TargetSpecifications {
         };
     }
 
+    public  static Specification<JpaTarget> eqTargetGroup(final String targetGroup) {
+        return (targetRoot, query, criteriaBuilder) -> {
+            final String groupTextToLower = targetGroup.toLowerCase();
+            return criteriaBuilder.equal(criteriaBuilder.lower(targetRoot.get(JpaTarget_.group)), groupTextToLower);
+        };
+    }
+
+    public static Specification<JpaTarget> eqOrSubTargetGroup(final String targetGroupSearch) {
+        return (targetRoot, query, criteriaBuilder) ->  {
+            final String searchTextToLower = targetGroupSearch.toLowerCase();
+            return criteriaBuilder.or(
+                    criteriaBuilder.equal(criteriaBuilder.lower(targetRoot.get(JpaTarget_.group)), searchTextToLower),
+                    criteriaBuilder.like(criteriaBuilder.lower(targetRoot.get(JpaTarget_.group)), searchTextToLower.concat("/%")));
+        };
+    }
+
     /**
      * {@link Specification} for retrieving {@link Target}s by "like controllerId".
      *
