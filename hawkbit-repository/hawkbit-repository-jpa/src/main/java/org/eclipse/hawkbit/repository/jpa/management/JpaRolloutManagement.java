@@ -29,6 +29,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -200,7 +201,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         // scheduled rollout, the creator shall have permissions to start rollout
         if (rolloutRequest.getStartAt() != null && rolloutRequest.getStartAt() != Long.MAX_VALUE && // if scheduled rollout
                 !systemSecurityContext.hasPermission(SpPermission.HANDLE_ROLLOUT) &&
-                !systemSecurityContext.hasPermission(SpPermission.SpringEvalExpressions.SYSTEM_ROLE)) {
+                !systemSecurityContext.hasPermission(SpRole.SYSTEM_ROLE)) {
             throw new InsufficientPermissionException("You need permission to start rollouts to create a scheduled rollout");
         }
         if (dynamicRolloutGroupTemplate != null && !rolloutRequest.isDynamic()) {

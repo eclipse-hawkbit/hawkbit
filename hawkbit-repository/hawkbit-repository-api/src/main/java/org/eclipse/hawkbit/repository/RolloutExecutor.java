@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Target;

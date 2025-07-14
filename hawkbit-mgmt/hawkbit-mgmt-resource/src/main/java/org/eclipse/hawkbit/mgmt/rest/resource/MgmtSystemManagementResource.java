@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.Objects;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.mgmt.json.model.systemmanagement.MgmtSystemCache;
 import org.eclipse.hawkbit.mgmt.json.model.systemmanagement.MgmtSystemStatisticsRest;
 import org.eclipse.hawkbit.mgmt.json.model.systemmanagement.MgmtSystemTenantServiceUsage;

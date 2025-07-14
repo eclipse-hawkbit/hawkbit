@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.junit.jupiter.api.Test;
 
@@ -45,7 +46,7 @@ class ConfirmationManagementSecurityTest extends AbstractJpaIntegrationTest {
     void getStatusPermissionsCheck() {
         assertPermissions(() -> confirmationManagement.getStatus("controllerId"), List.of(SpPermission.READ_TARGET),
                 List.of(SpPermission.CREATE_TARGET));
-        assertPermissions(() -> confirmationManagement.getStatus("controllerId"), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_TARGET));
+        assertPermissions(() -> confirmationManagement.getStatus("controllerId"), List.of(SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_TARGET));
     }
 
     /**

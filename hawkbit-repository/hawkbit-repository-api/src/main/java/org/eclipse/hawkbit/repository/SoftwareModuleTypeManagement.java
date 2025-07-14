@@ -13,7 +13,7 @@ import java.util.Optional;
 
 import jakarta.validation.constraints.NotEmpty;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;

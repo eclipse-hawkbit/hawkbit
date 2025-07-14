@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.aopalliance.intercept.MethodInvocation;
-import org.eclipse.hawkbit.im.authentication.SpRole;
+import org.eclipse.hawkbit.im.authentication.Hierarchy;
 import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -49,7 +49,7 @@ public class RepositoryConfiguration {
     @Bean
     @ConditionalOnMissingBean
     static RoleHierarchy roleHierarchy() {
-        return RoleHierarchyImpl.fromHierarchy(SpRole.DEFAULT_ROLE_HIERARCHY);
+        return RoleHierarchyImpl.fromHierarchy(Hierarchy.DEFAULT);
     }
 
     @Bean

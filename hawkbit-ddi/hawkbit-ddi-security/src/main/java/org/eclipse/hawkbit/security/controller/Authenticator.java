@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 
 import lombok.EqualsAndHashCode;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -77,7 +77,7 @@ public interface Authenticator {
         private static class AuthenticatedController extends AbstractAuthenticationToken {
 
             private static final Collection<GrantedAuthority> CONTROLLER_AUTHORITY =
-                    List.of(new SimpleGrantedAuthority(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
+                    List.of(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE));
             private final String controllerId;
 
             AuthenticatedController(final String tenant, final String controllerId) {

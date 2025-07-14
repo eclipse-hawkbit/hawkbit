@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
@@ -273,7 +274,7 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     void deleteActionsByStatusAndLastModifiedBeforePermissionsCheck() {
         assertPermissions(() -> deploymentManagement.deleteActionsByStatusAndLastModifiedBefore(Set.of(Action.Status.CANCELED), 1L),
-                List.of(SpPermission.SpringEvalExpressions.SYSTEM_ROLE));
+                List.of(SpRole.SYSTEM_ROLE));
     }
 
     /**

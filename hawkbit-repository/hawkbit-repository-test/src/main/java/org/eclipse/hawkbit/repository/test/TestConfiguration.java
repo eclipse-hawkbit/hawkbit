@@ -17,6 +17,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.eclipse.hawkbit.ContextAware;
+import org.eclipse.hawkbit.im.authentication.Hierarchy;
 import org.eclipse.hawkbit.repository.artifact.ArtifactFilesystemProperties;
 import org.eclipse.hawkbit.repository.artifact.ArtifactFilesystemRepository;
 import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
@@ -24,7 +25,6 @@ import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandlerProp
 import org.eclipse.hawkbit.repository.artifact.urlhandler.PropertyBasedArtifactUrlHandler;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
-import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -140,7 +140,7 @@ public class TestConfiguration implements AsyncConfigurer {
 
     @Bean
     SystemSecurityContext systemSecurityContext(final TenantAware tenantAware) {
-        return new SystemSecurityContext(tenantAware, RoleHierarchyImpl.fromHierarchy(SpRole.DEFAULT_ROLE_HIERARCHY));
+        return new SystemSecurityContext(tenantAware, RoleHierarchyImpl.fromHierarchy(Hierarchy.DEFAULT));
     }
 
     @Bean

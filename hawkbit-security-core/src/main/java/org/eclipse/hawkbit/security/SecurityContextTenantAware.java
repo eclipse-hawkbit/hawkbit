@@ -19,7 +19,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.eclipse.hawkbit.ContextAware;
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAwareUser;
@@ -42,8 +42,7 @@ public class SecurityContextTenantAware implements ContextAware {
 
     public static final String SYSTEM_USER = "system";
 
-    private static final Collection<? extends GrantedAuthority> SYSTEM_AUTHORITIES =
-            List.of(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
+    private static final Collection<? extends GrantedAuthority> SYSTEM_AUTHORITIES = List.of(new SimpleGrantedAuthority(SpRole.SYSTEM_ROLE));
 
     private final UserAuthoritiesResolver authoritiesResolver;
     private final SecurityContextSerializer securityContextSerializer;

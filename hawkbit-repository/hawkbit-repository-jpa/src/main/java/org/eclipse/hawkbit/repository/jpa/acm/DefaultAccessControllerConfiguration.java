@@ -32,12 +32,12 @@ public class DefaultAccessControllerConfiguration {
     @Bean
     @ConditionalOnProperty(name = "hawkbit.acm.access-controller.target-type.enabled", havingValue = "true", matchIfMissing = true)
     AccessController<JpaTargetType> targetTypeAccessController() {
-        return new DefaultAccessController<>(TargetTypeFields.class, "TARGET", "TARGET_TYPE");
+        return new DefaultAccessController<>(TargetTypeFields.class, "TARGET_TYPE");
     }
 
     @Bean
     @ConditionalOnProperty(name = "hawkbit.acm.access-controller.distribution-set.enabled", havingValue = "true", matchIfMissing = true)
     AccessController<JpaDistributionSet> distributionSetAccessController() {
-        return new DefaultAccessController<>(DistributionSetFields.class, "REPOSITORY", "DISTRIBUTION_SET");
+        return new DefaultAccessController<>(DistributionSetFields.class, "DISTRIBUTION_SET");
     }
 }

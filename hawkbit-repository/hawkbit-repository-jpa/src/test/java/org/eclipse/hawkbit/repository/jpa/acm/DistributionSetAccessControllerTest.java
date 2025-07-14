@@ -11,9 +11,10 @@ package org.eclipse.hawkbit.repository.jpa.acm;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_DISTRIBUTION_SET;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_REPOSITORY;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TARGET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_REPOSITORY;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_DISTRIBUTION_SET;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_TARGET;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withUser;
@@ -38,6 +39,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
+ * Note: Still all test gets READ_REPOSITORY since find methods are inherited with request for READ_REPOSITORY. However,
+ * using READ_DISTRIBUTION_SET scoping - the scopes still work.
+ * <p/>
  * Feature: Component Tests - Access Control<br/>
  * Story: Test Distribution Set Access Controller
  */
@@ -56,7 +60,8 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
         final Action hiddenAction = testdataFactory.performAssignment(hidden);
 
         runAs(withUser("user",
-                        READ_REPOSITORY + "/id==" + permitted.getId(),
+                READ_REPOSITORY,
+                        READ_DISTRIBUTION_SET + "/id==" + permitted.getId(),
                         READ_TARGET +"/controllerId==" + permittedAction.getTarget().getControllerId()), () -> {
             final Long permittedActionId = permitted.getId();
 
@@ -125,8 +130,9 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
         final SoftwareModule swModule = testdataFactory.createSoftwareModuleOs();
 
         runAs(withUser("user",
-                READ_REPOSITORY + "/id==" + permitted.getId() + " or id==" + readOnly.getId(),
-                UPDATE_REPOSITORY + "/id==" + permitted.getId()), () -> {
+                READ_REPOSITORY,
+                READ_DISTRIBUTION_SET + "/id==" + permitted.getId() + " or id==" + readOnly.getId(),
+                UPDATE_DISTRIBUTION_SET + "/id==" + permitted.getId()), () -> {
             // verify distributionSetManagement#assignSoftwareModules
             final List<Long> singleModuleIdList = Collections.singletonList(swModule.getId());
             assertThat(distributionSetManagement.assignSoftwareModules(permitted.getId(), singleModuleIdList))
@@ -185,8 +191,9 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
         distributionSetManagement.assignTag(Arrays.asList(permitted.getId(), readOnly.getId(), hidden.getId()), dsTagId);
 
         runAs(withUser("user",
-                READ_REPOSITORY + "/id==" + permitted.getId() + " or id==" + readOnly.getId(),
-                UPDATE_REPOSITORY + "/id==" + permitted.getId()), () -> {
+                READ_REPOSITORY,
+                READ_DISTRIBUTION_SET + "/id==" + permitted.getId() + " or id==" + readOnly.getId(),
+                UPDATE_DISTRIBUTION_SET + "/id==" + permitted.getId()), () -> {
             assertThat(distributionSetManagement.findByTag(dsTagId, Pageable.unpaged()).get().map(Identifiable::getId)
                     .toList()).containsOnly(permitted.getId(), readOnly.getId());
 
@@ -252,8 +259,9 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
                 .create(entityFactory.targetFilterQuery().create().name("test").query("id==*"));
 
         runAs(withUser("user",
-                READ_REPOSITORY + "/id==" + permitted.getId() + " or id==" + readOnly.getId(),
-                UPDATE_REPOSITORY + "/id==" + permitted.getId(),
+                READ_REPOSITORY,
+                READ_DISTRIBUTION_SET + "/id==" + permitted.getId() + " or id==" + readOnly.getId(),
+                UPDATE_DISTRIBUTION_SET + "/id==" + permitted.getId(),
                 // read / update target needed to update target filter query
                 READ_TARGET, UPDATE_TARGET), () -> {
             assertThat(targetFilterQueryManagement

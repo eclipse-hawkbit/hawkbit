@@ -18,8 +18,10 @@ import java.util.concurrent.Callable;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.im.authentication.SpRole;
+import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -161,19 +163,25 @@ public class SystemSecurityContext {
 
     /**
      * An implementation of the Spring's {@link Authentication} object which is used within a system security code block and
-     * wraps the original authentication object. The wrapped object contains the necessary {@link SpringEvalExpressions#SYSTEM_ROLE}
+     * wraps the original authentication object. The wrapped object contains the necessary {@link SpRole#SYSTEM_ROLE}
      * which is allowed to execute all secured methods.
      */
+    @Getter
     public static final class SystemCodeAuthentication implements Authentication {
 
         @Serial
         private static final long serialVersionUID = 1L;
 
-        private static final List<SimpleGrantedAuthority> AUTHORITIES = List.of(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
-        private final Authentication oldAuthentication;
+        private static final List<SimpleGrantedAuthority> AUTHORITIES = List.of(new SimpleGrantedAuthority(SpRole.SYSTEM_ROLE));
+
+        private final Object credentials;
+        private final Object details;
+        private final Object principal;
 
         private SystemCodeAuthentication(final Authentication oldAuthentication) {
-            this.oldAuthentication = oldAuthentication;
+            credentials = oldAuthentication != null ? oldAuthentication.getCredentials() : null;
+            details = oldAuthentication != null ? oldAuthentication.getDetails() : null;
+            principal = oldAuthentication != null ? oldAuthentication.getPrincipal() : null;
         }
 
         @Override
@@ -184,21 +192,6 @@ public class SystemSecurityContext {
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
             return AUTHORITIES;
-        }
-
-        @Override
-        public Object getCredentials() {
-            return oldAuthentication != null ? oldAuthentication.getCredentials() : null;
-        }
-
-        @Override
-        public Object getDetails() {
-            return oldAuthentication != null ? oldAuthentication.getDetails() : null;
-        }
-
-        @Override
-        public Object getPrincipal() {
-            return oldAuthentication != null ? oldAuthentication.getPrincipal() : null;
         }
 
         @Override
