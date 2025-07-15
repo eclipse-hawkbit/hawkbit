@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.ui.simple.view;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -402,15 +401,15 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
         protected void onAttach(final AttachEvent attachEvent) {
             description.setValue(target.getDescription() == null ? "N/A" : target.getDescription());
             createdBy.setValue(target.getCreatedBy());
-            createdAt.setValue(new Date(target.getCreatedAt()).toString());
+            createdAt.setValue(Utils.localDateTimeFromTs(target.getCreatedAt()));
             lastModifiedBy.setValue(target.getLastModifiedBy());
-            lastModifiedAt.setValue(new Date(target.getLastModifiedAt()).toString());
+            lastModifiedAt.setValue(Utils.localDateTimeFromTs(target.getLastModifiedAt()));
             securityToken.setValue(Objects.requireNonNullElse(target.getSecurityToken(), ""));
             group.setValue(target.getGroup() != null ? target.getGroup() : "");
             targetAddress.setValue(target.getAddress() != null ? target.getAddress() : "");
 
             final MgmtPollStatus pollStatus = target.getPollStatus();
-            lastPoll.setValue(pollStatus == null ? NOT_AVAILABLE_NULL : new Date(pollStatus.getLastRequestAt()).toString());
+            lastPoll.setValue(pollStatus == null ? NOT_AVAILABLE_NULL : Utils.localDateTimeFromTs(pollStatus.getLastRequestAt()));
             final ResponseEntity<MgmtTargetAttributes> response = hawkbitClient.getTargetRestApi().getAttributes(target.getControllerId());
             if (response.getStatusCode().is2xxSuccessful()) {
                 targetAttributes.setValue(Objects.requireNonNullElse(response.getBody(), Collections.emptyMap()).entrySet().stream()

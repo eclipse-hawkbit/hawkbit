@@ -282,6 +282,12 @@ public class Utils {
                         FormatStyle.MEDIUM).withLocale(UI.getCurrent().getLocale()));
     }
 
+    public static String localDateTimeFromTs(long timestamp) {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), getZoneId()).format(DateTimeFormatter.ofLocalizedDateTime(
+                FormatStyle.SHORT,
+                FormatStyle.MEDIUM).withLocale(UI.getCurrent().getLocale()));
+    }
+
     public static String getSortParam(List<QuerySortOrder> querySortOrders) {
         return getSortParam(querySortOrders, null);
     }

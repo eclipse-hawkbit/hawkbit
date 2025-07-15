@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.simple.view;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -216,9 +215,9 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
         private void setItem(final MgmtDistributionSet distributionSet) {
             description.setValue(distributionSet.getDescription());
             createdBy.setValue(distributionSet.getCreatedBy());
-            createdAt.setValue(new Date(distributionSet.getCreatedAt()).toString());
+            createdAt.setValue(Utils.localDateTimeFromTs(distributionSet.getCreatedAt()));
             lastModifiedBy.setValue(distributionSet.getLastModifiedBy());
-            lastModifiedAt.setValue(new Date(distributionSet.getLastModifiedAt()).toString());
+            lastModifiedAt.setValue(Utils.localDateTimeFromTs(distributionSet.getLastModifiedAt()));
             metadata.setValue(Optional.ofNullable(
                     hawkbitClient.getDistributionSetRestApi().getMetadata(distributionSet.getId()).getBody())
                     .map(body -> body.getContent().stream()

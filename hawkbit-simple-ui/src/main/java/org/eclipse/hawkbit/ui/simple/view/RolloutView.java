@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.ui.simple.view;
 
 import java.time.ZoneOffset;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -231,9 +230,9 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
         private void setItem(final MgmtRolloutResponseBody rollout) {
             description.setValue(rollout.getDescription());
             createdBy.setValue(rollout.getCreatedBy());
-            createdAt.setValue(new Date(rollout.getCreatedAt()).toString());
+            createdAt.setValue(Utils.localDateTimeFromTs(rollout.getCreatedAt()));
             lastModifiedBy.setValue(rollout.getLastModifiedBy());
-            lastModifiedAt.setValue(new Date(rollout.getLastModifiedAt()).toString());
+            lastModifiedAt.setValue(Utils.localDateTimeFromTs(rollout.getLastModifiedAt()));
             targetFilter.setValue(rollout.getTargetFilterQuery());
             final MgmtDistributionSet distributionSetMgmt = hawkbitClient.getDistributionSetRestApi()
                     .getDistributionSet(rollout.getDistributionSetId()).getBody();
@@ -244,9 +243,9 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                 case SOFT -> Constants.SOFT;
                 case FORCED -> Constants.FORCED;
                 case DOWNLOAD_ONLY -> Constants.DOWNLOAD_ONLY;
-                case TIMEFORCED -> "Scheduled at " + new Date(rollout.getForcetime());
+                case TIMEFORCED -> "Scheduled at " + Utils.localDateTimeFromTs(rollout.getForcetime());
             });
-            startAt.setValue(ObjectUtils.isEmpty(rollout.getStartAt()) ? "" : new Date(rollout.getStartAt()).toString());
+            startAt.setValue(ObjectUtils.isEmpty(rollout.getStartAt()) ? "" : Utils.localDateTimeFromTs(rollout.getStartAt()));
             dynamic.setValue(rollout.isDynamic());
 
             groupGrid.setItems(query -> Optional.ofNullable(
