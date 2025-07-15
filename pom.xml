@@ -575,25 +575,27 @@
                                         <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BLUEZONE_25.txt</validHeader>
                                     </validHeaders>
                                     <excludes>
-                                        <exclude>.3rd-party/**</exclude>
-                                        <exclude>.git*</exclude>
-                                        <exclude>.github/**</exclude>
+                                        <exclude>docker/**</exclude>
                                         <exclude>licenses/LICENSE*</exclude>
+                                        <exclude>**/*.sql</exclude>
+                                        <exclude>**/application-local.properties</exclude>
                                         <exclude>eclipse_codeformatter.xml</exclude>
                                         <exclude>intellij_codeformatter.xml</exclude>
+                                        <!-- hawkbit-simple-ui - start-->
                                         <exclude>**/banner.txt</exclude>
-                                        <exclude>**/helm/**</exclude>
-                                        <exclude>**/README</exclude>
-                                        <exclude>**/.git*</exclude>
                                         <exclude>**/robots.txt</exclude>
-                                        <exclude>**/*.sql</exclude>
-                                        <exclude>**/docker/**</exclude>
                                         <exclude>**/frontend/**</exclude>
-                                        <exclude>site/content/**</exclude>
+                                        <exclude>**/generated/**</exclude>
+                                        <exclude>**/tsconfig.json</exclude>
+                                        <exclude>**/types.d.ts</exclude>
+                                        <exclude>**/vite.config.ts</exclude>
+                                        <exclude>**/vite.generated.ts</exclude>
+                                        <!-- hawkbit-simple-ui - end -->
+                                        <!-- site - start -->
                                         <exclude>site/layouts/**</exclude>
                                         <exclude>site/static/**</exclude>
                                         <exclude>site/*.toml</exclude>
-                                        <exclude>**/spring.factories</exclude>
+                                        <!-- site - end -->
                                     </excludes>
                                 </licenseSet>
                             </licenseSets>
