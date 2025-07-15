@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.im.authentication;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import lombok.AccessLevel;
@@ -168,7 +169,7 @@ public final class SpPermission {
                 }
             }
         }
-        return allPermissions;
+        return Collections.unmodifiableList(allPermissions);
     });
     /**
      * Return all permission.

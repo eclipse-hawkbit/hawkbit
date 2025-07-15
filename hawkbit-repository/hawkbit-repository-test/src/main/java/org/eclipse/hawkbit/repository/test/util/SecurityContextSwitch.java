@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.test.util;
 import java.io.Serial;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -164,7 +165,7 @@ public class SecurityContextSwitch {
         }
 
         private String[] getAllAuthorities(final String[] additionalAuthorities, final String[] notInclude) {
-            final List<String> permissions = SpPermission.getAllAuthorities();
+            final List<String> permissions = new ArrayList<>(SpPermission.getAllAuthorities()); // list is unmodifiable
             if (notInclude != null) {
                 permissions.removeAll(Arrays.asList(notInclude));
             }
