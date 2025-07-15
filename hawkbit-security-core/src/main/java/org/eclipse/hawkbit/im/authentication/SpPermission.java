@@ -163,7 +163,7 @@ public final class SpPermission {
         final Field[] declaredFields = SpPermission.class.getDeclaredFields();
         for (final Field field : declaredFields) {
             if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers()) &&
-                    String.class.equals(field.getType())) {
+                    String.class.equals(field.getType()) && !field.getName().endsWith("_HIERARCHY")) {
                 try {
                     final String role = (String) field.get(null);
                     allPermissions.add(role);
