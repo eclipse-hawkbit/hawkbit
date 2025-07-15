@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -184,9 +183,9 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
         private void setItem(final MgmtSoftwareModule softwareModule) {
             description.setValue(softwareModule.getDescription());
             createdBy.setValue(softwareModule.getCreatedBy());
-            createdAt.setValue(new Date(softwareModule.getCreatedAt()).toString());
+            createdAt.setValue(Utils.localDateTimeFromTs(softwareModule.getCreatedAt()));
             lastModifiedBy.setValue(softwareModule.getLastModifiedBy());
-            lastModifiedAt.setValue(new Date(softwareModule.getLastModifiedAt()).toString());
+            lastModifiedAt.setValue(Utils.localDateTimeFromTs(softwareModule.getLastModifiedAt()));
 
             artifactGrid.setItems(query -> Optional.ofNullable(
                             hawkbitClient.getSoftwareModuleRestApi()
