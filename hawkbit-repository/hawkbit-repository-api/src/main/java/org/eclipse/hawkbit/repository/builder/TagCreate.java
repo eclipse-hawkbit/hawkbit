@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.builder;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import org.eclipse.hawkbit.repository.RepositoryManagement;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Tag;
@@ -21,28 +22,28 @@ import org.eclipse.hawkbit.repository.model.Tag;
  * at creation time. Other fields are set by the repository automatically, e.g.
  * {@link BaseEntity#getCreatedAt()}.
  */
-public interface TagCreate {
+public interface TagCreate<T extends Tag> extends RepositoryManagement.Builder<T> {
 
     /**
      * @param name for {@link Tag#getName()}
      * @return updated builder instance
      */
-    TagCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
+    TagCreate<T> name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
      * @param description for {@link Tag#getDescription()}
      * @return updated builder instance
      */
-    TagCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
+    TagCreate<T> description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
      * @param colour for {@link Tag#getColour()}
      * @return updated builder instance
      */
-    TagCreate colour(@Size(max = Tag.COLOUR_MAX_SIZE) String colour);
+    TagCreate<T> colour(@Size(max = Tag.COLOUR_MAX_SIZE) String colour);
 
     /**
      * @return peek on current state of {@link Tag} in the builder
      */
-    Tag build();
+    T build();
 }

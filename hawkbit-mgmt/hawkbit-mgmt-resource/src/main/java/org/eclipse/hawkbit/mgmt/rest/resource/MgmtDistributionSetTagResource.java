@@ -26,6 +26,10 @@ import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
+import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
+import org.eclipse.hawkbit.repository.builder.TagCreate;
+import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -43,8 +47,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRestApi {
 
-    private final DistributionSetTagManagement distributionSetTagManagement;
-    private final DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement<DistributionSet, DistributionSetCreate<DistributionSet>, DistributionSetUpdate> distributionSetManagement;
+    private final DistributionSetTagManagement<DistributionSetTag, TagCreate<DistributionSetTag>, TagUpdate> distributionSetTagManagement;
     private final EntityFactory entityFactory;
 
     MgmtDistributionSetTagResource(
@@ -88,7 +92,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     public ResponseEntity<List<MgmtTag>> createDistributionSetTags(final List<MgmtTagRequestBodyPut> tags) {
         log.debug("creating {} ds tags", tags.size());
 
-        final List<DistributionSetTag> createdTags = distributionSetTagManagement.create(MgmtTagMapper.mapTagFromRequest(entityFactory, tags));
+        final List<DistributionSetTag> createdTags = distributionSetTagManagement.create(MgmtDistributionSetMapper.mapTagFromRequest(entityFactory, tags));
         return new ResponseEntity<>(MgmtTagMapper.toResponseDistributionSetTag(createdTags), HttpStatus.CREATED);
     }
 

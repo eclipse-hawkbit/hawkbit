@@ -35,7 +35,7 @@ import org.eclipse.hawkbit.rest.json.model.ResponseList;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtDistributionSetTypeMapper {
 
-    public static List<DistributionSetTypeCreate> smFromRequest(final EntityFactory entityFactory, final Collection<MgmtDistributionSetTypeRequestBodyPost> smTypesRest) {
+    public static List<DistributionSetTypeCreate<DistributionSetType>> smFromRequest(final EntityFactory entityFactory, final Collection<MgmtDistributionSetTypeRequestBodyPost> smTypesRest) {
         if (smTypesRest == null) {
             return Collections.emptyList();
         }
@@ -71,7 +71,7 @@ public final class MgmtDistributionSetTypeMapper {
                 .withRel(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULES).expand());
     }
 
-    private static DistributionSetTypeCreate fromRequest(final EntityFactory entityFactory,
+    private static DistributionSetTypeCreate<DistributionSetType> fromRequest(final EntityFactory entityFactory,
             final MgmtDistributionSetTypeRequestBodyPost smsRest) {
         return entityFactory.distributionSetType().create().key(smsRest.getKey()).name(smsRest.getName())
                 .description(smsRest.getDescription()).colour(smsRest.getColour())

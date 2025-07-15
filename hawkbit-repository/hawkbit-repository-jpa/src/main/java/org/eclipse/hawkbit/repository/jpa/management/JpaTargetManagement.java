@@ -96,7 +96,7 @@ import org.springframework.validation.annotation.Validated;
 public class JpaTargetManagement implements TargetManagement {
 
     private final EntityManager entityManager;
-    private final DistributionSetManagement distributionSetManagement;
+    private final JpaDistributionSetManagement distributionSetManagement;
     private final QuotaManagement quotaManagement;
     private final TargetRepository targetRepository;
     private final TargetTypeRepository targetTypeRepository;
@@ -107,7 +107,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @SuppressWarnings("java:S107")
     public JpaTargetManagement(final EntityManager entityManager,
-            final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
+            final JpaDistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository,
             final RolloutGroupRepository rolloutGroupRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,

@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.builder;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.eclipse.hawkbit.repository.RepositoryManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractDistributionSetTypeUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
@@ -23,12 +24,13 @@ import org.springframework.util.CollectionUtils;
 /**
  * Create/build implementation.
  */
-public class JpaDistributionSetTypeCreate extends AbstractDistributionSetTypeUpdateCreate<DistributionSetTypeCreate>
-        implements DistributionSetTypeCreate {
+public class JpaDistributionSetTypeCreate
+        extends AbstractDistributionSetTypeUpdateCreate<DistributionSetTypeCreate<JpaDistributionSetType>>
+        implements DistributionSetTypeCreate<JpaDistributionSetType> {
 
-    private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
+    private final SoftwareModuleTypeManagement<? extends SoftwareModuleType, ?, ?> softwareModuleTypeManagement;
 
-    JpaDistributionSetTypeCreate(final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
+    JpaDistributionSetTypeCreate(final SoftwareModuleTypeManagement<? extends SoftwareModuleType, ?, ?> softwareModuleTypeManagement) {
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }
 
@@ -42,13 +44,12 @@ public class JpaDistributionSetTypeCreate extends AbstractDistributionSetTypeUpd
         return result;
     }
 
-    private Collection<SoftwareModuleType> findSoftwareModuleTypeWithExceptionIfNotFound(
-            final Collection<Long> softwareModuleTypeId) {
+    private Collection<? extends SoftwareModuleType> findSoftwareModuleTypeWithExceptionIfNotFound(final Collection<Long> softwareModuleTypeId) {
         if (CollectionUtils.isEmpty(softwareModuleTypeId)) {
             return Collections.emptyList();
         }
 
-        final Collection<SoftwareModuleType> module = softwareModuleTypeManagement.get(softwareModuleTypeId);
+        final Collection<? extends SoftwareModuleType> module = softwareModuleTypeManagement.get(softwareModuleTypeId);
         if (module.size() < softwareModuleTypeId.size()) {
             throw new EntityNotFoundException(SoftwareModuleType.class, softwareModuleTypeId);
         }

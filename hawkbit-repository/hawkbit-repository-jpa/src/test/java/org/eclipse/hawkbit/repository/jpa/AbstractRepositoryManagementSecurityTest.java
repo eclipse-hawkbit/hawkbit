@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 
-public abstract class AbstractRepositoryManagementSecurityTest<T extends BaseEntity, C, U> extends AbstractJpaIntegrationTest {
+public abstract class AbstractRepositoryManagementSecurityTest<T extends BaseEntity, C extends RepositoryManagement.Builder<T>, U> extends AbstractJpaIntegrationTest {
 
     /**
      * @return the repository management to test with

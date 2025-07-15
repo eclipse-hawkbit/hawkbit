@@ -25,11 +25,11 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 
-@Slf4j
 /**
  * Feature: SecurityTests - RolloutManagement<br/>
  * Story: SecurityTests RolloutManagement
  */
+@Slf4j
 class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     /**

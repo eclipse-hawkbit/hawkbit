@@ -23,9 +23,15 @@ import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTagBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagBuilder;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTag;
+import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.Tag;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -39,7 +45,7 @@ public class JpaEntityFactory implements EntityFactory {
     private final TargetFilterQueryBuilder targetFilterQueryBuilder;
     private final SoftwareModuleBuilder softwareModuleBuilder;
     private final SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder;
-    private final DistributionSetBuilder distributionSetBuilder;
+    private final DistributionSetBuilder<JpaDistributionSet> distributionSetBuilder;
     private final DistributionSetTypeBuilder distributionSetTypeBuilder;
     private final RolloutBuilder rolloutBuilder;
 
@@ -48,7 +54,7 @@ public class JpaEntityFactory implements EntityFactory {
             final TargetBuilder targetBuilder, final TargetTypeBuilder targetTypeBuilder,
             final TargetFilterQueryBuilder targetFilterQueryBuilder,
             final SoftwareModuleBuilder softwareModuleBuilder, final SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder,
-            final DistributionSetBuilder distributionSetBuilder, final DistributionSetTypeBuilder distributionSetTypeBuilder,
+            final DistributionSetBuilder<JpaDistributionSet> distributionSetBuilder, final DistributionSetTypeBuilder distributionSetTypeBuilder,
             final RolloutBuilder rolloutBuilder) {
         this.targetBuilder = targetBuilder;
         this.targetTypeBuilder = targetTypeBuilder;
@@ -75,8 +81,13 @@ public class JpaEntityFactory implements EntityFactory {
     }
 
     @Override
-    public TagBuilder tag() {
-        return new JpaTagBuilder();
+    public TagBuilder<Tag> tag() {
+        return (TagBuilder)new JpaTagBuilder();
+    }
+
+    @Override
+    public TagBuilder<DistributionSetTag> distributionSetTag() {
+        return (TagBuilder)new JpaDistributionSetTagBuilder();
     }
 
     @Override

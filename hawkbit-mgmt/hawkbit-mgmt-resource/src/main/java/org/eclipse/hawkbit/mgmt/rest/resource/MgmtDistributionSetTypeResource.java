@@ -28,6 +28,10 @@ import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
+import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.SoftwareModuleTypeNotInDistributionSetTypeException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -45,8 +49,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeRestApi {
 
-    private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
-    private final DistributionSetTypeManagement distributionSetTypeManagement;
+    private final SoftwareModuleTypeManagement<SoftwareModuleType, SoftwareModuleTypeCreate<SoftwareModuleType>, SoftwareModuleTypeUpdate> softwareModuleTypeManagement;
+    private final DistributionSetTypeManagement<DistributionSetType, DistributionSetTypeCreate<DistributionSetType>, DistributionSetTypeUpdate> distributionSetTypeManagement;
     private final EntityFactory entityFactory;
 
     MgmtDistributionSetTypeResource(

@@ -29,7 +29,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 /**
  * Management service for {@link DistributionSetTag}s.
  */
-public interface DistributionSetTagManagement extends RepositoryManagement<DistributionSetTag, TagCreate, TagUpdate> {
+public interface DistributionSetTagManagement<T extends DistributionSetTag, C extends TagCreate<T>, U extends TagUpdate>
+        extends RepositoryManagement<T, C, U> {
 
     /**
      * Find {@link DistributionSet} based on given name.
@@ -38,7 +39,7 @@ public interface DistributionSetTagManagement extends RepositoryManagement<Distr
      * @return {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<DistributionSetTag> findByName(@NotEmpty String name);
+    Optional<T> findByName(@NotEmpty String name);
 
     /**
      * Finds all {@link TargetTag} assigned to given {@link Target}.
@@ -49,7 +50,7 @@ public interface DistributionSetTagManagement extends RepositoryManagement<Distr
      * @throws EntityNotFoundException if {@link DistributionSet} with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Page<DistributionSetTag> findByDistributionSet(long distributionSetId, @NotNull Pageable pageable);
+    Page<T> findByDistributionSet(long distributionSetId, @NotNull Pageable pageable);
 
     /**
      * Deletes {@link DistributionSetTag} by given

@@ -57,6 +57,12 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
+import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
+import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
+import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -82,14 +88,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
-    private final SoftwareModuleManagement softwareModuleManagement;
+    private final SoftwareModuleManagement<SoftwareModule, SoftwareModuleCreate<SoftwareModule>, SoftwareModuleUpdate> softwareModuleManagement;
     private final TargetManagement targetManagement;
     private final TargetFilterQueryManagement targetFilterQueryManagement;
     private final DeploymentManagement deployManagement;
     private final SystemManagement systemManagement;
     private final EntityFactory entityFactory;
-    private final DistributionSetManagement distributionSetManagement;
-    private final DistributionSetTypeManagement distributionSetTypeManagement;
+    private final DistributionSetManagement<DistributionSet, DistributionSetCreate<DistributionSet>, DistributionSetUpdate> distributionSetManagement;
+    private final DistributionSetTypeManagement<DistributionSetType, DistributionSetTypeCreate<DistributionSetType>, DistributionSetTypeUpdate> distributionSetTypeManagement;
     private final SystemSecurityContext systemSecurityContext;
     private final DistributionSetInvalidationManagement distributionSetInvalidationManagement;
     private final TenantConfigHelper tenantConfigHelper;

@@ -106,7 +106,7 @@ public final class MgmtTagMapper {
                 .withRel("assignedDistributionSets").expand());
     }
 
-    public static List<TagCreate> mapTagFromRequest(final EntityFactory entityFactory, final Collection<MgmtTagRequestBodyPut> tags) {
+    public static List<TagCreate<Tag>> mapTagFromRequest(final EntityFactory entityFactory, final Collection<MgmtTagRequestBodyPut> tags) {
         return tags.stream()
                 .map(tagRest -> entityFactory.tag().create().name(tagRest.getName())
                         .description(tagRest.getDescription()).colour(tagRest.getColour()))

@@ -11,15 +11,15 @@ package org.eclipse.hawkbit.repository.builder;
 
 import jakarta.validation.constraints.Size;
 
+import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Type;
 
 /**
- * Builder to update an existing {@link SoftwareModuleType} entry. Defines all
- * fields that can be updated.
+ * Builder to update an existing {@link SoftwareModuleType} entry. Defines all fields that can be updated.
  */
-public interface SoftwareModuleTypeUpdate {
+public interface SoftwareModuleTypeUpdate extends Identifiable<Long> {
 
     /**
      * @param description for {@link SoftwareModuleType#getDescription()}

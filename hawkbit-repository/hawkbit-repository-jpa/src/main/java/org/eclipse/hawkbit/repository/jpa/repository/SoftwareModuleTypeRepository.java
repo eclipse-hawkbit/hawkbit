@@ -31,13 +31,13 @@ public interface SoftwareModuleTypeRepository extends BaseEntityRepository<JpaSo
      * @param key to search for
      * @return all {@link SoftwareModuleType}s in the repository with given {@link SoftwareModuleType#getKey()}
      */
-    Optional<SoftwareModuleType> findByKey(String key);
+    Optional<JpaSoftwareModuleType> findByKey(String key);
 
     /**
      * @param name to search for
      * @return all {@link SoftwareModuleType}s in the repository with given {@link SoftwareModuleType#getName()}
      */
-    Optional<SoftwareModuleType> findByName(String name);
+    Optional<JpaSoftwareModuleType> findByName(String name);
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety reasons (this is a "delete everything" query

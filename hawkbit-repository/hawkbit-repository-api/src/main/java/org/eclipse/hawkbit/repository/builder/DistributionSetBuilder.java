@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 /**
  * Builder for {@link DistributionSet}.
  */
-public interface DistributionSetBuilder {
+public interface DistributionSetBuilder<T extends DistributionSet> {
 
     /**
      * @param id of the updatable entity
@@ -25,5 +25,5 @@ public interface DistributionSetBuilder {
     /**
      * @return builder instance
      */
-    DistributionSetCreate create();
+    DistributionSetCreate<T> create();
 }

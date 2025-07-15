@@ -25,15 +25,15 @@ import org.junit.jupiter.api.Test;
  * Story: SecurityTests DistributionSetTypeManagement
  */
 class DistributionSetTypeManagementSecurityTest
-        extends AbstractRepositoryManagementSecurityTest<DistributionSetType, DistributionSetTypeCreate, DistributionSetTypeUpdate> {
+        extends AbstractRepositoryManagementSecurityTest<DistributionSetType, DistributionSetTypeCreate<DistributionSetType>, DistributionSetTypeUpdate> {
 
     @Override
-    protected RepositoryManagement<DistributionSetType, DistributionSetTypeCreate, DistributionSetTypeUpdate> getRepositoryManagement() {
+    protected RepositoryManagement<DistributionSetType, DistributionSetTypeCreate<DistributionSetType>, DistributionSetTypeUpdate> getRepositoryManagement() {
         return distributionSetTypeManagement;
     }
 
     @Override
-    protected DistributionSetTypeCreate getCreateObject() {
+    protected DistributionSetTypeCreate<DistributionSetType> getCreateObject() {
         return entityFactory.distributionSetType().create().key(String.format("key-%d", new Random().nextInt())).name(String.format("name-%d", new Random().nextInt()));
     }
 

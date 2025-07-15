@@ -39,6 +39,10 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
@@ -62,8 +66,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
     private final ArtifactManagement artifactManagement;
-    private final SoftwareModuleManagement softwareModuleManagement;
-    private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
+    private final SoftwareModuleManagement<SoftwareModule, SoftwareModuleCreate<SoftwareModule>, SoftwareModuleUpdate> softwareModuleManagement;
+    private final SoftwareModuleTypeManagement<SoftwareModuleType, SoftwareModuleTypeCreate<SoftwareModuleType>, SoftwareModuleTypeUpdate> softwareModuleTypeManagement;
     private final ArtifactUrlHandler artifactUrlHandler;
     private final SystemManagement systemManagement;
     private final EntityFactory entityFactory;

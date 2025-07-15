@@ -22,6 +22,9 @@ import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetTypeBuilder;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.Tag;
 
 /**
  * central {@link BaseEntity} generation service. Objects are created but not
@@ -37,7 +40,7 @@ public interface EntityFactory {
     /**
      * @return {@link DistributionSetBuilder} object
      */
-    DistributionSetBuilder distributionSet();
+    DistributionSetBuilder<DistributionSet> distributionSet();
 
     /**
      * @return {@link SoftwareModuleMetadataBuilder} object
@@ -47,7 +50,12 @@ public interface EntityFactory {
     /**
      * @return {@link TagBuilder} object
      */
-    TagBuilder tag();
+    TagBuilder<Tag> tag();
+
+    /**
+     * @return {@link DistributionSetTypeBuilder} object
+     */
+    TagBuilder<DistributionSetTag> distributionSetTag();
 
     /**
      * @return {@link RolloutGroupBuilder} object

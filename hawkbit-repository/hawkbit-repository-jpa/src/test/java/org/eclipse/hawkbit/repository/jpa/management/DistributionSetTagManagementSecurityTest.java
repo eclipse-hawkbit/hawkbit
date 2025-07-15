@@ -25,16 +25,17 @@ import org.springframework.data.domain.Pageable;
  * Feature: SecurityTests - DistributionSetTagManagement<br/>
  * Story: SecurityTests DistributionSetTagManagement
  */
-class DistributionSetTagManagementSecurityTest extends AbstractRepositoryManagementSecurityTest<DistributionSetTag, TagCreate, TagUpdate> {
+class DistributionSetTagManagementSecurityTest
+        extends AbstractRepositoryManagementSecurityTest<DistributionSetTag, TagCreate<DistributionSetTag>, TagUpdate> {
 
     @Override
-    protected RepositoryManagement<DistributionSetTag, TagCreate, TagUpdate> getRepositoryManagement() {
+    protected RepositoryManagement<DistributionSetTag, TagCreate<DistributionSetTag>, TagUpdate> getRepositoryManagement() {
         return distributionSetTagManagement;
     }
 
     @Override
-    protected TagCreate getCreateObject() {
-        return entityFactory.tag().create().name(String.format("tag-%d", new Random().nextInt()));
+    protected TagCreate<DistributionSetTag> getCreateObject() {
+        return entityFactory.distributionSetTag().create().name(String.format("tag-%d", new Random().nextInt()));
     }
 
     @Override

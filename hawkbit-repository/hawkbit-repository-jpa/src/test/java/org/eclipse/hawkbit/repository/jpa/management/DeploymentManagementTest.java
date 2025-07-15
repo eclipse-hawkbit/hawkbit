@@ -298,7 +298,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // not exists
         assignDS.add(100_000L);
 
-        final Long tagId = distributionSetTagManagement.create(entityFactory.tag().create().name("Tag1")).getId();
+        final Long tagId = distributionSetTagManagement.create(entityFactory.distributionSetTag().create().name("Tag1")).getId();
 
         assertThatExceptionOfType(EntityNotFoundException.class)
                 .isThrownBy(() -> distributionSetManagement.assignTag(assignDS, tagId))
@@ -1351,7 +1351,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         }
 
         // verify that deleted attribute is used correctly
-        List<DistributionSet> allFoundDS = distributionSetManagement.findByCompleted(true, PAGE).getContent();
+        List<? extends DistributionSet> allFoundDS = distributionSetManagement.findByCompleted(true, PAGE).getContent();
         assertThat(allFoundDS).as("no ds should be founded").isEmpty();
 
         assertThat(distributionSetRepository.findAll(SpecificationsBuilder.combineWithAnd(Arrays

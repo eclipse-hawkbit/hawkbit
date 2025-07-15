@@ -184,8 +184,8 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
         final DistributionSet permitted = testdataFactory.createDistributionSet();
         final DistributionSet readOnly = testdataFactory.createDistributionSet();
         final DistributionSet hidden = testdataFactory.createDistributionSet();
-        final Long dsTagId = distributionSetTagManagement.create(entityFactory.tag().create().name("dsTag")).getId();
-        final Long dsTag2Id = distributionSetTagManagement.create(entityFactory.tag().create().name("dsTag2")).getId();
+        final Long dsTagId = distributionSetTagManagement.create(entityFactory.distributionSetTag().create().name("dsTag")).getId();
+        final Long dsTag2Id = distributionSetTagManagement.create(entityFactory.distributionSetTag().create().name("dsTag2")).getId();
 
         // perform tag assignment before setting access rules
         distributionSetManagement.assignTag(Arrays.asList(permitted.getId(), readOnly.getId(), hidden.getId()), dsTagId);

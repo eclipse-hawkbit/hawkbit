@@ -28,14 +28,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 /**
  * Management service for {@link DistributionSetType}s.
  */
-public interface DistributionSetTypeManagement
-        extends RepositoryManagement<DistributionSetType, DistributionSetTypeCreate, DistributionSetTypeUpdate> {
+public interface DistributionSetTypeManagement<T extends DistributionSetType, C extends DistributionSetTypeCreate<T>, U extends DistributionSetTypeUpdate>
+        extends RepositoryManagement<T, C, U> {
 
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<DistributionSetType> findByKey(@NotEmpty String key);
+    Optional<T> findByKey(@NotEmpty String key);
 
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<DistributionSetType> findByName(@NotEmpty String name);
+    Optional<T> findByName(@NotEmpty String name);
 
     /**
      * Assigns {@link DistributionSetType#getMandatoryModuleTypes()}.
@@ -49,7 +49,7 @@ public interface DistributionSetTypeManagement
      *         {@link DistributionSetType}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    DistributionSetType assignOptionalSoftwareModuleTypes(long id, @NotEmpty Collection<Long> softwareModuleTypeIds);
+    T assignOptionalSoftwareModuleTypes(long id, @NotEmpty Collection<Long> softwareModuleTypeIds);
 
     /**
      * Assigns {@link DistributionSetType#getOptionalModuleTypes()}.
@@ -63,7 +63,7 @@ public interface DistributionSetTypeManagement
      *         {@link DistributionSetType}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    DistributionSetType assignMandatorySoftwareModuleTypes(long id, @NotEmpty Collection<Long> softwareModuleTypeIds);
+    T assignMandatorySoftwareModuleTypes(long id, @NotEmpty Collection<Long> softwareModuleTypeIds);
 
     /**
      * Unassigns a {@link SoftwareModuleType} from the {@link DistributionSetType}. Does nothing if {@link SoftwareModuleType}
@@ -76,5 +76,5 @@ public interface DistributionSetTypeManagement
      * @throws EntityReadOnlyException if the {@link DistributionSetType} while it is already in use by a {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    DistributionSetType unassignSoftwareModuleType(long id, long softwareModuleTypeId);
+    T unassignSoftwareModuleType(long id, long softwareModuleTypeId);
 }

@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.builder;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.repository.RepositoryManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractSoftwareModuleTypeUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
@@ -19,8 +20,9 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
  * Create/build implementation.
  */
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
-public class JpaSoftwareModuleTypeCreate extends AbstractSoftwareModuleTypeUpdateCreate<SoftwareModuleTypeCreate>
-        implements SoftwareModuleTypeCreate {
+public class JpaSoftwareModuleTypeCreate
+        extends AbstractSoftwareModuleTypeUpdateCreate<SoftwareModuleTypeCreate<JpaSoftwareModuleType>>
+        implements SoftwareModuleTypeCreate<JpaSoftwareModuleType> {
 
     @Override
     public JpaSoftwareModuleType build() {

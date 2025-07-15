@@ -62,7 +62,7 @@ public final class MgmtSoftwareModuleMapper {
                 .toList();
     }
 
-    public static List<SoftwareModuleCreate> smFromRequest(
+    public static List<SoftwareModuleCreate<SoftwareModule>> smFromRequest(
             final EntityFactory entityFactory, final Collection<MgmtSoftwareModuleRequestBodyPost> smsRest) {
         if (smsRest == null) {
             return Collections.emptyList();
@@ -159,7 +159,7 @@ public final class MgmtSoftwareModuleMapper {
         urls.forEach(entry -> response.add(Link.of(entry.getRef()).withRel(entry.getRel()).expand()));
     }
 
-    private static SoftwareModuleCreate fromRequest(final EntityFactory entityFactory,
+    private static SoftwareModuleCreate<SoftwareModule> fromRequest(final EntityFactory entityFactory,
             final MgmtSoftwareModuleRequestBodyPost smsRest) {
         return entityFactory.softwareModule().create().type(smsRest.getType()).name(smsRest.getName())
                 .version(smsRest.getVersion()).description(smsRest.getDescription()).vendor(smsRest.getVendor())

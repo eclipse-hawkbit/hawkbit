@@ -20,11 +20,11 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 
-@Slf4j
 /**
  * Feature: SecurityTests - TargetManagement<br/>
  * Story: SecurityTests TargetManagement
  */
+@Slf4j
 class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     /**

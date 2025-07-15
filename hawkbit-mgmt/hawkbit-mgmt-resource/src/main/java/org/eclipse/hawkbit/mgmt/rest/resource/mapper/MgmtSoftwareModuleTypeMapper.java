@@ -32,7 +32,8 @@ import org.eclipse.hawkbit.rest.json.model.ResponseList;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtSoftwareModuleTypeMapper {
 
-    public static List<SoftwareModuleTypeCreate> smFromRequest(final EntityFactory entityFactory,
+    public static List<SoftwareModuleTypeCreate<SoftwareModuleType>> smFromRequest(
+            final EntityFactory entityFactory,
             final Collection<MgmtSoftwareModuleTypeRequestBodyPost> smTypesRest) {
         if (smTypesRest == null) {
             return Collections.emptyList();
@@ -62,7 +63,7 @@ public final class MgmtSoftwareModuleTypeMapper {
         return result;
     }
 
-    private static SoftwareModuleTypeCreate fromRequest(final EntityFactory entityFactory,
+    private static SoftwareModuleTypeCreate<SoftwareModuleType> fromRequest(final EntityFactory entityFactory,
             final MgmtSoftwareModuleTypeRequestBodyPost smsRest) {
         return entityFactory.softwareModuleType().create().key(smsRest.getKey()).name(smsRest.getName())
                 .description(smsRest.getDescription()).colour(smsRest.getColour())

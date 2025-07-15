@@ -98,7 +98,7 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void createModuleTypesCallFailsForExistingTypes() {
-        final List<SoftwareModuleTypeCreate> created = Arrays.asList(
+        final List<SoftwareModuleTypeCreate<SoftwareModuleType>> created = Arrays.asList(
                 entityFactory.softwareModuleType().create().key("test-key").name("test-name"),
                 entityFactory.softwareModuleType().create().key("test-key2").name("test-name2"));
         softwareModuleTypeManagement.create(created);
@@ -178,7 +178,7 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void createSoftwareModuleTypesFailsWithExistingEntity() {
         softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create().key("thetype").name("thename"));
-        final List<SoftwareModuleTypeCreate> creates = List.of(
+        final List<SoftwareModuleTypeCreate<SoftwareModuleType>> creates = List.of(
                 entityFactory.softwareModuleType().create().key("thetype").name("thename"),
                 entityFactory.softwareModuleType().create().key("anothertype").name("anothername"));
         assertThatExceptionOfType(EntityAlreadyExistsException.class)
@@ -191,7 +191,7 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void createSoftwareModuleTypesFailsWithInvalidMaxAssignment() {
-        final SoftwareModuleTypeCreate create = entityFactory.softwareModuleType().create().key("type").name("name").maxAssignments(0);
+        final SoftwareModuleTypeCreate<SoftwareModuleType> create = entityFactory.softwareModuleType().create().key("type").name("name").maxAssignments(0);
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("should not have worked as max assignment is invalid. Should be greater than 0")
                 .isThrownBy(() -> softwareModuleTypeManagement.create(create));

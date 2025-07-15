@@ -15,15 +15,16 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericDistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
 /**
  * Builder implementation for {@link DistributionSetType}.
  */
 public class JpaDistributionSetTypeBuilder implements DistributionSetTypeBuilder {
 
-    private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
+    private final SoftwareModuleTypeManagement<? extends SoftwareModuleType, ?, ?> softwareModuleTypeManagement;
 
-    public JpaDistributionSetTypeBuilder(final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
+    public JpaDistributionSetTypeBuilder(final SoftwareModuleTypeManagement<? extends SoftwareModuleType, ?, ?> softwareModuleTypeManagement) {
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }
 

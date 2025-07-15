@@ -22,20 +22,20 @@ import org.springframework.security.access.prepost.PreAuthorize;
 /**
  * Service for managing {@link SoftwareModuleType}s.
  */
-public interface SoftwareModuleTypeManagement
-        extends RepositoryManagement<SoftwareModuleType, SoftwareModuleTypeCreate, SoftwareModuleTypeUpdate> {
+public interface SoftwareModuleTypeManagement<T extends SoftwareModuleType, C extends SoftwareModuleTypeCreate<T>, U extends SoftwareModuleTypeUpdate>
+        extends RepositoryManagement<T, C, U> {
 
     /**
      * @param key to search for
      * @return {@link SoftwareModuleType} in the repository with given {@link SoftwareModuleType#getKey()}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<SoftwareModuleType> findByKey(@NotEmpty String key);
+    Optional<T> findByKey(@NotEmpty String key);
 
     /**
      * @param name to search for
      * @return all {@link SoftwareModuleType}s in the repository with given {@link SoftwareModuleType#getName()}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<SoftwareModuleType> findByName(@NotEmpty String name);
+    Optional<T> findByName(@NotEmpty String name);
 }

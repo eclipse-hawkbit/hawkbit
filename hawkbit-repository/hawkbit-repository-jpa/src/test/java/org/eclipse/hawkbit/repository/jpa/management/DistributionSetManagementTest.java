@@ -223,14 +223,14 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void createMultipleDistributionSetsWithImplicitType() {
-        final List<DistributionSetCreate> creates = new ArrayList<>(10);
+        final List<DistributionSetCreate<DistributionSet>> creates = new ArrayList<>(10);
         for (int i = 0; i < 10; i++) {
             creates.add(entityFactory.distributionSet().create().name("newtypesoft" + i).version("1" + i));
         }
 
         assertThat(distributionSetManagement.create(creates))
                 .as("Type should be equal to default type of tenant")
-                .are(new Condition<>() {
+                .are(new Condition<DistributionSet>() {
 
                     @Override
                     public boolean matches(final DistributionSet value) {
@@ -308,9 +308,9 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             assignDS.add(testdataFactory.createDistributionSet("DS" + i, "1.0", Collections.emptyList()).getId());
         }
 
-        final DistributionSetTag tag = distributionSetTagManagement.create(entityFactory.tag().create().name(TAG1_NAME));
+        final DistributionSetTag tag = distributionSetTagManagement.create(entityFactory.distributionSetTag().create().name(TAG1_NAME));
 
-        final List<DistributionSet> assignedDS = distributionSetManagement.assignTag(assignDS, tag.getId());
+        final List<? extends DistributionSet> assignedDS = distributionSetManagement.assignTag(assignDS, tag.getId());
         assertThat(assignedDS).as("assigned ds has wrong size").hasSize(4);
         assignedDS.stream().map(JpaDistributionSet.class::cast).forEach(ds -> assertThat(ds.getTags())
                 .as("ds has wrong tag size")
@@ -548,12 +548,12 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void searchDistributionSetsOnFilters() {
         DistributionSetTag dsTagA = distributionSetTagManagement
-                .create(entityFactory.tag().create().name("DistributionSetTag-A"));
+                .create(entityFactory.distributionSetTag().create().name("DistributionSetTag-A"));
         final DistributionSetTag dsTagB = distributionSetTagManagement
-                .create(entityFactory.tag().create().name("DistributionSetTag-B"));
+                .create(entityFactory.distributionSetTag().create().name("DistributionSetTag-B"));
         final DistributionSetTag dsTagC = distributionSetTagManagement
-                .create(entityFactory.tag().create().name("DistributionSetTag-C"));
-        distributionSetTagManagement.create(entityFactory.tag().create().name("DistributionSetTag-D"));
+                .create(entityFactory.distributionSetTag().create().name("DistributionSetTag-C"));
+        distributionSetTagManagement.create(entityFactory.distributionSetTag().create().name("DistributionSetTag-D"));
 
         List<DistributionSet> dsGroup1 = testdataFactory.createDistributionSets("", 5);
         final String dsGroup2Prefix = "test";
@@ -729,21 +729,22 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Test implicit locks for a DS and skip tags.
      */
+    @SuppressWarnings("rawtypes")
     @Test
     void isImplicitLockApplicableForDistributionSet() {
-        final JpaDistributionSetManagement distributionSetManagement = (JpaDistributionSetManagement) this.distributionSetManagement;
+        final JpaDistributionSetManagement distributionSetManagement = (JpaDistributionSetManagement) (DistributionSetManagement) this.distributionSetManagement;
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-non-skip");
         // assert that implicit lock is applicable for non skip tags
         assertThat(distributionSetManagement.isImplicitLockApplicable(distributionSet)).isTrue();
 
         assertThat(repositoryProperties.getSkipImplicitLockForTags().size()).isNotZero();
-        final List<DistributionSetTag> skipTags = distributionSetTagManagement.create(
+        final List<? extends DistributionSetTag> skipTags = distributionSetTagManagement.create(
                 repositoryProperties.getSkipImplicitLockForTags().stream()
                         .map(String::toLowerCase)
                         // remove same in case-insensitive terms tags
                         // in of case-insensitive db's it will end up as same names and constraint violation (?)
                         .distinct()
-                        .map(skipTag -> entityFactory.tag().create().name(skipTag))
+                        .map(skipTag -> entityFactory.distributionSetTag().create().name(skipTag))
                         .toList());
         // assert that implicit lock locks for every skip tag
         skipTags.forEach(skipTag -> {
@@ -874,7 +875,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             testdataFactory.createDistributionSet("test" + i);
         }
 
-        final List<DistributionSet> foundDs = distributionSetManagement.get(searchIds);
+        final List<? extends DistributionSet> foundDs = distributionSetManagement.get(searchIds);
 
         assertThat(foundDs).hasSize(3);
 

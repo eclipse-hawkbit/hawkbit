@@ -44,7 +44,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 /**
  * Management service for {@link DistributionSet}s.
  */
-public interface DistributionSetManagement extends RepositoryManagement<DistributionSet, DistributionSetCreate, DistributionSetUpdate> {
+public interface DistributionSetManagement<T extends DistributionSet, C extends DistributionSetCreate<T>, U extends DistributionSetUpdate>
+        extends RepositoryManagement<T, C, U> {
 
     @Override
     default String permissionGroup() {
@@ -59,7 +60,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @return {@link DistributionSet}
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
-    Optional<DistributionSet> getWithDetails(long id);
+    Optional<T> getWithDetails(long id);
 
     /**
      * Find distribution set by id and throw an exception if it is (soft) deleted.
@@ -69,7 +70,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
-    DistributionSet getOrElseThrowException(long id);
+    T getOrElseThrowException(long id);
 
     /**
      * Sets the specified {@link DistributionSet} as invalidated.
@@ -77,7 +78,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @param distributionSet the ID of the {@link DistributionSet} to be set to invalid
      */
     @PreAuthorize(HAS_UPDATE_REPOSITORY)
-    void invalidate(DistributionSet distributionSet);
+    void invalidate(T distributionSet);
 
     /**
      * Assigns {@link SoftwareModule} to existing {@link DistributionSet}.
@@ -93,7 +94,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      *         {@link DistributionSet}.
      */
     @PreAuthorize(HAS_UPDATE_REPOSITORY)
-    DistributionSet assignSoftwareModules(long id, @NotEmpty Collection<Long> moduleIds);
+    T assignSoftwareModules(long id, @NotEmpty Collection<Long> moduleIds);
 
     /**
      * Unassigns a {@link SoftwareModule} form an existing {@link DistributionSet}.
@@ -105,7 +106,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @throws EntityReadOnlyException if use tries to change the {@link DistributionSet} s while the DS is already in use.
      */
     @PreAuthorize(HAS_UPDATE_REPOSITORY)
-    DistributionSet unassignSoftwareModule(long id, long moduleId);
+    T unassignSoftwareModule(long id, long moduleId);
 
     /**
      * Assign a {@link DistributionSetTag} assignment to given {@link DistributionSet}s.
@@ -116,7 +117,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @throws EntityNotFoundException if tag with given ID does not exist or (at least one) of the distribution sets.
      */
     @PreAuthorize(HAS_UPDATE_REPOSITORY)
-    List<DistributionSet> assignTag(@NotEmpty Collection<Long> ids, long tagId);
+    List<T> assignTag(@NotEmpty Collection<Long> ids, long tagId);
 
     /**
      * Unassign a {@link DistributionSetTag} assignment to given {@link DistributionSet}s.
@@ -127,7 +128,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @throws EntityNotFoundException if tag with given ID does not exist or (at least one) of the distribution sets.
      */
     @PreAuthorize(HAS_UPDATE_REPOSITORY)
-    List<DistributionSet> unassignTag(@NotEmpty Collection<Long> ids, long tagId);
+    List<T> unassignTag(@NotEmpty Collection<Long> ids, long tagId);
 
     /**
      * Creates a map of distribution set meta-data entries.
@@ -201,7 +202,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @throws InvalidDistributionSetException if distribution set with given ID is invalidated
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
-    DistributionSet getValid(long id);
+    T getValid(long id);
 
     /**
      * Find distribution set by id and throw an exception if it is deleted, incomplete or invalidated.
@@ -213,7 +214,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @throws IncompleteDistributionSetException if distribution set with given ID is incomplete
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
-    DistributionSet getValidAndComplete(long id);
+    T getValidAndComplete(long id);
 
     /**
      * Retrieves the distribution set for a given action.
@@ -223,7 +224,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @throws EntityNotFoundException if action with given ID does not exist
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
-    Optional<DistributionSet> findByAction(long actionId);
+    Optional<T> findByAction(long actionId);
 
     /**
      * Find distribution set by name and version.
@@ -233,7 +234,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @return the page with the found {@link DistributionSet}
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
-    Optional<DistributionSet> findByNameAndVersion(@NotEmpty String distributionName, @NotEmpty String version);
+    Optional<T> findByNameAndVersion(@NotEmpty String distributionName, @NotEmpty String version);
 
     /**
      * Finds all {@link DistributionSet}s based on completeness.
@@ -244,7 +245,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @return all found {@link DistributionSet}s
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
-    Slice<DistributionSet> findByCompleted(Boolean complete, @NotNull Pageable pageable);
+    Slice<T> findByCompleted(Boolean complete, @NotNull Pageable pageable);
 
     /**
      * Retrieves {@link DistributionSet}s by filtering on the given parameters.
@@ -254,7 +255,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @return the page of found {@link DistributionSet}
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
-    Slice<DistributionSet> findByDistributionSetFilter(@NotNull DistributionSetFilter distributionSetFilter, @NotNull Pageable pageable);
+    Slice<T> findByDistributionSetFilter(@NotNull DistributionSetFilter distributionSetFilter, @NotNull Pageable pageable);
 
     /**
      * Retrieves {@link DistributionSet}s by filtering on the given parameters.
@@ -268,7 +269,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @throws EntityNotFoundException of distribution set tag with given ID does not exist
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
-    Page<DistributionSet> findByTag(long tagId, @NotNull Pageable pageable);
+    Page<T> findByTag(long tagId, @NotNull Pageable pageable);
 
     /**
      * Retrieves {@link DistributionSet}s by filtering on the given parameters.
@@ -280,7 +281,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @throws EntityNotFoundException of distribution set tag with given ID does not exist
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
-    Page<DistributionSet> findByRsqlAndTag(@NotNull String rsql, long tagId, @NotNull Pageable pageable);
+    Page<T> findByRsqlAndTag(@NotNull String rsql, long tagId, @NotNull Pageable pageable);
 
     /**
      * Counts all {@link DistributionSet}s based on completeness.

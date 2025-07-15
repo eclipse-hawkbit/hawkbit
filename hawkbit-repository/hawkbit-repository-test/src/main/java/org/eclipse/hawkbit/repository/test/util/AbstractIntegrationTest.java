@@ -53,14 +53,26 @@ import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
 import org.eclipse.hawkbit.repository.artifact.exception.ArtifactStoreException;
+import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
+import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
+import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
+import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
+import org.eclipse.hawkbit.repository.builder.TagCreate;
+import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
@@ -122,13 +134,15 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected EntityFactory entityFactory;
     @Autowired
-    protected SoftwareModuleManagement softwareModuleManagement;
+    protected SoftwareModuleManagement<SoftwareModule, SoftwareModuleCreate<SoftwareModule>, SoftwareModuleUpdate> softwareModuleManagement;
     @Autowired
-    protected SoftwareModuleTypeManagement softwareModuleTypeManagement;
+    protected SoftwareModuleTypeManagement<SoftwareModuleType, SoftwareModuleTypeCreate<SoftwareModuleType>, SoftwareModuleTypeUpdate> softwareModuleTypeManagement;
     @Autowired
-    protected DistributionSetManagement distributionSetManagement;
+    protected DistributionSetManagement<DistributionSet, DistributionSetCreate<DistributionSet>, DistributionSetUpdate> distributionSetManagement;
     @Autowired
-    protected DistributionSetTypeManagement distributionSetTypeManagement;
+    protected DistributionSetTagManagement<DistributionSetTag, TagCreate<DistributionSetTag>, TagUpdate> distributionSetTagManagement;
+    @Autowired
+    protected DistributionSetTypeManagement<DistributionSetType, DistributionSetTypeCreate<DistributionSetType>, DistributionSetTypeUpdate> distributionSetTypeManagement;
     @Autowired
     protected ControllerManagement controllerManagement;
     @Autowired
@@ -139,8 +153,6 @@ public abstract class AbstractIntegrationTest {
     protected TargetFilterQueryManagement targetFilterQueryManagement;
     @Autowired
     protected TargetTagManagement targetTagManagement;
-    @Autowired
-    protected DistributionSetTagManagement distributionSetTagManagement;
     @Autowired
     protected DeploymentManagement deploymentManagement;
     @Autowired

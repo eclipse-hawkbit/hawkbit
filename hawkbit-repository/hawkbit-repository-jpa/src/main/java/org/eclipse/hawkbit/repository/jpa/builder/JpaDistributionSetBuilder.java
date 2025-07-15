@@ -9,24 +9,26 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
-import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetBuilder;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericDistributionSetUpdate;
+import org.eclipse.hawkbit.repository.jpa.management.JpaDistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaSoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 
 /**
  * Builder implementation for {@link DistributionSet}.
  */
-public class JpaDistributionSetBuilder implements DistributionSetBuilder {
+public class JpaDistributionSetBuilder implements DistributionSetBuilder<JpaDistributionSet> {
 
-    private final DistributionSetTypeManagement distributionSetTypeManagement;
-    private final SoftwareModuleManagement softwareModuleManagement;
+    private final JpaDistributionSetTypeManagement distributionSetTypeManagement;
+    private final JpaSoftwareModuleManagement softwareModuleManagement;
 
-    public JpaDistributionSetBuilder(final DistributionSetTypeManagement distributionSetTypeManagement,
-            final SoftwareModuleManagement softwareManagement) {
+    public JpaDistributionSetBuilder(
+            final JpaDistributionSetTypeManagement distributionSetTypeManagement,
+            final JpaSoftwareModuleManagement softwareManagement) {
         this.distributionSetTypeManagement = distributionSetTypeManagement;
         this.softwareModuleManagement = softwareManagement;
     }
@@ -37,7 +39,7 @@ public class JpaDistributionSetBuilder implements DistributionSetBuilder {
     }
 
     @Override
-    public DistributionSetCreate create() {
+    public DistributionSetCreate<JpaDistributionSet> create() {
         return new JpaDistributionSetCreate(distributionSetTypeManagement, softwareModuleManagement);
     }
 }

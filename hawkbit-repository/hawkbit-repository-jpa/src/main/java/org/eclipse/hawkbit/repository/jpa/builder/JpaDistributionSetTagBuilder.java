@@ -13,13 +13,13 @@ import org.eclipse.hawkbit.repository.builder.GenericTagUpdate;
 import org.eclipse.hawkbit.repository.builder.TagBuilder;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTag;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Tag;
 
 /**
  * Builder implementation for {@link Tag}.
  */
-public class JpaTagBuilder implements TagBuilder<JpaTag> {
+public class JpaDistributionSetTagBuilder implements TagBuilder<JpaDistributionSetTag> {
 
     @Override
     public TagUpdate update(final long id) {
@@ -27,7 +27,7 @@ public class JpaTagBuilder implements TagBuilder<JpaTag> {
     }
 
     @Override
-    public TagCreate<JpaTag> create() {
-        return new JpaTagCreate();
+    public TagCreate<JpaDistributionSetTag> create() {
+        return new JpaDistributionSetTagCreate();
     }
 }

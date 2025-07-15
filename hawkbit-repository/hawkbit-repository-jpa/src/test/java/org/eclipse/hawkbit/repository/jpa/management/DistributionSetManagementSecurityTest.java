@@ -26,15 +26,15 @@ import org.junit.jupiter.api.Test;
  * Story: SecurityTests DistributionSetManagement
  */
 class DistributionSetManagementSecurityTest
-        extends AbstractRepositoryManagementSecurityTest<DistributionSet, DistributionSetCreate, DistributionSetUpdate> {
+        extends AbstractRepositoryManagementSecurityTest<DistributionSet, DistributionSetCreate<DistributionSet>, DistributionSetUpdate> {
 
     @Override
-    protected RepositoryManagement<DistributionSet, DistributionSetCreate, DistributionSetUpdate> getRepositoryManagement() {
+    protected RepositoryManagement<DistributionSet, DistributionSetCreate<DistributionSet>, DistributionSetUpdate> getRepositoryManagement() {
         return distributionSetManagement;
     }
 
     @Override
-    protected DistributionSetCreate getCreateObject() {
+    protected DistributionSetCreate<DistributionSet> getCreateObject() {
         return entityFactory.distributionSet().create().name("name").version("1.0.0").type("type");
     }
 
@@ -97,7 +97,7 @@ class DistributionSetManagementSecurityTest
     @Test
     void updateMetadataPermissionsCheck() {
         assertPermissions(() -> {
-                    distributionSetManagement.updateMetadata(1L,"key", "value");
+                    distributionSetManagement.updateMetadata(1L, "key", "value");
                     return null;
                 },
                 List.of(SpPermission.UPDATE_REPOSITORY));

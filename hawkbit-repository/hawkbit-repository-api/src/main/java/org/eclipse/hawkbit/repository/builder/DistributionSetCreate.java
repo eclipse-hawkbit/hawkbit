@@ -14,6 +14,7 @@ import java.util.Collection;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import org.eclipse.hawkbit.repository.RepositoryManagement;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -26,37 +27,37 @@ import org.eclipse.hawkbit.repository.model.Type;
  * that can be set at creation time. Other fields are set by the repository
  * automatically, e.g. {@link BaseEntity#getCreatedAt()}.
  */
-public interface DistributionSetCreate {
+public interface DistributionSetCreate<T extends DistributionSet> extends RepositoryManagement.Builder<T> {
 
     /**
      * @param name for {@link DistributionSet#getName()}
      * @return updated builder instance
      */
-    DistributionSetCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
+    DistributionSetCreate<T> name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
      * @param version for {@link DistributionSet#getVersion()}
      * @return updated builder instance
      */
-    DistributionSetCreate version(@Size(min = 1, max = NamedVersionedEntity.VERSION_MAX_SIZE) @NotNull String version);
+    DistributionSetCreate<T> version(@Size(min = 1, max = NamedVersionedEntity.VERSION_MAX_SIZE) @NotNull String version);
 
     /**
      * @param description for {@link DistributionSet#getDescription()}
      * @return updated builder instance
      */
-    DistributionSetCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
+    DistributionSetCreate<T> description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
      * @param typeKey for {@link DistributionSet#getType()}
      * @return updated builder instance
      */
-    DistributionSetCreate type(@Size(min = 1, max = Type.KEY_MAX_SIZE) @NotNull String typeKey);
+    DistributionSetCreate<T> type(@Size(min = 1, max = Type.KEY_MAX_SIZE) @NotNull String typeKey);
 
     /**
      * @param type for {@link DistributionSet#getType()}
      * @return updated builder instance
      */
-    default DistributionSetCreate type(@NotNull final DistributionSetType type) {
+    default DistributionSetCreate<T> type(@NotNull final DistributionSetType type) {
         return type(type.getKey());
     }
 
@@ -64,16 +65,16 @@ public interface DistributionSetCreate {
      * @param modules for {@link DistributionSet#getModules()}
      * @return updated builder instance
      */
-    DistributionSetCreate modules(Collection<Long> modules);
+    DistributionSetCreate<T> modules(Collection<Long> modules);
 
     /**
      * @param requiredMigrationStep for {@link DistributionSet#isRequiredMigrationStep()}
      * @return updated builder instance
      */
-    DistributionSetCreate requiredMigrationStep(Boolean requiredMigrationStep);
+    DistributionSetCreate<T> requiredMigrationStep(Boolean requiredMigrationStep);
 
     /**
      * @return peek on current state of {@link DistributionSet} in the builder
      */
-    DistributionSet build();
+    T build();
 }

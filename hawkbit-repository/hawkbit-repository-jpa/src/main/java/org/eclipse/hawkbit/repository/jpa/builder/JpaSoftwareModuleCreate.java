@@ -11,22 +11,26 @@ package org.eclipse.hawkbit.repository.jpa.builder;
 
 import jakarta.validation.ValidationException;
 
+import org.eclipse.hawkbit.repository.RepositoryManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractSoftwareModuleUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.management.JpaSoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
 /**
  * Create/build implementation.
  */
-public class JpaSoftwareModuleCreate extends AbstractSoftwareModuleUpdateCreate<SoftwareModuleCreate> implements SoftwareModuleCreate {
+public class JpaSoftwareModuleCreate
+        extends AbstractSoftwareModuleUpdateCreate<SoftwareModuleCreate<JpaSoftwareModule>>
+        implements SoftwareModuleCreate<JpaSoftwareModule> {
 
-    private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
+    private final JpaSoftwareModuleTypeManagement softwareModuleTypeManagement;
     private boolean encrypted;
 
-    JpaSoftwareModuleCreate(final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
+    JpaSoftwareModuleCreate(final JpaSoftwareModuleTypeManagement softwareModuleTypeManagement) {
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }
 

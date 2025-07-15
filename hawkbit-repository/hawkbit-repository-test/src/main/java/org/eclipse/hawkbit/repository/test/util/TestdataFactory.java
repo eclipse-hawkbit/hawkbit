@@ -47,8 +47,17 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
+import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
+import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
+import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
+import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
 import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
+import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -75,6 +84,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -144,17 +154,17 @@ public class TestdataFactory {
 
     private final ControllerManagement controllerManagement;
     private final ArtifactManagement artifactManagement;
-    private final SoftwareModuleManagement softwareModuleManagement;
-    private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
-    private final DistributionSetManagement distributionSetManagement;
+    private final SoftwareModuleManagement<? extends SoftwareModule, SoftwareModuleCreate<? extends SoftwareModule>, SoftwareModuleUpdate> softwareModuleManagement;
+    private final SoftwareModuleTypeManagement<? extends SoftwareModuleType, SoftwareModuleTypeCreate<?>, SoftwareModuleTypeUpdate> softwareModuleTypeManagement;
+    private final DistributionSetManagement<? extends DistributionSet, DistributionSetCreate<? extends DistributionSet>, DistributionSetUpdate> distributionSetManagement;
+    private final DistributionSetTagManagement<? extends DistributionSetTag, TagCreate<? extends DistributionSetTag>, TagUpdate> distributionSetTagManagement;
+    private final DistributionSetTypeManagement<? extends DistributionSetType, DistributionSetTypeCreate<? extends DistributionSetType>, ? extends DistributionSetTypeUpdate> distributionSetTypeManagement;
     private final DistributionSetInvalidationManagement distributionSetInvalidationManagement;
-    private final DistributionSetTypeManagement distributionSetTypeManagement;
     private final TargetManagement targetManagement;
     private final TargetFilterQueryManagement targetFilterQueryManagement;
     private final TargetTypeManagement targetTypeManagement;
     private final TargetTagManagement targetTagManagement;
     private final DeploymentManagement deploymentManagement;
-    private final DistributionSetTagManagement distributionSetTagManagement;
     private final RolloutManagement rolloutManagement;
     private final RolloutHandler rolloutHandler;
     private final QuotaManagement quotaManagement;
@@ -165,11 +175,11 @@ public class TestdataFactory {
             final ControllerManagement controllerManagement, final ArtifactManagement artifactManagement,
             final SoftwareModuleManagement softwareModuleManagement, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetManagement distributionSetManagement,
-            final DistributionSetInvalidationManagement distributionSetInvalidationManagement,
+            final DistributionSetTagManagement distributionSetTagManagement, final DistributionSetInvalidationManagement distributionSetInvalidationManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
             final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetTypeManagement targetTypeManagement, final TargetTagManagement targetTagManagement,
-            final DeploymentManagement deploymentManagement, final DistributionSetTagManagement distributionSetTagManagement,
+            final DeploymentManagement deploymentManagement,
             final RolloutManagement rolloutManagement, final RolloutHandler rolloutHandler,
             final QuotaManagement quotaManagement,
             final EntityFactory entityFactory, final TenantAware tenantAware) {
@@ -177,14 +187,14 @@ public class TestdataFactory {
         this.softwareModuleManagement = softwareModuleManagement;
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
         this.distributionSetManagement = distributionSetManagement;
-        this.distributionSetInvalidationManagement = distributionSetInvalidationManagement;
+        this.distributionSetTagManagement = distributionSetTagManagement;
         this.distributionSetTypeManagement = distributionSetTypeManagement;
+        this.distributionSetInvalidationManagement = distributionSetInvalidationManagement;
         this.targetManagement = targetManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.targetTypeManagement = targetTypeManagement;
         this.targetTagManagement = targetTagManagement;
         this.deploymentManagement = deploymentManagement;
-        this.distributionSetTagManagement = distributionSetTagManagement;
         this.entityFactory = entityFactory;
         this.artifactManagement = artifactManagement;
         this.rolloutManagement = rolloutManagement;
@@ -639,6 +649,7 @@ public class TestdataFactory {
      */
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName) {
         return distributionSetTypeManagement.findByKey(dsTypeKey)
+                .map(DistributionSetType.class::cast)
                 .orElseGet(() -> distributionSetTypeManagement.create(entityFactory.distributionSetType().create()
                         .key(dsTypeKey).name(dsTypeName).description(randomDescriptionShort()).colour("black")));
     }
@@ -656,6 +667,7 @@ public class TestdataFactory {
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName,
             final Collection<SoftwareModuleType> mandatory, final Collection<SoftwareModuleType> optional) {
         return distributionSetTypeManagement.findByKey(dsTypeKey)
+                .map(DistributionSetType.class::cast)
                 .orElseGet(() -> distributionSetTypeManagement.create(
                         entityFactory.distributionSetType().create()
                                 .key(dsTypeKey)
@@ -686,6 +698,7 @@ public class TestdataFactory {
      */
     public SoftwareModuleType findOrCreateSoftwareModuleType(final String key, final int maxAssignments) {
         return softwareModuleTypeManagement.findByKey(key)
+                .map(SoftwareModuleType.class::cast)
                 .orElseGet(() -> softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create()
                         .key(key)
                         .name(key)
@@ -878,7 +891,7 @@ public class TestdataFactory {
      * @return the created set of {@link TargetTag}s
      */
     public List<TargetTag> createTargetTags(final int number, final String tagPrefix) {
-        final List<TagCreate> result = new ArrayList<>(number);
+        final List<TagCreate<Tag>> result = new ArrayList<>(number);
         for (int i = 0; i < number; i++) {
             result.add(entityFactory.tag().create().name(tagPrefix + i).description(tagPrefix + i).colour(String.valueOf(i)));
         }
@@ -892,11 +905,11 @@ public class TestdataFactory {
      * @return the persisted {@link DistributionSetTag}s
      */
     public List<DistributionSetTag> createDistributionSetTags(final int number) {
-        final List<TagCreate> result = new ArrayList<>(number);
+        final List<TagCreate<? extends DistributionSetTag>> result = new ArrayList<>(number);
         for (int i = 0; i < number; i++) {
-            result.add(entityFactory.tag().create().name("tag" + i).description("tagdesc" + i).colour(String.valueOf(i)));
+            result.add(entityFactory.distributionSetTag().create().name("tag" + i).description("tagdesc" + i).colour(String.valueOf(i)));
         }
-        return distributionSetTagManagement.create(result);
+        return distributionSetTagManagement.create(result).stream().map(DistributionSetTag.class::cast).toList();
     }
 
     /**

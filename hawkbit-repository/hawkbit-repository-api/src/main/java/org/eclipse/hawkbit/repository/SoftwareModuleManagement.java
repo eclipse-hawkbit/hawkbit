@@ -38,7 +38,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 /**
  * Service for managing {@link SoftwareModule}s.
  */
-public interface SoftwareModuleManagement extends RepositoryManagement<SoftwareModule, SoftwareModuleCreate, SoftwareModuleUpdate> {
+public interface SoftwareModuleManagement<T extends SoftwareModule, C extends SoftwareModuleCreate<T>, U extends SoftwareModuleUpdate>
+        extends RepositoryManagement<T, C, U> {
 
     @Override
     default String permissionGroup() {
@@ -152,7 +153,7 @@ public interface SoftwareModuleManagement extends RepositoryManagement<SoftwareM
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Page<SoftwareModule> findByAssignedTo(long distributionSetId, @NotNull Pageable pageable);
+    Page<T> findByAssignedTo(long distributionSetId, @NotNull Pageable pageable);
 
     /**
      * Filter {@link SoftwareModule}s with given {@link SoftwareModule#getName()} or {@link SoftwareModule#getVersion()}
@@ -165,7 +166,7 @@ public interface SoftwareModuleManagement extends RepositoryManagement<SoftwareM
      * @throws EntityNotFoundException if given software module type does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Slice<SoftwareModule> findByTextAndType(String searchText, Long typeId, @NotNull Pageable pageable);
+    Slice<T> findByTextAndType(String searchText, Long typeId, @NotNull Pageable pageable);
 
     /**
      * Retrieves {@link SoftwareModule} by their name AND version AND type.
@@ -177,7 +178,7 @@ public interface SoftwareModuleManagement extends RepositoryManagement<SoftwareM
      * @throws EntityNotFoundException if software module type with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<SoftwareModule> findByNameAndVersionAndType(@NotEmpty String name, @NotEmpty String version, long typeId);
+    Optional<T> findByNameAndVersionAndType(@NotEmpty String name, @NotEmpty String version, long typeId);
 
     /**
      * Retrieves the {@link SoftwareModule}s by their {@link SoftwareModuleType}
@@ -188,7 +189,7 @@ public interface SoftwareModuleManagement extends RepositoryManagement<SoftwareM
      * @throws EntityNotFoundException if software module type with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Slice<SoftwareModule> findByType(long typeId, @NotNull Pageable pageable);
+    Slice<T> findByType(long typeId, @NotNull Pageable pageable);
 
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Map<Long, List<SoftwareModuleMetadata>> findMetaDataBySoftwareModuleIdsAndTargetVisible(Collection<Long> moduleIds);

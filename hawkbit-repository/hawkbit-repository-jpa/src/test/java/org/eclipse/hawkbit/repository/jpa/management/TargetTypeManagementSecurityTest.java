@@ -17,11 +17,11 @@ import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 
-@Slf4j
 /**
  * Feature: SecurityTests - TargetTypeManagement<br/>
  * Story: SecurityTests TargetTypeManagement
  */
+@Slf4j
 class TargetTypeManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     /**

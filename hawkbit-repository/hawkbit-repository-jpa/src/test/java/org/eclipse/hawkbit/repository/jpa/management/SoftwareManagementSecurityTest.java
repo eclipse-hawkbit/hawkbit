@@ -24,15 +24,15 @@ import org.junit.jupiter.api.Test;
  * Story: SecurityTests SoftwareManagement
  */
 class SoftwareManagementSecurityTest
-        extends AbstractRepositoryManagementSecurityTest<SoftwareModule, SoftwareModuleCreate, SoftwareModuleUpdate> {
+        extends AbstractRepositoryManagementSecurityTest<SoftwareModule, SoftwareModuleCreate<SoftwareModule>, SoftwareModuleUpdate> {
 
     @Override
-    protected RepositoryManagement<SoftwareModule, SoftwareModuleCreate, SoftwareModuleUpdate> getRepositoryManagement() {
+    protected RepositoryManagement<SoftwareModule, SoftwareModuleCreate<SoftwareModule>, SoftwareModuleUpdate> getRepositoryManagement() {
         return softwareModuleManagement;
     }
 
     @Override
-    protected SoftwareModuleCreate getCreateObject() {
+    protected SoftwareModuleCreate<SoftwareModule> getCreateObject() {
         return entityFactory.softwareModule().create().name("name").version("version").type("type");
     }
 

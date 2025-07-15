@@ -25,15 +25,15 @@ import org.junit.jupiter.api.Test;
  * Story: SecurityTests SoftwareModuleTypeManagement
  */
 class SoftwareModuleTypeManagementSecurityTest
-        extends AbstractRepositoryManagementSecurityTest<SoftwareModuleType, SoftwareModuleTypeCreate, SoftwareModuleTypeUpdate> {
+        extends AbstractRepositoryManagementSecurityTest<SoftwareModuleType, SoftwareModuleTypeCreate<SoftwareModuleType>, SoftwareModuleTypeUpdate> {
 
     @Override
-    protected RepositoryManagement<SoftwareModuleType, SoftwareModuleTypeCreate, SoftwareModuleTypeUpdate> getRepositoryManagement() {
+    protected RepositoryManagement<SoftwareModuleType, SoftwareModuleTypeCreate<SoftwareModuleType>, SoftwareModuleTypeUpdate> getRepositoryManagement() {
         return softwareModuleTypeManagement;
     }
 
     @Override
-    protected SoftwareModuleTypeCreate getCreateObject() {
+    protected SoftwareModuleTypeCreate<SoftwareModuleType> getCreateObject() {
         return entityFactory.softwareModuleType().create().key(String.format("key-%d", new Random().nextInt())).name(String.format("name-%d", new Random().nextInt()));
     }
 

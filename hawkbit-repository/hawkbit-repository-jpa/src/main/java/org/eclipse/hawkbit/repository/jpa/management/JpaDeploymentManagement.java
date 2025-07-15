@@ -39,7 +39,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -89,6 +88,8 @@ import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
@@ -104,17 +105,17 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-/**
- * JPA implementation for {@link DeploymentManagement}.
- */
 @Slf4j
 @Transactional(readOnly = true)
 @Validated
+@Service
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "deployment-management" }, matchIfMissing = true)
 public class JpaDeploymentManagement extends JpaActionManagement implements DeploymentManagement {
 
     /**
@@ -146,7 +147,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private final EntityManager entityManager;
-    private final DistributionSetManagement distributionSetManagement;
+    private final JpaDistributionSetManagement distributionSetManagement;
     private final TargetRepository targetRepository;
     private final AuditorAware<String> auditorProvider;
     private final PlatformTransactionManager txManager;
@@ -162,12 +163,12 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @SuppressWarnings("java:S107")
     public JpaDeploymentManagement(
             final EntityManager entityManager, final ActionRepository actionRepository,
-            final DistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
+            final JpaDistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
             final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
             final AfterTransactionCommitExecutor afterCommit, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final AuditorAware<String> auditorAware,
-            final Database database, final RepositoryProperties repositoryProperties) {
+            final JpaProperties jpaProperties, final RepositoryProperties repositoryProperties) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
         this.entityManager = entityManager;
         this.distributionSetManagement = distributionSetManagement;
@@ -184,7 +185,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;
         this.auditorAware = auditorAware;
-        this.database = database;
+        this.database = jpaProperties.getDatabase();
         this.retryTemplate = createRetryTemplate();
     }
 

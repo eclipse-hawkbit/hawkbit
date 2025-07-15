@@ -23,6 +23,8 @@ import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtSoftwareModuleTypeMappe
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
+import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.springframework.data.domain.Page;
@@ -38,7 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRestApi {
 
-    private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
+    private final SoftwareModuleTypeManagement<SoftwareModuleType, SoftwareModuleTypeCreate<SoftwareModuleType>, SoftwareModuleTypeUpdate> softwareModuleTypeManagement;
     private final EntityFactory entityFactory;
 
     MgmtSoftwareModuleTypeResource(final SoftwareModuleTypeManagement softwareModuleTypeManagement, final EntityFactory entityFactory) {

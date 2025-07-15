@@ -36,7 +36,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * @param <C> entity create builder
  * @param <U> entity update builder
  */
-public interface RepositoryManagement<T extends BaseEntity, C, U> {
+public interface RepositoryManagement<T extends BaseEntity, C extends RepositoryManagement.Builder<T>, U> {
 
     /**
      * Creates new {@link BaseEntity}.
@@ -51,12 +51,12 @@ public interface RepositoryManagement<T extends BaseEntity, C, U> {
     /**
      * Creates multiple {@link BaseEntity}s.
      *
-     * @param creates to create
+     * @param create to create
      * @return created Entity
      * @throws ConstraintViolationException if fields are not filled as specified. Check {@link BaseEntity} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_CREATE_REPOSITORY)
-    List<T> create(@NotNull @Valid Collection<C> creates);
+    List<T> create(@NotNull @Valid Collection<C> create);
 
     /**
      * Retrieves all {@link BaseEntity}s without details.
@@ -155,5 +155,10 @@ public interface RepositoryManagement<T extends BaseEntity, C, U> {
 
     default String permissionGroup() {
         return "REPOSITORY";
+    }
+
+    interface Builder<T> {
+
+        T build();
     }
 }

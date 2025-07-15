@@ -16,6 +16,7 @@ import java.util.Optional;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import org.eclipse.hawkbit.repository.RepositoryManagement;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
@@ -27,43 +28,43 @@ import org.eclipse.hawkbit.repository.model.Type;
  * that can be set at creation time. Other fields are set by the repository
  * automatically, e.g. {@link BaseEntity#getCreatedAt()}.
  */
-public interface DistributionSetTypeCreate {
+public interface DistributionSetTypeCreate<T extends DistributionSetType> extends RepositoryManagement.Builder<T> {
 
     /**
      * @param key for {@link DistributionSetType#getKey()}
      * @return updated builder instance
      */
-    DistributionSetTypeCreate key(@Size(min = 1, max = Type.KEY_MAX_SIZE) @NotNull String key);
+    DistributionSetTypeCreate<T> key(@Size(min = 1, max = Type.KEY_MAX_SIZE) @NotNull String key);
 
     /**
      * @param name for {@link DistributionSetType#getName()}
      * @return updated builder instance
      */
-    DistributionSetTypeCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
+    DistributionSetTypeCreate<T> name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
      * @param description for {@link DistributionSetType#getDescription()}
      * @return updated builder instance
      */
-    DistributionSetTypeCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
+    DistributionSetTypeCreate<T> description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
      * @param colour for {@link DistributionSetType#getColour()}
      * @return updated builder instance
      */
-    DistributionSetTypeCreate colour(@Size(max = Type.COLOUR_MAX_SIZE) String colour);
+    DistributionSetTypeCreate<T> colour(@Size(max = Type.COLOUR_MAX_SIZE) String colour);
 
     /**
      * @param mandatory for {@link DistributionSetType#getMandatoryModuleTypes()}
      * @return updated builder instance
      */
-    DistributionSetTypeCreate mandatory(Collection<Long> mandatory);
+    DistributionSetTypeCreate<T> mandatory(Collection<Long> mandatory);
 
     /**
      * @param mandatory for {@link DistributionSetType#getMandatoryModuleTypes()}
      * @return updated builder instance
      */
-    default DistributionSetTypeCreate mandatory(final Long mandatory) {
+    default DistributionSetTypeCreate<T> mandatory(final Long mandatory) {
         return mandatory(Collections.singletonList(mandatory));
     }
 
@@ -71,7 +72,7 @@ public interface DistributionSetTypeCreate {
      * @param mandatory for {@link DistributionSetType#getOptionalModuleTypes()}
      * @return updated builder instance
      */
-    default DistributionSetTypeCreate mandatory(final SoftwareModuleType mandatory) {
+    default DistributionSetTypeCreate<T> mandatory(final SoftwareModuleType mandatory) {
         return mandatory(Optional.ofNullable(mandatory).map(SoftwareModuleType::getId).orElse(null));
     }
 
@@ -79,13 +80,13 @@ public interface DistributionSetTypeCreate {
      * @param optional for {@link DistributionSetType#getOptionalModuleTypes()}
      * @return updated builder instance
      */
-    DistributionSetTypeCreate optional(Collection<Long> optional);
+    DistributionSetTypeCreate<T> optional(Collection<Long> optional);
 
     /**
      * @param optional for {@link DistributionSetType#getOptionalModuleTypes()}
      * @return updated builder instance
      */
-    default DistributionSetTypeCreate optional(final Long optional) {
+    default DistributionSetTypeCreate<T> optional(final Long optional) {
         return optional(Collections.singletonList(optional));
     }
 
@@ -93,12 +94,12 @@ public interface DistributionSetTypeCreate {
      * @param optional for {@link DistributionSetType#getOptionalModuleTypes()}
      * @return updated builder instance
      */
-    default DistributionSetTypeCreate optional(final SoftwareModuleType optional) {
+    default DistributionSetTypeCreate<T> optional(final SoftwareModuleType optional) {
         return optional(Optional.ofNullable(optional).map(SoftwareModuleType::getId).orElse(null));
     }
 
     /**
      * @return peek on current state of {@link DistributionSetType} in the builder
      */
-    DistributionSetType build();
+    T build();
 }
