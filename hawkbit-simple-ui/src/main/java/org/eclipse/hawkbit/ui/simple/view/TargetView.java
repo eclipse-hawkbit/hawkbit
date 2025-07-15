@@ -754,6 +754,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private final TextField controllerId;
         private final TextField name;
         private final TextArea description;
+        private final TextField group;
 
         private RegisterDialog(final HawkbitMgmtClient hawkbitClient) {
             super("Register Target");
@@ -778,6 +779,8 @@ public class TargetView extends TableView<MgmtTarget, String> {
             description = new TextArea(Constants.DESCRIPTION);
             description.setMinLength(2);
             description.setWidthFull();
+            group = Utils.textField(Constants.GROUP);
+            group.setWidthFull();
 
             addCreateClickListener(register, hawkbitClient);
             register.setEnabled(false);
@@ -793,7 +796,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
             layout.setSizeFull();
             layout.setPadding(true);
             layout.setSpacing(false);
-            layout.add(type, controllerId, name, description);
+            layout.add(type, controllerId, name, description, group);
             add(layout);
             open();
         }
@@ -803,7 +806,8 @@ public class TargetView extends TableView<MgmtTarget, String> {
                 final MgmtTargetRequestBody request = new MgmtTargetRequestBody()
                         .setControllerId(controllerId.getValue())
                         .setName(name.getValue())
-                        .setDescription(description.getValue());
+                        .setDescription(description.getValue())
+                        .setGroup(group.getValue());
                 if (!ObjectUtils.isEmpty(type.getValue())) {
                     request.setTargetType(type.getValue().getId());
                 }
