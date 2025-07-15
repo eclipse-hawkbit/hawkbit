@@ -36,17 +36,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * @param <C> entity create builder
  * @param <U> entity update builder
  */
-public interface RepositoryManagement<T, C, U> {
-
-    /**
-     * Creates multiple {@link BaseEntity}s.
-     *
-     * @param creates to create
-     * @return created Entity
-     * @throws ConstraintViolationException if fields are not filled as specified. Check {@link BaseEntity} for field constraints.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
-    List<T> create(@NotNull @Valid Collection<C> creates);
+public interface RepositoryManagement<T extends BaseEntity, C, U> {
 
     /**
      * Creates new {@link BaseEntity}.
@@ -55,39 +45,18 @@ public interface RepositoryManagement<T, C, U> {
      * @return created Entity
      * @throws ConstraintViolationException if fields are not filled as specified. Check {@link BaseEntity} for field constraints.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_CREATE_REPOSITORY)
     T create(@NotNull @Valid C create);
 
     /**
-     * Updates existing {@link BaseEntity}.
+     * Creates multiple {@link BaseEntity}s.
      *
-     * @param update to update
-     * @return updated Entity
-     * @throws EntityReadOnlyException if the {@link BaseEntity} cannot be updated (e.g. is already in use)
-     * @throws EntityNotFoundException in case the {@link BaseEntity} does not exist and cannot be updated
+     * @param creates to create
+     * @return created Entity
      * @throws ConstraintViolationException if fields are not filled as specified. Check {@link BaseEntity} for field constraints.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    T update(@NotNull @Valid U update);
-
-    /**
-     * Deletes or marks as delete in case the {@link BaseEntity} is in use.
-     *
-     * @param id to delete
-     * @throws EntityNotFoundException BaseEntity with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    void delete(long id);
-
-    /**
-     * Delete {@link BaseEntity}s by their IDs. That is either a soft delete of the entities have been linked to another entity before or a hard
-     * delete if not.
-     *
-     * @param ids to be deleted
-     * @throws EntityNotFoundException if (at least one) given distribution set does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    void delete(@NotEmpty Collection<Long> ids);
+    @PreAuthorize(SpringEvalExpressions.HAS_CREATE_REPOSITORY)
+    List<T> create(@NotNull @Valid Collection<C> creates);
 
     /**
      * Retrieves all {@link BaseEntity}s without details.
@@ -95,7 +64,7 @@ public interface RepositoryManagement<T, C, U> {
      * @param ids the ids to for
      * @return the found {@link BaseEntity}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     List<T> get(@NotEmpty Collection<Long> ids);
 
     /**
@@ -104,7 +73,7 @@ public interface RepositoryManagement<T, C, U> {
      * @param id to search for
      * @return {@link BaseEntity} in the repository with given {@link BaseEntity#getId()}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Optional<T> get(long id);
 
     /**
@@ -113,7 +82,7 @@ public interface RepositoryManagement<T, C, U> {
      * @param pageable paging parameter
      * @return all {@link BaseEntity}s in the repository.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Slice<T> findAll(@NotNull Pageable pageable);
 
     /**
@@ -126,7 +95,7 @@ public interface RepositoryManagement<T, C, U> {
      *         {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Page<T> findByRsql(@NotNull String rsql, @NotNull Pageable pageable);
 
     /**
@@ -135,12 +104,56 @@ public interface RepositoryManagement<T, C, U> {
      * @param id of entity to check existence
      * @return <code>true</code> if entity with given ID exists
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     boolean exists(long id);
 
     /**
      * @return number of {@link BaseEntity}s in the repository.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     long count();
+
+//    /**
+//     * Counts the number of {@link BaseEntity}s matching the given RSQL filter.
+//     *
+//     * @param rsql filter definition in RSQL syntax
+//     * @return number of matching {@link BaseEntity}s in the repository.
+//     */
+//    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+//    long countByRsql(String rsql);
+
+    /**
+     * Updates existing {@link BaseEntity}.
+     *
+     * @param update to update
+     * @return updated Entity
+     * @throws EntityReadOnlyException if the {@link BaseEntity} cannot be updated (e.g. is already in use)
+     * @throws EntityNotFoundException in case the {@link BaseEntity} does not exist and cannot be updated
+     * @throws ConstraintViolationException if fields are not filled as specified. Check {@link BaseEntity} for field constraints.
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    T update(@NotNull @Valid U update);
+
+    /**
+     * Deletes or marks as delete in case the {@link BaseEntity} is in use.
+     *
+     * @param id to delete
+     * @throws EntityNotFoundException BaseEntity with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
+    void delete(long id);
+
+    /**
+     * Delete {@link BaseEntity}s by their IDs. That is either a soft delete of the entities have been linked to another entity before or a hard
+     * delete if not.
+     *
+     * @param ids to be deleted
+     * @throws EntityNotFoundException if (at least one) given distribution set does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
+    void delete(@NotEmpty Collection<Long> ids);
+
+    default String permissionGroup() {
+        return "REPOSITORY";
+    }
 }

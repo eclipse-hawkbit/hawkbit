@@ -37,7 +37,7 @@ public interface DistributionSetTagManagement extends RepositoryManagement<Distr
      * @param name to look for.
      * @return {@link DistributionSet}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Optional<DistributionSetTag> findByName(@NotEmpty String name);
 
     /**
@@ -48,7 +48,7 @@ public interface DistributionSetTagManagement extends RepositoryManagement<Distr
      * @return page of the found {@link TargetTag}s
      * @throws EntityNotFoundException if {@link DistributionSet} with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Page<DistributionSetTag> findByDistributionSet(long distributionSetId, @NotNull Pageable pageable);
 
     /**
@@ -58,6 +58,6 @@ public interface DistributionSetTagManagement extends RepositoryManagement<Distr
      * @param tagName to be deleted
      * @throws EntityNotFoundException if tag with given name does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
     void delete(@NotEmpty String tagName);
 }

@@ -79,6 +79,7 @@ import org.springframework.validation.annotation.Validated;
 public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     protected static final String SOFTWARE_MODULE_METADATA = "SoftwareModuleMetadata";
+
     private final EntityManager entityManager;
     private final DistributionSetRepository distributionSetRepository;
     private final SoftwareModuleRepository softwareModuleRepository;

@@ -29,13 +29,13 @@ public interface SoftwareModuleTypeManagement
      * @param key to search for
      * @return {@link SoftwareModuleType} in the repository with given {@link SoftwareModuleType#getKey()}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Optional<SoftwareModuleType> findByKey(@NotEmpty String key);
 
     /**
      * @param name to search for
      * @return all {@link SoftwareModuleType}s in the repository with given {@link SoftwareModuleType#getName()}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Optional<SoftwareModuleType> findByName(@NotEmpty String name);
 }

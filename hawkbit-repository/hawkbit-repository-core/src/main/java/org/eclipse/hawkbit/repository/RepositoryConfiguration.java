@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +27,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.access.expression.DenyAllPermissionEvaluator;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
@@ -53,9 +56,36 @@ public class RepositoryConfiguration {
     }
 
     @Bean
+    PermissionEvaluator permissionEvaluator(final RoleHierarchy roleHierarchy) {
+        return new DenyAllPermissionEvaluator() {
+
+            @Override
+            public boolean hasPermission(final Authentication authentication, final Object targetDomainObject, final Object permission) {
+                if (targetDomainObject instanceof MethodSecurityExpressionOperations root &&
+                        root.getThis() instanceof RepositoryManagement<?, ?, ?> repositoryManagement) {
+                    final String neededPermission = permission + "_" + repositoryManagement.permissionGroup();
+                    return roleHierarchy.getReachableGrantedAuthorities(authentication.getAuthorities()).stream()
+                            .map(GrantedAuthority::getAuthority)
+                            .anyMatch(authority -> authority.equals(neededPermission));
+                }
+                return super.hasPermission(authentication, targetDomainObject, permission);
+            }
+
+            @Override
+            public boolean hasPermission(
+                    final Authentication authentication, final Serializable targetId, final String targetType, final Object permission) {
+                return super.hasPermission(authentication, targetId, targetType, permission);
+            }
+        }
+
+                ;
+    }
+
+    @Bean
     @Primary
     MethodSecurityExpressionHandler methodSecurityExpressionHandler(
-            final Optional<RoleHierarchy> roleHierarchy, final Optional<ApplicationContext> applicationContext) {
+            final RoleHierarchy roleHierarchy, final PermissionEvaluator permissionEvaluator,
+            final Optional<ApplicationContext> applicationContext) {
         final DefaultMethodSecurityExpressionHandler methodSecurityExpressionHandler = new DefaultMethodSecurityExpressionHandler() {
 
             @Override
@@ -69,7 +99,8 @@ public class RepositoryConfiguration {
                 return super.createSecurityExpressionRoot(new RawAuthoritiesAuthentication(authentication), mi);
             }
         };
-        roleHierarchy.ifPresent(methodSecurityExpressionHandler::setRoleHierarchy);
+        methodSecurityExpressionHandler.setRoleHierarchy(roleHierarchy);
+        methodSecurityExpressionHandler.setPermissionEvaluator(permissionEvaluator);
         applicationContext.ifPresent(methodSecurityExpressionHandler::setApplicationContext);
         return methodSecurityExpressionHandler;
     }

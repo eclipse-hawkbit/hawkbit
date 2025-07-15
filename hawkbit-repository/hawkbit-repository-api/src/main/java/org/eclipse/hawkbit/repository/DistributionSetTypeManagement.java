@@ -31,10 +31,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface DistributionSetTypeManagement
         extends RepositoryManagement<DistributionSetType, DistributionSetTypeCreate, DistributionSetTypeUpdate> {
 
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Optional<DistributionSetType> findByKey(@NotEmpty String key);
 
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Optional<DistributionSetType> findByName(@NotEmpty String name);
 
     /**
@@ -48,7 +48,7 @@ public interface DistributionSetTypeManagement
      * @throws AssignmentQuotaExceededException if the maximum number of {@link SoftwareModuleType}s is exceeded for the addressed
      *         {@link DistributionSetType}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     DistributionSetType assignOptionalSoftwareModuleTypes(long id, @NotEmpty Collection<Long> softwareModuleTypeIds);
 
     /**
@@ -62,7 +62,7 @@ public interface DistributionSetTypeManagement
      * @throws AssignmentQuotaExceededException if the maximum number of {@link SoftwareModuleType}s is exceeded for the addressed
      *         {@link DistributionSetType}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     DistributionSetType assignMandatorySoftwareModuleTypes(long id, @NotEmpty Collection<Long> softwareModuleTypeIds);
 
     /**
@@ -75,6 +75,6 @@ public interface DistributionSetTypeManagement
      * @throws EntityNotFoundException in case the {@link DistributionSetType} does not exist
      * @throws EntityReadOnlyException if the {@link DistributionSetType} while it is already in use by a {@link DistributionSet}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     DistributionSetType unassignSoftwareModuleType(long id, long softwareModuleTypeId);
 }

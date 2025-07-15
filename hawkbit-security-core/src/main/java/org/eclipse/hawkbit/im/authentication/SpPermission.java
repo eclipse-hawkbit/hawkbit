@@ -18,7 +18,6 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.function.SingletonSupplier;
 
@@ -37,21 +36,9 @@ import org.springframework.util.function.SingletonSupplier;
 @Slf4j
 public final class SpPermission {
 
-    /**
-     * Permission to add new targets including their meta information.
-     */
     public static final String CREATE_TARGET = "CREATE_TARGET";
-    /**
-     * Permission to read the targets (list and filter).
-     */
     public static final String READ_TARGET = "READ_TARGET";
-    /**
-     * Permission to change/edit/update targets and to assign updates.
-     */
     public static final String UPDATE_TARGET = "UPDATE_TARGET";
-    /**
-     * Permission to delete targets.
-     */
     public static final String DELETE_TARGET = "DELETE_TARGET";
     /**
      * Permission to read the target security token. The security token is security
@@ -66,31 +53,14 @@ public final class SpPermission {
     public static final String UPDATE_TARGET_TYPE = "UPDATE_TARGET_TYPE";
     public static final String DELETE_TARGET_TYPE = "DELETE_TARGET_TYPE";
 
-    public static final String CREATE_DISTRIBUTION_SET = "CREATE_DISTRIBUTION_SET";
     public static final String READ_DISTRIBUTION_SET = "READ_DISTRIBUTION_SET";
     public static final String UPDATE_DISTRIBUTION_SET = "UPDATE_DISTRIBUTION_SET";
-    public static final String DELETE_DISTRIBUTION_SET = "DELETE_DISTRIBUTION_SET";
 
-    /**
-     * Permission to read distributions and artifacts.
-     */
     public static final String READ_REPOSITORY = "READ_REPOSITORY";
-    /**
-     * Permission to edit/update distributions and artifacts.
-     */
     public static final String UPDATE_REPOSITORY = "UPDATE_REPOSITORY";
-    /**
-     * Permission to add distributions and artifacts.
-     */
     public static final String CREATE_REPOSITORY = "CREATE_REPOSITORY";
-    /**
-     * Permission to delete distributions and artifacts.
-     */
     public static final String DELETE_REPOSITORY = "DELETE_REPOSITORY";
 
-    /**
-     * Permission to download repository artifacts of a software module.
-     */
     public static final String DOWNLOAD_REPOSITORY_ARTIFACT = "DOWNLOAD_REPOSITORY_ARTIFACT";
 
     /**
@@ -109,51 +79,37 @@ public final class SpPermission {
      */
     public static final String TENANT_CONFIGURATION = "TENANT_CONFIGURATION";
 
-    /**
-     * Permission to create a rollout.
-     */
     public static final String CREATE_ROLLOUT = "CREATE_ROLLOUT";
-    /**
-     * Permission to read a rollout.
-     */
     public static final String READ_ROLLOUT = "READ_ROLLOUT";
-    /**
-     * Permission to update a rollout.
-     */
     public static final String UPDATE_ROLLOUT = "UPDATE_ROLLOUT";
-    /**
-     * Permission to delete a rollout.
-     */
     public static final String DELETE_ROLLOUT = "DELETE_ROLLOUT";
-    /**
-     * Permission to approve or deny a rollout prior to starting.
-     */
+    /** Permission to approve or deny a rollout prior to starting. */
     public static final String APPROVE_ROLLOUT = "APPROVE_ROLLOUT";
-    /**
-     * Permission to start/stop/resume a rollout.
-     */
+    /** Permission to start/stop/resume a rollout. */
     public static final String HANDLE_ROLLOUT = "HANDLE_ROLLOUT";
 
-    /**
-     * Permission to administrate the system on a global, i.e. tenant independent scale. That includes the deletion of tenants.
-     */
+    /** Permission to administrate the system on a global, i.e. tenant independent scale. That includes the deletion of tenants. */
     public static final String SYSTEM_ADMIN = "SYSTEM_ADMIN";
 
-    private static final String IMPLIES = " > ";
-    private static final String LINE_BREAK = "\n";
-    public static final String TARGET_HIERARCHY =
-            CREATE_TARGET + IMPLIES + CREATE_TARGET_TYPE + LINE_BREAK +
-            READ_TARGET + IMPLIES + READ_TARGET_TYPE + LINE_BREAK +
-            UPDATE_TARGET + IMPLIES + UPDATE_TARGET_TYPE + LINE_BREAK +
-            DELETE_TARGET + IMPLIES + DELETE_TARGET_TYPE + LINE_BREAK;
-    public static final String REPOSITORY_HIERARCHY =
-            CREATE_REPOSITORY + IMPLIES + CREATE_DISTRIBUTION_SET + LINE_BREAK +
-            READ_REPOSITORY + IMPLIES + READ_DISTRIBUTION_SET + LINE_BREAK +
-            UPDATE_REPOSITORY + IMPLIES + UPDATE_DISTRIBUTION_SET + LINE_BREAK +
-            DELETE_REPOSITORY + IMPLIES + DELETE_DISTRIBUTION_SET + LINE_BREAK;
-    public static final String TENANT_CONFIGURATION_HIERARCHY =
-            TENANT_CONFIGURATION + IMPLIES + READ_TENANT_CONFIGURATION + LINE_BREAK +
-            TENANT_CONFIGURATION + IMPLIES + READ_GATEWAY_SEC_TOKEN + LINE_BREAK;
+    public static final String TARGET_HIERARCHY = """
+            CREATE_TARGET > CREATE_TARGET_TYPE
+            READ_TARGET > READ_TARGET_TYPE
+            UPDATE_TARGET > UPDATE_TARGET_TYPE
+            DELETE_TARGET > DELETE_TARGET_TYPE""";
+    public static final String REPOSITORY_HIERARCHY = """
+            CREATE_REPOSITORY > CREATE_DISTRIBUTION_SET
+            READ_REPOSITORY > READ_DISTRIBUTION_SET
+            UPDATE_REPOSITORY > UPDATE_DISTRIBUTION_SET
+            DELETE_REPOSITORY > DELETE_DISTRIBUTION_SET
+            CREATE_REPOSITORY > CREATE_SOFTWARE_MODULE
+            READ_REPOSITORY > READ_SOFTWARE_MODULE
+            UPDATE_REPOSITORY > UPDATE_SOFTWARE_MODULE
+            DELETE_REPOSITORY > DELETE_SOFTWARE_MODULE
+            """;
+    public static final String TENANT_CONFIGURATION_HIERARCHY = """
+            TENANT_CONFIGURATION > READ_TENANT_CONFIGURATION
+            TENANT_CONFIGURATION > READ_GATEWAY_SECURITY_TOKEN
+            """;
 
     private static final SingletonSupplier<List<String>> ALL_AUTHORITIES = SingletonSupplier.of(() -> {
         final List<String> allPermissions = new ArrayList<>();
@@ -171,6 +127,7 @@ public final class SpPermission {
         }
         return Collections.unmodifiableList(allPermissions);
     });
+
     /**
      * Return all permission.
      *

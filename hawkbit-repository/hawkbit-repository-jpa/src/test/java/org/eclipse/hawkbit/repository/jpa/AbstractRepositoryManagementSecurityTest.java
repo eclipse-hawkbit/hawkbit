@@ -13,10 +13,11 @@ import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
+import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 
-public abstract class AbstractRepositoryManagementSecurityTest<T, C, U> extends AbstractJpaIntegrationTest {
+public abstract class AbstractRepositoryManagementSecurityTest<T extends BaseEntity, C, U> extends AbstractJpaIntegrationTest {
 
     /**
      * @return the repository management to test with

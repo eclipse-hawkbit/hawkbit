@@ -66,13 +66,12 @@ public final class SpringEvalExpressions {
     public static final String HAS_AUTH_READ_TARGET_TYPE = HAS_AUTH_PREFIX + SpPermission.READ_TARGET_TYPE + HAS_AUTH_SUFFIX;
     public static final String HAS_AUTH_DELETE_TARGET_TYPE = HAS_AUTH_PREFIX + SpPermission.DELETE_TARGET_TYPE + HAS_AUTH_SUFFIX;
 
-    public static final String HAS_AUTH_UPDATE_DISTRIBUTION_SET = HAS_AUTH_PREFIX + SpPermission.UPDATE_DISTRIBUTION_SET + HAS_AUTH_SUFFIX;
-    public static final String HAS_AUTH_READ_DISTRIBUTION_SET = HAS_AUTH_PREFIX + SpPermission.READ_DISTRIBUTION_SET + HAS_AUTH_SUFFIX;
+    // evaluated to <permission>_<permissionGroup> (e.g. DISTRIBUTION_SET_CREATE)
+    public static final String HAS_CREATE_REPOSITORY = "hasPermission(#root, 'CREATE')";
+    public static final String HAS_READ_REPOSITORY = "hasPermission(#root, 'READ')";
+    public static final String HAS_UPDATE_REPOSITORY = "hasPermission(#root, 'UPDATE')";
+    public static final String HAS_DELETE_REPOSITORY = "hasPermission(#root, 'DELETE')";
 
-    public static final String HAS_AUTH_CREATE_REPOSITORY = HAS_AUTH_PREFIX + SpPermission.CREATE_REPOSITORY + HAS_AUTH_SUFFIX;
-    public static final String HAS_AUTH_READ_REPOSITORY = HAS_AUTH_PREFIX + SpPermission.READ_REPOSITORY + HAS_AUTH_SUFFIX;
-    public static final String HAS_AUTH_UPDATE_REPOSITORY = HAS_AUTH_PREFIX + SpPermission.UPDATE_REPOSITORY + HAS_AUTH_SUFFIX;
-    public static final String HAS_AUTH_DELETE_REPOSITORY = HAS_AUTH_PREFIX + SpPermission.DELETE_REPOSITORY + HAS_AUTH_SUFFIX;
     public static final String HAS_AUTH_DOWNLOAD_ARTIFACT = HAS_AUTH_PREFIX + SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT + HAS_AUTH_SUFFIX;
     public static final String HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET = BRACKET_OPEN + HAS_AUTH_PREFIX
             + SpPermission.READ_REPOSITORY + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + SpPermission.UPDATE_TARGET + HAS_AUTH_SUFFIX
