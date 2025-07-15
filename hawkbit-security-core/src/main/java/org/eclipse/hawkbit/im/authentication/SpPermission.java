@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.util.function.SingletonSupplier;
 
 /**
  * <p>
@@ -153,12 +154,7 @@ public final class SpPermission {
             TENANT_CONFIGURATION + IMPLIES + READ_TENANT_CONFIGURATION + LINE_BREAK +
             TENANT_CONFIGURATION + IMPLIES + READ_GATEWAY_SEC_TOKEN + LINE_BREAK;
 
-    /**
-     * Return all permission.
-     *
-     * @return all permissions
-     */
-    public static List<String> getAllAuthorities() {
+    private static final SingletonSupplier<List<String>> ALL_AUTHORITIES = SingletonSupplier.of(() -> {
         final List<String> allPermissions = new ArrayList<>();
         final Field[] declaredFields = SpPermission.class.getDeclaredFields();
         for (final Field field : declaredFields) {
@@ -173,5 +169,13 @@ public final class SpPermission {
             }
         }
         return allPermissions;
+    });
+    /**
+     * Return all permission.
+     *
+     * @return all permissions
+     */
+    public static List<String> getAllAuthorities() {
+        return ALL_AUTHORITIES.get();
     }
 }
