@@ -23,6 +23,8 @@ public enum ActionFields implements RsqlQueryField, FieldValueConverter<ActionFi
     STATUS("active"),
     DETAILSTATUS("status"),
     LASTSTATUSCODE("lastActionStatusCode"),
+    CREATEDAT("createdAt"),
+    LASTMODIFIEDAT("lastModifiedAt"),
     WEIGHT("weight"),
     TARGET("target",
             TargetFields.ID.getJpaEntityFieldName(), TargetFields.NAME.getJpaEntityFieldName(),
