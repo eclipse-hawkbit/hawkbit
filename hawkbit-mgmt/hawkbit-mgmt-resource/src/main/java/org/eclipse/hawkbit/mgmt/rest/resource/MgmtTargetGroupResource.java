@@ -36,14 +36,16 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
     private final TargetManagement targetManagement;
     private final TenantConfigHelper tenantConfigHelper;
 
-    public MgmtTargetGroupResource(final TargetManagement targetManagement, final SystemSecurityContext systemSecurityContext,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
+    public MgmtTargetGroupResource(
+            final TargetManagement targetManagement,
+            final TenantConfigurationManagement tenantConfigurationManagement, final SystemSecurityContext systemSecurityContext) {
         this.targetManagement = targetManagement;
         this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(String group, int pagingOffsetParam, int pagingLimitParam, String sortParam) {
+    public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(
+            final String group, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeTargetSortParam(sortParam));
 
         final Page<Target> targets = targetManagement.findTargetsByGroup(group, false, pageable);
@@ -53,7 +55,8 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargetsWithSubgroups(String groupFilter, boolean subgroups, int pagingOffsetParam, int pagingLimitParam, String sortParam) {
+    public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargetsWithSubgroups(
+            final String groupFilter, final boolean subgroups, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeTargetSortParam(sortParam));
 
         final Page<Target> targets = targetManagement.findTargetsByGroup(groupFilter, subgroups, pageable);
@@ -63,31 +66,29 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> assignTargetsToGroup(String group, List<String> controllerIds) {
+    public ResponseEntity<Void> assignTargetsToGroup(final String group, final List<String> controllerIds) {
         return assignTargets(group, controllerIds);
     }
 
     @Override
-    public ResponseEntity<Void> assignTargetsToGroupWithSubgroups(String group, List<String> controllerIds) {
+    public ResponseEntity<Void> assignTargetsToGroupWithSubgroups(final String group, final List<String> controllerIds) {
         return assignTargets(group, controllerIds);
     }
 
     @Override
-    public ResponseEntity<Void> assignTargetsToGroupWithRsql(String group, String rsql) {
-        targetManagement.assignTargetGroupWithRsql(group, rsql);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> assignTargetsToGroupWithRsql(final String group, final String rsql) {
+        return assignTargetsToGroupWithRsql0(group, rsql);
     }
 
     @Override
-    public ResponseEntity<Void> unassignTargetsFromGroup(List<String> controllerIds) {
+    public ResponseEntity<Void> unassignTargetsFromGroup(final List<String> controllerIds) {
         targetManagement.assignTargetsWithGroup(null, controllerIds);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> unassignTargetsFromGroupByRsql(String rsql) {
-        targetManagement.assignTargetGroupWithRsql(null, rsql);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> unassignTargetsFromGroupByRsql(final String rsql) {
+        return assignTargetsToGroupWithRsql0(null, rsql);
     }
 
     @Override
@@ -98,12 +99,16 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
 
     @Override
     public ResponseEntity<Void> assignTargetsToGroup(final String group, final String rsql) {
-        targetManagement.assignTargetGroupWithRsql(group, rsql);
-        return ResponseEntity.ok().build();
+        return assignTargetsToGroupWithRsql0(group, rsql);
     }
 
     private ResponseEntity<Void> assignTargets(final String group, final List<String> controllerIds) {
         targetManagement.assignTargetsWithGroup(group, controllerIds);
+        return ResponseEntity.ok().build();
+    }
+
+    private ResponseEntity<Void> assignTargetsToGroupWithRsql0(final String group, final String rsql) {
+        targetManagement.assignTargetGroupWithRsql(group, rsql);
         return ResponseEntity.ok().build();
     }
 }

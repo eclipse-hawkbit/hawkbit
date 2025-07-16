@@ -9,7 +9,11 @@
  */
 package org.eclipse.hawkbit.security;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serial;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -18,7 +22,6 @@ import java.util.concurrent.Callable;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
@@ -166,7 +169,7 @@ public class SystemSecurityContext {
      * wraps the original authentication object. The wrapped object contains the necessary {@link SpRole#SYSTEM_ROLE}
      * which is allowed to execute all secured methods.
      */
-    @Getter
+    @SuppressWarnings("java:S4275") // java:S4275 - intentionally returns the "hold" objects
     public static final class SystemCodeAuthentication implements Authentication {
 
         @Serial
@@ -174,14 +177,14 @@ public class SystemSecurityContext {
 
         private static final List<SimpleGrantedAuthority> AUTHORITIES = List.of(new SimpleGrantedAuthority(SpRole.SYSTEM_ROLE));
 
-        private final Object credentials;
-        private final Object details;
-        private final Object principal;
+        private final Holder credentials;
+        private final Holder details;
+        private final Holder principal;
 
         private SystemCodeAuthentication(final Authentication oldAuthentication) {
-            credentials = oldAuthentication != null ? oldAuthentication.getCredentials() : null;
-            details = oldAuthentication != null ? oldAuthentication.getDetails() : null;
-            principal = oldAuthentication != null ? oldAuthentication.getPrincipal() : null;
+            credentials = new Holder(oldAuthentication != null ? oldAuthentication.getCredentials() : null);
+            details = new Holder(oldAuthentication != null ? oldAuthentication.getDetails() : null);
+            principal = new Holder(oldAuthentication != null ? oldAuthentication.getPrincipal() : null);
         }
 
         @Override
@@ -195,6 +198,21 @@ public class SystemSecurityContext {
         }
 
         @Override
+        public Object getCredentials() {
+            return credentials.obj;
+        }
+
+        @Override
+        public Object getDetails() {
+            return details.obj;
+        }
+
+        @Override
+        public Object getPrincipal() {
+            return principal.obj;
+        }
+
+        @Override
         public boolean isAuthenticated() {
             return true;
         }
@@ -202,6 +220,29 @@ public class SystemSecurityContext {
         @Override
         public void setAuthenticated(final boolean isAuthenticated) {
             throw new UnsupportedOperationException();
+        }
+
+        // Serializable wrapper that ensures that the content will be serialized only if it is Serializable
+        private static class Holder implements Serializable {
+
+            @Serial
+            private static final long serialVersionUID = 1L;
+
+            private Object obj;
+
+            private Holder(final Object obj) {
+                this.obj = obj;
+            }
+
+            @Serial
+            private void writeObject(final ObjectOutputStream oos) throws IOException {
+                oos.writeObject(obj instanceof Serializable ? obj : null);
+            }
+
+            @Serial
+            private void readObject(final ObjectInputStream ois) throws IOException, ClassNotFoundException {
+                obj = ois.readObject();
+            }
         }
     }
 }
