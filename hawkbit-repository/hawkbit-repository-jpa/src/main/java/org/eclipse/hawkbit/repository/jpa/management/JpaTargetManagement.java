@@ -77,6 +77,7 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -84,6 +85,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
@@ -93,7 +95,9 @@ import org.springframework.validation.annotation.Validated;
  */
 @Transactional(readOnly = true)
 @Validated
-public class JpaTargetManagement implements TargetManagement {
+@Service
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "target-management" }, matchIfMissing = true)
+class JpaTargetManagement implements TargetManagement {
 
     private final EntityManager entityManager;
     private final JpaDistributionSetManagement distributionSetManagement;
@@ -106,7 +110,7 @@ public class JpaTargetManagement implements TargetManagement {
     private final TenantAware tenantAware;
 
     @SuppressWarnings("java:S107")
-    public JpaTargetManagement(final EntityManager entityManager,
+    JpaTargetManagement(final EntityManager entityManager,
             final JpaDistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository,
             final RolloutGroupRepository rolloutGroupRepository,

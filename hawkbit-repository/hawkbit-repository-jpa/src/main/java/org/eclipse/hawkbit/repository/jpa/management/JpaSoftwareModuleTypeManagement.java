@@ -34,7 +34,7 @@ public class JpaSoftwareModuleTypeManagement
     private final DistributionSetTypeRepository distributionSetTypeRepository;
     private final SoftwareModuleRepository softwareModuleRepository;
 
-    public JpaSoftwareModuleTypeManagement(
+    JpaSoftwareModuleTypeManagement(
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final EntityManager entityManager,
             final DistributionSetTypeRepository distributionSetTypeRepository,

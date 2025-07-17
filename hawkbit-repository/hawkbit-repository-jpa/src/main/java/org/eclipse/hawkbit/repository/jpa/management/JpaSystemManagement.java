@@ -48,6 +48,7 @@ import org.eclipse.hawkbit.repository.report.model.SystemUsageReportWithTenants;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -58,6 +59,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,6 +71,8 @@ import org.springframework.validation.annotation.Validated;
 @Slf4j
 @Transactional(readOnly = true)
 @Validated
+@Service
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "system-management" }, matchIfMissing = true)
 public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, SystemManagement {
 
     private static final int MAX_TENANTS_QUERY = 1000;
@@ -102,7 +106,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     private ArtifactRepository artifactRepository;
 
     @SuppressWarnings("squid:S00107")
-    public JpaSystemManagement(
+    JpaSystemManagement(
             final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository,
             final TargetTagRepository targetTagRepository, final TargetFilterQueryRepository targetFilterQueryRepository,
             final SoftwareModuleRepository softwareModuleRepository, final SoftwareModuleTypeRepository softwareModuleTypeRepository,

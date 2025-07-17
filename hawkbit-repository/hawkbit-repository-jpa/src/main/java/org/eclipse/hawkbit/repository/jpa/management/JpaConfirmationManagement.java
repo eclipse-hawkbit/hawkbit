@@ -42,9 +42,11 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -56,15 +58,15 @@ import org.springframework.validation.annotation.Validated;
 @Slf4j
 @Transactional(readOnly = true)
 @Validated
-public class JpaConfirmationManagement extends JpaActionManagement implements ConfirmationManagement {
-
-    public static final String CONFIRMATION_CODE_MSG_PREFIX = "Confirmation status code: %d";
+@Service
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "confirmation-management" }, matchIfMissing = true)
+class JpaConfirmationManagement extends JpaActionManagement implements ConfirmationManagement {
 
     private final EntityManager entityManager;
     private final EntityFactory entityFactory;
     private final TargetRepository targetRepository;
 
-    public JpaConfirmationManagement(
+    JpaConfirmationManagement(
             final TargetRepository targetRepository,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final RepositoryProperties repositoryProperties, final QuotaManagement quotaManagement,

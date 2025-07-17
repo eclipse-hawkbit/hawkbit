@@ -30,11 +30,13 @@ import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -43,11 +45,13 @@ import org.springframework.validation.annotation.Validated;
  */
 @Transactional(readOnly = true)
 @Validated
-public class JpaTargetTagManagement implements TargetTagManagement {
+@Service
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "target-tag-management" }, matchIfMissing = true)
+class JpaTargetTagManagement implements TargetTagManagement {
 
     private final TargetTagRepository targetTagRepository;
 
-    public JpaTargetTagManagement(final TargetTagRepository targetTagRepository) {
+    JpaTargetTagManagement(final TargetTagRepository targetTagRepository) {
         this.targetTagRepository = targetTagRepository;;
     }
 

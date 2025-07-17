@@ -20,15 +20,10 @@ import jakarta.validation.Validation;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import org.eclipse.hawkbit.ContextAware;
-import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
-import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryptionSecretsStore;
 import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryptionService;
-import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.BaseRepositoryTypeProvider;
-import org.eclipse.hawkbit.repository.ConfirmationManagement;
-import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
@@ -43,15 +38,12 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
-import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.builder.DistributionSetBuilder;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeBuilder;
@@ -85,24 +77,9 @@ import org.eclipse.hawkbit.repository.jpa.cluster.DistributedLockRepository;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitDefaultServiceExecutor;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
-import org.eclipse.hawkbit.repository.jpa.management.JpaArtifactManagement;
-import org.eclipse.hawkbit.repository.jpa.management.JpaConfirmationManagement;
-import org.eclipse.hawkbit.repository.jpa.management.JpaControllerManagement;
-import org.eclipse.hawkbit.repository.jpa.management.JpaDeploymentManagement;
-import org.eclipse.hawkbit.repository.jpa.management.JpaDistributionSetInvalidationManagement;
-import org.eclipse.hawkbit.repository.jpa.management.JpaDistributionSetManagement;
 import org.eclipse.hawkbit.repository.jpa.management.JpaDistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.jpa.management.JpaRolloutGroupManagement;
-import org.eclipse.hawkbit.repository.jpa.management.JpaRolloutManagement;
 import org.eclipse.hawkbit.repository.jpa.management.JpaSoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.jpa.management.JpaSoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.jpa.management.JpaSystemManagement;
-import org.eclipse.hawkbit.repository.jpa.management.JpaTargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.jpa.management.JpaTargetManagement;
-import org.eclipse.hawkbit.repository.jpa.management.JpaTargetTagManagement;
-import org.eclipse.hawkbit.repository.jpa.management.JpaTargetTypeManagement;
-import org.eclipse.hawkbit.repository.jpa.management.JpaTenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.jpa.management.JpaTenantStatsManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -116,24 +93,17 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.HawkbitBaseRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.LocalArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutTargetGroupRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleMetadataRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleTypeRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.TenantConfigurationRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.TenantMetaDataRepository;
 import org.eclipse.hawkbit.repository.jpa.rollout.RolloutScheduler;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.PauseRolloutGroupAction;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupActionEvaluator;
@@ -148,7 +118,6 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
@@ -159,8 +128,6 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
-import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -170,9 +137,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
-import org.springframework.cache.CacheManager;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -180,7 +144,6 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.jdbc.lock.DefaultLockRepository;
@@ -206,7 +169,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @EnableScheduling
 @EnableRetry
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
-//@ComponentScan("org.eclipse.hawkbit.repository.jpa.management")
+@ComponentScan("org.eclipse.hawkbit.repository.jpa.management")
 @PropertySource("classpath:/hawkbit-jpa-defaults.properties")
 @Import({ JpaConfiguration.class, RepositoryConfiguration.class, LockProperties.class, DataSourceAutoConfiguration.class, SystemManagementCacheKeyGenerator.class })
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
@@ -496,125 +459,6 @@ public class JpaRepositoryConfiguration {
         return new HawkbitBaseRepository.RepositoryTypeProvider();
     }
 
-    /**
-     * {@link JpaSystemManagement} bean.
-     *
-     * @return a new {@link SystemManagement}
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    SystemManagement systemManagement(
-            final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository,
-            final TargetTagRepository targetTagRepository, final TargetFilterQueryRepository targetFilterQueryRepository,
-            final SoftwareModuleRepository softwareModuleRepository, final SoftwareModuleTypeRepository softwareModuleTypeRepository,
-            final DistributionSetRepository distributionSetRepository, final DistributionSetTypeRepository distributionSetTypeRepository,
-            final DistributionSetTagRepository distributionSetTagRepository, final RolloutRepository rolloutRepository,
-            final TenantConfigurationRepository tenantConfigurationRepository, final TenantMetaDataRepository tenantMetaDataRepository,
-            final TenantStatsManagement systemStatsManagement, final SystemManagementCacheKeyGenerator currentTenantCacheKeyGenerator,
-            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final PlatformTransactionManager txManager,
-            final TenancyCacheManager cacheManager, final RolloutStatusCache rolloutStatusCache,
-            final EntityManager entityManager, final RepositoryProperties repositoryProperties,
-            final JpaProperties properties) {
-        return new JpaSystemManagement(targetRepository, targetTypeRepository, targetTagRepository,
-                targetFilterQueryRepository, softwareModuleRepository, softwareModuleTypeRepository, distributionSetRepository,
-                distributionSetTypeRepository, distributionSetTagRepository, rolloutRepository, tenantConfigurationRepository,
-                tenantMetaDataRepository, systemStatsManagement, currentTenantCacheKeyGenerator, systemSecurityContext,
-                tenantAware, txManager, cacheManager, rolloutStatusCache, entityManager, repositoryProperties, properties);
-    }
-
-    /**
-     * {@link JpaTargetTypeManagement} bean.
-     *
-     * @return a new {@link TargetTypeManagement}
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    TargetTypeManagement targetTypeManagement(final TargetTypeRepository targetTypeRepository,
-            final TargetRepository targetRepository, final DistributionSetTypeRepository distributionSetTypeRepository,
-            final QuotaManagement quotaManagement) {
-        return new JpaTargetTypeManagement(targetTypeRepository, targetRepository, distributionSetTypeRepository, quotaManagement);
-    }
-
-    /**
-     * {@link JpaTenantStatsManagement} bean.
-     *
-     * @return a new {@link TenantStatsManagement}
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    TenantStatsManagement tenantStatsManagement(
-            final TargetRepository targetRepository, final LocalArtifactRepository artifactRepository, final ActionRepository actionRepository,
-            final TenantAware tenantAware) {
-        return new JpaTenantStatsManagement(targetRepository, artifactRepository, actionRepository, tenantAware);
-    }
-
-    /**
-     * {@link JpaTenantConfigurationManagement} bean.
-     *
-     * @return a new {@link TenantConfigurationManagement}
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    TenantConfigurationManagement tenantConfigurationManagement(
-            final TenantConfigurationRepository tenantConfigurationRepository,
-            final TenantConfigurationProperties tenantConfigurationProperties,
-            final CacheManager cacheManager, final AfterTransactionCommitExecutor afterCommitExecutor,
-            final ApplicationContext applicationContext) {
-        return new JpaTenantConfigurationManagement(tenantConfigurationRepository, tenantConfigurationProperties,
-                cacheManager, afterCommitExecutor, applicationContext);
-    }
-
-    /**
-     * {@link JpaTargetManagement} bean.
-     *
-     * @return a new {@link JpaTargetManagement}
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    TargetManagement targetManagement(
-            final EntityManager entityManager, final QuotaManagement quotaManagement,
-            final TargetRepository targetRepository,
-            final RolloutGroupRepository rolloutGroupRepository,
-            final TargetFilterQueryRepository targetFilterQueryRepository,
-            final TargetTypeRepository targetTypeRepository, final TargetTagRepository targetTagRepository,
-            final TenantAware tenantAware, final JpaDistributionSetManagement distributionSetManagement) {
-        return new JpaTargetManagement(entityManager, distributionSetManagement, quotaManagement, targetRepository,
-                targetTypeRepository, rolloutGroupRepository, targetFilterQueryRepository,
-                targetTagRepository, tenantAware);
-    }
-
-    /**
-     * {@link JpaTargetFilterQueryManagement} bean.
-     *
-     * @param targetFilterQueryRepository holding {@link TargetFilterQuery} entities
-     * @param targetManagement managing {@link Target} entities
-     * @param distributionSetManagement for auto assign DS access
-     * @param quotaManagement to access quotas
-     * @return a new {@link TargetFilterQueryManagement}
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    TargetFilterQueryManagement targetFilterQueryManagement(
-            final TargetFilterQueryRepository targetFilterQueryRepository, final TargetManagement targetManagement,
-            final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement, final RepositoryProperties repositoryProperties,
-            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final AuditorAware<String> auditorAware) {
-        return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetManagement,
-                distributionSetManagement, quotaManagement, tenantConfigurationManagement, repositoryProperties,
-                systemSecurityContext, contextAware, auditorAware);
-    }
-
-    /**
-     * {@link JpaTargetTagManagement} bean.
-     *
-     * @return a new {@link TargetTagManagement}
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    TargetTagManagement targetTagManagement(final TargetTagRepository targetTagRepository) {
-        return new JpaTargetTagManagement(targetTagRepository);
-    }
-
     @Bean
     @ConditionalOnMissingBean
     RolloutHandler rolloutHandler(final TenantAware tenantAware, final RolloutManagement rolloutManagement,
@@ -641,28 +485,6 @@ public class JpaRepositoryConfiguration {
                 tenantAware, repositoryProperties);
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    RolloutManagement rolloutManagement(
-            final RolloutRepository rolloutRepository,
-            final RolloutGroupRepository rolloutGroupRepository,
-            final RolloutApprovalStrategy rolloutApprovalStrategy,
-            final StartNextGroupRolloutGroupSuccessAction startNextRolloutGroupAction,
-            final RolloutStatusCache rolloutStatusCache,
-            final ActionRepository actionRepository,
-            final TargetManagement targetManagement,
-            final DistributionSetManagement distributionSetManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement,
-            final QuotaManagement quotaManagement,
-            final AfterTransactionCommitExecutor afterCommit,
-            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware,
-            final RepositoryProperties repositoryProperties) {
-        return new JpaRolloutManagement(rolloutRepository, rolloutGroupRepository, rolloutApprovalStrategy,
-                startNextRolloutGroupAction, rolloutStatusCache, actionRepository, targetManagement,
-                distributionSetManagement, tenantConfigurationManagement, quotaManagement, afterCommit,
-                systemSecurityContext, contextAware, repositoryProperties);
-    }
-
     /**
      * {@link DefaultRolloutApprovalStrategy} bean.
      *
@@ -675,42 +497,6 @@ public class JpaRepositoryConfiguration {
             final SystemSecurityContext systemSecurityContext) {
         return new DefaultRolloutApprovalStrategy(userAuthoritiesResolver, tenantConfigurationManagement,
                 systemSecurityContext);
-    }
-
-    /**
-     * {@link JpaRolloutGroupManagement} bean.
-     *
-     * @return a new {@link RolloutGroupManagement}
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    RolloutGroupManagement rolloutGroupManagement(final RolloutGroupRepository rolloutGroupRepository,
-            final RolloutRepository rolloutRepository, final ActionRepository actionRepository,
-            final TargetRepository targetRepository, final EntityManager entityManager, final RolloutStatusCache rolloutStatusCache) {
-        return new JpaRolloutGroupManagement(rolloutGroupRepository, rolloutRepository, actionRepository,
-                targetRepository, entityManager, rolloutStatusCache);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    ConfirmationManagement confirmationManagement(final TargetRepository targetRepository,
-            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-            final RepositoryProperties repositoryProperties, final QuotaManagement quotaManagement,
-            final EntityManager entityManager, final EntityFactory entityFactory) {
-        return new JpaConfirmationManagement(targetRepository, actionRepository, actionStatusRepository,
-                repositoryProperties, quotaManagement, entityManager, entityFactory);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    ArtifactManagement artifactManagement(
-            final EntityManager entityManager, final PlatformTransactionManager txManager,
-            final LocalArtifactRepository localArtifactRepository, final SoftwareModuleRepository softwareModuleRepository,
-            final Optional<ArtifactRepository> artifactRepository,
-            final QuotaManagement quotaManagement, final TenantAware tenantAware) {
-        return new JpaArtifactManagement(
-                entityManager, txManager, localArtifactRepository, softwareModuleRepository, artifactRepository.orElse(null),
-                quotaManagement, tenantAware);
     }
 
     /**
@@ -856,25 +642,6 @@ public class JpaRepositoryConfiguration {
     @Bean
     RsqlUtility rsqlUtility() {
         return RsqlUtility.getInstance();
-    }
-
-    /**
-     * {@link JpaDistributionSetInvalidationManagement} bean.
-     *
-     * @return a new {@link JpaDistributionSetInvalidationManagement}
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    JpaDistributionSetInvalidationManagement distributionSetInvalidationManagement(
-            final DistributionSetManagement distributionSetManagement, final RolloutManagement rolloutManagement,
-            final DeploymentManagement deploymentManagement,
-            final TargetFilterQueryManagement targetFilterQueryManagement, final ActionRepository actionRepository,
-            final PlatformTransactionManager txManager, final RepositoryProperties repositoryProperties,
-            final TenantAware tenantAware, final LockRegistry lockRegistry,
-            final SystemSecurityContext systemSecurityContext) {
-        return new JpaDistributionSetInvalidationManagement(distributionSetManagement, rolloutManagement,
-                deploymentManagement, targetFilterQueryManagement, actionRepository, txManager, repositoryProperties,
-                tenantAware, lockRegistry, systemSecurityContext);
     }
 
     /**

@@ -130,7 +130,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "controller-management" }, matchIfMissing = true)
-public class JpaControllerManagement extends JpaActionManagement implements ControllerManagement {
+class JpaControllerManagement extends JpaActionManagement implements ControllerManagement {
 
     private static final Pattern PATTERN = Pattern.compile("[a-zA-Z0-9_\\-!@#$%^&*()+=\\[\\]{}|;:'\",.<>/\\\\?\\s]*");
 
@@ -156,7 +156,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private final TenantAware tenantAware;
 
     @SuppressWarnings("squid:S00107")
-    public JpaControllerManagement(
+    JpaControllerManagement(
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
             final RepositoryProperties repositoryProperties,
             final TargetRepository targetRepository, final TargetTypeManagement targetTypeManagement,

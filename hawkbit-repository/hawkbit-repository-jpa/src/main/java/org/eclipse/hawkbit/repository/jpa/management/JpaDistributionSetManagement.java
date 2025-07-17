@@ -96,7 +96,7 @@ import org.springframework.util.ObjectUtils;
 
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "distribution-set-management" }, matchIfMissing = true)
-public class JpaDistributionSetManagement
+class JpaDistributionSetManagement
         extends AbstractJpaRepositoryManagement<JpaDistributionSet, JpaDistributionSetCreate, GenericDistributionSetUpdate, DistributionSetRepository, DistributionSetFields>
         implements DistributionSetManagement<JpaDistributionSet, JpaDistributionSetCreate, GenericDistributionSetUpdate> {
 
@@ -113,7 +113,7 @@ public class JpaDistributionSetManagement
     private final RepositoryProperties repositoryProperties;
 
     @SuppressWarnings("java:S107")
-    public JpaDistributionSetManagement(
+    JpaDistributionSetManagement(
             final DistributionSetRepository jpaRepository,
             final EntityManager entityManager,
             final DistributionSetTagManagement<JpaDistributionSetTag, JpaDistributionSetTagCreate, GenericTagUpdate> distributionSetTagManagement,

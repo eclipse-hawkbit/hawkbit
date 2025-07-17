@@ -15,6 +15,8 @@ import org.eclipse.hawkbit.repository.jpa.repository.LocalArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -23,6 +25,8 @@ import org.springframework.validation.annotation.Validated;
  * Management service for statistics of a single tenant.
  */
 @Validated
+@Service
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "tenant-stats-management" }, matchIfMissing = true)
 public class JpaTenantStatsManagement implements TenantStatsManagement {
 
     private final TargetRepository targetRepository;
@@ -30,7 +34,7 @@ public class JpaTenantStatsManagement implements TenantStatsManagement {
     private final ActionRepository actionRepository;
     private final TenantAware tenantAware;
 
-    public JpaTenantStatsManagement(
+    JpaTenantStatsManagement(
             final TargetRepository targetRepository, final LocalArtifactRepository artifactRepository, final ActionRepository actionRepository,
             final TenantAware tenantAware) {
         this.targetRepository = targetRepository;

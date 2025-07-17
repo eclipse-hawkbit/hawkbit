@@ -83,8 +83,7 @@ public class JpaSoftwareModuleManagement
     private final ArtifactManagement artifactManagement;
     private final QuotaManagement quotaManagement;
 
-    @SuppressWarnings("java:S107")
-    public JpaSoftwareModuleManagement(
+    JpaSoftwareModuleManagement(
             final SoftwareModuleRepository softwareModuleRepository,
             final EntityManager entityManager,
             final DistributionSetRepository distributionSetRepository,

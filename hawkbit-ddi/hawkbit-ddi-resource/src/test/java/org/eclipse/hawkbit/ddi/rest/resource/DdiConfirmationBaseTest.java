@@ -10,7 +10,7 @@
 package org.eclipse.hawkbit.ddi.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.repository.jpa.management.JpaConfirmationManagement.CONFIRMATION_CODE_MSG_PREFIX;
+import static org.eclipse.hawkbit.repository.ConfirmationManagement.CONFIRMATION_CODE_MSG_PREFIX;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;

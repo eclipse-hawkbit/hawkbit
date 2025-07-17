@@ -80,6 +80,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -89,6 +90,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
@@ -99,6 +101,8 @@ import org.springframework.validation.annotation.Validated;
 @Slf4j
 @Validated
 @Transactional(readOnly = true)
+@Service
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "rollout-management" }, matchIfMissing = true)
 public class JpaRolloutManagement implements RolloutManagement {
 
     private static final List<RolloutStatus> ACTIVE_ROLLOUTS = List.of(
@@ -123,8 +127,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     private final ContextAware contextAware;
     private final RepositoryProperties repositoryProperties;
 
-    @SuppressWarnings("java:S107")
-    public JpaRolloutManagement(
+    JpaRolloutManagement(
             final RolloutRepository rolloutRepository,
             final RolloutGroupRepository rolloutGroupRepository,
             final RolloutApprovalStrategy rolloutApprovalStrategy,

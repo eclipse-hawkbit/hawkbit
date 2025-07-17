@@ -33,21 +33,23 @@ import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 
 /**
  * Implements utility methods for managing {@link Action}s
  */
 @Slf4j
-public class JpaActionManagement {
+class JpaActionManagement {
 
     protected final ActionRepository actionRepository;
     protected final ActionStatusRepository actionStatusRepository;
     protected final QuotaManagement quotaManagement;
     protected final RepositoryProperties repositoryProperties;
 
-    public JpaActionManagement(
+    JpaActionManagement(
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
             final RepositoryProperties repositoryProperties) {
         this.actionRepository = actionRepository;

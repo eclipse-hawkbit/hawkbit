@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.builder;
 
 import jakarta.validation.ValidationException;
 
-import org.eclipse.hawkbit.repository.RepositoryManagement;
-import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractSoftwareModuleUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;

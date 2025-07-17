@@ -116,7 +116,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "deployment-management" }, matchIfMissing = true)
-public class JpaDeploymentManagement extends JpaActionManagement implements DeploymentManagement {
+class JpaDeploymentManagement extends JpaActionManagement implements DeploymentManagement {
 
     /**
      * Maximum amount of Actions that are started at once.
@@ -161,7 +161,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final RetryTemplate retryTemplate;
 
     @SuppressWarnings("java:S107")
-    public JpaDeploymentManagement(
+    JpaDeploymentManagement(
             final EntityManager entityManager, final ActionRepository actionRepository,
             final JpaDistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
             final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,

@@ -31,14 +31,18 @@ import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.Cancelat
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidationCount;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Jpa implementation for {@link DistributionSetInvalidationManagement}
  */
 @Slf4j
-public class JpaDistributionSetInvalidationManagement implements DistributionSetInvalidationManagement {
+@Service
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "distribution-set-invalidation-management" }, matchIfMissing = true)
+class JpaDistributionSetInvalidationManagement implements DistributionSetInvalidationManagement {
 
     private final DistributionSetManagement distributionSetManagement;
     private final RolloutManagement rolloutManagement;
@@ -52,7 +56,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     private final SystemSecurityContext systemSecurityContext;
 
     @SuppressWarnings("java:S107")
-    public JpaDistributionSetInvalidationManagement(final DistributionSetManagement distributionSetManagement,
+    JpaDistributionSetInvalidationManagement(final DistributionSetManagement distributionSetManagement,
             final RolloutManagement rolloutManagement, final DeploymentManagement deploymentManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final ActionRepository actionRepository,
             final PlatformTransactionManager txManager, final RepositoryProperties repositoryProperties,
