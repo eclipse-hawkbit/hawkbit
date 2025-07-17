@@ -144,12 +144,12 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
     private static class DistributionSetFilter implements Filter.Rsql {
 
-        private final TextField name = Utils.textField("Name");
+        private final TextField textFilter = Utils.textField("Filter");
         private final CheckboxGroup<MgmtDistributionSetType> type = new CheckboxGroup<>("Type");
         private final CheckboxGroup<MgmtTag> tag = new CheckboxGroup<>("Tag");
 
         private DistributionSetFilter(final HawkbitMgmtClient hawkbitClient) {
-            name.setPlaceholder("<name filter>");
+            textFilter.setPlaceholder("<name/version filter>");
             type.setItemLabelGenerator(MgmtDistributionSetType::getName);
             type.setItems(Optional.ofNullable(
                     hawkbitClient.getDistributionSetTypeRestApi()
@@ -168,14 +168,14 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
         @Override
         public List<Component> components() {
-            return List.of(name, type);
+            return List.of(textFilter, type);
         }
 
         @Override
         public String filter() {
             return Filter.filter(
                     Map.of(
-                            "name", name.getOptionalValue(),
+                            List.of("version", "name"), textFilter.getOptionalValue().map(s -> "*" + s + "*"),
                             "type", type.getSelectedItems().stream().map(MgmtDistributionSetType::getKey).toList(),
                             "tag", tag.getSelectedItems().stream().map(MgmtTag::getName).toList()));
         }

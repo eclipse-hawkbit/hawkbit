@@ -28,6 +28,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.springframework.util.ObjectUtils;
 
 public class Filter extends Div {
 
@@ -111,33 +112,33 @@ public class Filter extends Div {
         });
     }
 
-    public static String filter(final Map<String, Object> keyToValues) {
-        final Map<String, Object> normalized = new HashMap<>(keyToValues)
+    public static String filter(final Map<Object, Object> keyToValues) {
+        final Map<Object, Object> normalized = new HashMap<>(keyToValues)
                 .entrySet()
                 .stream()
-                .filter(e -> {
+                .map(e -> {
                     if (e.getValue() instanceof Optional<?> opt) {
-                        return opt.isPresent();
-                    } else {
-                        return e.getValue() != null;
+                        e.setValue(opt.orElse(null));
                     }
+                    return e;
                 })
-                .filter(e -> !(e.getValue() instanceof Collection<?> coll && coll.isEmpty()))
+                .filter(e -> !ObjectUtils.isEmpty(e))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         if (normalized.isEmpty()) {
             return null;
-        } else if (normalized.size() == 1) {
-            return normalized.entrySet().stream()
-                    .findFirst().map(e -> filter(e.getKey(), e.getValue())).orElse(null); // never return null!
         } else {
             final StringBuilder sb = new StringBuilder();
             normalized.forEach((k, v) -> {
-                if (v instanceof Collection<?>) {
-                    sb.append('(').append(filter(k, v)).append(')');
-                } else if (v instanceof Optional<?> opt) {
-                    sb.append(filter(k, opt.get()));
-                } else {
-                    sb.append(filter(k, v));
+                if (k instanceof Collection<?> keyList) {
+                    sb.append('(').append(
+                            keyList.stream().map(subKey -> filter((String) subKey, v))
+                                    .collect(Collectors.joining(" or "))).append(")");
+                } else if (k instanceof String key) {
+                    if (v instanceof Collection<?>) {
+                        sb.append('(').append(filter(key, v)).append(')');
+                    } else {
+                        sb.append(filter(key, v));
+                    }
                 }
                 sb.append(';');
             });
