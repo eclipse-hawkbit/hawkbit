@@ -97,7 +97,7 @@ public class TargetView extends TableView<TargetView.MgmtTargetVersioned, String
 
     public static final String STATUS = "Status";
     public static final String UPDATE = "Sync";
-    public static final String CONTROLLER_ID = "Controller Id";
+    public static final String FILTER = "Filter";
     public static final String TAG = "Tag";
 
     public TargetView(final HawkbitMgmtClient hawkbitClient) {
@@ -115,8 +115,7 @@ public class TargetView extends TableView<TargetView.MgmtTargetVersioned, String
                                 .setHeader(UPDATE)
                                 .setAutoWidth(true)
                                 .setFlexGrow(0).setKey("updateStatus").setSortable(true);
-                        // todo remove controller id and filter by name instead ?
-                        grid.addColumn(MgmtTarget::getControllerId).setHeader(CONTROLLER_ID).setAutoWidth(true).setKey("id").setSortable(true);
+                        grid.addColumn(MgmtTarget::getControllerId).setHeader(FILTER).setAutoWidth(true).setKey("id").setSortable(true);
                         grid.addColumn(Utils.localDateTimeRenderer(MgmtTarget::getLastModifiedAt)).setHeader(LAST_MODIFIED_AT).setAutoWidth(true).setKey("lastModifiedAt").setSortable(true);
                         grid.addColumn(MgmtTarget::getName).setHeader(Constants.NAME).setAutoWidth(true).setKey("name").setSortable(true);
                         grid.addColumn(MgmtTarget::getTargetTypeName).setHeader(Constants.TYPE).setAutoWidth(true).setKey("targetType").setSortable(true);
@@ -155,15 +154,15 @@ public class TargetView extends TableView<TargetView.MgmtTargetVersioned, String
 
         private final HawkbitMgmtClient hawkbitClient;
 
-        private final TextField controllerId;
+        private final TextField textFilter;
         private final CheckboxGroup<MgmtTargetType> type;
         private final CheckboxGroup<MgmtTag> tag;
 
         private SimpleFilter(final HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
 
-            controllerId = Utils.textField(CONTROLLER_ID);
-            controllerId.setPlaceholder("<controller id filter>");
+            textFilter = Utils.textField(FILTER);
+            textFilter.setPlaceholder("<controller id/name filter>");
             type = new CheckboxGroup<>(Constants.TYPE);
             type.setItemLabelGenerator(MgmtTargetType::getName);
             tag = new CheckboxGroup<>(TAG);
@@ -173,7 +172,7 @@ public class TargetView extends TableView<TargetView.MgmtTargetVersioned, String
         @Override
         public List<Component> components() {
             final List<Component> components = new LinkedList<>();
-            components.add(controllerId);
+            components.add(textFilter);
             type.setItems(hawkbitClient.getTargetTypeRestApi().getTargetTypes(null, 0, 20, Constants.NAME_ASC).getBody().getContent());
             if (!((ListDataProvider)type.getDataProvider()).getItems().isEmpty()) {
                 components.add(type);
@@ -189,7 +188,7 @@ public class TargetView extends TableView<TargetView.MgmtTargetVersioned, String
         public String filter() {
             return Filter.filter(
                     Map.of(
-                            "controllerid", controllerId.getOptionalValue(),
+                            List.of("controllerid", "name"), textFilter.getOptionalValue().map(s->"*"+s+"*"),
                             "targettype.name", type.getSelectedItems().stream().map(MgmtTargetType::getName)
                                     .toList(),
                             "tag", tag.getSelectedItems().stream().map(MgmtTag::getName).toList()));
@@ -906,7 +905,7 @@ public class TargetView extends TableView<TargetView.MgmtTargetVersioned, String
             type.setWidthFull();
             type.setEmptySelectionAllowed(true);
             type.setItemLabelGenerator(item -> item == null ? "" : item.getName());
-            controllerId = Utils.textField(CONTROLLER_ID,e -> register.setEnabled(!e.getHasValue().isEmpty()));
+            controllerId = Utils.textField(FILTER,e -> register.setEnabled(!e.getHasValue().isEmpty()));
             controllerId.focus();
             name = Utils.textField(Constants.NAME);
             name.setWidthFull();
