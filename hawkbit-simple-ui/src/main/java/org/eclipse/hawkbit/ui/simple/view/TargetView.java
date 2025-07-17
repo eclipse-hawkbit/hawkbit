@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import jakarta.annotation.security.RolesAllowed;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -177,11 +178,11 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
             final List<Component> components = new LinkedList<>();
             components.add(controllerId);
             type.setItems(hawkbitClient.getTargetTypeRestApi().getTargetTypes(null, 0, 20, Constants.NAME_ASC).getBody().getContent());
-            if (!type.getValue().isEmpty()) {
+            if (!((ListDataProvider) type.getDataProvider()).getItems().isEmpty()) {
                 components.add(type);
             }
             tag.setItems(hawkbitClient.getTargetTagRestApi().getTargetTags(null, 0, 20, Constants.NAME_ASC).getBody().getContent());
-            if (!tag.isEmpty()) {
+            if (!((ListDataProvider) tag.getDataProvider()).getItems().isEmpty()) {
                 components.add(tag);
             }
             return components;
@@ -194,7 +195,7 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
                             "controllerid", controllerId.getOptionalValue(),
                             "targettype.name", type.getSelectedItems().stream().map(MgmtTargetType::getName)
                                     .toList(),
-                            "tag", tag.getSelectedItems()));
+                            "tag", tag.getSelectedItems().stream().map(MgmtTag::getName).toList()));
         }
     }
 
