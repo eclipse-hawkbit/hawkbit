@@ -137,33 +137,20 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @Column(name = "required_migration_step")
     private boolean requiredMigrationStep;
 
-    public JpaDistributionSet(
-            final String name, final String version, final String description,
-            final JpaDistributionSetType type, final Collection<JpaSoftwareModule> moduleList,
-            final boolean requiredMigrationStep) {
-        super(name, version, description);
-
-        this.type = type;
-        // modules shall be set before type.checkComplete call
-        if (moduleList != null) {
-            moduleList.forEach(this::addModule);
-        }
-        if (this.type != null) {
-            complete = this.type.checkComplete(this);
-        }
-
-        this.valid = true;
-        this.requiredMigrationStep = requiredMigrationStep;
-    }
-
-    public JpaDistributionSet(final String name, final String version, final String description,
-            final JpaDistributionSetType type, final Collection<JpaSoftwareModule> moduleList) {
-        this(name, version, description, type, moduleList, false);
-    }
-
     @Override
     public Set<SoftwareModule> getModules() {
         return Collections.unmodifiableSet(modules);
+    }
+
+    @SuppressWarnings("java:S1144") // used via reflection copy utils
+    private JpaDistributionSet setModules(final Set<SoftwareModule> modules) {
+        if (modules == null) {
+            return this; // do not change
+        }
+
+        modules.forEach(this::addModule); // skip if already present
+        this.modules.stream().filter(module -> !modules.contains(module)).toList().forEach(this::removeModule);
+        return this;
     }
 
     public void addModule(final SoftwareModule softwareModule) {
@@ -175,13 +162,11 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
         final Optional<SoftwareModule> found = modules.stream()
                 .filter(module -> module.getId().equals(softwareModule.getId())).findAny();
-
         if (found.isPresent()) {
             return;
         }
 
         final long already = modules.stream().filter(module -> module.getType().getKey().equals(softwareModule.getType().getKey())).count();
-
         if (already >= softwareModule.getType().getMaxAssignments()) {
             modules.stream().filter(module -> module.getType().getKey().equals(softwareModule.getType().getKey()))
                     .findAny().ifPresent(modules::remove);

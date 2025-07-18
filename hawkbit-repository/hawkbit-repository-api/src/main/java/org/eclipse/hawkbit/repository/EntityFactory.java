@@ -10,20 +10,14 @@
 package org.eclipse.hawkbit.repository;
 
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
-import org.eclipse.hawkbit.repository.builder.DistributionSetBuilder;
-import org.eclipse.hawkbit.repository.builder.DistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupBuilder;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataBuilder;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.TagBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetTypeBuilder;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Tag;
 
 /**
@@ -38,11 +32,6 @@ public interface EntityFactory {
     ActionStatusBuilder actionStatus();
 
     /**
-     * @return {@link DistributionSetBuilder} object
-     */
-    DistributionSetBuilder<DistributionSet> distributionSet();
-
-    /**
      * @return {@link SoftwareModuleMetadataBuilder} object
      */
     SoftwareModuleMetadataBuilder softwareModuleMetadata();
@@ -53,34 +42,14 @@ public interface EntityFactory {
     TagBuilder<Tag> tag();
 
     /**
-     * @return {@link DistributionSetTypeBuilder} object
-     */
-    TagBuilder<DistributionSetTag> distributionSetTag();
-
-    /**
      * @return {@link RolloutGroupBuilder} object
      */
     RolloutGroupBuilder rolloutGroup();
 
     /**
-     * @return {@link DistributionSetTypeBuilder} object
-     */
-    DistributionSetTypeBuilder distributionSetType();
-
-    /**
      * @return {@link RolloutBuilder} object
      */
     RolloutBuilder rollout();
-
-    /**
-     * @return {@link SoftwareModuleBuilder} object
-     */
-    SoftwareModuleBuilder softwareModule();
-
-    /**
-     * @return {@link SoftwareModuleTypeBuilder} object
-     */
-    SoftwareModuleTypeBuilder softwareModuleType();
 
     /**
      * @return {@link TargetBuilder} object

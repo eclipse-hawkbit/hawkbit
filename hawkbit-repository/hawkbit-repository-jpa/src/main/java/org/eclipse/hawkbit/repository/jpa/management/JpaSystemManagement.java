@@ -9,17 +9,18 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import java.util.Set;
 import java.util.function.Consumer;
 
 import jakarta.persistence.EntityManager;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
+import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.CurrentTenantCacheKeyGenerator;
 import org.eclipse.hawkbit.repository.jpa.SystemManagementCacheKeyGenerator;
@@ -197,6 +198,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     public void forEachTenant(final Consumer<String> consumer) {
         forEachTenant0(consumer);
     }
+
     private void forEachTenant0(final Consumer<String> consumer) {
         Page<String> tenants;
         Pageable query = PageRequest.of(0, MAX_TENANTS_QUERY);
@@ -324,18 +326,19 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         distributionSetTypeRepository
                 .save(new JpaDistributionSetType(org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_ONLY_KEY,
                         org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_ONLY_NAME,
-                        "Default type with Firmware/OS only.").addMandatoryModuleType(os));
+                        "Default type with Firmware/OS only.").setMandatoryModuleTypes(Set.of(os)));
 
         distributionSetTypeRepository
                 .save(new JpaDistributionSetType(org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_APP_ONLY_KEY,
                         org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_APP_ONLY_NAME,
-                        "Default type with app(s) only.").addMandatoryModuleType(app));
+                        "Default type with app(s) only.").setMandatoryModuleTypes(Set.of(app)));
 
         return distributionSetTypeRepository
                 .save(new JpaDistributionSetType(org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_WITH_APPS_KEY,
                         org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_WITH_APPS_NAME,
-                        "Default type with Firmware/OS and optional app(s).").addMandatoryModuleType(os)
-                        .addOptionalModuleType(app));
+                        "Default type with Firmware/OS and optional app(s).")
+                        .setMandatoryModuleTypes(Set.of(os))
+                        .setOptionalModuleTypes(Set.of(app)));
     }
 
     private TenantMetaData createTenantMetadata0(final String tenant) {

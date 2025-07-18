@@ -124,7 +124,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
         getAndVerifyConfirmationBasePayload(
                 DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, artifact,
                 artifactSignature, action.getId(),
-                findDistributionSetByAction.findFirstModuleByType(osType).get().getId(), "forced", "forced");
+                findFirstModuleByType(findDistributionSetByAction, osType).orElseThrow().getId(), "forced", "forced");
 
         // Retrieved is reported
         final Iterable<ActionStatus> actionStatus = deploymentManagement

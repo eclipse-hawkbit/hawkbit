@@ -16,12 +16,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ApiType;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrl;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder;
+import jakarta.validation.ValidationException;
+
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifactHash;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
@@ -33,21 +29,35 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.MgmtDownloadArtifactResource;
 import org.eclipse.hawkbit.mgmt.rest.resource.MgmtSoftwareModuleResource;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ApiType;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrl;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.rest.json.model.ResponseList;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.stereotype.Service;
 
 /**
  * A mapper which maps repository model to RESTful model representation and back.
  */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Service
 public final class MgmtSoftwareModuleMapper {
+
+    private final SoftwareModuleTypeManagement<? extends SoftwareModuleType> softwareModuleTypeManagement;
+
+    MgmtSoftwareModuleMapper(final SoftwareModuleTypeManagement<? extends SoftwareModuleType> softwareModuleTypeManagement) {
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
+    }
 
     public static List<SoftwareModuleMetadataCreate> fromRequestSwMetadata(
             final EntityFactory entityFactory, final Long softwareModuleId, final Collection<MgmtSoftwareModuleMetadata> metadata) {
@@ -62,16 +72,15 @@ public final class MgmtSoftwareModuleMapper {
                 .toList();
     }
 
-    public static List<SoftwareModuleCreate<SoftwareModule>> smFromRequest(
-            final EntityFactory entityFactory, final Collection<MgmtSoftwareModuleRequestBodyPost> smsRest) {
+    public List<SoftwareModuleManagement.Create> smFromRequest(final Collection<MgmtSoftwareModuleRequestBodyPost> smsRest) {
         if (smsRest == null) {
             return Collections.emptyList();
         }
 
-        return smsRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).toList();
+        return smsRest.stream().map(this::fromRequest).toList();
     }
 
-    public static List<MgmtSoftwareModule> toResponse(final Collection<SoftwareModule> softwareModules) {
+    public static List<MgmtSoftwareModule> toResponse(final Collection<? extends SoftwareModule> softwareModules) {
         if (softwareModules == null) {
             return Collections.emptyList();
         }
@@ -145,7 +154,7 @@ public final class MgmtSoftwareModuleMapper {
 
     public static void addLinks(final Artifact artifact, final MgmtArtifact response) {
         response.add(WebMvcLinkBuilder.linkTo(methodOn(MgmtDownloadArtifactResource.class)
-                .downloadArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withRel("download")
+                        .downloadArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withRel("download")
                 .expand());
     }
 
@@ -159,10 +168,21 @@ public final class MgmtSoftwareModuleMapper {
         urls.forEach(entry -> response.add(Link.of(entry.getRef()).withRel(entry.getRel()).expand()));
     }
 
-    private static SoftwareModuleCreate<SoftwareModule> fromRequest(final EntityFactory entityFactory,
+    private SoftwareModuleManagement.Create fromRequest(
             final MgmtSoftwareModuleRequestBodyPost smsRest) {
-        return entityFactory.softwareModule().create().type(smsRest.getType()).name(smsRest.getName())
-                .version(smsRest.getVersion()).description(smsRest.getDescription()).vendor(smsRest.getVendor())
-                .encrypted(smsRest.isEncrypted());
+        return SoftwareModuleManagement.Create.builder()
+                .type(getSoftwareModuleTypeFromKeyString(smsRest.getType()))
+                .name(smsRest.getName()).version(smsRest.getVersion()).description(smsRest.getDescription()).vendor(smsRest.getVendor())
+                .encrypted(smsRest.isEncrypted())
+                .build();
+    }
+
+    private SoftwareModuleType getSoftwareModuleTypeFromKeyString(final String type) {
+        if (type == null) {
+            throw new ValidationException("type cannot be null");
+        }
+
+        return softwareModuleTypeManagement.findByKey(type.trim())
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, type.trim()));
     }
 }

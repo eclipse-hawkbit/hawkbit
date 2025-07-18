@@ -54,8 +54,6 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
-import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -99,9 +97,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private final SystemManagement systemManagement;
     private final TargetManagement targetManagement;
     private final ServiceMatcher serviceMatcher;
-    private final DistributionSetManagement<DistributionSet, DistributionSetCreate<DistributionSet>, DistributionSetUpdate> distributionSetManagement;
+    private final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement;
+    private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final DeploymentManagement deploymentManagement;
-    private final SoftwareModuleManagement softwareModuleManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
 
     /**
@@ -123,8 +121,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
             final TargetManagement targetManagement, final ServiceMatcher serviceMatcher,
-            final DistributionSetManagement distributionSetManagement,
-            final SoftwareModuleManagement softwareModuleManagement, final DeploymentManagement deploymentManagement,
+            final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement, final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
+            final DeploymentManagement deploymentManagement,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
@@ -133,8 +131,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         this.systemManagement = systemManagement;
         this.targetManagement = targetManagement;
         this.serviceMatcher = serviceMatcher;
-        this.distributionSetManagement = distributionSetManagement;
         this.softwareModuleManagement = softwareModuleManagement;
+        this.distributionSetManagement = distributionSetManagement;
         this.deploymentManagement = deploymentManagement;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
     }

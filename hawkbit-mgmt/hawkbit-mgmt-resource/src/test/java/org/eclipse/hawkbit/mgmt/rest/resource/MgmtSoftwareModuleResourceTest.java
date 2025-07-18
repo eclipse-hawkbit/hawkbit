@@ -45,6 +45,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
 import org.eclipse.hawkbit.repository.Constants;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.FileSizeQuotaExceededException;
@@ -98,12 +99,10 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
      * Trying to create a SM from already marked as deleted type - should get as response 400 Bad Request
      */
     @Test
-     void createSMFromAlreadyMarkedAsDeletedType() throws Exception {
+    void createSMFromAlreadyMarkedAsDeletedType() throws Exception {
         final String SM_TYPE = "someSmType";
         final SoftwareModule sm = testdataFactory.createSoftwareModule(SM_TYPE);
-        testdataFactory.findOrCreateDistributionSetType(
-                "testKey", "testType", Collections.singletonList(sm.getType()),
-                Collections.singletonList(sm.getType()));
+        testdataFactory.findOrCreateDistributionSetType("testKey", "testType", List.of(sm.getType()), List.of());
         final DistributionSetType type = testdataFactory.findOrCreateDistributionSetType("testKey", "testType");
         final DistributionSet ds = testdataFactory.createDistributionSet("name", "version", type, Collections.singletonList(sm));
         final Target target = testdataFactory.createTarget("test");
@@ -113,7 +112,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         softwareModuleTypeManagement.delete(sm.getType().getId());
 
         //check if it is marked as deleted
-        final Optional<SoftwareModuleType> opt = softwareModuleTypeManagement.findByKey(SM_TYPE);
+        final Optional<? extends SoftwareModuleType> opt = softwareModuleTypeManagement.findByKey(SM_TYPE);
         if (opt.isEmpty()) {
             throw new AssertionError("The Optional object of software module type should not be empty!");
         }
@@ -137,7 +136,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
      * Handles the GET request of retrieving all meta data of artifacts assigned to a software module (in full representation mode including a download URL by the artifact provider).
      */
     @Test
-     void getArtifactsWithParameters() throws Exception {
+    void getArtifactsWithParameters() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final byte[] random = randomBytes(5);
@@ -153,14 +152,14 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     /**
-     *  Get a paged list of meta data for a software module.
+     * Get a paged list of meta data for a software module.
      */
     @Test
-     void getMetadata() throws Exception {
+    void getMetadata() throws Exception {
         final int totalMetadata = 4;
         final String knownKeyPrefix = "knownKey";
         final String knownValuePrefix = "knownValue";
-        final SoftwareModule module = testdataFactory.createDistributionSet("one").findFirstModuleByType(osType).get();
+        final SoftwareModule module = findFirstModuleByType(testdataFactory.createDistributionSet("one"), osType).get();
 
         for (int index = 0; index < totalMetadata; index++) {
             softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().create(module.getId())
@@ -175,14 +174,14 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     /**
-     *  Get a paged list of meta data for a software module with defined page size and sorting by name descending and key starting with 'known'.
+     * Get a paged list of meta data for a software module with defined page size and sorting by name descending and key starting with 'known'.
      */
     @Test
-     void getMetadataWithParameters() throws Exception {
+    void getMetadataWithParameters() throws Exception {
         final int totalMetadata = 4;
         final String knownKeyPrefix = "knownKey";
         final String knownValuePrefix = "knownValue";
-        final SoftwareModule module = testdataFactory.createDistributionSet("one").findFirstModuleByType(osType).get();
+        final SoftwareModule module = findFirstModuleByType(testdataFactory.createDistributionSet("one"), osType).orElseThrow();
 
         for (int index = 0; index < totalMetadata; index++) {
             softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().create(module.getId())
@@ -201,23 +200,23 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
      * Get a single meta data value for a meta data key.
      */
     @Test
-     void getMetadataValue() throws Exception {
+    void getMetadataValue() throws Exception {
 
         // prepare and create metadata
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
-        final SoftwareModule module = testdataFactory.createDistributionSet("one").findFirstModuleByType(osType).get();
+        final SoftwareModule module = findFirstModuleByType(testdataFactory.createDistributionSet("one"), osType).orElseThrow();
         softwareModuleManagement.updateMetadata(
                 entityFactory.softwareModuleMetadata().create(module.getId()).key(knownKey).value(knownValue));
 
         mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata/{metadataKey}",
-                                module.getId(), knownKey))
+                        module.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
     }
 
     /**
-     * Tests the update of software module metadata. It is verfied that only the selected fields for the update are really updated and the modification values are filled (i.e. updated by and at).
+     * Tests the update of software module metadata. It is verified that only the selected fields for the update are really updated and the modification values are filled (i.e. updated by and at).
      */
     @Test
     @WithUser(principal = "smUpdateTester", allSpPermissions = true)
@@ -230,13 +229,13 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final String updateVendor = "newVendor1";
         final String updateDescription = "newDescription1";
 
-        final SoftwareModule sm = softwareModuleManagement.create(entityFactory.softwareModule()
-                .create()
+        final SoftwareModule sm = softwareModuleManagement.create(SoftwareModuleManagement.Create.builder()
                 .type(osType)
                 .name(knownSWName)
                 .version(knownSWVersion)
                 .description(knownSWDescription)
-                .vendor(knownSWVendor));
+                .vendor(knownSWVendor)
+                .build());
 
         assertThat(sm.getName()).as("Wrong name of the software module").isEqualTo(knownSWName);
 
@@ -279,7 +278,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final String knownSWVersion = "version1";
 
         final SoftwareModule sm = softwareModuleManagement.create(
-                entityFactory.softwareModule().create().type(osType).name(knownSWName).version(knownSWVersion));
+                SoftwareModuleManagement.Create.builder().type(osType).name(knownSWName).version(knownSWVersion).build());
 
         assertThat(sm.isDeleted()).as("Created software module should not be deleted").isFalse();
 
@@ -311,7 +310,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     @WithUser(principal = "smUpdateTester", allSpPermissions = true)
     void lockSoftwareModule() throws Exception {
         final SoftwareModule sm = softwareModuleManagement.create(
-                entityFactory.softwareModule().create().type(osType).name("name1").version("version1"));
+                SoftwareModuleManagement.Create.builder().type(osType).name("name1").version("version1").build());
         assertThat(sm.isLocked()).as("Created software module should not be locked").isFalse();
         // ensures that we are not to fast so that last modified is not set correctly
         await().until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
@@ -342,7 +341,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     @WithUser(principal = "smUpdateTester", allSpPermissions = true)
     void unlockSoftwareModule() throws Exception {
         final SoftwareModule sm = softwareModuleManagement.create(
-                entityFactory.softwareModule().create().type(osType).name("name1").version("version1"));
+                SoftwareModuleManagement.Create.builder().type(osType).name("name1").version("version1").build());
         softwareModuleManagement.lock(sm.getId());
         assertThat(softwareModuleManagement.get(sm.getId())
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, sm.getId())).isLocked())
@@ -402,10 +401,10 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 mvcResult.getResponse().getContentAsString());
         final Long artId = softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0).getId();
         assertThat(artResult.getId()).as("Wrong artifact id").isEqualTo(artId);
-        assertThat((Object)JsonPath.compile("$._links.self.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat((Object) JsonPath.compile("$._links.self.href").read(mvcResult.getResponse().getContentAsString()))
                 .as("Link contains no self url")
                 .hasToString("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId);
-        assertThat((Object)JsonPath.compile("$._links.download.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat((Object) JsonPath.compile("$._links.download.href").read(mvcResult.getResponse().getContentAsString()))
                 .as("response contains no download url ")
                 .hasToString("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId + "/download");
 
@@ -772,11 +771,9 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("$.providedFilename", equalTo("file1")))
                 .andExpect(jsonPath("$._links.download.href", useArtifactUrlHandler
                         ? equalTo("http://download-cdn.com/artifacts/%s/download".formatted(artifact.getFilename()))
-                        : equalTo("http://localhost/rest/v1/softwaremodules/%s/artifacts/%s/download"
-                                .formatted(sm.getId(), artifact.getId()))))
+                        : equalTo("http://localhost/rest/v1/softwaremodules/%s/artifacts/%s/download".formatted(sm.getId(), artifact.getId()))))
                 .andExpect(jsonPath("$._links.self.href", equalTo(
-                        "http://localhost/rest/v1/softwaremodules/%s/artifacts/%s".formatted(sm.getId(),
-                                artifact.getId()))));
+                        "http://localhost/rest/v1/softwaremodules/%s/artifacts/%s".formatted(sm.getId(), artifact.getId()))));
     }
 
     /**
@@ -785,14 +782,16 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     @Test
     void getArtifactSoftDeleted() throws Exception {
         // prepare data for test
-        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs("softDeleted");
+        SoftwareModule sm = testdataFactory.createSoftwareModuleOs("softDeleted");
         final Artifact artifact = testdataFactory.createArtifacts(sm.getId()).get(0);
-        testdataFactory.createDistributionSet(Collections.singletonList(sm));
+        // the sm is changed by artifact creation, necessary to get the latest version for Hibernate
+        sm = softwareModuleManagement.get(sm.getId()).orElseThrow();
+        testdataFactory.createDistributionSet(List.of(sm));
         softwareModuleManagement.delete(sm.getId());
 
         // perform test
-        mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId()).accept(
-                        MediaType.APPLICATION_JSON))
+        mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId())
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -900,18 +899,18 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
      */
     @Test
     void invalidRequestsOnArtifactResource() throws Exception {
-
         final int artifactSize = 5 * 1024;
         final byte[] random = randomBytes(artifactSize);
         final MockMultipartFile file = new MockMultipartFile("file", "orig", null, random);
 
-        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
-
-        final SoftwareModule smSoftDeleted = testdataFactory.createSoftwareModuleOs("softDeleted");
+        SoftwareModule smSoftDeleted = testdataFactory.createSoftwareModuleOs("softDeleted");
         final Artifact artifactSoftDeleted = testdataFactory.createArtifacts(smSoftDeleted.getId()).get(0);
+        // the smSoftDeleted is changed by artifact creation, necessary to get the latest version for Hibernate
+        smSoftDeleted = softwareModuleManagement.get(smSoftDeleted.getId()).orElseThrow();
         testdataFactory.createDistributionSet(List.of(smSoftDeleted));
         softwareModuleManagement.delete(smSoftDeleted.getId());
 
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
         // no artifact available
         mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/1234567/download", sm.getId()))
                 .andDo(MockMvcResultPrinter.print())
@@ -996,8 +995,6 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     void invalidRequestsOnSoftwareModulesResource() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final List<SoftwareModule> modules = Collections.singletonList(sm);
-
         // SM does not exist
         mvc.perform(get("/rest/v1/softwaremodules/12345678"))
                 .andDo(MockMvcResultPrinter.print())
@@ -1024,7 +1021,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
-        final SoftwareModule toLongName = entityFactory.softwareModule().create().type(osType)
+        final SoftwareModuleManagement.Create toLongName = SoftwareModuleManagement.Create.builder().type(osType)
                 .name(randomString(80)).build();
         mvc.perform(post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(Collections.singletonList(toLongName)))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -1032,16 +1029,22 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(status().isBadRequest());
 
         // unsupported media type
-        mvc.perform(post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(modules))
+        mvc.perform(post("/rest/v1/softwaremodules")
+                        .content(JsonBuilder.softwareModules(List.of(SoftwareModuleManagement.Create.builder()
+                                .type(sm.getType())
+                                .name(sm.getName())
+                                .version(sm.getVersion())
+                                .build())))
                         .contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isUnsupportedMediaType());
 
-        final SoftwareModule swm = entityFactory.softwareModule().create().name("encryptedModule").type(osType)
+        final SoftwareModuleManagement.Create swm = SoftwareModuleManagement.Create.builder()
+                .name("encryptedModule").type(osType)
                 .version("version").vendor("vendor").description("description").encrypted(true).build();
         // artifact decryption is not supported
         mvc.perform(
-                        post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(Collections.singletonList(swm)))
+                        post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(List.of(swm)))
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
@@ -1270,16 +1273,14 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     void createSoftwareModules() throws Exception {
-        final SoftwareModule os = entityFactory.softwareModule()
-                .create()
+        final SoftwareModuleManagement.Create os = SoftwareModuleManagement.Create.builder()
                 .name("name1")
                 .type(osType)
                 .version("version1")
                 .vendor("vendor1")
                 .description("description1")
                 .build();
-        final SoftwareModule ah = entityFactory.softwareModule()
-                .create()
+        final SoftwareModuleManagement.Create ah = SoftwareModuleManagement.Create.builder()
                 .name("name3")
                 .type(appType)
                 .version("version3")
@@ -1287,7 +1288,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .description("description3")
                 .build();
 
-        final List<SoftwareModule> modules = Arrays.asList(os, ah);
+        final List<SoftwareModuleManagement.Create> modules = Arrays.asList(os, ah);
 
         final long current = System.currentTimeMillis();
 
@@ -1375,7 +1376,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final int artifactSize = 5 * 1024;
         final byte[] random = randomBytes(artifactSize);
 
-        final Long appTypeSmId = ds1.findFirstModuleByType(appType).get().getId();
+        final Long appTypeSmId = findFirstModuleByType(ds1, appType).get().getId();
 
         artifactManagement.create(
                 new ArtifactUpload(new ByteArrayInputStream(random), appTypeSmId, "file1", false, artifactSize));
@@ -1535,7 +1536,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         // binary
         try (final InputStream fileInputStream = artifactManagement
-                .loadArtifactBinary(softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0).getSha1Hash(),
+                .loadArtifactBinary(softwareModuleManagement.get(sm.getId()).orElseThrow().getArtifacts().get(0).getSha1Hash(),
                         sm.getId(), sm.isEncrypted())
                 .get().getFileInputStream()) {
             assertTrue(IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream),
@@ -1543,17 +1544,17 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         }
 
         // hashes
-        assertThat(artifactManagement.getByFilename("origFilename").get().getSha1Hash()).as("Wrong sha1 hash")
+        assertThat(artifactManagement.getByFilename("origFilename").orElseThrow().getSha1Hash()).as("Wrong sha1 hash")
                 .isEqualTo(HashGeneratorUtils.generateSHA1(random));
 
-        assertThat(artifactManagement.getByFilename("origFilename").get().getMd5Hash()).as("Wrong md5 hash")
+        assertThat(artifactManagement.getByFilename("origFilename").orElseThrow().getMd5Hash()).as("Wrong md5 hash")
                 .isEqualTo(HashGeneratorUtils.generateMD5(random));
 
-        assertThat(artifactManagement.getByFilename("origFilename").get().getSha256Hash()).as("Wrong sha256 hash")
+        assertThat(artifactManagement.getByFilename("origFilename").orElseThrow().getSha256Hash()).as("Wrong sha256 hash")
                 .isEqualTo(HashGeneratorUtils.generateSHA256(random));
 
         // metadata
-        assertThat(softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0).getFilename())
+        assertThat(softwareModuleManagement.get(sm.getId()).orElseThrow().getArtifacts().get(0).getFilename())
                 .as("wrong metadata of the filename").isEqualTo("origFilename");
     }
 
@@ -1574,8 +1575,8 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         char character = 'a';
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
-            softwareModuleManagement.create(entityFactory.softwareModule().create().type(osType).name(str)
-                    .description(str).vendor(str).version(str));
+            softwareModuleManagement.create(
+                    SoftwareModuleManagement.Create.builder().type(osType).name(str).description(str).vendor(str).version(str).build());
             character++;
         }
     }

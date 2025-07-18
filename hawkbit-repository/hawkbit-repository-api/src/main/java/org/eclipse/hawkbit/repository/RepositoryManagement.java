@@ -33,15 +33,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * Generic management methods common to (software) repository content.
  *
  * @param <T> type of the {@link BaseEntity}
- * @param <C> entity create builder
- * @param <U> entity update builder
+ * @param <C> type of the create request
+ * @param <U> type of the update request
  */
-public interface RepositoryManagement<T extends BaseEntity, C extends RepositoryManagement.Builder<T>, U> {
+public interface RepositoryManagement<T extends BaseEntity, C, U extends Identifiable<Long>> {
 
     /**
      * Creates new {@link BaseEntity}.
      *
-     * @param create to create
+     * @param create bean with properties of the object to create
      * @return created Entity
      * @throws ConstraintViolationException if fields are not filled as specified. Check {@link BaseEntity} for field constraints.
      */
@@ -51,21 +51,12 @@ public interface RepositoryManagement<T extends BaseEntity, C extends Repository
     /**
      * Creates multiple {@link BaseEntity}s.
      *
-     * @param create to create
+     * @param create beans with properties of the object to create
      * @return created Entity
      * @throws ConstraintViolationException if fields are not filled as specified. Check {@link BaseEntity} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_CREATE_REPOSITORY)
     List<T> create(@NotNull @Valid Collection<C> create);
-
-    /**
-     * Retrieves all {@link BaseEntity}s without details.
-     *
-     * @param ids the ids to for
-     * @return the found {@link BaseEntity}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    List<T> get(@NotEmpty Collection<Long> ids);
 
     /**
      * Retrieve {@link BaseEntity}
@@ -75,6 +66,15 @@ public interface RepositoryManagement<T extends BaseEntity, C extends Repository
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Optional<T> get(long id);
+
+    /**
+     * Retrieves all {@link BaseEntity}s without details.
+     *
+     * @param ids the ids to for
+     * @return the found {@link BaseEntity}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    List<T> get(@NotEmpty Collection<Long> ids);
 
     /**
      * Retrieves {@link Page} of all {@link BaseEntity} of given type.
@@ -113,19 +113,19 @@ public interface RepositoryManagement<T extends BaseEntity, C extends Repository
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     long count();
 
-//    /**
-//     * Counts the number of {@link BaseEntity}s matching the given RSQL filter.
-//     *
-//     * @param rsql filter definition in RSQL syntax
-//     * @return number of matching {@link BaseEntity}s in the repository.
-//     */
-//    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-//    long countByRsql(String rsql);
+    /**
+     * Counts the number of {@link BaseEntity}s matching the given RSQL filter.
+     *
+     * @param rsql filter definition in RSQL syntax
+     * @return number of matching {@link BaseEntity}s in the repository.
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    long countByRsql(String rsql);
 
     /**
      * Updates existing {@link BaseEntity}.
      *
-     * @param update to update
+     * @param update bean with properties of the object to update
      * @return updated Entity
      * @throws EntityReadOnlyException if the {@link BaseEntity} cannot be updated (e.g. is already in use)
      * @throws EntityNotFoundException in case the {@link BaseEntity} does not exist and cannot be updated
@@ -155,10 +155,5 @@ public interface RepositoryManagement<T extends BaseEntity, C extends Repository
 
     default String permissionGroup() {
         return "REPOSITORY";
-    }
-
-    interface Builder<T> {
-
-        T build();
     }
 }

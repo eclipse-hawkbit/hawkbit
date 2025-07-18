@@ -17,19 +17,26 @@ import java.util.Optional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataUpdate;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.Type;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -38,8 +45,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 /**
  * Service for managing {@link SoftwareModule}s.
  */
-public interface SoftwareModuleManagement<T extends SoftwareModule, C extends SoftwareModuleCreate<T>, U extends SoftwareModuleUpdate>
-        extends RepositoryManagement<T, C, U> {
+public interface SoftwareModuleManagement<T extends SoftwareModule>
+        extends RepositoryManagement<T, SoftwareModuleManagement.Create, SoftwareModuleManagement.Update> {
 
     @Override
     default String permissionGroup() {
@@ -118,8 +125,8 @@ public interface SoftwareModuleManagement<T extends SoftwareModule, C extends So
      *
      * @param id where meta-data has to be deleted
      * @param key of the meta-data element
-     * @throws EntityNotFoundException if software module with given ID does not exist or the key is not found
      * @return true if really deleted, false if not
+     * @throws EntityNotFoundException if software module with given ID does not exist or the key is not found
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     void deleteMetadata(long id, @NotEmpty String key);
@@ -203,4 +210,46 @@ public interface SoftwareModuleManagement<T extends SoftwareModule, C extends So
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     long countByAssignedTo(long distributionSetId);
+
+    @SuperBuilder
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    final class Create extends UpdateCreate {
+
+        private boolean encrypted;
+    }
+
+    @SuperBuilder
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    final class Update extends UpdateCreate implements Identifiable<Long> {
+
+        @NotNull
+        private Long id;
+        @Builder.Default
+        private Boolean locked = false;
+    }
+
+    @SuperBuilder
+    @Getter
+    class UpdateCreate {
+
+        @ValidString
+        @Size(min = 1, max = NamedEntity.NAME_MAX_SIZE)
+        @NotNull(groups = Create.class)
+        private String name;
+        @ValidString
+        @Size(min = 1, max = NamedVersionedEntity.VERSION_MAX_SIZE)
+        @NotNull(groups = Create.class)
+        private String version;
+        @ValidString
+        @Size(max = NamedEntity.DESCRIPTION_MAX_SIZE)
+        private String description;
+        @ValidString
+        @Size(max = SoftwareModule.VENDOR_MAX_SIZE)
+        private String vendor;
+        private SoftwareModuleType type;
+    }
 }

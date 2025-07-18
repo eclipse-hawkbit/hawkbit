@@ -21,8 +21,7 @@ import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
-import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.rest.json.model.ResponseList;
 
@@ -32,17 +31,16 @@ import org.eclipse.hawkbit.rest.json.model.ResponseList;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtSoftwareModuleTypeMapper {
 
-    public static List<SoftwareModuleTypeCreate<SoftwareModuleType>> smFromRequest(
-            final EntityFactory entityFactory,
+    public static List<SoftwareModuleTypeManagement.Create> smFromRequest(
             final Collection<MgmtSoftwareModuleTypeRequestBodyPost> smTypesRest) {
         if (smTypesRest == null) {
             return Collections.emptyList();
         }
 
-        return smTypesRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).toList();
+        return smTypesRest.stream().map(MgmtSoftwareModuleTypeMapper::fromRequest).toList();
     }
 
-    public static List<MgmtSoftwareModuleType> toTypesResponse(final Collection<SoftwareModuleType> types) {
+    public static List<MgmtSoftwareModuleType> toTypesResponse(final Collection<? extends SoftwareModuleType> types) {
         if (types == null) {
             return Collections.emptyList();
         }
@@ -63,10 +61,11 @@ public final class MgmtSoftwareModuleTypeMapper {
         return result;
     }
 
-    private static SoftwareModuleTypeCreate<SoftwareModuleType> fromRequest(final EntityFactory entityFactory,
-            final MgmtSoftwareModuleTypeRequestBodyPost smsRest) {
-        return entityFactory.softwareModuleType().create().key(smsRest.getKey()).name(smsRest.getName())
+    private static SoftwareModuleTypeManagement.Create fromRequest(final MgmtSoftwareModuleTypeRequestBodyPost smsRest) {
+        return SoftwareModuleTypeManagement.Create.builder()
+                .key(smsRest.getKey()).name(smsRest.getName())
                 .description(smsRest.getDescription()).colour(smsRest.getColour())
-                .maxAssignments(smsRest.getMaxAssignments());
+                .maxAssignments(smsRest.getMaxAssignments())
+                .build();
     }
 }

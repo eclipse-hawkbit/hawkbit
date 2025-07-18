@@ -13,12 +13,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.repository.RepositoryManagement;
-import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
-import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractRepositoryManagementSecurityTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -26,22 +26,22 @@ import org.junit.jupiter.api.Test;
  * Story: SecurityTests DistributionSetManagement
  */
 class DistributionSetManagementSecurityTest
-        extends AbstractRepositoryManagementSecurityTest<DistributionSet, DistributionSetCreate<DistributionSet>, DistributionSetUpdate> {
+        extends AbstractRepositoryManagementSecurityTest<DistributionSet, DistributionSetManagement.Create, DistributionSetManagement.Update> {
 
     @Override
-    protected RepositoryManagement<DistributionSet, DistributionSetCreate<DistributionSet>, DistributionSetUpdate> getRepositoryManagement() {
+    protected DistributionSetManagement getRepositoryManagement() {
         return distributionSetManagement;
     }
 
     @Override
-    protected DistributionSetCreate<DistributionSet> getCreateObject() {
-        return entityFactory.distributionSet().create().name("name").version("1.0.0").type("type");
+    protected DistributionSetManagement.Create getCreateObject() {
+        return DistributionSetManagement.Create.builder().name("name").version("1.0.0").type(defaultDsType()).build();
     }
 
     @Override
-    protected DistributionSetUpdate getUpdateObject() {
-        return entityFactory.distributionSet().update(0L).name("a new name")
-                .description("a new description").version("a new version").requiredMigrationStep(true);
+    protected DistributionSetManagement.Update getUpdateObject() {
+        return DistributionSetManagement.Update.builder().id(0L).name("a new name")
+                .description("a new description").version("a new version").requiredMigrationStep(true).build();
     }
 
     /**
@@ -87,7 +87,7 @@ class DistributionSetManagementSecurityTest
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void getMetadataPermissiosCheck() {
+    void getMetadataPermissionsCheck() {
         assertPermissions(() -> distributionSetManagement.getMetadata(1L), List.of(SpPermission.READ_REPOSITORY));
     }
 
@@ -287,9 +287,12 @@ class DistributionSetManagementSecurityTest
      */
     @Test
     void invalidatePermissionsCheck() {
-        distributionSetTypeManagement.create(entityFactory.distributionSetType().create().key("type").name("name"));
+        final DistributionSetType dsType = distributionSetTypeManagement.create(DistributionSetTypeManagement.Create.builder()
+                .key("type").name("name").build());
+        final DistributionSet ds = distributionSetManagement.create(DistributionSetManagement.Create.builder()
+                .type(dsType).name("test").version("1.0.0").build());
         assertPermissions(() -> {
-            distributionSetManagement.invalidate(entityFactory.distributionSet().create().name("name").version("1.0").type("type").build());
+            ((DistributionSetManagement) distributionSetManagement).invalidate(ds);
             return null;
         }, List.of(SpPermission.UPDATE_REPOSITORY, SpPermission.READ_REPOSITORY));
     }

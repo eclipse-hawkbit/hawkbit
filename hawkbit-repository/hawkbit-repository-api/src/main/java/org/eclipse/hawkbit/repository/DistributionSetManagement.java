@@ -15,13 +15,19 @@ import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_UP
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
-import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
-import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -34,6 +40,9 @@ import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThis
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Statistic;
 import org.springframework.data.domain.Page;
@@ -44,13 +53,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 /**
  * Management service for {@link DistributionSet}s.
  */
-public interface DistributionSetManagement<T extends DistributionSet, C extends DistributionSetCreate<T>, U extends DistributionSetUpdate>
-        extends RepositoryManagement<T, C, U> {
+public interface DistributionSetManagement<T extends DistributionSet>
+        extends RepositoryManagement<T, DistributionSetManagement.Create, DistributionSetManagement.Update> {
 
     @Override
     default String permissionGroup() {
         return "DISTRIBUTION_SET";
     }
+
 
     /**
      * Find {@link DistributionSet} based on given ID including (lazy loaded) details, e.g. {@link DistributionSet#getModules()}. <br/>
@@ -352,4 +362,58 @@ public interface DistributionSetManagement<T extends DistributionSet, C extends 
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
     Long countAutoAssignmentsForDistributionSet(@NotNull Long id);
+
+    @SuperBuilder
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    final class Create extends UpdateCreate {
+
+        @NotNull
+        private DistributionSetType type;
+
+        @Builder.Default
+        private Set<? extends SoftwareModule> modules = Set.of();
+
+        public Create setType(@NotEmpty DistributionSetType type) {
+            this.type = Objects.requireNonNull(type, "type must not be null");
+            return this;
+        }
+
+        public boolean isValid() {
+            return true;
+        }
+    }
+
+    @SuperBuilder
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    final class Update extends UpdateCreate implements Identifiable<Long> {
+
+        @NotNull
+        private Long id;
+
+        @Builder.Default
+        private Boolean locked = false;
+    }
+
+    @SuperBuilder
+    @Getter
+    class UpdateCreate {
+
+        @ValidString
+        @Size(min = 1, max = NamedEntity.NAME_MAX_SIZE)
+        @NotNull(groups = Create.class)
+        private String name;
+        @ValidString
+        @Size(min = 1, max = NamedVersionedEntity.VERSION_MAX_SIZE)
+        @NotNull(groups = Create.class)
+        private String version;
+        @ValidString
+        @Size(max = NamedEntity.DESCRIPTION_MAX_SIZE)
+        private String description;
+        @Builder.Default
+        private Boolean requiredMigrationStep = false;
+    }
 }

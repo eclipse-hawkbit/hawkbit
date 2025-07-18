@@ -13,8 +13,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractRepositoryManagementSecurityTest;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.junit.jupiter.api.Test;
@@ -24,21 +23,21 @@ import org.junit.jupiter.api.Test;
  * Story: SecurityTests SoftwareManagement
  */
 class SoftwareManagementSecurityTest
-        extends AbstractRepositoryManagementSecurityTest<SoftwareModule, SoftwareModuleCreate<SoftwareModule>, SoftwareModuleUpdate> {
+        extends AbstractRepositoryManagementSecurityTest<SoftwareModule, SoftwareModuleManagement.Create, SoftwareModuleManagement.Update> {
 
     @Override
-    protected RepositoryManagement<SoftwareModule, SoftwareModuleCreate<SoftwareModule>, SoftwareModuleUpdate> getRepositoryManagement() {
+    protected RepositoryManagement getRepositoryManagement() {
         return softwareModuleManagement;
     }
 
     @Override
-    protected SoftwareModuleCreate<SoftwareModule> getCreateObject() {
-        return entityFactory.softwareModule().create().name("name").version("version").type("type");
+    protected SoftwareModuleManagement.Create getCreateObject() {
+        return SoftwareModuleManagement.Create.builder().type(getASmType()).name("name").version("version").build();
     }
 
     @Override
-    protected SoftwareModuleUpdate getUpdateObject() {
-        return entityFactory.softwareModule().update(1L).locked(true);
+    protected SoftwareModuleManagement.Update getUpdateObject() {
+        return SoftwareModuleManagement.Update.builder().id(1L).locked(true).build();
     }
 
     /**
@@ -170,5 +169,4 @@ class SoftwareManagementSecurityTest
         assertPermissions(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(List.of(1L)),
                 List.of(SpPermission.READ_REPOSITORY));
     }
-
 }

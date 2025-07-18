@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
@@ -85,28 +86,13 @@ public class DistributionSetTypeElement implements Serializable {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (key == null ? 0 : key.hashCode());
-        return result;
+        return Objects.hash(key, mandatory);
     }
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final DistributionSetTypeElement other = (DistributionSetTypeElement) obj;
-        if (key == null) {
-            return other.key == null;
-        } else {
-            return key.equals(other.key);
-        }
+        return obj instanceof DistributionSetTypeElement distributionSetTypeElement &&
+                Objects.equals(key, distributionSetTypeElement.key) &&
+                Objects.equals(mandatory, distributionSetTypeElement.mandatory);
     }
 }

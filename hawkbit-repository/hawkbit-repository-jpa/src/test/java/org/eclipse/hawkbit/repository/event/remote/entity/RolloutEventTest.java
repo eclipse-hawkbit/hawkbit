@@ -9,8 +9,10 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import java.util.Collections;
+import java.util.Set;
 
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
@@ -38,10 +40,16 @@ class RolloutEventTest extends AbstractRemoteEntityEventTest<Rollout> {
     protected Rollout createEntity() {
         testdataFactory.createTarget("12345");
         final SoftwareModule module = softwareModuleManagement.create(
-                entityFactory.softwareModule().create().name("swm").version("2").description("desc").type("os"));
+                SoftwareModuleManagement.Create.builder()
+                        .type(softwareModuleTypeManagement.findByKey("os").orElseThrow())
+                        .name("swm").version("2").description("desc")
+                        .build());
         final DistributionSet ds = distributionSetManagement
-                .create(entityFactory.distributionSet().create().name("complete").version("2").description("complete")
-                        .type("os").modules(Collections.singletonList(module.getId())));
+                .create(DistributionSetManagement.Create.builder()
+                        .type(distributionSetTypeManagement.findByKey("os").orElseThrow())
+                        .name("complete").version("2").description("complete")
+                        .modules(Set.of(module))
+                        .build());
 
         return rolloutManagement.create(
                 entityFactory.rollout().create().name("exampleRollout").targetFilterQuery("controllerId==*").distributionSetId(ds),

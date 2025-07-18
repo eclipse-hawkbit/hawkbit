@@ -44,7 +44,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "distribution-set-invalidation-management" }, matchIfMissing = true)
 class JpaDistributionSetInvalidationManagement implements DistributionSetInvalidationManagement {
 
-    private final DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final RolloutManagement rolloutManagement;
     private final DeploymentManagement deploymentManagement;
     private final TargetFilterQueryManagement targetFilterQueryManagement;
@@ -56,7 +56,7 @@ class JpaDistributionSetInvalidationManagement implements DistributionSetInvalid
     private final SystemSecurityContext systemSecurityContext;
 
     @SuppressWarnings("java:S107")
-    JpaDistributionSetInvalidationManagement(final DistributionSetManagement distributionSetManagement,
+    JpaDistributionSetInvalidationManagement(final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final RolloutManagement rolloutManagement, final DeploymentManagement deploymentManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final ActionRepository actionRepository,
             final PlatformTransactionManager txManager, final RepositoryProperties repositoryProperties,
@@ -138,7 +138,7 @@ class JpaDistributionSetInvalidationManagement implements DistributionSetInvalid
             throw new IncompleteDistributionSetException("Distribution set of type "
                     + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
         }
-        distributionSetManagement.invalidate(distributionSet);
+        ((DistributionSetManagement)distributionSetManagement).invalidate(distributionSet);
         log.debug("Distribution set {} marked as invalid.", setId);
 
         // rollout cancellation should only be permitted with UPDATE_ROLLOUT permission

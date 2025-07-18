@@ -70,7 +70,7 @@ public final class MgmtTagMapper {
                 .expand());
     }
 
-    public static List<MgmtTag> toResponseDistributionSetTag(final List<DistributionSetTag> distributionSetTags) {
+    public static List<MgmtTag> toResponseDistributionSetTag(final Collection<? extends DistributionSetTag> distributionSetTags) {
         final List<MgmtTag> tagsRest = new ArrayList<>();
         if (distributionSetTags == null) {
             return tagsRest;

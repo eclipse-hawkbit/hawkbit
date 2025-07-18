@@ -15,23 +15,16 @@ import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_M
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.function.LongFunction;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
-import org.eclipse.hawkbit.repository.builder.GenericDistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
@@ -49,13 +42,12 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "distribution-set-type-management" }, matchIfMissing = true)
 public class JpaDistributionSetTypeManagement
-        extends AbstractJpaRepositoryManagement<JpaDistributionSetType, JpaDistributionSetTypeCreate, GenericDistributionSetTypeUpdate, DistributionSetTypeRepository, DistributionSetTypeFields>
-        implements DistributionSetTypeManagement<JpaDistributionSetType, JpaDistributionSetTypeCreate, GenericDistributionSetTypeUpdate> {
+        extends AbstractJpaRepositoryManagement<JpaDistributionSetType, DistributionSetTypeManagement.Create, DistributionSetTypeManagement.Update, DistributionSetTypeRepository, DistributionSetTypeFields>
+        implements DistributionSetTypeManagement<JpaDistributionSetType> {
 
     private final SoftwareModuleTypeRepository softwareModuleTypeRepository;
     private final DistributionSetRepository distributionSetRepository;
@@ -73,35 +65,6 @@ public class JpaDistributionSetTypeManagement
         this.distributionSetRepository = distributionSetRepository;
         this.targetTypeRepository = targetTypeRepository;
         this.quotaManagement = quotaManagement;
-    }
-
-    @Override
-    public JpaDistributionSetType update(final GenericDistributionSetTypeUpdate update) {
-        final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(update.getId());
-        if (hasModuleChanges(update)) {
-            checkDistributionSetTypeNotAssigned(update.getId());
-
-            final Collection<Long> currentMandatorySmTypeIds = type.getMandatoryModuleTypes().stream()
-                    .map(SoftwareModuleType::getId).collect(Collectors.toSet());
-            final Collection<Long> currentOptionalSmTypeIds = type.getOptionalModuleTypes().stream()
-                    .map(SoftwareModuleType::getId).collect(Collectors.toSet());
-            final Collection<Long> currentSmTypeIds = Stream
-                    .concat(currentMandatorySmTypeIds.stream(), currentOptionalSmTypeIds.stream())
-                    .collect(Collectors.toSet());
-
-            final Collection<Long> updatedMandatorySmTypeIds = update.getMandatory().orElse(currentMandatorySmTypeIds);
-            final Collection<Long> updatedOptionalSmTypeIds = update.getOptional().orElse(currentOptionalSmTypeIds);
-            final Collection<Long> updatedSmTypeIds = Stream
-                    .concat(updatedMandatorySmTypeIds.stream(), updatedOptionalSmTypeIds.stream())
-                    .collect(Collectors.toSet());
-
-            addModuleTypes(currentMandatorySmTypeIds, updatedMandatorySmTypeIds, type::addMandatoryModuleType);
-            addModuleTypes(currentOptionalSmTypeIds, updatedOptionalSmTypeIds, type::addOptionalModuleType);
-
-            removeModuleTypes(currentSmTypeIds, updatedSmTypeIds, type::removeModuleType);
-        }
-
-        return super.update(update, type);
     }
 
     @Override
@@ -157,31 +120,8 @@ public class JpaDistributionSetTypeManagement
     public JpaDistributionSetType unassignSoftwareModuleType(final long id, final long softwareModuleTypeId) {
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(id);
         checkDistributionSetTypeNotAssigned(id);
-        type.removeModuleType(softwareModuleTypeId);
+        type.removeModuleType(softwareModuleTypeRepository.getById(softwareModuleTypeId));
         return jpaRepository.save(type);
-    }
-
-    private static void removeModuleTypes(
-            final Collection<Long> currentSmTypeIds, final Collection<Long> updatedSmTypeIds,
-            final LongFunction<JpaDistributionSetType> removeModuleTypeCallback) {
-        final Set<Long> smTypeIdsToRemove = currentSmTypeIds.stream().filter(id -> !updatedSmTypeIds.contains(id))
-                .collect(Collectors.toSet());
-        if (!CollectionUtils.isEmpty(smTypeIdsToRemove)) {
-            smTypeIdsToRemove.forEach(removeModuleTypeCallback::apply);
-        }
-    }
-
-    private static boolean hasModuleChanges(final GenericDistributionSetTypeUpdate update) {
-        return update.getOptional().isPresent() || update.getMandatory().isPresent();
-    }
-
-    private void addModuleTypes(
-            final Collection<Long> currentSmTypeIds, final Collection<Long> updatedSmTypeIds,
-            final Function<SoftwareModuleType, JpaDistributionSetType> addModuleTypeCallback) {
-        final Set<Long> smTypeIdsToAdd = updatedSmTypeIds.stream().filter(id -> !currentSmTypeIds.contains(id)).collect(Collectors.toSet());
-        if (!CollectionUtils.isEmpty(smTypeIdsToAdd)) {
-            softwareModuleTypeRepository.findAllById(smTypeIdsToAdd).forEach(addModuleTypeCallback::apply);
-        }
     }
 
     private JpaDistributionSetType assignSoftwareModuleTypes(

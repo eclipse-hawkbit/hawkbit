@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ScheduledExecutorService;
 
 import javax.sql.DataSource;
 
@@ -19,10 +18,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.validation.Validation;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.hawkbit.ContextAware;
-import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryption;
-import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryptionSecretsStore;
-import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.BaseRepositoryTypeProvider;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -38,17 +35,16 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
-import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryption;
+import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryptionSecretsStore;
+import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
-import org.eclipse.hawkbit.repository.builder.DistributionSetBuilder;
-import org.eclipse.hawkbit.repository.builder.DistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
@@ -64,22 +60,18 @@ import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoActionCleanup;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoCleanupScheduler;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.CleanupTask;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetBuilder;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutBuilder;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleMetadataBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetTypeBuilder;
-import org.eclipse.hawkbit.repository.jpa.cluster.LockProperties;
 import org.eclipse.hawkbit.repository.jpa.cluster.DistributedLockRepository;
+import org.eclipse.hawkbit.repository.jpa.cluster.LockProperties;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitDefaultServiceExecutor;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
-import org.eclipse.hawkbit.repository.jpa.management.JpaDistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.jpa.utils.ExceptionMapper;
 import org.eclipse.hawkbit.repository.jpa.management.JpaSoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.jpa.management.JpaSoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -112,17 +104,14 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupEvaluati
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupSuccessCondition;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -154,9 +143,14 @@ import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.lang.NonNull;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.authorization.AuthorizationResult;
+import org.springframework.security.authorization.method.MethodAuthorizationDeniedHandler;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
+
+;
 
 /**
  * General configuration for hawkBit's Repository.
@@ -171,7 +165,8 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 @ComponentScan("org.eclipse.hawkbit.repository.jpa.management")
 @PropertySource("classpath:/hawkbit-jpa-defaults.properties")
-@Import({ JpaConfiguration.class, RepositoryConfiguration.class, LockProperties.class, DataSourceAutoConfiguration.class, SystemManagementCacheKeyGenerator.class })
+@Import({ JpaConfiguration.class, RepositoryConfiguration.class, LockProperties.class, DataSourceAutoConfiguration.class,
+        SystemManagementCacheKeyGenerator.class })
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 public class JpaRepositoryConfiguration {
 
@@ -187,7 +182,8 @@ public class JpaRepositoryConfiguration {
         // methods shall not be called - we need the validator in future
         processor.setValidator(Validation.byDefaultProvider()
                 .configure()
-                .addProperty(org.hibernate.validator.BaseHibernateValidatorConfiguration.ALLOW_PARALLEL_METHODS_DEFINE_PARAMETER_CONSTRAINTS, "true")
+                .addProperty(org.hibernate.validator.BaseHibernateValidatorConfiguration.ALLOW_PARALLEL_METHODS_DEFINE_PARAMETER_CONSTRAINTS,
+                        "true")
                 .buildValidatorFactory()
                 .getValidator());
         return processor;
@@ -233,7 +229,8 @@ public class JpaRepositoryConfiguration {
     @Bean
     @ConditionalOnProperty(name = "hawkbit.lock", havingValue = "distributed", matchIfMissing = true)
     @ConditionalOnMissingBean
-    LockRepository lockRepository(final DataSource dataSource, final LockProperties lockProperties, final PlatformTransactionManager txManager) {
+    LockRepository lockRepository(final DataSource dataSource, final LockProperties lockProperties,
+            final PlatformTransactionManager txManager) {
         final DefaultLockRepository repository = new DistributedLockRepository(dataSource, lockProperties, txManager);
         repository.setPrefix("SP_");
         return repository;
@@ -242,7 +239,7 @@ public class JpaRepositoryConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public LockRegistry lockRegistry(final Optional<LockRepository> lockRepository) {
-        return lockRepository.<LockRegistry>map(JdbcLockRegistry::new).orElseGet(DefaultLockRegistry::new);
+        return lockRepository.<LockRegistry> map(JdbcLockRegistry::new).orElseGet(DefaultLockRegistry::new);
     }
 
     @Bean
@@ -314,18 +311,6 @@ public class JpaRepositoryConfiguration {
         return e -> e instanceof TargetPollEvent && !repositoryProperties.isPublishTargetPollEvent();
     }
 
-    /**
-     * @param distributionSetTypeManagement to loading the {@link DistributionSetType}
-     * @param softwareManagement for loading {@link DistributionSet#getModules()}
-     * @return DistributionSetBuilder bean
-     */
-    @Bean
-    DistributionSetBuilder distributionSetBuilder(
-            final JpaDistributionSetTypeManagement distributionSetTypeManagement,
-            final JpaSoftwareModuleManagement softwareManagement) {
-        return new JpaDistributionSetBuilder(distributionSetTypeManagement, softwareManagement);
-    }
-
     @Bean
     TargetBuilder targetBuilder(final TargetTypeManagement targetTypeManagement) {
         return new JpaTargetBuilder(targetTypeManagement);
@@ -341,28 +326,9 @@ public class JpaRepositoryConfiguration {
     }
 
     @Bean
-    SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder(final JpaSoftwareModuleManagement softwareModuleManagement) {
+    SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder(
+            final JpaSoftwareModuleManagement softwareModuleManagement) {
         return new JpaSoftwareModuleMetadataBuilder(softwareModuleManagement);
-    }
-
-    /**
-     * @param softwareModuleTypeManagement for loading {@link DistributionSetType#getMandatoryModuleTypes()}
-     *         and {@link DistributionSetType#getOptionalModuleTypes()}
-     * @return DistributionSetTypeBuilder bean
-     */
-    @Bean
-    DistributionSetTypeBuilder distributionSetTypeBuilder(
-            final SoftwareModuleTypeManagement<? extends SoftwareModuleType, ?, ?> softwareModuleTypeManagement) {
-        return new JpaDistributionSetTypeBuilder(softwareModuleTypeManagement);
-    }
-
-    /**
-     * @param softwareModuleTypeManagement for loading {@link SoftwareModule#getType()}
-     * @return SoftwareModuleBuilder bean
-     */
-    @Bean
-    SoftwareModuleBuilder softwareModuleBuilder(final JpaSoftwareModuleTypeManagement softwareModuleTypeManagement) {
-        return new JpaSoftwareModuleBuilder(softwareModuleTypeManagement);
     }
 
     /**
@@ -495,8 +461,7 @@ public class JpaRepositoryConfiguration {
     RolloutApprovalStrategy rolloutApprovalStrategy(final UserAuthoritiesResolver userAuthoritiesResolver,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final SystemSecurityContext systemSecurityContext) {
-        return new DefaultRolloutApprovalStrategy(userAuthoritiesResolver, tenantConfigurationManagement,
-                systemSecurityContext);
+        return new DefaultRolloutApprovalStrategy(userAuthoritiesResolver, tenantConfigurationManagement, systemSecurityContext);
     }
 
     /**
@@ -509,11 +474,11 @@ public class JpaRepositoryConfiguration {
     EntityFactory entityFactory(
             final TargetBuilder targetBuilder, final TargetTypeBuilder targetTypeBuilder,
             final TargetFilterQueryBuilder targetFilterQueryBuilder,
-            final SoftwareModuleBuilder softwareModuleBuilder, final SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder,
-            final DistributionSetBuilder distributionSetBuilder, final DistributionSetTypeBuilder distributionSetTypeBuilder,
+            final SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder,
             final RolloutBuilder rolloutBuilder) {
-        return new JpaEntityFactory(targetBuilder, targetTypeBuilder, targetFilterQueryBuilder, softwareModuleBuilder,
-                softwareModuleMetadataBuilder, distributionSetBuilder, distributionSetTypeBuilder, rolloutBuilder);
+        return new JpaEntityFactory(
+                targetBuilder, targetTypeBuilder, targetFilterQueryBuilder,
+                softwareModuleMetadataBuilder, rolloutBuilder);
     }
 
     /**
@@ -631,7 +596,7 @@ public class JpaRepositoryConfiguration {
     RolloutScheduler rolloutScheduler(
             final SystemManagement systemManagement, final RolloutHandler rolloutHandler, final SystemSecurityContext systemSecurityContext,
             @Value("${hawkbit.rollout.executor.thread-pool.size:1}") final int threadPoolSize, final Optional<MeterRegistry> meterRegistry) {
-        return new RolloutScheduler(rolloutHandler, systemManagement, systemSecurityContext,  threadPoolSize, meterRegistry);
+        return new RolloutScheduler(rolloutHandler, systemManagement, systemSecurityContext, threadPoolSize, meterRegistry);
     }
 
     /**
@@ -654,5 +619,21 @@ public class JpaRepositoryConfiguration {
     @ConditionalOnMissingBean
     ArtifactEncryptionService artifactEncryptionService() {
         return ArtifactEncryptionService.getInstance();
+    }
+
+    @Bean
+    ManagementExceptionThrowingMethodAuthorizationDeniedHandler managementExceptionThrowingMethodAuthorizationDeniedHandler() {
+        return new ManagementExceptionThrowingMethodAuthorizationDeniedHandler();
+    }
+
+    public static class ManagementExceptionThrowingMethodAuthorizationDeniedHandler implements MethodAuthorizationDeniedHandler {
+
+        @Override
+        public Object handleDeniedInvocation(final MethodInvocation methodInvocation, final AuthorizationResult authorizationResult) {
+            throw ExceptionMapper.mapRe(
+                    authorizationResult instanceof AuthorizationDeniedException denied
+                            ? denied
+                            : new AuthorizationDeniedException("Access Denied", authorizationResult));
+        }
     }
 }

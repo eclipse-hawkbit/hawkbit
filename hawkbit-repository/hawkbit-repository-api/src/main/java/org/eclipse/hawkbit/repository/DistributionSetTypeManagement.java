@@ -11,25 +11,33 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
-import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
-import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.Type;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * Management service for {@link DistributionSetType}s.
  */
-public interface DistributionSetTypeManagement<T extends DistributionSetType, C extends DistributionSetTypeCreate<T>, U extends DistributionSetTypeUpdate>
-        extends RepositoryManagement<T, C, U> {
+public interface DistributionSetTypeManagement<T extends DistributionSetType>
+        extends RepositoryManagement<T, DistributionSetTypeManagement.Create, DistributionSetTypeManagement.Update> {
 
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Optional<T> findByKey(@NotEmpty String key);
@@ -77,4 +85,47 @@ public interface DistributionSetTypeManagement<T extends DistributionSetType, C 
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     T unassignSoftwareModuleType(long id, long softwareModuleTypeId);
+
+    @SuperBuilder
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    final class Create extends UpdateCreate {
+
+        @Size(min = 1, max = Type.KEY_MAX_SIZE)
+        @NotNull
+        private String key;
+
+        @Size(min = 1, max = NamedEntity.NAME_MAX_SIZE)
+        @NotNull
+        private String name;
+    }
+
+    @SuperBuilder
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    final class Update extends UpdateCreate implements Identifiable<Long> {
+
+        @NotNull
+        private Long id;
+    }
+
+    @SuperBuilder
+    @Getter
+    class UpdateCreate {
+
+        @ValidString
+        @Size(max = NamedEntity.DESCRIPTION_MAX_SIZE)
+        private String description;
+
+        @ValidString
+        @Size(max = Type.COLOUR_MAX_SIZE)
+        private String colour;
+
+        @Builder.Default
+        private Set<? extends SoftwareModuleType> mandatoryModuleTypes = Set.of();
+        @Builder.Default
+        private Set<? extends SoftwareModuleType> optionalModuleTypes = Set.of();
+    }
 }

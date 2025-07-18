@@ -19,11 +19,8 @@ import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.DistributionSetTagFields;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
-import org.eclipse.hawkbit.repository.TargetTagManagement;
-import org.eclipse.hawkbit.repository.builder.GenericTagUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTagCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
@@ -43,8 +40,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "distribution-set-tag-management" }, matchIfMissing = true)
 class JpaDistributionSetTagManagement
-        extends AbstractJpaRepositoryManagement<JpaDistributionSetTag, JpaDistributionSetTagCreate, GenericTagUpdate, DistributionSetTagRepository, DistributionSetTagFields>
-        implements DistributionSetTagManagement<JpaDistributionSetTag, JpaDistributionSetTagCreate, GenericTagUpdate> {
+        extends AbstractJpaRepositoryManagement<JpaDistributionSetTag, DistributionSetTagManagement.Create, DistributionSetTagManagement.Update, DistributionSetTagRepository, DistributionSetTagFields>
+        implements DistributionSetTagManagement<JpaDistributionSetTag> {
 
     private final DistributionSetRepository distributionSetRepository;
 

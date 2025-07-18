@@ -23,23 +23,15 @@ public class InsufficientPermissionException extends AbstractServerRtException {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * creates new InsufficientPermissionException.
-     *
-     * @param cause the cause of the exception
-     */
     public InsufficientPermissionException(final Throwable cause) {
         super(SpServerError.SP_INSUFFICIENT_PERMISSION, cause);
     }
 
-    /**
-     * creates new InsufficientPermissionException.
-     */
     public InsufficientPermissionException(final String message) {
         super(message, SpServerError.SP_INSUFFICIENT_PERMISSION);
     }
 
     public InsufficientPermissionException() {
-        super(SpServerError.SP_INSUFFICIENT_PERMISSION, null);
+        this((String)null);
     }
 }

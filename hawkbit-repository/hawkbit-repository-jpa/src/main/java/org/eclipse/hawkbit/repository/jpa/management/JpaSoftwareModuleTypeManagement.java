@@ -16,20 +16,19 @@ import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.builder.GenericSoftwareModuleTypeUpdate;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleTypeRepository;
+import org.eclipse.hawkbit.repository.jpa.utils.ExceptionMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "software-module-type=management" }, matchIfMissing = true)
 public class JpaSoftwareModuleTypeManagement
-        extends AbstractJpaRepositoryManagement<JpaSoftwareModuleType, JpaSoftwareModuleTypeCreate, GenericSoftwareModuleTypeUpdate, SoftwareModuleTypeRepository, SoftwareModuleTypeFields>
-        implements SoftwareModuleTypeManagement<JpaSoftwareModuleType, JpaSoftwareModuleTypeCreate, GenericSoftwareModuleTypeUpdate> {
+        extends AbstractJpaRepositoryManagement<JpaSoftwareModuleType, SoftwareModuleTypeManagement.Create, SoftwareModuleTypeManagement.Update, SoftwareModuleTypeRepository, SoftwareModuleTypeFields>
+        implements SoftwareModuleTypeManagement<JpaSoftwareModuleType> {
 
     private final DistributionSetTypeRepository distributionSetTypeRepository;
     private final SoftwareModuleRepository softwareModuleRepository;
@@ -42,6 +41,15 @@ public class JpaSoftwareModuleTypeManagement
         super(softwareModuleTypeRepository, entityManager);
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleRepository = softwareModuleRepository;
+    }
+
+    // TODO - do not override just to do a mapping
+    public JpaSoftwareModuleType create(final Create create) {
+        try {
+            return super.create(create);
+        } catch (final Exception e) {
+            throw ExceptionMapper.mapRe(e);
+        }
     }
 
     @Override

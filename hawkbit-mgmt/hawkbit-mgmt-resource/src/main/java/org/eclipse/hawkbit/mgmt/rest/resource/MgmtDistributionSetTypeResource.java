@@ -26,12 +26,7 @@ import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtDistributionSetTypeMapp
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtSoftwareModuleTypeMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
-import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.SoftwareModuleTypeNotInDistributionSetTypeException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -49,33 +44,34 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeRestApi {
 
-    private final SoftwareModuleTypeManagement<SoftwareModuleType, SoftwareModuleTypeCreate<SoftwareModuleType>, SoftwareModuleTypeUpdate> softwareModuleTypeManagement;
-    private final DistributionSetTypeManagement<DistributionSetType, DistributionSetTypeCreate<DistributionSetType>, DistributionSetTypeUpdate> distributionSetTypeManagement;
-    private final EntityFactory entityFactory;
+    private final SoftwareModuleTypeManagement<? extends SoftwareModuleType> softwareModuleTypeManagement;
+    private final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement;
+    private final MgmtDistributionSetTypeMapper mgmtDistributionSetTypeMapper;
 
     MgmtDistributionSetTypeResource(
-            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-            final DistributionSetTypeManagement distributionSetTypeManagement, final EntityFactory entityFactory) {
+            final SoftwareModuleTypeManagement<? extends SoftwareModuleType> softwareModuleTypeManagement,
+            final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement,
+            final MgmtDistributionSetTypeMapper mgmtDistributionSetTypeMapper) {
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
         this.distributionSetTypeManagement = distributionSetTypeManagement;
-        this.entityFactory = entityFactory;
+        this.mgmtDistributionSetTypeMapper = mgmtDistributionSetTypeMapper;
     }
 
     @Override
     public ResponseEntity<PagedList<MgmtDistributionSetType>> getDistributionSetTypes(
             final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetTypeSortParam(sortParam));
-        final Slice<DistributionSetType> findModuleTypessAll;
+        final Slice<? extends DistributionSetType> findModuleTypesAll;
         long countModulesAll;
         if (rsqlParam != null) {
-            findModuleTypessAll = distributionSetTypeManagement.findByRsql(rsqlParam, pageable);
-            countModulesAll = ((Page<DistributionSetType>) findModuleTypessAll).getTotalElements();
+            findModuleTypesAll = distributionSetTypeManagement.findByRsql(rsqlParam, pageable);
+            countModulesAll = ((Page<?>) findModuleTypesAll).getTotalElements();
         } else {
-            findModuleTypessAll = distributionSetTypeManagement.findAll(pageable);
+            findModuleTypesAll = distributionSetTypeManagement.findAll(pageable);
             countModulesAll = distributionSetTypeManagement.count();
         }
 
-        final List<MgmtDistributionSetType> rest = MgmtDistributionSetTypeMapper.toListResponse(findModuleTypessAll.getContent());
+        final List<MgmtDistributionSetType> rest = MgmtDistributionSetTypeMapper.toListResponse(findModuleTypesAll.getContent());
         return ResponseEntity.ok(new PagedList<>(rest, countModulesAll));
     }
 
@@ -101,9 +97,10 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     @AuditLog(entity = "DistributionSetType", type = AuditLog.Type.UPDATE, description = "Update Distribution Set Type")
     public ResponseEntity<MgmtDistributionSetType> updateDistributionSetType(
             final Long distributionSetTypeId, final MgmtDistributionSetTypeRequestBodyPut restDistributionSetType) {
-        final DistributionSetType updated = distributionSetTypeManagement.update(entityFactory.distributionSetType()
-                .update(distributionSetTypeId).description(restDistributionSetType.getDescription())
-                .colour(restDistributionSetType.getColour()));
+        final DistributionSetType updated = distributionSetTypeManagement.update(DistributionSetTypeManagement.Update.builder()
+                .id(distributionSetTypeId).description(restDistributionSetType.getDescription())
+                .colour(restDistributionSetType.getColour()).
+                build());
 
         final MgmtDistributionSetType response = MgmtDistributionSetTypeMapper.toResponse(updated);
         MgmtDistributionSetTypeMapper.addLinks(response);
@@ -114,11 +111,10 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     @Override
     public ResponseEntity<List<MgmtDistributionSetType>> createDistributionSetTypes(
             final List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes) {
-        final List<DistributionSetType> createdSoftwareModules = distributionSetTypeManagement
-                .create(MgmtDistributionSetTypeMapper.smFromRequest(entityFactory, distributionSetTypes));
+        final List<? extends DistributionSetType> createdSoftwareModules = distributionSetTypeManagement
+                .create(mgmtDistributionSetTypeMapper.smFromRequest(distributionSetTypes));
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(MgmtDistributionSetTypeMapper.toListResponse(createdSoftwareModules));
+        return ResponseEntity.status(HttpStatus.CREATED).body(MgmtDistributionSetTypeMapper.toListResponse(createdSoftwareModules));
     }
 
     @Override

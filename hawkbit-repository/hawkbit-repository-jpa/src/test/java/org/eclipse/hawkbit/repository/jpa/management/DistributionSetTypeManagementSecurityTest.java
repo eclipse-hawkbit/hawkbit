@@ -13,9 +13,8 @@ import java.util.List;
 import java.util.Random;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
-import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
-import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.jpa.AbstractRepositoryManagementSecurityTest;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.junit.jupiter.api.Test;
@@ -25,21 +24,21 @@ import org.junit.jupiter.api.Test;
  * Story: SecurityTests DistributionSetTypeManagement
  */
 class DistributionSetTypeManagementSecurityTest
-        extends AbstractRepositoryManagementSecurityTest<DistributionSetType, DistributionSetTypeCreate<DistributionSetType>, DistributionSetTypeUpdate> {
+        extends AbstractRepositoryManagementSecurityTest<DistributionSetType, DistributionSetTypeManagement.Create, DistributionSetTypeManagement.Update> {
 
     @Override
-    protected RepositoryManagement<DistributionSetType, DistributionSetTypeCreate<DistributionSetType>, DistributionSetTypeUpdate> getRepositoryManagement() {
+    protected RepositoryManagement getRepositoryManagement() {
         return distributionSetTypeManagement;
     }
 
     @Override
-    protected DistributionSetTypeCreate<DistributionSetType> getCreateObject() {
-        return entityFactory.distributionSetType().create().key(String.format("key-%d", new Random().nextInt())).name(String.format("name-%d", new Random().nextInt()));
+    protected DistributionSetTypeManagement.Create getCreateObject() {
+        return DistributionSetTypeManagement.Create.builder().key(String.format("key-%d", new Random().nextInt())).name(String.format("name-%d", new Random().nextInt())).build();
     }
 
     @Override
-    protected DistributionSetTypeUpdate getUpdateObject() {
-        return entityFactory.distributionSetType().update(1L).description("description");
+    protected DistributionSetTypeManagement.Update getUpdateObject() {
+        return DistributionSetTypeManagement.Update.builder().id(1L).description("description").build();
     }
 
     /**

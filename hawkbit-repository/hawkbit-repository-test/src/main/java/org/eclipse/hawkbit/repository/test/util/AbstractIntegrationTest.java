@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -53,16 +54,6 @@ import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
 import org.eclipse.hawkbit.repository.artifact.exception.ArtifactStoreException;
-import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
-import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
-import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
-import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
-import org.eclipse.hawkbit.repository.builder.TagCreate;
-import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -89,6 +80,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -116,6 +108,7 @@ import org.springframework.test.context.TestPropertySource;
         listeners = { EventVerifier.class, CleanupTestExecutionListener.class },
         mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
+@Import(TestdataFactory.class)
 @SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 public abstract class AbstractIntegrationTest {
 
@@ -134,15 +127,15 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected EntityFactory entityFactory;
     @Autowired
-    protected SoftwareModuleManagement<SoftwareModule, SoftwareModuleCreate<SoftwareModule>, SoftwareModuleUpdate> softwareModuleManagement;
+    protected SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement;
     @Autowired
-    protected SoftwareModuleTypeManagement<SoftwareModuleType, SoftwareModuleTypeCreate<SoftwareModuleType>, SoftwareModuleTypeUpdate> softwareModuleTypeManagement;
+    protected SoftwareModuleTypeManagement<? extends SoftwareModuleType> softwareModuleTypeManagement;
     @Autowired
-    protected DistributionSetManagement<DistributionSet, DistributionSetCreate<DistributionSet>, DistributionSetUpdate> distributionSetManagement;
+    protected DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     @Autowired
-    protected DistributionSetTagManagement<DistributionSetTag, TagCreate<DistributionSetTag>, TagUpdate> distributionSetTagManagement;
+    protected DistributionSetTagManagement<? extends DistributionSetTag> distributionSetTagManagement;
     @Autowired
-    protected DistributionSetTypeManagement<DistributionSetType, DistributionSetTypeCreate<DistributionSetType>, DistributionSetTypeUpdate> distributionSetTypeManagement;
+    protected DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement;
     @Autowired
     protected ControllerManagement controllerManagement;
     @Autowired
@@ -217,17 +210,17 @@ public abstract class AbstractIntegrationTest {
         osType = SecurityContextSwitch
                 .callAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
         osType = SecurityContextSwitch.callAsPrivileged(() -> softwareModuleTypeManagement
-                .update(entityFactory.softwareModuleType().update(osType.getId()).description(description)));
+                .update(SoftwareModuleTypeManagement.Update.builder().id(osType.getId()).description(description).build()));
 
         appType = SecurityContextSwitch.callAsPrivileged(
                 () -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_APP, Integer.MAX_VALUE));
         appType = SecurityContextSwitch.callAsPrivileged(() -> softwareModuleTypeManagement
-                .update(entityFactory.softwareModuleType().update(appType.getId()).description(description)));
+                .update(SoftwareModuleTypeManagement.Update.builder().id(appType.getId()).description(description).build()));
 
         runtimeType = SecurityContextSwitch
                 .callAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_RT));
         runtimeType = SecurityContextSwitch.callAsPrivileged(() -> softwareModuleTypeManagement
-                .update(entityFactory.softwareModuleType().update(runtimeType.getId()).description(description)));
+                .update(SoftwareModuleTypeManagement.Update.builder().id(runtimeType.getId()).description(description).build()));
 
         standardDsType = SecurityContextSwitch.callAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
 
@@ -283,6 +276,14 @@ public abstract class AbstractIntegrationTest {
     // default wait condition factory
     protected ConditionFactory await() {
         return Awaitility.await().atLeast(AT_LEAST).pollInterval(POLL_INTERVAL).atMost(TIMEOUT);
+    }
+
+    protected DistributionSetType defaultDsType() {
+        return systemManagement.getTenantMetadata().getDefaultDsType();
+    }
+
+    protected SoftwareModuleType getASmType() {
+        return defaultDsType().getMandatoryModuleTypes().stream().findAny().orElseThrow();
     }
 
     protected static Action getFirstAssignedAction(
@@ -434,7 +435,15 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected Long getOsModule(final DistributionSet ds) {
-        return ds.findFirstModuleByType(osType).orElseThrow(NoSuchElementException::new).getId();
+        return findFirstModuleByType(ds, osType).orElseThrow(NoSuchElementException::new).getId();
+    }
+
+    protected Optional<SoftwareModule> findFirstModuleByType(final DistributionSet ds, final SoftwareModuleType type) {
+        return ds.getModules().stream().filter(module -> module.getType().equals(type)).findAny();
+    }
+
+    protected Optional<? extends SoftwareModule> findFirstModuleByType(final DistributionSetManagement.Create dsCreate, final SoftwareModuleType type) {
+        return dsCreate.getModules().stream().filter(module -> module.getType().equals(type)).findAny();
     }
 
     protected Action prepareFinishedUpdate() {

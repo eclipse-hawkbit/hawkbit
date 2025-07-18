@@ -353,7 +353,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        final List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
+        final List<? extends DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).toList()).containsOnly(set.getId());
     }
 
@@ -375,7 +375,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        final List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
+        final List<? extends DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).toList())
                 .containsAll(sets.stream().map(DistributionSet::getId).toList());
     }
@@ -402,7 +402,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        final List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
+        final List<? extends DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).toList())
                 .containsOnly(assigned.getId());
     }
@@ -430,7 +430,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        final List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
+        final List<? extends DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).toList())
                 .containsOnly(assigned.getId());
     }

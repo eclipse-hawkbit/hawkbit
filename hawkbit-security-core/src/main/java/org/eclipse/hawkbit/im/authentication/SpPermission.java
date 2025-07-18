@@ -95,7 +95,8 @@ public final class SpPermission {
             CREATE_TARGET > CREATE_TARGET_TYPE
             READ_TARGET > READ_TARGET_TYPE
             UPDATE_TARGET > UPDATE_TARGET_TYPE
-            DELETE_TARGET > DELETE_TARGET_TYPE""";
+            DELETE_TARGET > DELETE_TARGET_TYPE
+            """;
     public static final String REPOSITORY_HIERARCHY = """
             CREATE_REPOSITORY > CREATE_DISTRIBUTION_SET
             READ_REPOSITORY > READ_DISTRIBUTION_SET

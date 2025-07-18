@@ -40,11 +40,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
-import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.builder.GenericDistributionSetTypeUpdate;
-import org.eclipse.hawkbit.repository.builder.GenericDistributionSetUpdate;
-import org.eclipse.hawkbit.repository.builder.GenericTagUpdate;
 import org.eclipse.hawkbit.repository.exception.DeletedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -53,9 +49,6 @@ import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetExcepti
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetCreate;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTagCreate;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
@@ -97,17 +90,16 @@ import org.springframework.util.ObjectUtils;
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "distribution-set-management" }, matchIfMissing = true)
 class JpaDistributionSetManagement
-        extends AbstractJpaRepositoryManagement<JpaDistributionSet, JpaDistributionSetCreate, GenericDistributionSetUpdate, DistributionSetRepository, DistributionSetFields>
-        implements DistributionSetManagement<JpaDistributionSet, JpaDistributionSetCreate, GenericDistributionSetUpdate> {
+        extends AbstractJpaRepositoryManagement<JpaDistributionSet, DistributionSetManagement.Create, DistributionSetManagement.Update, DistributionSetRepository, DistributionSetFields>
+        implements DistributionSetManagement<JpaDistributionSet> {
 
-    private final DistributionSetTagManagement<JpaDistributionSetTag, JpaDistributionSetTagCreate, GenericTagUpdate> distributionSetTagManagement;
-    private final DistributionSetTypeManagement<JpaDistributionSetType, JpaDistributionSetTypeCreate, GenericDistributionSetTypeUpdate> distributionSetTypeManagement;
+    private final DistributionSetTagManagement<JpaDistributionSetTag> distributionSetTagManagement;
+    private final DistributionSetTypeManagement<JpaDistributionSetType> distributionSetTypeManagement;
     private final SoftwareModuleRepository softwareModuleRepository;
     private final DistributionSetTagRepository distributionSetTagRepository;
     private final TargetRepository targetRepository;
     private final TargetFilterQueryRepository targetFilterQueryRepository;
     private final ActionRepository actionRepository;
-    private final SystemManagement systemManagement;
     private final QuotaManagement quotaManagement;
     private final TenantConfigHelper tenantConfigHelper;
     private final RepositoryProperties repositoryProperties;
@@ -116,14 +108,14 @@ class JpaDistributionSetManagement
     JpaDistributionSetManagement(
             final DistributionSetRepository jpaRepository,
             final EntityManager entityManager,
-            final DistributionSetTagManagement<JpaDistributionSetTag, JpaDistributionSetTagCreate, GenericTagUpdate> distributionSetTagManagement,
-            final DistributionSetTypeManagement<JpaDistributionSetType, JpaDistributionSetTypeCreate, GenericDistributionSetTypeUpdate> distributionSetTypeManagement,
+            final DistributionSetTagManagement<JpaDistributionSetTag> distributionSetTagManagement,
+            final DistributionSetTypeManagement<JpaDistributionSetType> distributionSetTypeManagement,
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
             final TargetRepository targetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
             final ActionRepository actionRepository,
-            final SystemManagement systemManagement, final QuotaManagement quotaManagement,
+            final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final RepositoryProperties repositoryProperties) {
@@ -135,37 +127,28 @@ class JpaDistributionSetManagement
         this.targetRepository = targetRepository;
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.actionRepository = actionRepository;
-        this.systemManagement = systemManagement;
         this.quotaManagement = quotaManagement;
         this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
         this.repositoryProperties = repositoryProperties;
     }
 
-    public JpaDistributionSet create(final JpaDistributionSetCreate create) {
-        return super.create(setDefaultTypeIfMissing(create));
-    }
-
-    public List<JpaDistributionSet> create(final Collection<JpaDistributionSetCreate> create) {
-        create.forEach(this::setDefaultTypeIfMissing);
-        return super.create(create);
-    }
-
-    public JpaDistributionSet update(final GenericDistributionSetUpdate update) {
+    @Override
+    public JpaDistributionSet update(final Update update) {
         final JpaDistributionSet distributionSet = getValid0(update.getId());
 
         // lock/unlock ONLY if locked flag is present!
-        if (Boolean.TRUE.equals(update.locked())) {
+        if (Boolean.TRUE.equals(update.getLocked())) {
             if (!distributionSet.isLocked()) {
                 lockSoftwareModules(distributionSet);
                 distributionSet.lock();
             }
-        } else if (Boolean.FALSE.equals(update.locked())) {
+        } else if (Boolean.FALSE.equals(update.getLocked())) {
             if (distributionSet.isLocked()) {
                 distributionSet.unlock();
             }
         }
 
-        if (update.isRequiredMigrationStep() != null && !update.isRequiredMigrationStep().equals(distributionSet.isRequiredMigrationStep())) {
+        if (update.getRequiredMigrationStep() != null && !update.getRequiredMigrationStep().equals(distributionSet.isRequiredMigrationStep())) {
             assertDistributionSetIsNotAssignedToTargets(update.getId());
         }
 
@@ -188,7 +171,7 @@ class JpaDistributionSetManagement
 
         // if delete fail (because of permission denied) transaction will be rolled back
         targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(distributionSetIDs.toArray(new Long[0]));
-        super.delete(distributionSetIDs);
+        super.delete0(distributionSetIDs);
     }
 
     @Override
@@ -376,8 +359,8 @@ class JpaDistributionSetManagement
         final JpaDistributionSet distributionSet = getValid0(id);
 
         if (!distributionSet.isComplete()) {
-            throw new IncompleteDistributionSetException("Distribution set of type "
-                    + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
+            throw new IncompleteDistributionSetException(
+                    "Distribution set of type " + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
         }
 
         if (distributionSet.isDeleted()) {
@@ -588,13 +571,6 @@ class JpaDistributionSetManagement
     private JpaSoftwareModule findSoftwareModuleAndThrowExceptionIfNotFound(final Long softwareModuleId) {
         return softwareModuleRepository.findById(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
-    }
-
-    private JpaDistributionSetCreate setDefaultTypeIfMissing(final JpaDistributionSetCreate create) {
-        if (create.getType() == null) {
-            create.type(systemManagement.getTenantMetadata().getDefaultDsType().getKey());
-        }
-        return create;
     }
 
     private List<Specification<JpaDistributionSet>> buildSpecsByComplete(final Boolean complete) {

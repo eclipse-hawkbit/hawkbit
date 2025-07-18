@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.repository.builder;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import org.eclipse.hawkbit.repository.RepositoryManagement;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Tag;
@@ -22,7 +21,7 @@ import org.eclipse.hawkbit.repository.model.Tag;
  * at creation time. Other fields are set by the repository automatically, e.g.
  * {@link BaseEntity#getCreatedAt()}.
  */
-public interface TagCreate<T extends Tag> extends RepositoryManagement.Builder<T> {
+public interface TagCreate<T extends Tag> {
 
     /**
      * @param name for {@link Tag#getName()}

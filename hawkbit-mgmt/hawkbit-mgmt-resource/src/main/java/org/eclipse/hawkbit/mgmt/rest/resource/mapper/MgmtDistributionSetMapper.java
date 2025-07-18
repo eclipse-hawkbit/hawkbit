@@ -12,15 +12,15 @@ package org.eclipse.hawkbit.mgmt.rest.resource.mapper;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionId;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
@@ -30,30 +30,41 @@ import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
-import org.eclipse.hawkbit.repository.builder.TagCreate;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.rest.json.model.ResponseList;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 /**
- * A mapper which maps repository model to RESTful model representation and
- * back.
+ * A mapper which maps repository model to RESTful model representation and back.
  */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class MgmtDistributionSetMapper {
+@Service
+public class MgmtDistributionSetMapper {
 
-    /**
-     * {@link MgmtDistributionSetRequestBodyPost}s to {@link DistributionSet}s.
-     *
-     * @param sets to convert
-     * @return converted list of {@link DistributionSet}s
-     */
-    public static List<DistributionSetCreate<DistributionSet>> dsFromRequest(
-            final Collection<MgmtDistributionSetRequestBodyPost> sets, final EntityFactory entityFactory) {
-        return sets.stream().map(dsRest -> fromRequest(dsRest, entityFactory)).toList();
+    private final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement;
+    private final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement;
+    private final SystemManagement systemManagement;
+
+    MgmtDistributionSetMapper(
+            final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement,
+            final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
+            final SystemManagement systemManagement) {
+        this.distributionSetTypeManagement = distributionSetTypeManagement;
+        this.softwareModuleManagement = softwareModuleManagement;
+        this.systemManagement = systemManagement;
+    }
+
+    public List<DistributionSetManagement.Create> fromRequest(final Collection<MgmtDistributionSetRequestBodyPost> sets) {
+        return sets.stream().map(this::fromRequest).toList();
     }
 
     public static MgmtDistributionSet toResponse(final DistributionSet distributionSet) {
@@ -73,13 +84,11 @@ public final class MgmtDistributionSetMapper {
         response.setDeleted(distributionSet.isDeleted());
         response.setValid(distributionSet.isValid());
 
-        distributionSet.getModules()
-                .forEach(module -> response.getModules().add(MgmtSoftwareModuleMapper.toResponse(module)));
+        distributionSet.getModules().forEach(module -> response.getModules().add(MgmtSoftwareModuleMapper.toResponse(module)));
 
         response.setRequiredMigrationStep(distributionSet.isRequiredMigrationStep());
 
-        response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(response.getId()))
-                .withSelfRel().expand());
+        response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(response.getId())).withSelfRel().expand());
 
         return response;
     }
@@ -105,7 +114,7 @@ public final class MgmtDistributionSetMapper {
         return result;
     }
 
-    public static MgmtTargetAssignmentResponseBody toResponse(final List<DistributionSetAssignmentResult> dsAssignmentResults) {
+    public MgmtTargetAssignmentResponseBody toResponse(final List<DistributionSetAssignmentResult> dsAssignmentResults) {
         final MgmtTargetAssignmentResponseBody result = new MgmtTargetAssignmentResponseBody();
         final int alreadyAssigned = dsAssignmentResults.stream()
                 .mapToInt(DistributionSetAssignmentResult::getAlreadyAssigned).sum();
@@ -118,7 +127,7 @@ public final class MgmtDistributionSetMapper {
         return result;
     }
 
-    public static List<MgmtDistributionSet> toResponseDistributionSets(final Collection<DistributionSet> sets) {
+    public static List<MgmtDistributionSet> toResponseDistributionSets(final Collection<? extends DistributionSet> sets) {
         if (sets == null) {
             return Collections.emptyList();
         }
@@ -126,10 +135,13 @@ public final class MgmtDistributionSetMapper {
         return new ResponseList<>(sets.stream().map(MgmtDistributionSetMapper::toResponse).toList());
     }
 
-    public static List<TagCreate<DistributionSetTag>> mapTagFromRequest(final EntityFactory entityFactory, final Collection<MgmtTagRequestBodyPut> tags) {
+    public static List<DistributionSetTagManagement.Create> mapTagFromRequest(final Collection<MgmtTagRequestBodyPut> tags) {
         return tags.stream()
-                .map(tagRest -> entityFactory.distributionSetTag().create().name(tagRest.getName())
-                        .description(tagRest.getDescription()).colour(tagRest.getColour()))
+                .map(tagRest -> DistributionSetTagManagement.Create.builder()
+                        .name(tagRest.getName())
+                        .description(tagRest.getDescription()).colour(tagRest.getColour())
+                        .build())
+                .map(DistributionSetTagManagement.Create.class::cast)
                 .toList();
     }
 
@@ -150,7 +162,7 @@ public final class MgmtDistributionSetMapper {
         return metadata.entrySet().stream().map(e -> toResponseDsMetadata(e.getKey(), e.getValue())).toList();
     }
 
-    public static List<MgmtDistributionSet> toResponseFromDsList(final List<DistributionSet> sets) {
+    public static List<MgmtDistributionSet> toResponseFromDsList(final List<? extends DistributionSet> sets) {
         if (sets == null) {
             return Collections.emptyList();
         }
@@ -158,14 +170,8 @@ public final class MgmtDistributionSetMapper {
         return sets.stream().map(MgmtDistributionSetMapper::toResponse).toList();
     }
 
-    /**
-     * {@link MgmtDistributionSetRequestBodyPost} to {@link DistributionSet}.
-     *
-     * @param dsRest to convert
-     * @return converted {@link DistributionSet}
-     */
-    private static DistributionSetCreate<DistributionSet> fromRequest(final MgmtDistributionSetRequestBodyPost dsRest, final EntityFactory entityFactory) {
-        final List<Long> modules = new ArrayList<>();
+    private DistributionSetManagement.Create fromRequest(final MgmtDistributionSetRequestBodyPost dsRest) {
+        final Set<Long> modules = new HashSet<>();
         if (dsRest.getOs() != null) {
             modules.add(dsRest.getOs().getId());
         }
@@ -178,8 +184,32 @@ public final class MgmtDistributionSetMapper {
         if (dsRest.getModules() != null) {
             dsRest.getModules().forEach(module -> modules.add(module.getId()));
         }
-        return entityFactory.distributionSet().create().name(dsRest.getName()).version(dsRest.getVersion())
-                .description(dsRest.getDescription()).type(dsRest.getType()).modules(modules)
-                .requiredMigrationStep(dsRest.getRequiredMigrationStep());
+        return DistributionSetManagement.Create.builder()
+                .type(Optional.ofNullable(dsRest.getType())
+                        // if the type is supplied the type MUST exist
+                        .map(typeKey -> distributionSetTypeManagement
+                                .findByKey(typeKey)
+                                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, typeKey)))
+                        .map(DistributionSetType.class::cast)
+                        // if here, the type is not supplied, use the default type
+                        .orElseGet(() -> systemManagement.getTenantMetadata().getDefaultDsType()))
+                .name(dsRest.getName()).version(dsRest.getVersion())
+                .description(dsRest.getDescription())
+                .modules(findSoftwareModuleWithExceptionIfNotFound(modules))
+                .requiredMigrationStep(dsRest.getRequiredMigrationStep())
+                .build();
+    }
+
+    private Set<? extends SoftwareModule> findSoftwareModuleWithExceptionIfNotFound(final Set<Long> softwareModuleIds) {
+         if (CollectionUtils.isEmpty(softwareModuleIds)) {
+            return Collections.emptySet();
+        }
+
+        final List<? extends SoftwareModule> modules = softwareModuleManagement.get(softwareModuleIds);
+        if (modules.size() < softwareModuleIds.size()) {
+            throw new EntityNotFoundException(SoftwareModule.class, softwareModuleIds);
+        }
+
+        return new HashSet<>(modules);
     }
 }

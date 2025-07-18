@@ -9,12 +9,12 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.hawkbit.im.authentication.Hierarchy;
 import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
@@ -43,6 +43,7 @@ import org.springframework.util.function.SingletonSupplier;
 /**
  * Default configuration that is common to all repository implementations.
  */
+@Slf4j
 @Configuration
 @EnableMethodSecurity(proxyTargetClass = true, securedEnabled = true)
 @EnableConfigurationProperties({ RepositoryProperties.class, ControllerPollProperties.class, TenantConfigurationProperties.class })
@@ -61,24 +62,24 @@ public class RepositoryConfiguration {
 
             @Override
             public boolean hasPermission(final Authentication authentication, final Object targetDomainObject, final Object permission) {
-                if (targetDomainObject instanceof MethodSecurityExpressionOperations root &&
-                        root.getThis() instanceof RepositoryManagement<?, ?, ?> repositoryManagement) {
-                    final String neededPermission = permission + "_" + repositoryManagement.permissionGroup();
-                    return roleHierarchy.getReachableGrantedAuthorities(authentication.getAuthorities()).stream()
+                if (targetDomainObject instanceof MethodSecurityExpressionOperations root) {
+                    final String neededPermission =
+                            permission + "_" + (root.getThis() instanceof RepositoryManagement<?, ?, ?> repositoryManagement
+                                    ? repositoryManagement.permissionGroup()
+                                    : "REPOSITORY"); // TODO - should not fall back here - all using parmissions should extend repository management interface
+                    final boolean hasPermission = roleHierarchy.getReachableGrantedAuthorities(authentication.getAuthorities()).stream()
                             .map(GrantedAuthority::getAuthority)
                             .anyMatch(authority -> authority.equals(neededPermission));
+                    if (!hasPermission) {
+                        log.debug(
+                                "User {} does not have permission {} for target {}",
+                                authentication.getName(), neededPermission, targetDomainObject);
+                    }
+                    return hasPermission;
                 }
                 return super.hasPermission(authentication, targetDomainObject, permission);
             }
-
-            @Override
-            public boolean hasPermission(
-                    final Authentication authentication, final Serializable targetId, final String targetType, final Object permission) {
-                return super.hasPermission(authentication, targetId, targetType, permission);
-            }
-        }
-
-                ;
+        };
     }
 
     @Bean

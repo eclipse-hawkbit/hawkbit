@@ -13,9 +13,8 @@ import java.util.List;
 import java.util.Random;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
-import org.eclipse.hawkbit.repository.builder.TagCreate;
-import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.jpa.AbstractRepositoryManagementSecurityTest;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.junit.jupiter.api.Test;
@@ -26,21 +25,21 @@ import org.springframework.data.domain.Pageable;
  * Story: SecurityTests DistributionSetTagManagement
  */
 class DistributionSetTagManagementSecurityTest
-        extends AbstractRepositoryManagementSecurityTest<DistributionSetTag, TagCreate<DistributionSetTag>, TagUpdate> {
+        extends AbstractRepositoryManagementSecurityTest<DistributionSetTag, DistributionSetTagManagement.Create, DistributionSetTagManagement.Update> {
 
     @Override
-    protected RepositoryManagement<DistributionSetTag, TagCreate<DistributionSetTag>, TagUpdate> getRepositoryManagement() {
+    protected RepositoryManagement getRepositoryManagement() {
         return distributionSetTagManagement;
     }
 
     @Override
-    protected TagCreate<DistributionSetTag> getCreateObject() {
-        return entityFactory.distributionSetTag().create().name(String.format("tag-%d", new Random().nextInt()));
+    protected DistributionSetTagManagement.Create getCreateObject() {
+        return DistributionSetTagManagement.Create.builder().name(String.format("tag-%d", new Random().nextInt())).build();
     }
 
     @Override
-    protected TagUpdate getUpdateObject() {
-        return entityFactory.tag().update(1L).name("tag");
+    protected DistributionSetTagManagement.Update getUpdateObject() {
+        return DistributionSetTagManagement.Update.builder().id(1L).name("tag").build();
     }
 
     /**

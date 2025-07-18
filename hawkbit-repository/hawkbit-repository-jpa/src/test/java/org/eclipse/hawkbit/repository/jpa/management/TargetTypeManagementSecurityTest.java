@@ -151,5 +151,4 @@ class TargetTypeManagementSecurityTest extends AbstractJpaIntegrationTest {
         assertPermissions(() -> targetTypeManagement.unassignDistributionSetType(1L, 1L),
                 List.of(SpPermission.UPDATE_TARGET, SpPermission.READ_REPOSITORY));
     }
-
 }
