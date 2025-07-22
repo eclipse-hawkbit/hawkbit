@@ -338,26 +338,26 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
         private final TargetDetails targetDetails;
         private final TargetAssignedInstalled targetAssignedInstalled;
         private final TargetTags targetTags;
-        private final TargetActionsLayout targetActionsLayout;
+        private final TargetActionsHistoryLayout targetActionsHistoryLayout;
 
         private TargetDetailedView(final HawkbitMgmtClient hawkbitClient) {
             targetDetails = new TargetDetails(hawkbitClient);
             targetAssignedInstalled = new TargetAssignedInstalled(hawkbitClient);
             targetTags = new TargetTags(hawkbitClient);
-            targetActionsLayout = new TargetActionsLayout(hawkbitClient);
+            targetActionsHistoryLayout = new TargetActionsHistoryLayout(hawkbitClient);
             setWidthFull();
 
             add("Details", targetDetails);
             add("Assigned / Installed", targetAssignedInstalled);
             add("Tags", targetTags);
-            add("Action History", targetActionsLayout);
+            add("Action History", targetActionsHistoryLayout);
         }
 
         private void setItem(final MgmtTarget target) {
             this.targetDetails.setItem(target);
             this.targetAssignedInstalled.setItem(target);
             this.targetTags.setItem(target);
-            this.targetActionsLayout.setItem(target);
+            this.targetActionsHistoryLayout.setItem(target);
         }
     }
 
@@ -579,29 +579,29 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
         }
     }
 
-    private static class TargetActionsLayout extends VerticalLayout {
+    private static class TargetActionsHistoryLayout extends VerticalLayout {
 
-        private final TargetActions targetActions;
+        private final TargetActionsHistory targetActionsHistory;
 
-        public TargetActionsLayout(HawkbitMgmtClient hawkbitMgmtClient) {
+        public TargetActionsHistoryLayout(HawkbitMgmtClient hawkbitMgmtClient) {
             ActionStepsGrid actionStepsGrid = new ActionStepsGrid(hawkbitMgmtClient);
-            targetActions = new TargetActions(hawkbitMgmtClient, actionStepsGrid);
-            add(targetActions);
+            targetActionsHistory = new TargetActionsHistory(hawkbitMgmtClient, actionStepsGrid);
+            add(targetActionsHistory);
             add(actionStepsGrid);
         }
 
         public void setItem(MgmtTarget target) {
-            targetActions.setItem(target);
+            targetActionsHistory.setItem(target);
         }
 
         @Slf4j
-        private static class TargetActions extends Grid<TargetActions.ActionStatusEntry> {
+        private static class TargetActionsHistory extends Grid<TargetActionsHistory.ActionStatusEntry> {
 
             private final transient HawkbitMgmtClient hawkbitClient;
             private transient MgmtTarget target;
             private final ActionStepsGrid actionStepsGrid;
 
-            private TargetActions(final HawkbitMgmtClient hawkbitClient, ActionStepsGrid actionStepsGrid) {
+            private TargetActionsHistory(final HawkbitMgmtClient hawkbitClient, ActionStepsGrid actionStepsGrid) {
                 this.hawkbitClient = hawkbitClient;
                 setWidthFull();
                 addColumn(new ComponentRenderer<>(ActionStatusEntry::getStatusIcon)).setHeader(STATUS).setAutoWidth(true).setFlexGrow(0);
