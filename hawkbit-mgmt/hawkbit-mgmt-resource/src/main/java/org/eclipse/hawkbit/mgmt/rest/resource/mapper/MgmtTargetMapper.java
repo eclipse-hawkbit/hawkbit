@@ -207,7 +207,7 @@ public final class MgmtTargetMapper {
         return actionStatus.stream()
                 .map(status -> toResponse(status,
                         deploymentManagement.findMessagesByActionStatusId(
-                                        status.getId(), PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT))
+                                status.getId(), PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT))
                                 .getContent()))
                 .toList();
     }
@@ -346,7 +346,7 @@ public final class MgmtTargetMapper {
         result.setReportedAt(actionStatus.getCreatedAt());
         result.setTimestamp(actionStatus.getOccurredAt());
         result.setId(actionStatus.getId());
-        result.setType(actionStatus.getStatus().name().toLowerCase());
+        result.setType(MgmtActionStatus.StatusType.forValue(actionStatus.getStatus().name()));
         actionStatus.getCode().ifPresent(result::setCode);
 
         return result;

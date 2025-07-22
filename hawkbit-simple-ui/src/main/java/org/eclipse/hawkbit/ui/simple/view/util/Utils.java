@@ -9,14 +9,27 @@
  */
 package org.eclipse.hawkbit.ui.simple.view.util;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.ToLongFunction;
 
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.IconFactory;
+import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.ui.simple.view.Constants;
 
@@ -44,6 +57,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
+@Slf4j
 public class Utils {
 
     private Utils() {
@@ -117,7 +131,8 @@ public class Utils {
         return layout;
     }
 
-    private static <T, ID> ConfirmDialog promptForDeleteConfirmation(Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler, SelectionGrid<T, ID> selectionGrid) {
+    private static <T, ID> ConfirmDialog promptForDeleteConfirmation(Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler,
+            SelectionGrid<T, ID> selectionGrid) {
         final ConfirmDialog dialog = new ConfirmDialog();
         dialog.setHeader("Confirm Deletion");
         dialog.setText("Are you sure you want to delete the selected items? This action cannot be undone.");
@@ -139,7 +154,7 @@ public class Utils {
     public static <T> void remove(final Collection<T> remove, final Set<T> from, final Function<T, ?> idFn) {
         remove.forEach(toRemove -> {
             final Object id = idFn.apply(toRemove);
-            for (final Iterator<T> i = from.iterator(); i.hasNext(); ) {
+            for (final Iterator<T> i = from.iterator(); i.hasNext();) {
                 if (idFn.apply(i.next()).equals(id)) {
                     i.remove();
                 }
@@ -175,27 +190,31 @@ public class Utils {
         return component;
     }
 
+    public static Icon iconColored(final IconFactory component, final String text, final String color) {
+        var icon = tooltip(component.create(), text);
+        icon.setColor(color);
+        return icon;
+    }
+
     public static Select<MgmtActionType> actionTypeControls(DateTimePicker forceTime) {
 
         Select<MgmtActionType> actionType = new Select<>();
         actionType.setLabel(Constants.ACTION_TYPE);
         actionType.setItems(MgmtActionType.values());
         actionType.setValue(MgmtActionType.FORCED);
-        final ComponentRenderer<Component, MgmtActionType> actionTypeRenderer = new ComponentRenderer<>(actionTypeO ->
-                switch (actionTypeO) {
-                    case SOFT -> new Text(Constants.SOFT);
-                    case FORCED -> new Text(Constants.FORCED);
-                    case DOWNLOAD_ONLY -> new Text(Constants.DOWNLOAD_ONLY);
-                    case TIMEFORCED -> forceTime;
-                });
+        final ComponentRenderer<Component, MgmtActionType> actionTypeRenderer = new ComponentRenderer<>(actionTypeO -> switch (actionTypeO) {
+            case SOFT -> new Text(Constants.SOFT);
+            case FORCED -> new Text(Constants.FORCED);
+            case DOWNLOAD_ONLY -> new Text(Constants.DOWNLOAD_ONLY);
+            case TIMEFORCED -> forceTime;
+        });
         actionType.addValueChangeListener(e -> actionType.setRenderer(actionTypeRenderer));
-        actionType.setItemLabelGenerator(startTypeO ->
-                switch (startTypeO) {
-                    case SOFT -> Constants.SOFT;
-                    case FORCED -> Constants.FORCED;
-                    case DOWNLOAD_ONLY -> Constants.DOWNLOAD_ONLY;
-                    case TIMEFORCED -> "Time Forced at " + (forceTime.isEmpty() ? "" : " " + forceTime.getValue());
-                });
+        actionType.setItemLabelGenerator(startTypeO -> switch (startTypeO) {
+            case SOFT -> Constants.SOFT;
+            case FORCED -> Constants.FORCED;
+            case DOWNLOAD_ONLY -> Constants.DOWNLOAD_ONLY;
+            case TIMEFORCED -> "Time Forced at " + (forceTime.isEmpty() ? "" : " " + forceTime.getValue());
+        });
         actionType.setWidthFull();
         return actionType;
     }
@@ -234,5 +253,28 @@ public class Utils {
             }
             super.close();
         }
+    }
+
+    private static ZoneId getZoneId() {
+        CompletableFuture<ZoneId> zoneId = new CompletableFuture<>();
+        UI.getCurrent().getPage().retrieveExtendedClientDetails(details -> {
+            zoneId.complete(ZoneId.of(details.getTimeZoneId()));
+        });
+        try {
+            return zoneId.get(1, TimeUnit.SECONDS);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException | ExecutionException ignored) {
+            log.warn("failed to get zone");
+        }
+        return ZoneId.systemDefault();
+    }
+
+    public static <G> LocalDateTimeRenderer<G> localDateTimeRenderer(ToLongFunction<G> f) {
+
+        return new LocalDateTimeRenderer<>((e) -> LocalDateTime.ofInstant(Instant.ofEpochMilli(f.applyAsLong(e)), getZoneId()),
+                () -> DateTimeFormatter.ofLocalizedDateTime(
+                        FormatStyle.SHORT,
+                        FormatStyle.MEDIUM).withLocale(UI.getCurrent().getLocale()));
     }
 }
