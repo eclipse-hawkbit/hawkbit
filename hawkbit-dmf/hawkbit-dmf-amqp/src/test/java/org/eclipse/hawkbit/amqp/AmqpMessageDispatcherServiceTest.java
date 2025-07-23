@@ -69,8 +69,7 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles({ "test" })
 @SpringBootTest(classes = { JpaRepositoryConfiguration.class }, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @TestPropertySource(properties = {
-        "spring.main.allow-bean-definition-overriding=true",
-        "spring.cloud.bus.enabled=true" })
+        "spring.main.allow-bean-definition-overriding=true" })
 class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     private static final String TENANT = "DEFAULT";
@@ -108,7 +107,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         when(systemManagement.getTenantMetadataWithoutDetails()).thenReturn(tenantMetaData);
 
         amqpMessageDispatcherService = new AmqpMessageDispatcherService(rabbitTemplate, senderService,
-                artifactUrlHandlerMock, systemSecurityContext, systemManagement, targetManagement, serviceMatcher,
+                artifactUrlHandlerMock, systemSecurityContext, systemManagement, targetManagement,
                 distributionSetManagement, softwareModuleManagement, deploymentManagement, tenantConfigurationManagement);
 
     }

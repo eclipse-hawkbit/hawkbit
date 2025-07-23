@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
 import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandlerProperties;
 import org.eclipse.hawkbit.repository.artifact.urlhandler.PropertyBasedArtifactUrlHandler;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
-import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -69,7 +68,6 @@ import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
-import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -81,7 +79,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.integration.support.locks.DefaultLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
-import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
@@ -218,7 +215,7 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    EventPublisherHolder eventBusHolder() {
+    EventPublisherHolder eventPublisherHolder() {
         return EventPublisherHolder.getInstance();
     }
 
@@ -245,14 +242,14 @@ public class TestConfiguration implements AsyncConfigurer {
         return new RolloutTestApprovalStrategy();
     }
 
-    /**
-     * @return the protostuff io message converter
-     */
-    @Bean
-    @ConditionalOnBusEnabled
-    MessageConverter busProtoBufConverter() {
-        return new BusProtoStuffMessageConverter();
-    }
+    // TODO Check
+//    /**
+//     * @return the protostuff io message converter
+//     */
+//    @Bean
+//    MessageConverter busProtoBufConverter() {
+//        return new EventProtoStuffMessageConverter();
+//    }
 
     private static class FilterEnabledApplicationEventPublisher extends SimpleApplicationEventMulticaster {
 

@@ -73,8 +73,6 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.cloud.bus.ServiceMatcher;
-import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContext;
@@ -96,7 +94,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private final SystemSecurityContext systemSecurityContext;
     private final SystemManagement systemManagement;
     private final TargetManagement targetManagement;
-    private final ServiceMatcher serviceMatcher;
     private final DistributionSetManagement distributionSetManagement;
     private final DeploymentManagement deploymentManagement;
     private final SoftwareModuleManagement softwareModuleManagement;
@@ -111,7 +108,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * @param systemSecurityContext for execution with system permissions
      * @param systemManagement the systemManagement
      * @param targetManagement to access target information
-     * @param serviceMatcher to check in cluster case if the message is from the same cluster node
      * @param distributionSetManagement to retrieve modules
      * @param tenantConfigurationManagement to access tenant configuration
      */
@@ -120,7 +116,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final RabbitTemplate rabbitTemplate,
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
-            final TargetManagement targetManagement, final ServiceMatcher serviceMatcher,
+            final TargetManagement targetManagement,
             final DistributionSetManagement distributionSetManagement,
             final SoftwareModuleManagement softwareModuleManagement, final DeploymentManagement deploymentManagement,
             final TenantConfigurationManagement tenantConfigurationManagement) {
@@ -130,7 +126,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         this.systemSecurityContext = systemSecurityContext;
         this.systemManagement = systemManagement;
         this.targetManagement = targetManagement;
-        this.serviceMatcher = serviceMatcher;
         this.distributionSetManagement = distributionSetManagement;
         this.softwareModuleManagement = softwareModuleManagement;
         this.deploymentManagement = deploymentManagement;
@@ -150,10 +145,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      */
     @EventListener(classes = TargetAssignDistributionSetEvent.class)
     protected void targetAssignDistributionSet(final TargetAssignDistributionSetEvent assignedEvent) {
-        if (shouldSkip(assignedEvent)) {
-            return;
-        }
-
         final List<Target> filteredTargetList = getTargetsWithoutPendingCancellations(assignedEvent.getActions().keySet());
 
         if (!filteredTargetList.isEmpty()) {
@@ -169,10 +160,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      */
     @EventListener(classes = MultiActionEvent.class)
     protected void onMultiAction(final MultiActionEvent multiActionEvent) {
-        if (shouldSkip(multiActionEvent)) {
-            return;
-        }
-
         log.debug("MultiActionEvent received for {}", multiActionEvent.getControllerIds());
         sendMultiActionRequestMessages(multiActionEvent.getControllerIds());
     }
@@ -202,10 +189,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      */
     @EventListener(classes = CancelTargetAssignmentEvent.class)
     protected void targetCancelAssignmentToDistributionSet(final CancelTargetAssignmentEvent cancelEvent) {
-        if (shouldSkip(cancelEvent)) {
-            return;
-        }
-
         final List<Target> eventTargets = partitionedParallelExecution(
                 cancelEvent.getActions().keySet(), targetManagement::getByControllerID);
 
@@ -225,10 +208,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      */
     @EventListener(classes = TargetDeletedEvent.class)
     protected void targetDelete(final TargetDeletedEvent deleteEvent) {
-        if (shouldSkip(deleteEvent)) {
-            return;
-        }
-
+        System.out.println("targetDelete received for " + deleteEvent.getControllerId());
         sendDeleteMessage(deleteEvent.getTenant(), deleteEvent.getControllerId(), deleteEvent.getTargetAddress());
     }
 
@@ -250,10 +230,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
         amqpSenderService.sendMessage(message,
                 IpUtil.createAmqpUri(virtualHost, ping.getMessageProperties().getReplyTo()));
-    }
-
-    protected boolean shouldSkip(final RemoteApplicationEvent event) {
-        return !isFromSelf(event);
     }
 
     protected void sendCancelMessageToTarget(final String tenant, final String controllerId, final Long actionId, final URI address) {
@@ -513,10 +489,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private boolean hasInvalidAddress(final String targetAddress) {
         return targetAddress == null || !IpUtil.isAmqpUri(URI.create(targetAddress));
-    }
-
-    private boolean isFromSelf(final RemoteApplicationEvent event) {
-        return serviceMatcher == null || serviceMatcher.isFromSelf(event);
     }
 
     private boolean hasPendingCancellations(final Long targetId) {

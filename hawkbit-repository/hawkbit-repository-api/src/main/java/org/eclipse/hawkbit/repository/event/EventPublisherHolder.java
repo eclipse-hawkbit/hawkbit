@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,63 +9,92 @@
  */
 package org.eclipse.hawkbit.repository.event;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
+import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.bus.BusProperties;
-import org.springframework.cloud.bus.ServiceMatcher;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 
-/**
- * A singleton bean which holds the event publisher and service origin id in order to publish remote application events.
- * It can be used in beans not instantiated by spring e.g. JPA entities which cannot be auto-wired.
- */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-@SuppressWarnings("java:S6548") // java:S6548 - singleton holder ensures static access to spring resources in some places
+@Slf4j
 public final class EventPublisherHolder {
 
+    @Value("${org.eclipse.hawkbit.events.remote-enabled:false}")
+    private boolean remoteEventsEnabled;
+    @Value("${org.eclipse.hawkbit.events.remote.group.destination:groupEventChannel}")
+    private String groupChannel;
+    @Value("${org.eclipse.hawkbit.events.remote.fanout.destination:fanoutEventChannel}")
+    private String fanoutChannel;
+
     private static final EventPublisherHolder SINGLETON = new EventPublisherHolder();
+    private ApplicationEventPublisher delegateEventPublisher;
+    private StreamBridge streamBridge;
 
-    @Getter
-    private ApplicationEventPublisher eventPublisher;
-    private ServiceMatcher serviceMatcher;
-    private BusProperties bus;
-
-    /**
-     * @return the event publisher holder singleton instance
-     */
     public static EventPublisherHolder getInstance() {
         return SINGLETON;
     }
 
-    @Autowired // spring setter injection
-    public void setApplicationEventPublisher(final ApplicationEventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
+    @Autowired
+    public void setApplicationEventPublisher(final ApplicationEventPublisher delegate) {
+        this.delegateEventPublisher = delegate;
     }
 
-    @Autowired(required = false) // spring setter injection
-    public void setServiceMatcher(final ServiceMatcher serviceMatcher) {
-        this.serviceMatcher = serviceMatcher;
+    @Autowired(required = false)
+    public void setStreamBridge(final StreamBridge streamBridge) {
+        this.streamBridge = streamBridge;
     }
 
-    @Autowired(required = false) // spring setter injection
-    public void setBusProperties(final BusProperties bus) {
-        this.bus = bus;
+    public ApplicationEventPublisher getEventPublisher() {
+        return new RoutingEventPublisher(streamBridge, delegateEventPublisher);
     }
 
-    /**
-     * @return the service origin Id coming either from {@link ServiceMatcher} when available or {@link BusProperties} otherwise.
-     */
-    public String getApplicationId() {
-        String id = null;
-        if (serviceMatcher != null) {
-            id = serviceMatcher.getBusId();
+    class RoutingEventPublisher implements ApplicationEventPublisher {
+
+        private final StreamBridge streamBridge;
+        private final ApplicationEventPublisher delegate;
+
+        private static final Set<Class<?>> GROUPED_REMOTE_EVENTS = Set.of(
+                TargetAssignDistributionSetEvent.class,
+                MultiActionEvent.class,
+                CancelTargetAssignmentEvent.class,
+                TargetDeletedEvent.class,
+                TargetAttributesRequestedEvent.class
+        );
+
+        public RoutingEventPublisher(StreamBridge streamBridge, ApplicationEventPublisher delegate) {
+            this.streamBridge = streamBridge;
+            this.delegate = delegate;
         }
-        if (id == null && bus != null) {
-            id = bus.getId();
+
+        @Override
+        public void publishEvent(Object event) {
+            routeEvent(event);
         }
-        // due to a bug (?) in Spring Cloud, we cannot pass null for applicationId
-        return id == null ? "" : id;
+
+        @Override
+        public void publishEvent(ApplicationEvent event) {
+            routeEvent(event);
+        }
+
+        private void routeEvent(Object event) {
+            if (remoteEventsEnabled && streamBridge != null && event instanceof AbstractRemoteEvent) {
+                if (GROUPED_REMOTE_EVENTS.contains(event.getClass())) {
+                    streamBridge.send(groupChannel, event);
+                } else {
+                    streamBridge.send(fanoutChannel, event);
+                }
+            } else if (delegate != null) {
+                delegate.publishEvent(event);
+            } else {
+                log.error("Could not publish (neither remote nor local) Event: {}.", event);
+            }
+        }
     }
 }

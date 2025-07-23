@@ -27,10 +27,10 @@ import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
+import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
 import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
-import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -129,12 +129,12 @@ public class EventVerifier extends AbstractTestExecutionListener {
         testContext.getApplicationContext().getBean(ApplicationEventMulticaster.class).removeApplicationListener(eventCaptor);
     }
 
-    private static class EventCaptor implements ApplicationListener<RemoteApplicationEvent> {
+    private static class EventCaptor implements ApplicationListener<AbstractRemoteEvent> {
 
         private final ConcurrentHashMap<Class<?>, Integer> capturedEvents = new ConcurrentHashMap<>();
 
         @Override
-        public void onApplicationEvent(final RemoteApplicationEvent event) {
+        public void onApplicationEvent(final AbstractRemoteEvent event) {
             log.debug("Received event {}", event.getClass().getSimpleName());
 
             if (ResetCounterMarkerEvent.class.isAssignableFrom(event.getClass())) {
@@ -170,13 +170,13 @@ public class EventVerifier extends AbstractTestExecutionListener {
         }
     }
 
-    private static final class ResetCounterMarkerEvent extends RemoteApplicationEvent {
+    private static final class ResetCounterMarkerEvent extends AbstractRemoteEvent {
 
         @Serial
         private static final long serialVersionUID = 1L;
 
         private ResetCounterMarkerEvent() {
-            super(new Object(), "resetcounter", DEFAULT_DESTINATION_FACTORY.getDestination(null));
+            super("event-verifier");
         }
     }
 }

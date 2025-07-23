@@ -43,13 +43,11 @@ import org.springframework.amqp.rabbit.listener.FatalExceptionStrategy;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
@@ -71,19 +69,12 @@ public class DmfApiConfiguration {
     private final AmqpDeadletterProperties amqpDeadletterProperties;
     private final ConnectionFactory rabbitConnectionFactory;
 
-    private ServiceMatcher serviceMatcher;
-
     public DmfApiConfiguration(
             final AmqpProperties amqpProperties, final AmqpDeadletterProperties amqpDeadletterProperties,
             final ConnectionFactory rabbitConnectionFactory) {
         this.amqpProperties = amqpProperties;
         this.amqpDeadletterProperties = amqpDeadletterProperties;
         this.rabbitConnectionFactory = rabbitConnectionFactory;
-    }
-
-    @Autowired(required = false) // spring setter injection
-    public void setServiceMatcher(final ServiceMatcher serviceMatcher) {
-        this.serviceMatcher = serviceMatcher;
     }
 
     @Bean
@@ -279,7 +270,7 @@ public class DmfApiConfiguration {
             final SoftwareModuleManagement softwareModuleManagement, final DeploymentManagement deploymentManagement,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
-                systemSecurityContext, systemManagement, targetManagement, serviceMatcher, distributionSetManagement,
+                systemSecurityContext, systemManagement, targetManagement, distributionSetManagement,
                 softwareModuleManagement, deploymentManagement, tenantConfigurationManagement);
     }
 
