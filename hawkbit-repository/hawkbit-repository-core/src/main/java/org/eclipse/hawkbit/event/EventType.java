@@ -9,10 +9,12 @@
  */
 package org.eclipse.hawkbit.event;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +26,13 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetTypeDeletedEve
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
+import org.eclipse.hawkbit.repository.event.remote.ServiceCancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.ServiceMultiActionAssignEvent;
+import org.eclipse.hawkbit.repository.event.remote.ServiceMultiActionCancelEvent;
+import org.eclipse.hawkbit.repository.event.remote.ServiceTargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.ServiceTargetAttributesRequestedEvent;
+import org.eclipse.hawkbit.repository.event.remote.ServiceTargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.ServiceTargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutStoppedEvent;
@@ -166,6 +175,15 @@ public class EventType {
         TYPES.put(44, TargetTypeCreatedEvent.class);
         TYPES.put(45, TargetTypeUpdatedEvent.class);
         TYPES.put(46, TargetTypeDeletedEvent.class);
+
+        // processing events - start from 1000 to leave room for future db events
+        TYPES.put(1000, ServiceTargetCreatedEvent.class);
+        TYPES.put(1001, ServiceTargetDeletedEvent.class);
+        TYPES.put(1002, ServiceTargetAssignDistributionSetEvent.class);
+        TYPES.put(1003, ServiceTargetAttributesRequestedEvent.class);
+        TYPES.put(1004, ServiceCancelTargetAssignmentEvent.class);
+        TYPES.put(1005, ServiceMultiActionAssignEvent.class);
+        TYPES.put(1006, ServiceMultiActionCancelEvent.class);
     }
 
     /**
@@ -196,5 +214,11 @@ public class EventType {
 
     public Class<?> getTargetClass() {
         return TYPES.get(value);
+    }
+
+    public static Collection<NamedType> getNamedTypes() {
+        return TYPES.entrySet().stream()
+                .map(e -> new NamedType(e.getValue(), String.valueOf(e.getKey())))
+                .toList();
     }
 }

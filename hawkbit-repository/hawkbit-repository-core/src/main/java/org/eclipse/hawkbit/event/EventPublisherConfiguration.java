@@ -10,23 +10,18 @@
 package org.eclipse.hawkbit.event;
 
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
-import io.protostuff.ProtostuffIOUtil;
-import io.protostuff.Schema;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
-import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
+import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
 import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.bus.BusProperties;
-import org.springframework.cloud.bus.ConditionalOnBusEnabled;
-import org.springframework.cloud.bus.ServiceMatcher;
-import org.springframework.cloud.bus.jackson.RemoteApplicationEventScan;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -37,12 +32,10 @@ import org.springframework.core.ResolvableType;
 import org.springframework.messaging.converter.MessageConverter;
 
 /**
- * Autoconfiguration for the event bus.
+ * Autoconfiguration for the events.
  */
 @Configuration
-@RemoteApplicationEventScan(basePackages = "org.eclipse.hawkbit.repository.event.remote")
-@PropertySource("classpath:/hawkbit-eventbus-defaults.properties")
-@EnableConfigurationProperties(BusProperties.class)
+@PropertySource("classpath:/hawkbit-events-defaults.properties")
 public class EventPublisherConfiguration {
 
     /**
@@ -66,7 +59,7 @@ public class EventPublisherConfiguration {
      * @return the singleton instance of the {@link EventPublisherHolder}
      */
     @Bean
-    EventPublisherHolder eventBusHolder() {
+    public EventPublisherHolder eventPublisherHolder() {
         return EventPublisherHolder.getInstance();
     }
 
@@ -84,17 +77,10 @@ public class EventPublisherConfiguration {
         private final SystemSecurityContext systemSecurityContext;
         private final ApplicationEventFilter applicationEventFilter;
 
-        private ServiceMatcher serviceMatcher;
-
         protected TenantAwareApplicationEventPublisher(
                 final SystemSecurityContext systemSecurityContext, final ApplicationEventFilter applicationEventFilter) {
             this.systemSecurityContext = systemSecurityContext;
             this.applicationEventFilter = applicationEventFilter;
-        }
-
-        @Autowired(required = false)
-        public void setServiceMatcher(final ServiceMatcher serviceMatcher) {
-            this.serviceMatcher = serviceMatcher;
         }
 
         /**
@@ -106,33 +92,53 @@ public class EventPublisherConfiguration {
                 return;
             }
 
-            if (serviceMatcher == null || !(event instanceof final RemoteTenantAwareEvent remoteEvent)) {
-                super.multicastEvent(event, eventType);
+            if (event instanceof final RemoteTenantAwareEvent remoteEvent) {
+                systemSecurityContext.runAsSystemAsTenant(() -> {
+                    super.multicastEvent(event, eventType);
+                    return null;
+                }, remoteEvent.getTenant());
                 return;
             }
 
-            if (serviceMatcher.isFromSelf(remoteEvent)) {
-                super.multicastEvent(event, eventType);
-                return;
-            }
-
-            systemSecurityContext.runAsSystemAsTenant(() -> {
-                super.multicastEvent(event, eventType);
-                return null;
-            }, remoteEvent.getTenant());
+            super.multicastEvent(event, eventType);
         }
     }
 
-    @ConditionalOnBusEnabled
-    @ConditionalOnClass({ Schema.class, ProtostuffIOUtil.class })
-    protected static class BusProtoStuffAutoConfiguration {
+    @Bean
+    @ConditionalOnProperty(name = "org.eclipse.hawkbit.events.remote-enabled", havingValue = "true")
+    public Consumer<AbstractRemoteEvent> serviceEventConsumer(ApplicationEventPublisher publisher) {
+        return publisher::publishEvent;
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "org.eclipse.hawkbit.events.remote-enabled", havingValue = "true")
+    public Consumer<AbstractRemoteEvent> fanoutEventConsumer(ApplicationEventPublisher publisher) {
+        return publisher::publishEvent;
+    }
+
+    @ConditionalOnProperty(name = "org.eclipse.hawkbit.events.remote-enabled", havingValue = "true")
+    @ConditionalOnProperty(name = "spring.cloud.stream.default.content-type", havingValue = "application/binary+stuff")
+    protected static class EventProtoStuffAutoConfiguration {
 
         /**
-         * @return the protostuff io message converter
+         * @return the protostuff io message converter for events
          */
         @Bean
-        public MessageConverter busProtoBufConverter() {
-            return new BusProtoStuffMessageConverter();
+        public MessageConverter eventProtoStuffConverter() {
+            return new EventProtoStuffMessageConverter();
+        }
+    }
+
+    @ConditionalOnProperty(name = "org.eclipse.hawkbit.events.remote-enabled", havingValue = "true")
+    @ConditionalOnProperty(name = "spring.cloud.stream.default.content-type", havingValue = "application/remote-event-json")
+    protected static class EventJacksonAutoConfiguration {
+
+        /**
+         * @return the Jackson message converter for events
+         */
+        @Bean
+        public MessageConverter eventJacksonMessageConverter() {
+            return new EventJacksonMessageConverter();
         }
     }
 }

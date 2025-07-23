@@ -11,49 +11,42 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
+import org.eclipse.hawkbit.event.EventProtoStuffMessageConverter;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.bus.event.RemoteApplicationEvent;
-import org.springframework.cloud.bus.jackson.BusJacksonAutoConfiguration;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.integration.support.MutableMessageHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.AbstractMessageConverter;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.MimeType;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.util.MimeTypeUtils;
 
 /**
  * Test the remote entity events.
  */
-@TestPropertySource(properties = { "spring.cloud.bus.enabled=true" })
 @SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
- public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest {
+@Import(AbstractRemoteEventTest.EventProtoStuffTestConfig.class)
+public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest {
 
     @Autowired
-    private BusProtoStuffMessageConverter busProtoStuffMessageConverter;
+    private EventProtoStuffMessageConverter eventProtoStuffMessageConverter;
+
     private AbstractMessageConverter jacksonMessageConverter;
 
     @BeforeEach
-    public void setup() throws Exception {
-        final BusJacksonAutoConfiguration autoConfiguration = new BusJacksonAutoConfiguration();
-        this.jacksonMessageConverter = autoConfiguration.busJsonConverter(null);
-        ReflectionTestUtils.setField(
-                jacksonMessageConverter, "packagesToScan",
-                new String[] { "org.eclipse.hawkbit.repository.event.remote", ClassUtils.getPackageName(RemoteApplicationEvent.class) });
-        ((InitializingBean) jacksonMessageConverter).afterPropertiesSet();
+    public void setup() {
+        this.jacksonMessageConverter = new MappingJackson2MessageConverter();
     }
 
     @SuppressWarnings("unchecked")
@@ -65,24 +58,33 @@ import org.springframework.util.MimeTypeUtils;
     @SuppressWarnings("unchecked")
     protected <T extends TenantAwareEvent> T createProtoStuffEvent(final T event) {
         final Message<?> message = createProtoStuffMessage(event);
-        return (T) busProtoStuffMessageConverter.fromMessage(message, event.getClass());
+        return (T) eventProtoStuffMessageConverter.fromMessage(message, event.getClass());
     }
 
     private Message<?> createProtoStuffMessage(final TenantAwareEvent event) {
-        final Map<String, Object> headers = new LinkedHashMap<>();
-        headers.put(MessageHeaders.CONTENT_TYPE, BusProtoStuffMessageConverter.APPLICATION_BINARY_PROTOSTUFF);
-        return busProtoStuffMessageConverter.toMessage(event, new MutableMessageHeaders(headers));
+        return eventProtoStuffMessageConverter.toMessage(
+                event, new MutableMessageHeaders(Map.of(MessageHeaders.CONTENT_TYPE,
+                        EventProtoStuffMessageConverter.APPLICATION_BINARY_PROTOSTUFF))
+        );
     }
 
     private Message<String> createJsonMessage(final Object event) {
-        final Map<String, MimeType> headers = new LinkedHashMap<>();
-        headers.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON);
         try {
-            final String json = new ObjectMapper().writeValueAsString(event);
-            return MessageBuilder.withPayload(json).copyHeaders(headers).build();
-        } catch (final JsonProcessingException e) {
+            String json = new ObjectMapper().writeValueAsString(event);
+            return MessageBuilder.withPayload(json)
+                    .setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON)
+                    .build();
+        } catch (JsonProcessingException e) {
             fail(e.getMessage());
         }
         return null;
+    }
+
+    @TestConfiguration
+    static class EventProtoStuffTestConfig {
+        @Bean
+        public MessageConverter eventProtoBufConverter() {
+            return new EventProtoStuffMessageConverter();
+        }
     }
 }
