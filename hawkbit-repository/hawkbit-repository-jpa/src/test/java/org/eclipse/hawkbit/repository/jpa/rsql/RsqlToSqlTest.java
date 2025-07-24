@@ -102,6 +102,21 @@ class RsqlToSqlTest {
         print(JpaTarget.class, TargetFields.class, TargetFields.TAG.name() + "!=''");
     }
 
+    @Test
+    void printComplex() {
+        print(JpaTarget.class, TargetFields.class, "attribute.key1==00 and (attribute.key2==02 or attribute.key2==01)");
+        print(JpaTarget.class, TargetFields.class, "(attribute.key1==00 or attribute.key1==01) and (attribute.key2==02 or attribute.key2==01) and attribute.key3==01");
+        print(JpaTarget.class, TargetFields.class, "(attribute.key1==00 or attribute.key1==01) and (attribute.key2==02 or attribute.key2==01) and attribute.key3==01 and updateStatus!=pending");
+        print(JpaTarget.class, TargetFields.class, "((attribute.key1==00 or attribute.key1==01) and (attribute.key2==02 or attribute.key2==01) and attribute.key3==03 and updateStatus!=pending)");
+        print(JpaTarget.class, TargetFields.class, "((attribute.key1==00 or attribute.key1==01) and (attribute.key2==02 or attribute.key2==01) and attribute.key3==01 and updateStatus!=pending)");
+    }
+
+    @Test
+    void printVeryComplex() {
+        print(JpaTarget.class, TargetFields.class, "(attribute.key1==00 or attribute.key1==01) and ((attribute.key2==02 or attribute.key2==01) and (attribute.key4==02 or attribute.key5==01)) and attribute.key3==01 and updateStatus!=pending");
+        print(JpaTarget.class, TargetFields.class, "(attribute.key1==00 or attribute.key1==01) and ((attribute.key2==02 or attribute.key2==01) or (attribute.key4==02 or attribute.key5==01)) and attribute.key3==01 and updateStatus!=pending");
+    }
+
     private static String from(final String sql) {
         return sql.substring(sql.indexOf("FROM"));
     }
