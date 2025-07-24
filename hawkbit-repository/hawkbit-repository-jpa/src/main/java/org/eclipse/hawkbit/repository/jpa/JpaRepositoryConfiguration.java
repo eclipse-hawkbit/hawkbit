@@ -20,7 +20,6 @@ import jakarta.validation.Validation;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.hawkbit.ContextAware;
-import org.eclipse.hawkbit.repository.BaseRepositoryTypeProvider;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
@@ -87,7 +86,6 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.HawkbitBaseRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.LocalArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
@@ -155,7 +153,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 /**
  * General configuration for hawkBit's Repository.
  */
-@EnableJpaRepositories(value = "org.eclipse.hawkbit.repository.jpa.repository", repositoryFactoryBeanClass = CustomBaseRepositoryFactoryBean.class)
+@EnableJpaRepositories(value = "org.eclipse.hawkbit.repository.jpa.repository", repositoryFactoryBeanClass = HawkbitBaseRepositoryFactoryBean.class)
 @EnableTransactionManagement
 @EnableJpaAuditing
 @EnableAspectJAutoProxy
@@ -412,17 +410,6 @@ public class JpaRepositoryConfiguration {
     @Bean
     ExceptionMappingAspectHandler createRepositoryExceptionHandlerAdvice() {
         return new ExceptionMappingAspectHandler();
-    }
-
-    /**
-     * Default {@link BaseRepositoryTypeProvider} bean always provides the NoCountBaseRepository
-     *
-     * @return a {@link BaseRepositoryTypeProvider} bean
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    BaseRepositoryTypeProvider baseRepositoryTypeProvider() {
-        return new HawkbitBaseRepository.RepositoryTypeProvider();
     }
 
     @Bean

@@ -408,7 +408,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
      * Ensures that the server is behaving as expected on invalid requests (wrong media type, wrong ID etc.).
      */
     @Test
-    void invalidRequestsOnSoftwaremoduleTypesResource() throws Exception {
+    void invalidRequestsOnSoftwareModuleTypesResource() throws Exception {
         final SoftwareModuleType testType = createTestType();
 
         final List<SoftwareModuleTypeManagement.Create> types = List.of(SoftwareModuleTypeManagement.Create.builder()

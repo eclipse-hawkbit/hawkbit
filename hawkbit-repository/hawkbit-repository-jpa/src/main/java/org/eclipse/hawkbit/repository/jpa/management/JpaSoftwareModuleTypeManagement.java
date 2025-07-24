@@ -43,15 +43,6 @@ public class JpaSoftwareModuleTypeManagement
         this.softwareModuleRepository = softwareModuleRepository;
     }
 
-    // TODO - do not override just to do a mapping
-    public JpaSoftwareModuleType create(final Create create) {
-        try {
-            return super.create(create);
-        } catch (final Exception e) {
-            throw ExceptionMapper.mapRe(e);
-        }
-    }
-
     @Override
     public Optional<JpaSoftwareModuleType> findByKey(final String key) {
         return jpaRepository.findByKey(key);

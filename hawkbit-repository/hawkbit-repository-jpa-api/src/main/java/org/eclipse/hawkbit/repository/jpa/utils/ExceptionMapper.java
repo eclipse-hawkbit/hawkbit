@@ -36,10 +36,8 @@ public class ExceptionMapper {
 
     private static final Map<String, String> EXCEPTION_MAPPING = new HashMap<>(4);
 
-    /**
-     * this is required to enable a certain order of exception and to select the most specific mappable exception according to the type
-     * hierarchy of the exception.
-     */
+    // this is required to enable a certain order of exception and to select the most specific mappable exception according to the type
+    // hierarchy of the exception
     private static final List<Class<?>> MAPPED_EXCEPTION_ORDER = new ArrayList<>(4);
 
     static {
@@ -48,9 +46,10 @@ public class ExceptionMapper {
         MAPPED_EXCEPTION_ORDER.add(AccessDeniedException.class);
 
         EXCEPTION_MAPPING.put(DuplicateKeyException.class.getName(), EntityAlreadyExistsException.class.getName());
-
         EXCEPTION_MAPPING.put(OptimisticLockingFailureException.class.getName(), ConcurrentModificationException.class.getName());
         EXCEPTION_MAPPING.put(AccessDeniedException.class.getName(), InsufficientPermissionException.class.getName());
+
+        EXCEPTION_MAPPING.put("org.hibernate.exception.ConstraintViolationException", EntityAlreadyExistsException.class.getName());
         EXCEPTION_MAPPING.put(AuthorizationDeniedException.class.getName(), InsufficientPermissionException.class.getName());
     }
 
@@ -97,6 +96,17 @@ public class ExceptionMapper {
 
             log.error("there is no mapping configured for exception class {}", mappedEx.getName());
             return new GenericSpServerException(e);
+        }
+
+        // not ordered
+        final String mappingClass = EXCEPTION_MAPPING.get(e.getClass().getName());
+        if (mappingClass != null) {
+            try {
+                return (Exception) Class.forName(mappingClass).getConstructor(Throwable.class).newInstance(e);
+            } catch (final ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex) {
+                log.error(ex.getMessage(), ex);
+                return e;
+            }
         }
 
         return e;
