@@ -11,16 +11,15 @@ package org.eclipse.hawkbit.repository.jpa.specifications;
 
 import java.util.List;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
  * Helper class to easily combine {@link Specification} instances.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SpecificationsBuilder {
-
-    private SpecificationsBuilder() {
-
-    }
 
     /**
      * Combine all given specification with and. The first specification is the
@@ -33,11 +32,10 @@ public final class SpecificationsBuilder {
         if (specList.isEmpty()) {
             return null;
         }
-        Specification<T> specs = Specification.where(specList.get(0));
+        Specification<T> specs = specList.get(0);
         for (final Specification<T> specification : specList.subList(1, specList.size())) {
             specs = specs.and(specification);
         }
         return specs;
     }
-
 }

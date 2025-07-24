@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -44,6 +45,8 @@ import jakarta.persistence.metamodel.MapAttribute;
 import jakarta.persistence.metamodel.PluralAttribute;
 import jakarta.persistence.metamodel.SetAttribute;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
@@ -117,9 +120,10 @@ public class SpecificationBuilder<T> {
                             .toList()
                             .toArray(PREDICATES_ARRAY_0));
                 } else if (op == Logical.Operator.OR) {
+                    final Map<String, Integer> state = pathResolver.getState();
                     return cb.or(logical.getChildren().stream()
                             .map(child -> {
-                                pathResolver.reset();
+                                pathResolver.reset(state);
                                 return build(child); // for or path resolver joins could be reused
                             })
                             .toList()
@@ -324,12 +328,13 @@ public class SpecificationBuilder<T> {
         private static Path<?> deepGetPath(final Path<?> path, final String subAttributeName) {
             return deepGetPath(path, subAttributeName.split("\\."), 0);
         }
+
         private static Path<?> deepGetPath(final Path<?> path, final String[] subAttributeNameSplit, int startIndex) {
             final String subAttributeName = subAttributeNameSplit[startIndex++];
             if (startIndex == subAttributeNameSplit.length) {
                 return path.get(subAttributeName);
             } else { // else its a deeper path so request left join
-                if (path instanceof Join<?,?> join) {
+                if (path instanceof Join<?, ?> join) {
                     return deepGetPath(join.join(subAttributeName, JoinType.LEFT), subAttributeNameSplit, startIndex);
                 } else {
                     throw new RSQLParameterSyntaxException("Unexpected sub attribute " + subAttributeName);
@@ -432,8 +437,13 @@ public class SpecificationBuilder<T> {
                 return getCollectionPathResolver(attribute.getName()).getJoinOnInner(value);
             }
 
-            private void reset() {
-                attributeToPathResolver.values().forEach(CollectionPathResolver::reset);
+            private Map<String, Integer> getState() {
+                return attributeToPathResolver.entrySet().stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey, resolver -> resolver.getValue().getPos()));
+            }
+
+            private void reset(final Map<String, Integer> toState) {
+                attributeToPathResolver.forEach((attribute, resolver) -> resolver.setPos(toState.getOrDefault(attribute, 0)));
             }
 
             @Nonnull
@@ -445,6 +455,8 @@ public class SpecificationBuilder<T> {
 
                 private final String attributeName;
                 private final List<Path<?>> paths = new ArrayList<>();
+                @Getter
+                @Setter
                 private int pos;
                 private final Map<Object, MapJoin<?, ?, ?>> joinOnCache = new HashMap<>();
                 private final Map<Object, MapJoin<?, ?, ?>> joinOnInnerCache = new HashMap<>();
@@ -478,10 +490,6 @@ public class SpecificationBuilder<T> {
                         mapPath.on(equal(mapPath.key(), k));
                         return mapPath;
                     });
-                }
-
-                private void reset() {
-                    pos = 0;
                 }
             }
         }
