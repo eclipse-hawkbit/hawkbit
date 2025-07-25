@@ -11,14 +11,17 @@ package org.eclipse.hawkbit.repository.exception;
 
 import java.io.Serial;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- * {@link StopRolloutException} is thrown when an error occurs while stopping
- * the rollout (due to an invalidation of distribution set). This could be
- * caused by a long ongoing creation of a rollout.
+ * {@link StopRolloutException} is thrown when an error occurs while stopping the rollout (due to an invalidation of distribution set).
+ * This could be caused by a long ongoing creation of a rollout.
  */
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class StopRolloutException extends AbstractServerRtException {
 
     @Serial

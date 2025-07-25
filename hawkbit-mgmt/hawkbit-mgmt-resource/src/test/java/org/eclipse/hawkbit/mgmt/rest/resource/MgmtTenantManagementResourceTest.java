@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValueRequest;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
@@ -334,10 +335,10 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     }
 
     private Long createTestDistributionSetType() {
-        DistributionSetType testDefaultDsType = distributionSetTypeManagement.create(entityFactory.distributionSetType().create()
-                .key("test123").name("TestName123").description("TestDefaultDsType"));
+        DistributionSetType testDefaultDsType = distributionSetTypeManagement.create(DistributionSetTypeManagement.Create.builder()
+                .key("test123").name("TestName123").description("TestDefaultDsType").build());
         testDefaultDsType = distributionSetTypeManagement
-                .update(entityFactory.distributionSetType().update(testDefaultDsType.getId()).description("TestDefaultDsType"));
+                .update(DistributionSetTypeManagement.Update.builder().id(testDefaultDsType.getId()).description("TestDefaultDsType").build());
         return testDefaultDsType.getId();
     }
 

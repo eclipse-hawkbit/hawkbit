@@ -18,11 +18,11 @@ import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.junit.jupiter.api.Test;
 
-@Slf4j
 /**
  * Feature: SecurityTests - SystemManagement<br/>
  * Story: SecurityTests SystemManagement
  */
+@Slf4j
 class SystemManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     /**

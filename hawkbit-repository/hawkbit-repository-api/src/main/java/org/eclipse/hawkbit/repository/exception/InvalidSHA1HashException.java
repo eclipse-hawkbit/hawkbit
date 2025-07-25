@@ -11,12 +11,16 @@ package org.eclipse.hawkbit.repository.exception;
 
 import java.io.Serial;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * Thrown if SHA1 checksum check fails.
  */
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class InvalidSHA1HashException extends AbstractServerRtException {
 
     @Serial

@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement.Create;
 import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -251,8 +252,10 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
     void checkAutoAssignWithFailures() {
 
         // incomplete distribution set that will be assigned
-        final DistributionSet setF = distributionSetManagement.create(entityFactory.distributionSet().create()
-                .name("dsA").version("1").type(testdataFactory.findOrCreateDefaultTestDsType()));
+        final DistributionSet setF = distributionSetManagement.create(Create.builder()
+                .type(testdataFactory.findOrCreateDefaultTestDsType())
+                .name("dsA").version("1")
+                .build());
         final DistributionSet setA = testdataFactory.createDistributionSet("dsA");
         final DistributionSet setB = testdataFactory.createDistributionSet("dsB");
 

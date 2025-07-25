@@ -158,25 +158,6 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    TestdataFactory testdataFactory(
-            final ControllerManagement controllerManagement, final ArtifactManagement artifactManagement,
-            final SoftwareModuleManagement softwareModuleManagement, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-            final DistributionSetManagement distributionSetManagement,
-            final DistributionSetInvalidationManagement distributionSetInvalidationManagement,
-            final DistributionSetTypeManagement distributionSetTypeManagement,
-            final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
-            final TargetTypeManagement targetTypeManagement, final TargetTagManagement targetTagManagement,
-            final DeploymentManagement deploymentManagement, final DistributionSetTagManagement distributionSetTagManagement,
-            final RolloutManagement rolloutManagement, final RolloutHandler rolloutHandler,
-            final QuotaManagement quotaManagement,
-            final EntityFactory entityFactory, final TenantAware tenantAware) {
-        return new TestdataFactory(controllerManagement, artifactManagement, softwareModuleManagement, softwareModuleTypeManagement,
-                distributionSetManagement, distributionSetInvalidationManagement, distributionSetTypeManagement, targetManagement,
-                targetFilterQueryManagement, targetTypeManagement, targetTagManagement, deploymentManagement,
-                distributionSetTagManagement, rolloutManagement, rolloutHandler, quotaManagement, entityFactory, tenantAware);
-    }
-
-    @Bean
     PropertyBasedArtifactUrlHandler testPropertyBasedArtifactUrlHandler(final ArtifactUrlHandlerProperties urlHandlerProperties) {
         return new PropertyBasedArtifactUrlHandler(urlHandlerProperties, "");
     }

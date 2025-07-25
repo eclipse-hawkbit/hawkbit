@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.junit.jupiter.api.Test;
@@ -59,12 +60,12 @@ class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
     @Test
     void changedEntitiesAreNotEqual() {
         final SoftwareModuleType type = softwareModuleTypeManagement
-                .create(entityFactory.softwareModuleType().create().key("test").name("test"));
+                .create(SoftwareModuleTypeManagement.Create.builder().key("test").name("test").build());
         assertThat(type).as("persited entity is not equal to regular object")
-                .isNotEqualTo(entityFactory.softwareModuleType().create().key("test").name("test").build());
+                .isNotEqualTo(SoftwareModuleTypeManagement.Create.builder().key("test").name("test").build());
 
         final SoftwareModuleType updated = softwareModuleTypeManagement.update(
-                entityFactory.softwareModuleType().update(type.getId()).description("another"));
+                SoftwareModuleTypeManagement.Update.builder().id(type.getId()).description("another").build());
         assertThat(type).as("Changed entity is not equal to the previous version").isNotEqualTo(updated);
     }
 
@@ -72,9 +73,9 @@ class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
      * Verify that no proxy of the entity manager has an influence on the equals or hashcode result.
      */
     @Test
-    void managedEntityIsEqualToUnamangedObjectWithSameKey() {
+    void managedEntityIsEqualToUnmanagedObjectWithSameKey() {
         final SoftwareModuleType type = softwareModuleTypeManagement.create(
-                entityFactory.softwareModuleType().create().key("test").name("test").description("test"));
+                SoftwareModuleTypeManagement.Create.builder().key("test").name("test").description("test").build());
 
         final JpaSoftwareModuleType mock = new JpaSoftwareModuleType("test", "test", "test", 1);
         mock.setId(type.getId());
@@ -86,5 +87,4 @@ class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
                 .as("managed entity has same hash code as regular object with same content")
                 .hasSameHashCodeAs(mock.hashCode());
     }
-
 }

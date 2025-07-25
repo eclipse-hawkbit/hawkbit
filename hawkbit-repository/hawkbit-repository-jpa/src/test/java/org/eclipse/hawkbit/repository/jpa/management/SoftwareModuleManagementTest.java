@@ -22,6 +22,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import jakarta.validation.ConstraintViolationException;
+
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
@@ -61,7 +65,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     private static final PageRequest PAGE_REQUEST_100 = PageRequest.of(0, 100);
 
     /**
-     * Verifies that management get access reacts as specified on calls for non existing entities by means 
+     * Verifies that management get access reacts as specified on calls for non existing entities by means
      * of Optional not present.
      */
     @Test
@@ -79,20 +83,19 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Verifies that management queries react as specfied on calls for non existing entities 
-     *  by means of throwing EntityNotFoundException.
+     * Verifies that management queries react as specfied on calls for non existing entities
+     * by means of throwing EntityNotFoundException.
      */
     @Test
     @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
 
-        verifyThrownExceptionBy(
-                () -> softwareModuleManagement.create(Collections
-                        .singletonList(entityFactory.softwareModule().create().name("xxx").type(NOT_EXIST_ID))), "SoftwareModuleType");
-        verifyThrownExceptionBy(
-                () -> softwareModuleManagement
-                        .create(entityFactory.softwareModule().create().name("xxx").type(NOT_EXIST_ID)), "SoftwareModuleType");
+        final SoftwareModuleManagement.Create noType = SoftwareModuleManagement.Create.builder().name("xxx").type(null).build();
+        final List<SoftwareModuleManagement.Create> noTypeList = List.of(noType);
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> softwareModuleManagement.create(noTypeList));
+        assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(() -> softwareModuleManagement.create(noType));
 
         verifyThrownExceptionBy(
                 () -> softwareModuleManagement.updateMetadata(
@@ -122,7 +125,8 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> softwareModuleManagement.getMetadata(NOT_EXIST_IDL), "SoftwareModule");
         verifyThrownExceptionBy(() -> softwareModuleManagement.findByType(NOT_EXIST_IDL, PAGE), "SoftwareModule");
 
-        verifyThrownExceptionBy(() -> softwareModuleManagement.update(entityFactory.softwareModule().update(NOT_EXIST_IDL)), "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareModuleManagement.update(SoftwareModuleManagement.Update.builder().id(NOT_EXIST_IDL).build()),
+                "SoftwareModule");
     }
 
     /**
@@ -133,7 +137,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule ah = testdataFactory.createSoftwareModuleOs();
 
         final SoftwareModule updated = softwareModuleManagement
-                .update(entityFactory.softwareModule().update(ah.getId()));
+                .update(SoftwareModuleManagement.Update.builder().id(ah.getId()).build());
 
         assertThat(updated.getOptLockRevision())
                 .as("Expected version number of updated entity to be equal to created version")
@@ -148,7 +152,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule ah = testdataFactory.createSoftwareModuleOs();
 
         final SoftwareModule updated = softwareModuleManagement
-                .update(entityFactory.softwareModule().update(ah.getId()).description("changed").vendor("changed"));
+                .update(SoftwareModuleManagement.Update.builder().id(ah.getId()).description("changed").vendor("changed").build());
 
         assertThat(updated.getOptLockRevision())
                 .as("Expected version number of updated entitity is")
@@ -174,17 +178,20 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void findSoftwareModuleByFilters() {
         final SoftwareModule ah = softwareModuleManagement
-                .create(entityFactory.softwareModule().create().type(appType).name("agent-hub").version("1.0.1"));
+                .create(SoftwareModuleManagement.Create.builder().type(appType).name("agent-hub").version("1.0.1").build());
         final SoftwareModule jvm = softwareModuleManagement
-                .create(entityFactory.softwareModule().create().type(runtimeType).name("oracle-jre").version("1.7.2"));
+                .create(SoftwareModuleManagement.Create.builder().type(runtimeType).name("oracle-jre").version("1.7.2").build());
         final SoftwareModule os = softwareModuleManagement
-                .create(entityFactory.softwareModule().create().type(osType).name("poky").version("3.0.2"));
+                .create(SoftwareModuleManagement.Create.builder().type(osType).name("poky").version("3.0.2").build());
 
         final SoftwareModule ah2 = softwareModuleManagement
-                .create(entityFactory.softwareModule().create().type(appType).name("agent-hub").version("1.0.2"));
+                .create(SoftwareModuleManagement.Create.builder().type(appType).name("agent-hub").version("1.0.2").build());
         JpaDistributionSet ds = (JpaDistributionSet) distributionSetManagement
-                .create(entityFactory.distributionSet().create().name("ds-1").version("1.0.1").type(standardDsType)
-                        .modules(Arrays.asList(os.getId(), jvm.getId(), ah2.getId())));
+                .create(DistributionSetManagement.Create.builder()
+                        .type(standardDsType)
+                        .name("ds-1").version("1.0.1")
+                        .modules(Set.of(os, jvm, ah2))
+                        .build());
 
         final JpaTarget target = (JpaTarget) testdataFactory.createTarget();
         ds = (JpaDistributionSet) assignSet(target, ds).getDistributionSet();
@@ -217,10 +224,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void findSoftwareModulesById() {
-
-        final List<Long> modules = Arrays.asList(testdataFactory.createSoftwareModuleOs().getId(),
-                testdataFactory.createSoftwareModuleApp().getId(), 624355263L);
-
+        final List<Long> modules = List.of(testdataFactory.createSoftwareModuleOs().getId(), testdataFactory.createSoftwareModuleApp().getId());
         assertThat(softwareModuleManagement.get(modules)).hasSize(2);
     }
 
@@ -236,7 +240,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         softwareModuleManagement.delete(testdataFactory.createSoftwareModuleOs("deleted").getId());
         testdataFactory.createSoftwareModuleApp();
 
-        assertThat(softwareModuleManagement.findByType(osType.getId(), PAGE).getContent())
+        assertThat((List) softwareModuleManagement.findByType(osType.getId(), PAGE).getContent())
                 .as("Expected to find the following number of modules:").hasSize(2).as("with the following elements")
                 .contains(two, one);
     }
@@ -497,8 +501,9 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         // one soft deleted
         final SoftwareModule deleted = testdataFactory.createSoftwareModuleApp();
-        final DistributionSet set = distributionSetManagement.create(entityFactory.distributionSet().create()
-                .name("set").version("1").modules(Arrays.asList(one.getId(), deleted.getId())));
+        final DistributionSet set = distributionSetManagement.create(DistributionSetManagement.Create.builder()
+                .type(defaultDsType())
+                .name("set").version("1").modules(Set.of(one, deleted)).build());
         softwareModuleManagement.delete(deleted.getId());
 
         assertThat(softwareModuleManagement.findByAssignedTo(set.getId(), PAGE).getContent())
@@ -825,7 +830,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final List<SoftwareModule> modules = distributionSet.getModules().stream().toList();
         assertThat(modules).hasSizeGreaterThan(1);
 
-        // try delete while DS is not locked
+        // try to delete while DS is not locked
         softwareModuleManagement.delete(modules.get(0).getId());
 
         distributionSetManagement.lock(distributionSet.getId());
@@ -833,7 +838,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
                 distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false))
                 .isTrue();
 
-        // try delete SM of a locked DS
+        // try to delete SM of a locked DS
         final Long moduleId = modules.get(1).getId();
         assertThatExceptionOfType(LockedException.class)
                 .as("Attempt to delete a software module of a locked DS should throw an exception")
@@ -865,8 +870,8 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final long countSoftwareModule = softwareModuleRepository.count();
 
         // create SoftwareModule
-        SoftwareModule softwareModule = softwareModuleManagement.create(entityFactory.softwareModule().create()
-                .type(type).name(name).version(version).description("description of artifact " + name));
+        SoftwareModule softwareModule = softwareModuleManagement.create(SoftwareModuleManagement.Create.builder()
+                .type(type).name(name).version(version).description("description of artifact " + name).build());
 
         final int artifactSize = 5 * 1024;
         for (int i = 0; i < numberArtifacts; i++) {

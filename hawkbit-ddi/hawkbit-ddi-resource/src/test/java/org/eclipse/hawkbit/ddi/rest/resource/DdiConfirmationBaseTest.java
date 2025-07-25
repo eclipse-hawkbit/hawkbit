@@ -10,7 +10,7 @@
 package org.eclipse.hawkbit.ddi.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.repository.jpa.management.JpaConfirmationManagement.CONFIRMATION_CODE_MSG_PREFIX;
+import static org.eclipse.hawkbit.repository.ConfirmationManagement.CONFIRMATION_CODE_MSG_PREFIX;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
@@ -124,7 +124,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
         getAndVerifyConfirmationBasePayload(
                 DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, artifact,
                 artifactSignature, action.getId(),
-                findDistributionSetByAction.findFirstModuleByType(osType).get().getId(), "forced", "forced");
+                findFirstModuleByType(findDistributionSetByAction, osType).orElseThrow().getId(), "forced", "forced");
 
         // Retrieved is reported
         final Iterable<ActionStatus> actionStatus = deploymentManagement

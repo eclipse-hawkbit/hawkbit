@@ -61,15 +61,13 @@ public class JpaConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * {@link MultiTenantJpaTransactionManager} bean.
-     *
-     * @return a new {@link PlatformTransactionManager}
-     * @see org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration#transactionManager(ObjectProvider)
+     * {@link TransactionManager} bean. It mainly handles the tenancy but some other thins like conversion of dao / jpa exceptions to
+     * transaction exceptions
      */
     @Override
     @Bean
     public PlatformTransactionManager transactionManager(final ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
-        return new MultiTenantJpaTransactionManager(tenantResolver);
+        return new TransactionManager(tenantResolver);
     }
 
     @Override

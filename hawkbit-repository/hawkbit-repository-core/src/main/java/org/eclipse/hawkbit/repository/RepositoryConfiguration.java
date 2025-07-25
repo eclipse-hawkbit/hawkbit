@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.hawkbit.im.authentication.Hierarchy;
 import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
@@ -26,6 +27,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.access.expression.DenyAllPermissionEvaluator;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
@@ -40,6 +43,7 @@ import org.springframework.util.function.SingletonSupplier;
 /**
  * Default configuration that is common to all repository implementations.
  */
+@Slf4j
 @Configuration
 @EnableMethodSecurity(proxyTargetClass = true, securedEnabled = true)
 @EnableConfigurationProperties({ RepositoryProperties.class, ControllerPollProperties.class, TenantConfigurationProperties.class })
@@ -53,9 +57,36 @@ public class RepositoryConfiguration {
     }
 
     @Bean
+    PermissionEvaluator permissionEvaluator(final RoleHierarchy roleHierarchy) {
+        return new DenyAllPermissionEvaluator() {
+
+            @Override
+            public boolean hasPermission(final Authentication authentication, final Object targetDomainObject, final Object permission) {
+                if (targetDomainObject instanceof MethodSecurityExpressionOperations root) {
+                    final String neededPermission =
+                            permission + "_" + (root.getThis() instanceof RepositoryManagement<?, ?, ?> repositoryManagement
+                                    ? repositoryManagement.permissionGroup()
+                                    : "REPOSITORY"); // TODO - should not fall back here - all using parmissions should extend repository management interface
+                    final boolean hasPermission = roleHierarchy.getReachableGrantedAuthorities(authentication.getAuthorities()).stream()
+                            .map(GrantedAuthority::getAuthority)
+                            .anyMatch(authority -> authority.equals(neededPermission));
+                    if (!hasPermission) {
+                        log.debug(
+                                "User {} does not have permission {} for target {}",
+                                authentication.getName(), neededPermission, targetDomainObject);
+                    }
+                    return hasPermission;
+                }
+                return super.hasPermission(authentication, targetDomainObject, permission);
+            }
+        };
+    }
+
+    @Bean
     @Primary
     MethodSecurityExpressionHandler methodSecurityExpressionHandler(
-            final Optional<RoleHierarchy> roleHierarchy, final Optional<ApplicationContext> applicationContext) {
+            final RoleHierarchy roleHierarchy, final PermissionEvaluator permissionEvaluator,
+            final Optional<ApplicationContext> applicationContext) {
         final DefaultMethodSecurityExpressionHandler methodSecurityExpressionHandler = new DefaultMethodSecurityExpressionHandler() {
 
             @Override
@@ -69,7 +100,8 @@ public class RepositoryConfiguration {
                 return super.createSecurityExpressionRoot(new RawAuthoritiesAuthentication(authentication), mi);
             }
         };
-        roleHierarchy.ifPresent(methodSecurityExpressionHandler::setRoleHierarchy);
+        methodSecurityExpressionHandler.setRoleHierarchy(roleHierarchy);
+        methodSecurityExpressionHandler.setPermissionEvaluator(permissionEvaluator);
         applicationContext.ifPresent(methodSecurityExpressionHandler::setApplicationContext);
         return methodSecurityExpressionHandler;
     }

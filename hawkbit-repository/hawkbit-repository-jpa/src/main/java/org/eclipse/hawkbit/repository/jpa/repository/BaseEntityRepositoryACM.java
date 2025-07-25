@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
-import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -35,7 +35,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 @Slf4j
-public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity> implements BaseEntityRepository<T> {
+public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements BaseEntityRepository<T> {
 
     private static final String SPEC_MUST_NOT_BE_NULL = "Specification must not be null";
     private static final String APPENDED_ACCESS_RULES_SPEC_OF_NON_NULL_SPEC_MUST_NOT_BE_NULL =
@@ -337,7 +337,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     }
 
     @SuppressWarnings("unchecked")
-    static <T extends AbstractJpaTenantAwareBaseEntity, R extends BaseEntityRepository<T>> R of(
+    static <T extends AbstractJpaBaseEntity, R extends BaseEntityRepository<T>> R of(
             final R repository, @NonNull final AccessController<T> accessController) {
         Objects.requireNonNull(repository);
         Objects.requireNonNull(accessController);

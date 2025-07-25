@@ -11,12 +11,16 @@ package org.eclipse.hawkbit.repository.exception;
 
 import java.io.Serial;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * Thrown when force quitting an actions is not allowed. e.g. the action is not active, or it is not canceled before.
  */
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public final class ForceQuitActionNotAllowedException extends AbstractServerRtException {
 
     @Serial

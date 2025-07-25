@@ -13,27 +13,21 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.builder.AbstractTagUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
-import org.eclipse.hawkbit.repository.model.Tag;
 
 /**
  * Create/build implementation.
  */
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
-public class JpaTagCreate extends AbstractTagUpdateCreate<TagCreate> implements TagCreate {
-
-    public JpaDistributionSetTag buildDistributionSetTag() {
-        return new JpaDistributionSetTag(name, description, colour);
-    }
+public class JpaTagCreate extends AbstractTagUpdateCreate<TagCreate<JpaTag>> implements TagCreate<JpaTag> {
 
     public JpaTargetTag buildTargetTag() {
         return new JpaTargetTag(name, description, colour);
     }
 
     @Override
-    public Tag build() {
+    public JpaTag build() {
         return new JpaTag(name, description, colour);
     }
 }

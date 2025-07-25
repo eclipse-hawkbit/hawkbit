@@ -16,8 +16,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
-import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -62,7 +62,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Tests different parameter combinations for target search operations. 
+     * Tests different parameter combinations for target search operations.
      * and query definitions by RSQL (named and un-named).
      */
     @Test
@@ -278,13 +278,12 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void shouldNotFindTargetsIncompatibleWithDS() {
-        final DistributionSetType dsType = testdataFactory.findOrCreateDistributionSetType("test-ds-type",
-                "test-ds-type");
-        final DistributionSet testDs = createDistSetWithType(dsType);
-        final TargetType compatibleTargetType = testdataFactory.createTargetType("compTestType",
-                Collections.singletonList(dsType));
-        final TargetType incompatibleTargetType = testdataFactory.createTargetType("incompTestType",
-                Collections.singletonList(testdataFactory.createDistributionSet().getType()));
+        final DistributionSetType dsType = testdataFactory.findOrCreateDistributionSetType("test-ds-type", "test-ds-type");
+        final DistributionSet testDs = distributionSetManagement.create(DistributionSetManagement.Create.builder()
+                .type(dsType).name("test-ds").version("1.0").build());
+        final TargetType compatibleTargetType = testdataFactory.createTargetType("compTestType", List.of(dsType));
+        final TargetType incompatibleTargetType = testdataFactory.createTargetType(
+                "incompTestType", List.of(testdataFactory.createDistributionSet().getType()));
         final TargetFilterQuery tfq = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("test-filter").query("name==*"));
 
@@ -658,11 +657,5 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .hasSize(400).as("that number is also returned by count query")
                 .hasSize((int) targetManagement.countByFilters(filterParams))
                 .as("and contains the following elements").containsAll(expected);
-    }
-
-    private DistributionSet createDistSetWithType(final DistributionSetType type) {
-        final DistributionSetCreate dsCreate = entityFactory.distributionSet().create().name("test-ds").version("1.0")
-                .type(type);
-        return distributionSetManagement.create(dsCreate);
     }
 }

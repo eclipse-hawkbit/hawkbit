@@ -11,13 +11,16 @@ package org.eclipse.hawkbit.repository.exception;
 
 import java.io.Serial;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- * This exception is thrown if multi assignments is enabled and an target
- * distribution set assignment request does not contain a weight value
+ * This exception is thrown if multi assignments is enabled and a target distribution set assignment request does not contain a weight value
  */
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class NoWeightProvidedInMultiAssignmentModeException extends AbstractServerRtException {
 
     @Serial

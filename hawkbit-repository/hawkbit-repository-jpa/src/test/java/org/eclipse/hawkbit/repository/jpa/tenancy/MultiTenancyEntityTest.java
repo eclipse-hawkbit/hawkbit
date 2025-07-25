@@ -167,11 +167,11 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         createDistributionSetForTenant(anotherTenant);
 
         // ensure both tenants see their distribution sets
-        final Slice<DistributionSet> findDistributionSetsForTenant = findDistributionSetForTenant(tenant);
+        final Slice<? extends DistributionSet> findDistributionSetsForTenant = findDistributionSetForTenant(tenant);
         assertThat(findDistributionSetsForTenant).hasSize(1);
         assertThat(findDistributionSetsForTenant.getContent().get(0).getTenant().toUpperCase())
                 .isEqualTo(tenant.toUpperCase());
-        final Slice<DistributionSet> findDistributionSetsForAnotherTenant = findDistributionSetForTenant(anotherTenant);
+        final Slice<? extends DistributionSet> findDistributionSetsForAnotherTenant = findDistributionSetForTenant(anotherTenant);
         assertThat(findDistributionSetsForAnotherTenant).hasSize(1);
         assertThat(findDistributionSetsForAnotherTenant.getContent().get(0).getTenant().toUpperCase())
                 .isEqualTo(anotherTenant.toUpperCase());
@@ -200,7 +200,7 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         return runAsTenant(tenant, () -> testdataFactory.createDistributionSet());
     }
 
-    private Slice<DistributionSet> findDistributionSetForTenant(final String tenant) throws Exception {
+    private Slice<? extends DistributionSet> findDistributionSetForTenant(final String tenant) throws Exception {
         return runAsTenant(tenant, () -> distributionSetManagement.findByCompleted(true, PAGE));
     }
 }

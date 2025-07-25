@@ -16,31 +16,36 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transaction;
 
 import org.eclipse.hawkbit.repository.jpa.model.EntityPropertyChangeListener;
+import org.eclipse.hawkbit.repository.jpa.utils.ExceptionMapper;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.eclipse.persistence.descriptors.ClassDescriptor;
 import org.eclipse.persistence.descriptors.DescriptorEventManager;
 import org.eclipse.persistence.sessions.Session;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * {@link JpaTransactionManager} that sets the {@link TenantAware#getCurrentTenant()} in the eclipselink session. This has
+ * {@link org.springframework.orm.jpa.JpaTransactionManager} that sets the {@link TenantAware#getCurrentTenant()} in the eclipselink session. This has
  * to be done in eclipselink after a {@link Transaction} has been started.
  * <p/>
- * The class also handles setting the {@link EntityPropertyChangeListener} to the {@link DescriptorEventManager} of the
+ * The class also handles setting:
+ * <ul>
+ *     <li>the {@link EntityPropertyChangeListener} to the {@link DescriptorEventManager}</li>
+ *     <li>exception on doCommit mapping to management exceptions</li>
+ * </ul>
  */
-class MultiTenantJpaTransactionManager extends JpaTransactionManager {
+class TransactionManager extends JpaTransactionManager {
 
     @Serial
     private static final long serialVersionUID = 1L;
+    
+    private static final Class<?> JPA_TARGET;
 
     private transient TenantAware.TenantResolver tenantResolver;
-
-    private static final Class<?> JPA_TARGET;
 
     static {
         try {
@@ -52,7 +57,7 @@ class MultiTenantJpaTransactionManager extends JpaTransactionManager {
         }
     }
 
-    MultiTenantJpaTransactionManager(final TenantAware.TenantResolver tenantResolver) {
+    TransactionManager(final TenantAware.TenantResolver tenantResolver) {
         this.tenantResolver = tenantResolver;
     }
 
@@ -83,6 +88,15 @@ class MultiTenantJpaTransactionManager extends JpaTransactionManager {
             cleanupTenant(em);
         } else {
             em.setProperty(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, currentTenant.toUpperCase());
+        }
+    }
+
+    @Override
+    protected void doCommit(final DefaultTransactionStatus status) {
+        try {
+            super.doCommit(status);
+        } catch (final RuntimeException e) {
+            throw ExceptionMapper.mapRe(e);
         }
     }
 

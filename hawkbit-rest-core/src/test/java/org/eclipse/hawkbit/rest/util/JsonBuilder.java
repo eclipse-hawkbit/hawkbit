@@ -18,13 +18,13 @@ import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetType;
@@ -79,12 +79,12 @@ public class JsonBuilder {
         return builder.toString();
     }
 
-    public static String softwareModules(final List<SoftwareModule> modules) throws JSONException {
+    public static String softwareModules(final List<SoftwareModuleManagement.Create> modules) throws JSONException {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("[");
         int i = 0;
-        for (final SoftwareModule module : modules) {
+        for (final SoftwareModuleManagement.Create module : modules) {
             builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
                     .put("type", module.getType().getKey()).put("id", Long.MAX_VALUE).put("vendor", module.getVendor())
                     .put("version", module.getVersion()).put("createdAt", "0").put("updatedAt", "0")
@@ -100,12 +100,12 @@ public class JsonBuilder {
         return builder.toString();
     }
 
-    public static String softwareModuleTypes(final List<SoftwareModuleType> types) throws JSONException {
+    public static String softwareModuleTypes(final List<SoftwareModuleTypeManagement.Create> types) throws JSONException {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("[");
         int i = 0;
-        for (final SoftwareModuleType module : types) {
+        for (final SoftwareModuleTypeManagement.Create module : types) {
             builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
                     .put("colour", module.getColour()).put("id", Long.MAX_VALUE).put("key", module.getKey())
                     .put("maxAssignments", module.getMaxAssignments()).put("createdAt", "0").put("updatedAt", "0")
@@ -120,10 +120,30 @@ public class JsonBuilder {
         return builder.toString();
     }
 
-    public static String distributionSetTypes(final List<DistributionSetType> types) throws JSONException {
+    public static String softwareModuleTypeCreates(final List<SoftwareModuleTypeManagement.Create> creates) throws JSONException {
+        final StringBuilder builder = new StringBuilder();
+
+        builder.append("[");
+        int i = 0;
+        for (final SoftwareModuleTypeManagement.Create module : creates) {
+            builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
+                    .put("colour", module.getColour()).put("id", Long.MAX_VALUE).put("key", module.getKey())
+                    .put("maxAssignments", module.getMaxAssignments()).put("createdAt", "0").put("updatedAt", "0")
+                    .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh").toString());
+
+            if (++i < creates.size()) {
+                builder.append(",");
+            }
+        }
+        builder.append("]");
+
+        return builder.toString();
+    }
+
+    public static String distributionSetTypes(final List<DistributionSetTypeManagement.Create> types) throws JSONException {
         final JSONArray result = new JSONArray();
 
-        for (final DistributionSetType type : types) {
+        for (final DistributionSetTypeManagement.Create type : types) {
             final JSONArray osmTypes = new JSONArray();
             type.getOptionalModuleTypes().forEach(smt -> {
                 try {
@@ -153,7 +173,7 @@ public class JsonBuilder {
         return result.toString();
     }
 
-    public static String distributionSets(final List<DistributionSet> sets) {
+    public static String distributionSets(final List<DistributionSetManagement.Create> sets) {
         final JSONArray setsJson = new JSONArray();
 
         sets.forEach(set -> {
@@ -165,10 +185,9 @@ public class JsonBuilder {
         });
 
         return setsJson.toString();
-
     }
 
-    public static JSONObject distributionSet(final DistributionSet set) throws JSONException {
+    public static JSONObject distributionSet(final DistributionSetManagement.Create set) throws JSONException {
         final List<JSONObject> modules = set.getModules().stream().map(module -> {
             try {
                 return new JSONObject().put("id", module.getId());
@@ -182,8 +201,7 @@ public class JsonBuilder {
                 .put("type", set.getType() == null ? null : set.getType().getKey()).put("id", Long.MAX_VALUE)
                 .put("version", set.getVersion()).put("createdAt", "0").put("updatedAt", "0")
                 .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
-                .put("requiredMigrationStep", set.isRequiredMigrationStep()).put("modules", new JSONArray(modules));
-
+                .put("requiredMigrationStep", set.getRequiredMigrationStep()).put("modules", new JSONArray(modules));
     }
 
     public static String targets(final List<Target> targets, final boolean withToken) throws JSONException {

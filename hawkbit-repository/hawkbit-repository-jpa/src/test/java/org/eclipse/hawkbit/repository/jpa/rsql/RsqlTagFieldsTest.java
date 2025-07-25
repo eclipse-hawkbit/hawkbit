@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.TagFields;
-import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -29,12 +29,11 @@ class RsqlTagFieldsTest extends AbstractJpaIntegrationTest {
 
     @BeforeEach
     void seuptBeforeTest() {
-
         for (int i = 0; i < 5; i++) {
-            final TagCreate targetTag = entityFactory.tag().create()
-                    .name(Integer.toString(i)).description(Integer.toString(i)).colour(i % 2 == 0 ? "red" : "blue");
-            targetTagManagement.create(targetTag);
-            distributionSetTagManagement.create(targetTag);
+            targetTagManagement.create(entityFactory.tag().create()
+                    .name(Integer.toString(i)).description(Integer.toString(i)).colour(i % 2 == 0 ? "red" : "blue"));
+            distributionSetTagManagement.create(DistributionSetTagManagement.Create.builder()
+                    .name(Integer.toString(i)).description(Integer.toString(i)).colour(i % 2 == 0 ? "red" : "blue").build());
         }
     }
 
@@ -129,9 +128,9 @@ class RsqlTagFieldsTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQueryDistributionSet(final String rsql, final long expectedEntities) {
-        final Page<DistributionSetTag> findEnitity = distributionSetTagManagement.findByRsql(rsql, PageRequest.of(0, 100));
-        final long countAllEntities = findEnitity.getTotalElements();
-        assertThat(findEnitity).isNotNull();
+        final Page<? extends DistributionSetTag> findEntity = distributionSetTagManagement.findByRsql(rsql, PageRequest.of(0, 100));
+        final long countAllEntities = findEntity.getTotalElements();
+        assertThat(findEntity).isNotNull();
         assertThat(countAllEntities).isEqualTo(expectedEntities);
     }
 

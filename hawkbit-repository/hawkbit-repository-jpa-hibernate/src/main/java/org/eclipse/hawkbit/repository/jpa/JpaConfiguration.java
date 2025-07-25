@@ -16,6 +16,7 @@ import java.util.Map;
 import lombok.Data;
 import org.eclipse.hawkbit.repository.jpa.model.EntityPropertyChangeListener;
 
+import org.eclipse.hawkbit.repository.jpa.utils.ExceptionMapper;
 import org.eclipse.hawkbit.repository.jpa.utils.JpaExceptionTranslator;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.hibernate.boot.Metadata;
@@ -29,17 +30,21 @@ import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.jpa.boot.spi.IntegratorProvider;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
+import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.security.core.parameters.P;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.jta.JtaTransactionManager;
+import org.springframework.transaction.support.DefaultTransactionStatus;
 
 import javax.sql.DataSource;
 
@@ -84,6 +89,25 @@ public class JpaConfiguration extends JpaBaseConfiguration {
             @Override
             public HibernateJpaDialect getJpaDialect() {
                 return hibernateJpaDialect;
+            }
+        };
+    }
+
+    /**
+     * {@link PlatformTransactionManager} bean. It handles conversion of dao / jpa exceptions to transaction exceptions
+     */
+    @Override
+    @Bean
+    public PlatformTransactionManager transactionManager(final ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
+        return new JpaTransactionManager() {
+
+            @Override
+            protected void doCommit(final DefaultTransactionStatus status) {
+                try {
+                    super.doCommit(status);
+                } catch (final RuntimeException e) {
+                    throw ExceptionMapper.mapRe(e);
+                }
             }
         };
     }

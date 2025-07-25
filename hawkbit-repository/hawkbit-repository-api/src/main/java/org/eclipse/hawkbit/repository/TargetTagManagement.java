@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
+import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.springframework.data.domain.Page;
@@ -53,7 +54,7 @@ public interface TargetTagManagement {
      * @throws ConstraintViolationException if fields are not filled as specified. Check {@link TagCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    TargetTag create(@NotNull @Valid TagCreate create);
+    TargetTag create(@NotNull @Valid TagCreate<Tag> create);
 
     /**
      * Created multiple {@link TargetTag}s.
@@ -64,7 +65,7 @@ public interface TargetTagManagement {
      * @throws ConstraintViolationException if fields are not filled as specified. Check {@link TagCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    List<TargetTag> create(@NotNull @Valid Collection<TagCreate> creates);
+    List<TargetTag> create(@NotNull @Valid Collection<TagCreate<Tag>> creates);
 
     /**
      * Deletes {@link TargetTag} with given name.

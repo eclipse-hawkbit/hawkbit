@@ -16,6 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.assertj.core.api.Assertions;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
@@ -211,7 +212,7 @@ class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     void softwareModuleUpdateEventIsPublished() throws InterruptedException {
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleApp();
         softwareModuleManagement
-                .update(entityFactory.softwareModule().update(softwareModule.getId()).description("New"));
+                .update(SoftwareModuleManagement.Update.builder().id(softwareModule.getId()).description("New").build());
 
         final SoftwareModuleUpdatedEvent softwareModuleUpdatedEvent = eventListener
                 .waitForEvent(SoftwareModuleUpdatedEvent.class);
@@ -267,5 +268,4 @@ class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
             return null;
         }
     }
-
 }

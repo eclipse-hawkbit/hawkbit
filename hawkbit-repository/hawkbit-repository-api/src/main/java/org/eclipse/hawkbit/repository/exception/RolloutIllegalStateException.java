@@ -11,14 +11,17 @@ package org.eclipse.hawkbit.repository.exception;
 
 import java.io.Serial;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- * the {@link RolloutIllegalStateException} is thrown when a rollout is changing
- * it's state which is not valid. E.g. trying to start a already running
- * rollout, or trying to resume a already finished rollout.
+ * the {@link RolloutIllegalStateException} is thrown when a rollout is changing it's state which is not valid. E.g. trying to start an already
+ * running rollout, or trying to resume a already finished rollout.
  */
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class RolloutIllegalStateException extends AbstractServerRtException {
 
     @Serial

@@ -353,13 +353,13 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
                 .andExpect(jsonPath(prefix + ".download", equalTo(downloadType)))
                 .andExpect(jsonPath(prefix + ".update", equalTo(updateType)))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='jvm')].name",
-                        contains(ds.findFirstModuleByType(runtimeType).get().getName())))
+                        contains(findFirstModuleByType(ds, runtimeType).orElseThrow().getName())))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='jvm')].version",
-                        contains(ds.findFirstModuleByType(runtimeType).get().getVersion())))
+                        contains(findFirstModuleByType(ds, runtimeType).orElseThrow().getVersion())))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].name",
-                        contains(ds.findFirstModuleByType(osType).get().getName())))
+                        contains(findFirstModuleByType(ds, osType).orElseThrow().getName())))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].version",
-                        contains(ds.findFirstModuleByType(osType).get().getVersion())))
+                        contains(findFirstModuleByType(ds, osType).orElseThrow().getVersion())))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].size", contains(ARTIFACT_SIZE)))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].filename",
                         contains(artifact.getFilename())))
@@ -391,9 +391,9 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
                         contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId +
                                 "/softwaremodules/" + osModuleId + "/artifacts/" + artifactSignature.getFilename() + "/download.MD5SUM")))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='bApp')].version",
-                        contains(ds.findFirstModuleByType(appType).get().getVersion())))
+                        contains(findFirstModuleByType(ds, appType).orElseThrow().getVersion())))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='bApp')].metadata").doesNotExist())
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='bApp')].name")
-                        .value(ds.findFirstModuleByType(appType).get().getName()));
+                        .value(findFirstModuleByType(ds, appType).orElseThrow().getName()));
     }
 }

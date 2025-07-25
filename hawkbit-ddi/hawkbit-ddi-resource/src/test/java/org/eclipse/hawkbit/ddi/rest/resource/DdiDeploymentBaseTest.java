@@ -189,7 +189,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet findDistributionSetByAction = distributionSetManagement.findByAction(action.getId()).get();
         getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, artifact,
                 artifactSignature, action.getId(),
-                findDistributionSetByAction.findFirstModuleByType(osType).get().getId(), "forced", "forced");
+                findFirstModuleByType(findDistributionSetByAction, osType).orElseThrow().getId(), "forced", "forced");
 
         // Retrieved is reported
         final Iterable<ActionStatus> actionStatusMessages = deploymentManagement
@@ -348,10 +348,10 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet findDistributionSetByAction = distributionSetManagement.findByAction(action.getId()).get();
         getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, artifact,
                 artifactSignature, action.getId(),
-                findDistributionSetByAction.findFirstModuleByType(osType).get().getId(), "forced", "forced");
+                findFirstModuleByType(findDistributionSetByAction, osType).orElseThrow().getId(), "forced", "forced");
 
         getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaTypes.HAL_JSON, ds, artifact, artifactSignature,
-                action.getId(), findDistributionSetByAction.findFirstModuleByType(osType).get().getId(), "forced",
+                action.getId(), findFirstModuleByType(findDistributionSetByAction, osType).orElseThrow().getId(), "forced",
                 "forced");
 
         // Retrieved is reported

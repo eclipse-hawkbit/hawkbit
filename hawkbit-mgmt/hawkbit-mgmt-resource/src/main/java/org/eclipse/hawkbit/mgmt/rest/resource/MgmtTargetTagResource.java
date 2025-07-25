@@ -92,7 +92,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     @Override
     public ResponseEntity<List<MgmtTag>> createTargetTags(final List<MgmtTagRequestBodyPut> tags) {
         log.debug("creating {} target tags", tags.size());
-        final List<TargetTag> createdTargetTags = this.tagManagement.create(MgmtTagMapper.mapTagFromRequest(entityFactory, tags));
+        final List<TargetTag> createdTargetTags = tagManagement.create(MgmtTagMapper.mapTagFromRequest(entityFactory, tags));
         return new ResponseEntity<>(MgmtTagMapper.toResponse(createdTargetTags), HttpStatus.CREATED);
     }
 

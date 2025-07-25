@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -184,8 +185,10 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
         final DistributionSet permitted = testdataFactory.createDistributionSet();
         final DistributionSet readOnly = testdataFactory.createDistributionSet();
         final DistributionSet hidden = testdataFactory.createDistributionSet();
-        final Long dsTagId = distributionSetTagManagement.create(entityFactory.tag().create().name("dsTag")).getId();
-        final Long dsTag2Id = distributionSetTagManagement.create(entityFactory.tag().create().name("dsTag2")).getId();
+        final Long dsTagId = distributionSetTagManagement.create(
+                DistributionSetTagManagement.Create.builder().name("dsTag").build()).getId();
+        final Long dsTag2Id = distributionSetTagManagement.create(
+                DistributionSetTagManagement.Create.builder().name("dsTag2").build()).getId();
 
         // perform tag assignment before setting access rules
         distributionSetManagement.assignTag(Arrays.asList(permitted.getId(), readOnly.getId(), hidden.getId()), dsTagId);

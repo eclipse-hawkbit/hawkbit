@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.security.controller.GatewayTokenAuthenticator;
 import org.eclipse.hawkbit.security.controller.SecurityHeaderAuthenticator;
 import org.eclipse.hawkbit.security.controller.SecurityTokenAuthenticator;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -57,8 +56,8 @@ class ControllerDownloadSecurityConfiguration {
     private final HawkbitSecurityProperties securityProperties;
     private final SystemSecurityContext systemSecurityContext;
 
-    @Autowired
-    ControllerDownloadSecurityConfiguration(final ControllerManagement controllerManagement,
+    ControllerDownloadSecurityConfiguration(
+            final ControllerManagement controllerManagement,
             final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
             final DdiSecurityProperties ddiSecurityConfiguration,
             final HawkbitSecurityProperties securityProperties, final SystemSecurityContext systemSecurityContext) {

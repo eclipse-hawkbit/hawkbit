@@ -112,7 +112,6 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     private boolean deleted;
 
     @ToString.Exclude
-    @Getter(AccessLevel.NONE)
     @ManyToMany(mappedBy = "modules", targetEntity = JpaDistributionSet.class, fetch = FetchType.LAZY)
     private List<DistributionSet> assignedTo;
 
@@ -172,29 +171,6 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
     public void unlock() {
         locked = false;
-    }
-
-    public void setDeleted(final boolean deleted) {
-        if (assignedTo != null) {
-            final List<DistributionSet> lockedDS = assignedTo.stream()
-                    .filter(DistributionSet::isLocked)
-                    .filter(ds -> !ds.isDeleted())
-                    .toList();
-            if (!lockedDS.isEmpty()) {
-                final StringBuilder sb = new StringBuilder("Part of ");
-                if (lockedDS.size() == 1) {
-                    sb.append("a locked distribution set: ");
-                } else {
-                    sb.append(lockedDS.size()).append(" locked distribution sets: ");
-                }
-                for (final DistributionSet ds : lockedDS) {
-                    sb.append(ds.getName()).append(":").append(ds.getVersion()).append(" (").append(ds.getId()).append("), ");
-                }
-                sb.delete(sb.length() - 2, sb.length());
-                throw new LockedException(JpaSoftwareModule.class, getId(), "DELETE", sb.toString());
-            }
-        }
-        this.deleted = deleted;
     }
 
     @Override

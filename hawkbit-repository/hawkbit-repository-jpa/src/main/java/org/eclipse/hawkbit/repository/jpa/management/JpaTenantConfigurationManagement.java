@@ -53,6 +53,7 @@ import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -65,6 +66,7 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
@@ -75,6 +77,8 @@ import org.springframework.validation.annotation.Validated;
 @Slf4j
 @Transactional(readOnly = true)
 @Validated
+@Service
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "tenant-configuration-management" }, matchIfMissing = true)
 public class JpaTenantConfigurationManagement implements TenantConfigurationManagement {
 
     private static final ConfigurableConversionService CONVERSION_SERVICE = new DefaultConversionService();
@@ -87,7 +91,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
 
     private ServiceMatcher serviceMatcher;
 
-    public JpaTenantConfigurationManagement(
+    protected JpaTenantConfigurationManagement(
             final TenantConfigurationRepository tenantConfigurationRepository,
             final TenantConfigurationProperties tenantConfigurationProperties,
             final CacheManager cacheManager, final AfterTransactionCommitExecutor afterCommitExecutor,

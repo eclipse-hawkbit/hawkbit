@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.EntityInterceptor;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
@@ -115,7 +116,7 @@ class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     private void executeDeleteAndAssertCallbackResult(final AbstractEntityListener entityInterceptor) {
         EntityInterceptorHolder.getInstance().getEntityInterceptors().add(entityInterceptor);
         final SoftwareModuleType type = softwareModuleTypeManagement
-                .create(entityFactory.softwareModuleType().create().name("test").key("test"));
+                .create(SoftwareModuleTypeManagement.Create.builder().name("test").key("test").build());
 
         softwareModuleTypeManagement.delete(type.getId());
         assertThat(entityInterceptor.getEntity()).isNotNull();

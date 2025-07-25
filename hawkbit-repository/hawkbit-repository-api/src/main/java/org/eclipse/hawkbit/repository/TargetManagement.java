@@ -15,12 +15,12 @@ import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AU
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_CREATE_TARGET;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_DELETE_TARGET;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_PREFIX;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_READ_REPOSITORY;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_READ_TARGET;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_SUFFIX;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_UPDATE_REPOSITORY;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET;
 
 import java.util.Collection;
@@ -752,7 +752,7 @@ public interface TargetManagement {
      * @throws EntityAlreadyExistsException in case one of the metad-ata entry already exists for the specific key
      * @throws AssignmentQuotaExceededException if the maximum number of meta-data entries is exceeded for the addressed {@link Target}
      */
-    @PreAuthorize(HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
     void createMetadata(@NotEmpty String controllerId, @NotEmpty Map<String, String> metadata);
 
     /**
@@ -762,7 +762,7 @@ public interface TargetManagement {
      * @return the found target meta-data
      * @throws EntityNotFoundException if target with given ID does not exist
      */
-    @PreAuthorize(HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Map<String, String> getMetadata(@NotEmpty String controllerId);
 
     /**
@@ -773,7 +773,7 @@ public interface TargetManagement {
      * @param value meta data-entry to be new value
      * @throws EntityNotFoundException in case the meta-data entry does not exist and cannot be updated
      */
-    @PreAuthorize(HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
     void updateMetadata(@NotEmpty String controllerId, @NotNull String key, @NotNull String value);
 
     /**
@@ -783,6 +783,6 @@ public interface TargetManagement {
      * @param key of the meta data element
      * @throws EntityNotFoundException if given target does not exist
      */
-    @PreAuthorize(HAS_AUTH_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
     void deleteMetadata(@NotEmpty String controllerId, @NotEmpty String key);
 }

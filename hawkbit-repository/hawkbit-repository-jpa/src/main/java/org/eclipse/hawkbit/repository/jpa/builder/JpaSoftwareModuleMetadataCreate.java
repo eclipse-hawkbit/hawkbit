@@ -9,10 +9,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
-import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractSoftwareModuleMetadataUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.management.JpaSoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
@@ -23,16 +24,16 @@ public class JpaSoftwareModuleMetadataCreate
         extends AbstractSoftwareModuleMetadataUpdateCreate<SoftwareModuleMetadataCreate>
         implements SoftwareModuleMetadataCreate {
 
-    private final SoftwareModuleManagement softwareModuleManagement;
+    private final JpaSoftwareModuleManagement softwareModuleManagement;
 
-    JpaSoftwareModuleMetadataCreate(final long softwareModuleId, final SoftwareModuleManagement softwareModuleManagement) {
+    JpaSoftwareModuleMetadataCreate(final long softwareModuleId, final JpaSoftwareModuleManagement softwareModuleManagement) {
         this.softwareModuleManagement = softwareModuleManagement;
         this.softwareModuleId = softwareModuleId;
     }
 
     @Override
     public JpaSoftwareModuleMetadata build() {
-        final SoftwareModule module = softwareModuleManagement.get(softwareModuleId)
+        final JpaSoftwareModule module = softwareModuleManagement.get(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
         if (key == null) {

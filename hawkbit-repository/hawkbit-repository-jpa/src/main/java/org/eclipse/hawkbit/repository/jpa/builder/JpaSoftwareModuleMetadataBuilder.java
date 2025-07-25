@@ -9,11 +9,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
-import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.GenericSoftwareModuleMetadataUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataUpdate;
+import org.eclipse.hawkbit.repository.jpa.management.JpaSoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 
 /**
@@ -21,9 +21,9 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
  */
 public class JpaSoftwareModuleMetadataBuilder implements SoftwareModuleMetadataBuilder {
 
-    private final SoftwareModuleManagement softwareModuleManagement;
+    private final JpaSoftwareModuleManagement softwareModuleManagement;
 
-    public JpaSoftwareModuleMetadataBuilder(final SoftwareModuleManagement softwareModuleManagement) {
+    public JpaSoftwareModuleMetadataBuilder(final JpaSoftwareModuleManagement softwareModuleManagement) {
         this.softwareModuleManagement = softwareModuleManagement;
     }
 

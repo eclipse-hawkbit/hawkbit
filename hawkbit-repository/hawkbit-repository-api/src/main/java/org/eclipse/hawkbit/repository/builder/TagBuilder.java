@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.repository.model.Tag;
 /**
  * Builder for {@link Tag}.
  */
-public interface TagBuilder {
+public interface TagBuilder<T extends Tag> {
 
     /**
      * @param id of the updatable entity
@@ -25,5 +25,5 @@ public interface TagBuilder {
     /**
      * @return builder instance
      */
-    TagCreate create();
+    TagCreate<T> create();
 }

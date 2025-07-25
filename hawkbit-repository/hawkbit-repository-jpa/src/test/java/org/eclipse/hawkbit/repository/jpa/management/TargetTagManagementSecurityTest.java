@@ -16,11 +16,11 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.junit.jupiter.api.Test;
 
-@Slf4j
 /**
  * Feature: SecurityTests - TargetTagManagement<br/>
  * Story: SecurityTests TargetTagManagement
  */
+@Slf4j
 class TargetTagManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     /**

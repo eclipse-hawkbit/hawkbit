@@ -74,14 +74,4 @@ public interface DistributionSet extends NamedVersionedEntity {
      *         and not automatically canceled if overridden by a newer update.
      */
     boolean isRequiredMigrationStep();
-
-    /**
-     * Searches through modules for the given type.
-     *
-     * @param type to search for
-     * @return SoftwareModule of given type
-     */
-    default Optional<SoftwareModule> findFirstModuleByType(final SoftwareModuleType type) {
-        return getModules().stream().filter(module -> module.getType().equals(type)).findAny();
-    }
 }

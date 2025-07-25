@@ -11,15 +11,17 @@ package org.eclipse.hawkbit.repository.exception;
 
 import java.io.Serial;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- * The {@link AutoConfirmationAlreadyActiveException} is thrown when auto
- * confirmation is already active for a device but the
- * {@link org.eclipse.hawkbit.repository.ConfirmationManagement#activateAutoConfirmation}
- * is getting called.
+ * The {@link AutoConfirmationAlreadyActiveException} is thrown when auto confirmation is already active for a device but the
+ * {@link org.eclipse.hawkbit.repository.ConfirmationManagement#activateAutoConfirmation} is getting called.
  */
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class AutoConfirmationAlreadyActiveException extends AbstractServerRtException {
 
     @Serial
