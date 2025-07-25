@@ -55,6 +55,10 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.GroupedCancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.GroupedMultiActionAssignEvent;
+import org.eclipse.hawkbit.repository.event.remote.GroupedTargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.GroupedTargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -141,10 +145,11 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     /**
      * Method to send a message to a RabbitMQ Exchange after the Distribution set has been assign to a Target.
      *
-     * @param assignedEvent the object to be sent.
+     * @param groupedTargetAssignDistributionSetEvent  event to be processed
      */
-    @EventListener(classes = TargetAssignDistributionSetEvent.class)
-    protected void targetAssignDistributionSet(final TargetAssignDistributionSetEvent assignedEvent) {
+    @EventListener(classes = GroupedTargetAssignDistributionSetEvent.class)
+    protected void targetAssignDistributionSet(final GroupedTargetAssignDistributionSetEvent groupedTargetAssignDistributionSetEvent) {
+        final TargetAssignDistributionSetEvent assignedEvent = groupedTargetAssignDistributionSetEvent.getRemoteEvent();
         final List<Target> filteredTargetList = getTargetsWithoutPendingCancellations(assignedEvent.getActions().keySet());
 
         if (!filteredTargetList.isEmpty()) {
@@ -156,10 +161,11 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     /**
      * Listener for Multi-Action events.
      *
-     * @param multiActionAssignEvent the Multi-Action event to be processed
+     * @param groupedMultiActionAssignEvent the Multi-Action event to be processed
      */
-    @EventListener(classes = MultiActionAssignEvent.class)
-    protected void onMultiActionAssign(final MultiActionAssignEvent multiActionAssignEvent) {
+    @EventListener(classes = GroupedMultiActionAssignEvent.class)
+    protected void onMultiActionAssign(final GroupedMultiActionAssignEvent groupedMultiActionAssignEvent) {
+        final MultiActionAssignEvent multiActionAssignEvent = groupedMultiActionAssignEvent.getRemoteEvent();
         log.debug("MultiActionAssignEvent received for {}", multiActionAssignEvent.getControllerIds());
         sendMultiActionRequestMessages(multiActionAssignEvent.getControllerIds());
     }
@@ -187,10 +193,11 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * Method to send a message to a RabbitMQ Exchange after the assignment of
      * the Distribution set to a Target has been canceled.
      *
-     * @param cancelEvent that is to be converted to a DMF message
+     * @param groupedCancelEvent that is to be converted to a DMF message
      */
-    @EventListener(classes = CancelTargetAssignmentEvent.class)
-    protected void targetCancelAssignmentToDistributionSet(final CancelTargetAssignmentEvent cancelEvent) {
+    @EventListener(classes = GroupedCancelTargetAssignmentEvent.class)
+    protected void targetCancelAssignmentToDistributionSet(final GroupedCancelTargetAssignmentEvent groupedCancelEvent) {
+        final CancelTargetAssignmentEvent cancelEvent = groupedCancelEvent.getRemoteEvent();
         final List<Target> eventTargets = partitionedParallelExecution(
                 cancelEvent.getActions().keySet(), targetManagement::getByControllerID);
 
@@ -206,11 +213,11 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     /**
      * Method to send a message to a RabbitMQ Exchange after a Target was deleted.
      *
-     * @param deleteEvent the TargetDeletedEvent which holds the necessary data for sending a target delete message.
+     * @param groupedDeleteEvent the TargetDeletedEvent which holds the necessary data for sending a target delete message.
      */
-    @EventListener(classes = TargetDeletedEvent.class)
-    protected void targetDelete(final TargetDeletedEvent deleteEvent) {
-        System.out.println("targetDelete received for " + deleteEvent.getControllerId());
+    @EventListener(classes = GroupedTargetDeletedEvent.class)
+    protected void targetDelete(final GroupedTargetDeletedEvent groupedDeleteEvent) {
+        final TargetDeletedEvent deleteEvent = groupedDeleteEvent.getRemoteEvent();
         sendDeleteMessage(deleteEvent.getTenant(), deleteEvent.getControllerId(), deleteEvent.getTargetAddress());
     }
 
