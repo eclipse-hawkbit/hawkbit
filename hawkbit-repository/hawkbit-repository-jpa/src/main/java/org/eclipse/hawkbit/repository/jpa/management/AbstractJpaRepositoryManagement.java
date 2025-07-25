@@ -18,8 +18,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.persistence.EntityManager;
@@ -33,6 +36,7 @@ import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
@@ -40,6 +44,7 @@ import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.repository.BaseEntityRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
+import org.eclipse.hawkbit.utils.ObjectCopyUtil;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -151,7 +156,9 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
     }
 
     protected T update(final Identifiable<Long> update, final T entity) {
-        if (Utils.copy(update, entity, entityManager)) {
+        // update getId has not setter in target JPA entity but shall have getter and the value shall be the same
+        // otherwise the Utils will throw an exception that there is no counterpart setter for getId
+        if (ObjectCopyUtil.copy(update, entity, false, this::attach)) {
             return jpaRepository.save(entity);
         } else { // otherwise it is not changed, so return the same entity
             return entity;
@@ -288,7 +295,39 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
         } catch (final InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException("Must NEVER happen!", e);
         }
-        Utils.copy(create, jpaEntity, entityManager);
+        ObjectCopyUtil.copy(create, jpaEntity, false, this::attach);
         return jpaEntity;
+    }
+
+    private Object attach(final Object propertyValue) {
+        if (Jpa.JPA_VENDOR != Jpa.JpaVendor.HIBERNATE) {
+            return propertyValue; // no need to attach, only Hibernate supports this
+        }
+
+        if (propertyValue instanceof List<?> list) {
+            return list.stream().map(this::attach).toList();
+        } else if (propertyValue instanceof Set<?> set) {
+            return set.stream().map(this::attach).collect(Collectors.toSet());
+        } else if (propertyValue instanceof Map<?, ?> map) {
+            return map.entrySet().stream().collect(Collectors.toMap(
+                    entry -> attach(entry.getKey()),
+                    entry -> attach(entry.getValue())));
+        } else if (attachable(propertyValue)) {
+            // hibernate require detached entities to be attached before setting to jpa entity as a sub-property
+            return entityManager.merge(propertyValue);
+        } else {
+            return propertyValue; // no change
+        }
+    }
+
+    private boolean attachable(final Object propertyValue) {
+        if (propertyValue == null) {
+            return false;
+        }
+
+        final Class<?> clazz = propertyValue.getClass();
+        return !clazz.isPrimitive() && !clazz.isEnum() &&
+                clazz != String.class && !Number.class.isAssignableFrom(clazz) && !Boolean.class.isAssignableFrom(clazz) &&
+                !entityManager.contains(propertyValue); // no need to attach
     }
 }
