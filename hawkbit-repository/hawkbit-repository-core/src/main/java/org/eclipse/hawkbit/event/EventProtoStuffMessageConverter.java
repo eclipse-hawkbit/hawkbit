@@ -14,7 +14,7 @@ import io.protostuff.ProtobufIOUtil;
 import io.protostuff.Schema;
 import io.protostuff.runtime.RuntimeSchema;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.bus.event.RemoteApplicationEvent;
+import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.AbstractMessageConverter;
@@ -30,20 +30,20 @@ import org.springframework.util.MimeType;
  * values of {@link EventType}.
  */
 @Slf4j
-public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
+public class EventProtoStuffMessageConverter extends AbstractMessageConverter {
 
     public static final MimeType APPLICATION_BINARY_PROTOSTUFF = new MimeType("application", "binary+protostuff");
 
     /** The length of the class type length of the payload. */
     private static final byte EVENT_TYPE_LENGTH = 2;
 
-    public BusProtoStuffMessageConverter() {
+    public EventProtoStuffMessageConverter() {
         super(APPLICATION_BINARY_PROTOSTUFF);
     }
 
     @Override
     protected boolean supports(final Class<?> aClass) {
-        return RemoteApplicationEvent.class.isAssignableFrom(aClass);
+        return AbstractRemoteEvent.class.isAssignableFrom(aClass);
     }
 
     @Override

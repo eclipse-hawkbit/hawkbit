@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.TenantConfigurationDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
@@ -52,12 +51,10 @@ import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.convert.support.ConfigurableConversionService;
@@ -85,8 +82,6 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     private final CacheManager cacheManager;
     private final AfterTransactionCommitExecutor afterCommitExecutor;
 
-    private ServiceMatcher serviceMatcher;
-
     public JpaTenantConfigurationManagement(
             final TenantConfigurationRepository tenantConfigurationRepository,
             final TenantConfigurationProperties tenantConfigurationProperties,
@@ -97,11 +92,6 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         this.cacheManager = cacheManager;
         this.afterCommitExecutor = afterCommitExecutor;
         this.applicationContext = applicationContext;
-    }
-
-    @Autowired(required = false)
-    public void setServiceMatcher(final ServiceMatcher serviceMatcher) {
-        this.serviceMatcher = serviceMatcher;
     }
 
     @Override
@@ -182,10 +172,6 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
      */
     @EventListener
     public void onTenantConfigurationDeletedEvent(final TenantConfigurationDeletedEvent event) {
-        if (!shouldProcessRemoteTenantAwareEvent(event)) {
-            return;
-        }
-
         evictCacheEntryByKeyIfPresent(event.getConfigKey());
     }
 
@@ -196,10 +182,6 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
      */
     @EventListener
     public void onTenantConfigurationRemoteEntityEvent(final RemoteEntityEvent<TenantConfiguration> event) {
-        if (!shouldProcessRemoteTenantAwareEvent(event)) {
-            return;
-        }
-
         event.getEntity().ifPresent(tenantConfiguration -> {
             evictCacheEntryByKeyIfPresent(tenantConfiguration.getKey());
         });
@@ -388,9 +370,5 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         if (cache != null) {
             cache.evictIfPresent(key);
         }
-    }
-
-    private boolean shouldProcessRemoteTenantAwareEvent(final RemoteTenantAwareEvent event) {
-        return serviceMatcher == null || !serviceMatcher.isFromSelf(event) && serviceMatcher.isForSelf(event);
     }
 }

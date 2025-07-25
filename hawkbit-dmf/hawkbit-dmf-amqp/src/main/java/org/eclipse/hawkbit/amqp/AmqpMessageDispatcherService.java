@@ -55,7 +55,11 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
+import org.eclipse.hawkbit.repository.event.remote.ProcessingCancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.ProcessingMultiActionAssignEvent;
+import org.eclipse.hawkbit.repository.event.remote.ProcessingTargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.ProcessingTargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
@@ -73,8 +77,6 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.cloud.bus.ServiceMatcher;
-import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContext;
@@ -96,7 +98,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private final SystemSecurityContext systemSecurityContext;
     private final SystemManagement systemManagement;
     private final TargetManagement targetManagement;
-    private final ServiceMatcher serviceMatcher;
     private final DistributionSetManagement distributionSetManagement;
     private final DeploymentManagement deploymentManagement;
     private final SoftwareModuleManagement softwareModuleManagement;
@@ -111,7 +112,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * @param systemSecurityContext for execution with system permissions
      * @param systemManagement the systemManagement
      * @param targetManagement to access target information
-     * @param serviceMatcher to check in cluster case if the message is from the same cluster node
      * @param distributionSetManagement to retrieve modules
      * @param tenantConfigurationManagement to access tenant configuration
      */
@@ -120,7 +120,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final RabbitTemplate rabbitTemplate,
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
-            final TargetManagement targetManagement, final ServiceMatcher serviceMatcher,
+            final TargetManagement targetManagement,
             final DistributionSetManagement distributionSetManagement,
             final SoftwareModuleManagement softwareModuleManagement, final DeploymentManagement deploymentManagement,
             final TenantConfigurationManagement tenantConfigurationManagement) {
@@ -130,7 +130,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         this.systemSecurityContext = systemSecurityContext;
         this.systemManagement = systemManagement;
         this.targetManagement = targetManagement;
-        this.serviceMatcher = serviceMatcher;
         this.distributionSetManagement = distributionSetManagement;
         this.softwareModuleManagement = softwareModuleManagement;
         this.deploymentManagement = deploymentManagement;
@@ -146,14 +145,11 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     /**
      * Method to send a message to a RabbitMQ Exchange after the Distribution set has been assign to a Target.
      *
-     * @param assignedEvent the object to be sent.
+     * @param processingTargetAssignDistributionSetEvent  event to be processed
      */
-    @EventListener(classes = TargetAssignDistributionSetEvent.class)
-    protected void targetAssignDistributionSet(final TargetAssignDistributionSetEvent assignedEvent) {
-        if (shouldSkip(assignedEvent)) {
-            return;
-        }
-
+    @EventListener(classes = ProcessingTargetAssignDistributionSetEvent.class)
+    protected void targetAssignDistributionSet(final ProcessingTargetAssignDistributionSetEvent processingTargetAssignDistributionSetEvent) {
+        final TargetAssignDistributionSetEvent assignedEvent = processingTargetAssignDistributionSetEvent.getRemoteEvent();
         final List<Target> filteredTargetList = getTargetsWithoutPendingCancellations(assignedEvent.getActions().keySet());
 
         if (!filteredTargetList.isEmpty()) {
@@ -165,17 +161,16 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     /**
      * Listener for Multi-Action events.
      *
-     * @param multiActionEvent the Multi-Action event to be processed
+     * @param processingMultiActionAssignEvent the Multi-Action event to be processed
      */
-    @EventListener(classes = MultiActionEvent.class)
-    protected void onMultiAction(final MultiActionEvent multiActionEvent) {
-        if (shouldSkip(multiActionEvent)) {
-            return;
-        }
-
-        log.debug("MultiActionEvent received for {}", multiActionEvent.getControllerIds());
-        sendMultiActionRequestMessages(multiActionEvent.getControllerIds());
+    @EventListener(classes = ProcessingMultiActionAssignEvent.class)
+    protected void onMultiActionAssign(final ProcessingMultiActionAssignEvent processingMultiActionAssignEvent) {
+        final MultiActionAssignEvent multiActionAssignEvent = processingMultiActionAssignEvent.getRemoteEvent();
+        log.debug("MultiActionAssignEvent received for {}", multiActionAssignEvent.getControllerIds());
+        sendMultiActionRequestMessages(multiActionAssignEvent.getControllerIds());
     }
+
+    //TODO implement MultiActionCancelEvent handling
 
     protected void sendUpdateMessageToTarget(
             final ActionProperties actionsProps, final Target target,
@@ -198,14 +193,11 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * Method to send a message to a RabbitMQ Exchange after the assignment of
      * the Distribution set to a Target has been canceled.
      *
-     * @param cancelEvent that is to be converted to a DMF message
+     * @param groupedCancelEvent that is to be converted to a DMF message
      */
-    @EventListener(classes = CancelTargetAssignmentEvent.class)
-    protected void targetCancelAssignmentToDistributionSet(final CancelTargetAssignmentEvent cancelEvent) {
-        if (shouldSkip(cancelEvent)) {
-            return;
-        }
-
+    @EventListener(classes = ProcessingCancelTargetAssignmentEvent.class)
+    protected void targetCancelAssignmentToDistributionSet(final ProcessingCancelTargetAssignmentEvent groupedCancelEvent) {
+        final CancelTargetAssignmentEvent cancelEvent = groupedCancelEvent.getRemoteEvent();
         final List<Target> eventTargets = partitionedParallelExecution(
                 cancelEvent.getActions().keySet(), targetManagement::getByControllerID);
 
@@ -221,14 +213,11 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     /**
      * Method to send a message to a RabbitMQ Exchange after a Target was deleted.
      *
-     * @param deleteEvent the TargetDeletedEvent which holds the necessary data for sending a target delete message.
+     * @param groupedDeleteEvent the TargetDeletedEvent which holds the necessary data for sending a target delete message.
      */
-    @EventListener(classes = TargetDeletedEvent.class)
-    protected void targetDelete(final TargetDeletedEvent deleteEvent) {
-        if (shouldSkip(deleteEvent)) {
-            return;
-        }
-
+    @EventListener(classes = ProcessingTargetDeletedEvent.class)
+    protected void targetDelete(final ProcessingTargetDeletedEvent groupedDeleteEvent) {
+        final TargetDeletedEvent deleteEvent = groupedDeleteEvent.getRemoteEvent();
         sendDeleteMessage(deleteEvent.getTenant(), deleteEvent.getControllerId(), deleteEvent.getTargetAddress());
     }
 
@@ -250,10 +239,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
         amqpSenderService.sendMessage(message,
                 IpUtil.createAmqpUri(virtualHost, ping.getMessageProperties().getReplyTo()));
-    }
-
-    protected boolean shouldSkip(final RemoteApplicationEvent event) {
-        return !isFromSelf(event);
     }
 
     protected void sendCancelMessageToTarget(final String tenant, final String controllerId, final Long actionId, final URI address) {
@@ -513,10 +498,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private boolean hasInvalidAddress(final String targetAddress) {
         return targetAddress == null || !IpUtil.isAmqpUri(URI.create(targetAddress));
-    }
-
-    private boolean isFromSelf(final RemoteApplicationEvent event) {
-        return serviceMatcher == null || serviceMatcher.isFromSelf(event);
     }
 
     private boolean hasPendingCancellations(final Long targetId) {

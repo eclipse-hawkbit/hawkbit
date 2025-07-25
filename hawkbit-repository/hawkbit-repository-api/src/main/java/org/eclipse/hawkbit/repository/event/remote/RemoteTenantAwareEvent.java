@@ -10,15 +10,14 @@
 package org.eclipse.hawkbit.repository.event.remote;
 
 import java.io.Serial;
+import java.util.UUID;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
-import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 
 /**
  * A distributed tenant aware event. It's the base class of the other
@@ -29,19 +28,21 @@ import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class RemoteTenantAwareEvent extends RemoteApplicationEvent implements TenantAwareEvent {
+public class RemoteTenantAwareEvent extends AbstractRemoteEvent implements TenantAwareEvent {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     private String tenant;
 
+    /**
+     * Constructor.
+     *
+     * @param source the for the remote event.
+     * @param tenant the tenant
+     */
     public RemoteTenantAwareEvent(final String tenant, final Object source) {
-        super(source == null ? getApplicationId() : source, getApplicationId(), DEFAULT_DESTINATION_FACTORY.getDestination(null));
+        super(source == null ? UUID.randomUUID() : source);
         this.tenant = tenant;
-    }
-
-    private static String getApplicationId() {
-        return EventPublisherHolder.getInstance().getApplicationId();
     }
 }
