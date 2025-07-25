@@ -54,7 +54,7 @@ public class JpaDistributionSetTypeManagement
     private final TargetTypeRepository targetTypeRepository;
     private final QuotaManagement quotaManagement;
 
-    JpaDistributionSetTypeManagement(
+    protected JpaDistributionSetTypeManagement(
             final DistributionSetTypeRepository distributionSetTypeRepository,
             final EntityManager entityManager,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,

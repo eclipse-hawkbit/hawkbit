@@ -42,7 +42,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Slf4j
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "distribution-set-invalidation-management" }, matchIfMissing = true)
-class JpaDistributionSetInvalidationManagement implements DistributionSetInvalidationManagement {
+public class JpaDistributionSetInvalidationManagement implements DistributionSetInvalidationManagement {
 
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final RolloutManagement rolloutManagement;
@@ -56,7 +56,7 @@ class JpaDistributionSetInvalidationManagement implements DistributionSetInvalid
     private final SystemSecurityContext systemSecurityContext;
 
     @SuppressWarnings("java:S107")
-    JpaDistributionSetInvalidationManagement(final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
+    protected JpaDistributionSetInvalidationManagement(final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final RolloutManagement rolloutManagement, final DeploymentManagement deploymentManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final ActionRepository actionRepository,
             final PlatformTransactionManager txManager, final RepositoryProperties repositoryProperties,

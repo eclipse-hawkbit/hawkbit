@@ -65,7 +65,7 @@ import org.springframework.validation.annotation.Validated;
 @Transactional(readOnly = true)
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "rollout-group-management" }, matchIfMissing = true)
-class JpaRolloutGroupManagement implements RolloutGroupManagement {
+public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     private final RolloutGroupRepository rolloutGroupRepository;
     private final RolloutRepository rolloutRepository;
@@ -75,7 +75,7 @@ class JpaRolloutGroupManagement implements RolloutGroupManagement {
     private final RolloutStatusCache rolloutStatusCache;
 
     @SuppressWarnings("java:S107")
-    JpaRolloutGroupManagement(final RolloutGroupRepository rolloutGroupRepository,
+    protected JpaRolloutGroupManagement(final RolloutGroupRepository rolloutGroupRepository,
             final RolloutRepository rolloutRepository, final ActionRepository actionRepository,
             final TargetRepository targetRepository, final EntityManager entityManager, final RolloutStatusCache rolloutStatusCache) {
         this.rolloutGroupRepository = rolloutGroupRepository;

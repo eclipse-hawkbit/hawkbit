@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -24,6 +25,7 @@ import org.eclipse.hawkbit.repository.model.TargetType;
  * Thrown if user tries to assign a {@link DistributionSet} to a {@link Target} that has an incompatible {@link TargetType}
  */
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class IncompatibleTargetTypeException extends AbstractServerRtException {
 
     @Serial

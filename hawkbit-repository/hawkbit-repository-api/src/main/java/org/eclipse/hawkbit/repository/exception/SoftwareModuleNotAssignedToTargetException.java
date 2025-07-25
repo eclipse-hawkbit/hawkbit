@@ -12,6 +12,8 @@ package org.eclipse.hawkbit.repository.exception;
 import java.io.Serial;
 import java.lang.annotation.Target;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
@@ -19,6 +21,8 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
  * the {@link SoftwareModuleNotAssignedToTargetException} is thrown when a {@link SoftwareModule} is requested as part of an {@link Action}
  * that has however never been assigned to the {@link Target}.
  */
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class SoftwareModuleNotAssignedToTargetException extends EntityNotFoundException {
 
     @Serial

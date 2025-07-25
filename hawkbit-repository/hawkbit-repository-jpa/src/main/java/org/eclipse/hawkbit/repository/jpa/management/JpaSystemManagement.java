@@ -107,7 +107,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     private ArtifactRepository artifactRepository;
 
     @SuppressWarnings("squid:S00107")
-    JpaSystemManagement(
+    protected JpaSystemManagement(
             final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository,
             final TargetTagRepository targetTagRepository, final TargetFilterQueryRepository targetFilterQueryRepository,
             final SoftwareModuleRepository softwareModuleRepository, final SoftwareModuleTypeRepository softwareModuleTypeRepository,

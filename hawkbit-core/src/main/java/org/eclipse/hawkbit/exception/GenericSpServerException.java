@@ -11,10 +11,15 @@ package org.eclipse.hawkbit.exception;
 
 import java.io.Serial;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 /**
  * {@link GenericSpServerException} is thrown when a given entity in's actual and cannot be stored within the current session. Reason could be
  * that it has been changed within another session.
  */
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class GenericSpServerException extends AbstractServerRtException {
 
     @Serial

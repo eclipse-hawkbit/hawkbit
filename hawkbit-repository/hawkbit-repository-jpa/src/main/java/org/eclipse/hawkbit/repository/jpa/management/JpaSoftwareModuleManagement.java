@@ -77,17 +77,17 @@ public class JpaSoftwareModuleManagement
 
     protected static final String SOFTWARE_MODULE_METADATA = "SoftwareModuleMetadata";
 
-    private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
+    private final SoftwareModuleTypeManagement<? extends SoftwareModuleType> softwareModuleTypeManagement;
     private final DistributionSetRepository distributionSetRepository;
     private final SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
     private final SoftwareModuleTypeRepository softwareModuleTypeRepository;
     private final ArtifactManagement artifactManagement;
     private final QuotaManagement quotaManagement;
 
-    JpaSoftwareModuleManagement(
+    protected JpaSoftwareModuleManagement(
             final SoftwareModuleRepository softwareModuleRepository,
             final EntityManager entityManager,
-            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final SoftwareModuleTypeManagement<? extends SoftwareModuleType> softwareModuleTypeManagement,
             final DistributionSetRepository distributionSetRepository,
             final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,

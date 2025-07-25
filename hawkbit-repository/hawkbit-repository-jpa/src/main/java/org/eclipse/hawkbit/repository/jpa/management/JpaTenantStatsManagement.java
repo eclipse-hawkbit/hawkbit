@@ -34,7 +34,7 @@ public class JpaTenantStatsManagement implements TenantStatsManagement {
     private final ActionRepository actionRepository;
     private final TenantAware tenantAware;
 
-    JpaTenantStatsManagement(
+    protected JpaTenantStatsManagement(
             final TargetRepository targetRepository, final LocalArtifactRepository artifactRepository, final ActionRepository actionRepository,
             final TenantAware tenantAware) {
         this.targetRepository = targetRepository;

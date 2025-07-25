@@ -11,14 +11,17 @@ package org.eclipse.hawkbit.repository.exception;
 
 import java.io.Serial;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- * {@link ConcurrentModificationException} is thrown when a given entity in's
- * actual and cannot be stored within the current session. Reason could be that
- * it has been changed within another session.
+ * {@link ConcurrentModificationException} is thrown when a given entity in's actual and cannot be stored within the current session.
+ * Reason could be that it has been changed within another session.
  */
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class ConcurrentModificationException extends AbstractServerRtException {
 
     @Serial

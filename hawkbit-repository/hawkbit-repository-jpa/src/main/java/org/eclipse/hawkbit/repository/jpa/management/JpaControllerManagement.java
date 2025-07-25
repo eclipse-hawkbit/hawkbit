@@ -48,6 +48,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -130,7 +131,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "controller-management" }, matchIfMissing = true)
-class JpaControllerManagement extends JpaActionManagement implements ControllerManagement {
+public class JpaControllerManagement extends JpaActionManagement implements ControllerManagement {
 
     private static final Pattern PATTERN = Pattern.compile("[a-zA-Z0-9_\\-!@#$%^&*()+=\\[\\]{}|;:'\",.<>/\\\\?\\s]*");
 
@@ -143,7 +144,7 @@ class JpaControllerManagement extends JpaActionManagement implements ControllerM
     private final ConfirmationManagement confirmationManagement;
     private final SoftwareModuleRepository softwareModuleRepository;
     private final SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
-    private final JpaDistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final ControllerPollProperties controllerPollProperties;
     private final Duration minPollingTime;
@@ -156,13 +157,13 @@ class JpaControllerManagement extends JpaActionManagement implements ControllerM
     private final TenantAware tenantAware;
 
     @SuppressWarnings("squid:S00107")
-    JpaControllerManagement(
+    protected JpaControllerManagement(
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
             final RepositoryProperties repositoryProperties,
             final TargetRepository targetRepository, final TargetTypeManagement targetTypeManagement,
             final DeploymentManagement deploymentManagement, final ConfirmationManagement confirmationManagement,
             final SoftwareModuleRepository softwareModuleRepository, final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
-            final JpaDistributionSetManagement distributionSetManagement,
+            final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final TenantConfigurationManagement tenantConfigurationManagement, final ControllerPollProperties controllerPollProperties,
             final PlatformTransactionManager txManager, final EntityFactory entityFactory, final EntityManager entityManager,
             final AfterTransactionCommitExecutor afterCommit,

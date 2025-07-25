@@ -79,7 +79,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "tenant-configuration-management" }, matchIfMissing = true)
-class JpaTenantConfigurationManagement implements TenantConfigurationManagement {
+public class JpaTenantConfigurationManagement implements TenantConfigurationManagement {
 
     private static final ConfigurableConversionService CONVERSION_SERVICE = new DefaultConversionService();
 
@@ -91,7 +91,7 @@ class JpaTenantConfigurationManagement implements TenantConfigurationManagement 
 
     private ServiceMatcher serviceMatcher;
 
-    JpaTenantConfigurationManagement(
+    protected JpaTenantConfigurationManagement(
             final TenantConfigurationRepository tenantConfigurationRepository,
             final TenantConfigurationProperties tenantConfigurationProperties,
             final CacheManager cacheManager, final AfterTransactionCommitExecutor afterCommitExecutor,

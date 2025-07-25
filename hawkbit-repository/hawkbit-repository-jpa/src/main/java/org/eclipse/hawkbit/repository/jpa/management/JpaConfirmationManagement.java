@@ -59,13 +59,13 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "confirmation-management" }, matchIfMissing = true)
-class JpaConfirmationManagement extends JpaActionManagement implements ConfirmationManagement {
+public class JpaConfirmationManagement extends JpaActionManagement implements ConfirmationManagement {
 
     private final EntityManager entityManager;
     private final EntityFactory entityFactory;
     private final TargetRepository targetRepository;
 
-    JpaConfirmationManagement(
+    protected JpaConfirmationManagement(
             final TargetRepository targetRepository,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final RepositoryProperties repositoryProperties, final QuotaManagement quotaManagement,

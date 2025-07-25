@@ -127,7 +127,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     private final ContextAware contextAware;
     private final RepositoryProperties repositoryProperties;
 
-    JpaRolloutManagement(
+    protected JpaRolloutManagement(
             final RolloutRepository rolloutRepository,
             final RolloutGroupRepository rolloutGroupRepository,
             final RolloutApprovalStrategy rolloutApprovalStrategy,

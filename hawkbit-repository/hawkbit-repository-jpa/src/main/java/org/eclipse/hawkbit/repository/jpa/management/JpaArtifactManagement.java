@@ -70,7 +70,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "artifact-management" }, matchIfMissing = true)
-class JpaArtifactManagement implements ArtifactManagement {
+public class JpaArtifactManagement implements ArtifactManagement {
 
     private final EntityManager entityManager;
     private final PlatformTransactionManager txManager;
@@ -81,7 +81,7 @@ class JpaArtifactManagement implements ArtifactManagement {
     private final TenantAware tenantAware;
     private final QuotaManagement quotaManagement;
 
-    JpaArtifactManagement(
+    protected JpaArtifactManagement(
             final EntityManager entityManager,
             final PlatformTransactionManager txManager,
             final LocalArtifactRepository localArtifactRepository,

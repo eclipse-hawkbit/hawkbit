@@ -11,13 +11,16 @@ package org.eclipse.hawkbit.repository.exception;
 
 import java.io.Serial;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- * Exception which is thrown in case the current security context object does
- * not hold a required authority/permission.
+ * Exception which is thrown in case the current security context object does not hold a required authority/permission.
  */
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class InsufficientPermissionException extends AbstractServerRtException {
 
     @Serial

@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +25,6 @@ import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetType;
@@ -102,12 +100,12 @@ public class JsonBuilder {
         return builder.toString();
     }
 
-    public static String softwareModuleTypes(final List<SoftwareModuleType> types) throws JSONException {
+    public static String softwareModuleTypes(final List<SoftwareModuleTypeManagement.Create> types) throws JSONException {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("[");
         int i = 0;
-        for (final SoftwareModuleType module : types) {
+        for (final SoftwareModuleTypeManagement.Create module : types) {
             builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
                     .put("colour", module.getColour()).put("id", Long.MAX_VALUE).put("key", module.getKey())
                     .put("maxAssignments", module.getMaxAssignments()).put("createdAt", "0").put("updatedAt", "0")

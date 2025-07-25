@@ -40,14 +40,14 @@ import org.springframework.data.domain.Sort;
  * Implements utility methods for managing {@link Action}s
  */
 @Slf4j
-class JpaActionManagement {
+public class JpaActionManagement {
 
     protected final ActionRepository actionRepository;
     protected final ActionStatusRepository actionStatusRepository;
     protected final QuotaManagement quotaManagement;
     protected final RepositoryProperties repositoryProperties;
 
-    JpaActionManagement(
+    protected JpaActionManagement(
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
             final RepositoryProperties repositoryProperties) {
         this.actionRepository = actionRepository;

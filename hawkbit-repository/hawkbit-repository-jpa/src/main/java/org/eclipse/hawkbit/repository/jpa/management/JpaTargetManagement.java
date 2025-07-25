@@ -97,7 +97,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "target-management" }, matchIfMissing = true)
-class JpaTargetManagement implements TargetManagement {
+public class JpaTargetManagement implements TargetManagement {
 
     private final EntityManager entityManager;
     private final JpaDistributionSetManagement distributionSetManagement;
@@ -110,7 +110,7 @@ class JpaTargetManagement implements TargetManagement {
     private final TenantAware tenantAware;
 
     @SuppressWarnings("java:S107")
-    JpaTargetManagement(final EntityManager entityManager,
+    protected JpaTargetManagement(final EntityManager entityManager,
             final JpaDistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository,
             final RolloutGroupRepository rolloutGroupRepository,

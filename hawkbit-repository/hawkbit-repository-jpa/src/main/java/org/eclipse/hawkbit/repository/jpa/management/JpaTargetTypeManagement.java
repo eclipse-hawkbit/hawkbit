@@ -56,7 +56,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "target-type-management" }, matchIfMissing = true)
-class JpaTargetTypeManagement implements TargetTypeManagement {
+public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     private final TargetTypeRepository targetTypeRepository;
     private final TargetRepository targetRepository;
@@ -64,7 +64,7 @@ class JpaTargetTypeManagement implements TargetTypeManagement {
 
     private final QuotaManagement quotaManagement;
 
-    JpaTargetTypeManagement(final TargetTypeRepository targetTypeRepository,
+    protected JpaTargetTypeManagement(final TargetTypeRepository targetTypeRepository,
             final TargetRepository targetRepository, final DistributionSetTypeRepository distributionSetTypeRepository,
             final QuotaManagement quotaManagement) {
         this.targetTypeRepository = targetTypeRepository;

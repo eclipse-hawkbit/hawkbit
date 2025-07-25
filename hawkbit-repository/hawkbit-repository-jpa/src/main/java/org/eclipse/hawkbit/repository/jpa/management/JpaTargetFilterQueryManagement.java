@@ -86,7 +86,7 @@ class JpaTargetFilterQueryManagement implements TargetFilterQueryManagement {
     private final ContextAware contextAware;
     private final AuditorAware<String> auditorAware;
 
-    JpaTargetFilterQueryManagement(
+    protected JpaTargetFilterQueryManagement(
             final TargetFilterQueryRepository targetFilterQueryRepository,
             final TargetManagement targetManagement, final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final QuotaManagement quotaManagement, final TenantConfigurationManagement tenantConfigurationManagement,

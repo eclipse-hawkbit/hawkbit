@@ -39,13 +39,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "distribution-set-tag-management" }, matchIfMissing = true)
-class JpaDistributionSetTagManagement
+public class JpaDistributionSetTagManagement
         extends AbstractJpaRepositoryManagement<JpaDistributionSetTag, DistributionSetTagManagement.Create, DistributionSetTagManagement.Update, DistributionSetTagRepository, DistributionSetTagFields>
         implements DistributionSetTagManagement<JpaDistributionSetTag> {
 
     private final DistributionSetRepository distributionSetRepository;
 
-    JpaDistributionSetTagManagement(
+    protected JpaDistributionSetTagManagement(
             final DistributionSetTagRepository distributionSetTagRepository,
             final EntityManager entityManager,
             final DistributionSetRepository distributionSetRepository) {

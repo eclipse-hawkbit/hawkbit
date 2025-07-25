@@ -11,12 +11,16 @@ package org.eclipse.hawkbit.repository.exception;
 
 import java.io.Serial;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * Thrown if repository operation is no longer supported.
  */
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public final class MethodNotSupportedException extends AbstractServerRtException {
 
     @Serial
