@@ -9,7 +9,7 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-#set -xe
+set -xe
 
 # Usage: builds all docker images. Use:
 # -v <version> to pass version
@@ -20,6 +20,8 @@
 VERSION=0-SNAPSHOT
 MVN_REPO=~/.m2/repository
 TAG=latest
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd "${SCRIPT_DIR}"
 
 while getopts v:r:t: option
 do
