@@ -55,10 +55,10 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.remote.GroupedCancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.remote.GroupedMultiActionAssignEvent;
-import org.eclipse.hawkbit.repository.event.remote.GroupedTargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.event.remote.GroupedTargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.ProcessingCancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.ProcessingMultiActionAssignEvent;
+import org.eclipse.hawkbit.repository.event.remote.ProcessingTargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.ProcessingTargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -145,11 +145,11 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     /**
      * Method to send a message to a RabbitMQ Exchange after the Distribution set has been assign to a Target.
      *
-     * @param groupedTargetAssignDistributionSetEvent  event to be processed
+     * @param processingTargetAssignDistributionSetEvent  event to be processed
      */
-    @EventListener(classes = GroupedTargetAssignDistributionSetEvent.class)
-    protected void targetAssignDistributionSet(final GroupedTargetAssignDistributionSetEvent groupedTargetAssignDistributionSetEvent) {
-        final TargetAssignDistributionSetEvent assignedEvent = groupedTargetAssignDistributionSetEvent.getRemoteEvent();
+    @EventListener(classes = ProcessingTargetAssignDistributionSetEvent.class)
+    protected void targetAssignDistributionSet(final ProcessingTargetAssignDistributionSetEvent processingTargetAssignDistributionSetEvent) {
+        final TargetAssignDistributionSetEvent assignedEvent = processingTargetAssignDistributionSetEvent.getRemoteEvent();
         final List<Target> filteredTargetList = getTargetsWithoutPendingCancellations(assignedEvent.getActions().keySet());
 
         if (!filteredTargetList.isEmpty()) {
@@ -161,11 +161,11 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     /**
      * Listener for Multi-Action events.
      *
-     * @param groupedMultiActionAssignEvent the Multi-Action event to be processed
+     * @param processingMultiActionAssignEvent the Multi-Action event to be processed
      */
-    @EventListener(classes = GroupedMultiActionAssignEvent.class)
-    protected void onMultiActionAssign(final GroupedMultiActionAssignEvent groupedMultiActionAssignEvent) {
-        final MultiActionAssignEvent multiActionAssignEvent = groupedMultiActionAssignEvent.getRemoteEvent();
+    @EventListener(classes = ProcessingMultiActionAssignEvent.class)
+    protected void onMultiActionAssign(final ProcessingMultiActionAssignEvent processingMultiActionAssignEvent) {
+        final MultiActionAssignEvent multiActionAssignEvent = processingMultiActionAssignEvent.getRemoteEvent();
         log.debug("MultiActionAssignEvent received for {}", multiActionAssignEvent.getControllerIds());
         sendMultiActionRequestMessages(multiActionAssignEvent.getControllerIds());
     }
@@ -195,8 +195,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      *
      * @param groupedCancelEvent that is to be converted to a DMF message
      */
-    @EventListener(classes = GroupedCancelTargetAssignmentEvent.class)
-    protected void targetCancelAssignmentToDistributionSet(final GroupedCancelTargetAssignmentEvent groupedCancelEvent) {
+    @EventListener(classes = ProcessingCancelTargetAssignmentEvent.class)
+    protected void targetCancelAssignmentToDistributionSet(final ProcessingCancelTargetAssignmentEvent groupedCancelEvent) {
         final CancelTargetAssignmentEvent cancelEvent = groupedCancelEvent.getRemoteEvent();
         final List<Target> eventTargets = partitionedParallelExecution(
                 cancelEvent.getActions().keySet(), targetManagement::getByControllerID);
@@ -215,8 +215,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      *
      * @param groupedDeleteEvent the TargetDeletedEvent which holds the necessary data for sending a target delete message.
      */
-    @EventListener(classes = GroupedTargetDeletedEvent.class)
-    protected void targetDelete(final GroupedTargetDeletedEvent groupedDeleteEvent) {
+    @EventListener(classes = ProcessingTargetDeletedEvent.class)
+    protected void targetDelete(final ProcessingTargetDeletedEvent groupedDeleteEvent) {
         final TargetDeletedEvent deleteEvent = groupedDeleteEvent.getRemoteEvent();
         sendDeleteMessage(deleteEvent.getTenant(), deleteEvent.getControllerId(), deleteEvent.getTargetAddress());
     }

@@ -61,7 +61,7 @@ class GroupedEventsTest {
                 TargetDeletedEvent.class,
                 TargetAttributesRequestedEvent.class
         );
-        assertEquals(EventPublisherHolder.GROUPED_REMOTE_EVENTS, expected);
+        assertEquals(EventPublisherHolder.PROCESSING_REMOTE_EVENTS, expected);
     }
 
     @Test
@@ -71,7 +71,7 @@ class GroupedEventsTest {
         publisher.publishEvent(event);
 
         verify(streamBridge).send(eq("fanout"), eq(event));
-        verify(streamBridge).send(eq("group"), any(GroupedTargetAssignDistributionSetEvent.class));
+        verify(streamBridge).send(eq("group"), any(ProcessingTargetAssignDistributionSetEvent.class));
     }
 
     @Test
@@ -80,7 +80,7 @@ class GroupedEventsTest {
         publisher.publishEvent(event);
 
         verify(streamBridge).send(eq("fanout"), eq(event));
-        verify(streamBridge).send(eq("group"), any(GroupedTargetDeletedEvent.class));
+        verify(streamBridge).send(eq("group"), any(ProcessingTargetDeletedEvent.class));
     }
 
     @Test
@@ -89,7 +89,7 @@ class GroupedEventsTest {
         publisher.publishEvent(event);
 
         verify(streamBridge).send(eq("fanout"), eq(event));
-        verify(streamBridge).send(eq("group"), any(GroupedTargetAttributesRequestedEvent.class));
+        verify(streamBridge).send(eq("group"), any(ProcessingTargetAttributesRequestedEvent.class));
     }
 
     @Test
@@ -99,7 +99,7 @@ class GroupedEventsTest {
         publisher.publishEvent(event);
 
         verify(streamBridge).send(eq("fanout"), eq(event));
-        verify(streamBridge).send(eq("group"), any(GroupedMultiActionAssignEvent.class));
+        verify(streamBridge).send(eq("group"), any(ProcessingMultiActionAssignEvent.class));
     }
 
     @Test
@@ -109,7 +109,7 @@ class GroupedEventsTest {
         publisher.publishEvent(event);
 
         verify(streamBridge).send(eq("fanout"), eq(event));
-        verify(streamBridge).send(eq("group"), any(GroupedCancelTargetAssignmentEvent.class));
+        verify(streamBridge).send(eq("group"), any(ProcessingCancelTargetAssignmentEvent.class));
     }
 
     private Action mockAction() {

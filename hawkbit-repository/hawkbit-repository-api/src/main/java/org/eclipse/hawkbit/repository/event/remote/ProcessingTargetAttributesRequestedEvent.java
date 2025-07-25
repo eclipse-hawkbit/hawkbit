@@ -13,25 +13,18 @@ import java.io.Serial;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import org.eclipse.hawkbit.repository.event.entity.EntityDeletedEvent;
-import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 /**
- * Grouped event for {@link TargetDeletedEvent}. Event that needs single processing
+ * Grouped event for {@link TargetAttributesRequestedEvent}. Event that needs single processing
  */
-public class GroupedTargetDeletedEvent extends AbstractGroupedRemoteEvent<TargetDeletedEvent> {
+public class ProcessingTargetAttributesRequestedEvent extends AbstractGroupedRemoteEvent<TargetAttributesRequestedEvent> {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
 
     @JsonCreator
-    public GroupedTargetDeletedEvent(@JsonProperty("payload") final TargetDeletedEvent remoteEvent) {
+    public ProcessingTargetAttributesRequestedEvent(@JsonProperty("payload") final TargetAttributesRequestedEvent remoteEvent) {
         super(remoteEvent);
     }
 }

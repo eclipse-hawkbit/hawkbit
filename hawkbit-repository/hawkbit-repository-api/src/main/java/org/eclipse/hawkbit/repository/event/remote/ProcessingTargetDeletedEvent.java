@@ -15,16 +15,16 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Grouped event for {@link CancelTargetAssignmentEvent}. Event that needs single processing
+ * Grouped event for {@link TargetDeletedEvent}. Event that needs single processing
  */
-public class GroupedCancelTargetAssignmentEvent extends AbstractGroupedRemoteEvent<CancelTargetAssignmentEvent> {
+public class ProcessingTargetDeletedEvent extends AbstractGroupedRemoteEvent<TargetDeletedEvent> {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
 
     @JsonCreator
-    public GroupedCancelTargetAssignmentEvent(@JsonProperty("payload") final CancelTargetAssignmentEvent remoteEvent) {
+    public ProcessingTargetDeletedEvent(@JsonProperty("payload") final TargetDeletedEvent remoteEvent) {
         super(remoteEvent);
     }
 }
