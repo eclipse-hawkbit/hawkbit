@@ -13,7 +13,12 @@ import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
+import org.eclipse.hawkbit.repository.event.remote.GroupedCancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.GroupedMultiActionAssignEvent;
+import org.eclipse.hawkbit.repository.event.remote.GroupedTargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.GroupedTargetAttributesRequestedEvent;
+import org.eclipse.hawkbit.repository.event.remote.GroupedTargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
@@ -41,6 +46,14 @@ public final class EventPublisherHolder {
         return SINGLETON;
     }
 
+    public static final Set<Class<?>> GROUPED_REMOTE_EVENTS = Set.of(
+            TargetAssignDistributionSetEvent.class,
+            MultiActionAssignEvent.class,
+            CancelTargetAssignmentEvent.class,
+            TargetDeletedEvent.class,
+            TargetAttributesRequestedEvent.class
+    );
+
     @Autowired
     public void setApplicationEventPublisher(final ApplicationEventPublisher delegate) {
         this.delegateEventPublisher = delegate;
@@ -60,14 +73,6 @@ public final class EventPublisherHolder {
         private final StreamBridge streamBridge;
         private final ApplicationEventPublisher delegate;
 
-        private static final Set<Class<?>> GROUPED_REMOTE_EVENTS = Set.of(
-                TargetAssignDistributionSetEvent.class,
-                MultiActionEvent.class,
-                CancelTargetAssignmentEvent.class,
-                TargetDeletedEvent.class,
-                TargetAttributesRequestedEvent.class
-        );
-
         public RoutingEventPublisher(final StreamBridge streamBridge, final ApplicationEventPublisher delegate) {
             this.streamBridge = streamBridge;
             this.delegate = delegate;
@@ -84,11 +89,18 @@ public final class EventPublisherHolder {
         }
 
         private void routeEvent(Object event) {
-            if (remoteEventsEnabled && streamBridge != null && event instanceof AbstractRemoteEvent) {
-                if (GROUPED_REMOTE_EVENTS.contains(event.getClass())) {
-                    streamBridge.send(groupChannel, event);
-                } else {
-                    streamBridge.send(fanoutChannel, event);
+            if (remoteEventsEnabled && streamBridge != null && event instanceof AbstractRemoteEvent remoteEvent) {
+                streamBridge.send(fanoutChannel, remoteEvent);
+                // some events need to be processed only by single replica of a kind
+                // wrap the entity event into a grouped event and send it to the group channel
+                if (GROUPED_REMOTE_EVENTS.contains(remoteEvent.getClass())) {
+                    final AbstractRemoteEvent groupedEvent = toGroupedEvent(remoteEvent);
+                    if (groupedEvent != null) {
+                        log.debug("Publishing grouped event: {} to channel: {}", groupedEvent, groupChannel);
+                        streamBridge.send(groupChannel, groupedEvent);
+                    } else {
+                        log.error("No grouped event created for: {}. Skipping send event to group channel.", remoteEvent.getClass());
+                    }
                 }
             } else if (delegate != null) {
                 delegate.publishEvent(event);
@@ -96,5 +108,20 @@ public final class EventPublisherHolder {
                 log.error("Could not publish (neither remote nor local) Event: {}.", event);
             }
         }
+    }
+
+    private AbstractRemoteEvent toGroupedEvent(final AbstractRemoteEvent event) {
+        if (event instanceof TargetAssignDistributionSetEvent) {
+            return new GroupedTargetAssignDistributionSetEvent((TargetAssignDistributionSetEvent) event);
+        } else if (event instanceof MultiActionAssignEvent) {
+            return new GroupedMultiActionAssignEvent((MultiActionAssignEvent) event);
+        } else if (event instanceof CancelTargetAssignmentEvent) {
+            return new GroupedCancelTargetAssignmentEvent((CancelTargetAssignmentEvent) event);
+        } else if (event instanceof TargetDeletedEvent) {
+            return new GroupedTargetDeletedEvent((TargetDeletedEvent) event);
+        } else if (event instanceof TargetAttributesRequestedEvent) {
+            return new GroupedTargetAttributesRequestedEvent((TargetAttributesRequestedEvent) event);
+        }
+        return null;
     }
 }

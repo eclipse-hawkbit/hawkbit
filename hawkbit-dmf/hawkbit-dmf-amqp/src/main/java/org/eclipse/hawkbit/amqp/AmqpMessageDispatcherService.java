@@ -55,7 +55,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
@@ -156,13 +156,15 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     /**
      * Listener for Multi-Action events.
      *
-     * @param multiActionEvent the Multi-Action event to be processed
+     * @param multiActionAssignEvent the Multi-Action event to be processed
      */
-    @EventListener(classes = MultiActionEvent.class)
-    protected void onMultiAction(final MultiActionEvent multiActionEvent) {
-        log.debug("MultiActionEvent received for {}", multiActionEvent.getControllerIds());
-        sendMultiActionRequestMessages(multiActionEvent.getControllerIds());
+    @EventListener(classes = MultiActionAssignEvent.class)
+    protected void onMultiActionAssign(final MultiActionAssignEvent multiActionAssignEvent) {
+        log.debug("MultiActionAssignEvent received for {}", multiActionAssignEvent.getControllerIds());
+        sendMultiActionRequestMessages(multiActionAssignEvent.getControllerIds());
     }
+
+    //TODO implement MultiActionCancelEvent handling
 
     protected void sendUpdateMessageToTarget(
             final ActionProperties actionsProps, final Target target,

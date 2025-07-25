@@ -1,0 +1,120 @@
+// Java
+package org.eclipse.hawkbit.repository.event.remote;
+
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Target;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.context.ApplicationEventPublisher;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+import java.util.List;
+import java.util.Set;
+
+class GroupedEventsTest {
+
+    private StreamBridge streamBridge;
+    private ApplicationEventPublisher delegate;
+    private ApplicationEventPublisher publisher;
+
+    @BeforeEach
+    void setUp() throws IllegalAccessException, NoSuchFieldException {
+        streamBridge = mock(StreamBridge.class);
+        delegate = mock(ApplicationEventPublisher.class);
+        EventPublisherHolder.getInstance().setApplicationEventPublisher(delegate);
+        EventPublisherHolder.getInstance().setStreamBridge(streamBridge);
+        publisher = EventPublisherHolder.getInstance().getEventPublisher();
+
+        // Set up fields via reflection
+        var remoteEventsEnabledField = EventPublisherHolder.class.getDeclaredField("remoteEventsEnabled");
+        remoteEventsEnabledField.setAccessible(true);
+        remoteEventsEnabledField.set(EventPublisherHolder.getInstance(), true);
+
+        var fanoutChannelField = EventPublisherHolder.class.getDeclaredField("fanoutChannel");
+        fanoutChannelField.setAccessible(true);
+        fanoutChannelField.set(EventPublisherHolder.getInstance(), "fanout");
+
+        var groupChannelField = EventPublisherHolder.class.getDeclaredField("groupChannel");
+        groupChannelField.setAccessible(true);
+        groupChannelField.set(EventPublisherHolder.getInstance(), "group");
+    }
+
+    @Test
+    void testGroupedTargetAssignDistributionSetEventIsSent() {
+        TargetAssignDistributionSetEvent event = new TargetAssignDistributionSetEvent(mockAction());
+
+        publisher.publishEvent(event);
+
+        verify(streamBridge).send(eq("fanout"), eq(event));
+        verify(streamBridge).send(eq("group"), any(GroupedTargetAssignDistributionSetEvent.class));
+    }
+
+    @Test
+    void testGroupedTargetDeletedEventIsSent() {
+        TargetDeletedEvent event = new TargetDeletedEvent("testtenant", 1l, Target.class, "testControllerId", "address");
+        publisher.publishEvent(event);
+
+        verify(streamBridge).send(eq("fanout"), eq(event));
+        verify(streamBridge).send(eq("group"), any(GroupedTargetDeletedEvent.class));
+    }
+
+    @Test
+    void testGroupedTargetAttributesRequestedEventIsSent() {
+        TargetAttributesRequestedEvent event = new TargetAttributesRequestedEvent("testtenant", 1l, Target.class, "testControllerId","address");
+        publisher.publishEvent(event);
+
+        verify(streamBridge).send(eq("fanout"), eq(event));
+        verify(streamBridge).send(eq("group"), any(GroupedTargetAttributesRequestedEvent.class));
+    }
+
+    @Test
+    void testMultiActionAssignmentEventIsSent() {
+        MultiActionAssignEvent event = new MultiActionAssignEvent("testtenant", List.of(mockAction()));
+
+        publisher.publishEvent(event);
+
+        verify(streamBridge).send(eq("fanout"), eq(event));
+        verify(streamBridge).send(eq("group"), any(GroupedMultiActionAssignEvent.class));
+    }
+
+    @Test
+    void testCancelTargetAssignmentEventIsSent() {
+        CancelTargetAssignmentEvent event = new CancelTargetAssignmentEvent(mockAction());
+
+        publisher.publishEvent(event);
+
+        verify(streamBridge).send(eq("fanout"), eq(event));
+        verify(streamBridge).send(eq("group"), any(GroupedCancelTargetAssignmentEvent.class));
+    }
+
+    @Test
+    void testExpectedGroupedRemoteEvents(){
+        var expected = Set.of(
+                TargetAssignDistributionSetEvent.class,
+                MultiActionAssignEvent.class,
+                CancelTargetAssignmentEvent.class,
+                TargetDeletedEvent.class,
+                TargetAttributesRequestedEvent.class
+        );
+        assertEquals(EventPublisherHolder.GROUPED_REMOTE_EVENTS, expected);
+    }
+
+    private Action mockAction() {
+        final Action actionMock = mock(Action.class);
+        final Target targetMock = mock(Target.class);
+        final DistributionSet distributionSetMock = mock(DistributionSet.class);
+        when(distributionSetMock.getId()).thenReturn(1L);
+        when(actionMock.getDistributionSet()).thenReturn(distributionSetMock);
+        when(actionMock.getId()).thenReturn(1l);
+        when(actionMock.getTenant()).thenReturn("DEFAULT");
+        when(actionMock.getTarget()).thenReturn(targetMock);
+        when(actionMock.getActionType()).thenReturn(Action.ActionType.SOFT);
+        when(targetMock.getControllerId()).thenReturn("target1");
+        return actionMock;
+    }
+}
