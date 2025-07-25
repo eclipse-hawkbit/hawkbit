@@ -68,18 +68,18 @@ public final class EventPublisherHolder {
                 TargetAttributesRequestedEvent.class
         );
 
-        public RoutingEventPublisher(StreamBridge streamBridge, ApplicationEventPublisher delegate) {
+        public RoutingEventPublisher(final StreamBridge streamBridge, final ApplicationEventPublisher delegate) {
             this.streamBridge = streamBridge;
             this.delegate = delegate;
         }
 
         @Override
-        public void publishEvent(Object event) {
+        public void publishEvent(final Object event) {
             routeEvent(event);
         }
 
         @Override
-        public void publishEvent(ApplicationEvent event) {
+        public void publishEvent(final ApplicationEvent event) {
             routeEvent(event);
         }
 

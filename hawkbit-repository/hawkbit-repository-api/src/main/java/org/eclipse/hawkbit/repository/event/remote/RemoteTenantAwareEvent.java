@@ -18,6 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
+
 /**
  * A distributed tenant aware event. It's the base class of the other
  * distributed events. All the necessary information of distributing events to

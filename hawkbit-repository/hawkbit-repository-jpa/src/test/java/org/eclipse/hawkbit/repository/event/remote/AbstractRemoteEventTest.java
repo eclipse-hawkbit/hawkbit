@@ -49,10 +49,6 @@ public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest
         this.jacksonMessageConverter = new MappingJackson2MessageConverter();
     }
 
-    protected Message<?> createMessageWithImmutableHeader(final TenantAwareEvent event) {
-        return eventProtoStuffMessageConverter.toMessage(event, new MessageHeaders(Map.of()));
-    }
-
     @SuppressWarnings("unchecked")
     protected <T extends TenantAwareEvent> T createJacksonEvent(final T event) {
         final Message<String> message = createJsonMessage(event);

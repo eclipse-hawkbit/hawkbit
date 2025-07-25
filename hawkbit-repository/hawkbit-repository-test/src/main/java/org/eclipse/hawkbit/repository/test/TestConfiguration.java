@@ -242,15 +242,6 @@ public class TestConfiguration implements AsyncConfigurer {
         return new RolloutTestApprovalStrategy();
     }
 
-    // TODO Check
-//    /**
-//     * @return the protostuff io message converter
-//     */
-//    @Bean
-//    MessageConverter busProtoBufConverter() {
-//        return new EventProtoStuffMessageConverter();
-//    }
-
     private static class FilterEnabledApplicationEventPublisher extends SimpleApplicationEventMulticaster {
 
         private final ApplicationEventFilter applicationEventFilter;

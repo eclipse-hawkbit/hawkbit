@@ -9,10 +9,10 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
-import java.util.Objects;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
@@ -21,6 +21,7 @@ import org.springframework.context.ApplicationEvent;
         property = "@class" // standard property name
 )
 @Getter
+@EqualsAndHashCode(callSuper = false)
 public abstract class AbstractRemoteEvent extends ApplicationEvent {
 
     private final String id;
@@ -32,18 +33,5 @@ public abstract class AbstractRemoteEvent extends ApplicationEvent {
     protected AbstractRemoteEvent(Object source) {
         super(source);
         this.id = UUID.randomUUID().toString();
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final AbstractRemoteEvent that = (AbstractRemoteEvent) o;
-        return Objects.equals(getId(), that.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId());
     }
 }
