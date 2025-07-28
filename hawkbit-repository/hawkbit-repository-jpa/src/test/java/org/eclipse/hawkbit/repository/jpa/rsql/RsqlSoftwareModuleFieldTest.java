@@ -13,10 +13,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModule.MetadataValueCreate;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,13 +49,8 @@ class RsqlSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
         final JpaSoftwareModule ah2 = (JpaSoftwareModule) softwareModuleManagement.create(
                 SoftwareModuleManagement.Create.builder().type(appType).name("agent-hub2").version("1.0.1").description("agent-hub2").build());
 
-        final SoftwareModuleMetadataCreate softwareModuleMetadata = entityFactory.softwareModuleMetadata()
-                .create(ah.getId()).key("metaKey").value("metaValue");
-        softwareModuleManagement.updateMetadata(softwareModuleMetadata);
-
-        final SoftwareModuleMetadataCreate softwareModuleMetadata2 = entityFactory.softwareModuleMetadata()
-                .create(ah2.getId()).key("metaKey").value("value");
-        softwareModuleManagement.updateMetadata(softwareModuleMetadata2);
+        softwareModuleManagement.createMetadata(ah.getId(), "metaKey", new MetadataValueCreate("metaValue"));
+        softwareModuleManagement.createMetadata(ah2.getId(), "metaKey", new MetadataValueCreate("value"));
     }
 
     /**
@@ -160,7 +155,6 @@ class RsqlSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey=in=(metaValue,value)", 2);
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".metaKey=out=(metaValue,notexist)", 1);
         assertRSQLQuery(SoftwareModuleFields.METADATA.name() + ".notExist==metaValue", 0);
-
     }
 
     private void assertRSQLQuery(final String rsql, final long expectedEntity) {

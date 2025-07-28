@@ -13,7 +13,6 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupBuilder;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataBuilder;
 import org.eclipse.hawkbit.repository.builder.TagBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
@@ -33,29 +32,21 @@ public class JpaEntityFactory implements EntityFactory {
     private final TargetBuilder targetBuilder;
     private final TargetTypeBuilder targetTypeBuilder;
     private final TargetFilterQueryBuilder targetFilterQueryBuilder;
-    private final SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder;
     private final RolloutBuilder rolloutBuilder;
 
     @SuppressWarnings("java:S107")
     public JpaEntityFactory(
             final TargetBuilder targetBuilder, final TargetTypeBuilder targetTypeBuilder,
             final TargetFilterQueryBuilder targetFilterQueryBuilder,
-            final SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder,
             final RolloutBuilder rolloutBuilder) {
         this.targetBuilder = targetBuilder;
         this.targetTypeBuilder = targetTypeBuilder;
         this.targetFilterQueryBuilder = targetFilterQueryBuilder;
-        this.softwareModuleMetadataBuilder = softwareModuleMetadataBuilder;
         this.rolloutBuilder = rolloutBuilder;
     }
     @Override
     public ActionStatusBuilder actionStatus() {
         return new JpaActionStatusBuilder();
-    }
-
-    @Override
-    public SoftwareModuleMetadataBuilder softwareModuleMetadata() {
-        return softwareModuleMetadataBuilder;
     }
 
     @Override

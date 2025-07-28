@@ -44,7 +44,6 @@ import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryptionSecr
 import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetTypeBuilder;
@@ -60,7 +59,6 @@ import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoActionCleanup;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoCleanupScheduler;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.CleanupTask;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutBuilder;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleMetadataBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetTypeBuilder;
@@ -70,7 +68,6 @@ import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitDefaultServiceExecutor;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.utils.ExceptionMapper;
-import org.eclipse.hawkbit.repository.jpa.management.JpaSoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -323,12 +320,6 @@ public class JpaRepositoryConfiguration {
         return new JpaTargetTypeBuilder(dsTypeManagement);
     }
 
-    @Bean
-    SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder(
-            final JpaSoftwareModuleManagement softwareModuleManagement) {
-        return new JpaSoftwareModuleMetadataBuilder(softwareModuleManagement);
-    }
-
     /**
      * @param distributionSetManagement for loading {@link Rollout#getDistributionSet()}
      * @return RolloutBuilder bean
@@ -461,11 +452,9 @@ public class JpaRepositoryConfiguration {
     EntityFactory entityFactory(
             final TargetBuilder targetBuilder, final TargetTypeBuilder targetTypeBuilder,
             final TargetFilterQueryBuilder targetFilterQueryBuilder,
-            final SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder,
             final RolloutBuilder rolloutBuilder) {
         return new JpaEntityFactory(
-                targetBuilder, targetTypeBuilder, targetFilterQueryBuilder,
-                softwareModuleMetadataBuilder, rolloutBuilder);
+                targetBuilder, targetTypeBuilder, targetFilterQueryBuilder, rolloutBuilder);
     }
 
     /**

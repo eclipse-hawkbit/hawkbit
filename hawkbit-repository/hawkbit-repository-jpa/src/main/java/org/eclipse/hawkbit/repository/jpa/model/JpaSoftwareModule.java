@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,7 @@ import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -36,7 +37,7 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import lombok.AccessLevel;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -102,8 +103,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
             joinColumns = { @JoinColumn(name = "sm", nullable = false) },
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_sm_metadata_sm"))
     @MapKeyColumn(name = "meta_key", length = SoftwareModule.METADATA_KEY_MAX_SIZE)
-    @Column(name = "meta_value", length = SoftwareModule.METADATA_VALUE_MAX_SIZE)
-    private Map<String, String> metadata;
+    private Map<String, JpaMetadataValue> metadata;
 
     @Column(name = "locked")
     private boolean locked;
@@ -191,5 +191,16 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     @Override
     public void fireDeleteEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new SoftwareModuleDeletedEvent(getTenant(), getId(), getClass()));
+    }
+
+    @Data
+    @Embeddable
+    public static class JpaMetadataValue implements MetadataValue {
+
+        @Column(name = "meta_value", length = SoftwareModule.METADATA_VALUE_MAX_SIZE)
+        @Size(max = METADATA_VALUE_MAX_SIZE)
+        private String value;
+        @Column(name = "target_visible", length = SoftwareModule.METADATA_VALUE_MAX_SIZE)
+        private boolean targetVisible;
     }
 }

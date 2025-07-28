@@ -51,7 +51,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
@@ -351,7 +350,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 .flatMap(ds -> ds.getModules().stream())
                 .map(SoftwareModule::getId)
                 .collect(Collectors.toSet());
-        final Map<Long, List<SoftwareModuleMetadata>> getSoftwareModuleMetadata =
+        final Map<Long, Map<String, String>> getSoftwareModuleMetadata =
                 allSmIds.isEmpty() ? Collections.emptyMap() : controllerManagement.findTargetVisibleMetaDataBySoftwareModuleId(allSmIds);
 
         amqpMessageDispatcherService.sendMultiActionRequestToTarget(target, actions, module -> getSoftwareModuleMetadata.get(module.getId()));
@@ -373,11 +372,11 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
-    private Map<SoftwareModule, List<SoftwareModuleMetadata>> getSoftwareModulesWithMetadata(final DistributionSet distributionSet) {
+    private Map<SoftwareModule, Map<String, String>> getSoftwareModulesWithMetadata(final DistributionSet distributionSet) {
         final List<Long> smIds = distributionSet.getModules().stream().map(SoftwareModule::getId).toList();
-        final Map<Long, List<SoftwareModuleMetadata>> metadata = controllerManagement.findTargetVisibleMetaDataBySoftwareModuleId(smIds);
+        final Map<Long, Map<String, String>> metadata = controllerManagement.findTargetVisibleMetaDataBySoftwareModuleId(smIds);
         return distributionSet.getModules().stream().collect(Collectors.toMap(
-                Function.identity(), sm -> metadata.getOrDefault(sm.getId(), Collections.emptyList())));
+                Function.identity(), sm -> metadata.getOrDefault(sm.getId(), Collections.emptyMap())));
 
     }
 

@@ -343,8 +343,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
 
         final Predicate mapPredicate = mapToMapPredicate(fieldPath, queryPath);
 
-
-        final Predicate valuePredicate = addOperatorPredicate(node, fieldPath, transformedValues, value, queryPath);
+        final Predicate valuePredicate = addOperatorPredicate(node, queryPath.getEnumValue().isMap() ? (Path)toMapValuePath(fieldPath) : fieldPath, transformedValues, value, queryPath);
         return toSingleList(mapPredicate != null ? cb.and(mapPredicate, valuePredicate) : valuePredicate);
     }
 
@@ -377,6 +376,16 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
             default:
                 throw new RSQLParameterSyntaxException(
                         "operator symbol {" + operator + "} is either not supported or not implemented");
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Path<String> toMapValuePath(final Path<?> fieldPath) {
+        final Path<?> mapValuePath = ((MapJoin<?, ?, ?>) pathOfString(fieldPath)).value();
+        if (mapValuePath.getJavaType() == String.class) {
+            return (Path<String>) mapValuePath;
+        } else {
+            return mapValuePath.get("value");
         }
     }
 
@@ -496,8 +505,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private Expression<String> getExpressionToCompare(final Path innerFieldPath, final A enumField) {
         if (enumField.isMap()){
-            // Currently we support only string key. So below cast is safe.
-            return (Expression<String>) (((MapJoin<?, ?, ?>) pathOfString(innerFieldPath)).value());
+            return toMapValuePath(innerFieldPath);
         } else {
             return pathOfString(innerFieldPath);
         }

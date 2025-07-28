@@ -32,7 +32,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
@@ -69,14 +68,13 @@ public interface ControllerManagement {
     Optional<SoftwareModule> getSoftwareModule(long moduleId);
 
     /**
-     * Retrieves {@link SoftwareModuleMetadata} where {@link SoftwareModuleMetadata#isTargetVisible()}.
+     * Retrieves software module metadata where isTargetVisible.
      *
      * @param moduleId of the {@link SoftwareModule}
-     * @return the map of software module id to {@link SoftwareModuleMetadata} with maximum size of
-     *         {@link RepositoryConstants#MAX_META_DATA_COUNT}
+     * @return the map of software module id to software module metadata with maximum size of {@link RepositoryConstants#MAX_META_DATA_COUNT}
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Map<Long, List<SoftwareModuleMetadata>> findTargetVisibleMetaDataBySoftwareModuleId(@NotNull Collection<Long> moduleId);
+    Map<Long, Map<String, String>> findTargetVisibleMetaDataBySoftwareModuleId(@NotNull Collection<Long> moduleId);
 
     /**
      * Simple addition of a new {@link ActionStatus} entry to the {@link Action}. No state changes.

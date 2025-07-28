@@ -10,12 +10,14 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractRepositoryManagementSecurityTest;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModule.MetadataValueCreate;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -46,11 +48,15 @@ class SoftwareManagementSecurityTest
     @Test
     void createMetaDataPermissionsCheck() {
         assertPermissions(
-                () -> softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().create(1L).key("key").value("value")),
+                () -> {
+                    softwareModuleManagement.createMetadata(1L, "key", new MetadataValueCreate("value"));
+                    return null;
+                },
                 List.of(SpPermission.UPDATE_REPOSITORY));
         assertPermissions(() -> {
             softwareModuleManagement.createMetadata(
-                    List.of(entityFactory.softwareModuleMetadata().create(1L).key("key").value("value")));
+                    1L,
+                    Map.of("key", new MetadataValueCreate("value")));
             return null;
         }, List.of(SpPermission.UPDATE_REPOSITORY));
     }
@@ -117,7 +123,7 @@ class SoftwareManagementSecurityTest
      */
     @Test
     void findMetaDataBySoftwareModuleIdAndTargetVisiblePermissionsCheck() {
-        assertPermissions(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(1L, PAGE),
+        assertPermissions(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(1L),
                 List.of(SpPermission.READ_REPOSITORY));
     }
 
@@ -157,7 +163,10 @@ class SoftwareManagementSecurityTest
     @Test
     void updateMetaDataPermissionsCheck() {
         assertPermissions(
-                () -> softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().update(1L, "key").value("value")),
+                () -> {
+                    softwareModuleManagement.createMetadata(1L, "key", new MetadataValueCreate("value"));
+                    return null;
+                },
                 List.of(SpPermission.UPDATE_REPOSITORY));
     }
 

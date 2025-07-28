@@ -48,6 +48,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.SoftwareModule.MetadataValueCreate;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
@@ -253,10 +254,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Artifact artifactSignature = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE),
                 getOsModule(ds), "test1.signature", ARTIFACT_SIZE);
 
-        softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
-                .key(visibleMetadataOsKey).value(visibleMetadataOsValue).targetVisible(true));
-        softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
-                .key("metaDataNotVisible").value("withValue").targetVisible(false));
+        softwareModuleManagement.createMetadata(getOsModule(ds), visibleMetadataOsKey, new MetadataValueCreate(visibleMetadataOsValue, true));
+        softwareModuleManagement.createMetadata(getOsModule(ds), "metaDataNotVisible", new MetadataValueCreate("withValue", false));
 
         final Target savedTarget = createTargetAndAssertNoActiveActions();
 
@@ -374,10 +373,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Artifact artifactSignature = testdataFactory.createArtifact(
                 nextBytes(ARTIFACT_SIZE), getOsModule(ds), "test1.signature", ARTIFACT_SIZE);
 
-        softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
-                .key("metaDataVisible").value("withValue").targetVisible(true));
-        softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
-                .key("metaDataNotVisible").value("withValue").targetVisible(false));
+        softwareModuleManagement.createMetadata(getOsModule(ds), "metaDataVisible", new MetadataValueCreate("withValue", true));
+        softwareModuleManagement.createMetadata(getOsModule(ds), "metaDataNotVisible", new MetadataValueCreate("withValue", false));
 
         final Target savedTarget = createTargetAndAssertNoActiveActions();
 

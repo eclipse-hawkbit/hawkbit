@@ -74,7 +74,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCond
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
+import org.eclipse.hawkbit.repository.model.SoftwareModule.MetadataValueCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -341,12 +341,12 @@ public class TestdataFactory {
     }
 
     /**
-     * Adds {@link SoftwareModuleMetadata} to every module of given {@link DistributionSet}.
+     * Adds software module metadata to every module of given {@link DistributionSet}.
      * <p/>
      * {@link #VISIBLE_SM_MD_VALUE}, {@link #VISIBLE_SM_MD_KEY} with
-     * {@link SoftwareModuleMetadata#isTargetVisible()} and
+     * {@link MetadataValueCreate#isTargetVisible()} and
      * {@link #INVISIBLE_SM_MD_KEY}, {@link #INVISIBLE_SM_MD_VALUE} without
-     * {@link SoftwareModuleMetadata#isTargetVisible()}
+     * {@link MetadataValueCreate#isTargetVisible()}
      *
      * @param set to add metadata to
      */
@@ -1256,10 +1256,14 @@ public class TestdataFactory {
     }
 
     private void addTestModuleMetadata(final SoftwareModule module) {
-        softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().create(module.getId())
-                .key(VISIBLE_SM_MD_KEY).value(VISIBLE_SM_MD_VALUE).targetVisible(true));
-        softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().create(module.getId())
-                .key(INVISIBLE_SM_MD_KEY).value(INVISIBLE_SM_MD_VALUE).targetVisible(false));
+        softwareModuleManagement.createMetadata(
+                module.getId(),
+                VISIBLE_SM_MD_KEY,
+                new MetadataValueCreate(VISIBLE_SM_MD_VALUE, true));
+        softwareModuleManagement.createMetadata(
+                module.getId(),
+                INVISIBLE_SM_MD_KEY,
+                new MetadataValueCreate(INVISIBLE_SM_MD_VALUE, false));
     }
 
     private void assertTargetProperlyCreated(final Target target) {

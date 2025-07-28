@@ -12,6 +12,11 @@ package org.eclipse.hawkbit.repository.model;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.validation.constraints.Size;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 /**
  * Software package as sub element of a {@link DistributionSet}.
  */
@@ -80,5 +85,29 @@ public interface SoftwareModule extends NamedVersionedEntity {
     default Optional<Artifact> getArtifactByFilename(final String fileName) {
         return getArtifacts().stream().filter(artifact -> artifact.getFilename().equalsIgnoreCase(fileName.trim()))
                 .findAny();
+    }
+
+    interface MetadataValue {
+
+        String getValue();
+        boolean isTargetVisible();
+    }
+
+    @NoArgsConstructor
+    @Data
+    class MetadataValueCreate implements MetadataValue {
+
+        @Size(max = METADATA_VALUE_MAX_SIZE)
+        private String value;
+        private boolean targetVisible;
+
+        public MetadataValueCreate(final String value) {
+            this(value, false);
+        }
+
+        public MetadataValueCreate(final String value, final boolean targetVisible) {
+            this.value = value;
+            this.targetVisible = targetVisible;
+        }
     }
 }

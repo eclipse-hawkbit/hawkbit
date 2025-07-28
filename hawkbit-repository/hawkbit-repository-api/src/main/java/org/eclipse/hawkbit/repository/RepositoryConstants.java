@@ -9,14 +9,17 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
  * Repository constants.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RepositoryConstants {
 
     /**
@@ -46,12 +49,7 @@ public final class RepositoryConstants {
     /**
      * Maximum number of metadata entries provided to controllers.
      *
-     * @see SoftwareModuleMetadata#isTargetVisible()
+     * @see SoftwareModule.MetadataValueCreate#isTargetVisible()
      */
     public static final int MAX_META_DATA_COUNT = 50;
-
-    private RepositoryConstants() {
-        // Utility class.
-    }
-
 }
