@@ -14,7 +14,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
@@ -22,14 +25,18 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
 /**
  * the {@link EntityNotFoundException} is thrown when a entity queried but not found.
  */
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @Getter
 public class EntityNotFoundException extends AbstractServerRtException {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public static final String KEY = "key";
     public static final String ENTITY_ID = "entityId";
     public static final String TYPE = "type";
-    @Serial
-    private static final long serialVersionUID = 1L;
+
     private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_ENTITY_NOT_EXISTS;
     private static final int ENTITY_STRING_MAX_LENGTH = 100;
 

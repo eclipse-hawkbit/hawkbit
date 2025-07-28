@@ -160,14 +160,14 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                         startsWith(deploymentBaseLink(CONTROLLER_ID, actionId1.toString()))));
 
         getAndVerifyDeploymentBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds1, artifact1, artifactSignature1,
-                actionId1, ds1.findFirstModuleByType(osType).get().getId(), Action.ActionType.SOFT);
+                actionId1, findFirstModuleByType(ds1, osType).orElseThrow().getId(), Action.ActionType.SOFT);
 
         postDeploymentFeedback(target.getControllerId(), actionId1,
                 getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("Closed")),
                 status().isOk());
 
         getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds1, artifact1, artifactSignature1,
-                actionId1, ds1.findFirstModuleByType(osType).get().getId(), Action.ActionType.SOFT);
+                actionId1, findFirstModuleByType(ds1, osType).orElseThrow().getId(), Action.ActionType.SOFT);
 
         // Run test with 2nd action
         final Long actionId2 = getFirstAssignedActionId(
@@ -180,14 +180,14 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                         startsWith(deploymentBaseLink(CONTROLLER_ID, actionId2.toString()))));
 
         getAndVerifyDeploymentBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds2, artifact2, artifactSignature2,
-                actionId2, ds2.findFirstModuleByType(osType).get().getId(), Action.ActionType.FORCED);
+                actionId2, findFirstModuleByType(ds2, osType).orElseThrow().getId(), Action.ActionType.FORCED);
 
         postDeploymentFeedback(target.getControllerId(), actionId2,
                 getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("Closed")),
                 status().isOk());
 
         getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds2, artifact2, artifactSignature2,
-                actionId2, ds2.findFirstModuleByType(osType).get().getId(), Action.ActionType.FORCED);
+                actionId2, findFirstModuleByType(ds2, osType).orElseThrow().getId(), Action.ActionType.FORCED);
 
         performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenantAware.getCurrentTenant(), CONTROLLER_ID)
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
@@ -197,7 +197,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
         // older installed action is still accessible, although not part of controller base
         getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds1, artifact1, artifactSignature1,
-                actionId1, ds1.findFirstModuleByType(osType).get().getId(), Action.ActionType.SOFT);
+                actionId1, findFirstModuleByType(ds1, osType).orElseThrow().getId(), Action.ActionType.SOFT);
     }
 
     /**
@@ -245,7 +245,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist());
 
         getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds1, artifact1, artifactSignature1,
-                actionId3, ds1.findFirstModuleByType(osType).get().getId(), Action.ActionType.SOFT);
+                actionId3, findFirstModuleByType(ds1, osType).orElseThrow().getId(), Action.ActionType.SOFT);
 
         // cancelled action are not accessible
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), target.getControllerId(),
@@ -304,7 +304,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist());
 
         getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds1, artifact1, artifactSignature1,
-                actionId1, ds1.findFirstModuleByType(osType).get().getId(), Action.ActionType.SOFT);
+                actionId1, findFirstModuleByType(ds1, osType).orElseThrow().getId(), Action.ActionType.SOFT);
 
         // cancelled action are not accessible
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), target.getControllerId(),
@@ -359,7 +359,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                         startsWith(deploymentBaseLink(CONTROLLER_ID, actionId3.toString()))));
 
         getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds1, artifact1, artifactSignature1,
-                actionId1, ds1.findFirstModuleByType(osType).get().getId(), Action.ActionType.SOFT);
+                actionId1, findFirstModuleByType(ds1, osType).orElseThrow().getId(), Action.ActionType.SOFT);
 
         // cancelled action are not accessible
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), target.getControllerId(),
@@ -463,10 +463,10 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                         tenantAware.getCurrentTenant(), target.getControllerId(), actionId))));
 
         getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, artifact, artifactSignature,
-                actionId, ds.findFirstModuleByType(osType).get().getId(), actionType);
+                actionId, findFirstModuleByType(ds, osType).orElseThrow().getId(), actionType);
 
         getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaTypes.HAL_JSON, ds, artifact, artifactSignature, actionId,
-                ds.findFirstModuleByType(osType).get().getId(), actionType);
+                findFirstModuleByType(ds, osType).orElseThrow().getId(), actionType);
 
         // Action is still finished after calling installedBase
         final Iterable<ActionStatus> actionStatusMessages = deploymentManagement

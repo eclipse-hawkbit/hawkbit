@@ -14,36 +14,47 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssignment;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.rest.json.model.ResponseList;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 /**
  * A mapper which maps repository model to RESTful model representation and back.
  */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Service
 public final class MgmtDistributionSetTypeMapper {
 
-    public static List<DistributionSetTypeCreate> smFromRequest(final EntityFactory entityFactory, final Collection<MgmtDistributionSetTypeRequestBodyPost> smTypesRest) {
+    private final SoftwareModuleTypeManagement<? extends SoftwareModuleType> softwareModuleTypeManagement;
+
+    MgmtDistributionSetTypeMapper(final SoftwareModuleTypeManagement<? extends SoftwareModuleType> softwareModuleTypeManagement) {
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
+    }
+
+    public List<DistributionSetTypeManagement.Create> smFromRequest(final Collection<MgmtDistributionSetTypeRequestBodyPost> smTypesRest) {
         if (smTypesRest == null) {
             return Collections.emptyList();
         }
 
-        return smTypesRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).toList();
+        return smTypesRest.stream().map(this::fromRequest).toList();
     }
 
-    public static List<MgmtDistributionSetType> toListResponse(final Collection<DistributionSetType> types) {
+    public static List<MgmtDistributionSetType> toListResponse(final Collection<? extends DistributionSetType> types) {
         if (types == null) {
             return Collections.emptyList();
         }
@@ -71,22 +82,32 @@ public final class MgmtDistributionSetTypeMapper {
                 .withRel(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULES).expand());
     }
 
-    private static DistributionSetTypeCreate fromRequest(final EntityFactory entityFactory,
-            final MgmtDistributionSetTypeRequestBodyPost smsRest) {
-        return entityFactory.distributionSetType().create().key(smsRest.getKey()).name(smsRest.getName())
+    private DistributionSetTypeManagement.Create fromRequest(final MgmtDistributionSetTypeRequestBodyPost smsRest) {
+        return DistributionSetTypeManagement.Create.builder()
+                .key(smsRest.getKey()).name(smsRest.getName())
                 .description(smsRest.getDescription()).colour(smsRest.getColour())
-                .mandatory(getMandatoryModules(smsRest)).optional(getOptionalModules(smsRest));
+                .mandatoryModuleTypes(getModules(smsRest.getMandatorymodules()))
+                .optionalModuleTypes(getModules(smsRest.getOptionalmodules()))
+                .build();
     }
 
-    private static Collection<Long> getMandatoryModules(final MgmtDistributionSetTypeRequestBodyPost smsRest) {
-        return Optional.ofNullable(smsRest.getMandatorymodules())
-                .map(modules -> modules.stream().map(MgmtSoftwareModuleTypeAssignment::getId).toList())
-                .orElse(Collections.emptyList());
+    private Set<? extends SoftwareModuleType> getModules(final List<MgmtSoftwareModuleTypeAssignment> moduleAssignments) {
+        return Optional.ofNullable(moduleAssignments)
+                .map(modules -> modules.stream().map(MgmtSoftwareModuleTypeAssignment::getId).collect(Collectors.toSet()))
+                .map(this::findSoftwareModuleTypeWithExceptionIfNotFound)
+                .orElse(Collections.emptySet());
     }
 
-    private static Collection<Long> getOptionalModules(final MgmtDistributionSetTypeRequestBodyPost smsRest) {
-        return Optional.ofNullable(smsRest.getOptionalmodules())
-                .map(modules -> modules.stream().map(MgmtSoftwareModuleTypeAssignment::getId).toList())
-                .orElse(Collections.emptyList());
+    private Set<? extends SoftwareModuleType> findSoftwareModuleTypeWithExceptionIfNotFound(final Collection<Long> softwareModuleTypeId) {
+        if (CollectionUtils.isEmpty(softwareModuleTypeId)) {
+            return Collections.emptySet();
+        }
+
+        final List<? extends SoftwareModuleType> module = softwareModuleTypeManagement.get(softwareModuleTypeId);
+        if (module.size() < softwareModuleTypeId.size()) {
+            throw new EntityNotFoundException(SoftwareModuleType.class, softwareModuleTypeId);
+        }
+
+        return new HashSet<>(module);
     }
 }

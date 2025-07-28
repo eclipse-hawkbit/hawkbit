@@ -31,16 +31,20 @@ import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.Cancelat
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidationCount;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Jpa implementation for {@link DistributionSetInvalidationManagement}
  */
 @Slf4j
+@Service
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "distribution-set-invalidation-management" }, matchIfMissing = true)
 public class JpaDistributionSetInvalidationManagement implements DistributionSetInvalidationManagement {
 
-    private final DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final RolloutManagement rolloutManagement;
     private final DeploymentManagement deploymentManagement;
     private final TargetFilterQueryManagement targetFilterQueryManagement;
@@ -52,7 +56,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     private final SystemSecurityContext systemSecurityContext;
 
     @SuppressWarnings("java:S107")
-    public JpaDistributionSetInvalidationManagement(final DistributionSetManagement distributionSetManagement,
+    protected JpaDistributionSetInvalidationManagement(final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final RolloutManagement rolloutManagement, final DeploymentManagement deploymentManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final ActionRepository actionRepository,
             final PlatformTransactionManager txManager, final RepositoryProperties repositoryProperties,
@@ -134,7 +138,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
             throw new IncompleteDistributionSetException("Distribution set of type "
                     + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
         }
-        distributionSetManagement.invalidate(distributionSet);
+        ((DistributionSetManagement)distributionSetManagement).invalidate(distributionSet);
         log.debug("Distribution set {} marked as invalid.", setId);
 
         // rollout cancellation should only be permitted with UPDATE_ROLLOUT permission

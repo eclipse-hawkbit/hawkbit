@@ -123,11 +123,11 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.update", equalTo("forced")))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part=='jvm')].version",
-                        contains(ds.findFirstModuleByType(runtimeType).get().getVersion())))
+                        contains(findFirstModuleByType(ds, runtimeType).orElseThrow().getVersion())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].version",
-                        contains(ds.findFirstModuleByType(osType).get().getVersion())))
+                        contains(findFirstModuleByType(ds, osType).orElseThrow().getVersion())))
                 .andExpect(jsonPath("$.deployment.chunks[?(@.part=='bApp')].version",
-                        contains(ds.findFirstModuleByType(appType).get().getVersion())));
+                        contains(findFirstModuleByType(ds, appType).orElseThrow().getVersion())));
 
         // and finish it
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/deploymentBase/"

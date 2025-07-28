@@ -11,13 +11,17 @@ package org.eclipse.hawkbit.repository.exception;
 
 import java.io.Serial;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- * the {@link EntityAlreadyExistsException} is thrown when an entity is tried to
- * be saved which already exists or which violates unique key constraints.
+ * the {@link EntityAlreadyExistsException} is thrown when an entity is tried to be saved which already exists or which violates unique key
+ * constraints.
  */
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class EntityAlreadyExistsException extends AbstractServerRtException {
 
     @Serial

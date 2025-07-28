@@ -83,7 +83,7 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         final int artifactSize = 5 * 1024;
         final byte[] random = nextBytes(artifactSize);
         final Artifact artifact = artifactManagement.create(new ArtifactUpload(
-                new ByteArrayInputStream(random), ds.findFirstModuleByType(osType).get().getId(), "file1", false, artifactSize));
+                new ByteArrayInputStream(random), findFirstModuleByType(ds, osType).orElseThrow().getId(), "file1", false, artifactSize));
 
         assignDistributionSet(ds, targets);
 
@@ -178,7 +178,7 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         final int artifactSize = (int) quotaManagement.getMaxArtifactSize();
         final byte[] random = nextBytes(artifactSize);
         final Artifact artifact = artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random),
-                ds.findFirstModuleByType(osType).get().getId(), "file1", false, artifactSize));
+                findFirstModuleByType(ds, osType).orElseThrow().getId(), "file1", false, artifactSize));
 
         // download fails as artifact is not yet assigned
         mvc.perform(get("/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",

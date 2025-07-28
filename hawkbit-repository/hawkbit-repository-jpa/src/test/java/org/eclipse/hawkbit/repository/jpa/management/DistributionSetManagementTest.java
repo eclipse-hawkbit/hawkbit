@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -30,9 +31,10 @@ import jakarta.validation.ConstraintViolationException;
 
 import org.assertj.core.api.Condition;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
-import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
-import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
@@ -96,7 +98,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Verifies that management queries react as specified on calls for non existing entities by means of 
+     * Verifies that management queries react as specified on calls for non existing entities by means of
      * throwing EntityNotFoundException.
      */
     @Test
@@ -133,9 +135,6 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         verifyThrownExceptionBy(() -> distributionSetManagement.unassignTag(singletonList(NOT_EXIST_IDL), dsTag.getId()), "DistributionSet");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.create(
-                entityFactory.distributionSet().create().name("xxx").type(NOT_EXIST_ID)), "DistributionSetType");
-
         verifyThrownExceptionBy(() -> distributionSetManagement.createMetadata(NOT_EXIST_IDL, Map.of("123", "123")), "DistributionSet");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.delete(singletonList(NOT_EXIST_IDL)), "DistributionSet");
@@ -154,10 +153,11 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .hasMessageContaining("DistributionSet");
 
         verifyThrownExceptionBy(
-                () -> distributionSetManagement.update(entityFactory.distributionSet().update(NOT_EXIST_IDL)), "DistributionSet");
+                () -> distributionSetManagement.update(DistributionSetManagement.Update.builder().id(NOT_EXIST_IDL).build()),
+                "DistributionSet");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.updateMetadata(NOT_EXIST_IDL,"xxx", "xxx"), "DistributionSet");
-        verifyThrownExceptionBy(() -> distributionSetManagement.updateMetadata(set.getId(),NOT_EXIST_ID, "xxx"), "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.updateMetadata(NOT_EXIST_IDL, "xxx", "xxx"), "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.updateMetadata(set.getId(), NOT_EXIST_ID, "xxx"), "DistributionSet");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.getOrElseThrowException(NOT_EXIST_IDL), "DistributionSet");
 
@@ -199,7 +199,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void createDistributionSetWithImplicitType() {
         final DistributionSet set = distributionSetManagement
-                .create(entityFactory.distributionSet().create().name("newtypesoft").version("1"));
+                .create(DistributionSetManagement.Create.builder().type(defaultDsType()).name("newtypesoft").version("1").build());
 
         assertThat(set.getType())
                 .as("Type should be equal to default type of tenant")
@@ -212,7 +212,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void createDistributionSetWithDuplicateNameAndVersionFails() {
-        final DistributionSetCreate distributionSetCreate = entityFactory.distributionSet().create().name("newtypesoft").version("1");
+        final DistributionSetManagement.Create distributionSetCreate =
+                DistributionSetManagement.Create.builder().type(defaultDsType()).name("newtypesoft").version("1").build();
         distributionSetManagement.create(distributionSetCreate);
 
         assertThatExceptionOfType(EntityAlreadyExistsException.class).isThrownBy(() -> distributionSetManagement.create(distributionSetCreate));
@@ -223,14 +224,14 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void createMultipleDistributionSetsWithImplicitType() {
-        final List<DistributionSetCreate> creates = new ArrayList<>(10);
+        final List<DistributionSetManagement.Create> creates = new ArrayList<>(10);
         for (int i = 0; i < 10; i++) {
-            creates.add(entityFactory.distributionSet().create().name("newtypesoft" + i).version("1" + i));
+            creates.add(DistributionSetManagement.Create.builder().type(defaultDsType()).name("newtypesoft" + i).version("1" + i).build());
         }
 
         assertThat(distributionSetManagement.create(creates))
                 .as("Type should be equal to default type of tenant")
-                .are(new Condition<>() {
+                .are(new Condition<DistributionSet>() {
 
                     @Override
                     public boolean matches(final DistributionSet value) {
@@ -308,9 +309,10 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             assignDS.add(testdataFactory.createDistributionSet("DS" + i, "1.0", Collections.emptyList()).getId());
         }
 
-        final DistributionSetTag tag = distributionSetTagManagement.create(entityFactory.tag().create().name(TAG1_NAME));
+        final DistributionSetTag tag = distributionSetTagManagement.create(
+                DistributionSetTagManagement.Create.builder().name(TAG1_NAME).build());
 
-        final List<DistributionSet> assignedDS = distributionSetManagement.assignTag(assignDS, tag.getId());
+        final List<? extends DistributionSet> assignedDS = distributionSetManagement.assignTag(assignDS, tag.getId());
         assertThat(assignedDS).as("assigned ds has wrong size").hasSize(4);
         assignedDS.stream().map(JpaDistributionSet.class::cast).forEach(ds -> assertThat(ds.getTags())
                 .as("ds has wrong tag size")
@@ -362,7 +364,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .isInstanceOf(EntityReadOnlyException.class);
 
         // not allowed as it is assigned now
-        final Long appId = getOrThrow(ds.findFirstModuleByType(appType)).getId();
+        final Long appId = getOrThrow(findFirstModuleByType(ds, appType)).getId();
         assertThatThrownBy(() -> distributionSetManagement.unassignSoftwareModule(dsId, appId))
                 .isInstanceOf(EntityReadOnlyException.class);
     }
@@ -373,17 +375,22 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void updateDistributionSetUnsupportedModuleFails() {
         final Long setId = distributionSetManagement.create(
-                entityFactory.distributionSet().create()
+                DistributionSetManagement.Create.builder()
                         .type(distributionSetTypeManagement.create(
-                                entityFactory.distributionSetType().create()
+                                DistributionSetTypeManagement.Create.builder()
                                         .key("test")
                                         .name("test")
-                                        .mandatory(singletonList(osType.getId()))).getKey())
+                                        .mandatoryModuleTypes(Set.of(osType))
+                                        .build()))
                         .name("agent-hub2")
-                        .version("1.0.5")).getId();
+                        .version("1.0.5")
+                        .build()).getId();
 
         final Set<Long> moduleId = Set.of(softwareModuleManagement.create(
-                entityFactory.softwareModule().create().name("agent-hub2").version("1.0.5").type(appType.getKey())).getId());
+                SoftwareModuleManagement.Create.builder()
+                        .type(appType)
+                        .name("agent-hub2").version("1.0.5")
+                        .build()).getId());
 
         // update data
         assertThatThrownBy(() -> distributionSetManagement.assignSoftwareModules(setId, moduleId))
@@ -403,17 +410,17 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // legal update of module addition
         distributionSetManagement.assignSoftwareModules(ds.getId(), Set.of(os.getId()));
         ds = getOrThrow(distributionSetManagement.getWithDetails(ds.getId()));
-        assertThat(getOrThrow(ds.findFirstModuleByType(osType))).isEqualTo(os);
+        assertThat(getOrThrow(findFirstModuleByType(ds, osType))).isEqualTo(os);
 
         // legal update of module removal
         distributionSetManagement.unassignSoftwareModule(ds.getId(),
-                getOrThrow(ds.findFirstModuleByType(appType)).getId());
+                getOrThrow(findFirstModuleByType(ds, appType)).getId());
         ds = getOrThrow(distributionSetManagement.getWithDetails(ds.getId()));
-        assertThat(ds.findFirstModuleByType(appType)).isNotPresent();
+        assertThat(findFirstModuleByType(ds, appType)).isNotPresent();
 
         // Update description
-        distributionSetManagement.update(entityFactory.distributionSet().update(ds.getId()).name("a new name")
-                .description("a new description").version("a new version").requiredMigrationStep(true));
+        distributionSetManagement.update(DistributionSetManagement.Update.builder().id(ds.getId()).name("a new name")
+                .description("a new description").version("a new version").requiredMigrationStep(true).build());
         ds = getOrThrow(distributionSetManagement.getWithDetails(ds.getId()));
         assertThat(ds.getDescription()).isEqualTo("a new description");
         assertThat(ds.getName()).isEqualTo("a new name");
@@ -428,7 +435,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     void updateInvalidDistributionSet() {
         final DistributionSet distributionSet = testdataFactory.createAndInvalidateDistributionSet();
 
-        final DistributionSetUpdate update = entityFactory.distributionSet().update(distributionSet.getId()).name("new_name");
+        final DistributionSetManagement.Update update =
+                DistributionSetManagement.Update.builder().id(distributionSet.getId()).name("new_name").build();
         assertThatExceptionOfType(InvalidDistributionSetException.class)
                 .as("Invalid distributionSet should throw an exception").isThrownBy(() -> distributionSetManagement.update(update));
     }
@@ -548,22 +556,23 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void searchDistributionSetsOnFilters() {
         DistributionSetTag dsTagA = distributionSetTagManagement
-                .create(entityFactory.tag().create().name("DistributionSetTag-A"));
+                .create(DistributionSetTagManagement.Create.builder().name("DistributionSetTag-A").build());
         final DistributionSetTag dsTagB = distributionSetTagManagement
-                .create(entityFactory.tag().create().name("DistributionSetTag-B"));
+                .create(DistributionSetTagManagement.Create.builder().name("DistributionSetTag-B").build());
         final DistributionSetTag dsTagC = distributionSetTagManagement
-                .create(entityFactory.tag().create().name("DistributionSetTag-C"));
-        distributionSetTagManagement.create(entityFactory.tag().create().name("DistributionSetTag-D"));
+                .create(DistributionSetTagManagement.Create.builder().name("DistributionSetTag-C").build());
+        distributionSetTagManagement.create(DistributionSetTagManagement.Create.builder().name("DistributionSetTag-D").build());
 
-        List<DistributionSet> dsGroup1 = testdataFactory.createDistributionSets("", 5);
+        List<? extends DistributionSet> dsGroup1 = testdataFactory.createDistributionSets("", 5);
         final String dsGroup2Prefix = "test";
-        List<DistributionSet> dsGroup2 = testdataFactory.createDistributionSets(dsGroup2Prefix, 5);
+        List<? extends DistributionSet> dsGroup2 = testdataFactory.createDistributionSets(dsGroup2Prefix, 5);
         DistributionSet dsDeleted = testdataFactory.createDistributionSet("testDeleted");
-        final DistributionSet dsInComplete = distributionSetManagement.create(entityFactory.distributionSet().create()
-                .name("notcomplete").version("1").type(standardDsType.getKey()));
+        final DistributionSet dsInComplete = distributionSetManagement.create(
+                DistributionSetManagement.Create.builder()
+                        .name("notcomplete").version("1").type(standardDsType).build());
 
         DistributionSetType newType = distributionSetTypeManagement
-                .create(entityFactory.distributionSetType().create().key("foo").name("bar").description("test"));
+                .create(DistributionSetTypeManagement.Create.builder().key("foo").name("bar").description("test").build());
 
         distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(newType.getId(),
                 singletonList(osType.getId()));
@@ -571,8 +580,11 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 Arrays.asList(appType.getId(), runtimeType.getId()));
 
         final DistributionSet dsNewType = distributionSetManagement.create(
-                entityFactory.distributionSet().create().name("newtype").version("1").type(newType.getKey()).modules(
-                        dsDeleted.getModules().stream().map(SoftwareModule::getId).toList()));
+                DistributionSetManagement.Create.builder()
+                        .type(newType)
+                        .name("newtype").version("1")
+                        .modules(new HashSet<>(dsDeleted.getModules()))
+                        .build());
 
         assignDistributionSet(dsDeleted, testdataFactory.createTargets(5));
         distributionSetManagement.delete(dsDeleted.getId());
@@ -585,10 +597,10 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         dsGroup2 = assignTag(dsGroup2, dsTagA);
         dsTagA = getOrThrow(distributionSetTagRepository.findByNameEquals(dsTagA.getName()));
 
-        final List<DistributionSet> allDistributionSets = Stream
+        final List<? extends DistributionSet> allDistributionSets = Stream
                 .of(dsGroup1, dsGroup2, Arrays.asList(dsDeleted, dsInComplete, dsNewType)).flatMap(Collection::stream)
                 .toList();
-        final List<DistributionSet> dsGroup1WithGroup2 = Stream.of(dsGroup1, dsGroup2).flatMap(Collection::stream)
+        final List<? extends DistributionSet> dsGroup1WithGroup2 = Stream.of(dsGroup1, dsGroup2).flatMap(Collection::stream)
                 .toList();
         final int sizeOfAllDistributionSets = allDistributionSets.size();
 
@@ -604,8 +616,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         validateDeletedAndCompleted(dsGroup1WithGroup2, dsNewType, dsDeleted);
         validateDeletedAndCompletedAndType(dsGroup1WithGroup2, dsDeleted, newType, dsNewType);
         validateDeletedAndCompletedAndTypeAndSearchText(dsGroup2, newType, dsGroup2Prefix);
-        validateDeletedAndCompletedAndTypeAndSearchText(dsGroup1WithGroup2, dsDeleted, dsInComplete, dsNewType, newType,
-                ":1");
+        validateDeletedAndCompletedAndTypeAndSearchText(dsGroup1WithGroup2, dsDeleted, dsInComplete, dsNewType, newType, ":1");
         validateDeletedAndCompletedAndTypeAndSearchTextAndTag(dsGroup2, dsTagA, dsGroup2Prefix);
     }
 
@@ -729,21 +740,22 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Test implicit locks for a DS and skip tags.
      */
+    @SuppressWarnings("rawtypes")
     @Test
     void isImplicitLockApplicableForDistributionSet() {
-        final JpaDistributionSetManagement distributionSetManagement = (JpaDistributionSetManagement) this.distributionSetManagement;
+        final JpaDistributionSetManagement distributionSetManagement = (JpaDistributionSetManagement) (DistributionSetManagement) this.distributionSetManagement;
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-non-skip");
         // assert that implicit lock is applicable for non skip tags
         assertThat(distributionSetManagement.isImplicitLockApplicable(distributionSet)).isTrue();
 
         assertThat(repositoryProperties.getSkipImplicitLockForTags().size()).isNotZero();
-        final List<DistributionSetTag> skipTags = distributionSetTagManagement.create(
+        final List<? extends DistributionSetTag> skipTags = distributionSetTagManagement.create(
                 repositoryProperties.getSkipImplicitLockForTags().stream()
                         .map(String::toLowerCase)
                         // remove same in case-insensitive terms tags
                         // in of case-insensitive db's it will end up as same names and constraint violation (?)
                         .distinct()
-                        .map(skipTag -> entityFactory.tag().create().name(skipTag))
+                        .map(skipTag -> (DistributionSetTagManagement.Create)DistributionSetTagManagement.Create.builder().name(skipTag).build())
                         .toList());
         // assert that implicit lock locks for every skip tag
         skipTags.forEach(skipTag -> {
@@ -829,7 +841,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Deletes a DS that is in use by either target assignment or rollout. Expected behaviour is a soft delete on the database, i.e. only marked as 
+     * Deletes a DS that is in use by either target assignment or rollout. Expected behaviour is a soft delete on the database, i.e. only marked as
      * deleted, kept as reference but unavailable for future use..
      */
     @Test
@@ -874,7 +886,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             testdataFactory.createDistributionSet("test" + i);
         }
 
-        final List<DistributionSet> foundDs = distributionSetManagement.get(searchIds);
+        final List<? extends DistributionSet> foundDs = distributionSetManagement.get(searchIds);
 
         assertThat(foundDs).hasSize(3);
 
@@ -1006,91 +1018,92 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void createAndUpdateDistributionSetWithInvalidDescription(final DistributionSet set) {
-        final DistributionSetCreate distributionSetCreate =
-                entityFactory.distributionSet().create().name("a").version("a").description(randomString(513));
+        final DistributionSetManagement.Create distributionSetCreate =
+                DistributionSetManagement.Create.builder().name("a").version("a").description(randomString(513)).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("entity with too long description should not be created")
                 .isThrownBy(() -> distributionSetManagement.create(distributionSetCreate));
 
-        final DistributionSetCreate distributionSetCreate2 =
-                entityFactory.distributionSet().create().name("a").version("a").description(INVALID_TEXT_HTML);
+        final DistributionSetManagement.Create distributionSetCreate2 =
+                DistributionSetManagement.Create.builder().name("a").version("a").description(INVALID_TEXT_HTML).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("entity with invalid description should not be created")
                 .isThrownBy(() -> distributionSetManagement.create(distributionSetCreate2));
 
-        final DistributionSetUpdate distributionSetUpdate =
-                entityFactory.distributionSet().update(set.getId()).description(randomString(513));
+        final DistributionSetManagement.Update distributionSetUpdate =
+                DistributionSetManagement.Update.builder().id(set.getId()).description(randomString(513)).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("entity with too long description should not be updated")
                 .isThrownBy(() -> distributionSetManagement.update(distributionSetUpdate));
 
-        final DistributionSetUpdate distributionSetUpdate2 = entityFactory.distributionSet().update(set.getId()).description(INVALID_TEXT_HTML);
+        final DistributionSetManagement.Update distributionSetUpdate2 =
+                DistributionSetManagement.Update.builder().id(set.getId()).description(INVALID_TEXT_HTML).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("entity with invalid characters should not be updated")
                 .isThrownBy(() -> distributionSetManagement.update(distributionSetUpdate2));
     }
 
     private void createAndUpdateDistributionSetWithInvalidName(final DistributionSet set) {
-        final DistributionSetCreate distributionSetCreate = entityFactory.distributionSet().create()
-                .version("a").name(randomString(NamedEntity.NAME_MAX_SIZE + 1));
+        final DistributionSetManagement.Create distributionSetCreate = DistributionSetManagement.Create.builder()
+                .version("a").name(randomString(NamedEntity.NAME_MAX_SIZE + 1)).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("entity with too long name should not be created")
                 .isThrownBy(() -> distributionSetManagement.create(distributionSetCreate));
 
-        final DistributionSetCreate distributionSetCreate2 = entityFactory.distributionSet().create().version("a").name("");
+        final DistributionSetManagement.Create distributionSetCreate2 = DistributionSetManagement.Create.builder().version("a").name("").build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("entity with too short name should not be created")
                 .isThrownBy(() -> distributionSetManagement.create(distributionSetCreate2));
 
-        final DistributionSetCreate distributionSetCreate3 = entityFactory.distributionSet().create().version("a").name(INVALID_TEXT_HTML);
+        final DistributionSetManagement.Create distributionSetCreate3 = DistributionSetManagement.Create.builder().version("a").name(INVALID_TEXT_HTML).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("entity with invalid characters in name should not be created")
                 .isThrownBy(() -> distributionSetManagement.create(distributionSetCreate3));
 
-        final DistributionSetUpdate distributionSetUpdate = entityFactory.distributionSet().update(set.getId())
-                .name(randomString(NamedEntity.NAME_MAX_SIZE + 1));
+        final DistributionSetManagement.Update distributionSetUpdate = DistributionSetManagement.Update.builder().id(set.getId())
+                .name(randomString(NamedEntity.NAME_MAX_SIZE + 1)).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("entity with too long name should not be updated")
                 .isThrownBy(() -> distributionSetManagement.update(distributionSetUpdate));
 
-        final DistributionSetUpdate distributionSetUpdate2 = entityFactory.distributionSet().update(set.getId()).name(INVALID_TEXT_HTML);
+        final DistributionSetManagement.Update distributionSetUpdate2 = DistributionSetManagement.Update.builder().id(set.getId()).name(INVALID_TEXT_HTML).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("entity with invalid characters should not be updated")
                 .isThrownBy(() -> distributionSetManagement.update(distributionSetUpdate2));
 
-        final DistributionSetUpdate distributionSetUpdate3 = entityFactory.distributionSet().update(set.getId()).name("");
+        final DistributionSetManagement.Update distributionSetUpdate3 = DistributionSetManagement.Update.builder().id(set.getId()).name("").build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("entity with too short name should not be updated")
                 .isThrownBy(() -> distributionSetManagement.update(distributionSetUpdate3));
     }
 
     private void createAndUpdateDistributionSetWithInvalidVersion(final DistributionSet set) {
-        final DistributionSetCreate distributionSetCreate = entityFactory.distributionSet().create()
-                .name("a").version(randomString(NamedVersionedEntity.VERSION_MAX_SIZE + 1));
+        final DistributionSetManagement.Create distributionSetCreate = DistributionSetManagement.Create.builder()
+                .name("a").version(randomString(NamedVersionedEntity.VERSION_MAX_SIZE + 1)).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("entity with too long version should not be created")
                 .isThrownBy(() -> distributionSetManagement.create(distributionSetCreate));
 
-        final DistributionSetCreate distributionSetCreate2 = entityFactory.distributionSet().create().name("a").version("");
+        final DistributionSetManagement.Create distributionSetCreate2 = DistributionSetManagement.Create.builder().name("a").version("").build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("entity with too short version should not be created")
                 .isThrownBy(() -> distributionSetManagement.create(distributionSetCreate2));
 
-        final DistributionSetUpdate distributionSetUpdate = entityFactory.distributionSet().update(set.getId())
-                .version(randomString(NamedVersionedEntity.VERSION_MAX_SIZE + 1));
+        final DistributionSetManagement.Update distributionSetUpdate = DistributionSetManagement.Update.builder().id(set.getId())
+                .version(randomString(NamedVersionedEntity.VERSION_MAX_SIZE + 1)).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("entity with too long version should not be updated")
                 .isThrownBy(() -> distributionSetManagement.update(distributionSetUpdate));
 
-        final DistributionSetUpdate distributionSetUpdate2 = entityFactory.distributionSet().update(set.getId()).version("");
+        final DistributionSetManagement.Update distributionSetUpdate2 = DistributionSetManagement.Update.builder().id(set.getId()).version("").build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("entity with too short version should not be updated")
                 .isThrownBy(() -> distributionSetManagement.update(distributionSetUpdate2));
     }
 
-    private void validateFindAll(final List<DistributionSet> expectedDistributionsets) {
+    private void validateFindAll(final List<? extends DistributionSet> expectedDistributionSets) {
 
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder(), expectedDistributionsets);
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder(), expectedDistributionSets);
     }
 
     private void validateDeleted(final DistributionSet deletedDistributionSet, final int notDeletedSize) {
@@ -1119,51 +1132,44 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 DistributionSetFilter.builder().typeId(standardDsType.getId()), standardDsTypeSize, dsNewType);
     }
 
-    private void validateSearchText(final List<DistributionSet> allDistributionSets, final String dsNamePrefix) {
-
-        final List<DistributionSet> withTestNamePrefix = allDistributionSets.stream()
+    private void validateSearchText(final List<? extends DistributionSet> allDistributionSets, final String dsNamePrefix) {
+        final List<? extends DistributionSet> withTestNamePrefix = allDistributionSets.stream()
                 .filter(ds -> ds.getName().startsWith(dsNamePrefix)).toList();
         assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(dsNamePrefix),
                 withTestNamePrefix);
 
-        final List<DistributionSet> withTestNameExact = withTestNamePrefix.stream()
+        final List<? extends DistributionSet> withTestNameExact = withTestNamePrefix.stream()
                 .filter(ds -> ds.getName().equals(dsNamePrefix)).toList();
         assertThatFilterContainsOnlyGivenDistributionSets(
                 DistributionSetFilter.builder().searchText(dsNamePrefix + ":"), withTestNameExact);
 
-        final List<DistributionSet> withTestNameExactAndVersionPrefix = withTestNameExact.stream()
+        final List<? extends DistributionSet> withTestNameExactAndVersionPrefix = withTestNameExact.stream()
                 .filter(ds -> ds.getVersion().startsWith("1")).toList();
         assertThatFilterContainsOnlyGivenDistributionSets(
                 DistributionSetFilter.builder().searchText(dsNamePrefix + ":1"),
                 withTestNameExactAndVersionPrefix);
 
-        final List<DistributionSet> dsWithExactNameAndVersion = withTestNameExactAndVersionPrefix.stream()
+        final List<? extends DistributionSet> dsWithExactNameAndVersion = withTestNameExactAndVersionPrefix.stream()
                 .filter(ds -> ds.getVersion().equals("1.0.0")).toList();
         assertThat(dsWithExactNameAndVersion).hasSize(1);
         assertThatFilterContainsOnlyGivenDistributionSets(
                 DistributionSetFilter.builder().searchText(dsNamePrefix + ":1.0.0"), dsWithExactNameAndVersion);
 
-        final List<DistributionSet> withVersionPrefix = allDistributionSets.stream()
+        final List<? extends DistributionSet> withVersionPrefix = allDistributionSets.stream()
                 .filter(ds -> ds.getVersion().startsWith("1.0.")).toList();
         assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(":1.0."),
                 withVersionPrefix);
 
-        final List<DistributionSet> withVersionExact = withVersionPrefix.stream()
+        final List<? extends DistributionSet> withVersionExact = withVersionPrefix.stream()
                 .filter(ds -> ds.getVersion().equals("1.0.0")).toList();
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(":1.0.0"),
-                withVersionExact);
-
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(":"),
-                allDistributionSets);
-
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(" : "),
-                allDistributionSets);
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(":1.0.0"), withVersionExact);
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(":"), allDistributionSets);
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(" : "), allDistributionSets);
     }
 
     private void validateTags(final DistributionSetTag dsTagA, final DistributionSetTag dsTagB,
-            final DistributionSetTag dsTagC, final List<DistributionSet> dsWithTagA,
-            final List<DistributionSet> dsWithTagB) {
-
+            final DistributionSetTag dsTagC, final List<? extends DistributionSet> dsWithTagA,
+            final List<? extends DistributionSet> dsWithTagB) {
         assertThatFilterContainsOnlyGivenDistributionSets(
                 DistributionSetFilter.builder().tagNames(singletonList(dsTagA.getName())), dsWithTagA);
 
@@ -1182,7 +1188,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 DistributionSetFilter.builder().tagNames(singletonList(dsTagC.getName())));
     }
 
-    private void validateDeletedAndCompleted(final List<DistributionSet> completedStandardType,
+    private void validateDeletedAndCompleted(final List<? extends DistributionSet> completedStandardType,
             final DistributionSet dsNewType, final DistributionSet dsDeleted) {
 
         final List<DistributionSet> completedNotDeleted = new ArrayList<>(completedStandardType);
@@ -1199,7 +1205,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 DistributionSetFilter.builder().isComplete(Boolean.FALSE).isDeleted(Boolean.TRUE));
     }
 
-    private void validateDeletedAndCompletedAndType(final List<DistributionSet> deletedAndCompletedAndStandardType,
+    private void validateDeletedAndCompletedAndType(final List<? extends DistributionSet> deletedAndCompletedAndStandardType,
             final DistributionSet dsDeleted, final DistributionSetType newType, final DistributionSet dsNewType) {
         assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().isDeleted(Boolean.FALSE)
                 .isComplete(Boolean.TRUE).typeId(standardDsType.getId()), deletedAndCompletedAndStandardType);
@@ -1213,9 +1219,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void validateDeletedAndCompletedAndTypeAndSearchText(
-            final List<DistributionSet> completedAndStandardTypeAndSearchText, final DistributionSetType newType,
-            final String text) {
-
+            final List<? extends DistributionSet> completedAndStandardTypeAndSearchText, final DistributionSetType newType, final String text) {
         assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().isDeleted(Boolean.FALSE)
                         .isComplete(Boolean.TRUE).typeId(standardDsType.getId()).searchText(text),
                 completedAndStandardTypeAndSearchText);
@@ -1232,7 +1236,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void validateDeletedAndCompletedAndTypeAndSearchText(
-            final List<DistributionSet> completedAndNotDeletedStandardTypeAndFilterString,
+            final List<? extends DistributionSet> completedAndNotDeletedStandardTypeAndFilterString,
             final DistributionSet dsDeleted, final DistributionSet dsInComplete, final DistributionSet dsNewType,
             final DistributionSetType newType, final String filterString) {
 
@@ -1263,9 +1267,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void validateDeletedAndCompletedAndTypeAndSearchTextAndTag(
-            final List<DistributionSet> completedAndStandartTypeAndSearchTextAndTagA, final DistributionSetTag dsTagA,
-            final String text) {
-
+            final List<? extends DistributionSet> completedAndStandartTypeAndSearchTextAndTagA, final DistributionSetTag dsTagA, final String text) {
         assertThatFilterContainsOnlyGivenDistributionSets(
                 DistributionSetFilter.builder().isComplete(Boolean.TRUE).typeId(standardDsType.getId())
                         .searchText(text).tagNames(singletonList(dsTagA.getName())),
@@ -1282,9 +1284,9 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertThatFilterContainsOnlyGivenDistributionSets(final DistributionSetFilterBuilder filterBuilder,
-            final List<DistributionSet> distributionSets) {
+            final List<? extends DistributionSet> distributionSets) {
         final int expectedDsSize = distributionSets.size();
-        assertThat(distributionSetManagement.findByDistributionSetFilter(filterBuilder.build(), PAGE).getContent())
+        assertThat(((DistributionSetManagement)distributionSetManagement).findByDistributionSetFilter(filterBuilder.build(), PAGE).getContent())
                 .hasSize(expectedDsSize).containsOnly(distributionSets.toArray(new DistributionSet[expectedDsSize]));
     }
 
@@ -1295,7 +1297,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
     private void assertThatFilterHasSizeAndDoesNotContainDistributionSet(
             final DistributionSetFilterBuilder filterBuilder, final int size, final DistributionSet ds) {
-        assertThat(distributionSetManagement.findByDistributionSetFilter(filterBuilder.build(), PAGE).getContent())
+        assertThat(((DistributionSetManagement)distributionSetManagement).findByDistributionSetFilter(filterBuilder.build(), PAGE).getContent())
                 .hasSize(size).doesNotContain(ds);
     }
 

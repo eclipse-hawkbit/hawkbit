@@ -26,6 +26,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface ConfirmationManagement {
 
+    String CONFIRMATION_CODE_MSG_PREFIX = "Confirmation status code: %d";
+
     /**
      * Activate auto confirmation for a given controller ID. In case auto confirmation is active already, this method will fail with an exception.
      *

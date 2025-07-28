@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtRestModelMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.DeletedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
@@ -774,8 +775,10 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
 
     private void verifyAutoAssignmentWithIncompleteDs(final TargetFilterQuery tfq) throws Exception {
         final DistributionSet incompleteDistributionSet = distributionSetManagement
-                .create(entityFactory.distributionSet().create().name("incomplete").version("1")
-                        .type(testdataFactory.findOrCreateDefaultTestDsType()));
+                .create(DistributionSetManagement.Create.builder()
+                        .type(testdataFactory.findOrCreateDefaultTestDsType())
+                        .name("incomplete").version("1")
+                        .build());
 
         mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
                         .content("{\"id\":" + incompleteDistributionSet.getId() + "}").contentType(MediaType.APPLICATION_JSON))

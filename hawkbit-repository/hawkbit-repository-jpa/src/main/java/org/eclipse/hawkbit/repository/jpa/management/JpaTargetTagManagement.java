@@ -28,12 +28,15 @@ import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaNamedEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
+import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -42,11 +45,13 @@ import org.springframework.validation.annotation.Validated;
  */
 @Transactional(readOnly = true)
 @Validated
+@Service
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "target-tag-management" }, matchIfMissing = true)
 public class JpaTargetTagManagement implements TargetTagManagement {
 
     private final TargetTagRepository targetTagRepository;
 
-    public JpaTargetTagManagement(final TargetTagRepository targetTagRepository) {
+    protected JpaTargetTagManagement(final TargetTagRepository targetTagRepository) {
         this.targetTagRepository = targetTagRepository;;
     }
 
@@ -69,7 +74,7 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<TargetTag> create(final Collection<TagCreate> tt) {
+    public List<TargetTag> create(final Collection<TagCreate<Tag>> tt) {
         final List<JpaTargetTag> targetTagList = tt.stream().map(JpaTagCreate.class::cast)
                 .map(JpaTagCreate::buildTargetTag).toList();
         return Collections.unmodifiableList(

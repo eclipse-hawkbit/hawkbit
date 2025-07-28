@@ -48,7 +48,7 @@ import org.springframework.util.CollectionUtils;
 /**
  * AbstractDsAssignmentStrategy for online assignments, i.e. managed by hawkBit.
  */
-public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
+class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     OnlineDsAssignmentStrategy(final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit,

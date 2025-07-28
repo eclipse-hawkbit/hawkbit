@@ -51,11 +51,13 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -66,6 +68,8 @@ import org.springframework.validation.annotation.Validated;
 @Slf4j
 @Transactional(readOnly = true)
 @Validated
+@Service
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "artifact-management" }, matchIfMissing = true)
 public class JpaArtifactManagement implements ArtifactManagement {
 
     private final EntityManager entityManager;
@@ -77,7 +81,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     private final TenantAware tenantAware;
     private final QuotaManagement quotaManagement;
 
-    public JpaArtifactManagement(
+    protected JpaArtifactManagement(
             final EntityManager entityManager,
             final PlatformTransactionManager txManager,
             final LocalArtifactRepository localArtifactRepository,

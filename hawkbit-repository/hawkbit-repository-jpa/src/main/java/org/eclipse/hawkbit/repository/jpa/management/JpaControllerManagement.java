@@ -106,6 +106,7 @@ import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -116,6 +117,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -124,12 +126,11 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
-/**
- * JPA based {@link ControllerManagement} implementation.
- */
 @Slf4j
 @Transactional(readOnly = true)
 @Validated
+@Service
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "controller-management" }, matchIfMissing = true)
 public class JpaControllerManagement extends JpaActionManagement implements ControllerManagement {
 
     private static final Pattern PATTERN = Pattern.compile("[a-zA-Z0-9_\\-!@#$%^&*()+=\\[\\]{}|;:'\",.<>/\\\\?\\s]*");
@@ -143,10 +144,11 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private final ConfirmationManagement confirmationManagement;
     private final SoftwareModuleRepository softwareModuleRepository;
     private final SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
-    private final DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final ControllerPollProperties controllerPollProperties;
-    private final Duration minPollingTime, maxPollingTime;
+    private final Duration minPollingTime;
+    private final Duration maxPollingTime;
     private final PlatformTransactionManager txManager;
     private final EntityFactory entityFactory;
     private final EntityManager entityManager;
@@ -155,13 +157,13 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private final TenantAware tenantAware;
 
     @SuppressWarnings("squid:S00107")
-    public JpaControllerManagement(
+    protected JpaControllerManagement(
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
             final RepositoryProperties repositoryProperties,
             final TargetRepository targetRepository, final TargetTypeManagement targetTypeManagement,
             final DeploymentManagement deploymentManagement, final ConfirmationManagement confirmationManagement,
             final SoftwareModuleRepository softwareModuleRepository, final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
-            final DistributionSetManagement distributionSetManagement,
+            final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final TenantConfigurationManagement tenantConfigurationManagement, final ControllerPollProperties controllerPollProperties,
             final PlatformTransactionManager txManager, final EntityFactory entityFactory, final EntityManager entityManager,
             final AfterTransactionCommitExecutor afterCommit,

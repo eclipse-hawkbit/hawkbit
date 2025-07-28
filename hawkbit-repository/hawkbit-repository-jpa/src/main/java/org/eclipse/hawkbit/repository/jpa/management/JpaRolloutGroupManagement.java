@@ -48,10 +48,12 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
@@ -61,6 +63,8 @@ import org.springframework.validation.annotation.Validated;
  */
 @Validated
 @Transactional(readOnly = true)
+@Service
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "rollout-group-management" }, matchIfMissing = true)
 public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     private final RolloutGroupRepository rolloutGroupRepository;
@@ -71,7 +75,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     private final RolloutStatusCache rolloutStatusCache;
 
     @SuppressWarnings("java:S107")
-    public JpaRolloutGroupManagement(final RolloutGroupRepository rolloutGroupRepository,
+    protected JpaRolloutGroupManagement(final RolloutGroupRepository rolloutGroupRepository,
             final RolloutRepository rolloutRepository, final ActionRepository actionRepository,
             final TargetRepository targetRepository, final EntityManager entityManager, final RolloutStatusCache rolloutStatusCache) {
         this.rolloutGroupRepository = rolloutGroupRepository;

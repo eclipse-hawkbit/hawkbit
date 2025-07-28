@@ -11,12 +11,16 @@ package org.eclipse.hawkbit.repository.exception;
 
 import java.io.Serial;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * Exception which is thrown when trying to set an invalid target address.
  */
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class InvalidTargetAddressException extends AbstractServerRtException {
 
     @Serial

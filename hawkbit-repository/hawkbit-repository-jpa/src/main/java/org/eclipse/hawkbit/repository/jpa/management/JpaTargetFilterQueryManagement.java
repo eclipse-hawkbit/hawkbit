@@ -52,6 +52,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
@@ -60,6 +61,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
@@ -70,11 +72,13 @@ import org.springframework.validation.annotation.Validated;
 @Slf4j
 @Transactional(readOnly = true)
 @Validated
-public class JpaTargetFilterQueryManagement implements TargetFilterQueryManagement {
+@Service
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "target-filter-management" }, matchIfMissing = true)
+class JpaTargetFilterQueryManagement implements TargetFilterQueryManagement {
 
     private final TargetFilterQueryRepository targetFilterQueryRepository;
     private final TargetManagement targetManagement;
-    private final DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final QuotaManagement quotaManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final RepositoryProperties repositoryProperties;
@@ -82,10 +86,9 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     private final ContextAware contextAware;
     private final AuditorAware<String> auditorAware;
 
-    @SuppressWarnings("java:S107")
-    public JpaTargetFilterQueryManagement(
+    protected JpaTargetFilterQueryManagement(
             final TargetFilterQueryRepository targetFilterQueryRepository,
-            final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement,
+            final TargetManagement targetManagement, final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final QuotaManagement quotaManagement, final TenantConfigurationManagement tenantConfigurationManagement,
             final RepositoryProperties repositoryProperties,
             final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final AuditorAware<String> auditorAware) {

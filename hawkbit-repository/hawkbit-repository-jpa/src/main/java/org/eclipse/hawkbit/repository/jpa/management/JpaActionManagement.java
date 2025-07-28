@@ -47,7 +47,7 @@ public class JpaActionManagement {
     protected final QuotaManagement quotaManagement;
     protected final RepositoryProperties repositoryProperties;
 
-    public JpaActionManagement(
+    protected JpaActionManagement(
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
             final RepositoryProperties repositoryProperties) {
         this.actionRepository = actionRepository;

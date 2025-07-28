@@ -18,8 +18,8 @@ import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
-import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.jpa.domain.Specification;
@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @NoRepositoryBean
 @Transactional(readOnly = true)
-public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity>
+public interface BaseEntityRepository<T extends AbstractJpaBaseEntity>
         extends PagingAndSortingRepository<T, Long>, CrudRepository<T, Long>, JpaSpecificationExecutor<T>,
         JpaSpecificationEntityGraphExecutor<T>, NoCountSliceRepository<T>, ACMRepository<T> {
 
@@ -118,11 +118,11 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
         }
     }
 
-    default <S extends AbstractJpaTenantAwareBaseEntity> Specification<S> byIdSpec(final Long id) {
+    default <S extends AbstractJpaBaseEntity> Specification<S> byIdSpec(final Long id) {
         return (root, query, cb) -> cb.equal(root.get(AbstractJpaBaseEntity_.id), id);
     }
 
-    default <S extends AbstractJpaTenantAwareBaseEntity> Specification<S> byIdsSpec(final Iterable<Long> ids) {
+    default <S extends AbstractJpaBaseEntity> Specification<S> byIdsSpec(final Iterable<Long> ids) {
         final Collection<Long> collection;
         if (ids instanceof Collection<Long> idCollection) {
             collection = idCollection;

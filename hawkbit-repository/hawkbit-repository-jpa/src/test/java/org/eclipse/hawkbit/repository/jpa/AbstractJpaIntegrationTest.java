@@ -176,16 +176,14 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
                 targets.stream().map(Target::getControllerId).toList(), tag.getId());
     }
 
-    protected List<DistributionSet> assignTag(final Collection<DistributionSet> sets,
+    protected List<? extends DistributionSet> assignTag(final Collection<? extends DistributionSet> sets,
             final DistributionSetTag tag) {
-        return distributionSetManagement.assignTag(
-                sets.stream().map(DistributionSet::getId).toList(), tag.getId());
+        return distributionSetManagement.assignTag(sets.stream().map(DistributionSet::getId).toList(), tag.getId());
     }
 
-    protected List<DistributionSet> unassignTag(final Collection<DistributionSet> sets,
-            final DistributionSetTag tag) {
-        return distributionSetManagement.unassignTag(
-                sets.stream().map(DistributionSet::getId).toList(), tag.getId());
+    protected List<? extends DistributionSet> unassignTag(
+            final Collection<DistributionSet> sets, final DistributionSetTag tag) {
+        return distributionSetManagement.unassignTag(sets.stream().map(DistributionSet::getId).toList(), tag.getId());
     }
 
     protected TargetTypeAssignmentResult initiateTypeAssignment(final Collection<Target> targets, final TargetType type) {
@@ -278,7 +276,7 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     /**
      * Asserts that the given callable succeeds.
-     *
+     * </p>
      * Note: This method will assume that EntityNotFoundException is OK, as security tests use dummy (non-existing) IDs.
      * It matters to either callable succeeds without any exception or at most EntityNotFoundException.
      * All other cases will be considered as an error.
@@ -288,7 +286,7 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     private void assertPermissionWorks(final Callable<?> callable) {
         try {
             callable.call();
-        } catch (Throwable th) {
+        } catch (final Throwable th) {
             if (th instanceof EntityNotFoundException) {
                 log.info("Expected (at most) EntityNotFoundException catch: {}", th.getMessage());
             } else {
@@ -298,8 +296,7 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     }
 
     protected void finishAction(final Action action) {
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Action.Status.FINISHED));
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Action.Status.FINISHED));
     }
 
     protected Set<TargetTag> getTargetTags(final String controllerId) {

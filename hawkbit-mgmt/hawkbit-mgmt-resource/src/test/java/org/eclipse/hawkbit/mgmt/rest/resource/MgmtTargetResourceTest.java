@@ -947,9 +947,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // test
 
-        final SoftwareModule os = ds.findFirstModuleByType(osType).get();
-        final SoftwareModule jvm = ds.findFirstModuleByType(runtimeType).get();
-        final SoftwareModule bApp = ds.findFirstModuleByType(appType).get();
+        final SoftwareModule os = findFirstModuleByType(ds, osType).orElseThrow();
+        final SoftwareModule jvm = findFirstModuleByType(ds, runtimeType).orElseThrow();
+        final SoftwareModule bApp = findFirstModuleByType(ds,appType).orElseThrow();
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId + "/assignedDS"))
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())

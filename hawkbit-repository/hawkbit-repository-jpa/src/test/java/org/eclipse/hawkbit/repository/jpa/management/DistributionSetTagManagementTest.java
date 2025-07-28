@@ -22,8 +22,6 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
-import org.eclipse.hawkbit.repository.builder.TagCreate;
-import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
@@ -60,7 +58,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Verifies that management queries react as specified on calls for non existing entities by means of throwing 
+     * Verifies that management queries react as specified on calls for non existing entities by means of throwing
      * EntityNotFoundException.
      */
     @Test
@@ -69,10 +67,9 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetTagUpdatedEvent.class, count = 0) })
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         verifyThrownExceptionBy(() -> distributionSetTagManagement.delete(NOT_EXIST_ID), "DistributionSetTag");
-        verifyThrownExceptionBy(() -> distributionSetTagManagement.findByDistributionSet(NOT_EXIST_IDL, PAGE),
-                "DistributionSet");
-        verifyThrownExceptionBy(() -> distributionSetTagManagement.update(entityFactory.tag().update(NOT_EXIST_IDL)),
-                "DistributionSetTag");
+        verifyThrownExceptionBy(() -> distributionSetTagManagement.findByDistributionSet(NOT_EXIST_IDL, PAGE), "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetTagManagement.update(
+                DistributionSetTagManagement.Update.builder().id(NOT_EXIST_IDL).build()), "DistributionSetTag");
     }
 
     /**
@@ -88,11 +85,11 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
         final Collection<DistributionSet> dsBCs = testdataFactory.createDistributionSets("DS-BC", 13);
         final Collection<DistributionSet> dsABCs = testdataFactory.createDistributionSets("DS-ABC", 9);
 
-        final DistributionSetTag tagA = distributionSetTagManagement.create(entityFactory.tag().create().name("A"));
-        final DistributionSetTag tagB = distributionSetTagManagement.create(entityFactory.tag().create().name("B"));
-        final DistributionSetTag tagC = distributionSetTagManagement.create(entityFactory.tag().create().name("C"));
-        final DistributionSetTag tagX = distributionSetTagManagement.create(entityFactory.tag().create().name("X"));
-        final DistributionSetTag tagY = distributionSetTagManagement.create(entityFactory.tag().create().name("Y"));
+        final DistributionSetTag tagA = distributionSetTagManagement.create(DistributionSetTagManagement.Create.builder().name("A").build());
+        final DistributionSetTag tagB = distributionSetTagManagement.create(DistributionSetTagManagement.Create.builder().name("B").build());
+        final DistributionSetTag tagC = distributionSetTagManagement.create(DistributionSetTagManagement.Create.builder().name("C").build());
+        final DistributionSetTag tagX = distributionSetTagManagement.create(DistributionSetTagManagement.Create.builder().name("X").build());
+        final DistributionSetTag tagY = distributionSetTagManagement.create(DistributionSetTagManagement.Create.builder().name("Y").build());
 
         assignTag(dsAs, tagA);
         assignTag(dsBs, tagB);
@@ -148,13 +145,13 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
         final Collection<DistributionSet> groupB = testdataFactory.createDistributionSets("unassigned", 20);
 
         final DistributionSetTag tag = distributionSetTagManagement
-                .create(entityFactory.tag().create().name("tag1").description("tagdesc1"));
+                .create(DistributionSetTagManagement.Create.builder().name("tag1").description("tagdesc1").build());
 
         // toggle A only -> A is now assigned
-        List<DistributionSet> result = assignTag(groupA, tag);
+        List<? extends DistributionSet> result = assignTag(groupA, tag);
         assertThat(result)
                 .hasSize(20)
-                .containsAll(distributionSetManagement.get(groupA.stream().map(DistributionSet::getId).toList()));
+                .containsAll((Collection) distributionSetManagement.get(groupA.stream().map(DistributionSet::getId).toList()));
         assertThat(
                 distributionSetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent().stream()
                         .map(DistributionSet::getId)
@@ -165,7 +162,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
         final Collection<DistributionSet> groupAB = concat(groupA, groupB);
         // toggle A+B -> A is still assigned and B is assigned as well
         result = assignTag(groupAB, tag);
-        assertThat(result)
+        assertThat((List) result)
                 .hasSize(40)
                 .containsAll(distributionSetManagement.get(groupAB.stream().map(DistributionSet::getId).toList()));
         assertThat(
@@ -177,7 +174,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
         result = unassignTag(concat(groupA, groupB), tag);
         assertThat(result)
                 .hasSize(40)
-                .containsAll(distributionSetManagement.get(concat(groupB, groupA).stream().map(DistributionSet::getId).toList()));
+                .containsAll((List) distributionSetManagement.get(concat(groupB, groupA).stream().map(DistributionSet::getId).toList()));
         assertThat(distributionSetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent()).isEmpty();
     }
 
@@ -187,7 +184,8 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void failOnMissingDs() {
         final Collection<Long> group = testdataFactory.createDistributionSets(5).stream().map(DistributionSet::getId).toList();
-        final DistributionSetTag tag = distributionSetTagManagement.create(entityFactory.tag().create().name("tag1").description("tagdesc1"));
+        final DistributionSetTag tag = distributionSetTagManagement.create(
+                DistributionSetTagManagement.Create.builder().name("tag1").description("tagdesc1").build());
         final List<Long> missing = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             while (true) {
@@ -217,7 +215,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void createDistributionSetTag() {
         final Tag tag = distributionSetTagManagement
-                .create(entityFactory.tag().create().name("kai1").description("kai2").colour("colour"));
+                .create(DistributionSetTagManagement.Create.builder().name("kai1").description("kai2").colour("colour").build());
 
         assertThat(distributionSetTagRepository.findByNameEquals("kai1").get().getDescription()).as("wrong tag found")
                 .isEqualTo("kai2");
@@ -261,7 +259,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void failedDuplicateDsTagNameException() {
-        final TagCreate tag = entityFactory.tag().create().name("A");
+        final DistributionSetTagManagement.Create tag = DistributionSetTagManagement.Create.builder().name("A").build();
         distributionSetTagManagement.create(tag);
 
         assertThatExceptionOfType(EntityAlreadyExistsException.class).as("should not have worked as tag already exists")
@@ -273,10 +271,10 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void failedDuplicateDsTagNameExceptionAfterUpdate() {
-        distributionSetTagManagement.create(entityFactory.tag().create().name("A"));
-        final DistributionSetTag tag = distributionSetTagManagement.create(entityFactory.tag().create().name("B"));
+        distributionSetTagManagement.create(DistributionSetTagManagement.Create.builder().name("A").build());
+        final DistributionSetTag tag = distributionSetTagManagement.create(DistributionSetTagManagement.Create.builder().name("B").build());
 
-        final TagUpdate tagUpdate = entityFactory.tag().update(tag.getId()).name("A");
+        final DistributionSetTagManagement.Update tagUpdate = DistributionSetTagManagement.Update.builder().id(tag.getId()).name("A").build();
         assertThatExceptionOfType(EntityAlreadyExistsException.class).as("should not have worked as tag already exists")
                 .isThrownBy(() -> distributionSetTagManagement.update(tagUpdate));
     }
@@ -291,7 +289,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
         // change data
         final DistributionSetTag savedAssigned = tags.iterator().next();
         // persist
-        distributionSetTagManagement.update(entityFactory.tag().update(savedAssigned.getId()).name("test123"));
+        distributionSetTagManagement.update(DistributionSetTagManagement.Update.builder().id(savedAssigned.getId()).name("test123").build());
         // check data
         assertThat(distributionSetTagManagement.findAll(PAGE).getContent()).as("Wrong size of ds tags")
                 .hasSize(tags.size());
@@ -337,7 +335,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
 
         tags.forEach(tag -> assignTag(sets, tag));
 
-        return distributionSetTagManagement.findAll(PAGE).getContent();
+        return distributionSetTagManagement.findAll(PAGE).getContent().stream().map(DistributionSetTag.class::cast).toList();
     }
 
     private DistributionSetFilter.DistributionSetFilterBuilder getDistributionSetFilterBuilder() {

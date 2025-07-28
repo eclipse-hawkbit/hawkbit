@@ -86,17 +86,21 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     private final TargetManagement targetManagement;
     private final ConfirmationManagement confirmationManagement;
     private final DeploymentManagement deploymentManagement;
+    private final MgmtDistributionSetMapper mgmtDistributionSetMapper;
     private final EntityFactory entityFactory;
     private final TenantConfigHelper tenantConfigHelper;
 
     MgmtTargetResource(
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-            final ConfirmationManagement confirmationManagement, final EntityFactory entityFactory,
+            final ConfirmationManagement confirmationManagement,
+            final MgmtDistributionSetMapper mgmtDistributionSetMapper,
+            final EntityFactory entityFactory,
             final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
         this.confirmationManagement = confirmationManagement;
+        this.mgmtDistributionSetMapper = mgmtDistributionSetMapper;
         this.entityFactory = entityFactory;
         this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
     }
@@ -290,7 +294,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         log.debug("updateActionConfirmation with data [targetId={}, actionId={}]: {}", targetId, actionId, actionConfirmation);
 
         return getValidatedAction(targetId, actionId)
-                .map(action -> {
+                .<ResponseEntity<Void>>map(action -> {
                     try {
                         switch (actionConfirmation.getConfirmation()) {
                             case CONFIRMED:
@@ -305,18 +309,18 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                                 confirmationManagement.denyAction(actionId, actionConfirmation.getCode(), actionConfirmation.getDetails());
                                 break;
                         }
-                        return new ResponseEntity<Void>(HttpStatus.OK);
+                        return new ResponseEntity<>(HttpStatus.OK);
                     } catch (final InvalidConfirmationFeedbackException e) {
                         if (e.getReason() == InvalidConfirmationFeedbackException.Reason.ACTION_CLOSED) {
                             log.warn("Updating action {} with confirmation {} not possible since action not active anymore.",
                                     action.getId(), actionConfirmation.getConfirmation(), e);
-                            return new ResponseEntity<Void>(HttpStatus.GONE);
+                            return new ResponseEntity<>(HttpStatus.GONE);
                         } else if (e.getReason() == InvalidConfirmationFeedbackException.Reason.NOT_AWAITING_CONFIRMATION) {
                             log.debug("Action is not waiting for confirmation, deny request.", e);
-                            return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+                            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
                         } else {
                             log.debug("Action confirmation failed with unknown reason.", e);
-                            return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+                            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                         }
                     }
                 })
@@ -371,7 +375,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             final List<Entry<String, Long>> offlineAssignments = dsAssignments.stream()
                     .map(dsAssignment -> new SimpleEntry<>(targetId, dsAssignment.getId()))
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(MgmtDistributionSetMapper
+            return ResponseEntity.ok(mgmtDistributionSetMapper
                     .toResponse(deploymentManagement.offlineAssignedDistributionSets(offlineAssignments)));
         }
         findTargetWithExceptionIfNotFound(targetId);
@@ -386,7 +390,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement
                 .assignDistributionSets(deploymentRequests);
-        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(assignmentResults));
+        return ResponseEntity.ok(mgmtDistributionSetMapper.toResponse(assignmentResults));
     }
 
     @Override

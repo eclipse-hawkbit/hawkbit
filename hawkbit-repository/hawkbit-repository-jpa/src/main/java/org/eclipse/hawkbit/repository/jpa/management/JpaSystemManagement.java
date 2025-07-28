@@ -9,17 +9,18 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import java.util.Set;
 import java.util.function.Consumer;
 
 import jakarta.persistence.EntityManager;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
+import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.CurrentTenantCacheKeyGenerator;
 import org.eclipse.hawkbit.repository.jpa.SystemManagementCacheKeyGenerator;
@@ -48,6 +49,7 @@ import org.eclipse.hawkbit.repository.report.model.SystemUsageReportWithTenants;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -58,6 +60,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,6 +72,8 @@ import org.springframework.validation.annotation.Validated;
 @Slf4j
 @Transactional(readOnly = true)
 @Validated
+@Service
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "system-management" }, matchIfMissing = true)
 public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, SystemManagement {
 
     private static final int MAX_TENANTS_QUERY = 1000;
@@ -102,7 +107,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     private ArtifactRepository artifactRepository;
 
     @SuppressWarnings("squid:S00107")
-    public JpaSystemManagement(
+    protected JpaSystemManagement(
             final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository,
             final TargetTagRepository targetTagRepository, final TargetFilterQueryRepository targetFilterQueryRepository,
             final SoftwareModuleRepository softwareModuleRepository, final SoftwareModuleTypeRepository softwareModuleTypeRepository,
@@ -193,6 +198,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     public void forEachTenant(final Consumer<String> consumer) {
         forEachTenant0(consumer);
     }
+
     private void forEachTenant0(final Consumer<String> consumer) {
         Page<String> tenants;
         Pageable query = PageRequest.of(0, MAX_TENANTS_QUERY);
@@ -320,18 +326,19 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         distributionSetTypeRepository
                 .save(new JpaDistributionSetType(org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_ONLY_KEY,
                         org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_ONLY_NAME,
-                        "Default type with Firmware/OS only.").addMandatoryModuleType(os));
+                        "Default type with Firmware/OS only.").setMandatoryModuleTypes(Set.of(os)));
 
         distributionSetTypeRepository
                 .save(new JpaDistributionSetType(org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_APP_ONLY_KEY,
                         org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_APP_ONLY_NAME,
-                        "Default type with app(s) only.").addMandatoryModuleType(app));
+                        "Default type with app(s) only.").setMandatoryModuleTypes(Set.of(app)));
 
         return distributionSetTypeRepository
                 .save(new JpaDistributionSetType(org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_WITH_APPS_KEY,
                         org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_WITH_APPS_NAME,
-                        "Default type with Firmware/OS and optional app(s).").addMandatoryModuleType(os)
-                        .addOptionalModuleType(app));
+                        "Default type with Firmware/OS and optional app(s).")
+                        .setMandatoryModuleTypes(Set.of(os))
+                        .setOptionalModuleTypes(Set.of(app)));
     }
 
     private TenantMetaData createTenantMetadata0(final String tenant) {

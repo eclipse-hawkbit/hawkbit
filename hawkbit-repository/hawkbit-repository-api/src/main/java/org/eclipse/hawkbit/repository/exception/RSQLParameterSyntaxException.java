@@ -19,8 +19,8 @@ import org.eclipse.hawkbit.exception.SpServerError;
 /**
  * Exception used by the REST API in case of RSQL search filter query.
  */
-@ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class RSQLParameterSyntaxException extends AbstractServerRtException {
 
     @Serial

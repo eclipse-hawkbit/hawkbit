@@ -12,30 +12,78 @@ package org.eclipse.hawkbit.repository;
 import java.util.Optional;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.Type;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * Service for managing {@link SoftwareModuleType}s.
  */
-public interface SoftwareModuleTypeManagement
-        extends RepositoryManagement<SoftwareModuleType, SoftwareModuleTypeCreate, SoftwareModuleTypeUpdate> {
+public interface SoftwareModuleTypeManagement<T extends SoftwareModuleType>
+        extends RepositoryManagement<T, SoftwareModuleTypeManagement.Create, SoftwareModuleTypeManagement.Update> {
 
     /**
      * @param key to search for
      * @return {@link SoftwareModuleType} in the repository with given {@link SoftwareModuleType#getKey()}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<SoftwareModuleType> findByKey(@NotEmpty String key);
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    Optional<T> findByKey(@NotEmpty String key);
 
     /**
      * @param name to search for
      * @return all {@link SoftwareModuleType}s in the repository with given {@link SoftwareModuleType#getName()}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<SoftwareModuleType> findByName(@NotEmpty String name);
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    Optional<T> findByName(@NotEmpty String name);
+
+    @SuperBuilder
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    final class Create extends UpdateCreate {
+
+        @Size(min = 1, max = Type.KEY_MAX_SIZE)
+        @NotNull
+        private String key;
+
+        @Size(min = 1, max = NamedEntity.NAME_MAX_SIZE)
+        @NotNull
+        private String name;
+
+        @Builder.Default
+        private int maxAssignments = 1;
+    }
+
+    @SuperBuilder
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    final class Update extends UpdateCreate implements Identifiable<Long> {
+
+        @NotNull
+        private Long id;
+    }
+
+    @SuperBuilder
+    @Getter
+    class UpdateCreate {
+
+        @ValidString
+        @Size(max = NamedEntity.DESCRIPTION_MAX_SIZE)
+        private String description;
+
+        @ValidString
+        @Size(max = Type.COLOUR_MAX_SIZE)
+        private String colour;
+    }
 }

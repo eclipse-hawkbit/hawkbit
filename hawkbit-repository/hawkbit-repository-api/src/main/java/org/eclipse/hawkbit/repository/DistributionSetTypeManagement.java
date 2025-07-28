@@ -11,31 +11,39 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
-import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
-import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.Type;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * Management service for {@link DistributionSetType}s.
  */
-public interface DistributionSetTypeManagement
-        extends RepositoryManagement<DistributionSetType, DistributionSetTypeCreate, DistributionSetTypeUpdate> {
+public interface DistributionSetTypeManagement<T extends DistributionSetType>
+        extends RepositoryManagement<T, DistributionSetTypeManagement.Create, DistributionSetTypeManagement.Update> {
 
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<DistributionSetType> findByKey(@NotEmpty String key);
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    Optional<T> findByKey(@NotEmpty String key);
 
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<DistributionSetType> findByName(@NotEmpty String name);
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    Optional<T> findByName(@NotEmpty String name);
 
     /**
      * Assigns {@link DistributionSetType#getMandatoryModuleTypes()}.
@@ -48,8 +56,8 @@ public interface DistributionSetTypeManagement
      * @throws AssignmentQuotaExceededException if the maximum number of {@link SoftwareModuleType}s is exceeded for the addressed
      *         {@link DistributionSetType}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetType assignOptionalSoftwareModuleTypes(long id, @NotEmpty Collection<Long> softwareModuleTypeIds);
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    T assignOptionalSoftwareModuleTypes(long id, @NotEmpty Collection<Long> softwareModuleTypeIds);
 
     /**
      * Assigns {@link DistributionSetType#getOptionalModuleTypes()}.
@@ -62,8 +70,8 @@ public interface DistributionSetTypeManagement
      * @throws AssignmentQuotaExceededException if the maximum number of {@link SoftwareModuleType}s is exceeded for the addressed
      *         {@link DistributionSetType}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetType assignMandatorySoftwareModuleTypes(long id, @NotEmpty Collection<Long> softwareModuleTypeIds);
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    T assignMandatorySoftwareModuleTypes(long id, @NotEmpty Collection<Long> softwareModuleTypeIds);
 
     /**
      * Unassigns a {@link SoftwareModuleType} from the {@link DistributionSetType}. Does nothing if {@link SoftwareModuleType}
@@ -75,6 +83,49 @@ public interface DistributionSetTypeManagement
      * @throws EntityNotFoundException in case the {@link DistributionSetType} does not exist
      * @throws EntityReadOnlyException if the {@link DistributionSetType} while it is already in use by a {@link DistributionSet}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetType unassignSoftwareModuleType(long id, long softwareModuleTypeId);
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    T unassignSoftwareModuleType(long id, long softwareModuleTypeId);
+
+    @SuperBuilder
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    final class Create extends UpdateCreate {
+
+        @Size(min = 1, max = Type.KEY_MAX_SIZE)
+        @NotNull
+        private String key;
+
+        @Size(min = 1, max = NamedEntity.NAME_MAX_SIZE)
+        @NotNull
+        private String name;
+    }
+
+    @SuperBuilder
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    final class Update extends UpdateCreate implements Identifiable<Long> {
+
+        @NotNull
+        private Long id;
+    }
+
+    @SuperBuilder
+    @Getter
+    class UpdateCreate {
+
+        @ValidString
+        @Size(max = NamedEntity.DESCRIPTION_MAX_SIZE)
+        private String description;
+
+        @ValidString
+        @Size(max = Type.COLOUR_MAX_SIZE)
+        private String colour;
+
+        @Builder.Default
+        private Set<? extends SoftwareModuleType> mandatoryModuleTypes = Set.of();
+        @Builder.Default
+        private Set<? extends SoftwareModuleType> optionalModuleTypes = Set.of();
+    }
 }

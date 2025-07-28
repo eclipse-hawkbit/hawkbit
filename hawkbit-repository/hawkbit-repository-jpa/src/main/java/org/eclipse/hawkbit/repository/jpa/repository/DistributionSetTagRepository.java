@@ -36,7 +36,7 @@ public interface DistributionSetTagRepository
      * @param tagName to filter on
      * @return the {@link DistributionSetTag} if found, otherwise null
      */
-    Optional<DistributionSetTag> findByNameEquals(String tagName);
+    Optional<JpaDistributionSetTag> findByNameEquals(String tagName);
 
     /**
      * Returns all instances of the type.

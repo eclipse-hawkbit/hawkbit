@@ -20,11 +20,11 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 
-@Slf4j
 /**
  * Feature: SecurityTests - TargetManagement<br/>
  * Story: SecurityTests TargetManagement
  */
+@Slf4j
 class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     /**
@@ -184,9 +184,9 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     void findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatablePermissionsCheck() {
         assertPermissions(
-                () -> targetManagement.findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(List.of(1L), "controllerId==id",
-                        entityFactory.distributionSetType().create().build(), PAGE
-                ), List.of(SpPermission.READ_TARGET, SpPermission.READ_ROLLOUT));
+                () -> targetManagement.findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
+                        List.of(1L), "controllerId==id", defaultDsType(), PAGE),
+                List.of(SpPermission.READ_TARGET, SpPermission.READ_ROLLOUT));
     }
 
     /**
@@ -203,8 +203,10 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatablePermissionsCheck() {
-        assertPermissions(() -> targetManagement.countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable("controllerId==id", List.of(1L),
-                entityFactory.distributionSetType().create().build()), List.of(SpPermission.READ_TARGET, SpPermission.READ_ROLLOUT));
+        assertPermissions(
+                () -> targetManagement.countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
+                        "controllerId==id", List.of(1L), defaultDsType()),
+                List.of(SpPermission.READ_TARGET, SpPermission.READ_ROLLOUT));
     }
 
     /**

@@ -40,10 +40,9 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 
 /**
- * AbstractDsAssignmentStrategy for offline assignments, i.e. not managed by
- * hawkBit.
+ * AbstractDsAssignmentStrategy for offline assignments, i.e. not managed by hawkBit.
  */
-public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
+class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     OfflineDsAssignmentStrategy(
             final TargetRepository targetRepository,

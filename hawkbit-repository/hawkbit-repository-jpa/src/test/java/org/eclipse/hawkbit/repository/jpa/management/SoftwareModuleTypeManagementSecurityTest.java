@@ -14,8 +14,7 @@ import java.util.Random;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractRepositoryManagementSecurityTest;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.junit.jupiter.api.Test;
@@ -25,21 +24,21 @@ import org.junit.jupiter.api.Test;
  * Story: SecurityTests SoftwareModuleTypeManagement
  */
 class SoftwareModuleTypeManagementSecurityTest
-        extends AbstractRepositoryManagementSecurityTest<SoftwareModuleType, SoftwareModuleTypeCreate, SoftwareModuleTypeUpdate> {
+        extends AbstractRepositoryManagementSecurityTest<SoftwareModuleType, SoftwareModuleTypeManagement.Create, SoftwareModuleTypeManagement.Update> {
 
     @Override
-    protected RepositoryManagement<SoftwareModuleType, SoftwareModuleTypeCreate, SoftwareModuleTypeUpdate> getRepositoryManagement() {
+    protected RepositoryManagement getRepositoryManagement() {
         return softwareModuleTypeManagement;
     }
 
     @Override
-    protected SoftwareModuleTypeCreate getCreateObject() {
-        return entityFactory.softwareModuleType().create().key(String.format("key-%d", new Random().nextInt())).name(String.format("name-%d", new Random().nextInt()));
+    protected SoftwareModuleTypeManagement.Create getCreateObject() {
+        return SoftwareModuleTypeManagement.Create.builder().key(String.format("key-%d", new Random().nextInt())).name(String.format("name-%d", new Random().nextInt())).build();
     }
 
     @Override
-    protected SoftwareModuleTypeUpdate getUpdateObject() {
-        return entityFactory.softwareModuleType().update(1L).description("description");
+    protected SoftwareModuleTypeManagement.Update getUpdateObject() {
+        return SoftwareModuleTypeManagement.Update.builder().id(1L).description("description").build();
     }
 
     /**
@@ -57,5 +56,4 @@ class SoftwareModuleTypeManagementSecurityTest
     void getByNamePermissionsCheck() {
         assertPermissions(() -> softwareModuleTypeManagement.findByName("name"), List.of(SpPermission.READ_REPOSITORY));
     }
-
 }

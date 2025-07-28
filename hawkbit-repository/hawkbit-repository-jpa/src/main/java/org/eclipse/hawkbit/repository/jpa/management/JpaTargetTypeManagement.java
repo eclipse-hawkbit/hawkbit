@@ -38,12 +38,14 @@ import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -52,6 +54,8 @@ import org.springframework.validation.annotation.Validated;
  */
 @Transactional(readOnly = true)
 @Validated
+@Service
+@ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "target-type-management" }, matchIfMissing = true)
 public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     private final TargetTypeRepository targetTypeRepository;
@@ -60,13 +64,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     private final QuotaManagement quotaManagement;
 
-    /**
-     * Constructor
-     *
-     * @param targetTypeRepository Target type repository
-     * @param targetRepository Target repository
-     */
-    public JpaTargetTypeManagement(final TargetTypeRepository targetTypeRepository,
+    protected JpaTargetTypeManagement(final TargetTypeRepository targetTypeRepository,
             final TargetRepository targetRepository, final DistributionSetTypeRepository distributionSetTypeRepository,
             final QuotaManagement quotaManagement) {
         this.targetTypeRepository = targetTypeRepository;

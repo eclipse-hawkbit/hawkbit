@@ -87,7 +87,7 @@ class RsqlSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsql, final long expectedEntity) {
-        final Page<SoftwareModuleType> find = softwareModuleTypeManagement.findByRsql(rsql, PageRequest.of(0, 100));
+        final Page<? extends SoftwareModuleType> find = softwareModuleTypeManagement.findByRsql(rsql, PageRequest.of(0, 100));
         final long countAll = find.getTotalElements();
         assertThat(find).isNotNull();
         assertThat(countAll).isEqualTo(expectedEntity);

@@ -70,7 +70,7 @@ public final class MgmtTagMapper {
                 .expand());
     }
 
-    public static List<MgmtTag> toResponseDistributionSetTag(final List<DistributionSetTag> distributionSetTags) {
+    public static List<MgmtTag> toResponseDistributionSetTag(final Collection<? extends DistributionSetTag> distributionSetTags) {
         final List<MgmtTag> tagsRest = new ArrayList<>();
         if (distributionSetTags == null) {
             return tagsRest;
@@ -106,7 +106,7 @@ public final class MgmtTagMapper {
                 .withRel("assignedDistributionSets").expand());
     }
 
-    public static List<TagCreate> mapTagFromRequest(final EntityFactory entityFactory, final Collection<MgmtTagRequestBodyPut> tags) {
+    public static List<TagCreate<Tag>> mapTagFromRequest(final EntityFactory entityFactory, final Collection<MgmtTagRequestBodyPut> tags) {
         return tags.stream()
                 .map(tagRest -> entityFactory.tag().create().name(tagRest.getName())
                         .description(tagRest.getDescription()).colour(tagRest.getColour()))
