@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.ui.simple.view.util;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -47,7 +48,11 @@ public class SelectionGrid<T, ID> extends Grid<T> {
                 final Stream<T> fetch = queryFn.apply(query, rsqlFilter);
                 final Set<T> selected = getSelectedItems();
                 if (selected == null || selected.isEmpty()) {
-                    return fetch;
+                    final List<T> fetchList = fetch.toList();
+                    if (fetchList.size() == 1) {
+                        this.setDetailsVisible(fetchList.get(0), true);
+                    }
+                    return fetchList.stream();
                 } else {
                     final Set<ID> selectedIds = new HashSet<>();
                     selected.forEach(next -> selectedIds.add(entityRepresentation.idFn.apply(next)));
@@ -61,10 +66,11 @@ public class SelectionGrid<T, ID> extends Grid<T> {
         } // else externally managed
     }
 
-    public void setRsqlFilter(final String rsqlFilter) {
+    public void setRsqlFilter(final String rsqlFilter, boolean refreshGrid) {
         if (!Objects.equals(this.rsqlFilter, rsqlFilter)) {
             this.rsqlFilter = rsqlFilter;
-            refreshGrid(true);
+            if (refreshGrid)
+                refreshGrid(true);
         }
     }
 

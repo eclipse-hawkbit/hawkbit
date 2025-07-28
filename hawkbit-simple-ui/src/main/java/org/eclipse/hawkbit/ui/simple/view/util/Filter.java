@@ -28,13 +28,19 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.springframework.util.ObjectUtils;
 
 public class Filter extends Div {
 
     private transient Rsql rsql;
+    private final transient Rsql secondaryRsql;
+    private final transient Rsql primaryRsql;
+    private final transient Div filtersDiv;
 
     public Filter(final Consumer<String> changeListener, final Rsql primaryRsql, final Rsql secondaryOptionalRsql) {
         rsql = primaryRsql;
+        this.primaryRsql = primaryRsql;
+        secondaryRsql = secondaryOptionalRsql;
 
         final HorizontalLayout layout = new HorizontalLayout();
 
@@ -42,7 +48,7 @@ public class Filter extends Div {
         addClassNames(LumoUtility.Padding.Horizontal.NONE, LumoUtility.Padding.Vertical.SMALL,
                 LumoUtility.BoxSizing.BORDER);
 
-        final Div filtersDiv = new Div();
+        filtersDiv = new Div();
         filtersDiv.setWidthFull();
         filtersDiv.add(primaryRsql.components());
         filtersDiv.addClassName(LumoUtility.Gap.SMALL);
@@ -70,11 +76,7 @@ public class Filter extends Div {
             final Button toggleBtn = Utils.tooltip(new Button(VaadinIcon.FLIP_V.create()), "Toggle Search");
             toggleBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
             toggleBtn.addClickListener(e -> {
-                filtersDiv.removeAll();
-                synchronized (this) { // toggle
-                    rsql = rsql == primaryRsql ? secondaryOptionalRsql : primaryRsql;
-                }
-                filtersDiv.add(rsql.components());
+                toggle();
                 changeListener.accept(primaryRsql.filter());
             });
             layout.add(toggleBtn);
@@ -84,34 +86,59 @@ public class Filter extends Div {
         changeListener.accept(primaryRsql.filter());
     }
 
-    public static String filter(final Map<String, Object> keyToValues) {
-        final Map<String, Object> normalized =
-                new HashMap<>(keyToValues)
-                        .entrySet()
-                        .stream()
-                        .filter(e -> {
-                            if (e.getValue() instanceof Optional<?> opt) {
-                                return opt.isPresent();
-                            } else {
-                                return e.getValue() != null;
-                            }
-                        })
-                        .filter(e -> !(e.getValue() instanceof Collection<?> coll && coll.isEmpty()))
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    private void toggle() {
+        // toggle
+        filtersDiv.removeAll();
+        synchronized (this) {
+            rsql = rsql == primaryRsql ? secondaryRsql : primaryRsql;
+        }
+        filtersDiv.add(rsql.components());
+    }
+
+    public void setFilter(String string, boolean allowToggle) {
+        var otherFilter = rsql == primaryRsql ? secondaryRsql : primaryRsql;
+        Stream<Filter.Rsql> rsqlFIlter;
+        // logic to find the filter to use
+        if (allowToggle) {
+            rsqlFIlter = Stream.of(this.rsql);
+        } else {
+            rsqlFIlter = Stream.of(this.rsql, otherFilter);
+        }
+        rsqlFIlter.filter(RsqlRw.class::isInstance).findFirst().map(RsqlRw.class::cast).ifPresent(f -> {
+            if (f == otherFilter) {
+                toggle();
+            }
+            f.setFilter(string);
+        });
+    }
+
+    public static String filter(final Map<Object, Object> keyToValues) {
+        final Map<Object, Object> normalized = new HashMap<>(keyToValues)
+                .entrySet()
+                .stream()
+                .map(e -> {
+                    if (e.getValue() instanceof Optional<?> opt) {
+                        e.setValue(opt.orElse(null));
+                    }
+                    return e;
+                })
+                .filter(e -> !ObjectUtils.isEmpty(e))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         if (normalized.isEmpty()) {
             return null;
-        } else if (normalized.size() == 1) {
-            return normalized.entrySet().stream()
-                    .findFirst().map(e -> filter(e.getKey(), e.getValue())).orElse(null); // never return null!
         } else {
             final StringBuilder sb = new StringBuilder();
             normalized.forEach((k, v) -> {
-                if (v instanceof Collection<?>) {
-                    sb.append('(').append(filter(k, v)).append(')');
-                } else if (v instanceof Optional<?> opt) {
-                    sb.append(filter(k, opt.get()));
-                } else {
-                    sb.append(filter(k, v));
+                if (k instanceof Collection<?> keyList) {
+                    sb.append('(').append(
+                            keyList.stream().map(subKey -> filter((String) subKey, v))
+                                    .collect(Collectors.joining(" or "))).append(")");
+                } else if (k instanceof String key) {
+                    if (v instanceof Collection<?>) {
+                        sb.append('(').append(filter(key, v)).append(')');
+                    } else {
+                        sb.append(filter(key, v));
+                    }
                 }
                 sb.append(';');
             });
@@ -157,5 +184,10 @@ public class Filter extends Div {
         List<Component> components();
 
         String filter();
+    }
+
+    public interface RsqlRw {
+
+        void setFilter(String filter);
     }
 }

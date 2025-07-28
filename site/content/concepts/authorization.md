@@ -41,19 +41,17 @@ hawkBit optionally supports configuring multiple static users through the applic
 and password Spring security properties are ignored.
 An example configuration is given below.
 
-    hawkbit.server.im.users[0].username=admin
-    hawkbit.server.im.users[0].password={noop}admin
-    hawkbit.server.im.users[0].firstname=Test
-    hawkbit.server.im.users[0].lastname=Admin
-    hawkbit.server.im.users[0].email=admin@test.de
-    hawkbit.server.im.users[0].permissions=ALL
+    hawkbit.security.user.admin.password={noop}admin
+    hawkbit.security.user.admin.firstname=Test
+    hawkbit.security.user.admin.lastname=Admin
+    hawkbit.security.user.admin.email=admin@test.de
+    hawkbit.security.user.admin.permissions=ALL
     
-    hawkbit.server.im.users[1].username=test
-    hawkbit.server.im.users[1].password={noop}test
-    hawkbit.server.im.users[1].firstname=Test
-    hawkbit.server.im.users[1].lastname=Tester
-    hawkbit.server.im.users[1].email=test@tester.com
-    hawkbit.server.im.users[1].permissions=READ_TARGET,UPDATE_TARGET,CREATE_TARGET,DELETE_TARGET
+    hawkbit.security.user.test.password={noop}test
+    hawkbit.security.user.test.firstname=Test
+    hawkbit.security.user.test.lastname=Tester
+    hawkbit.security.user.test.email=test@tester.com
+    hawkbit.security.user.test.permissions=READ_TARGET,UPDATE_TARGET,CREATE_TARGET,DELETE_TARGET
 
 A permissions value of `ALL` will provide that user with all possible permissions. Passwords need to be specified with
 the used password encoder in brackets. In this example, `noop` is used as the plaintext encoder. For production use, it

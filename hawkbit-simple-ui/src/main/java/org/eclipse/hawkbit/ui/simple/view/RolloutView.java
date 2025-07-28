@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.ui.simple.view;
 
 import java.time.ZoneOffset;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,7 +60,7 @@ import org.springframework.util.ObjectUtils;
 @Route(value = "rollouts", layout = MainLayout.class)
 @RolesAllowed({ "ROLLOUT_READ" })
 @Uses(Icon.class)
-@SuppressWarnings({"java:S1171", "java:S3599"})
+@SuppressWarnings({ "java:S1171", "java:S3599" })
 public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
     public RolloutView(final HawkbitMgmtClient hawkbitClient) {
@@ -118,33 +117,45 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
         private void init(final MgmtRolloutResponseBody rollout) {
             if ("READY".equalsIgnoreCase(rollout.getStatus())) {
-                add(Utils.tooltip(new Button(VaadinIcon.START_COG.create()) {{
-                    addClickListener(v -> {
-                        hawkbitClient.getRolloutRestApi().start(rollout.getId());
-                        refresh();
-                    });
-                }}, "Start"));
+                add(Utils.tooltip(new Button(VaadinIcon.START_COG.create()) {
+
+                    {
+                        addClickListener(v -> {
+                            hawkbitClient.getRolloutRestApi().start(rollout.getId());
+                            refresh();
+                        });
+                    }
+                }, "Start"));
             } else if ("RUNNING".equalsIgnoreCase(rollout.getStatus())) {
-                add(Utils.tooltip(new Button(VaadinIcon.PAUSE.create()) {{
-                    addClickListener(v -> {
-                        hawkbitClient.getRolloutRestApi().pause(rollout.getId());
-                        refresh();
-                    });
-                }}, "Pause"));
+                add(Utils.tooltip(new Button(VaadinIcon.PAUSE.create()) {
+
+                    {
+                        addClickListener(v -> {
+                            hawkbitClient.getRolloutRestApi().pause(rollout.getId());
+                            refresh();
+                        });
+                    }
+                }, "Pause"));
             } else if ("PAUSED".equalsIgnoreCase(rollout.getStatus())) {
-                add(Utils.tooltip(new Button(VaadinIcon.START_COG.create()) {{
-                    addClickListener(v -> {
-                        hawkbitClient.getRolloutRestApi().resume(rollout.getId());
-                        refresh();
-                    });
-                }}, "Resume"));
+                add(Utils.tooltip(new Button(VaadinIcon.START_COG.create()) {
+
+                    {
+                        addClickListener(v -> {
+                            hawkbitClient.getRolloutRestApi().resume(rollout.getId());
+                            refresh();
+                        });
+                    }
+                }, "Resume"));
             }
-            add(Utils.tooltip(new Button(VaadinIcon.TRASH.create()) {{
-                addClickListener(v -> {
-                    hawkbitClient.getRolloutRestApi().delete(rollout.getId());
-                    grid.getDataProvider().refreshAll();
-                });
-            }}, "Cancel and Remove"));
+            add(Utils.tooltip(new Button(VaadinIcon.TRASH.create()) {
+
+                {
+                    addClickListener(v -> {
+                        hawkbitClient.getRolloutRestApi().delete(rollout.getId());
+                        grid.getDataProvider().refreshAll();
+                    });
+                }
+            }, "Cancel and Remove"));
         }
 
         private void refresh() {
@@ -197,11 +208,11 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
             description.setMinLength(2);
             groupGrid = createGroupGrid();
             Stream.of(
-                            description,
-                            createdBy, createdAt,
-                            lastModifiedBy, lastModifiedAt,
-                            targetFilter, distributionSet,
-                            actonType, startAt)
+                    description,
+                    createdBy, createdAt,
+                    lastModifiedBy, lastModifiedAt,
+                    targetFilter, distributionSet,
+                    actonType, startAt)
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
@@ -219,9 +230,9 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
         private void setItem(final MgmtRolloutResponseBody rollout) {
             description.setValue(rollout.getDescription());
             createdBy.setValue(rollout.getCreatedBy());
-            createdAt.setValue(new Date(rollout.getCreatedAt()).toString());
+            createdAt.setValue(Utils.localDateTimeFromTs(rollout.getCreatedAt()));
             lastModifiedBy.setValue(rollout.getLastModifiedBy());
-            lastModifiedAt.setValue(new Date(rollout.getLastModifiedAt()).toString());
+            lastModifiedAt.setValue(Utils.localDateTimeFromTs(rollout.getLastModifiedAt()));
             targetFilter.setValue(rollout.getTargetFilterQuery());
             final MgmtDistributionSet distributionSetMgmt = hawkbitClient.getDistributionSetRestApi()
                     .getDistributionSet(rollout.getDistributionSetId()).getBody();
@@ -232,18 +243,18 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                 case SOFT -> Constants.SOFT;
                 case FORCED -> Constants.FORCED;
                 case DOWNLOAD_ONLY -> Constants.DOWNLOAD_ONLY;
-                case TIMEFORCED -> "Scheduled at " + new Date(rollout.getForcetime());
+                case TIMEFORCED -> "Scheduled at " + Utils.localDateTimeFromTs(rollout.getForcetime());
             });
-            startAt.setValue(ObjectUtils.isEmpty(rollout.getStartAt()) ? "" : new Date(rollout.getStartAt()).toString());
+            startAt.setValue(ObjectUtils.isEmpty(rollout.getStartAt()) ? "" : Utils.localDateTimeFromTs(rollout.getStartAt()));
             dynamic.setValue(rollout.isDynamic());
 
             groupGrid.setItems(query -> Optional.ofNullable(
-                            hawkbitClient.getRolloutRestApi()
-                                    .getRolloutGroups(
-                                            rollout.getId(),
-                                            null, query.getOffset(), query.getPageSize(),
-                                            null, "full")
-                                    .getBody())
+                    hawkbitClient.getRolloutRestApi()
+                            .getRolloutGroups(
+                                    rollout.getId(),
+                                    null, query.getOffset(), query.getPageSize(),
+                                    null, "full")
+                            .getBody())
                     .stream().flatMap(body -> body.getContent().stream())
                     .skip(query.getOffset())
                     .limit(query.getPageSize()));
@@ -259,7 +270,8 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                             grid.addColumn(MgmtRolloutGroupResponseBody::getId).setHeader(Constants.ID).setAutoWidth(true);
                             grid.addColumn(MgmtRolloutGroupResponseBody::getName).setHeader(Constants.NAME).setAutoWidth(true);
                             grid.addColumn(MgmtRolloutGroupResponseBody::getTotalTargets).setHeader(Constants.TARGET_COUNT).setAutoWidth(true);
-                            grid.addColumn(MgmtRolloutGroupResponseBody::getTotalTargetsPerStatus).setHeader(Constants.STATS).setAutoWidth(true);
+                            grid.addColumn(MgmtRolloutGroupResponseBody::getTotalTargetsPerStatus).setHeader(Constants.STATS).setAutoWidth(
+                                    true);
                             grid.addColumn(MgmtRolloutGroupResponseBody::getStatus).setHeader(Constants.STATUS).setAutoWidth(true);
                         }
                     });
@@ -291,22 +303,21 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                     "Distribution Set",
                     this::readyToCreate,
                     Optional.ofNullable(
-                                    hawkbitClient.getDistributionSetRestApi()
-                                            .getDistributionSets(null, 0, 30, Constants.NAME_ASC)
-                                            .getBody())
+                            hawkbitClient.getDistributionSetRestApi()
+                                    .getDistributionSets(null, 0, 30, Constants.CREATED_AT_DESC)
+                                    .getBody())
                             .map(body -> body.getContent().toArray(new MgmtDistributionSet[0]))
                             .orElseGet(() -> new MgmtDistributionSet[0]));
             distributionSet.setRequiredIndicatorVisible(true);
-            distributionSet.setItemLabelGenerator(distributionSetO ->
-                    distributionSetO.getName() + ":" + distributionSetO.getVersion());
+            distributionSet.setItemLabelGenerator(distributionSetO -> distributionSetO.getName() + ":" + distributionSetO.getVersion());
             distributionSet.setWidthFull();
             targetFilter = new Select<>(
                     "Target Filter",
                     this::readyToCreate,
                     Optional.ofNullable(
-                                    hawkbitClient.getTargetFilterQueryRestApi()
-                                            .getFilters(null, 0, 30, Constants.NAME_ASC, null)
-                                            .getBody())
+                            hawkbitClient.getTargetFilterQueryRestApi()
+                                    .getFilters(null, 0, 30, Constants.NAME_ASC, null)
+                                    .getBody())
                             .map(body -> body.getContent().toArray(new MgmtTargetFilterQuery[0]))
                             .orElseGet(() -> new MgmtTargetFilterQuery[0]));
             targetFilter.setRequiredIndicatorVisible(true);
@@ -323,20 +334,18 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
             startType.setLabel(Constants.START_TYPE);
             startType.setItems(StartType.values());
             startType.setValue(StartType.MANUAL);
-            final ComponentRenderer<Component, StartType> startTypeRenderer = new ComponentRenderer<>(startTypeO ->
-                    switch (startTypeO) {
-                        case MANUAL -> new Text(Constants.MANUAL);
-                        case AUTO -> new Text(Constants.AUTO);
-                        case SCHEDULED -> startAt;
-                    });
+            final ComponentRenderer<Component, StartType> startTypeRenderer = new ComponentRenderer<>(startTypeO -> switch (startTypeO) {
+                case MANUAL -> new Text(Constants.MANUAL);
+                case AUTO -> new Text(Constants.AUTO);
+                case SCHEDULED -> startAt;
+            });
             startType.setRenderer(startTypeRenderer);
             startType.addValueChangeListener(e -> startType.setRenderer(startTypeRenderer));
-            startType.setItemLabelGenerator(startTypeO ->
-                    switch (startTypeO) {
-                        case MANUAL -> Constants.MANUAL;
-                        case AUTO -> Constants.AUTO;
-                        case SCHEDULED -> "Scheduled" + (startAt.isEmpty() ? "" : "  at " + startAt.getValue());
-                    });
+            startType.setItemLabelGenerator(startTypeO -> switch (startTypeO) {
+                case MANUAL -> Constants.MANUAL;
+                case AUTO -> Constants.AUTO;
+                case SCHEDULED -> "Scheduled" + (startAt.isEmpty() ? "" : "  at " + startAt.getValue());
+            });
             startType.setWidthFull();
 
             final Div percentSuffix = new Div();
@@ -377,12 +386,8 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
         }
 
         private void readyToCreate(final Object v) {
-            final boolean createEnabled = !name.isEmpty() &&
-                    !distributionSet.isEmpty() &&
-                    !targetFilter.isEmpty() &&
-                    !groupNumber.isEmpty() &&
-                    !triggerThreshold.isEmpty() &&
-                    !errorThreshold.isEmpty();
+            final boolean createEnabled = !name.isEmpty() && !distributionSet.isEmpty() && !targetFilter.isEmpty() && !groupNumber
+                    .isEmpty() && !triggerThreshold.isEmpty() && !errorThreshold.isEmpty();
             if (create.isEnabled() != createEnabled) {
                 create.setEnabled(createEnabled);
             }
@@ -400,16 +405,12 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                 request.setType(actionType.getValue());
                 if (actionType.getValue() == MgmtActionType.TIMEFORCED) {
                     request.setForcetime(
-                            forceTime.isEmpty() ?
-                                    System.currentTimeMillis() :
-                                    forceTime.getValue().toEpochSecond(ZoneOffset.UTC) * 1000);
+                            forceTime.isEmpty() ? System.currentTimeMillis() : forceTime.getValue().toEpochSecond(ZoneOffset.UTC) * 1000);
                 }
                 switch (startType.getValue()) {
                     case AUTO -> request.setStartAt(System.currentTimeMillis());
                     case SCHEDULED -> request.setStartAt(
-                            startAt.isEmpty() ?
-                                    System.currentTimeMillis() :
-                                    startAt.getValue().toEpochSecond(ZoneOffset.UTC) * 1000);
+                            startAt.isEmpty() ? System.currentTimeMillis() : startAt.getValue().toEpochSecond(ZoneOffset.UTC) * 1000);
                     case MANUAL -> {
                         // do nothing, will be started manually
                     }
