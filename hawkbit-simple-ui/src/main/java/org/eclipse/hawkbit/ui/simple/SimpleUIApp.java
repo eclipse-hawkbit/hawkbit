@@ -59,8 +59,8 @@ public class SimpleUIApp implements AppShellConfigurator {
 
     private static final Function<OAuth2TokenManager, RequestInterceptor> AUTHORIZATION = oAuth2TokenManager -> requestTemplate -> {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.getPrincipal() instanceof OidcUser) {
-            var token = oAuth2TokenManager.getToken((OAuth2AuthenticationToken) authentication);
+        if (authentication instanceof OAuth2AuthenticationToken authenticationToken) {
+            var token = oAuth2TokenManager.getToken(authenticationToken);
             requestTemplate.header("Authorization", "Bearer " + token);
         } else {
             requestTemplate.header(
