@@ -22,7 +22,7 @@ public enum DistributionSetFields implements RsqlQueryField {
 
 // @formatter:off
     ID("id"),
-    TYPE("type", "key"),
+    TYPE("type", "key", "name"),
     NAME("name"),
     DESCRIPTION("description"),
     CREATEDAT("createdAt"),
