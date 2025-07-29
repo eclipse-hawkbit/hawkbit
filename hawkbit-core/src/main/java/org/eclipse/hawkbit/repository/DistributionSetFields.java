@@ -31,7 +31,6 @@ public enum DistributionSetFields implements RsqlQueryField {
     COMPLETE("complete"),
     MODULE("modules", SoftwareModuleFields.ID.getJpaEntityFieldName(), SoftwareModuleFields.NAME.getJpaEntityFieldName()),
     TAG("tags", "name"),
-    TYPENAME("typeName"),
     METADATA("metadata"),
     VALID("valid");
 // @formatter:on
