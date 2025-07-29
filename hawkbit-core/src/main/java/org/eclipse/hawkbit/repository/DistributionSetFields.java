@@ -20,7 +20,6 @@ import lombok.Getter;
 @Getter
 public enum DistributionSetFields implements RsqlQueryField {
 
-// @formatter:off
     ID("id"),
     TYPE("type", "key", "name"),
     NAME("name"),
@@ -33,7 +32,6 @@ public enum DistributionSetFields implements RsqlQueryField {
     TAG("tags", "name"),
     METADATA("metadata"),
     VALID("valid");
-// @formatter:on
 
     private final String jpaEntityFieldName;
     private final List<String> subEntityAttributes;
