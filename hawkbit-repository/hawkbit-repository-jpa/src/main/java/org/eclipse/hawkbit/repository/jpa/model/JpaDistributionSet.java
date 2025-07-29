@@ -53,6 +53,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.core.annotation.Order;
 
 /**
  * Jpa implementation of {@link DistributionSet}.
@@ -75,7 +76,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY, optional = false, targetEntity = JpaDistributionSetType.class)
     @JoinColumn(
             name = "ds_type", nullable = false, updatable = false,
@@ -136,6 +136,11 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @Setter
     @Column(name = "required_migration_step")
     private boolean requiredMigrationStep;
+
+    @Order(0)
+    public void setType(final DistributionSetType type) {
+        this.type = type;
+    }
 
     @Override
     public Set<SoftwareModule> getModules() {
