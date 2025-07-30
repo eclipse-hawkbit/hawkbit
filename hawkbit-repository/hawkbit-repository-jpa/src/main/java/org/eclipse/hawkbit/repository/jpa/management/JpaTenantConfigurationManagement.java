@@ -204,9 +204,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
             return;
         }
 
-        event.getEntity().ifPresent(tenantConfiguration -> {
-            evictCacheEntryByKeyIfPresent(tenantConfiguration.getKey());
-        });
+        event.getEntity().ifPresent(tenantConfiguration -> evictCacheEntryByKeyIfPresent(tenantConfiguration.getKey()));
     }
 
     @Override

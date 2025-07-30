@@ -17,6 +17,7 @@ import java.util.List;
 
 import jakarta.validation.ConstraintViolationException;
 
+import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
@@ -27,7 +28,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Slice;
 
 /**
  * Feature: Component Tests - Repository<br/>
@@ -40,7 +40,7 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
      * of Optional not present.
      */
     @Test
-    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 0) })
+    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class) })
     void nonExistingEntityAccessReturnsNotPresent() {
 
         assertThat(softwareModuleTypeManagement.get(NOT_EXIST_IDL)).isNotPresent();
@@ -53,7 +53,7 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
      * by means of throwing EntityNotFoundException.
      */
     @Test
-    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 0) })
+    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class) })
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         verifyThrownExceptionBy(() -> softwareModuleTypeManagement.delete(NOT_EXIST_IDL), "SoftwareModuleType");
 
@@ -114,35 +114,35 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void deleteAssignedAndUnassignedSoftwareModuleTypes() {
-        assertThat((Slice) softwareModuleTypeManagement.findAll(PAGE)).hasSize(3).contains(osType, runtimeType, appType);
+        Assertions.<SoftwareModuleType>assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(3).contains(osType, runtimeType, appType);
 
         SoftwareModuleType type = softwareModuleTypeManagement
                 .create(SoftwareModuleTypeManagement.Create.builder().key("bundle").name("OSGi Bundle").build());
 
-        assertThat((Slice) softwareModuleTypeManagement.findAll(PAGE)).hasSize(4).contains(osType, runtimeType, appType, type);
+        Assertions.<SoftwareModuleType>assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(4).contains(osType, runtimeType, appType, type);
 
         // delete unassigned
         softwareModuleTypeManagement.delete(type.getId());
-        assertThat((Slice) softwareModuleTypeManagement.findAll(PAGE)).hasSize(3).contains(osType, runtimeType, appType);
-        assertThat((List) softwareModuleTypeRepository.findAll()).hasSize(3).contains(osType, runtimeType, appType);
+        Assertions.<SoftwareModuleType>assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(3).contains(osType, runtimeType, appType);
+        Assertions.<SoftwareModuleType>assertThat(softwareModuleTypeRepository.findAll()).hasSize(3).contains(osType, runtimeType, appType);
 
         type = softwareModuleTypeManagement
                 .create(SoftwareModuleTypeManagement.Create.builder().key("bundle2").name("OSGi Bundle2").build());
 
-        assertThat((Slice) softwareModuleTypeManagement.findAll(PAGE)).hasSize(4).contains(osType, runtimeType, appType, type);
+        Assertions.<SoftwareModuleType>assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(4).contains(osType, runtimeType, appType, type);
 
         softwareModuleManagement
                 .create(SoftwareModuleManagement.Create.builder().type(type).name("Test SM").version("1.0").build());
 
         // delete assigned
         softwareModuleTypeManagement.delete(type.getId());
-        assertThat((Slice) softwareModuleTypeManagement.findAll(PAGE)).hasSize(3).contains(osType, runtimeType, appType);
-        assertThat((Slice) softwareModuleTypeManagement.findByRsql("name==*", PAGE)).hasSize(3).contains(osType, runtimeType, appType);
+        Assertions.<SoftwareModuleType>assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(3).contains(osType, runtimeType, appType);
+        Assertions.<SoftwareModuleType>assertThat(softwareModuleTypeManagement.findByRsql("name==*", PAGE)).hasSize(3).contains(osType, runtimeType, appType);
         assertThat(softwareModuleTypeManagement.count()).isEqualTo(3);
 
         assertThat(softwareModuleTypeRepository.findAll()).hasSize(4).contains((JpaSoftwareModuleType) osType,
                 (JpaSoftwareModuleType) runtimeType, (JpaSoftwareModuleType) appType,
-                softwareModuleTypeRepository.findById(type.getId()).get());
+                softwareModuleTypeRepository.findById(type.getId()).orElseThrow());
     }
 
     /**
@@ -156,8 +156,8 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
         softwareModuleTypeManagement
                 .create(SoftwareModuleTypeManagement.Create.builder().key("thetype2").name("anothername").build());
 
-        assertThat((((SoftwareModuleTypeManagement<SoftwareModuleType>) softwareModuleTypeManagement)).findByName("thename")).as(
-                "Type with given name").contains(found);
+        Assertions.<SoftwareModuleType>assertThat(((SoftwareModuleTypeManagement<SoftwareModuleType>) softwareModuleTypeManagement).findByName("thename"))
+                .as("Type with given name").contains(found);
     }
 
     /**

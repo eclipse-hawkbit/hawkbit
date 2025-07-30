@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.builder.GenericRolloutUpdate;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 
 /**
@@ -21,9 +22,9 @@ import org.eclipse.hawkbit.repository.model.Rollout;
  */
 public class JpaRolloutBuilder implements RolloutBuilder {
 
-    private final DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
 
-    public JpaRolloutBuilder(final DistributionSetManagement distributionSetManagement) {
+    public JpaRolloutBuilder(final DistributionSetManagement<? extends DistributionSet> distributionSetManagement) {
         this.distributionSetManagement = distributionSetManagement;
     }
 

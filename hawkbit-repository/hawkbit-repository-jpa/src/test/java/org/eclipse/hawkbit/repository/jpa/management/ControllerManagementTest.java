@@ -102,7 +102,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2) })
-    void updateTargetAttributesFailsIfTooManyEntries() throws Exception {
+    void updateTargetAttributesFailsIfTooManyEntries() {
         final String controllerId = "test123";
         final int allowedAttributes = quotaManagement.getMaxAttributeEntriesPerTarget();
         testdataFactory.createTarget(controllerId);
@@ -178,7 +178,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
-    void controllerProvidesIntermediateFeedbackFailsIfQuotaHit() throws Exception {
+    void controllerProvidesIntermediateFeedbackFailsIfQuotaHit() {
         final int allowStatusEntries = 10;
         final Long actionId = createTargetAndAssignDs();
 
@@ -1154,7 +1154,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 3) })
-    void updateTargetAttributes() throws Exception {
+    void updateTargetAttributes() {
         final String controllerId = "test123";
         final Target target = testdataFactory.createTarget(controllerId);
 

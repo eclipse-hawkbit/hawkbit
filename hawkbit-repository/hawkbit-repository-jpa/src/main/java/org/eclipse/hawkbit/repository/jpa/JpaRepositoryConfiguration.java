@@ -103,6 +103,8 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRollou
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -147,8 +149,6 @@ import org.springframework.security.authorization.method.MethodAuthorizationDeni
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
-
-;
 
 /**
  * General configuration for hawkBit's Repository.
@@ -319,7 +319,7 @@ public class JpaRepositoryConfiguration {
      * @return TargetTypeBuilder bean
      */
     @Bean
-    TargetTypeBuilder targetTypeBuilder(final DistributionSetTypeManagement dsTypeManagement) {
+    TargetTypeBuilder targetTypeBuilder(final DistributionSetTypeManagement<? extends DistributionSetType> dsTypeManagement) {
         return new JpaTargetTypeBuilder(dsTypeManagement);
     }
 
@@ -334,7 +334,7 @@ public class JpaRepositoryConfiguration {
      * @return RolloutBuilder bean
      */
     @Bean
-    RolloutBuilder rolloutBuilder(final DistributionSetManagement distributionSetManagement) {
+    RolloutBuilder rolloutBuilder(final DistributionSetManagement<? extends DistributionSet> distributionSetManagement) {
         return new JpaRolloutBuilder(distributionSetManagement);
     }
 
@@ -344,7 +344,7 @@ public class JpaRepositoryConfiguration {
      * @return TargetFilterQueryBuilder bean
      */
     @Bean
-    TargetFilterQueryBuilder targetFilterQueryBuilder(final DistributionSetManagement distributionSetManagement) {
+    TargetFilterQueryBuilder targetFilterQueryBuilder(final DistributionSetManagement<? extends DistributionSet> distributionSetManagement) {
         return new JpaTargetFilterQueryBuilder(distributionSetManagement);
     }
 

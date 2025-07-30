@@ -129,8 +129,7 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
         assertThat(tenants).containsOnly(new TenantUsage("DEFAULT"), tenantUsage0, tenantUsage1);
     }
 
-    private byte[] createTestTenantsForSystemStatistics(final int tenants, final int artifactSize, final int targets,
-            final int updates) throws Exception {
+    private byte[] createTestTenantsForSystemStatistics(final int tenants, final int artifactSize, final int targets, final int updates) {
         final Random randomgen = new Random();
         final byte[] random = new byte[artifactSize];
         randomgen.nextBytes(random);

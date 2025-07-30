@@ -57,7 +57,7 @@ public final class DeploymentHelper {
         action.setActive(false);
         action.setStatus(Status.CANCELED);
 
-        final JpaTarget target = (JpaTarget) action.getTarget();
+        final JpaTarget target = action.getTarget();
         final List<Action> nextActiveActions = actionRepository
                 .findAll(ActionSpecifications.byTargetIdAndIsActive(target.getId()), Sort.by(Sort.Order.asc(AbstractJpaBaseEntity_.ID)))
                 .stream()

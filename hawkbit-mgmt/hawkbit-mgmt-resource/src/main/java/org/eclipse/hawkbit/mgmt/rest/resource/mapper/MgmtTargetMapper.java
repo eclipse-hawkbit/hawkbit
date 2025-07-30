@@ -346,7 +346,7 @@ public final class MgmtTargetMapper {
         result.setReportedAt(actionStatus.getCreatedAt());
         result.setTimestamp(actionStatus.getOccurredAt());
         result.setId(actionStatus.getId());
-        result.setType(MgmtActionStatus.StatusType.forValue(actionStatus.getStatus().name()));
+        result.setType(MgmtActionStatus.Type.forValue(actionStatus.getStatus().name()));
         actionStatus.getCode().ifPresent(result::setCode);
 
         return result;

@@ -36,7 +36,6 @@ import jakarta.persistence.metamodel.MapAttribute;
 import jakarta.validation.constraints.NotEmpty;
 
 import org.apache.commons.collections4.ListUtils;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetFields;

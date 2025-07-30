@@ -261,9 +261,7 @@ public class Utils {
 
     private static ZoneId getZoneId() {
         CompletableFuture<ZoneId> zoneId = new CompletableFuture<>();
-        UI.getCurrent().getPage().retrieveExtendedClientDetails(details -> {
-            zoneId.complete(ZoneId.of(details.getTimeZoneId()));
-        });
+        UI.getCurrent().getPage().retrieveExtendedClientDetails(details -> zoneId.complete(ZoneId.of(details.getTimeZoneId())));
         try {
             return zoneId.get(1, TimeUnit.SECONDS);
         } catch (final InterruptedException e) {

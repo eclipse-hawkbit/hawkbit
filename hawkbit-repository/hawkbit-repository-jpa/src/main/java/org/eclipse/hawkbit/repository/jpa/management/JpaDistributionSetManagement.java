@@ -132,6 +132,7 @@ public class JpaDistributionSetManagement
         this.repositoryProperties = repositoryProperties;
     }
 
+    @SuppressWarnings("java:S1066") // java:S1066 better readable without merging the if statements
     @Override
     public JpaDistributionSet update(final Update update) {
         final JpaDistributionSet distributionSet = getValid0(update.getId());
@@ -164,6 +165,7 @@ public class JpaDistributionSetManagement
         return toDelete.stream().filter(distributionSet -> assigned.contains(distributionSet.getId())).toList();
     }
 
+    @Override
     protected void delete0(final Collection<Long> distributionSetIDs) {
         if (ObjectUtils.isEmpty(distributionSetIDs)) {
             return; // super checks but if empty we don't want to unassign from target filters

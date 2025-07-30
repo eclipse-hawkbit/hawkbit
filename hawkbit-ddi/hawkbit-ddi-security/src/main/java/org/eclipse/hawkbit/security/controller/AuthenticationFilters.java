@@ -62,7 +62,7 @@ public class AuthenticationFilters {
      * An abstraction for all controller based security to parse the e.g. the tenant name from the URL and the controller ID from the URL to do
      * security checks based on this information.
      */
-    public static abstract class AbstractAuthenticationFilter extends OncePerRequestFilter {
+    public abstract static class AbstractAuthenticationFilter extends OncePerRequestFilter {
 
         private static final String TENANT_PLACE_HOLDER = "tenant";
         private static final String CONTROLLER_ID_PLACE_HOLDER = "controllerId";

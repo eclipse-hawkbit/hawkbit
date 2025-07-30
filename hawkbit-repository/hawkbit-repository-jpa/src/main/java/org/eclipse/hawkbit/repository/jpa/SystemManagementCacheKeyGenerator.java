@@ -78,7 +78,7 @@ public class SystemManagementCacheKeyGenerator implements CurrentTenantCacheKeyG
 
         @Override
         public Object generate(final Object target, final Method method, final Object... params) {
-            String tenant = getTenantInCreation().orElseGet(() -> tenantAware.getCurrentTenant()).toUpperCase();
+            String tenant = getTenantInCreation().orElseGet(tenantAware::getCurrentTenant).toUpperCase();
             return SimpleKeyGenerator.generateKey(tenant, tenant);
         }
     }

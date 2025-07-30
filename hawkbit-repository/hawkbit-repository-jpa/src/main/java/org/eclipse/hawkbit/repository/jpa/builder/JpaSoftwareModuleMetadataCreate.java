@@ -21,8 +21,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
  * Create/build implementation.
  */
 public class JpaSoftwareModuleMetadataCreate
-        extends AbstractSoftwareModuleMetadataUpdateCreate<SoftwareModuleMetadataCreate>
-        implements SoftwareModuleMetadataCreate {
+        extends AbstractSoftwareModuleMetadataUpdateCreate<SoftwareModuleMetadataCreate> implements SoftwareModuleMetadataCreate {
 
     private final JpaSoftwareModuleManagement softwareModuleManagement;
 

@@ -87,7 +87,7 @@ public class TableView<T, ID> extends Div implements Constants, BeforeEnterObser
         }
 
         filter = new Filter(
-                (rsqlFilter) -> {
+                rsqlFilter -> {
                     closeDetailsPanel();
                     if (rsqlFilter != null) {
                         var queryParameters = UI.getCurrent().getActiveViewLocation()

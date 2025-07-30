@@ -380,6 +380,7 @@ public interface DistributionSetManagement<T extends DistributionSet>
             return this;
         }
 
+        @SuppressWarnings("java:S3400") // java:S3400 it's used via reflection
         public boolean isValid() {
             return true;
         }

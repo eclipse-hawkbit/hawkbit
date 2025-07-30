@@ -18,7 +18,6 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.Description;
 
 /**
  * Feature: Tests for the MgmtTargetAssignmentResponseBody<br/>

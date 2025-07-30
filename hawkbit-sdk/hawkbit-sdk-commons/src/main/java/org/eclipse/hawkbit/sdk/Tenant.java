@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.sdk;
 
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
 import lombok.Data;
