@@ -128,7 +128,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @Test
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 1), 
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2) })
     void registerTargetWithName() {
         final String controllerId = TARGET_PREFIX + "registerTargetWithName";
@@ -148,7 +148,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @Test
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 2), 
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetPollEvent.class, count = 2) })
     void registerTargetWithAttributes() {
         final String controllerId = TARGET_PREFIX + "registerTargetWithAttributes";
@@ -171,7 +171,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @Test
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 3), 
+            @Expect(type = TargetUpdatedEvent.class, count = 3),
             @Expect(type = TargetPollEvent.class, count = 2) })
     void registerTargetWithNameAndAttributes() {
         final String controllerId = TARGET_PREFIX + "registerTargetWithAttributes";
@@ -404,14 +404,14 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class, count = 1), 
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 2), 
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetPollEvent.class, count = 1) })
     void finishActionStatus() {
         final String controllerId = TARGET_PREFIX + "finishActionStatus";
@@ -425,7 +425,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class), 
+            @Expect(type = ActionUpdatedEvent.class),
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -445,7 +445,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class), 
+            @Expect(type = ActionUpdatedEvent.class),
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -484,7 +484,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class, count = 1), 
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -663,7 +663,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class, count = 1), 
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2) })
     void receiveCancelUpdateMessageAfterAssignmentWasCanceled() {
@@ -691,14 +691,14 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class, count = 1), 
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 1), 
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
     void actionNotExists() {
         final String controllerId = TARGET_PREFIX + "actionNotExists";
@@ -738,7 +738,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class, count = 2), 
+            @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -766,7 +766,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @Test
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 4), 
+            @Expect(type = TargetUpdatedEvent.class, count = 4),
             @Expect(type = TargetPollEvent.class, count = 1) })
     void updateAttributesWithDifferentUpdateModes() {
         final String controllerId = TARGET_PREFIX + "updateAttributes";
@@ -794,7 +794,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @Test
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class), 
+            @Expect(type = TargetUpdatedEvent.class),
             @Expect(type = TargetPollEvent.class, count = 1) })
     void updateAttributesWithNoThingId() {
         final String controllerId = TARGET_PREFIX + "updateAttributesWithNoThingId";
@@ -822,7 +822,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @Test
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class), 
+            @Expect(type = TargetUpdatedEvent.class),
             @Expect(type = TargetPollEvent.class, count = 1) })
     void updateAttributesWithWrongBody() {
         // setup
@@ -857,14 +857,14 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class, count = 1), 
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 2), 
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetPollEvent.class, count = 1) })
     void downloadOnlyAssignmentFinishesActionWhenTargetReportsDownloaded() throws IOException {
         // create target
@@ -893,14 +893,14 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class, count = 2), 
+            @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
             @Expect(type = TargetAttributesRequestedEvent.class, count = 2),
-            @Expect(type = TargetUpdatedEvent.class, count = 3), 
+            @Expect(type = TargetUpdatedEvent.class, count = 3),
             @Expect(type = TargetPollEvent.class, count = 1) })
     void downloadOnlyAssignmentAllowsActionStatusUpdatesWhenTargetReportsFinishedAndUpdatesInstalledDS()
             throws IOException {
@@ -1098,7 +1098,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class), 
+            @Expect(type = ActionUpdatedEvent.class),
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),

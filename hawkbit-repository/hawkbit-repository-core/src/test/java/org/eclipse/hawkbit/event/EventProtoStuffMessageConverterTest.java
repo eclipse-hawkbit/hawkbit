@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import java.io.Serial;
 import java.util.HashMap;
 
+import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -24,15 +25,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.MessageConversionException;
 
 @ExtendWith(MockitoExtension.class)
-class BusProtoStuffMessageConverterTest {
+class EventProtoStuffMessageConverterTest {
 
-    private final BusProtoStuffMessageConverter underTest = new BusProtoStuffMessageConverter();
+    private final EventProtoStuffMessageConverter underTest = new EventProtoStuffMessageConverter();
 
     @Mock
     private Target targetMock;
@@ -58,7 +58,7 @@ class BusProtoStuffMessageConverterTest {
 
         // deserialize
         when(messageMock.getPayload()).thenReturn(serializedEvent);
-        final Object deserializedEvent = underTest.convertFromInternal(messageMock, RemoteApplicationEvent.class, null);
+        final Object deserializedEvent = underTest.convertFromInternal(messageMock, AbstractRemoteEvent.class, null);
         assertThat(deserializedEvent)
                 .isInstanceOf(TargetCreatedEvent.class)
                 .isEqualTo(targetCreatedEvent);

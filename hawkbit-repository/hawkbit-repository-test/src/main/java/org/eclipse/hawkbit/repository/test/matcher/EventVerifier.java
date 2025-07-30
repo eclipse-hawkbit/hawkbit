@@ -15,8 +15,12 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.Serial;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,10 +31,23 @@ import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
+import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
+import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.MultiActionAssignServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.MultiActionCancelServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistributionSetServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
-import org.springframework.cloud.bus.event.RemoteApplicationEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -86,7 +103,50 @@ public class EventVerifier extends AbstractTestExecutionListener {
     }
 
     private Optional<Expect[]> getExpectationsFrom(final Method testMethod) {
-        return Optional.ofNullable(testMethod.getAnnotation(ExpectEvents.class)).map(ExpectEvents::value);
+        final Optional<Expect[]> expectedEvents = Optional.ofNullable(testMethod.getAnnotation(ExpectEvents.class)).map(ExpectEvents::value);
+        if (expectedEvents.isPresent()) {
+            List<Expect> modifiedEvents = new ArrayList<>(Arrays.asList(expectedEvents.get()));
+            for (Expect event : expectedEvents.get()) {
+                final Class<?> type = event.type();
+                if (type.isAssignableFrom(TargetCreatedEvent.class)) {
+                    modifiedEvents.add(toExpectServiceEvent(TargetCreatedServiceEvent.class, event.count()));
+                } else if (type.isAssignableFrom(TargetDeletedEvent.class)) {
+                    modifiedEvents.add(toExpectServiceEvent(TargetDeletedServiceEvent.class, event.count()));
+                } else if (type.isAssignableFrom(TargetAssignDistributionSetEvent.class)) {
+                    modifiedEvents.add(toExpectServiceEvent(TargetAssignDistributionSetServiceEvent.class, event.count()));
+                } else  if (type.isAssignableFrom(MultiActionAssignEvent.class)) {
+                    modifiedEvents.add(toExpectServiceEvent(MultiActionAssignServiceEvent.class, event.count()));
+                } else if (type.isAssignableFrom(MultiActionCancelEvent.class)) {
+                    modifiedEvents.add(toExpectServiceEvent(MultiActionCancelServiceEvent.class, event.count()));
+                } else if (type.isAssignableFrom(TargetAttributesRequestedEvent.class)) {
+                    modifiedEvents.add(toExpectServiceEvent(TargetAttributesRequestedServiceEvent.class, event.count()));
+                } else if (type.isAssignableFrom(CancelTargetAssignmentEvent.class)) {
+                    modifiedEvents.add(toExpectServiceEvent(CancelTargetAssignmentServiceEvent.class, event.count()));
+                }
+            }
+            return Optional.of(modifiedEvents.toArray(new Expect[0]));
+        }
+        return Optional.empty();
+    }
+
+    private static Expect toExpectServiceEvent(final Class<?> clazz, final int count) {
+        return new Expect() {
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return Expect.class;
+            }
+
+            @Override
+            public Class<?> type() {
+                return clazz;
+            }
+
+            @Override
+            public int count() {
+                return count;
+            }
+        };
     }
 
     private void beforeTest(final TestContext testContext) {
@@ -129,12 +189,12 @@ public class EventVerifier extends AbstractTestExecutionListener {
         testContext.getApplicationContext().getBean(ApplicationEventMulticaster.class).removeApplicationListener(eventCaptor);
     }
 
-    private static class EventCaptor implements ApplicationListener<RemoteApplicationEvent> {
+    private static class EventCaptor implements ApplicationListener<AbstractRemoteEvent> {
 
         private final ConcurrentHashMap<Class<?>, Integer> capturedEvents = new ConcurrentHashMap<>();
 
         @Override
-        public void onApplicationEvent(final RemoteApplicationEvent event) {
+        public void onApplicationEvent(final AbstractRemoteEvent event) {
             log.debug("Received event {}", event.getClass().getSimpleName());
 
             if (ResetCounterMarkerEvent.class.isAssignableFrom(event.getClass())) {
@@ -170,13 +230,13 @@ public class EventVerifier extends AbstractTestExecutionListener {
         }
     }
 
-    private static final class ResetCounterMarkerEvent extends RemoteApplicationEvent {
+    private static final class ResetCounterMarkerEvent extends AbstractRemoteEvent {
 
         @Serial
         private static final long serialVersionUID = 1L;
 
         private ResetCounterMarkerEvent() {
-            super(new Object(), "resetcounter", DEFAULT_DESTINATION_FACTORY.getDestination(null));
+            super("event-verifier");
         }
     }
 }

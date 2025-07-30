@@ -256,7 +256,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     @Test
     @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
-            @Expect(type = TargetCreatedEvent.class, count = 5), 
+            @Expect(type = TargetCreatedEvent.class, count = 5),
             @Expect(type = TargetUpdatedEvent.class, count = 5) })
     public void getAssignedTargetsWithPagingLimitRequestParameter() throws Exception {
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
@@ -280,7 +280,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     @Test
     @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
-            @Expect(type = TargetCreatedEvent.class, count = 5), 
+            @Expect(type = TargetCreatedEvent.class, count = 5),
             @Expect(type = TargetUpdatedEvent.class, count = 5) })
     public void getAssignedTargetsWithPagingLimitAndOffsetRequestParameter() throws Exception {
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
