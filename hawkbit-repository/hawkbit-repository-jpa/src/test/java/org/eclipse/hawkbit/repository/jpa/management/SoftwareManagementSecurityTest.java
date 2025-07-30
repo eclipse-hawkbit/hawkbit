@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractRepositoryManagementSecurityTest;
@@ -122,15 +123,6 @@ class SoftwareManagementSecurityTest
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void findMetaDataBySoftwareModuleIdAndTargetVisiblePermissionsCheck() {
-        assertPermissions(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(1L),
-                List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
     void findByTypePermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.findByType(1L, PAGE), List.of(SpPermission.READ_REPOSITORY));
     }
@@ -176,6 +168,6 @@ class SoftwareManagementSecurityTest
     @Test
     void findMetaDataBySoftwareModuleIdsAndTargetVisiblePermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(List.of(1L)),
-                List.of(SpPermission.READ_REPOSITORY));
+                List.of(SpRole.SYSTEM_ROLE));
     }
 }

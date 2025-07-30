@@ -67,14 +67,10 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
     void nonExistingEntityAccessReturnsNotPresent() {
         final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
-
         assertThat(softwareModuleManagement.get(1234L)).isNotPresent();
-
-        assertThat(softwareModuleManagement.findByNameAndVersionAndType(NOT_EXIST_ID, NOT_EXIST_ID, osType.getId()))
-                .isNotPresent();
-
-        assertThatExceptionOfType(EntityNotFoundException.class)
-                .isThrownBy(() -> softwareModuleManagement.getMetadata(module.getId(), NOT_EXIST_ID));
+        assertThat(softwareModuleManagement.findByNameAndVersionAndType(NOT_EXIST_ID, NOT_EXIST_ID, osType.getId())).isNotPresent();
+        final Long moduleId = module.getId();
+        assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> softwareModuleManagement.getMetadata(moduleId, NOT_EXIST_ID));
     }
 
     /**
@@ -84,7 +80,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
-        final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
+        testdataFactory.createSoftwareModuleApp();
 
         final SoftwareModuleManagement.Create noType = SoftwareModuleManagement.Create.builder().name("xxx").type(null).build();
         final List<SoftwareModuleManagement.Create> noTypeList = List.of(noType);
@@ -587,30 +583,6 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Checks that metadata for a software module cannot be created for an existing key.
-     */
-    @Test
-    void createSoftwareModuleMetadataFailsIfKeyExists() {
-
-        final String knownKey1 = "myKnownKey1";
-        final String knownValue1 = "myKnownValue1";
-        final SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
-
-        final Long moduleId = ah.getId();
-        final MetadataValueCreate metadataValue = new MetadataValueCreate(knownValue1, true);
-        softwareModuleManagement.createMetadata(moduleId, knownKey1, metadataValue);
-
-        // assert doesn't fail
-        softwareModuleManagement.createMetadata(moduleId, knownKey1, metadataValue);
-
-        final String knownKey2 = "myKnownKey2";
-
-        softwareModuleManagement.createMetadata(moduleId, knownKey2, new MetadataValueCreate(knownValue1));
-        // assert doesn't fail
-        softwareModuleManagement.createMetadata(moduleId, knownKey2, new MetadataValueCreate(knownValue1));
-    }
-
-    /**
      * Checks that metadata for a software module can be updated.
      */
     @Test
@@ -692,15 +664,17 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
             softwareModuleManagement.createMetadata(sw2.getId(), "key" + index, new MetadataValueCreate("value" + index, false));
         }
 
-        final Map<String, ? extends MetadataValue> metadataSw1 = softwareModuleManagement.getMetadata(sw1.getId());
-        final Map<String, ? extends MetadataValue> metadataSw2 = softwareModuleManagement.getMetadata(sw2.getId());
+        final Map<String, MetadataValue> metadataSw1 = softwareModuleManagement.getMetadata(sw1.getId());
+        final Map<String, MetadataValue> metadataSw2 = softwareModuleManagement.getMetadata(sw2.getId());
         assertThat(metadataSw1).hasSize(metadataCountSw1);
         assertThat(metadataSw2).hasSize(metadataCountSw2);
 
-        final Map<String, String> metadataSw1V = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(sw1.getId());
-        final Map<String, String> metadataSw2V = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(sw2.getId());
+        final Map<String, String> metadataSw1V = softwareModuleManagement
+                .findMetaDataBySoftwareModuleIdsAndTargetVisible(List.of(sw1.getId())).get(sw1.getId());
+        final Map<String, String> metadataSw2V = softwareModuleManagement
+                .findMetaDataBySoftwareModuleIdsAndTargetVisible(List.of(sw2.getId())).get(sw2.getId());
         assertThat(metadataSw1V).hasSize(metadataCountSw1);
-        assertThat(metadataSw2V).isEmpty();
+        assertThat(metadataSw2V).isNull();
     }
 
     /**

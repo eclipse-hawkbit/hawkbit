@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -195,12 +196,15 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
     @Data
     @Embeddable
-    public static class JpaMetadataValue implements MetadataValue {
+    public static class JpaMetadataValue implements MetadataValue, Serializable {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
 
         @Column(name = "meta_value", length = SoftwareModule.METADATA_VALUE_MAX_SIZE)
         @Size(max = METADATA_VALUE_MAX_SIZE)
         private String value;
-        @Column(name = "target_visible", length = SoftwareModule.METADATA_VALUE_MAX_SIZE)
+        @Column(name = "target_visible")
         private boolean targetVisible;
     }
 }

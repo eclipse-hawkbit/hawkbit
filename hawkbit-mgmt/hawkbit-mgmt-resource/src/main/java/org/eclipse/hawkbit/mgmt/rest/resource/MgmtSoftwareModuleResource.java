@@ -243,7 +243,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         // check if software module exists otherwise throw exception immediately
         findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
 
-        final Map<String, ? extends MetadataValue> metadata = softwareModuleManagement.getMetadata(softwareModuleId);
+        final Map<String, MetadataValue> metadata = softwareModuleManagement.getMetadata(softwareModuleId);
         return ResponseEntity.ok(new PagedList<>(MgmtSoftwareModuleMapper.toResponseSwMetadata(metadata), metadata.size()));
     }
 

@@ -15,10 +15,12 @@ import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_M
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -34,6 +36,7 @@ import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule.JpaMetadataValue;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
@@ -61,7 +64,8 @@ import org.springframework.util.ObjectUtils;
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "software-module-management" }, matchIfMissing = true)
 public class JpaSoftwareModuleManagement
-        extends AbstractJpaRepositoryManagement<JpaSoftwareModule, SoftwareModuleManagement.Create, SoftwareModuleManagement.Update, SoftwareModuleRepository, SoftwareModuleFields>
+        extends
+        AbstractJpaRepositoryManagement<JpaSoftwareModule, SoftwareModuleManagement.Create, SoftwareModuleManagement.Update, SoftwareModuleRepository, SoftwareModuleFields>
         implements SoftwareModuleManagement<JpaSoftwareModule> {
 
     protected static final String SOFTWARE_MODULE_METADATA = "SoftwareModuleMetadata";
@@ -167,11 +171,13 @@ public class JpaSoftwareModuleManagement
         final JpaSoftwareModule softwareModule = jpaRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
-        final Map<String, JpaSoftwareModule.JpaMetadataValue> metadataValueMap = softwareModule.getMetadata();
-        if (!metadataValueMap.containsKey(key)) {
+        final Map<String, JpaMetadataValue> metadataValueMap = softwareModule.getMetadata();
+        final JpaMetadataValue existingValue = metadataValueMap.get(key);
+        if (existingValue == null) {
             assertMetadataQuota(metadataValueMap.size() + 1L);
         }
-        final JpaSoftwareModule.JpaMetadataValue jpaMetadataValue = new JpaSoftwareModule.JpaMetadataValue();
+        final JpaMetadataValue jpaMetadataValue = existingValue == null ?
+                new JpaMetadataValue() : existingValue;
         if (ObjectCopyUtil.copy(value, jpaMetadataValue, true, UnaryOperator.identity())) {
             metadataValueMap.put(key, jpaMetadataValue);
             jpaRepository.save(softwareModule);
@@ -185,15 +191,19 @@ public class JpaSoftwareModuleManagement
         final JpaSoftwareModule softwareModule = jpaRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
-        final Map<String, JpaSoftwareModule.JpaMetadataValue> metadataValueMap = softwareModule.getMetadata();
+        final Map<String, JpaMetadataValue> metadataValueMap = softwareModule.getMetadata();
         assertMetadataQuota(metadata.keySet().stream().filter(key -> !metadataValueMap.containsKey(key)).count() + metadataValueMap.size());
-        // group by software module id to minimize database access
+        final AtomicBoolean changed = new AtomicBoolean(false);
         metadata.forEach((key, value) -> {
-            final JpaSoftwareModule.JpaMetadataValue jpaMetadataValue = new JpaSoftwareModule.JpaMetadataValue();
-            ObjectCopyUtil.copy(value, jpaMetadataValue, true, UnaryOperator.identity());
-            metadataValueMap.put(key, jpaMetadataValue);
+            final JpaMetadataValue jpaMetadataValue = metadataValueMap.getOrDefault(key, new JpaMetadataValue());
+            if (ObjectCopyUtil.copy(value, jpaMetadataValue, true, UnaryOperator.identity())) {
+                metadataValueMap.put(key, jpaMetadataValue);
+                changed.set(true);
+            }
         });
-        jpaRepository.save(softwareModule);
+        if (changed.get()) {
+            jpaRepository.save(softwareModule);
+        }
     }
 
     @Override
@@ -210,12 +220,14 @@ public class JpaSoftwareModuleManagement
     }
 
     @Override
-    public Map<String, ? extends MetadataValue> getMetadata(final Long id) {
+    public Map<String, MetadataValue> getMetadata(final Long id) {
         return jpaRepository
                 .findById(id)
                 .map(JpaSoftwareModule::getMetadata)
                 .map(metadata -> metadata.entrySet().stream()
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                e -> (MetadataValue)e.getValue())))
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
     }
 
@@ -226,7 +238,7 @@ public class JpaSoftwareModuleManagement
         final JpaSoftwareModule softwareModule = jpaRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
-        final Map<String, JpaSoftwareModule.JpaMetadataValue> metadataValueMap = softwareModule.getMetadata();
+        final Map<String, JpaMetadataValue> metadataValueMap = softwareModule.getMetadata();
         if (!metadataValueMap.containsKey(key)) {
             throw new EntityNotFoundException(SOFTWARE_MODULE_METADATA, id + ":" + key);
         }
@@ -234,23 +246,18 @@ public class JpaSoftwareModuleManagement
         jpaRepository.save(softwareModule);
     }
 
-    // TODO - more optimal via query or cache
+    // called only with 'system code' access, so no need to check access control
     @Override
-    public Map<String, String> findMetaDataBySoftwareModuleIdAndTargetVisible(final long id) {
-        return jpaRepository
-                .findById(id)
-                .map(JpaSoftwareModule::getMetadata)
-                .map(Map::entrySet)
-                .map(map -> map.stream()
-                        .filter(entry -> entry.getValue().isTargetVisible())
-                        .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getValue())))
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
-    }
-
-    // TODO - more optimal via query or cache
-    @Override
-    public Map<Long, Map<String, String>> findMetaDataBySoftwareModuleIdsAndTargetVisible(final Collection<Long> moduleIds) {
-        return moduleIds.stream().collect(Collectors.toMap(id -> id, this::findMetaDataBySoftwareModuleIdAndTargetVisible));
+    public Map<Long, Map<String, String>> findMetaDataBySoftwareModuleIdsAndTargetVisible(final Collection<Long> ids) {
+        return jpaRepository.findVisibleMetadataByModuleIds(ids)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        entry -> (Long) entry[0],
+                        Collectors.toMap(
+                                entry -> (String) entry[1],
+                                entry -> (String) entry[2],
+                                (existing, replacement) -> existing, // in case of duplicates, keep the first one
+                                HashMap::new)));
     }
 
     @Override

@@ -90,7 +90,7 @@ public interface SoftwareModuleManagement<T extends SoftwareModule>
      * @throws EntityNotFoundException if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Map<String, ? extends MetadataValue> getMetadata(@NotNull Long id);
+    Map<String, MetadataValue> getMetadata(@NotNull Long id);
 
     /**
      * Deletes a software module meta-data entry.
@@ -102,18 +102,8 @@ public interface SoftwareModuleManagement<T extends SoftwareModule>
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     void deleteMetadata(@NotNull Long id, @NotEmpty String key);
 
-    /**
-     * Finds all meta-data by the given software module id where {@link SoftwareModule.MetadataValueCreate#targetVisible()}.
-     *
-     * @param id the software module id to retrieve the meta-data from
-     * @return the result of all meta-data entries for a given software module id
-     * @throws EntityNotFoundException if software module with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Map<String, String> findMetaDataBySoftwareModuleIdAndTargetVisible(long id);
-
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Map<Long, Map<String, String>> findMetaDataBySoftwareModuleIdsAndTargetVisible(Collection<Long> moduleIds);
+    @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
+    Map<Long, Map<String, String>> findMetaDataBySoftwareModuleIdsAndTargetVisible(Collection<Long> ids);
 
     /**
      * Locks a software module.

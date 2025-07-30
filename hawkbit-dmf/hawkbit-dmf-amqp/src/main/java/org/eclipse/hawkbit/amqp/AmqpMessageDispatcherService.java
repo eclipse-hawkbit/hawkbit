@@ -29,11 +29,6 @@ import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.collections4.ListUtils;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ApiType;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrl;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder.SoftwareData;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -53,6 +48,11 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ApiType;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrl;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder.SoftwareData;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
@@ -121,7 +121,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
             final TargetManagement targetManagement,
-            final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement, final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
+            final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
+            final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final DeploymentManagement deploymentManagement,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         super(rabbitTemplate);
@@ -450,7 +451,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                         .flatMap(ds -> ds.getModules().stream())
                         .map(SoftwareModule::getId))
                 .collect(Collectors.toSet());
-        final Map<Long, Map<String, String>> getSoftwareModuleMetadata =
+        final Map<Long, ? extends Map<String, String>> getSoftwareModuleMetadata =
                 allSmIds.isEmpty()
                         ? Collections.emptyMap()
                         : softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(allSmIds);
@@ -574,11 +575,17 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         );
     }
 
+    @SuppressWarnings("unchecked")
     private Map<SoftwareModule, Map<String, String>> getSoftwareModulesWithMetadata(final DistributionSet distributionSet) {
+        final Map<Long, Map<String, String>> softwareModuleMetadata =
+                softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(
+                        distributionSet.getModules().stream()
+                                .map(SoftwareModule::getId)
+                                .toList());
         return distributionSet.getModules().stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
-                        module -> softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(module.getId())));
+                        module -> softwareModuleMetadata.getOrDefault(module.getId(), Collections.emptyMap())));
     }
 
     private void sendBatchUpdateMessage(

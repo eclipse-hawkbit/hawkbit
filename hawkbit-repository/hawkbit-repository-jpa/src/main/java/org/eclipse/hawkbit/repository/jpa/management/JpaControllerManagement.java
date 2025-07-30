@@ -142,7 +142,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private final DeploymentManagement deploymentManagement;
     private final ConfirmationManagement confirmationManagement;
     private final SoftwareModuleRepository softwareModuleRepository;
-    private final SoftwareModuleManagement softwareModuleManagement;
+    private final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final ControllerPollProperties controllerPollProperties;
@@ -161,7 +161,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             final RepositoryProperties repositoryProperties,
             final TargetRepository targetRepository, final TargetTypeManagement targetTypeManagement,
             final DeploymentManagement deploymentManagement, final ConfirmationManagement confirmationManagement,
-            final SoftwareModuleRepository softwareModuleRepository, final SoftwareModuleManagement softwareModuleManagement,
+            final SoftwareModuleRepository softwareModuleRepository,
+            final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final TenantConfigurationManagement tenantConfigurationManagement, final ControllerPollProperties controllerPollProperties,
             final PlatformTransactionManager txManager, final EntityFactory entityFactory, final EntityManager entityManager,
