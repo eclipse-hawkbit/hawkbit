@@ -54,6 +54,7 @@ import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
@@ -82,7 +83,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.ql.EntityMatcher;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleMetadataRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
@@ -96,7 +96,6 @@ import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -143,7 +142,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private final DeploymentManagement deploymentManagement;
     private final ConfirmationManagement confirmationManagement;
     private final SoftwareModuleRepository softwareModuleRepository;
-    private final SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
+    private final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final ControllerPollProperties controllerPollProperties;
@@ -162,7 +161,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             final RepositoryProperties repositoryProperties,
             final TargetRepository targetRepository, final TargetTypeManagement targetTypeManagement,
             final DeploymentManagement deploymentManagement, final ConfirmationManagement confirmationManagement,
-            final SoftwareModuleRepository softwareModuleRepository, final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
+            final SoftwareModuleRepository softwareModuleRepository,
+            final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final TenantConfigurationManagement tenantConfigurationManagement, final ControllerPollProperties controllerPollProperties,
             final PlatformTransactionManager txManager, final EntityFactory entityFactory, final EntityManager entityManager,
@@ -176,7 +176,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         this.deploymentManagement = deploymentManagement;
         this.confirmationManagement = confirmationManagement;
         this.softwareModuleRepository = softwareModuleRepository;
-        this.softwareModuleMetadataRepository = softwareModuleMetadataRepository;
+        this.softwareModuleManagement = softwareModuleManagement;
         this.distributionSetManagement = distributionSetManagement;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.controllerPollProperties = controllerPollProperties;
@@ -281,11 +281,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    public Map<Long, List<SoftwareModuleMetadata>> findTargetVisibleMetaDataBySoftwareModuleId(final Collection<Long> moduleId) {
-        return softwareModuleMetadataRepository
-                .findBySoftwareModuleIdInAndTargetVisible(moduleId, true, PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT))
-                .getContent().stream()
-                .collect(Collectors.groupingBy(o -> (Long) o[0], Collectors.mapping(o -> (SoftwareModuleMetadata) o[1], Collectors.toList())));
+    public Map<Long, Map<String, String>> findTargetVisibleMetaDataBySoftwareModuleId(final Collection<Long> moduleId) {
+        return systemSecurityContext.runAsSystem(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(moduleId));
     }
 
     @Override

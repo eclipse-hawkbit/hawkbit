@@ -44,7 +44,6 @@ import org.eclipse.hawkbit.repository.jpa.repository.LocalArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutTargetGroupRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleMetadataRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
@@ -110,8 +109,6 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     protected TargetTypeRepository targetTypeRepository;
     @Autowired
     protected DistributionSetTagRepository distributionSetTagRepository;
-    @Autowired
-    protected SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
     @Autowired
     protected ActionStatusRepository actionStatusRepository;
     @Autowired

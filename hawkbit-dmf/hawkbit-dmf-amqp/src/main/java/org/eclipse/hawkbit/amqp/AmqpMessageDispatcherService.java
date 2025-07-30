@@ -29,11 +29,6 @@ import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.collections4.ListUtils;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ApiType;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrl;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder.SoftwareData;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -49,11 +44,15 @@ import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.dmf.json.model.DmfTarget;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ApiType;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrl;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder.SoftwareData;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
@@ -71,7 +70,6 @@ import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -81,7 +79,6 @@ import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.event.EventListener;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.CollectionUtils;
@@ -124,7 +121,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
             final TargetManagement targetManagement,
-            final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement, final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
+            final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
+            final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final DeploymentManagement deploymentManagement,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         super(rabbitTemplate);
@@ -187,15 +185,14 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     protected void sendUpdateMessageToTarget(
             final ActionProperties actionsProps, final Target target,
-            final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
+            final Map<SoftwareModule, Map<String, String>> softwareModules) {
         final Map<String, ActionProperties> actionProp = new HashMap<>();
         actionProp.put(target.getControllerId(), actionsProps);
         sendUpdateMessageToTargets(actionProp, Collections.singletonList(target), softwareModules);
     }
 
     protected DmfDownloadAndUpdateRequest createDownloadAndUpdateRequest(
-            final Target target, final Long actionId,
-            final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
+            final Target target, final Long actionId, final Map<SoftwareModule, Map<String, String>> softwareModules) {
         return new DmfDownloadAndUpdateRequest(
                 actionId,
                 systemSecurityContext.runAsSystem(target::getSecurityToken),
@@ -273,7 +270,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     protected DmfConfirmRequest createConfirmRequest(
-            final Target target, final Long actionId, final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
+            final Target target, final Long actionId, final Map<SoftwareModule, Map<String, String>> softwareModules) {
         return new DmfConfirmRequest(
                 actionId,
                 systemSecurityContext.runAsSystem(target::getSecurityToken),
@@ -282,7 +279,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     void sendMultiActionRequestToTarget(
             final Target target, final List<Action> actions,
-            final Function<SoftwareModule, List<SoftwareModuleMetadata>> getSoftwareModuleMetaData) {
+            final Function<SoftwareModule, Map<String, String>> getSoftwareModuleMetaData) {
         final URI targetAddress = target.getAddress();
         if (!IpUtil.isAmqpUri(targetAddress) || CollectionUtils.isEmpty(actions)) {
             return;
@@ -295,9 +292,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                                     target, action,
                                     action.getDistributionSet().getModules().stream()
                                             .collect(Collectors.toMap(Function.identity(), module -> {
-                                                final List<SoftwareModuleMetadata> softwareModuleMetadata = getSoftwareModuleMetaData.apply(
-                                                        module);
-                                                return softwareModuleMetadata == null ? Collections.emptyList() : softwareModuleMetadata;
+                                                final Map<String, String> softwareModuleMetadata = getSoftwareModuleMetaData.apply(module);
+                                                return softwareModuleMetadata == null ? Collections.emptyMap() : softwareModuleMetadata;
                                             })));
                             final int weight = deploymentManagement.getWeightConsideringDefault(action);
                             return new DmfMultiActionRequest.DmfMultiActionElement(getEventTypeForAction(action), actionRequest, weight);
@@ -424,14 +420,14 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private void sendUpdateMessageToTargets(
             final Long dsId, final Map<String, ActionProperties> actionsPropsByTargetId, final List<Target> targets) {
         distributionSetManagement.get(dsId).ifPresent(ds -> {
-            final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules = getSoftwareModulesWithMetadata(ds);
+            final Map<SoftwareModule, Map<String, String>> softwareModules = getSoftwareModulesWithMetadata(ds);
             sendUpdateMessageToTargets(actionsPropsByTargetId, targets, softwareModules);
         });
     }
 
     private void sendUpdateMessageToTargets(
             final Map<String, ActionProperties> actionsPropsByTargetId,
-            final List<Target> targets, final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
+            final List<Target> targets, final Map<SoftwareModule, Map<String, String>> softwareModules) {
         if (!targets.isEmpty() && isBatchAssignmentsEnabled()) {
             sendBatchUpdateMessage(actionsPropsByTargetId, targets, softwareModules);
         } else {
@@ -455,7 +451,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                         .flatMap(ds -> ds.getModules().stream())
                         .map(SoftwareModule::getId))
                 .collect(Collectors.toSet());
-        final Map<Long, List<SoftwareModuleMetadata>> getSoftwareModuleMetadata =
+        final Map<Long, ? extends Map<String, String>> getSoftwareModuleMetadata =
                 allSmIds.isEmpty()
                         ? Collections.emptyMap()
                         : softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(allSmIds);
@@ -467,7 +463,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private DmfActionRequest createDmfActionRequest(
             final Target target, final Action action,
-            final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
+            final Map<SoftwareModule, Map<String, String>> softwareModules) {
         if (action.isCancelingOrCanceled()) {
             return new DmfActionRequest(action.getId());
         } else if (action.isWaitingConfirmation()) {
@@ -477,8 +473,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     private void sendSingleUpdateMessage(
-            final ActionProperties action, final Target target,
-            final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules) {
+            final ActionProperties action, final Target target, final Map<SoftwareModule, Map<String, String>> modules) {
         final String tenant = action.getTenant();
 
         final URI targetAddress = target.getAddress();
@@ -531,7 +526,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     private List<DmfSoftwareModule> convertToAmqpSoftwareModules(
-            final Target target, final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
+            final Target target, final Map<SoftwareModule, Map<String, String>> softwareModules) {
         return Optional.ofNullable(softwareModules)
                 .map(Map::entrySet)
                 .map(Set::stream)
@@ -539,19 +534,18 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 .orElse(null);
     }
 
-    private DmfSoftwareModule convertToAmqpSoftwareModule(
-            final Target target, final Entry<SoftwareModule, List<SoftwareModuleMetadata>> entry) {
+    private DmfSoftwareModule convertToAmqpSoftwareModule(final Target target, final Entry<SoftwareModule, Map<String, String>> entry) {
         return new DmfSoftwareModule(
                 entry.getKey().getId(),
                 entry.getKey().getType().getKey(),
                 entry.getKey().getVersion(),
                 entry.getKey().isEncrypted() ? Boolean.TRUE : null,
                 convertArtifacts(target, entry.getKey().getArtifacts()),
-                CollectionUtils.isEmpty(entry.getValue()) ? null :convertMetadata(entry.getValue()));
+                CollectionUtils.isEmpty(entry.getValue()) ? null : convertMetadata(entry.getValue()));
     }
 
-    private List<DmfMetadata> convertMetadata(final List<SoftwareModuleMetadata> metadata) {
-        return metadata.stream().map(md -> new DmfMetadata(md.getKey(), md.getValue())).toList();
+    private List<DmfMetadata> convertMetadata(final Map<String, String> metadata) {
+        return metadata.entrySet().stream().map(md -> new DmfMetadata(md.getKey(), md.getValue())).toList();
     }
 
     private List<DmfArtifact> convertArtifacts(final Target target, final List<Artifact> localArtifacts) {
@@ -559,8 +553,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return Collections.emptyList();
         }
 
-        return localArtifacts.stream().map(localArtifact -> convertArtifact(target, localArtifact))
-                .toList();
+        return localArtifacts.stream().map(localArtifact -> convertArtifact(target, localArtifact)).toList();
     }
 
     private DmfArtifact convertArtifact(final Target target, final Artifact localArtifact) {
@@ -582,19 +575,22 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         );
     }
 
-    private Map<SoftwareModule, List<SoftwareModuleMetadata>> getSoftwareModulesWithMetadata(final DistributionSet distributionSet) {
-        return distributionSet.getModules().stream().collect(Collectors.toMap(Function.identity(), this::getSoftwareModuleMetadata));
-    }
-
-    private List<SoftwareModuleMetadata> getSoftwareModuleMetadata(final SoftwareModule module) {
-        return softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(
-                module.getId(), PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT)).getContent();
+    @SuppressWarnings("unchecked")
+    private Map<SoftwareModule, Map<String, String>> getSoftwareModulesWithMetadata(final DistributionSet distributionSet) {
+        final Map<Long, Map<String, String>> softwareModuleMetadata =
+                softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(
+                        distributionSet.getModules().stream()
+                                .map(SoftwareModule::getId)
+                                .toList());
+        return distributionSet.getModules().stream()
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        module -> softwareModuleMetadata.getOrDefault(module.getId(), Collections.emptyMap())));
     }
 
     private void sendBatchUpdateMessage(
             final Map<String, ActionProperties> actions, final List<Target> targets,
-            final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules) {
-
+            final Map<SoftwareModule, Map<String, String>> modules) {
         final List<DmfTarget> dmfTargets = targets.stream()
                 .filter(target -> IpUtil.isAmqpUri(target.getAddress()))
                 .map(t -> convertToDmfTarget(t, actions.get(t.getControllerId()).getId()))

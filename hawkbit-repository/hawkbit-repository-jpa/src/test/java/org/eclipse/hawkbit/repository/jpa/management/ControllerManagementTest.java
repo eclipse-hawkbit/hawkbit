@@ -73,7 +73,6 @@ import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
@@ -989,7 +988,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet set = testdataFactory.createDistributionSet();
         testdataFactory.addSoftwareModuleMetadata(set);
 
-        final Map<Long, List<SoftwareModuleMetadata>> result = controllerManagement
+        final Map<Long, Map<String, String>> result = controllerManagement
                 .findTargetVisibleMetaDataBySoftwareModuleId(set.getModules().stream().map(SoftwareModule::getId).toList());
 
         assertThat(result).hasSize(3);

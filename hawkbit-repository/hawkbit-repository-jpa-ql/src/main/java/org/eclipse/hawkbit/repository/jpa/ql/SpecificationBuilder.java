@@ -149,17 +149,16 @@ public class SpecificationBuilder<T> {
                 if (comparison.getValue() == null) {
                     // map entry with key is null (doesn't exist) / is not null (exists) - use left join with on
                     return switch (op) {
-                        case EQ -> cb.isNull(pathResolver.getJoinOn(attribute, split[1]));
-                        case NE -> cb.isNotNull(pathResolver.getJoinOn(attribute, split[1]));
+                        case EQ -> cb.isNull(toMapValuePath(pathResolver.getJoinOn(attribute, split[1])));
+                        case NE -> cb.isNotNull(toMapValuePath(pathResolver.getJoinOn(attribute, split[1])));
                         default -> throw new RSQLParameterSyntaxException(
                                 String.format("Operator %s is not supported for map fields with value null", op));
                     };
                 } else {
                     final MapJoin<?, ?, ?> mapPath = (MapJoin<?, ?, ?>) pathResolver.getPath(attribute);
-                    final Path<String> valuePath = (Path<String>) mapPath.value();
                     return isNot(op)
-                            ? compare(comparison, pathResolver.getJoinOnInner(attribute, split[1]))
-                            : cb.and(equal(mapPath.key(), split[1]), compare(comparison, valuePath));
+                            ? compare(comparison, toMapValuePath(pathResolver.getJoinOnInner(attribute, split[1])))
+                            : cb.and(equal(mapPath.key(), split[1]), compare(comparison, toMapValuePath(mapPath)));
                 }
             } else if (attribute instanceof SetAttribute<?, ?> setAttribute) {
                 if (split.length < 2 || ObjectUtils.isEmpty(split[1])) {
@@ -183,6 +182,12 @@ public class SpecificationBuilder<T> {
                 final Path<?> attributePath = pathResolver.getPath(attribute);
                 return compare(comparison, split.length > 1 ? deepGetPath(attributePath, split[1]) : attributePath);
             }
+        }
+
+        @SuppressWarnings("unchecked")
+        private static Path<String> toMapValuePath(final Path<?> mapJoin) {
+            final Path<?> valuePath = ((MapJoin<?, ?, ?>) mapJoin).value();
+            return valuePath.getJavaType() == String.class ? (Path<String>) valuePath : valuePath.get("value");
         }
 
         private Predicate compare(final Comparison comparison, final Path<?> fieldPath) {

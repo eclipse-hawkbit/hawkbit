@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
+import java.util.Collection;
+import java.util.List;
+
 import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -46,6 +49,9 @@ public interface SoftwareModuleRepository extends BaseEntityRepository<JpaSoftwa
      * @return the number of software modules matching the given distribution set ID.
      */
     long countByAssignedToId(Long distributionSetId);
+
+    @Query("SELECT sm.id, KEY(m), m.value FROM JpaSoftwareModule sm JOIN sm.metadata m WHERE sm.id IN :ids AND m.targetVisible = true")
+    List<Object[]> findVisibleMetadataByModuleIds(@Param("ids") Collection<Long> ids);
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety

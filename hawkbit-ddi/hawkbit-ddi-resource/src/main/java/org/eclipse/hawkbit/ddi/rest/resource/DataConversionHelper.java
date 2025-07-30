@@ -33,7 +33,6 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.rest.json.model.ResponseList;
@@ -133,7 +132,7 @@ public final class DataConversionHelper {
             final Target target, final Action uAction,
             final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement,
             final HttpRequest request, final ControllerManagement controllerManagement) {
-        final Map<Long, List<SoftwareModuleMetadata>> metadata = controllerManagement
+        final Map<Long, Map<String, String>> metadata = controllerManagement
                 .findTargetVisibleMetaDataBySoftwareModuleId(uAction.getDistributionSet().getModules().stream()
                         .map(SoftwareModule::getId).toList());
 
@@ -155,10 +154,10 @@ public final class DataConversionHelper {
                 .toList());
     }
 
-    private static List<DdiMetadata> mapMetadata(final List<SoftwareModuleMetadata> metadata) {
+    private static List<DdiMetadata> mapMetadata(final Map<String, String> metadata) {
         return CollectionUtils.isEmpty(metadata)
                 ? null
-                : metadata.stream().map(md -> new DdiMetadata(md.getKey(), md.getValue())).toList();
+                : metadata.entrySet().stream().map(md -> new DdiMetadata(md.getKey(), md.getValue())).toList();
     }
 
     private static String mapChunkLegacyKeys(final String key) {

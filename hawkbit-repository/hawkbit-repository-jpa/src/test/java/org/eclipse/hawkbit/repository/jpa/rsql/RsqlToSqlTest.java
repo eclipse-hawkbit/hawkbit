@@ -18,8 +18,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 import org.eclipse.hawkbit.repository.RsqlQueryField;
+import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.ql.utils.HawkbitQlToSql;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
@@ -45,6 +47,8 @@ class RsqlToSqlTest {
 
     @Test
     void printPG() {
+        printFrom(JpaSoftwareModule.class, SoftwareModuleFields.class, "metadata.x!=y");
+        printFrom(JpaSoftwareModule.class, SoftwareModuleFields.class, "metadata.x==y");
         printFrom(JpaTarget.class, TargetFields.class, "metadata.x==y");
         printFrom(JpaTarget.class, TargetFields.class, "tag!=TAG1 and tag==TAG2");
         printFrom(JpaTarget.class, TargetFields.class, "tag==TAG1 and tag!=TAG2");

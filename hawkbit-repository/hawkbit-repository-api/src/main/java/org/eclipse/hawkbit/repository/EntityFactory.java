@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.repository;
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupBuilder;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataBuilder;
 import org.eclipse.hawkbit.repository.builder.TagBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
@@ -30,11 +29,6 @@ public interface EntityFactory {
      * @return {@link ActionStatusBuilder} object
      */
     ActionStatusBuilder actionStatus();
-
-    /**
-     * @return {@link SoftwareModuleMetadataBuilder} object
-     */
-    SoftwareModuleMetadataBuilder softwareModuleMetadata();
 
     /**
      * @return {@link TagBuilder} object

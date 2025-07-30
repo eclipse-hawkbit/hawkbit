@@ -15,6 +15,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import jakarta.validation.ValidationException;
 
@@ -28,7 +30,6 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.MgmtDownloadArtifactResource;
 import org.eclipse.hawkbit.mgmt.rest.resource.MgmtSoftwareModuleResource;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -36,11 +37,11 @@ import org.eclipse.hawkbit.repository.artifact.urlhandler.ApiType;
 import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrl;
 import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder;
-import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
+import org.eclipse.hawkbit.repository.model.SoftwareModule.MetadataValue;
+import org.eclipse.hawkbit.repository.model.SoftwareModule.MetadataValueCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.rest.json.model.ResponseList;
 import org.springframework.hateoas.Link;
@@ -59,17 +60,14 @@ public final class MgmtSoftwareModuleMapper {
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }
 
-    public static List<SoftwareModuleMetadataCreate> fromRequestSwMetadata(
-            final EntityFactory entityFactory, final Long softwareModuleId, final Collection<MgmtSoftwareModuleMetadata> metadata) {
+    public static Map<String, MetadataValueCreate> fromRequestSwMetadata(final Collection<MgmtSoftwareModuleMetadata> metadata) {
         if (metadata == null) {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
 
-        return metadata.stream()
-                .map(metadataRest -> entityFactory.softwareModuleMetadata().create(softwareModuleId)
-                        .key(metadataRest.getKey()).value(metadataRest.getValue())
-                        .targetVisible(metadataRest.isTargetVisible()))
-                .toList();
+        return metadata.stream().collect(Collectors.toMap(
+                MgmtSoftwareModuleMetadata::getKey,
+                metadataRest -> new MetadataValueCreate(metadataRest.getValue(), metadataRest.isTargetVisible())));
     }
 
     public List<SoftwareModuleManagement.Create> smFromRequest(final Collection<MgmtSoftwareModuleRequestBodyPost> smsRest) {
@@ -88,17 +86,17 @@ public final class MgmtSoftwareModuleMapper {
         return new ResponseList<>(softwareModules.stream().map(MgmtSoftwareModuleMapper::toResponse).toList());
     }
 
-    public static List<MgmtSoftwareModuleMetadata> toResponseSwMetadata(final Collection<SoftwareModuleMetadata> metadata) {
+    public static List<MgmtSoftwareModuleMetadata> toResponseSwMetadata(final Map<String, ? extends MetadataValue> metadata) {
         if (metadata == null) {
             return Collections.emptyList();
         }
 
-        return metadata.stream().map(MgmtSoftwareModuleMapper::toResponseSwMetadata).toList();
+        return metadata.entrySet().stream().map(e -> toResponseSwMetadata(e.getKey(), e.getValue())).toList();
     }
 
-    public static MgmtSoftwareModuleMetadata toResponseSwMetadata(final SoftwareModuleMetadata metadata) {
+    public static MgmtSoftwareModuleMetadata toResponseSwMetadata(final String key, final MetadataValue metadata) {
         final MgmtSoftwareModuleMetadata metadataRest = new MgmtSoftwareModuleMetadata();
-        metadataRest.setKey(metadata.getKey());
+        metadataRest.setKey(key);
         metadataRest.setValue(metadata.getValue());
         metadataRest.setTargetVisible(metadata.isTargetVisible());
         return metadataRest;
