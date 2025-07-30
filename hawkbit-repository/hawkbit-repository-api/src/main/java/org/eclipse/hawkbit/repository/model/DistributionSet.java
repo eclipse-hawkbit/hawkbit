@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import java.util.Optional;
 import java.util.Set;
 
 /**

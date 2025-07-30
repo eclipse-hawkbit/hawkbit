@@ -33,19 +33,13 @@ public class JpaRolloutCreate extends AbstractNamedEntityBuilder<RolloutCreate> 
     @Min(Action.WEIGHT_MIN)
     @Max(Action.WEIGHT_MAX)
     protected Integer weight;
-    private final DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private boolean dynamic;
 
-    JpaRolloutCreate(final DistributionSetManagement distributionSetManagement) {
+    JpaRolloutCreate(final DistributionSetManagement<? extends DistributionSet> distributionSetManagement) {
         this.distributionSetManagement = distributionSetManagement;
     }
 
-    /**
-     * {@link DistributionSet} of rollout
-     *
-     * @param distributionSetId ID of the distributionSetId
-     * @return this builder
-     */
     public RolloutCreate distributionSetId(final long distributionSetId) {
         this.distributionSetId = distributionSetId;
         return this;

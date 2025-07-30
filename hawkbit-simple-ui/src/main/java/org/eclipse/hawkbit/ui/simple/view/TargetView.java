@@ -97,6 +97,16 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
     public static final String FILTER = "Filter";
     public static final String TAG = "Tag";
 
+    public static final String GREEN = "green";
+    public static final String RED = "red";
+    public static final String ORANGE = "orange";
+    public static final String GRAY = "gray";
+    public static final String BROWN = "brown";
+    public static final String TEAL = "teal";
+    public static final String PURPLE = "purple";
+    public static final String CORAL = "coral";
+    public static final String BLACK = "black";
+
     public TargetView(final HawkbitMgmtClient hawkbitClient) {
         super(
                 new RawFilter(hawkbitClient), new SimpleFilter(hawkbitClient),
@@ -650,19 +660,17 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
                     final Icon icon;
 
                     switch (status.getType()) {
-                        case FINISHED -> icon = Utils.iconColored(VaadinIcon.CHECK_CIRCLE, "Finished", "green");
-                        case ERROR -> icon = Utils.iconColored(VaadinIcon.CLOSE_CIRCLE, "Error", "red");
-                        case WARNING -> icon = Utils.iconColored(VaadinIcon.WARNING, "Warning", "orange");
-                        case RUNNING -> icon = Utils.iconColored(VaadinIcon.ADJUST, "Running", "green");
-                        case RETRIEVED -> icon = Utils.iconColored(VaadinIcon.CIRCLE_THIN, "Retrieved", "green");
-                        case CANCELED -> icon = Utils.iconColored(VaadinIcon.CLOSE_CIRCLE_O, "Canceled", "gray");
-                        case CANCELING -> icon = Utils.iconColored(VaadinIcon.CLOSE_CIRCLE, "Cancelling", "brown");
-                        case DOWNLOAD -> icon = Utils.iconColored(VaadinIcon.CLOUD_DOWNLOAD_O, "Download", "teal");
-                        case DOWNLOADED -> icon = Utils.iconColored(VaadinIcon.CLOUD_DOWNLOAD, "Downloaded", "purple");
-                        case WAIT_FOR_CONFIRMATION ->
-                            icon = Utils.iconColored(VaadinIcon.QUESTION_CIRCLE, "Wait for confirmation", "coral");
-                        default -> icon = Utils.iconColored(VaadinIcon.CIRCLE_THIN, status.getType().getName().toLowerCase(),
-                                "black");
+                        case FINISHED -> icon = Utils.iconColored(VaadinIcon.CHECK_CIRCLE, "Finished", GREEN);
+                        case ERROR -> icon = Utils.iconColored(VaadinIcon.CLOSE_CIRCLE, "Error", RED);
+                        case WARNING -> icon = Utils.iconColored(VaadinIcon.WARNING, "Warning", ORANGE);
+                        case RUNNING -> icon = Utils.iconColored(VaadinIcon.ADJUST, "Running", GREEN);
+                        case RETRIEVED -> icon = Utils.iconColored(VaadinIcon.CIRCLE_THIN, "Retrieved", GREEN);
+                        case CANCELED -> icon = Utils.iconColored(VaadinIcon.CLOSE_CIRCLE_O, "Canceled", GRAY);
+                        case CANCELING -> icon = Utils.iconColored(VaadinIcon.CLOSE_CIRCLE, "Cancelling", BROWN);
+                        case DOWNLOAD -> icon = Utils.iconColored(VaadinIcon.CLOUD_DOWNLOAD_O, "Download", TEAL);
+                        case DOWNLOADED -> icon = Utils.iconColored(VaadinIcon.CLOUD_DOWNLOAD, "Downloaded", PURPLE);
+                        case WAIT_FOR_CONFIRMATION -> icon = Utils.iconColored(VaadinIcon.QUESTION_CIRCLE, "Wait for confirmation", CORAL);
+                        default -> icon = Utils.iconColored(VaadinIcon.CIRCLE_THIN, status.getType().getName().toLowerCase(), BLACK);
                     }
 
                     icon.addClassNames(LumoUtility.IconSize.SMALL);
@@ -910,9 +918,9 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
             };
 
             final String color = switch (targetUpdateStatus) {
-                case "error" -> "red";
-                case "in_sync" -> "green";
-                case "pending" -> "orange";
+                case "error" -> RED;
+                case "in_sync" -> GREEN;
+                case "pending" -> ORANGE;
                 case "registered" -> "lightblue";
                 default -> "blue";
             };

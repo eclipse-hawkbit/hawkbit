@@ -15,8 +15,6 @@ import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.AuditorAware;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 @SuppressWarnings("java:S6548") // java:S6548 - singleton holder ensures static access to spring resources in some places

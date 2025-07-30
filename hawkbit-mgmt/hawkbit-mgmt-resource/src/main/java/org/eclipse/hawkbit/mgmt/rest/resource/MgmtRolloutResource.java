@@ -64,14 +64,14 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
     private final RolloutManagement rolloutManagement;
     private final RolloutGroupManagement rolloutGroupManagement;
-    private final DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final TargetFilterQueryManagement targetFilterQueryManagement;
     private final EntityFactory entityFactory;
     private final TenantConfigHelper tenantConfigHelper;
 
     MgmtRolloutResource(
             final RolloutManagement rolloutManagement, final RolloutGroupManagement rolloutGroupManagement,
-            final DistributionSetManagement distributionSetManagement,
+            final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final EntityFactory entityFactory,
             final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement tenantConfigurationManagement) {

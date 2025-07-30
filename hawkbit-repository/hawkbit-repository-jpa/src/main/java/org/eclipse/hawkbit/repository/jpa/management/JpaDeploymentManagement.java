@@ -780,9 +780,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final String initiatedBy, final Long dsId,
             final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy) {
-        final JpaDistributionSet distributionSet = (JpaDistributionSet) distributionSetManagement.getValidAndComplete(dsId);
+        final JpaDistributionSet distributionSet = distributionSetManagement.getValidAndComplete(dsId);
 
-        if (((JpaDistributionSetManagement) distributionSetManagement).isImplicitLockApplicable(distributionSet)) {
+        if (distributionSetManagement.isImplicitLockApplicable(distributionSet)) {
             // without new transaction DS changed event is not thrown
             DeploymentHelper.runInNewTransaction(txManager, "Implicit lock", status -> {
                 distributionSetManagement.lock(distributionSet.getId());
@@ -951,7 +951,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             return action;
         }
 
-        final JpaTarget target = (JpaTarget) action.getTarget();
+        final JpaTarget target = action.getTarget();
         if (target.getAssignedDistributionSet() != null
                 && action.getDistributionSet().getId().equals(target.getAssignedDistributionSet().getId())) {
             // the target has already the distribution set assigned, we don't
@@ -1003,8 +1003,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     private void setAssignmentOnTargets(final List<JpaAction> actions) {
         final List<JpaTarget> assignedDsTargets = actions.stream().map(savedAction -> {
-            final JpaTarget mergedTarget = (JpaTarget) entityManager.merge(savedAction.getTarget());
-            mergedTarget.setAssignedDistributionSet((JpaDistributionSet) savedAction.getDistributionSet());
+            final JpaTarget mergedTarget = entityManager.merge(savedAction.getTarget());
+            mergedTarget.setAssignedDistributionSet(savedAction.getDistributionSet());
             mergedTarget.setUpdateStatus(TargetUpdateStatus.PENDING);
             return mergedTarget;
         }).toList();

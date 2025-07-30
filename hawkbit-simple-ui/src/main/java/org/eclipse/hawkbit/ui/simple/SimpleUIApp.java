@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.ui.simple;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 import feign.Contract;
 import feign.RequestInterceptor;
 import feign.codec.Decoder;
@@ -57,7 +56,7 @@ import static java.util.Collections.emptyList;
 @Import(FeignClientsConfiguration.class)
 public class SimpleUIApp implements AppShellConfigurator {
 
-    private static final Function<OAuth2TokenManager, RequestInterceptor> AUTHORIZATION = (oAuth2TokenManager) -> requestTemplate -> {
+    private static final Function<OAuth2TokenManager, RequestInterceptor> AUTHORIZATION = oAuth2TokenManager -> requestTemplate -> {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (oAuth2TokenManager != null && authentication instanceof OAuth2AuthenticationToken oAuth2AuthenticationToken) {
             String bearerToken = oAuth2TokenManager.getToken(oAuth2AuthenticationToken);
@@ -109,7 +108,7 @@ public class SimpleUIApp implements AppShellConfigurator {
     @Bean
     OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(final HawkbitMgmtClient hawkbitClient) {
         final OidcUserService delegate = new OidcUserService();
-        return (userRequest) -> {
+        return userRequest -> {
             OidcUser oidcUser = delegate.loadUser(userRequest);
 
             final OAuth2AuthenticationToken tempToken = new OAuth2AuthenticationToken(

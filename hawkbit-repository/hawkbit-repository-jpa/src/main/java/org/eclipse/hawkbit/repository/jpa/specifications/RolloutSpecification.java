@@ -13,7 +13,6 @@ import jakarta.persistence.criteria.Predicate;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaNamedEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
 import org.eclipse.hawkbit.repository.model.Rollout;

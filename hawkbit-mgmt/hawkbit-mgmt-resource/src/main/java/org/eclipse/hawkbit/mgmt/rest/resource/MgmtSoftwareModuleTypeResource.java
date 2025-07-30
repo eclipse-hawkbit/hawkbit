@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModule
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtSoftwareModuleTypeMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;

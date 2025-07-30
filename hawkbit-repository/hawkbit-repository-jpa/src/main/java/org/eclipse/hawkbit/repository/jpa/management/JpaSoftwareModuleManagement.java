@@ -28,7 +28,6 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.builder.GenericSoftwareModuleMetadataUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
@@ -77,7 +76,6 @@ public class JpaSoftwareModuleManagement
 
     protected static final String SOFTWARE_MODULE_METADATA = "SoftwareModuleMetadata";
 
-    private final SoftwareModuleTypeManagement<? extends SoftwareModuleType> softwareModuleTypeManagement;
     private final DistributionSetRepository distributionSetRepository;
     private final SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
     private final SoftwareModuleTypeRepository softwareModuleTypeRepository;
@@ -87,13 +85,11 @@ public class JpaSoftwareModuleManagement
     protected JpaSoftwareModuleManagement(
             final SoftwareModuleRepository softwareModuleRepository,
             final EntityManager entityManager,
-            final SoftwareModuleTypeManagement<? extends SoftwareModuleType> softwareModuleTypeManagement,
             final DistributionSetRepository distributionSetRepository,
             final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement) {
         super(softwareModuleRepository, entityManager);
-        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
         this.distributionSetRepository = distributionSetRepository;
         this.softwareModuleMetadataRepository = softwareModuleMetadataRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;

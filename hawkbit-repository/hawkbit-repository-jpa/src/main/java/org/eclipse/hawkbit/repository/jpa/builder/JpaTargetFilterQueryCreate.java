@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
 /**
@@ -23,9 +24,9 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 public class JpaTargetFilterQueryCreate extends AbstractTargetFilterQueryUpdateCreate<TargetFilterQueryCreate>
         implements TargetFilterQueryCreate {
 
-    private final DistributionSetManagement distributionSetManagement;
+    private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
 
-    JpaTargetFilterQueryCreate(final DistributionSetManagement distributionSetManagement) {
+    JpaTargetFilterQueryCreate(final DistributionSetManagement<? extends DistributionSet> distributionSetManagement) {
         this.distributionSetManagement = distributionSetManagement;
     }
 

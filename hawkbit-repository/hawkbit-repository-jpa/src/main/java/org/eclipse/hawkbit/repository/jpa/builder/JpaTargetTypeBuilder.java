@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.builder.GenericTargetTypeUpdate;
 import org.eclipse.hawkbit.repository.builder.TargetTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
 import org.eclipse.hawkbit.repository.builder.TargetTypeUpdate;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
 
 /**
@@ -21,14 +22,9 @@ import org.eclipse.hawkbit.repository.model.TargetType;
  */
 public class JpaTargetTypeBuilder implements TargetTypeBuilder {
 
-    private final DistributionSetTypeManagement distributionSetTypeManagement;
+    private final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement;
 
-    /**
-     * Constructor
-     *
-     * @param distributionSetTypeManagement Distribution set type management
-     */
-    public JpaTargetTypeBuilder(DistributionSetTypeManagement distributionSetTypeManagement) {
+    public JpaTargetTypeBuilder(DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement) {
         this.distributionSetTypeManagement = distributionSetTypeManagement;
     }
 

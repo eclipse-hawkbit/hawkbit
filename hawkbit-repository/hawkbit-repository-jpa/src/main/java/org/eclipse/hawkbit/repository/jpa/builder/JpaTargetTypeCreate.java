@@ -27,14 +27,9 @@ import org.springframework.util.CollectionUtils;
  */
 public class JpaTargetTypeCreate extends AbstractTargetTypeUpdateCreate<TargetTypeCreate> implements TargetTypeCreate {
 
-    private final DistributionSetTypeManagement distributionSetTypeManagement;
+    private final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement;
 
-    /**
-     * Constructor
-     *
-     * @param distributionSetTypeManagement Distribution set type management
-     */
-    JpaTargetTypeCreate(final DistributionSetTypeManagement distributionSetTypeManagement) {
+    JpaTargetTypeCreate(final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement) {
         this.distributionSetTypeManagement = distributionSetTypeManagement;
     }
 
@@ -49,13 +44,13 @@ public class JpaTargetTypeCreate extends AbstractTargetTypeUpdateCreate<TargetTy
         return result;
     }
 
-    private Collection<DistributionSetType> findDistributionSetTypeWithExceptionIfNotFound(
+    private Collection<? extends DistributionSetType> findDistributionSetTypeWithExceptionIfNotFound(
             final Collection<Long> distributionSetTypeId) {
         if (CollectionUtils.isEmpty(distributionSetTypeId)) {
             return Collections.emptyList();
         }
 
-        final Collection<DistributionSetType> type = distributionSetTypeManagement.get(distributionSetTypeId);
+        final Collection<? extends DistributionSetType> type = distributionSetTypeManagement.get(distributionSetTypeId);
         if (type.size() < distributionSetTypeId.size()) {
             throw new EntityNotFoundException(SoftwareModuleType.class, distributionSetTypeId);
         }

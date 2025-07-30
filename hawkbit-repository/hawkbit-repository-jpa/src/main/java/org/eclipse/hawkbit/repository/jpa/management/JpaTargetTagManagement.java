@@ -52,7 +52,7 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     private final TargetTagRepository targetTagRepository;
 
     protected JpaTargetTagManagement(final TargetTagRepository targetTagRepository) {
-        this.targetTagRepository = targetTagRepository;;
+        this.targetTagRepository = targetTagRepository;
     }
 
     @Override

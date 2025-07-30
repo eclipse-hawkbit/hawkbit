@@ -33,7 +33,7 @@ public class MgmtActionStatus {
     private Long id;
 
     @Schema(example = "running")
-    private StatusType type;
+    private Type type;
 
     private List<String> messages;
 
@@ -46,7 +46,7 @@ public class MgmtActionStatus {
     @Schema(example = "200")
     private Integer code;
 
-    public enum StatusType {
+    public enum Type {
 
         /**
          * Action is finished successfully for this target.
@@ -116,8 +116,8 @@ public class MgmtActionStatus {
         }
 
         @JsonCreator
-        public static StatusType forValue(String s) {
-            return StatusType.valueOf(s.toUpperCase());
+        public static Type forValue(String s) {
+            return Type.valueOf(s.toUpperCase());
         }
     }
 }

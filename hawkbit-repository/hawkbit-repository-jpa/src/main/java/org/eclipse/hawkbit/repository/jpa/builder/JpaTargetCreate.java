@@ -25,11 +25,6 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
 
     private final TargetTypeManagement targetTypeManagement;
 
-    /**
-     * Constructor
-     *
-     * @param targetTypeManagement Target type management
-     */
     JpaTargetCreate(final TargetTypeManagement targetTypeManagement) {
         super(null);
         this.targetTypeManagement = targetTypeManagement;

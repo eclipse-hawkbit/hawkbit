@@ -29,6 +29,8 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -275,8 +277,8 @@ public class DmfApiConfiguration {
             final RabbitTemplate rabbitTemplate,
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
-            final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement,
-            final SoftwareModuleManagement softwareModuleManagement, final DeploymentManagement deploymentManagement,
+            final TargetManagement targetManagement, final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
+            final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement, final DeploymentManagement deploymentManagement,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
                 systemSecurityContext, systemManagement, targetManagement, serviceMatcher, softwareModuleManagement, distributionSetManagement,

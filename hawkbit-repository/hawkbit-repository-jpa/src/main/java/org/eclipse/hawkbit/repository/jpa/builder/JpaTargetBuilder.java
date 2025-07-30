@@ -22,9 +22,6 @@ public class JpaTargetBuilder implements TargetBuilder {
 
     private final TargetTypeManagement targetTypeManagement;
 
-    /**
-     * @param targetTypeManagement Target type management
-     */
     public JpaTargetBuilder(TargetTypeManagement targetTypeManagement) {
         this.targetTypeManagement = targetTypeManagement;
     }
