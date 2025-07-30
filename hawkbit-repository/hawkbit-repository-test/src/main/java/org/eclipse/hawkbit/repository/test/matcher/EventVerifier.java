@@ -35,13 +35,13 @@ import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceCancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceMultiActionAssignEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceMultiActionCancelEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceTargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceTargetAttributesRequestedEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceTargetCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceTargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.MultiActionAssignServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.MultiActionCancelServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistributionSetServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -109,19 +109,19 @@ public class EventVerifier extends AbstractTestExecutionListener {
             for (Expect event : expectedEvents.get()) {
                 final Class<?> type = event.type();
                 if (type.isAssignableFrom(TargetCreatedEvent.class)) {
-                    modifiedEvents.add(toExpectServiceEvent(ServiceTargetCreatedEvent.class, event.count()));
+                    modifiedEvents.add(toExpectServiceEvent(TargetCreatedServiceEvent.class, event.count()));
                 } else if (type.isAssignableFrom(TargetDeletedEvent.class)) {
-                    modifiedEvents.add(toExpectServiceEvent(ServiceTargetDeletedEvent.class, event.count()));
+                    modifiedEvents.add(toExpectServiceEvent(TargetDeletedServiceEvent.class, event.count()));
                 } else if (type.isAssignableFrom(TargetAssignDistributionSetEvent.class)) {
-                    modifiedEvents.add(toExpectServiceEvent(ServiceTargetAssignDistributionSetEvent.class, event.count()));
+                    modifiedEvents.add(toExpectServiceEvent(TargetAssignDistributionSetServiceEvent.class, event.count()));
                 } else  if (type.isAssignableFrom(MultiActionAssignEvent.class)) {
-                    modifiedEvents.add(toExpectServiceEvent(ServiceMultiActionAssignEvent.class, event.count()));
+                    modifiedEvents.add(toExpectServiceEvent(MultiActionAssignServiceEvent.class, event.count()));
                 } else if (type.isAssignableFrom(MultiActionCancelEvent.class)) {
-                    modifiedEvents.add(toExpectServiceEvent(ServiceMultiActionCancelEvent.class, event.count()));
+                    modifiedEvents.add(toExpectServiceEvent(MultiActionCancelServiceEvent.class, event.count()));
                 } else if (type.isAssignableFrom(TargetAttributesRequestedEvent.class)) {
-                    modifiedEvents.add(toExpectServiceEvent(ServiceTargetAttributesRequestedEvent.class, event.count()));
+                    modifiedEvents.add(toExpectServiceEvent(TargetAttributesRequestedServiceEvent.class, event.count()));
                 } else if (type.isAssignableFrom(CancelTargetAssignmentEvent.class)) {
-                    modifiedEvents.add(toExpectServiceEvent(ServiceCancelTargetAssignmentEvent.class, event.count()));
+                    modifiedEvents.add(toExpectServiceEvent(CancelTargetAssignmentServiceEvent.class, event.count()));
                 }
             }
             return Optional.of(modifiedEvents.toArray(new Expect[0]));

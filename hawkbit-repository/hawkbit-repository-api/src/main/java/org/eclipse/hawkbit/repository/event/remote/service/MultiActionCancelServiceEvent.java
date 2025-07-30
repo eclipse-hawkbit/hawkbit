@@ -7,24 +7,25 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.event.remote;
+package org.eclipse.hawkbit.repository.event.remote.service;
 
 import java.io.Serial;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 
 /**
- * Service event for {@link TargetDeletedEvent}. Event that needs single replica processing
+ * Service event for {@link MultiActionCancelEvent}. Event that needs single replica processing
  */
-public class ServiceTargetDeletedEvent extends AbstractServiceRemoteEvent<TargetDeletedEvent> {
+public class MultiActionCancelServiceEvent extends AbstractServiceRemoteEvent<MultiActionCancelEvent> {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
 
     @JsonCreator
-    public ServiceTargetDeletedEvent(@JsonProperty("payload") final TargetDeletedEvent remoteEvent) {
+    public MultiActionCancelServiceEvent(@JsonProperty("payload") final MultiActionCancelEvent remoteEvent) {
         super(remoteEvent);
     }
 }

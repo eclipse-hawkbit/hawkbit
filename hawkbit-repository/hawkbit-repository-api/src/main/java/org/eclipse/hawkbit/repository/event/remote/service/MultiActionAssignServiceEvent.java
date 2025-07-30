@@ -7,24 +7,25 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.event.remote;
+package org.eclipse.hawkbit.repository.event.remote.service;
 
 import java.io.Serial;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 
 /**
  * Service event for {@link MultiActionAssignEvent}. Event that needs single replica processing
  */
-public class ServiceMultiActionAssignEvent extends AbstractServiceRemoteEvent<MultiActionAssignEvent> {
+public class MultiActionAssignServiceEvent extends AbstractServiceRemoteEvent<MultiActionAssignEvent> {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
 
     @JsonCreator
-    public ServiceMultiActionAssignEvent(@JsonProperty("payload") final MultiActionAssignEvent remoteEvent) {
+    public MultiActionAssignServiceEvent(@JsonProperty("payload") final MultiActionAssignEvent remoteEvent) {
         super(remoteEvent);
     }
 }

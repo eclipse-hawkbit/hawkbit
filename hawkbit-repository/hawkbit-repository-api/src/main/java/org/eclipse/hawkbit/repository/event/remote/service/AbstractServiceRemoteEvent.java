@@ -7,9 +7,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.event.remote;
+package org.eclipse.hawkbit.repository.event.remote.service;
 
 import lombok.Getter;
+import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
 
 @Getter
 public abstract class AbstractServiceRemoteEvent<T extends AbstractRemoteEvent> extends AbstractRemoteEvent {

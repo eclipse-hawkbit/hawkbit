@@ -26,13 +26,13 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetTypeDeletedEve
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceCancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceMultiActionAssignEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceMultiActionCancelEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceTargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceTargetAttributesRequestedEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceTargetCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceTargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.MultiActionAssignServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.MultiActionCancelServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistributionSetServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutStoppedEvent;
@@ -177,13 +177,13 @@ public class EventType {
         TYPES.put(46, TargetTypeDeletedEvent.class);
 
         // processing events - start from 1000 to leave room for future db events
-        TYPES.put(1000, ServiceTargetCreatedEvent.class);
-        TYPES.put(1001, ServiceTargetDeletedEvent.class);
-        TYPES.put(1002, ServiceTargetAssignDistributionSetEvent.class);
-        TYPES.put(1003, ServiceTargetAttributesRequestedEvent.class);
-        TYPES.put(1004, ServiceCancelTargetAssignmentEvent.class);
-        TYPES.put(1005, ServiceMultiActionAssignEvent.class);
-        TYPES.put(1006, ServiceMultiActionCancelEvent.class);
+        TYPES.put(1000, TargetCreatedServiceEvent.class);
+        TYPES.put(1001, TargetDeletedServiceEvent.class);
+        TYPES.put(1002, TargetAssignDistributionSetServiceEvent.class);
+        TYPES.put(1003, TargetAttributesRequestedServiceEvent.class);
+        TYPES.put(1004, CancelTargetAssignmentServiceEvent.class);
+        TYPES.put(1005, MultiActionAssignServiceEvent.class);
+        TYPES.put(1006, MultiActionCancelServiceEvent.class);
     }
 
     /**

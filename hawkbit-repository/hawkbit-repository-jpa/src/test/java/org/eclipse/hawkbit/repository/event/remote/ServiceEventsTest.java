@@ -11,6 +11,12 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.MultiActionAssignServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistributionSetServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -25,7 +31,7 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 import java.util.Set;
 
-class ProcessingEventsTest {
+class ServiceEventsTest {
 
     private StreamBridge streamBridge;
     private ApplicationEventPublisher delegate;
@@ -77,8 +83,8 @@ class ProcessingEventsTest {
 
         publisher.publishEvent(event);
 
-        verify(streamBridge).send(eq("fanout"), eq(event));
-        verify(streamBridge).send(eq("group"), any(ServiceTargetAssignDistributionSetEvent.class));
+        verify(streamBridge).send("fanout", event);
+        verify(streamBridge).send(eq("group"), any(TargetAssignDistributionSetServiceEvent.class));
     }
 
     @Test
@@ -86,8 +92,8 @@ class ProcessingEventsTest {
         TargetCreatedEvent event = new TargetCreatedEvent(mock(Target.class));
         publisher.publishEvent(event);
 
-        verify(streamBridge).send(eq("fanout"), eq(event));
-        verify(streamBridge).send(eq("group"), any(ServiceTargetCreatedEvent.class));
+        verify(streamBridge).send("fanout", event);
+        verify(streamBridge).send(eq("group"), any(TargetCreatedServiceEvent.class));
     }
 
     @Test
@@ -95,8 +101,8 @@ class ProcessingEventsTest {
         TargetDeletedEvent event = new TargetDeletedEvent("testtenant", 1l, Target.class, "testControllerId", "address");
         publisher.publishEvent(event);
 
-        verify(streamBridge).send(eq("fanout"), eq(event));
-        verify(streamBridge).send(eq("group"), any(ServiceTargetDeletedEvent.class));
+        verify(streamBridge).send("fanout", event);
+        verify(streamBridge).send(eq("group"), any(TargetDeletedServiceEvent.class));
     }
 
     @Test
@@ -104,8 +110,8 @@ class ProcessingEventsTest {
         TargetAttributesRequestedEvent event = new TargetAttributesRequestedEvent("testtenant", 1l, Target.class, "testControllerId","address");
         publisher.publishEvent(event);
 
-        verify(streamBridge).send(eq("fanout"), eq(event));
-        verify(streamBridge).send(eq("group"), any(ServiceTargetAttributesRequestedEvent.class));
+        verify(streamBridge).send("fanout", event);
+        verify(streamBridge).send(eq("group"), any(TargetAttributesRequestedServiceEvent.class));
     }
 
     @Test
@@ -114,8 +120,8 @@ class ProcessingEventsTest {
 
         publisher.publishEvent(event);
 
-        verify(streamBridge).send(eq("fanout"), eq(event));
-        verify(streamBridge).send(eq("group"), any(ServiceMultiActionAssignEvent.class));
+        verify(streamBridge).send("fanout", event);
+        verify(streamBridge).send(eq("group"), any(MultiActionAssignServiceEvent.class));
     }
 
     @Test
@@ -124,8 +130,8 @@ class ProcessingEventsTest {
 
         publisher.publishEvent(event);
 
-        verify(streamBridge).send(eq("fanout"), eq(event));
-        verify(streamBridge).send(eq("group"), any(ServiceCancelTargetAssignmentEvent.class));
+        verify(streamBridge).send("fanout", event);
+        verify(streamBridge).send(eq("group"), any(CancelTargetAssignmentServiceEvent.class));
     }
 
     private Action mockAction() {

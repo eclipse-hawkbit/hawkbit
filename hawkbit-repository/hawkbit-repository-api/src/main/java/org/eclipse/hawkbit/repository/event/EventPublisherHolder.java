@@ -17,18 +17,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceCancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceMultiActionAssignEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceMultiActionCancelEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceTargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceTargetAttributesRequestedEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceTargetCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.ServiceTargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.MultiActionAssignServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.MultiActionCancelServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistributionSetServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -156,19 +156,19 @@ public final class EventPublisherHolder {
 
     private AbstractRemoteEvent toServiceEvent(final AbstractRemoteEvent event) {
         if (event instanceof TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
-            return new ServiceTargetAssignDistributionSetEvent(targetAssignDistributionSetEvent);
+            return new TargetAssignDistributionSetServiceEvent(targetAssignDistributionSetEvent);
         } else if (event instanceof MultiActionAssignEvent multiActionAssignEvent) {
-            return new ServiceMultiActionAssignEvent(multiActionAssignEvent);
+            return new MultiActionAssignServiceEvent(multiActionAssignEvent);
         } else if (event instanceof MultiActionCancelEvent multiActionCancelEvent) {
-          return new ServiceMultiActionCancelEvent(multiActionCancelEvent);
+          return new MultiActionCancelServiceEvent(multiActionCancelEvent);
         } else if (event instanceof CancelTargetAssignmentEvent cancelTargetAssignmentEvent) {
-            return new ServiceCancelTargetAssignmentEvent(cancelTargetAssignmentEvent);
+            return new CancelTargetAssignmentServiceEvent(cancelTargetAssignmentEvent);
         } else if (event instanceof TargetDeletedEvent targetDeletedEvent) {
-            return new ServiceTargetDeletedEvent(targetDeletedEvent);
+            return new TargetDeletedServiceEvent(targetDeletedEvent);
         } else if (event instanceof TargetCreatedEvent targetCreatedEvent) {
-            return new ServiceTargetCreatedEvent(targetCreatedEvent);
+            return new TargetCreatedServiceEvent(targetCreatedEvent);
         } else if (event instanceof TargetAttributesRequestedEvent targetAttributesRequestedEvent) {
-            return new ServiceTargetAttributesRequestedEvent(targetAttributesRequestedEvent);
+            return new TargetAttributesRequestedServiceEvent(targetAttributesRequestedEvent);
         }
         return null;
     }
