@@ -120,15 +120,15 @@ public final class EventPublisherHolder {
         private void publishRemotely(final AbstractRemoteEvent remoteEvent) {
             streamBridge.send(fanoutEventChannel, remoteEvent);
 
-            // some events need to be processed only by single replica of a kind
-            // wrap the entity event into a processing event and send it to the group channel
+            // some events need to be processed only by single service replica
+            // wrap the entity event into a service event and send it to the service channel
             if (shouldForwardAsServiceEvent(remoteEvent)) {
                 final AbstractRemoteEvent serviceEvent = toServiceEvent(remoteEvent);
                 if (serviceEvent != null) {
                     log.debug("Publishing Service event: {} to remote channel: {}", serviceEvent, serviceEventChannel);
                     streamBridge.send(serviceEventChannel, serviceEvent);
                 } else {
-                    log.error("No Service event created for: {}. Skipping send Service event to Group channel. {}", remoteEvent.getClass(),
+                    log.error("No Service event created for: {}. Skipping send Service event to Service channel. {}", remoteEvent.getClass(),
                             serviceEventChannel);
                 }
             }
@@ -137,7 +137,7 @@ public final class EventPublisherHolder {
         private void publishLocally(final Object event) {
             delegate.publishEvent(event);
 
-            // check if the event should be forwarded as a processing event even if it is not a remote event
+            // check if the event should be forwarded as a service event even if it is not a remote event
             if (shouldForwardAsServiceEvent(event)) {
                 final AbstractRemoteEvent serviceEvent = toServiceEvent((AbstractRemoteEvent) event);
                 if (serviceEvent != null) {
@@ -148,28 +148,35 @@ public final class EventPublisherHolder {
                 }
             }
         }
-    }
 
-    private boolean shouldForwardAsServiceEvent(final Object remoteEvent) {
-        return remoteServiceEventsEnabled && SERVICE_EVENTS.contains(remoteEvent.getClass());
-    }
-
-    private AbstractRemoteEvent toServiceEvent(final AbstractRemoteEvent event) {
-        if (event instanceof TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
-            return new TargetAssignDistributionSetServiceEvent(targetAssignDistributionSetEvent);
-        } else if (event instanceof MultiActionAssignEvent multiActionAssignEvent) {
-            return new MultiActionAssignServiceEvent(multiActionAssignEvent);
-        } else if (event instanceof MultiActionCancelEvent multiActionCancelEvent) {
-          return new MultiActionCancelServiceEvent(multiActionCancelEvent);
-        } else if (event instanceof CancelTargetAssignmentEvent cancelTargetAssignmentEvent) {
-            return new CancelTargetAssignmentServiceEvent(cancelTargetAssignmentEvent);
-        } else if (event instanceof TargetDeletedEvent targetDeletedEvent) {
-            return new TargetDeletedServiceEvent(targetDeletedEvent);
-        } else if (event instanceof TargetCreatedEvent targetCreatedEvent) {
-            return new TargetCreatedServiceEvent(targetCreatedEvent);
-        } else if (event instanceof TargetAttributesRequestedEvent targetAttributesRequestedEvent) {
-            return new TargetAttributesRequestedServiceEvent(targetAttributesRequestedEvent);
+        /**
+         * Checks if the event should be forwarded as a service event.
+         * If remote service events are enabled and the event is one of the service events,
+         *
+         * @param remoteEvent the event to check whether it should be forwarded as a service event
+         * @return true if the event should be forwarded as a service event, false otherwise
+         */
+        private boolean shouldForwardAsServiceEvent(final Object remoteEvent) {
+            return remoteServiceEventsEnabled && SERVICE_EVENTS.contains(remoteEvent.getClass());
         }
-        return null;
+
+        private AbstractRemoteEvent toServiceEvent(final AbstractRemoteEvent event) {
+            if (event instanceof TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
+                return new TargetAssignDistributionSetServiceEvent(targetAssignDistributionSetEvent);
+            } else if (event instanceof MultiActionAssignEvent multiActionAssignEvent) {
+                return new MultiActionAssignServiceEvent(multiActionAssignEvent);
+            } else if (event instanceof MultiActionCancelEvent multiActionCancelEvent) {
+                return new MultiActionCancelServiceEvent(multiActionCancelEvent);
+            } else if (event instanceof CancelTargetAssignmentEvent cancelTargetAssignmentEvent) {
+                return new CancelTargetAssignmentServiceEvent(cancelTargetAssignmentEvent);
+            } else if (event instanceof TargetDeletedEvent targetDeletedEvent) {
+                return new TargetDeletedServiceEvent(targetDeletedEvent);
+            } else if (event instanceof TargetCreatedEvent targetCreatedEvent) {
+                return new TargetCreatedServiceEvent(targetCreatedEvent);
+            } else if (event instanceof TargetAttributesRequestedEvent targetAttributesRequestedEvent) {
+                return new TargetAttributesRequestedServiceEvent(targetAttributesRequestedEvent);
+            }
+            return null;
+        }
     }
 }
