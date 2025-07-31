@@ -89,6 +89,8 @@ public interface UpdateHandler {
                     if (updateStatus.status() != UpdateStatus.Status.FAILURE && updateType != DdiDeployment.HandlingType.SKIP) {
                         ddiController.sendFeedback(update());
                     }
+                } catch (final Exception ex) {
+                    log.error("Failed to download artifact. Reason : ", ex);
                 } finally {
                     cleanup();
                 }
