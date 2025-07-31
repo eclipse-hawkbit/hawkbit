@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.event;
+package org.eclipse.hawkbit.repository.event;
 
 import java.util.Set;
 

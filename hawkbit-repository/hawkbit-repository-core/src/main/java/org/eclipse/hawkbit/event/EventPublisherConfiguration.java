@@ -13,6 +13,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
 import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
