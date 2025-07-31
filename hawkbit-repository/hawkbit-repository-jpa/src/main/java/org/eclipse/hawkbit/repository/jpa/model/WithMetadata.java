@@ -11,8 +11,13 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.util.Map;
 
+/**
+ * Interface for entities that support metadata.
+ * @param <MV> metadata value type
+ * @param <MVI> metadata value implementation type
+ */
 @SuppressWarnings("java:S119") // java:S119 - better self explainable
-public interface WithMetadata<MV> {
+public interface WithMetadata<MV, MVI extends MV> {
 
-    Map<String, MV> getMetadata();
+    Map<String, MVI> getMetadata();
 }

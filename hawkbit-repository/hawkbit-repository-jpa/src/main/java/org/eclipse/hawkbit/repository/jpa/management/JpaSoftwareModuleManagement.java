@@ -61,7 +61,7 @@ import org.springframework.util.ObjectUtils;
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "software-module-management" }, matchIfMissing = true)
 public class JpaSoftwareModuleManagement
-        extends AbstractJpaRepositoryWithMetadataManagement<JpaSoftwareModule, SoftwareModuleManagement.Create, SoftwareModuleManagement.Update, SoftwareModuleRepository, SoftwareModuleFields, MetadataValue>
+        extends AbstractJpaRepositoryWithMetadataManagement<JpaSoftwareModule, SoftwareModuleManagement.Create, SoftwareModuleManagement.Update, SoftwareModuleRepository, SoftwareModuleFields, MetadataValue, JpaSoftwareModule.JpaMetadataValue>
         implements SoftwareModuleManagement<JpaSoftwareModule> {
 
     private final DistributionSetRepository distributionSetRepository;

@@ -34,7 +34,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 
 @SuppressWarnings("java:S119") // java:S119 - better self explainable
-abstract class AbstractJpaRepositoryWithMetadataManagement <T extends AbstractJpaBaseEntity & WithMetadata<MV>, C, U extends Identifiable<Long>, R extends BaseEntityRepository<T>, A extends Enum<A> & RsqlQueryField, MV>
+abstract class AbstractJpaRepositoryWithMetadataManagement <T extends AbstractJpaBaseEntity & WithMetadata<MV, MVI>, C, U extends Identifiable<Long>, R extends BaseEntityRepository<T>, A extends Enum<A> & RsqlQueryField, MV, MVI extends MV>
         extends AbstractJpaRepositoryManagement<T, C, U, R, A> implements MetadataSupport<MV> {
 
     protected AbstractJpaRepositoryWithMetadataManagement(final R repository, final EntityManager entityManager) {
@@ -48,12 +48,12 @@ abstract class AbstractJpaRepositoryWithMetadataManagement <T extends AbstractJp
         final T softwareModule = jpaRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
-        final Map<String, MV> metadataValueMap = softwareModule.getMetadata();
-        final MV existingValue = metadataValueMap.get(key);
+        final Map<String, MVI> metadataValueMap = softwareModule.getMetadata();
+        final MVI existingValue = metadataValueMap.get(key);
         if (existingValue == null) {
             assertMetadataQuota(metadataValueMap.size() + 1L);
         }
-        final MV jpaMetadataValue = existingValue == null ? createMetadataValue() : existingValue;
+        final MVI jpaMetadataValue = existingValue == null ? createMetadataValue() : existingValue;
         if (ObjectCopyUtil.copy(value, jpaMetadataValue, true, UnaryOperator.identity())) {
             metadataValueMap.put(key, jpaMetadataValue);
             jpaRepository.save(softwareModule);
@@ -67,11 +67,11 @@ abstract class AbstractJpaRepositoryWithMetadataManagement <T extends AbstractJp
         final T softwareModule = jpaRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
-        final Map<String, MV> metadataValueMap = softwareModule.getMetadata();
+        final Map<String, MVI> metadataValueMap = softwareModule.getMetadata();
         assertMetadataQuota(metadata.keySet().stream().filter(key -> !metadataValueMap.containsKey(key)).count() + metadataValueMap.size());
         final AtomicBoolean changed = new AtomicBoolean(false);
         metadata.forEach((key, value) -> {
-            final MV jpaMetadataValue = metadataValueMap.getOrDefault(key, createMetadataValue());
+            final MVI jpaMetadataValue = metadataValueMap.getOrDefault(key, createMetadataValue());
             if (ObjectCopyUtil.copy(value, jpaMetadataValue, true, UnaryOperator.identity())) {
                 metadataValueMap.put(key, jpaMetadataValue);
                 changed.set(true);
@@ -114,7 +114,7 @@ abstract class AbstractJpaRepositoryWithMetadataManagement <T extends AbstractJp
         final T softwareModule = jpaRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
-        final Map<String, MV> metadataValueMap = softwareModule.getMetadata();
+        final Map<String, MVI> metadataValueMap = softwareModule.getMetadata();
         if (!metadataValueMap.containsKey(key)) {
             throw new EntityNotFoundException("Metadata", jpaRepository.getManagementClass().getSimpleName() + ":" + id + ":" + key);
         }
@@ -122,7 +122,7 @@ abstract class AbstractJpaRepositoryWithMetadataManagement <T extends AbstractJp
         jpaRepository.save(softwareModule);
     }
 
-    protected abstract MV createMetadataValue();
+    protected abstract MVI createMetadataValue();
 
     protected abstract void assertMetadataQuota(final long requested);
 }

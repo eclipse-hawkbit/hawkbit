@@ -73,7 +73,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 @SuppressWarnings("squid:S2160")
 public class JpaSoftwareModule
         extends AbstractJpaNamedVersionedEntity
-        implements SoftwareModule, WithMetadata<JpaSoftwareModule.JpaMetadataValue>, EventAwareEntity {
+        implements SoftwareModule, WithMetadata<MetadataValue, JpaSoftwareModule.JpaMetadataValue>, EventAwareEntity {
 
     @Serial
     private static final long serialVersionUID = 1L;
