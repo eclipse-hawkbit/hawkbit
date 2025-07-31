@@ -42,65 +42,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * Service for managing {@link SoftwareModule}s.
  */
 public interface SoftwareModuleManagement<T extends SoftwareModule>
-        extends RepositoryManagement<T, SoftwareModuleManagement.Create, SoftwareModuleManagement.Update> {
+        extends RepositoryManagement<T, SoftwareModuleManagement.Create, SoftwareModuleManagement.Update>, MetadataSupport<MetadataValue> {
 
     @Override
     default String permissionGroup() {
         return "SOFTWARE_MODULE";
     }
-
-    /**
-     * Creates or updates a distribution set meta-data value.
-     *
-     * @param id the software module id which meta-data has to be updated
-     * @param key the key of the meta-data entry to be updated
-     * @param value the meta-data value to be updated
-     * @throws EntityNotFoundException in case the meta-data entry does not exist and cannot be updated
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    void createMetadata(@NotNull Long id, @NotEmpty String key, @NotNull @Valid MetadataValue value);
-
-    /**
-     * Creates a list of software module meta-data entries.
-     *
-     * @param metadata the meta-data entries to create
-     * @throws EntityAlreadyExistsException in case one of the meta-data entry already exists for the specific key
-     * @throws EntityNotFoundException if software module with given ID does not exist
-     * @throws AssignmentQuotaExceededException if the maximum number of meta-data entries is exceeded for the addressed {@link SoftwareModule}
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    void createMetadata(@NotNull Long id, @NotEmpty @Valid Map<String, ? extends MetadataValue> metadata);
-
-    /**
-     * Finds all meta-data by the given software module id and key.
-     *
-     * @param id the software module id to retrieve the meta-data from
-     * @param key the meta-data key to retrieve
-     * @return a paged result of all meta-data entries for a given software module id
-     * @throws EntityNotFoundException if software module with given ID does not exist ot the
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    MetadataValue getMetadata(@NotNull Long id, @NotEmpty String key);
-
-    /**
-     * Finds all meta-data by the given software module id.
-     *
-     * @param id the software module id to retrieve the meta-data from
-     * @return a paged result of all meta-data entries for a given software module id
-     * @throws EntityNotFoundException if software module with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Map<String, MetadataValue> getMetadata(@NotNull Long id);
-
-    /**
-     * Deletes a software module meta-data entry.
-     *
-     * @param id where meta-data has to be deleted
-     * @param key of the meta-data element
-     * @throws EntityNotFoundException if software module with given ID does not exist or the key is not found
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    void deleteMetadata(@NotNull Long id, @NotEmpty String key);
 
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     Map<Long, Map<String, String>> findMetaDataBySoftwareModuleIdsAndTargetVisible(Collection<Long> ids);

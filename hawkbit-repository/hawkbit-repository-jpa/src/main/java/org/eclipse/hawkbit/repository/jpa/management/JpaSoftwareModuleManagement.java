@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
@@ -48,7 +46,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModule.MetadataValue;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.utils.ObjectCopyUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -64,11 +61,8 @@ import org.springframework.util.ObjectUtils;
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "software-module-management" }, matchIfMissing = true)
 public class JpaSoftwareModuleManagement
-        extends
-        AbstractJpaRepositoryManagement<JpaSoftwareModule, SoftwareModuleManagement.Create, SoftwareModuleManagement.Update, SoftwareModuleRepository, SoftwareModuleFields>
+        extends AbstractJpaRepositoryWithMetadataManagement<JpaSoftwareModule, SoftwareModuleManagement.Create, SoftwareModuleManagement.Update, SoftwareModuleRepository, SoftwareModuleFields, MetadataValue>
         implements SoftwareModuleManagement<JpaSoftwareModule> {
-
-    protected static final String SOFTWARE_MODULE_METADATA = "SoftwareModuleMetadata";
 
     private final DistributionSetRepository distributionSetRepository;
     private final SoftwareModuleTypeRepository softwareModuleTypeRepository;
@@ -162,88 +156,6 @@ public class JpaSoftwareModuleManagement
                     return isAssigned;
                 })
                 .toList();
-    }
-
-    @Override
-    @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
-    public void createMetadata(final Long id, final String key, final MetadataValue value) {
-        final JpaSoftwareModule softwareModule = jpaRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
-        final Map<String, JpaMetadataValue> metadataValueMap = softwareModule.getMetadata();
-        final JpaMetadataValue existingValue = metadataValueMap.get(key);
-        if (existingValue == null) {
-            assertMetadataQuota(metadataValueMap.size() + 1L);
-        }
-        final JpaMetadataValue jpaMetadataValue = existingValue == null ?
-                new JpaMetadataValue() : existingValue;
-        if (ObjectCopyUtil.copy(value, jpaMetadataValue, true, UnaryOperator.identity())) {
-            metadataValueMap.put(key, jpaMetadataValue);
-            jpaRepository.save(softwareModule);
-        }
-    }
-
-    @Override
-    @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
-    public void createMetadata(final Long id, final Map<String, ? extends MetadataValue> metadata) {
-        final JpaSoftwareModule softwareModule = jpaRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
-        final Map<String, JpaMetadataValue> metadataValueMap = softwareModule.getMetadata();
-        assertMetadataQuota(metadata.keySet().stream().filter(key -> !metadataValueMap.containsKey(key)).count() + metadataValueMap.size());
-        final AtomicBoolean changed = new AtomicBoolean(false);
-        metadata.forEach((key, value) -> {
-            final JpaMetadataValue jpaMetadataValue = metadataValueMap.getOrDefault(key, new JpaMetadataValue());
-            if (ObjectCopyUtil.copy(value, jpaMetadataValue, true, UnaryOperator.identity())) {
-                metadataValueMap.put(key, jpaMetadataValue);
-                changed.set(true);
-            }
-        });
-        if (changed.get()) {
-            jpaRepository.save(softwareModule);
-        }
-    }
-
-    @Override
-    public MetadataValue getMetadata(final Long id, final String key) {
-        final JpaSoftwareModule softwareModule = jpaRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
-        final MetadataValue metadataValue = softwareModule.getMetadata().get(key);
-        if (metadataValue == null) {
-            throw new EntityNotFoundException(SOFTWARE_MODULE_METADATA, id + ":" + key);
-        } else {
-            return metadataValue;
-        }
-    }
-
-    @Override
-    public Map<String, MetadataValue> getMetadata(final Long id) {
-        return jpaRepository
-                .findById(id)
-                .map(JpaSoftwareModule::getMetadata)
-                .map(metadata -> metadata.entrySet().stream()
-                        .collect(Collectors.toMap(
-                                Map.Entry::getKey,
-                                e -> (MetadataValue)e.getValue())))
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
-    }
-
-    @Override
-    @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
-    public void deleteMetadata(final Long id, final String key) {
-        final JpaSoftwareModule softwareModule = jpaRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
-        final Map<String, JpaMetadataValue> metadataValueMap = softwareModule.getMetadata();
-        if (!metadataValueMap.containsKey(key)) {
-            throw new EntityNotFoundException(SOFTWARE_MODULE_METADATA, id + ":" + key);
-        }
-        metadataValueMap.remove(key);
-        jpaRepository.save(softwareModule);
     }
 
     // called only with 'system code' access, so no need to check access control
@@ -349,6 +261,22 @@ public class JpaSoftwareModuleManagement
         return jpaRepository.count(SoftwareModuleSpecification.byAssignedToDs(distributionSetId));
     }
 
+    @Override
+    protected JpaMetadataValue createMetadataValue() {
+        return new JpaMetadataValue();
+    }
+
+    /**
+     * Asserts the meta-data quota for the software module with the given ID.
+     *
+     * @param requested Number of meta-data entries to be created.
+     */
+    @Override
+    protected void assertMetadataQuota(final long requested) {
+        final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerSoftwareModule();
+        QuotaHelper.assertAssignmentQuota(requested, maxMetaData, SoftwareModule.MetadataValueCreate.class, SoftwareModule.class);
+    }
+
     private void deleteGridFsArtifacts(final JpaSoftwareModule swModule) {
         jpaRepository.getAccessController().ifPresent(accessController ->
                 accessController.assertOperationAllowed(AccessController.Operation.DELETE, swModule));
@@ -362,16 +290,6 @@ public class JpaSoftwareModuleManagement
                 .getFilterNameAndVersionEntries(searchText.trim());
         return SoftwareModuleSpecification.likeNameAndVersion(smFilterNameAndVersionEntries[0],
                 smFilterNameAndVersionEntries[1]);
-    }
-
-    /**
-     * Asserts the meta-data quota for the software module with the given ID.
-     *
-     * @param requested Number of meta-data entries to be created.
-     */
-    private void assertMetadataQuota(final long requested) {
-        final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerSoftwareModule();
-        QuotaHelper.assertAssignmentQuota(requested, maxMetaData, SoftwareModule.MetadataValueCreate.class, SoftwareModule.class);
     }
 
     private void assertSoftwareModuleTypeExists(final Long typeId) {
