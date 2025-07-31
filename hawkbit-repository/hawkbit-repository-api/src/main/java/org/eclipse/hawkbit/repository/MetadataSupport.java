@@ -43,6 +43,7 @@ public interface MetadataSupport<MV> {
     /**
      * Creates a list of entity meta-data entries.
      *
+     * @param id the entity id which meta-data has to be created
      * @param metadata the meta-data entries to create
      * @throws EntityAlreadyExistsException in case one of the meta-data entry already exists for the specific key
      * @throws EntityNotFoundException if entity with given ID does not exist

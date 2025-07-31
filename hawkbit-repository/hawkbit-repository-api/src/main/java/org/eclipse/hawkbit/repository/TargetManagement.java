@@ -15,12 +15,10 @@ import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AU
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_CREATE_TARGET;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_DELETE_TARGET;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_PREFIX;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_READ_REPOSITORY;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_READ_TARGET;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_SUFFIX;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_UPDATE_REPOSITORY;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET;
 
 import java.util.Collection;
@@ -36,6 +34,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
@@ -60,7 +59,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 /**
  * Management service for {@link Target}s.
  */
-public interface TargetManagement {
+public interface TargetManagement extends PermissionSupport {
 
     String DETAILS_BASE = "base";
     String DETAILS_AUTO_CONFIRMATION_STATUS = "autoConfirmationStatus";
@@ -72,6 +71,12 @@ public interface TargetManagement {
             HAS_AUTH_AND +
             HAS_AUTH_PREFIX + SpPermission.READ_TARGET + HAS_AUTH_SUFFIX +
             BRACKET_CLOSE;
+
+    @Override
+    default String permissionGroup() {
+        return "TARGET";
+    }
+
     /**
      * Counts number of targets with the given distribution set assigned.
      *
@@ -744,45 +749,56 @@ public interface TargetManagement {
     Page<Target> findByControllerAttributesRequested(@NotNull Pageable pageable);
 
     /**
-     * Creates a list of target meta-data entries.
+     * Creates or updates a meta-data value.
      *
-     * @param controllerId {@link Target} controller id the meta-data has to be created for
-     * @param metadata the meta-data entries to create or update
-     * @throws EntityNotFoundException if given target does not exist
-     * @throws EntityAlreadyExistsException in case one of the metad-ata entry already exists for the specific key
-     * @throws AssignmentQuotaExceededException if the maximum number of meta-data entries is exceeded for the addressed {@link Target}
-     */
-    @PreAuthorize(HAS_UPDATE_REPOSITORY)
-    void createMetadata(@NotEmpty String controllerId, @NotEmpty Map<String, String> metadata);
-
-    /**
-     * Finds a single target meta-data by its id.
-     *
-     * @param controllerId of the {@link Target}
-     * @return the found target meta-data
-     * @throws EntityNotFoundException if target with given ID does not exist
-     */
-    @PreAuthorize(HAS_READ_REPOSITORY)
-    Map<String, String> getMetadata(@NotEmpty String controllerId);
-
-    /**
-     * Updates a target meta-data value if corresponding entry exists.
-     *
-     * @param controllerId {@link Target} controller id of the meta-data entry to be updated
-     * @param key meta data-entry key to be updated
-     * @param value meta data-entry to be new value
+     * @param controllerId the entity id which meta-data has to be updated
+     * @param key the key of the meta-data entry to be updated
+     * @param value the meta-data value to be updated
      * @throws EntityNotFoundException in case the meta-data entry does not exist and cannot be updated
      */
-    @PreAuthorize(HAS_UPDATE_REPOSITORY)
-    void updateMetadata(@NotEmpty String controllerId, @NotNull String key, @NotNull String value);
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    void createMetadata(@NotNull String controllerId, @NotEmpty String key, @NotNull @Valid String value);
 
     /**
-     * Deletes a target meta data entry.
+     * Creates a list of entity meta-data entries.
+     *
+     * @param controllerId the entity id which meta-data has to be created
+     * @param metadata the meta-data entries to create
+     * @throws EntityAlreadyExistsException in case one of the meta-data entry already exists for the specific key
+     * @throws EntityNotFoundException if entity with given ID does not exist
+     * @throws AssignmentQuotaExceededException if the maximum number of meta-data entries is exceeded for the addressed entity
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    void createMetadata(@NotNull String controllerId, @NotEmpty @Valid Map<String, String> metadata);
+
+    /**
+     * Finds all meta-data by the given entity id and key.
+     *
+     * @param controllerId the entity id to retrieve the meta-data from
+     * @param key the meta-data key to retrieve
+     * @return a paged result of all meta-data entries for a given entity id
+     * @throws EntityNotFoundException if entity with given ID does not exist ot the
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    String getMetadata(@NotNull String controllerId, @NotEmpty String key);
+
+    /**
+     * Finds all meta-data by the given entity id.
+     *
+     * @param controllerId the entity id to retrieve the meta-data from
+     * @return a paged result of all meta-data entries for a given entity id
+     * @throws EntityNotFoundException if entity with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    Map<String, String> getMetadata(@NotNull String controllerId);
+
+    /**
+     * Deletes a entity meta-data entry.
      *
      * @param controllerId where meta-data has to be deleted
-     * @param key of the meta data element
-     * @throws EntityNotFoundException if given target does not exist
+     * @param key of the meta-data element
+     * @throws EntityNotFoundException if entity with given ID does not exist or the key is not found
      */
-    @PreAuthorize(HAS_UPDATE_REPOSITORY)
-    void deleteMetadata(@NotEmpty String controllerId, @NotEmpty String key);
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    void deleteMetadata(@NotNull String controllerId, @NotEmpty String key);
 }

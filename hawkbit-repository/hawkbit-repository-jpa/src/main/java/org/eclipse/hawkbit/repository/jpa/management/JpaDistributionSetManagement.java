@@ -90,7 +90,7 @@ import org.springframework.util.ObjectUtils;
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "distribution-set-management" }, matchIfMissing = true)
 public class JpaDistributionSetManagement
-        extends AbstractJpaRepositoryManagement<JpaDistributionSet, DistributionSetManagement.Create, DistributionSetManagement.Update, DistributionSetRepository, DistributionSetFields>
+        extends AbstractJpaRepositoryWithMetadataManagement<JpaDistributionSet, DistributionSetManagement.Create, DistributionSetManagement.Update, DistributionSetRepository, DistributionSetFields, String, String>
         implements DistributionSetManagement<JpaDistributionSet> {
 
     private final DistributionSetTagManagement<JpaDistributionSetTag> distributionSetTagManagement;
@@ -256,63 +256,6 @@ public class JpaDistributionSetManagement
     @Override
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
-    public void createMetadata(final long id, final Map<String, String> md) {
-        final JpaDistributionSet distributionSet = getValid0(id);
-
-        // get the modifiable metadata map
-        final Map<String, String> metadata = distributionSet.getMetadata();
-        md.keySet().forEach(key -> {
-            if (metadata.containsKey(key)) {
-                throw new EntityAlreadyExistsException("Metadata entry with key '" + key + "' already exists");
-            }
-        });
-        metadata.putAll(md);
-
-        assertMetaDataQuota(id, metadata.size());
-
-        jpaRepository.save(distributionSet);
-    }
-
-    @Override
-    public Map<String, String> getMetadata(final long id) {
-        assertDistributionSetExists(id);
-        return getMap(id, JpaDistributionSet_.metadata);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
-    public void updateMetadata(final long id, final String key, final String value) {
-        final JpaDistributionSet distributionSet = getValid0(id);
-
-        // get the modifiable metadata map
-        final Map<String, String> metadata = distributionSet.getMetadata();
-        if (!metadata.containsKey(key)) {
-            throw new EntityNotFoundException("DistributionSet metadata", id + ":" + key);
-        }
-        metadata.put(key, value);
-
-        jpaRepository.save(distributionSet);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
-    public void deleteMetadata(final long id, final String key) {
-        final JpaDistributionSet distributionSet = getValid0(id);
-
-        // get the modifiable metadata map
-        final Map<String, String> metadata = distributionSet.getMetadata();
-        if (metadata.remove(key) == null) {
-            throw new EntityNotFoundException("DistributionSet metadata", id + ":" + key);
-        }
-
-        jpaRepository.save(distributionSet);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
     public void lock(final long id) {
         final JpaDistributionSet distributionSet = getById(id);
         if (!distributionSet.isLocked()) {
@@ -450,6 +393,17 @@ public class JpaDistributionSetManagement
         return jpaRepository.countAutoAssignmentsForDistributionSet(id);
     }
 
+    /**
+     * Asserts the meta-data quota for the software module with the given ID.
+     *
+     * @param requested Number of meta-data entries to be created.
+     */
+    @Override
+    protected void assertMetadataQuota(final long requested) {
+        final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerDistributionSet();
+        QuotaHelper.assertAssignmentQuota(requested, maxMetaData, String.class, DistributionSet.class);
+    }
+
     // check if it shall implicitly lock a distribution set
     boolean isImplicitLockApplicable(final DistributionSet distributionSet) {
         final JpaDistributionSet jpaDistributionSet = (JpaDistributionSet) distributionSet;
@@ -582,11 +536,6 @@ public class JpaDistributionSetManagement
             specifications.add(DistributionSetSpecification.isCompleted(complete));
         }
         return specifications;
-    }
-
-    private void assertMetaDataQuota(final Long dsId, final int requested) {
-        final int limit = quotaManagement.getMaxMetaDataEntriesPerDistributionSet();
-        QuotaHelper.assertAssignmentQuota(dsId, requested, limit, "Metadata", DistributionSet.class.getSimpleName(), null);
     }
 
     private void assertSoftwareModuleQuota(final Long id, final int requested) {

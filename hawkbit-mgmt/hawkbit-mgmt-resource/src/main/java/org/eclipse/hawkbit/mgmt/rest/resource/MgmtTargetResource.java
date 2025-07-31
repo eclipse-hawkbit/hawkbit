@@ -438,7 +438,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public void updateMetadata(final String targetId, final String metadataKey, final MgmtMetadataBodyPut metadata) {
-        targetManagement.updateMetadata(targetId, metadataKey, metadata.getValue());
+        targetManagement.createMetadata(targetId, metadataKey, metadata.getValue());
     }
 
     @Override

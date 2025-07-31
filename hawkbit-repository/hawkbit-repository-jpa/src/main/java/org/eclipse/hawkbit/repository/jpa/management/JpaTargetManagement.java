@@ -715,6 +715,23 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void createMetadata(final String controllerId, final String key, final String value) {
+        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
+
+        // get the modifiable metadata map
+        final Map<String, String> metadata = target.getMetadata();
+        if (!metadata.containsKey(key)) {
+            throw new EntityNotFoundException("Target metadata", controllerId + ":" + key);
+        }
+        metadata.put(key, value);
+
+        targetRepository.save(target);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void createMetadata(final String controllerId, final Map<String, String> md) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
 
@@ -737,20 +754,8 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void updateMetadata(final String controllerId, final String key, final String value) {
-        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
-
-        // get the modifiable metadata map
-        final Map<String, String> metadata = target.getMetadata();
-        if (!metadata.containsKey(key)) {
-            throw new EntityNotFoundException("Target metadata", controllerId + ":" + key);
-        }
-        metadata.put(key, value);
-
-        targetRepository.save(target);
+    public String getMetadata(final String controllerId, final String key) {
+        return getMap(controllerId, JpaTarget_.metadata).get(key);
     }
 
     @Override

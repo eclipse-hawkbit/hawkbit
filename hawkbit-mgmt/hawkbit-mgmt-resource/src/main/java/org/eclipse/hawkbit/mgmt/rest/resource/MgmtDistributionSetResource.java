@@ -286,7 +286,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public void updateMetadata(final Long distributionSetId, final String metadataKey, final MgmtMetadataBodyPut metadata) {
-        distributionSetManagement.updateMetadata(distributionSetId, metadataKey, metadata.getValue());
+        distributionSetManagement.createMetadata(distributionSetId, metadataKey, metadata.getValue());
     }
 
     @Override

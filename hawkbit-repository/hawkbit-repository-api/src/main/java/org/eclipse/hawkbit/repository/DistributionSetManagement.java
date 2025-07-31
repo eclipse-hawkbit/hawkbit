@@ -54,13 +54,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * Management service for {@link DistributionSet}s.
  */
 public interface DistributionSetManagement<T extends DistributionSet>
-        extends RepositoryManagement<T, DistributionSetManagement.Create, DistributionSetManagement.Update> {
+        extends RepositoryManagement<T, DistributionSetManagement.Create, DistributionSetManagement.Update>, MetadataSupport<String> {
 
     @Override
     default String permissionGroup() {
         return "DISTRIBUTION_SET";
     }
-
 
     /**
      * Find {@link DistributionSet} based on given ID including (lazy loaded) details, e.g. {@link DistributionSet#getModules()}. <br/>
@@ -139,49 +138,6 @@ public interface DistributionSetManagement<T extends DistributionSet>
      */
     @PreAuthorize(HAS_UPDATE_REPOSITORY)
     List<T> unassignTag(@NotEmpty Collection<Long> ids, long tagId);
-
-    /**
-     * Creates a map of distribution set meta-data entries.
-     *
-     * @param id if the {@link DistributionSet} the meta-data has to be created for
-     * @param metadata the meta-data entries to create or update
-     * @throws EntityNotFoundException if given set does not exist
-     * @throws EntityAlreadyExistsException in case one of the meta-data entry already exists for the specific key
-     * @throws AssignmentQuotaExceededException if the maximum number of meta-data entries is exceeded for the addressed {@link DistributionSet}
-     */
-    @PreAuthorize(HAS_UPDATE_REPOSITORY)
-    void createMetadata(long id, @NotEmpty Map<String, String> metadata);
-
-    /**
-     * Finds all meta-data by the given distribution set id.
-     *
-     * @param id the distribution set id to retrieve the meta-data from
-     * @return a paged result of all meta-data entries for a given distribution set id
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     */
-    @PreAuthorize(HAS_READ_REPOSITORY)
-    Map<String, String> getMetadata(long id);
-
-    /**
-     * Updates a distribution set meta-data values by adding them.
-     *
-     * @param id {@link DistributionSet} of the meta-data entry to be updated
-     * @param key meta data-entry key to be updated
-     * @param value meta data-entry to be new value
-     * @throws EntityNotFoundException in case the meta-data entry does not exist and cannot be updated
-     */
-    @PreAuthorize(HAS_UPDATE_REPOSITORY)
-    void updateMetadata(long id, @NotNull String key, @NotNull String value);
-
-    /**
-     * Deletes a distribution set meta-data entry.
-     *
-     * @param id where meta-data has to be deleted
-     * @param key of the meta-data element
-     * @throws EntityNotFoundException if given set does not exist
-     */
-    @PreAuthorize(HAS_UPDATE_REPOSITORY)
-    void deleteMetadata(long id, @NotEmpty String key);
 
     /**
      * Locks a distribution set. From then on its functional properties could not be changed, and it could be assigned to targets

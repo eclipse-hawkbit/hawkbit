@@ -36,7 +36,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * @param <C> type of the create request
  * @param <U> type of the update request
  */
-public interface RepositoryManagement<T extends BaseEntity, C, U extends Identifiable<Long>> {
+public interface RepositoryManagement<T extends BaseEntity, C, U extends Identifiable<Long>> extends PermissionSupport {
 
     /**
      * Creates new {@link BaseEntity}.
@@ -153,6 +153,7 @@ public interface RepositoryManagement<T extends BaseEntity, C, U extends Identif
     @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
     void delete(@NotEmpty Collection<Long> ids);
 
+    @Override
     default String permissionGroup() {
         return "REPOSITORY";
     }

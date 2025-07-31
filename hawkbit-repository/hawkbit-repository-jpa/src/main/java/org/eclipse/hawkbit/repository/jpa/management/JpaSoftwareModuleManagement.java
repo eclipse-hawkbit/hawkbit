@@ -261,11 +261,6 @@ public class JpaSoftwareModuleManagement
         return jpaRepository.count(SoftwareModuleSpecification.byAssignedToDs(distributionSetId));
     }
 
-    @Override
-    protected JpaMetadataValue createMetadataValue() {
-        return new JpaMetadataValue();
-    }
-
     /**
      * Asserts the meta-data quota for the software module with the given ID.
      *

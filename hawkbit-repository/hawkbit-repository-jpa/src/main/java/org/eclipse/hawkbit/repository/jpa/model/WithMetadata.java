@@ -20,4 +20,9 @@ import java.util.Map;
 public interface WithMetadata<MV, MVI extends MV> {
 
     Map<String, MVI> getMetadata();
+
+    // return if the entity is valid for update metadata
+    default boolean isValid() {
+        return true;
+    }
 }

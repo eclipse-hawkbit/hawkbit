@@ -12,8 +12,13 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_DELAY;
 import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -23,10 +28,10 @@ import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.MetadataSupport;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.WithMetadata;
 import org.eclipse.hawkbit.repository.jpa.repository.BaseEntityRepository;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.utils.ObjectCopyUtil;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.retry.annotation.Backoff;
@@ -34,29 +39,54 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 
 @SuppressWarnings("java:S119") // java:S119 - better self explainable
-abstract class AbstractJpaRepositoryWithMetadataManagement <T extends AbstractJpaBaseEntity & WithMetadata<MV, MVI>, C, U extends Identifiable<Long>, R extends BaseEntityRepository<T>, A extends Enum<A> & RsqlQueryField, MV, MVI extends MV>
+abstract class AbstractJpaRepositoryWithMetadataManagement<T extends AbstractJpaBaseEntity & WithMetadata<MV, MVI>, C, U extends Identifiable<Long>, R extends BaseEntityRepository<T>, A extends Enum<A> & RsqlQueryField, MV, MVI extends MV>
         extends AbstractJpaRepositoryManagement<T, C, U, R, A> implements MetadataSupport<MV> {
 
+    private final Supplier<MVI> metadataValueCreator;
+    private final boolean useCopy;
+
+    // java:S3011 - intentionally to provide option to forbid constructors
+    // java:S1141 - better visible this way
+    @SuppressWarnings({"unchecked", "java:S3011", "java:S1141"})
     protected AbstractJpaRepositoryWithMetadataManagement(final R repository, final EntityManager entityManager) {
         super(repository, entityManager);
+        try {
+            final Class<MVI> metadataValueType = (Class<MVI>) ((ParameterizedType) jpaRepository.getDomainClass().getMethod("getMetadata")
+                    .getGenericReturnType())
+                    .getActualTypeArguments()[1];
+            final Constructor<MVI> constructor;
+            try {
+                constructor = metadataValueType.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                constructor.newInstance();
+            } catch (final NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                throw new IllegalStateException("Metadata class " + jpaRepository.getDomainClass() + " shall have no-args constructor", e);
+            }
+            metadataValueCreator = () -> {
+                try {
+                    return constructor.newInstance();
+                } catch (final InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                    throw new IllegalStateException("Must NEVER happen!", e);
+                }
+            };
+            useCopy = !String.class.equals(metadataValueType) && !metadataValueType.isPrimitive();
+        } catch (final NoSuchMethodException | SecurityException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
     public void createMetadata(final Long id, final String key, final MV value) {
-        final T softwareModule = jpaRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
-        final Map<String, MVI> metadataValueMap = softwareModule.getMetadata();
+        final T jpaEntity = getValid(id);
+        final Map<String, MVI> metadataValueMap = jpaEntity.getMetadata();
         final MVI existingValue = metadataValueMap.get(key);
         if (existingValue == null) {
             assertMetadataQuota(metadataValueMap.size() + 1L);
         }
-        final MVI jpaMetadataValue = existingValue == null ? createMetadataValue() : existingValue;
-        if (ObjectCopyUtil.copy(value, jpaMetadataValue, true, UnaryOperator.identity())) {
-            metadataValueMap.put(key, jpaMetadataValue);
-            jpaRepository.save(softwareModule);
+        if (setMetadataValue(key, value, existingValue, metadataValueMap)) {
+            jpaRepository.save(jpaEntity);
         }
     }
 
@@ -64,30 +94,24 @@ abstract class AbstractJpaRepositoryWithMetadataManagement <T extends AbstractJp
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
     public void createMetadata(final Long id, final Map<String, ? extends MV> metadata) {
-        final T softwareModule = jpaRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
-        final Map<String, MVI> metadataValueMap = softwareModule.getMetadata();
+        final T jpaEntity = getValid(id);
+        final Map<String, MVI> metadataValueMap = jpaEntity.getMetadata();
         assertMetadataQuota(metadata.keySet().stream().filter(key -> !metadataValueMap.containsKey(key)).count() + metadataValueMap.size());
         final AtomicBoolean changed = new AtomicBoolean(false);
         metadata.forEach((key, value) -> {
-            final MVI jpaMetadataValue = metadataValueMap.getOrDefault(key, createMetadataValue());
-            if (ObjectCopyUtil.copy(value, jpaMetadataValue, true, UnaryOperator.identity())) {
-                metadataValueMap.put(key, jpaMetadataValue);
+            if (setMetadataValue(key, value, metadataValueMap.get(key), metadataValueMap)) {
                 changed.set(true);
             }
         });
         if (changed.get()) {
-            jpaRepository.save(softwareModule);
+            jpaRepository.save(jpaEntity);
         }
     }
 
     @Override
     public MV getMetadata(final Long id, final String key) {
-        final T softwareModule = jpaRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
-        final MV metadataValue = softwareModule.getMetadata().get(key);
+        final T jpaEntity = getValid(id);
+        final MV metadataValue = jpaEntity.getMetadata().get(key);
         if (metadataValue == null) {
             throw new EntityNotFoundException("Metadata", jpaRepository.getManagementClass().getSimpleName() + ":" + id + ":" + key);
         } else {
@@ -103,26 +127,52 @@ abstract class AbstractJpaRepositoryWithMetadataManagement <T extends AbstractJp
                 .map(metadata -> metadata.entrySet().stream()
                         .collect(Collectors.toMap(
                                 Map.Entry::getKey,
-                                e -> (MV)e.getValue())))
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
+                                e -> (MV) e.getValue())))
+                .orElseThrow(() -> new EntityNotFoundException(jpaRepository.getManagementClass(), id));
     }
 
     @Override
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
     public void deleteMetadata(final Long id, final String key) {
-        final T softwareModule = jpaRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
-        final Map<String, MVI> metadataValueMap = softwareModule.getMetadata();
+        final T jpaEntity = getValid(id);
+        final Map<String, MVI> metadataValueMap = jpaEntity.getMetadata();
         if (!metadataValueMap.containsKey(key)) {
             throw new EntityNotFoundException("Metadata", jpaRepository.getManagementClass().getSimpleName() + ":" + id + ":" + key);
         }
         metadataValueMap.remove(key);
-        jpaRepository.save(softwareModule);
+        jpaRepository.save(jpaEntity);
     }
 
-    protected abstract MVI createMetadataValue();
-
     protected abstract void assertMetadataQuota(final long requested);
+
+    private T getValid(final Long id) {
+        final T jpaEntity = jpaRepository
+                .findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(jpaRepository.getManagementClass(), id));
+        if (!jpaEntity.isValid()) {
+            throw new InvalidDistributionSetException(jpaRepository.getManagementClass().getSimpleName() + " " + id + " is invalid");
+        }
+        return jpaEntity;
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean setMetadataValue(final String key, final MV newValue, final MVI existingValue, final Map<String, MVI> metadataValueMap) {
+        if (useCopy) {
+            final MVI jpaMetadataValue = existingValue == null ? metadataValueCreator.get() : existingValue;
+            if (ObjectCopyUtil.copy(newValue, jpaMetadataValue, true, UnaryOperator.identity())) {
+                metadataValueMap.put(key, jpaMetadataValue);
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (Objects.equals(newValue, existingValue)) {
+                return false;
+            } else {
+                metadataValueMap.put(key, (MVI)newValue);
+                return true;
+            }
+        }
+    }
 }
