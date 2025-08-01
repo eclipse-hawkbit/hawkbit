@@ -43,13 +43,13 @@ public interface TargetTagManagement<T extends TargetTag>
     @Getter
     @EqualsAndHashCode(callSuper = true)
     @ToString(callSuper = true)
-    final class Create extends DistributionSetTagManagement.UpdateCreate {}
+    final class Create extends UpdateCreate {}
 
     @SuperBuilder
     @Getter
     @EqualsAndHashCode(callSuper = true)
     @ToString(callSuper = true)
-    final class Update extends DistributionSetTagManagement.UpdateCreate implements Identifiable<Long> {
+    final class Update extends UpdateCreate implements Identifiable<Long> {
 
         @NotNull
         private Long id;

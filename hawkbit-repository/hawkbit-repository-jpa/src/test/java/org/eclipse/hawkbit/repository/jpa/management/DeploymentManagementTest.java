@@ -1608,8 +1608,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void verifyDSAssignmentForMultipleTargetsWithSameTargetType() {
         final DistributionSet ds = testdataFactory.createDistributionSet("test-ds");
-        final TargetType targetType = testdataFactory.createTargetType("test-type",
-                Collections.singletonList(ds.getType()));
+        final TargetType targetType = testdataFactory.createTargetType("test-type", Set.of(ds.getType()));
 
         final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
         for (int i = 0; i < quotaManagement.getMaxTargetDistributionSetAssignmentsPerManualAssignment(); i++) {
@@ -1635,8 +1634,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void verifyDSAssignmentForMultipleTargetsWithDifferentTargetTypes() {
         final DistributionSet ds = testdataFactory.createDistributionSet("test-ds");
-        final TargetType targetType1 = testdataFactory.createTargetType("test-type1", Collections.singletonList(ds.getType()));
-        final TargetType targetType2 = testdataFactory.createTargetType("test-type2", Collections.singletonList(ds.getType()));
+        final TargetType targetType1 = testdataFactory.createTargetType("test-type1", Set.of(ds.getType()));
+        final TargetType targetType2 = testdataFactory.createTargetType("test-type2", Set.of(ds.getType()));
         final Target target1 = testdataFactory.createTarget("test-target1", "test-target1", targetType1.getId());
         final Target target2 = testdataFactory.createTarget("test-target2", "test-target2", targetType2.getId());
 
@@ -1663,13 +1662,11 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     void verifyDSAssignmentFailsForTargetsWithIncompatibleTargetTypes() {
         final DistributionSet ds = testdataFactory.createDistributionSet("test-ds");
         final DistributionSetType dsType = testdataFactory.findOrCreateDistributionSetType("test-ds-type", "dsType");
-        final TargetType targetType = testdataFactory.createTargetType("target-type",
-                Collections.singletonList(dsType));
+        final TargetType targetType = testdataFactory.createTargetType("target-type", Set.of(dsType));
         final Target target = testdataFactory.createTarget("test-target", "test-target", targetType.getId());
 
-        final DeploymentRequest deploymentRequest = DeploymentManagement
-                .deploymentRequest(target.getControllerId(), ds.getId()).build();
-        final List<DeploymentRequest> deploymentRequests = Collections.singletonList(deploymentRequest);
+        final DeploymentRequest deploymentRequest = DeploymentManagement.deploymentRequest(target.getControllerId(), ds.getId()).build();
+        final List<DeploymentRequest> deploymentRequests = List.of(deploymentRequest);
 
         assertThatExceptionOfType(IncompatibleTargetTypeException.class)
                 .isThrownBy(() -> deploymentManagement.assignDistributionSets(deploymentRequests));
@@ -1681,9 +1678,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void verifyDSAssignmentFailsForTargetsWithTargetTypesThatAreNotCompatibleWithAnyDs() {
         final DistributionSet ds = testdataFactory.createDistributionSet("test-ds");
-        final TargetType emptyTargetType = testdataFactory.createTargetType("target-type", Collections.emptyList());
-        final Target targetWithEmptyType = testdataFactory.createTarget("test-target", "test-target",
-                emptyTargetType.getId());
+        final TargetType emptyTargetType = testdataFactory.createTargetType("target-type", Set.of());
+        final Target targetWithEmptyType = testdataFactory.createTarget("test-target", "test-target", emptyTargetType.getId());
 
         final DeploymentRequest deploymentRequestWithEmptyType = DeploymentManagement
                 .deploymentRequest(targetWithEmptyType.getControllerId(), ds.getId()).build();

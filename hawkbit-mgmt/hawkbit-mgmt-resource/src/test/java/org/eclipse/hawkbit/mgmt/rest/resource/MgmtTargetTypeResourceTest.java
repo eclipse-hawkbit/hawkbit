@@ -28,12 +28,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import com.jayway.jsonpath.JsonPath;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
+import org.eclipse.hawkbit.repository.TargetTypeManagement.Create;
+import org.eclipse.hawkbit.repository.TargetTypeManagement.Update;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
@@ -115,7 +117,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
     void getTargetTypes() throws Exception {
         String typeName = "TestTypeGET";
         int count = 5;
-        List<TargetType> testTypes = createTestTargetTypesInDB(typeName, count);
+        final List<? extends TargetType> testTypes = createTestTargetTypesInDB(typeName, count);
 
         ResultActions resultActions = mvc.perform(get(TARGETTYPES_ENDPOINT).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print());
@@ -178,7 +180,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         TargetType testTypeA = createTestTargetTypeInDB(typeNameA);
 
         testTypeA = targetTypeManagement
-                .update(entityFactory.targetType().update(testTypeA.getId()).description("Updated description"));
+                .update(Update.builder().id(testTypeA.getId()).description("Updated description").build());
 
         // descending
         mvc.perform(get(TARGETTYPES_ENDPOINT).accept(MediaType.APPLICATION_JSON)
@@ -303,8 +305,9 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         final String initialTypeName = "TestTypeGET";
         TargetType testType = createTestTargetTypeInDB(initialTypeName);
         final String typeNameUpdated = "TestTypeGETupdated";
-        testType = targetTypeManagement.update(entityFactory.targetType().update(testType.getId()).name(typeNameUpdated)
-                .description("Updated Description").colour("#ffffff"));
+        testType = targetTypeManagement.update(Update.builder().id(testType.getId())
+                .name(typeNameUpdated).description("Updated Description").colour("#ffffff")
+                .build());
 
         mvc.perform(get(TARGETTYPE_SINGLE_ENDPOINT, testType.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -328,7 +331,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
     @WithUser(principal = TEST_USER, allSpPermissions = true)
     void createTargetTypes() throws Exception {
         String typeName = "TestTypePOST";
-        final List<TargetType> types = buildTestTargetTypesWithoutDsTypes(typeName, 5);
+        final List<Create> types = buildTestTargetTypesWithoutDsTypes(typeName, 5);
 
         runPostTargetTypeAndVerify(types);
     }
@@ -351,7 +354,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         testType = targetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo(TEST_USER);
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
-        assertThat(testType.getCompatibleDistributionSetTypes()).containsExactly(standardDsType);
+        assertThat(testType.getDistributionSetTypes()).containsExactly(standardDsType);
     }
 
     /**
@@ -361,7 +364,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
     @WithUser(principal = TEST_USER, allSpPermissions = true)
     void getDistributionSetsOfTargetType() throws Exception {
         String typeName = "TestTypeGetDs";
-        final TargetType testType = createTestTargetTypeInDB(typeName, Collections.singletonList(standardDsType));
+        final TargetType testType = createTestTargetTypeInDB(typeName, Set.of(standardDsType));
 
         mvc.perform(get(TARGETTYPE_DSTYPES_ENDPOINT, testType.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -397,7 +400,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
     @WithUser(principal = TEST_USER, allSpPermissions = true)
     void removeDsTypeFromTargetType() throws Exception {
         String typeName = "TestTypeRemoveDs";
-        TargetType testType = createTestTargetTypeInDB(typeName, Collections.singletonList(standardDsType));
+        TargetType testType = createTestTargetTypeInDB(typeName, Set.of(standardDsType));
 
         mvc.perform(delete(TARGETTYPE_DSTYPE_SINGLE_ENDPOINT, testType.getId(), standardDsType.getId())
                         .contentType(MediaType.APPLICATION_JSON))
@@ -407,7 +410,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         testType = targetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo(TEST_USER);
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
-        assertThat(testType.getCompatibleDistributionSetTypes()).isEmpty();
+        assertThat(testType.getDistributionSetTypes()).isEmpty();
     }
 
     /**
@@ -416,8 +419,8 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     @WithUser(principal = TEST_USER, allSpPermissions = true)
     void deletingDsTypeRemovesAssignmentFromTargetType() throws Exception {
-        TargetType testType = createTestTargetTypeInDB("TestTypeRemoveDs", Collections.singletonList(standardDsType));
-        assertThat(testType.getCompatibleDistributionSetTypes()).hasSize(1);
+        TargetType testType = createTestTargetTypeInDB("TestTypeRemoveDs", Set.of(standardDsType));
+        assertThat(testType.getDistributionSetTypes()).hasSize(1);
         assertThat(distributionSetTypeManagement.findByKey(standardDsType.getKey())).isNotEmpty();
 
         mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/" + standardDsType.getId()))
@@ -427,7 +430,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         testType = targetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo(TEST_USER);
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
-        assertThat(testType.getCompatibleDistributionSetTypes()).isEmpty();
+        assertThat(testType.getDistributionSetTypes()).isEmpty();
         assertThat(distributionSetTypeManagement.findByKey(standardDsType.getKey())).isEmpty();
     }
 
@@ -508,7 +511,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     void invalidRequestsOnTargetTypesResource() throws Exception {
         String typeName = "TestTypeInvalidReq";
-        final TargetType testType = createTestTargetTypeInDB(typeName, Collections.singletonList(standardDsType));
+        final TargetType testType = createTestTargetTypeInDB(typeName, Set.of(standardDsType));
 
         // target type does not exist
         mvc.perform(get(TARGETTYPE_SINGLE_ENDPOINT, 12345678))
@@ -522,8 +525,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isNotFound());
 
         // target types at creation time invalid
-        final TargetType testNewType = createTestTargetTypeInDB(typeName + "Another",
-                Collections.singletonList(standardDsType));
+        final TargetType testNewType = createTestTargetTypeInDB(typeName + "Another", Set.of(standardDsType));
 
         mvc.perform(post(TARGETTYPES_ENDPOINT).content(JsonBuilder.targetTypes(Collections.singletonList(testNewType)))
                         .contentType(MediaType.APPLICATION_OCTET_STREAM))
@@ -547,9 +549,8 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
-        final TargetType tooLongName = entityFactory.targetType().create()
-                .name(randomString(NamedEntity.NAME_MAX_SIZE + 1)).build();
-        mvc.perform(post(TARGETTYPES_ENDPOINT).content(JsonBuilder.targetTypes(Collections.singletonList(tooLongName)))
+        final Create tooLongName = Create.builder().name(randomString(NamedEntity.NAME_MAX_SIZE + 1)).build();
+        mvc.perform(post(TARGETTYPES_ENDPOINT).content(JsonBuilder.targetTypesCreate(List.of(tooLongName)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
@@ -609,8 +610,8 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      */
     @Test
     void searchTargetTypeRsql() throws Exception {
-        targetTypeManagement.create(entityFactory.targetType().create().name("TestName123"));
-        targetTypeManagement.create(entityFactory.targetType().create().name("TestName1234"));
+        targetTypeManagement.create(Create.builder().name("TestName123").build());
+        targetTypeManagement.create(Create.builder().name("TestName1234").build());
 
         final String rsqlFindLikeDs1OrDs2 = "name==TestName123,name==TestName1234";
 
@@ -656,45 +657,46 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
     }
 
-    private TargetType buildTestTargetTypeBody(String name) {
-        return prepareTestTargetType(name, null).build();
+    private Create buildTestTargetTypeBody(final String name) {
+        return prepareTestTargetType(name, null);
     }
 
-    private TargetTypeCreate prepareTestTargetType(String name, Collection<DistributionSetType> dsTypes) {
-        TargetTypeCreate create = entityFactory.targetType().create().name(name)
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private Create prepareTestTargetType(final String name, final Collection<DistributionSetType> dsTypes) {
+        final Create.CreateBuilder create = Create.builder().name(name)
                 .description("Description of the test type").colour("#aaaaaa");
         if (dsTypes != null && !dsTypes.isEmpty()) {
-            create.compatible(Collections.singletonList(standardDsType.getId()));
+            create.distributionSetTypes(Set.of(standardDsType.getId()));
         }
-        return create;
+        return create.build();
     }
 
-    private List<TargetType> createTestTargetTypesInDB(String namePrefix, int count) {
+    private List<? extends TargetType> createTestTargetTypesInDB(final String namePrefix, final int count) {
         return testdataFactory.createTargetTypes(namePrefix, count);
     }
 
-    private TargetType createTestTargetTypeInDB(String name) {
+    private TargetType createTestTargetTypeInDB(final String name) {
         return testdataFactory.findOrCreateTargetType(name);
     }
 
-    private TargetType createTestTargetTypeInDB(String name, List<DistributionSetType> dsTypes) {
+    private TargetType createTestTargetTypeInDB(final String name, final Set<DistributionSetType> dsTypes) {
         TargetType targetType = testdataFactory.createTargetType(name, dsTypes);
         assertThat(targetType.getOptLockRevision()).isEqualTo(1);
         return targetType;
     }
 
-    private List<TargetType> buildTestTargetTypesWithoutDsTypes(String namePrefix, int count) {
-        final List<TargetType> types = new ArrayList<>();
+    private List<Create> buildTestTargetTypesWithoutDsTypes(final String namePrefix, final int count) {
+        final List<Create> types = new ArrayList<>();
         for (int index = 0; index < count; index++) {
             types.add(buildTestTargetTypeBody(namePrefix + index));
         }
         return types;
     }
 
-    private void runPostTargetTypeAndVerify(final List<TargetType> types) throws Exception {
+    private void runPostTargetTypeAndVerify(final List<Create> types) throws Exception {
         int size = types.size();
         ResultActions resultActions = mvc
-                .perform(post(TARGETTYPES_ENDPOINT).content(JsonBuilder.targetTypes(types))
+                .perform(post(TARGETTYPES_ENDPOINT).content(JsonBuilder.targetTypesCreate(types))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print());
 

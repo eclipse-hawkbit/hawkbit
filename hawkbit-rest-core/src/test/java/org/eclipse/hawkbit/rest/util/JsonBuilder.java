@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
@@ -314,9 +315,33 @@ public class JsonBuilder {
         for (final TargetType type : types) {
 
             final JSONArray dsTypes = new JSONArray();
-            type.getCompatibleDistributionSetTypes().forEach(dsType -> {
+            type.getDistributionSetTypes().forEach(dsType -> {
                 try {
                     dsTypes.put(new JSONObject().put("id", dsType.getId()));
+                } catch (final JSONException e1) {
+                    log.error("JSONException (skip)", e1);
+                }
+            });
+
+            result.put(new JSONObject().put("name", type.getName()).put("description", type.getDescription())
+                    .put("id", Long.MAX_VALUE).put("colour", type.getColour()).put("createdAt", "0")
+                    .put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
+                    .put("distributionsets", dsTypes));
+
+        }
+
+        return result.toString();
+    }
+
+    public static String targetTypesCreate(final List<TargetTypeManagement.Create> types) throws JSONException {
+        final JSONArray result = new JSONArray();
+
+        for (final TargetTypeManagement.Create type : types) {
+
+            final JSONArray dsTypes = new JSONArray();
+            type.getDistributionSetTypes().forEach(dsType -> {
+                try {
+                    dsTypes.put(new JSONObject().put("id", dsType));
                 } catch (final JSONException e1) {
                     log.error("JSONException (skip)", e1);
                 }

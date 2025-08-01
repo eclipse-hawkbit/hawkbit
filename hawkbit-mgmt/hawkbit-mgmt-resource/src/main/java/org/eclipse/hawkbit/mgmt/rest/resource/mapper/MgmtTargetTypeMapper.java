@@ -16,36 +16,46 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetType;
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTypeRestApi;
-import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.rest.json.model.ResponseList;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 /**
  * A mapper which maps repository model to RESTful model representation and back.
  */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Service
 public final class MgmtTargetTypeMapper {
 
-    public static List<TargetTypeCreate> targetFromRequest(
-            final EntityFactory entityFactory, final Collection<MgmtTargetTypeRequestBodyPost> targetTypesRest) {
+    private final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement;
+
+    public MgmtTargetTypeMapper(final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement) {
+        this.distributionSetTypeManagement = distributionSetTypeManagement;
+    }
+
+    public List<TargetTypeManagement.Create> targetFromRequest(final Collection<MgmtTargetTypeRequestBodyPost> targetTypesRest) {
         if (targetTypesRest == null) {
             return Collections.emptyList();
         }
         return targetTypesRest.stream()
-                .map(targetRest -> fromRequest(entityFactory, targetRest))
+                .map(this::fromRequest)
                 .toList();
     }
 
-    public static List<MgmtTargetType> toListResponse(final List<TargetType> types) {
+    public static List<MgmtTargetType> toListResponse(final List<? extends TargetType> types) {
         if (types == null) {
             return Collections.emptyList();
         }
@@ -67,17 +77,31 @@ public final class MgmtTargetTypeMapper {
                 .withRel(MgmtRestConstants.TARGETTYPE_V1_DS_TYPES).expand());
     }
 
-    private static TargetTypeCreate fromRequest(final EntityFactory entityFactory,
-            final MgmtTargetTypeRequestBodyPost targetTypesRest) {
-        return entityFactory.targetType().create()
+    private TargetTypeManagement.Create fromRequest(final MgmtTargetTypeRequestBodyPost targetTypesRest) {
+        return TargetTypeManagement.Create.builder()
                 .name(targetTypesRest.getName()).description(targetTypesRest.getDescription())
                 .key(targetTypesRest.getKey()).colour(targetTypesRest.getColour())
-                .compatible(getDistributionSets(targetTypesRest));
+                .distributionSetTypes(getDistributionSets(targetTypesRest))
+                .build();
     }
 
-    private static Collection<Long> getDistributionSets(final MgmtTargetTypeRequestBodyPost targetTypesRest) {
+    private Set<DistributionSetType> getDistributionSets(final MgmtTargetTypeRequestBodyPost targetTypesRest) {
         return Optional.ofNullable(targetTypesRest.getCompatibledistributionsettypes())
-                .map(ds -> ds.stream().map(MgmtDistributionSetTypeAssignment::getId).toList())
-                .orElse(Collections.emptyList());
+                .map(compatibleDs -> compatibleDs.stream().map(MgmtDistributionSetTypeAssignment::getId).toList())
+                .map(this::getDistributionSetTypes)
+                .orElse(Collections.emptySet());
+    }
+
+    private Set<DistributionSetType> getDistributionSetTypes(final Collection<Long> distributionSetTypeId) {
+        if (CollectionUtils.isEmpty(distributionSetTypeId)) {
+            return Collections.emptySet();
+        }
+
+        final Collection<? extends DistributionSetType> type = distributionSetTypeManagement.get(distributionSetTypeId);
+        if (type.size() < distributionSetTypeId.size()) {
+            throw new EntityNotFoundException(SoftwareModuleType.class, distributionSetTypeId);
+        }
+
+        return type.stream().map(DistributionSetType.class::cast).collect(Collectors.toSet());
     }
 }

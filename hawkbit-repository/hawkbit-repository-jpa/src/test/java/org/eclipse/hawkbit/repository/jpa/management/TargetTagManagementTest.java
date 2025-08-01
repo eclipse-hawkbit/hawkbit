@@ -319,7 +319,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
 
     private List<JpaTargetTag> createTargetsWithTags() {
         final List<Target> targets = testdataFactory.createTargets(20);
-        final Iterable<TargetTag> tags = testdataFactory.createTargetTags(20, "");
+        final Iterable<? extends TargetTag> tags = testdataFactory.createTargetTags(20, "");
 
         tags.forEach(tag -> assignTag(targets, tag));
 

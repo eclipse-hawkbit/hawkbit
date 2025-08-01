@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
@@ -118,8 +119,7 @@ class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     @Test
     void targetTypeUpdatedEventIsPublished() throws InterruptedException {
         final TargetType createdTargetType = testdataFactory.findOrCreateTargetType("targettype");
-        targetTypeManagement
-                .update(entityFactory.targetType().update(createdTargetType.getId()).name("updatedtargettype"));
+        targetTypeManagement.update(TargetTypeManagement.Update.builder().id(createdTargetType.getId()).name("updatedtargettype").build());
 
         final TargetTypeUpdatedEvent targetTypeUpdatedEvent = eventListener.waitForEvent(TargetTypeUpdatedEvent.class);
         assertThat(targetTypeUpdatedEvent).isNotNull();

@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
-import org.eclipse.hawkbit.repository.builder.TargetTypeBuilder;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 
 /**
@@ -41,11 +40,6 @@ public interface EntityFactory {
      * @return {@link TargetBuilder} object
      */
     TargetBuilder target();
-
-    /**
-     * @return {@link TargetTypeBuilder} object
-     */
-    TargetTypeBuilder targetType();
 
     /**
      * @return {@link TargetFilterQueryBuilder} object

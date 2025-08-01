@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
-import org.eclipse.hawkbit.repository.builder.TargetTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupBuilder;
 import org.springframework.validation.annotation.Validated;
@@ -27,17 +26,14 @@ import org.springframework.validation.annotation.Validated;
 public class JpaEntityFactory implements EntityFactory {
 
     private final TargetBuilder targetBuilder;
-    private final TargetTypeBuilder targetTypeBuilder;
     private final TargetFilterQueryBuilder targetFilterQueryBuilder;
     private final RolloutBuilder rolloutBuilder;
 
     @SuppressWarnings("java:S107")
     public JpaEntityFactory(
-            final TargetBuilder targetBuilder, final TargetTypeBuilder targetTypeBuilder,
-            final TargetFilterQueryBuilder targetFilterQueryBuilder,
+            final TargetBuilder targetBuilder, final TargetFilterQueryBuilder targetFilterQueryBuilder,
             final RolloutBuilder rolloutBuilder) {
         this.targetBuilder = targetBuilder;
-        this.targetTypeBuilder = targetTypeBuilder;
         this.targetFilterQueryBuilder = targetFilterQueryBuilder;
         this.rolloutBuilder = rolloutBuilder;
     }
@@ -59,11 +55,6 @@ public class JpaEntityFactory implements EntityFactory {
     @Override
     public TargetBuilder target() {
         return targetBuilder;
-    }
-
-    @Override
-    public TargetTypeBuilder targetType() {
-        return targetTypeBuilder;
     }
 
     @Override

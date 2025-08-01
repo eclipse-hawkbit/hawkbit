@@ -23,9 +23,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> implements TargetCreate {
 
-    private final TargetTypeManagement targetTypeManagement;
+    private final TargetTypeManagement<? extends TargetType> targetTypeManagement;
 
-    JpaTargetCreate(final TargetTypeManagement targetTypeManagement) {
+    JpaTargetCreate(final TargetTypeManagement<? extends TargetType> targetTypeManagement) {
         super(null);
         this.targetTypeManagement = targetTypeManagement;
     }

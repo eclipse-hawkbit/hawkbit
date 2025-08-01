@@ -20,6 +20,7 @@ import java.util.Map;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeFields;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -50,13 +51,13 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
     @BeforeEach
     void setupBeforeTest() {
         targetType1 = targetTypeManagement
-                .create(entityFactory.targetType().create()
-                        .name("Type1").description("Desc. Type1")
-                        .key("Type1.key"));
+                .create(TargetTypeManagement.Create.builder()
+                        .name("Type1").description("Desc. Type1").key("Type1.key")
+                        .build());
         targetType2 = targetTypeManagement
-                .create(entityFactory.targetType().create()
-                        .name("Type2").description("Desc. Type2")
-                        .key("Type2.key"));
+                .create(TargetTypeManagement.Create.builder()
+                        .name("Type2").description("Desc. Type2").key("Type2.key")
+                        .build());
 
         final DistributionSet ds = testdataFactory.createDistributionSet("AssignedDs");
 

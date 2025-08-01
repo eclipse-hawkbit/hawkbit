@@ -28,20 +28,11 @@ public interface TargetType extends Type {
     }
 
     /**
+     * Gets compatible distribution set types
+     *
      * @return immutable set of optional {@link DistributionSetType}s
      */
-    Set<DistributionSetType> getCompatibleDistributionSetTypes();
-
-    /**
-     * Checks if the given {@link DistributionSetType} is in
-     * {@link #getCompatibleDistributionSetTypes()}.
-     *
-     * @param distributionSetTypeId search by {@link DistributionSetType#getId()}
-     * @return <code>true</code> if found
-     */
-    default boolean containsCompatibleDistributionSetType(final Long distributionSetTypeId) {
-        return getCompatibleDistributionSetTypes().stream().anyMatch(element -> element.getId().equals(distributionSetTypeId));
-    }
+    Set<DistributionSetType> getDistributionSetTypes();
 
     /**
      * Unassigns a {@link DistributionSetType} from {@link TargetType}
@@ -49,5 +40,5 @@ public interface TargetType extends Type {
      * @param dsTypeId that will be removed from {@link TargetType}
      * @return the resulting target type
      */
-    TargetType removeDistributionSetType(final Long dsTypeId);
+    void removeDistributionSetType(final Long dsTypeId);
 }

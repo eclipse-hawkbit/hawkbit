@@ -719,7 +719,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final Set<DistributionSetType> incompatibleDistSetTypes = distributionSetManagement.get(distSetIds).stream()
                     .map(DistributionSet::getType)
                     .collect(Collectors.toSet());
-            incompatibleDistSetTypes.removeAll(target.getTargetType().getCompatibleDistributionSetTypes());
+            incompatibleDistSetTypes.removeAll(target.getTargetType().getDistributionSetTypes());
 
             if (!incompatibleDistSetTypes.isEmpty()) {
                 final Set<String> distSetTypeNames = incompatibleDistSetTypes.stream()
