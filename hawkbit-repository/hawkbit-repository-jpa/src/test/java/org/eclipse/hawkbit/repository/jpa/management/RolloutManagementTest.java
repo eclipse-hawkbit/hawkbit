@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -288,7 +289,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Verifies that management get access reacts as specified on calls for non existing entities by means 
+     * Verifies that management get access reacts as specified on calls for non existing entities by means
      * of Optional not present.
      */
     @Test
@@ -300,8 +301,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Verifies that management queries react as specified on calls for non existing entities 
-     *  by means of throwing EntityNotFoundException.
+     * Verifies that management queries react as specified on calls for non existing entities
+     * by means of throwing EntityNotFoundException.
      */
     @Test
     @ExpectEvents({
@@ -1822,7 +1823,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Creating a rollout with approval role or approval engine disabled results in the rollout being in 
+     * Creating a rollout with approval role or approval engine disabled results in the rollout being in
      * READY state.
      */
     @Test
@@ -1837,7 +1838,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Creating a rollout without approve role and approval enabled leads to transition to 
+     * Creating a rollout without approve role and approval enabled leads to transition to
      * WAITING_FOR_APPROVAL state.
      */
     @Test
@@ -2147,21 +2148,17 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final String rolloutName = "rolloutTestCompatibility";
 
         final DistributionSet testDs = testdataFactory.createDistributionSet("test-ds");
-        final TargetType incompatibleTargetType = testdataFactory.createTargetType("incompatible-type",
-                Collections.emptyList());
-        final TargetType compatibleTargetType = testdataFactory.createTargetType("compatible-type",
-                Collections.singletonList(testDs.getType()));
+        final TargetType incompatibleTargetType = testdataFactory.createTargetType("incompatible-type", Set.of());
+        final TargetType compatibleTargetType = testdataFactory.createTargetType("compatible-type", Set.of(testDs.getType()));
 
-        final List<Target> incompatibleTargets = testdataFactory.createTargetsWithType(10, "incompatible",
-                incompatibleTargetType);
+        final List<Target> incompatibleTargets = testdataFactory.createTargetsWithType(10, "incompatible", incompatibleTargetType);
         final List<Target> targetsWithoutType = testdataFactory.createTargets(10, "testTarget-");
-        final List<Target> targets = testdataFactory.createTargetsWithType(10, "compatibleTarget-",
-                compatibleTargetType);
+        final List<Target> targets = testdataFactory.createTargetsWithType(10, "compatibleTarget-", compatibleTargetType);
         targets.addAll(targetsWithoutType);
 
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults().build();
-        final RolloutCreate rolloutToCreate = entityFactory.rollout().create().name(rolloutName)
-                .targetFilterQuery("name==*").distributionSetId(testDs);
+        final RolloutCreate rolloutToCreate = entityFactory.rollout().create()
+                .name(rolloutName).targetFilterQuery("name==*").distributionSetId(testDs);
 
         final Rollout createdRollout = rolloutManagement.create(rolloutToCreate, 1, false, conditions);
 

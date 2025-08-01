@@ -78,7 +78,7 @@ public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, 
     }
 
     @Override
-    public Set<DistributionSetType> getCompatibleDistributionSetTypes() {
+    public Set<DistributionSetType> getDistributionSetTypes() {
         return Collections.unmodifiableSet(distributionSetTypes);
     }
 
@@ -88,12 +88,11 @@ public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, 
      * @param dsTypeId Distribution set type ID
      * @return Target type
      */
-    public JpaTargetType removeDistributionSetType(final Long dsTypeId) {
+    public void removeDistributionSetType(final Long dsTypeId) {
         distributionSetTypes.stream()
                 .filter(element -> element.getId().equals(dsTypeId))
                 .findAny()
                 .ifPresent(distributionSetTypes::remove);
-        return this;
     }
 
     @Override

@@ -385,16 +385,15 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         final TargetFilterQuery testFilter = targetFilterQueryManagement.create(entityFactory.targetFilterQuery()
                 .create().name("test-filter").query("name==*").autoAssignDistributionSet(testDs));
 
-        final TargetType incompatibleEmptyType = testdataFactory.createTargetType("incompatibleEmptyType",
-                Collections.emptyList());
-        final TargetType incompatibleSingleType = testdataFactory.createTargetType("incompatibleSingleType",
-                Collections.singletonList(incompatibleDsType1));
-        final TargetType incompatibleMultiType = testdataFactory.createTargetType("incompatibleMultiType",
-                Arrays.asList(incompatibleDsType1, incompatibleDsType2));
-        final TargetType compatibleSingleType = testdataFactory.createTargetType("compatibleSingleType",
-                Collections.singletonList(testDs.getType()));
-        final TargetType compatibleMultiType = testdataFactory.createTargetType("compatibleMultiType",
-                Arrays.asList(testDs.getType(), incompatibleDsType1));
+        final TargetType incompatibleEmptyType = testdataFactory.createTargetType("incompatibleEmptyType", Set.of());
+        final TargetType incompatibleSingleType = testdataFactory.createTargetType(
+                "incompatibleSingleType", Set.of(incompatibleDsType1));
+        final TargetType incompatibleMultiType = testdataFactory.createTargetType(
+                "incompatibleMultiType", Set.of(incompatibleDsType1, incompatibleDsType2));
+        final TargetType compatibleSingleType = testdataFactory.createTargetType(
+                "compatibleSingleType", Set.of(testDs.getType()));
+        final TargetType compatibleMultiType = testdataFactory.createTargetType(
+                "compatibleMultiType", Set.of(testDs.getType(), incompatibleDsType1));
 
         testdataFactory.createTargetsWithType(TARGET_COUNT, "incompatibleEmpty", incompatibleEmptyType);
         testdataFactory.createTargetsWithType(TARGET_COUNT, "incompatibleSingle", incompatibleSingleType);

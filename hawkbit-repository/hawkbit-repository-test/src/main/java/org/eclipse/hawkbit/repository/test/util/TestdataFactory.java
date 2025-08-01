@@ -50,7 +50,6 @@ import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
-import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -75,7 +74,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModule.MetadataValueCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -157,8 +155,8 @@ public class TestdataFactory {
     private final DistributionSetInvalidationManagement distributionSetInvalidationManagement;
     private final TargetManagement targetManagement;
     private final TargetFilterQueryManagement targetFilterQueryManagement;
-    private final TargetTypeManagement targetTypeManagement;
-    private final TargetTagManagement targetTagManagement;
+    private final TargetTypeManagement<? extends TargetType> targetTypeManagement;
+    private final TargetTagManagement<? extends TargetTag> targetTagManagement;
     private final DeploymentManagement deploymentManagement;
     private final RolloutManagement rolloutManagement;
     private final RolloutHandler rolloutHandler;
@@ -175,7 +173,8 @@ public class TestdataFactory {
             final DistributionSetTagManagement<? extends DistributionSetTag> distributionSetTagManagement,
             final DistributionSetInvalidationManagement distributionSetInvalidationManagement,
             final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
-            final TargetTypeManagement targetTypeManagement, final TargetTagManagement targetTagManagement,
+            final TargetTypeManagement<? extends TargetType> targetTypeManagement,
+            final TargetTagManagement<? extends TargetTag> targetTagManagement,
             final DeploymentManagement deploymentManagement,
             final RolloutManagement rolloutManagement, final RolloutHandler rolloutHandler,
             final QuotaManagement quotaManagement,
@@ -912,7 +911,7 @@ public class TestdataFactory {
      * @param tagPrefix prefix for the {@link TargetTag#getName()}
      * @return the created set of {@link TargetTag}s
      */
-    public List<TargetTag> createTargetTags(final int number, final String tagPrefix) {
+    public List<? extends TargetTag> createTargetTags(final int number, final String tagPrefix) {
         final List<TargetTagManagement.Create> result = new ArrayList<>(number);
         for (int i = 0; i < number; i++) {
             result.add(TargetTagManagement.Create.builder().name(tagPrefix + i).description(tagPrefix + i).colour(String.valueOf(i)).build());
@@ -1184,9 +1183,10 @@ public class TestdataFactory {
      */
     public TargetType findOrCreateTargetType(final String targetTypeName) {
         return targetTypeManagement.getByName(targetTypeName)
-                .orElseGet(() -> targetTypeManagement.create(entityFactory.targetType().create()
+                .orElseGet(() -> targetTypeManagement.create(TargetTypeManagement.Create.builder()
                         .name(targetTypeName).description(targetTypeName + SPACE_AND_DESCRIPTION)
-                        .key(targetTypeName + " key").colour(DEFAULT_COLOUR)));
+                        .key(targetTypeName + " key").colour(DEFAULT_COLOUR)
+                        .build()));
     }
 
     /**
@@ -1196,10 +1196,11 @@ public class TestdataFactory {
      * @param targetTypeName {@link TargetType#getName()}
      * @return persisted {@link TargetType}
      */
-    public TargetType createTargetType(final String targetTypeName, final List<DistributionSetType> compatibleDsTypes) {
-        return targetTypeManagement.create(entityFactory.targetType().create().name(targetTypeName)
-                .description(targetTypeName + SPACE_AND_DESCRIPTION).colour(DEFAULT_COLOUR)
-                .compatible(compatibleDsTypes.stream().map(DistributionSetType::getId).toList()));
+    public TargetType createTargetType(final String targetTypeName, final Set<DistributionSetType> compatibleDsTypes) {
+        return targetTypeManagement.create(TargetTypeManagement.Create.builder()
+                .name(targetTypeName).description(targetTypeName + SPACE_AND_DESCRIPTION).colour(DEFAULT_COLOUR)
+                .distributionSetTypes(compatibleDsTypes)
+                .build());
     }
 
     /**
@@ -1208,12 +1209,13 @@ public class TestdataFactory {
      * @param targetTypePrefix {@link TargetType#getName()}
      * @return persisted {@link TargetType}
      */
-    public List<TargetType> createTargetTypes(final String targetTypePrefix, final int count) {
-        final List<TargetTypeCreate> result = new ArrayList<>(count);
+    public List<? extends TargetType> createTargetTypes(final String targetTypePrefix, final int count) {
+        final List<TargetTypeManagement.Create> result = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
-            result.add(entityFactory.targetType().create()
+            result.add(TargetTypeManagement.Create.builder()
                     .name(targetTypePrefix + i).description(targetTypePrefix + SPACE_AND_DESCRIPTION)
-                    .key(targetTypePrefix + i + " key").colour(DEFAULT_COLOUR));
+                    .key(targetTypePrefix + i + " key").colour(DEFAULT_COLOUR)
+                    .build());
         }
         return targetTypeManagement.create(result);
     }

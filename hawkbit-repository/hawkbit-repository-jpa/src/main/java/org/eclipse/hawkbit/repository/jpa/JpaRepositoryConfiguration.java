@@ -46,7 +46,6 @@ import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
-import org.eclipse.hawkbit.repository.builder.TargetTypeBuilder;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
@@ -61,7 +60,6 @@ import org.eclipse.hawkbit.repository.jpa.autocleanup.CleanupTask;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryBuilder;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.cluster.DistributedLockRepository;
 import org.eclipse.hawkbit.repository.jpa.cluster.LockProperties;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
@@ -312,15 +310,6 @@ public class JpaRepositoryConfiguration {
     }
 
     /**
-     * @param dsTypeManagement for loading {@link TargetType#getCompatibleDistributionSetTypes()}
-     * @return TargetTypeBuilder bean
-     */
-    @Bean
-    TargetTypeBuilder targetTypeBuilder(final DistributionSetTypeManagement<? extends DistributionSetType> dsTypeManagement) {
-        return new JpaTargetTypeBuilder(dsTypeManagement);
-    }
-
-    /**
      * @param distributionSetManagement for loading {@link Rollout#getDistributionSet()}
      * @return RolloutBuilder bean
      */
@@ -450,10 +439,9 @@ public class JpaRepositoryConfiguration {
     @Bean
     @ConditionalOnMissingBean
     EntityFactory entityFactory(
-            final TargetBuilder targetBuilder, final TargetTypeBuilder targetTypeBuilder,
-            final TargetFilterQueryBuilder targetFilterQueryBuilder,
+            final TargetBuilder targetBuilder, final TargetFilterQueryBuilder targetFilterQueryBuilder,
             final RolloutBuilder rolloutBuilder) {
-        return new JpaEntityFactory(targetBuilder, targetTypeBuilder, targetFilterQueryBuilder, rolloutBuilder);
+        return new JpaEntityFactory(targetBuilder, targetFilterQueryBuilder, rolloutBuilder);
     }
 
     /**

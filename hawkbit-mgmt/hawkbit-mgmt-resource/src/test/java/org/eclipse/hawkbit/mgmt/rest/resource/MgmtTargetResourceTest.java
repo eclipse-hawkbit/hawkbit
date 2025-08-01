@@ -39,6 +39,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import jakarta.validation.ConstraintViolationException;
@@ -54,6 +55,8 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.Identifiable;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement.Create;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -152,8 +155,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String knownNameNotModify = "controllerName";
         final Long unassignTargetTypeValue = -1L;
 
-        final TargetType targetType = targetTypeManagement.create(
-                entityFactory.targetType().create().name("targettype1").description("targettypedes1"));
+        final TargetType targetType = targetTypeManagement.create(Create.builder().name("targettype1").description("targettypedes1").build());
 
         final String body = new JSONObject().put("targetType", unassignTargetTypeValue).toString();
 
@@ -192,8 +194,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final Long unassignTargetTypeValue = -1L;
         final String controllerNewName = "controllerNewName";
 
-        final TargetType targetType = targetTypeManagement.create(
-                entityFactory.targetType().create().name("targettype1").description("targettypedes1"));
+        final TargetType targetType = targetTypeManagement.create(Create.builder().name("targettype1").description("targettypedes1").build());
 
         final String body = new JSONObject()
                 .put("targetType", unassignTargetTypeValue).put("name", "controllerNewName")
@@ -2077,7 +2078,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", Matchers.hasSize(0)));
 
-        final List<TargetTag> targetTags = testdataFactory.createTargetTags(2, "tag_getControllerTagReturnsTagWithOk");
+        final List<? extends TargetTag> targetTags = testdataFactory.createTargetTags(2, "tag_getControllerTagReturnsTagWithOk");
         final List<String> tagNames = new ArrayList<>();
         for (final TargetTag targetTag : targetTags) {
             targetManagement.assignTag(Collections.singletonList(target.getControllerId()), targetTag.getId());
@@ -2459,10 +2460,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
      */
     @Test
     void createTargetsWithTargetType() throws Exception {
-        final TargetType type1 = testdataFactory.createTargetType("typeWithDs",
-                Collections.singletonList(standardDsType));
-        final TargetType type2 = testdataFactory.createTargetType("typeWithOutDs",
-                Collections.singletonList(standardDsType));
+        final TargetType type1 = testdataFactory.createTargetType("typeWithDs", Set.of(standardDsType));
+        final TargetType type2 = testdataFactory.createTargetType("typeWithOutDs", Set.of(standardDsType));
 
         final Target test1 = entityFactory.target().create().controllerId("id1").name("targetWithoutType")
                 .securityToken("token").address("amqp://test123/foobar").description("testid1").build();
@@ -2531,7 +2530,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     void createTargetWithExistingTargetType() throws Exception {
         // create target type
-        final List<TargetType> targetTypes = testdataFactory.createTargetTypes("targettype", 1);
+        final List<? extends TargetType> targetTypes = testdataFactory.createTargetTypes("targettype", 1);
         assertThat(targetTypes).hasSize(1);
 
         final Target target = entityFactory.target().create().controllerId("targetcontroller").name("testtarget")
@@ -2556,7 +2555,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     void updateTargetTypeInTarget() throws Exception {
         // create target type
-        final List<TargetType> targetTypes = testdataFactory.createTargetTypes("targettype", 2);
+        final List<? extends TargetType> targetTypes = testdataFactory.createTargetTypes("targettype", 2);
         assertThat(targetTypes).hasSize(2);
 
         final String controllerId = "targetcontroller";
@@ -2581,10 +2580,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     void addingNonExistingTargetTypeInTargetShouldFail() throws Exception {
         final long unknownTargetTypeId = 999;
-        final String errorMsg = String.format("TargetType with given identifier {%s} does not exist.",
-                unknownTargetTypeId);
+        final String errorMsg = String.format("TargetType with given identifier {%s} does not exist.", unknownTargetTypeId);
 
-        final Optional<TargetType> targetType = targetTypeManagement.get(unknownTargetTypeId);
+        final Optional<? extends TargetType> targetType = targetTypeManagement.get(unknownTargetTypeId);
         assertThat(targetType).isNotPresent();
 
         final String controllerId = "targetcontroller";
@@ -2664,7 +2662,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     void unassignTargetTypeFromTarget() throws Exception {
         // create target type
-        final List<TargetType> targetTypes = testdataFactory.createTargetTypes("targettype", 1);
+        final List<? extends TargetType> targetTypes = testdataFactory.createTargetTypes("targettype", 1);
         assertThat(targetTypes).hasSize(1);
 
         final String targetControllerId = "targetcontroller";
@@ -2686,7 +2684,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     void invalidRequestsOnTargetTypeResource() throws Exception {
         final String knownTargetId = "targetId";
         testdataFactory.createTarget(knownTargetId);
-        testdataFactory.createTargetType("targettype", Collections.emptyList());
+        testdataFactory.createTargetType("targettype", Set.of());
 
         // GET is not allowed
         mvc.perform(get(

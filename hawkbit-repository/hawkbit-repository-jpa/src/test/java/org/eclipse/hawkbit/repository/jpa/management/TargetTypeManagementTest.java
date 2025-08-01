@@ -18,8 +18,8 @@ import java.util.Optional;
 
 import jakarta.validation.ConstraintViolationException;
 
-import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
-import org.eclipse.hawkbit.repository.builder.TargetTypeUpdate;
+import org.eclipse.hawkbit.repository.TargetTypeManagement.Create;
+import org.eclipse.hawkbit.repository.TargetTypeManagement.Update;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -58,8 +58,7 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({ @Expect(type = TargetTypeUpdatedEvent.class) })
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         verifyThrownExceptionBy(() -> targetTypeManagement.delete(NOT_EXIST_IDL), "TargetType");
-        verifyThrownExceptionBy(() -> targetTypeManagement.update(entityFactory.targetType().update(NOT_EXIST_IDL)),
-                "TargetType");
+        verifyThrownExceptionBy(() -> targetTypeManagement.update(Update.builder().id(NOT_EXIST_IDL).build()),"TargetType");
     }
 
     /**
@@ -68,9 +67,7 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void createAndUpdateTargetTypeWithInvalidFields() {
         final TargetType targetType = targetTypeManagement
-                .create(entityFactory.targetType().create()
-                        .name("targettype1").description("targettypedes1")
-                        .key("targettype1.key"));
+                .create(Create.builder().name("targettype1").description("targettypedes1").key("targettype1.key").build());
 
         createAndUpdateTargetTypeWithInvalidDescription(targetType);
         createAndUpdateTargetTypeWithInvalidColour(targetType);
@@ -79,23 +76,24 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     }
 
     void createAndUpdateTargetTypeWithInvalidDescription(final TargetType targetType) {
-        final TargetTypeCreate targetTypeCreateTooLong = entityFactory.targetType().create().name("a").description(randomString(TargetType.DESCRIPTION_MAX_SIZE + 1));
+        final Create targetTypeCreateTooLong = Create.builder()
+                .name("a").description(randomString(TargetType.DESCRIPTION_MAX_SIZE + 1)).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with too long description should not be created")
                 .isThrownBy(() -> targetTypeManagement.create(targetTypeCreateTooLong));
 
-        final TargetTypeCreate targetTypeCreateInvalidHtml = entityFactory.targetType().create().name("a").description(INVALID_TEXT_HTML);
+        final Create targetTypeCreateInvalidHtml = Create.builder().name("a").description(INVALID_TEXT_HTML).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with invalid description should not be created")
                 .isThrownBy(() -> targetTypeManagement.create(targetTypeCreateInvalidHtml));
 
-        final TargetTypeUpdate targetTypeUpdateTooLong = entityFactory.targetType().update(targetType.getId())
-                .description(randomString(TargetType.DESCRIPTION_MAX_SIZE + 1));
+        final Update targetTypeUpdateTooLong = Update.builder().id(targetType.getId())
+                .description(randomString(TargetType.DESCRIPTION_MAX_SIZE + 1)).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with too long description should not be updated")
                 .isThrownBy(() -> targetTypeManagement.update(targetTypeUpdateTooLong));
 
-        final TargetTypeUpdate targetTypeUpdateInvalidHtml = entityFactory.targetType().update(targetType.getId()).description(INVALID_TEXT_HTML);
+        final Update targetTypeUpdateInvalidHtml = Update.builder().id(targetType.getId()).description(INVALID_TEXT_HTML).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with invalid description should not be updated")
                 .isThrownBy(() -> targetTypeManagement.update(targetTypeUpdateInvalidHtml));
@@ -107,15 +105,14 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void assignCompatibleDistributionSetTypesToTargetType() {
         final TargetType targetType = targetTypeManagement
-                .create(entityFactory.targetType().create()
-                        .name("targettype1").description("targettypedes1")
-                        .key("targettyp1.key"));
+                .create(Create.builder()
+                        .name("targettype1").description("targettypedes1").key("targettyp1.key").build());
         DistributionSetType distributionSetType = testdataFactory.findOrCreateDistributionSetType("testDst", "dst1");
         targetTypeManagement.assignCompatibleDistributionSetTypes(targetType.getId(), Collections.singletonList(distributionSetType.getId()));
 
         Optional<JpaTargetType> targetTypeWithDsTypes = targetTypeRepository.findById(targetType.getId());
         assertThat(targetTypeWithDsTypes).isPresent();
-        assertThat(targetTypeWithDsTypes.get().getCompatibleDistributionSetTypes()).extracting("key").contains("testDst");
+        assertThat(targetTypeWithDsTypes.get().getDistributionSetTypes()).extracting("key").contains("testDst");
     }
 
     /**
@@ -124,18 +121,16 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void unassignCompatibleDistributionSetTypesToTargetType() {
         final TargetType targetType = targetTypeManagement
-                .create(entityFactory.targetType().create()
-                        .name("targettype1").description("targettypedes1")
-                        .key("targettyp1.key"));
+                .create(Create.builder().name("targettype1").description("targettypedes1").key("targettyp1.key").build());
         DistributionSetType distributionSetType = testdataFactory.findOrCreateDistributionSetType("testDst1", "dst11");
         targetTypeManagement.assignCompatibleDistributionSetTypes(targetType.getId(), Collections.singletonList(distributionSetType.getId()));
         Optional<JpaTargetType> targetTypeWithDsTypes = targetTypeRepository.findById(targetType.getId());
         assertThat(targetTypeWithDsTypes).isPresent();
-        assertThat(targetTypeWithDsTypes.get().getCompatibleDistributionSetTypes()).extracting("key").contains("testDst1");
+        assertThat(targetTypeWithDsTypes.get().getDistributionSetTypes()).extracting("key").contains("testDst1");
         targetTypeManagement.unassignDistributionSetType(targetType.getId(), distributionSetType.getId());
         Optional<JpaTargetType> targetTypeWithDsTypes1 = targetTypeRepository.findById(targetType.getId());
         assertThat(targetTypeWithDsTypes1).isPresent();
-        assertThat(targetTypeWithDsTypes1.get().getCompatibleDistributionSetTypes()).isEmpty();
+        assertThat(targetTypeWithDsTypes1.get().getDistributionSetTypes()).isEmpty();
     }
 
     /**
@@ -154,12 +149,7 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     void createTargetType() {
         final String name = "targettype1";
         final String key = "targettype1.key";
-        targetTypeManagement
-                .create(entityFactory.targetType().create()
-                        .name(name)
-                        .description("targettypedes1")
-                        .key(key)
-                        .colour("colour1"));
+        targetTypeManagement.create(Create.builder().name(name).description("targettypedes1").key(key).colour("colour1").build());
 
         assertThat(findByName(name).map(JpaTargetType::getName).orElse(null)).as("type found (name)")
                 .isEqualTo(name);
@@ -185,10 +175,8 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void deleteTargetType() {
         // create test data
-        final TargetType targetType = targetTypeManagement
-                .create(entityFactory.targetType().create().name("targettype11").description("targettypedes11"));
-        assertThat(findByName("targettype11").get().getDescription()).as("type found")
-                .isEqualTo("targettypedes11");
+        final TargetType targetType = targetTypeManagement.create(Create.builder().name("targettype11").description("targettypedes11").build());
+        assertThat(findByName("targettype11").get().getDescription()).as("type found").isEqualTo("targettypedes11");
         targetTypeManagement.delete(targetType.getId());
         assertThat(targetTypeRepository.findById(targetType.getId())).as("No target type should be found").isNotPresent();
 
@@ -199,11 +187,10 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void updateTargetType() {
-        final TargetType targetType = targetTypeManagement
-                .create(entityFactory.targetType().create().name("targettype111").description("targettypedes111"));
-        assertThat(findByName("targettype111").get().getDescription()).as("type found")
-                .isEqualTo("targettypedes111");
-        targetTypeManagement.update(entityFactory.targetType().update(targetType.getId()).name("updatedtargettype111"));
+        final TargetType targetType =
+                targetTypeManagement.create(Create.builder().name("targettype111").description("targettypedes111").build());
+        assertThat(findByName("targettype111").get().getDescription()).as("type found").isEqualTo("targettypedes111");
+        targetTypeManagement.update(Update.builder().id(targetType.getId()).name("updatedtargettype111").build());
         assertThat(findByName("updatedtargettype111")).as("Updated target type should be found").isPresent();
     }
 
@@ -212,7 +199,7 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void failedDuplicateTargetTypeNameException() {
-        final TargetTypeCreate targetTypeCreate = entityFactory.targetType().create().name("targettype123");
+        final Create targetTypeCreate = Create.builder().name("targettype123").build();
         targetTypeManagement.create(targetTypeCreate);
         assertThrows(EntityAlreadyExistsException.class, () -> targetTypeManagement.create(targetTypeCreate));
     }
@@ -222,69 +209,71 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void failedDuplicateTargetTypeNameExceptionAfterUpdate() {
-        targetTypeManagement.create(entityFactory.targetType().create().name("targettype1234"));
-        TargetType targetType = targetTypeManagement.create(entityFactory.targetType().create().name("targettype12345"));
+        targetTypeManagement.create(Create.builder().name("targettype1234").build());
+        TargetType targetType = targetTypeManagement.create(Create.builder().name("targettype12345").build());
         assertThrows(EntityAlreadyExistsException.class,
-                () -> targetTypeManagement.update(entityFactory.targetType().update(targetType.getId()).name("targettype1234")));
+                () -> targetTypeManagement.update(Update.builder().id(targetType.getId()).name("targettype1234").build()));
     }
 
     private void createAndUpdateTargetTypeWithInvalidColour(final TargetType targetType) {
-        final TargetTypeCreate targetTypeCreateTooLong = entityFactory.targetType().create().name("a").colour(randomString(Type.COLOUR_MAX_SIZE + 1));
+        final Create targetTypeCreateTooLong = Create.builder().name("a").colour(randomString(Type.COLOUR_MAX_SIZE + 1)).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with too long colour should not be created")
                 .isThrownBy(() -> targetTypeManagement.create(targetTypeCreateTooLong));
 
-        final TargetTypeCreate targetTypeCreateInvalidHtml = entityFactory.targetType().create().name("a").colour(INVALID_TEXT_HTML);
+        final Create targetTypeCreateInvalidHtml = Create.builder().name("a").colour(INVALID_TEXT_HTML).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with invalid colour should not be created")
                 .isThrownBy(() -> targetTypeManagement.create(targetTypeCreateInvalidHtml));
 
-        final TargetTypeUpdate targetTypeUpdateTooLong = entityFactory.targetType().update(targetType.getId()).colour(randomString(Type.COLOUR_MAX_SIZE + 1));
+        final Update targetTypeUpdateTooLong = Update.builder()
+                .id(targetType.getId()).colour(randomString(Type.COLOUR_MAX_SIZE + 1)).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with too long colour should not be updated")
                 .isThrownBy(() -> targetTypeManagement.update(targetTypeUpdateTooLong));
 
-        final TargetTypeUpdate targetTypeUpdateInvalidHtml = entityFactory.targetType().update(targetType.getId()).colour(INVALID_TEXT_HTML);
+        final Update targetTypeUpdateInvalidHtml = Update.builder().id(targetType.getId()).colour(INVALID_TEXT_HTML).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with invalid colour should not be updated")
                 .isThrownBy(() -> targetTypeManagement.update(targetTypeUpdateInvalidHtml));
     }
 
     private void createTargetTypeWithInvalidKey() {
-        final TargetTypeCreate targetTypeCreateTooLong = entityFactory.targetType().create().name(randomString(Type.KEY_MAX_SIZE + 1));
+        final Create targetTypeCreateTooLong = Create.builder().name(randomString(Type.KEY_MAX_SIZE + 1)).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with too long key should not be created")
                 .isThrownBy(() -> targetTypeManagement.create(targetTypeCreateTooLong));
 
-        final TargetTypeCreate targetTypeCreateInvalidHtmle = entityFactory.targetType().create().name(INVALID_TEXT_HTML);
+        final Create targetTypeCreateInvalidHtmle = Create.builder().name(INVALID_TEXT_HTML).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with invalid key should not be created")
                 .isThrownBy(() -> targetTypeManagement.create(targetTypeCreateInvalidHtmle));
     }
 
     private void createAndUpdateTargetTypeWithInvalidName(final TargetType targetType) {
-        final TargetTypeCreate targetTypeCreateTooLong = entityFactory.targetType().create().name(randomString(NamedEntity.NAME_MAX_SIZE + 1));
+        final Create targetTypeCreateTooLong = Create.builder().name(randomString(NamedEntity.NAME_MAX_SIZE + 1)).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with too long name should not be created")
                 .isThrownBy(() -> targetTypeManagement
                         .create(targetTypeCreateTooLong));
 
-        final TargetTypeCreate targetTypeCreateInvalidHtml = entityFactory.targetType().create().name(INVALID_TEXT_HTML);
+        final Create targetTypeCreateInvalidHtml = Create.builder().name(INVALID_TEXT_HTML).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with invalid name should not be created")
                 .isThrownBy(() -> targetTypeManagement.create(targetTypeCreateInvalidHtml));
 
-        final TargetTypeUpdate targetTypeUpdateTooLong = entityFactory.targetType().update(targetType.getId()).name(randomString(NamedEntity.NAME_MAX_SIZE + 1));
+        final Update targetTypeUpdateTooLong = Update.builder()
+                .id(targetType.getId()).name(randomString(NamedEntity.NAME_MAX_SIZE + 1)).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with too long name should not be updated")
                 .isThrownBy(() -> targetTypeManagement.update(targetTypeUpdateTooLong));
 
-        final TargetTypeUpdate targetTypeUpdateInvalidHtml = entityFactory.targetType().update(targetType.getId()).name(INVALID_TEXT_HTML);
+        final Update targetTypeUpdateInvalidHtml = Update.builder().id(targetType.getId()).name(INVALID_TEXT_HTML).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with invalid name should not be updated")
                 .isThrownBy(() -> targetTypeManagement.update(targetTypeUpdateInvalidHtml));
 
-        final TargetTypeUpdate targetTypeUpdateEmpty = entityFactory.targetType().update(targetType.getId()).name("");
+        final Update targetTypeUpdateEmpty = Update.builder().id(targetType.getId()).name("").build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with too short name should not be updated")
                 .isThrownBy(() -> targetTypeManagement.update(targetTypeUpdateEmpty));

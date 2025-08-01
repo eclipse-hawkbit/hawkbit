@@ -52,10 +52,12 @@ public interface SoftwareModuleTypeManagement<T extends SoftwareModuleType>
     @ToString(callSuper = true)
     final class Create extends UpdateCreate {
 
+        @ValidString
         @Size(min = 1, max = Type.KEY_MAX_SIZE)
         @NotNull
         private String key;
 
+        @ValidString
         @Size(min = 1, max = NamedEntity.NAME_MAX_SIZE)
         @NotNull
         private String name;

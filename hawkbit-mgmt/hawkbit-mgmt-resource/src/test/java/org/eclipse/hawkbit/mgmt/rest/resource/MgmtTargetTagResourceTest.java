@@ -66,7 +66,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     @Test
     @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 2) })
     public void getTargetTags() throws Exception {
-        final List<TargetTag> tags = testdataFactory.createTargetTags(2, "");
+        final List<? extends TargetTag> tags = testdataFactory.createTargetTags(2, "");
         final TargetTag assigned = tags.get(0);
         final TargetTag unassigned = tags.get(1);
 
@@ -105,7 +105,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         testdataFactory.createTarget(controllerId1);
         testdataFactory.createTarget(controllerId2);
 
-        final List<TargetTag> tags = testdataFactory.createTargetTags(2, "");
+        final List<? extends TargetTag> tags = testdataFactory.createTargetTags(2, "");
         final TargetTag tag1 = tags.get(0);
         final TargetTag tag2 = tags.get(1);
 
@@ -133,7 +133,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     @Test
     @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 2) })
     public void getTargetTag() throws Exception {
-        final List<TargetTag> tags = testdataFactory.createTargetTags(2, "");
+        final List<? extends TargetTag> tags = testdataFactory.createTargetTags(2, "");
         final TargetTag assigned = tags.get(0);
 
         mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + assigned.getId())
@@ -190,7 +190,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetTagUpdatedEvent.class, count = 1) })
     public void updateTargetTag() throws Exception {
-        final List<TargetTag> tags = testdataFactory.createTargetTags(1, "");
+        final List<? extends TargetTag> tags = testdataFactory.createTargetTags(1, "");
         final TargetTag original = tags.get(0);
 
         final TargetTagManagement.Update update = TargetTagManagement.Update.builder()
@@ -222,7 +222,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetTagDeletedEvent.class, count = 1) })
     public void deleteTargetTag() throws Exception {
-        final List<TargetTag> tags = testdataFactory.createTargetTags(1, "");
+        final List<? extends TargetTag> tags = testdataFactory.createTargetTags(1, "");
         final TargetTag original = tags.get(0);
 
         mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + original.getId()))

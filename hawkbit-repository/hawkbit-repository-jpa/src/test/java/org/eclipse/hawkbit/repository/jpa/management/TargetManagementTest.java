@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.validation.ConstraintViolationException;
 
@@ -515,12 +516,12 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final Target t1 = testdataFactory.createTarget("id-1");
         final int noT2Tags = 4;
         final int noT1Tags = 3;
-        final List<TargetTag> t1Tags = testdataFactory.createTargetTags(noT1Tags, "tag1");
+        final List<? extends TargetTag> t1Tags = testdataFactory.createTargetTags(noT1Tags, "tag1");
 
         t1Tags.forEach(tag -> targetManagement.assignTag(Collections.singletonList(t1.getControllerId()), tag.getId()));
 
         final Target t2 = testdataFactory.createTarget("id-2");
-        final List<TargetTag> t2Tags = testdataFactory.createTargetTags(noT2Tags, "tag2");
+        final List<? extends TargetTag> t2Tags = testdataFactory.createTargetTags(noT2Tags, "tag2");
         t2Tags.forEach(tag -> targetManagement.assignTag(Collections.singletonList(t2.getControllerId()), tag.getId()));
 
         final Target t11 = targetManagement.getByControllerID(t1.getControllerId())
@@ -889,7 +890,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @WithUser(allSpPermissions = true)
     void createAndUpdateTargetTypeInTarget() {
         // create a target type
-        final List<TargetType> targetTypes = testdataFactory.createTargetTypes("targettype", 2);
+        final List<? extends TargetType> targetTypes = testdataFactory.createTargetTypes("targettype", 2);
         assertThat(targetTypes).hasSize(2);
         // create a target
         final Target target = testdataFactory.createTarget("target1", "testtarget", targetTypes.get(0).getId());
@@ -963,8 +964,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> typeBTargets = testdataFactory.createTargets(10, "typeBTargets", "first description");
 
         // create a target type
-        final TargetType typeA = testdataFactory.createTargetType("A", Collections.singletonList(standardDsType));
-        final TargetType typeB = testdataFactory.createTargetType("B", Collections.singletonList(standardDsType));
+        final TargetType typeA = testdataFactory.createTargetType("A", Set.of(standardDsType));
+        final TargetType typeB = testdataFactory.createTargetType("B", Set.of(standardDsType));
 
         // assign target type to target
         TargetTypeAssignmentResult resultA = initiateTypeAssignment(typeATargets, typeA);
@@ -1088,7 +1089,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final String controllerId1 = "target1";
         final String controllerId2 = "target2";
         createTargetWithMetadata(controllerId1, 2);
-        final TargetType type = testdataFactory.createTargetType("type1", Collections.emptyList());
+        final TargetType type = testdataFactory.createTargetType("type1", Set.of());
         createTargetWithTargetTypeAndMetadata(controllerId2, type.getId(), 2);
 
         assertThat(targetManagement.count()).as("Total targets").isEqualTo(2);
@@ -1147,7 +1148,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void matchesFilterWrongType() {
-        final TargetType type = testdataFactory.createTargetType("type", Collections.emptyList());
+        final TargetType type = testdataFactory.createTargetType("type", Set.of());
         final Target target = testdataFactory.createTarget("target", "target", type.getId());
         final DistributionSet ds = testdataFactory.createDistributionSet();
 

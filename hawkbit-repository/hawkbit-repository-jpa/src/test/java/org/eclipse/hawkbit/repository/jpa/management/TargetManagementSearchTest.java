@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
@@ -43,8 +44,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void findTargetByTargetType() {
-        final TargetType testType = testdataFactory.createTargetType("testType",
-                Collections.singletonList(standardDsType));
+        final TargetType testType = testdataFactory.createTargetType("testType", Set.of(standardDsType));
         final List<Target> unassigned = testdataFactory.createTargets(9, "unassigned");
         final List<Target> assigned = testdataFactory.createTargetsWithType(11, "assigned", testType);
 
@@ -76,8 +76,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final DistributionSet setA = testdataFactory.createDistributionSet("A");
         final DistributionSet setB = testdataFactory.createDistributionSet("B");
 
-        final TargetType targetTypeX = testdataFactory.createTargetType("TargetTypeX",
-                Collections.singletonList(setB.getType()));
+        final TargetType targetTypeX = testdataFactory.createTargetType("TargetTypeX", Set.of(setB.getType()));
 
         final DistributionSet installedSet = testdataFactory.createDistributionSet("another");
 
@@ -259,8 +258,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     @Test
     void shouldFindAllTargetsCompatibleWithDS() {
         final DistributionSet testDs = testdataFactory.createDistributionSet();
-        final TargetType targetType = testdataFactory.createTargetType("testType",
-                Collections.singletonList(testDs.getType()));
+        final TargetType targetType = testdataFactory.createTargetType("testType", Set.of(testDs.getType()));
         final TargetFilterQuery tfq = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("test-filter").query("name==*"));
         final List<Target> targets = testdataFactory.createTargets(20, "withOutType");
@@ -282,9 +280,9 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final DistributionSetType dsType = testdataFactory.findOrCreateDistributionSetType("test-ds-type", "test-ds-type");
         final DistributionSet testDs = distributionSetManagement.create(DistributionSetManagement.Create.builder()
                 .type(dsType).name("test-ds").version("1.0").build());
-        final TargetType compatibleTargetType = testdataFactory.createTargetType("compTestType", List.of(dsType));
+        final TargetType compatibleTargetType = testdataFactory.createTargetType("compTestType", Set.of(dsType));
         final TargetType incompatibleTargetType = testdataFactory.createTargetType(
-                "incompTestType", List.of(testdataFactory.createDistributionSet().getType()));
+                "incompTestType", Set.of(testdataFactory.createDistributionSet().getType()));
         final TargetFilterQuery tfq = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("test-filter").query("name==*"));
 

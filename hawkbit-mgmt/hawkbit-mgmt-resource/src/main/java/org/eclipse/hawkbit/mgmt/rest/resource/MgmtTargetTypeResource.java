@@ -25,13 +25,12 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtDistributionSetTypeMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetTypeMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement.Update;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,30 +42,28 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
 
-    private final TargetTypeManagement targetTypeManagement;
-    private final EntityFactory entityFactory;
+    private final TargetTypeManagement<? extends TargetType> targetTypeManagement;
+    private final MgmtTargetTypeMapper mgmtTargetTypeMapper;
 
-    public MgmtTargetTypeResource(final TargetTypeManagement targetTypeManagement, final EntityFactory entityFactory) {
+    public MgmtTargetTypeResource(
+            final TargetTypeManagement<? extends TargetType> targetTypeManagement, final MgmtTargetTypeMapper mgmtTargetTypeMapper) {
         this.targetTypeManagement = targetTypeManagement;
-        this.entityFactory = entityFactory;
+        this.mgmtTargetTypeMapper = mgmtTargetTypeMapper;
     }
 
     @Override
     public ResponseEntity<PagedList<MgmtTargetType>> getTargetTypes(
             final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeTargetTypeSortParam(sortParam));
-        final Slice<TargetType> findTargetTypesAll;
-        long countTargetTypesAll;
+        final Page<? extends TargetType> findTargetTypesAll;
         if (rsqlParam != null) {
             findTargetTypesAll = targetTypeManagement.findByRsql(rsqlParam, pageable);
-            countTargetTypesAll = ((Page<TargetType>) findTargetTypesAll).getTotalElements();
         } else {
             findTargetTypesAll = targetTypeManagement.findAll(pageable);
-            countTargetTypesAll = targetTypeManagement.count();
         }
 
         final List<MgmtTargetType> rest = MgmtTargetTypeMapper.toListResponse(findTargetTypesAll.getContent());
-        return ResponseEntity.ok(new PagedList<>(rest, countTargetTypesAll));
+        return ResponseEntity.ok(new PagedList<>(rest,  targetTypeManagement.count()));
     }
 
     @Override
@@ -88,8 +85,9 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
     @Override
     public ResponseEntity<MgmtTargetType> updateTargetType(final Long targetTypeId, final MgmtTargetTypeRequestBodyPut restTargetType) {
         final TargetType updated = targetTypeManagement
-                .update(entityFactory.targetType().update(targetTypeId).name(restTargetType.getName())
-                        .description(restTargetType.getDescription()).colour(restTargetType.getColour()));
+                .update(Update.builder().id(targetTypeId)
+                        .name(restTargetType.getName()).description(restTargetType.getDescription()).colour(restTargetType.getColour())
+                        .build());
         final MgmtTargetType response = MgmtTargetTypeMapper.toResponse(updated);
         MgmtTargetTypeMapper.addLinks(response);
         return ResponseEntity.ok(response);
@@ -97,15 +95,14 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
 
     @Override
     public ResponseEntity<List<MgmtTargetType>> createTargetTypes(final List<MgmtTargetTypeRequestBodyPost> targetTypes) {
-        final List<TargetType> createdTargetTypes = targetTypeManagement
-                .create(MgmtTargetTypeMapper.targetFromRequest(entityFactory, targetTypes));
+        final List<? extends TargetType> createdTargetTypes = targetTypeManagement.create(mgmtTargetTypeMapper.targetFromRequest(targetTypes));
         return ResponseEntity.status(HttpStatus.CREATED).body(MgmtTargetTypeMapper.toListResponse(createdTargetTypes));
     }
 
     @Override
     public ResponseEntity<List<MgmtDistributionSetType>> getCompatibleDistributionSets(final Long targetTypeId) {
         final TargetType foundType = findTargetTypeWithExceptionIfNotFound(targetTypeId);
-        return ResponseEntity.ok(MgmtDistributionSetTypeMapper.toListResponse(foundType.getCompatibleDistributionSetTypes()));
+        return ResponseEntity.ok(MgmtDistributionSetTypeMapper.toListResponse(foundType.getDistributionSetTypes()));
     }
 
     @Override

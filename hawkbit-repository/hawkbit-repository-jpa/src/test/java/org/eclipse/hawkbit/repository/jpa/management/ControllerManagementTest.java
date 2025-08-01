@@ -39,6 +39,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
@@ -1829,7 +1830,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void createTargetType(String targetTypeName) {
-        systemSecurityContext.runAsSystem(() -> targetTypeManagement.create(entityFactory.targetType().create().name(targetTypeName)));
+        systemSecurityContext.runAsSystem(
+                () -> targetTypeManagement.create(TargetTypeManagement.Create.builder().name(targetTypeName).build()));
     }
 
     private void addAttributeAndVerify(final String controllerId) {

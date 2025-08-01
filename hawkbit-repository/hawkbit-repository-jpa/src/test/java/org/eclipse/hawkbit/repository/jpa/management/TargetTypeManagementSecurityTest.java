@@ -13,6 +13,9 @@ import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement.Create;
+import org.eclipse.hawkbit.repository.TargetTypeManagement.Update;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
@@ -61,7 +64,7 @@ class TargetTypeManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void createPermissionsCheck() {
-        assertPermissions(() -> targetTypeManagement.create(entityFactory.targetType().create().name("name")),
+        assertPermissions(() -> targetTypeManagement.create(Create.builder().name("name").build()),
                 List.of(SpPermission.CREATE_TARGET));
     }
 
@@ -70,7 +73,7 @@ class TargetTypeManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void createCollectionPermissionsCheck() {
-        assertPermissions(() -> targetTypeManagement.create(List.of(entityFactory.targetType().create().name("name"))),
+        assertPermissions(() -> targetTypeManagement.create(List.of(Create.builder().name("name").build())),
                 List.of(SpPermission.CREATE_TARGET));
     }
 
@@ -130,7 +133,7 @@ class TargetTypeManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void updatePermissionsCheck() {
-        assertPermissions(() -> targetTypeManagement.update(entityFactory.targetType().update(1L)), List.of(SpPermission.UPDATE_TARGET));
+        assertPermissions(() -> targetTypeManagement.update(Update.builder().id(1L).build()), List.of(SpPermission.UPDATE_TARGET));
     }
 
     /**

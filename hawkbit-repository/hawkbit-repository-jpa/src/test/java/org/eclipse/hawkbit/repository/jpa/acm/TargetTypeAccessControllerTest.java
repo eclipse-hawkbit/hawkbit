@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.acm;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.DELETE_TARGET_TYPE;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TARGET_TYPE;
@@ -18,10 +19,11 @@ import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.run
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withUser;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.hawkbit.repository.Identifiable;
-import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
-import org.eclipse.hawkbit.repository.builder.TargetTypeUpdate;
+import org.eclipse.hawkbit.repository.TargetTypeManagement.Create;
+import org.eclipse.hawkbit.repository.TargetTypeManagement.Update;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -42,8 +44,8 @@ class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void verifyTargetTypeReadOperations() {
-        final TargetType permittedTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type1"));
-        final TargetType hiddenTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type2"));
+        final TargetType permittedTargetType = targetTypeManagement.create(Create.builder().name("type1").build());
+        final TargetType hiddenTargetType = targetTypeManagement.create(Create.builder().name("type2").build());
 
         runAs(withUser("user", READ_TARGET_TYPE + "/id==" + permittedTargetType.getId()), () -> {
             // verify targetTypeManagement#findAll
@@ -81,12 +83,13 @@ class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
             assertThat(targetTypeManagement.getByName(hiddenTargetType.getName())).isEmpty();
 
             // verify targetTypeManagement#get by ids
-            assertThat(targetTypeManagement.get(Arrays.asList(permittedTargetType.getId(), hiddenTargetTypeId))
-                    .stream().map(Identifiable::getId).toList()).containsOnly(permittedTargetType.getId());
+            final List<Long> allEntityIds = Arrays.asList(permittedTargetType.getId(), hiddenTargetTypeId);
+            assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> targetTypeManagement.get(allEntityIds));
 
             // verify targetTypeManagement#update is not possible. Assert exception thrown.
-            final TargetTypeUpdate targetTypeUpdate = entityFactory.targetType().update(hiddenTargetTypeId)
-                    .name(hiddenTargetType.getName() + "/new").description("newDesc");
+            final Update targetTypeUpdate = Update.builder()
+                    .id(hiddenTargetTypeId).name(hiddenTargetType.getName() + "/new").description("newDesc")
+                    .build();
             assertThatThrownBy(() -> targetTypeManagement.update(targetTypeUpdate))
                     .as("Target type update shouldn't be allowed since the target type is not visible.")
                     .isInstanceOf(InsufficientPermissionException.class);
@@ -103,8 +106,8 @@ class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void verifyTargetTypeDeleteOperations() {
-        final TargetType manageableTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type1"));
-        final TargetType readOnlyTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type2"));
+        final TargetType manageableTargetType = targetTypeManagement.create(Create.builder().name("type1").build());
+        final TargetType readOnlyTargetType = targetTypeManagement.create(Create.builder().name("type2").build());
 
         runAs(withUser("user",
                         READ_TARGET_TYPE + "/id==" + manageableTargetType.getId() + " or id==" + readOnlyTargetType.getId(),
@@ -124,21 +127,21 @@ class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void verifyTargetTypeUpdateOperations() {
-        final TargetType manageableTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type1"));
-        final TargetType readOnlyTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type2"));
+        final TargetType manageableTargetType = targetTypeManagement.create(Create.builder().name("type1").build());
+        final TargetType readOnlyTargetType = targetTypeManagement.create(Create.builder().name("type2").build());
 
         runAs(withUser("user",
                         READ_TARGET_TYPE + "/id==" + manageableTargetType.getId() + " or id==" + readOnlyTargetType.getId(),
                         UPDATE_TARGET_TYPE + "/id==" + manageableTargetType.getId()), () -> {
             // update the manageableTargetType
-            targetTypeManagement.update(entityFactory.targetType().update(manageableTargetType.getId())
-                    .name(manageableTargetType.getName() + "/new").description("newDesc"));
+            targetTypeManagement.update(Update.builder().id(manageableTargetType.getId())
+                    .name(manageableTargetType.getName() + "/new").description("newDesc").build());
 
             // verify targetTypeManagement#update for readOnlyTargetType is not possible
-            final TargetTypeUpdate targetTypeUpdate = entityFactory.targetType().update(readOnlyTargetType.getId())
-                    .name(readOnlyTargetType.getName() + "/new").description("newDesc");
-            assertThatThrownBy(() -> targetTypeManagement.update(targetTypeUpdate))
-                    .isInstanceOf(InsufficientPermissionException.class);
+            final Update targetTypeUpdate = Update.builder()
+                    .id(readOnlyTargetType.getId()).name(readOnlyTargetType.getName() + "/new").description("newDesc")
+                    .build();
+            assertThatThrownBy(() -> targetTypeManagement.update(targetTypeUpdate)).isInstanceOf(InsufficientPermissionException.class);
         });
     }
 
@@ -149,7 +152,7 @@ class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
     void verifyTargetTypeCreationBlockedByAccessController() {
         runAs(withUser("user", READ_TARGET_TYPE, UPDATE_TARGET_TYPE), () -> {
             // verify targetTypeManagement#create for any type
-            final TargetTypeCreate targetTypeCreate = entityFactory.targetType().create().name("type1");
+            final Create targetTypeCreate = Create.builder().name("type1").build();
             assertThatThrownBy(() -> targetTypeManagement.create(targetTypeCreate))
                     .as("Target type create shouldn't be allowed since the target type is not visible.")
                     .isInstanceOf(InsufficientPermissionException.class);
