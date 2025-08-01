@@ -160,11 +160,11 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
 
             // verify distributionSetManagement#updateMetaData
             final String newValue = "newValue";
-            distributionSetManagement.updateMetadata(permitted.getId(), mdPresetKey, newValue);
-            assertThatThrownBy(() -> distributionSetManagement.updateMetadata(readOnlyId, mdPresetKey, newValue))
+            distributionSetManagement.createMetadata(permitted.getId(), mdPresetKey, newValue);
+            assertThatThrownBy(() -> distributionSetManagement.createMetadata(readOnlyId, mdPresetKey, newValue))
                     .as("Distribution set not allowed to me modified.")
                     .isInstanceOf(InsufficientPermissionException.class);
-            assertThatThrownBy(() -> distributionSetManagement.updateMetadata(hiddenId, mdPresetKey, newValue))
+            assertThatThrownBy(() -> distributionSetManagement.createMetadata(hiddenId, mdPresetKey, newValue))
                     .as("Distribution set should not be visible.")
                     .isInstanceOf(EntityNotFoundException.class);
 

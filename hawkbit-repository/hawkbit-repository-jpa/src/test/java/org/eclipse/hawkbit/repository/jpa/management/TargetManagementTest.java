@@ -154,7 +154,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> targetManagement.deleteMetadata(NOT_EXIST_ID, "xxx"), "Target");
         verifyThrownExceptionBy(() -> targetManagement.deleteMetadata(target.getControllerId(), NOT_EXIST_ID), "Target");
         verifyThrownExceptionBy(() -> targetManagement.getMetadata(NOT_EXIST_ID).get("xxx"), "Target");
-        verifyThrownExceptionBy(() -> targetManagement.updateMetadata(NOT_EXIST_ID, "xxx", "xxx"), "Target");
+        verifyThrownExceptionBy(() -> targetManagement.createMetadata(NOT_EXIST_ID, "xxx", "xxx"), "Target");
     }
 
     /**
@@ -773,17 +773,6 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(target.isRequestControllerAttributes()).isFalse();
         assertThat(targetManagement.findByControllerAttributesRequested(PAGE).getContent()).contains(updated);
         assertThat(targetManagement.isControllerAttributesRequested(knownControllerId)).isTrue();
-
-    }
-
-    /**
-     * Checks that metadata for a target can be created.
-     */
-    @Test
-    void createMetadata() {
-        insertMetadata(
-                "targetMetaKnownKey", "targetMetaKnownValue",
-                testdataFactory.createTarget("targetIdWithMetadata")); // and validate
     }
 
     /**
@@ -847,7 +836,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     @WithUser(allSpPermissions = true)
-    void updateMetadata() {
+    void createMetadata() {
         final String knownKey = "myKnownKey";
         final String knownValue = "myKnownValue";
         final String knownUpdateValue = "myNewUpdatedValue";
@@ -864,7 +853,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(changedLockRevisionTarget.getOptLockRevision()).isEqualTo(2);
 
         // update the target metadata
-        targetManagement.updateMetadata(target.getControllerId(), knownKey, knownUpdateValue);
+        targetManagement.createMetadata(target.getControllerId(), knownKey, knownUpdateValue);
         // we are updating the target meta-data so also modifying the target so opt lock revision must be three
         final Target changedLockRevisionTarget2 = targetManagement.get(target.getId()).orElseThrow(NoSuchElementException::new);
         assertThat(changedLockRevisionTarget2.getOptLockRevision()).isEqualTo(3);

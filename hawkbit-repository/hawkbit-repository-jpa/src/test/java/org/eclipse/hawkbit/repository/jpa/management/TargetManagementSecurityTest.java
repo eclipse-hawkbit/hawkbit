@@ -500,13 +500,13 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void createMetadataPermissionsCheck() {
+    void createMetadataMapPermissionsCheck() {
         assertPermissions(
                 () -> {
                     targetManagement.createMetadata("controllerId", Map.of("key", "value"));
                     return null;
                 },
-                List.of(SpPermission.UPDATE_REPOSITORY));
+                List.of(SpPermission.UPDATE_TARGET));
     }
 
     /**
@@ -514,20 +514,20 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void getMetadataPermissionsCheck() {
-        assertPermissions(() -> targetManagement.getMetadata("controllerId"), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> targetManagement.getMetadata("controllerId"), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    @WithUser(principal = "user", authorities = { SpPermission.UPDATE_REPOSITORY })
-    void updateMetadataPermissionsCheck() {
+    @WithUser(principal = "user", authorities = { SpPermission.UPDATE_TARGET })
+    void createMetadataPermissionsCheck() {
         assertPermissions(() -> {
-                    targetManagement.updateMetadata("controllerId", "key", "value");
+                    targetManagement.createMetadata("controllerId", "key", "value");
                     return null;
                 },
-                List.of(SpPermission.UPDATE_REPOSITORY));
+                List.of(SpPermission.UPDATE_TARGET));
     }
 
     /**
@@ -538,6 +538,6 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
         assertPermissions(() -> {
             targetManagement.deleteMetadata("controllerId", "key");
             return null;
-        }, List.of(SpPermission.UPDATE_REPOSITORY));
+        }, List.of(SpPermission.UPDATE_TARGET));
     }
 }

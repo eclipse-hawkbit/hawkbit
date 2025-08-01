@@ -64,9 +64,9 @@ public class RepositoryConfiguration {
             public boolean hasPermission(final Authentication authentication, final Object targetDomainObject, final Object permission) {
                 if (targetDomainObject instanceof MethodSecurityExpressionOperations root) {
                     final String neededPermission =
-                            permission + "_" + (root.getThis() instanceof RepositoryManagement<?, ?, ?> repositoryManagement
-                                    ? repositoryManagement.permissionGroup()
-                                    : "REPOSITORY"); // TODO - should not fall back here - all using parmissions should extend repository management interface
+                            permission + "_" + (root.getThis() instanceof PermissionSupport permissionSupport
+                                    ? permissionSupport.permissionGroup()
+                                    : "REPOSITORY"); // TODO - should not fall back here - all using permissions should extend repository management interface
                     final boolean hasPermission = roleHierarchy.getReachableGrantedAuthorities(authentication.getAuthorities()).stream()
                             .map(GrantedAuthority::getAuthority)
                             .anyMatch(authority -> authority.equals(neededPermission));

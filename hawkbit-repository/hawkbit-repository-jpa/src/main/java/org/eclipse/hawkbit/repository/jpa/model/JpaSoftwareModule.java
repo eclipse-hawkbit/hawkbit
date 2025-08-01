@@ -51,6 +51,7 @@ import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModule.MetadataValue;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
 /**
@@ -70,7 +71,9 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 @NamedEntityGraph(name = "SoftwareModule.artifacts", attributeNodes = { @NamedAttributeNode("artifacts") })
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implements SoftwareModule, EventAwareEntity {
+public class JpaSoftwareModule
+        extends AbstractJpaNamedVersionedEntity
+        implements SoftwareModule, WithMetadata<MetadataValue, JpaSoftwareModule.JpaMetadataValue>, EventAwareEntity {
 
     @Serial
     private static final long serialVersionUID = 1L;

@@ -74,7 +74,7 @@ class DistributionSetManagementSecurityTest
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void createMetadataPermissionsCheck() {
+    void createMetadataMapPermissionsCheck() {
         assertPermissions(
                 () -> {
                     distributionSetManagement.createMetadata(1L, Map.of("key", "value"));
@@ -95,9 +95,9 @@ class DistributionSetManagementSecurityTest
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void updateMetadataPermissionsCheck() {
+    void createMetadataPermissionsCheck() {
         assertPermissions(() -> {
-                    distributionSetManagement.updateMetadata(1L, "key", "value");
+                    distributionSetManagement.createMetadata(1L, "key", "value");
                     return null;
                 },
                 List.of(SpPermission.UPDATE_REPOSITORY));

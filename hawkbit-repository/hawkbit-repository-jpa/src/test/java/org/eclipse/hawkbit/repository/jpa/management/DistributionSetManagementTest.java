@@ -156,8 +156,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 () -> distributionSetManagement.update(DistributionSetManagement.Update.builder().id(NOT_EXIST_IDL).build()),
                 "DistributionSet");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.updateMetadata(NOT_EXIST_IDL, "xxx", "xxx"), "DistributionSet");
-        verifyThrownExceptionBy(() -> distributionSetManagement.updateMetadata(set.getId(), NOT_EXIST_ID, "xxx"), "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.createMetadata(NOT_EXIST_IDL, "xxx", "xxx"), "DistributionSet");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.getOrElseThrowException(NOT_EXIST_IDL), "DistributionSet");
 
@@ -238,19 +237,6 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                         return value.getType().equals(systemManagement.getTenantMetadata().getDefaultDsType());
                     }
                 });
-    }
-
-    /**
-     * Checks that metadata for a distribution set can be created.
-     */
-    @Test
-    void createMetadata() {
-        final String knownKey = "dsMetaKnownKey";
-        final String knownValue = "dsMetaKnownValue";
-
-        final DistributionSet ds = testdataFactory.createDistributionSet("testDs");
-
-        insertMetadata(knownKey, knownValue, ds); // and validate
     }
 
     /**
@@ -520,7 +506,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     @WithUser(allSpPermissions = true)
-    void updateMetadata() {
+    void createMetadata() {
         final String knownKey = "myKnownKey";
         final String knownValue = "myKnownValue";
         final String knownUpdateValue = "myNewUpdatedValue";
@@ -539,7 +525,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         waitNextMillis();
         // update the DS metadata
-        distributionSetManagement.updateMetadata(ds.getId(), knownKey, knownUpdateValue);
+        distributionSetManagement.createMetadata(ds.getId(), knownKey, knownUpdateValue);
         // we are updating the sw metadata so also modifying the base software
         // module so opt lock revision must be three
         final DistributionSet reloadedDS = getOrThrow(distributionSetManagement.get(ds.getId()));
@@ -944,7 +930,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // assert that an existing metadata can not be updated
         assertThatExceptionOfType(InvalidDistributionSetException.class)
                 .as("Invalid distributionSet should throw an exception")
-                .isThrownBy(() -> distributionSetManagement.updateMetadata(dsId, knownKey1, knownUpdateValue));
+                .isThrownBy(() -> distributionSetManagement.createMetadata(dsId, knownKey1, knownUpdateValue));
     }
 
     /**

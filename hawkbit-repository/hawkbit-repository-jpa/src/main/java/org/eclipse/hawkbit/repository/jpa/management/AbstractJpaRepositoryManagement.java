@@ -80,11 +80,12 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
 
     protected final R jpaRepository;
     protected final EntityManager entityManager;
-    private final Constructor<T> entityConstructor;
+    private final Supplier<T> jpaEntityCreator;
 
     protected AbstractJpaRepositoryManagement(final R jpaRepository, final EntityManager entityManager) {
         this.jpaRepository = jpaRepository;
         this.entityManager = entityManager;
+        final Constructor<T> entityConstructor;
         try {
             entityConstructor = jpaRepository.getDomainClass().getConstructor();
             // test if method works, if fine - it shall never fail when called later
@@ -92,6 +93,13 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
         } catch (final NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException("JPA domain class " + jpaRepository.getDomainClass() + " shall have public no-args constructor", e);
         }
+        jpaEntityCreator = () -> {
+            try {
+                return entityConstructor.newInstance();
+            } catch (final InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                throw new IllegalStateException("Must NEVER happen!", e);
+            }
+        };
     }
 
     @Override
@@ -156,7 +164,7 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
     }
 
     protected T update(final Identifiable<Long> update, final T entity) {
-        // update getId has not setter in target JPA entity but shall have getter and the value shall be the same
+        // update getId has no setter in target JPA entity but shall have getter and the value shall be the same
         // otherwise the Utils will throw an exception that there is no counterpart setter for getId
         if (ObjectCopyUtil.copy(update, entity, false, this::attach)) {
             return jpaRepository.save(entity);
@@ -289,12 +297,7 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
     }
 
     private T jpaEntity(final Object create) {
-        final T jpaEntity;
-        try {
-            jpaEntity = entityConstructor.newInstance();
-        } catch (final InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException("Must NEVER happen!", e);
-        }
+        final T jpaEntity = jpaEntityCreator.get();
         ObjectCopyUtil.copy(create, jpaEntity, false, this::attach);
         return jpaEntity;
     }
