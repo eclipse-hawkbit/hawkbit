@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTagRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.builder.TagCreate;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -36,7 +36,7 @@ import org.eclipse.hawkbit.rest.json.model.ResponseList;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtTagMapper {
 
-    public static List<MgmtTag> toResponse(final List<TargetTag> targetTags) {
+    public static List<MgmtTag> toResponse(final List<? extends TargetTag> targetTags) {
         final List<MgmtTag> tagsRest = new ArrayList<>();
         if (targetTags == null) {
             return tagsRest;
@@ -106,10 +106,14 @@ public final class MgmtTagMapper {
                 .withRel("assignedDistributionSets").expand());
     }
 
-    public static List<TagCreate<Tag>> mapTagFromRequest(final EntityFactory entityFactory, final Collection<MgmtTagRequestBodyPut> tags) {
+    public static List<TargetTagManagement.Create> mapTagFromRequest(final Collection<MgmtTagRequestBodyPut> tags) {
         return tags.stream()
-                .map(tagRest -> entityFactory.tag().create().name(tagRest.getName())
-                        .description(tagRest.getDescription()).colour(tagRest.getColour()))
+                .map(tagRest -> TargetTagManagement.Create.builder()
+                        .name(tagRest.getName())
+                        .description(tagRest.getDescription())
+                        .colour(tagRest.getColour())
+                        .build())
+                .map(TargetTagManagement.Create.class::cast)
                 .toList();
     }
 

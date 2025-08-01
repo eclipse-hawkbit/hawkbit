@@ -13,6 +13,7 @@ import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +37,9 @@ class TargetTagManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void createPermissionsCheck() {
-        assertPermissions(() -> targetTagManagement.create(entityFactory.tag().create().name("name")), List.of(SpPermission.CREATE_TARGET));
+        assertPermissions(
+                () -> targetTagManagement.create(TargetTagManagement.Create.builder().name("name").build()),
+                List.of(SpPermission.CREATE_TARGET));
     }
 
     /**
@@ -44,7 +47,8 @@ class TargetTagManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void createCollectionPermissionsCheck() {
-        assertPermissions(() -> targetTagManagement.create(List.of(entityFactory.tag().create().name("name"))),
+        assertPermissions(
+                () -> targetTagManagement.create(List.of(TargetTagManagement.Create.builder().name("name").build())),
                 List.of(SpPermission.CREATE_TARGET));
     }
 
@@ -54,7 +58,7 @@ class TargetTagManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     void deletePermissionsCheck() {
         assertPermissions(() -> {
-            targetTagManagement.delete("tag");
+            targetTagManagement.delete(1);
             return null;
         }, List.of(SpPermission.DELETE_TARGET));
     }
@@ -104,6 +108,6 @@ class TargetTagManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void updatePermissionsCheck() {
-        assertPermissions(() -> targetTagManagement.update(entityFactory.tag().update(1L)), List.of(SpPermission.UPDATE_TARGET));
+        assertPermissions(() -> targetTagManagement.update(TargetTagManagement.Update.builder().id(1L).build()), List.of(SpPermission.UPDATE_TARGET));
     }
 }

@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,18 +50,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
-    private final TargetTagManagement tagManagement;
+    private final TargetTagManagement<? extends TargetTag> tagManagement;
     private final TargetManagement targetManagement;
-    private final EntityFactory entityFactory;
     private final TenantConfigHelper tenantConfigHelper;
 
     MgmtTargetTagResource(
-            final TargetTagManagement tagManagement, final TargetManagement targetManagement,
-            final EntityFactory entityFactory,
+            final TargetTagManagement<? extends TargetTag> tagManagement, final TargetManagement targetManagement,
             final SystemSecurityContext securityContext, final TenantConfigurationManagement configurationManagement) {
         this.tagManagement = tagManagement;
         this.targetManagement = targetManagement;
-        this.entityFactory = entityFactory;
         tenantConfigHelper = TenantConfigHelper.usingContext(securityContext, configurationManagement);
     }
 
@@ -68,7 +66,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     public ResponseEntity<PagedList<MgmtTag>> getTargetTags(
             final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeTagSortParam(sortParam));
-        final Page<TargetTag> findTargetsAll;
+        final Page<? extends TargetTag> findTargetsAll;
         if (rsqlParam == null) {
             findTargetsAll = this.tagManagement.findAll(pageable);
         } else {
@@ -92,7 +90,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     @Override
     public ResponseEntity<List<MgmtTag>> createTargetTags(final List<MgmtTagRequestBodyPut> tags) {
         log.debug("creating {} target tags", tags.size());
-        final List<TargetTag> createdTargetTags = tagManagement.create(MgmtTagMapper.mapTagFromRequest(entityFactory, tags));
+        final List<? extends TargetTag> createdTargetTags = tagManagement.create(MgmtTagMapper.mapTagFromRequest(tags));
         return new ResponseEntity<>(MgmtTagMapper.toResponse(createdTargetTags), HttpStatus.CREATED);
     }
 
@@ -101,8 +99,8 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         log.debug("update {} target tag", restTargetTagRest);
 
         final TargetTag updateTargetTag = tagManagement
-                .update(entityFactory.tag().update(targetTagId).name(restTargetTagRest.getName())
-                        .description(restTargetTagRest.getDescription()).colour(restTargetTagRest.getColour()));
+                .update(TargetTagManagement.Update.builder().id(targetTagId).name(restTargetTagRest.getName())
+                        .description(restTargetTagRest.getDescription()).colour(restTargetTagRest.getColour()).build());
 
         log.debug("target tag updated");
 
@@ -118,7 +116,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         log.debug("Delete {} target tag", targetTagId);
         final TargetTag targetTag = findTargetTagById(targetTagId);
 
-        this.tagManagement.delete(targetTag.getName());
+        this.tagManagement.delete(targetTag.getId());
 
         return ResponseEntity.ok().build();
     }

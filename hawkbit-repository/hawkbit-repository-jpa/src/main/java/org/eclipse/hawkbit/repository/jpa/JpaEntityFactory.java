@@ -13,14 +13,11 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupBuilder;
-import org.eclipse.hawkbit.repository.builder.TagBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupBuilder;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaTagBuilder;
-import org.eclipse.hawkbit.repository.model.Tag;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -48,12 +45,6 @@ public class JpaEntityFactory implements EntityFactory {
     public ActionStatusBuilder actionStatus() {
         return new JpaActionStatusBuilder();
     }
-
-    @Override
-    public TagBuilder<Tag> tag() {
-        return (TagBuilder)new JpaTagBuilder();
-    }
-
 
     @Override
     public RolloutGroupBuilder rolloutGroup() {

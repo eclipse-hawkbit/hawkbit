@@ -12,16 +12,13 @@ package org.eclipse.hawkbit.repository;
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupBuilder;
-import org.eclipse.hawkbit.repository.builder.TagBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetTypeBuilder;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
-import org.eclipse.hawkbit.repository.model.Tag;
 
 /**
- * central {@link BaseEntity} generation service. Objects are created but not
- * persisted.
+ * Central {@link BaseEntity} generation service. Objects are created but not persisted.
  */
 public interface EntityFactory {
 
@@ -29,11 +26,6 @@ public interface EntityFactory {
      * @return {@link ActionStatusBuilder} object
      */
     ActionStatusBuilder actionStatus();
-
-    /**
-     * @return {@link TagBuilder} object
-     */
-    TagBuilder<Tag> tag();
 
     /**
      * @return {@link RolloutGroupBuilder} object

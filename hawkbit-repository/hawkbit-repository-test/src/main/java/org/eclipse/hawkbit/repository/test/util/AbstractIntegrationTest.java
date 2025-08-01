@@ -66,6 +66,7 @@ import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -144,7 +145,7 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected TargetFilterQueryManagement targetFilterQueryManagement;
     @Autowired
-    protected TargetTagManagement targetTagManagement;
+    protected TargetTagManagement<? extends TargetTag> targetTagManagement;
     @Autowired
     protected DeploymentManagement deploymentManagement;
     @Autowired

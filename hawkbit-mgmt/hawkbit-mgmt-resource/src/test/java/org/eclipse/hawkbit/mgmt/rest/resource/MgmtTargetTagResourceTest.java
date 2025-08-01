@@ -30,6 +30,7 @@ import java.util.Random;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
@@ -153,14 +154,16 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     @Test
     @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 2) })
     public void createTargetTags() throws Exception {
-        final Tag tagOne = entityFactory.tag().create().colour("testcol1").description("its a test1").name("thetest1")
+        final TargetTagManagement.Create tagOne = TargetTagManagement.Create.builder()
+                .colour("testcol1").description("its a test1").name("thetest1")
                 .build();
-        final Tag tagTwo = entityFactory.tag().create().colour("testcol2").description("its a test2").name("thetest2")
+        final TargetTagManagement.Create tagTwo = TargetTagManagement.Create.builder()
+                .colour("testcol2").description("its a test2").name("thetest2")
                 .build();
 
         final ResultActions result = mvc
                 .perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING)
-                        .content(JsonBuilder.tags(Arrays.asList(tagOne, tagTwo)))
+                        .content(JsonBuilder.targetTags(List.of(tagOne, tagTwo)))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
@@ -190,12 +193,13 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final List<TargetTag> tags = testdataFactory.createTargetTags(1, "");
         final TargetTag original = tags.get(0);
 
-        final Tag update = entityFactory.tag().create().name("updatedName").colour("updatedCol")
-                .description("updatedDesc").build();
+        final TargetTagManagement.Update update = TargetTagManagement.Update.builder()
+                .name("updatedName").colour("updatedCol").description("updatedDesc")
+                .build();
 
         final ResultActions result = mvc
                 .perform(put(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + original.getId())
-                        .content(JsonBuilder.tag(update)).contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonBuilder.targetTag(update)).contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())

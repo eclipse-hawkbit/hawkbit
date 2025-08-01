@@ -142,8 +142,8 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
     }
 
     @Override
-    public Slice<T> findAll(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithoutCountBySpec(
+    public Page<T> findAll(final Pageable pageable) {
+        return JpaManagementHelper.findAllWithCountBySpec(
                 jpaRepository, isNotDeleted().map(List::of).orElseGet(Collections::emptyList), pageable);
     }
 
