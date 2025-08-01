@@ -49,7 +49,6 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
-import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -914,9 +913,9 @@ public class TestdataFactory {
      * @return the created set of {@link TargetTag}s
      */
     public List<TargetTag> createTargetTags(final int number, final String tagPrefix) {
-        final List<TagCreate<Tag>> result = new ArrayList<>(number);
+        final List<TargetTagManagement.Create> result = new ArrayList<>(number);
         for (int i = 0; i < number; i++) {
-            result.add(entityFactory.tag().create().name(tagPrefix + i).description(tagPrefix + i).colour(String.valueOf(i)));
+            result.add(TargetTagManagement.Create.builder().name(tagPrefix + i).description(tagPrefix + i).colour(String.valueOf(i)).build());
         }
         return targetTagManagement.create(result);
     }

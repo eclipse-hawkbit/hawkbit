@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -67,10 +68,10 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void targetSearchWithVariousFilterCombinations() {
-        final TargetTag targTagX = targetTagManagement.create(entityFactory.tag().create().name("TargTag-X"));
-        final TargetTag targTagY = targetTagManagement.create(entityFactory.tag().create().name("TargTag-Y"));
-        final TargetTag targTagZ = targetTagManagement.create(entityFactory.tag().create().name("TargTag-Z"));
-        final TargetTag targTagW = targetTagManagement.create(entityFactory.tag().create().name("TargTag-W"));
+        final TargetTag targTagX = targetTagManagement.create(TargetTagManagement.Create.builder().name("TargTag-X").build());
+        final TargetTag targTagY = targetTagManagement.create(TargetTagManagement.Create.builder().name("TargTag-Y").build());
+        final TargetTag targTagZ = targetTagManagement.create(TargetTagManagement.Create.builder().name("TargTag-Z").build());
+        final TargetTag targTagW = targetTagManagement.create(TargetTagManagement.Create.builder().name("TargTag-W").build());
 
         final DistributionSet setA = testdataFactory.createDistributionSet("A");
         final DistributionSet setB = testdataFactory.createDistributionSet("B");

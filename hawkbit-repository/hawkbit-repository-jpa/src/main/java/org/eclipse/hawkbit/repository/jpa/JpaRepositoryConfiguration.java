@@ -453,8 +453,7 @@ public class JpaRepositoryConfiguration {
             final TargetBuilder targetBuilder, final TargetTypeBuilder targetTypeBuilder,
             final TargetFilterQueryBuilder targetFilterQueryBuilder,
             final RolloutBuilder rolloutBuilder) {
-        return new JpaEntityFactory(
-                targetBuilder, targetTypeBuilder, targetFilterQueryBuilder, rolloutBuilder);
+        return new JpaEntityFactory(targetBuilder, targetTypeBuilder, targetFilterQueryBuilder, rolloutBuilder);
     }
 
     /**

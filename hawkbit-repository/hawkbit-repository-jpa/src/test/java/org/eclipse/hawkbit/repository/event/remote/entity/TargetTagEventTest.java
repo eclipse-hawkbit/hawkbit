@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.junit.jupiter.api.Test;
 
@@ -32,12 +33,12 @@ class TargetTagEventTest extends AbstractRemoteEntityEventTest<TargetTag> {
      * Verifies that the target tag entity reloading by remote updated event works
      */
     @Test
-    void testTargetTagUpdateEventt() {
+    void testTargetTagUpdateEvent() {
         assertAndCreateRemoteEvent(TargetTagUpdatedEvent.class);
     }
 
     @Override
     protected TargetTag createEntity() {
-        return targetTagManagement.create(entityFactory.tag().create().name("tag1"));
+        return targetTagManagement.create(TargetTagManagement.Create.builder().name("tag1").build());
     }
 }

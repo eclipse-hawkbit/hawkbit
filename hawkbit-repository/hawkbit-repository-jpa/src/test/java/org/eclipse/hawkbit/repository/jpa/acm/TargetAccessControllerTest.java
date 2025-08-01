@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.Identifiable;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
@@ -127,11 +128,11 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
         final Target hiddenTarget = targetManagement
                 .create(entityFactory.target().create().controllerId("device03").status(TargetUpdateStatus.REGISTERED));
 
-        final Long myTagId = targetTagManagement.create(entityFactory.tag().create().name("myTag")).getId();
+        final Long myTagId = targetTagManagement.create(TargetTagManagement.Create.builder().name("myTag").build()).getId();
 
         // perform tag assignment before setting access rules
         targetManagement.assignTag(
-                Arrays.asList(permittedTarget.getControllerId(), readOnlyTargetControllerId, hiddenTarget.getControllerId()), myTagId);
+                List.of(permittedTarget.getControllerId(), readOnlyTargetControllerId, hiddenTarget.getControllerId()), myTagId);
 
         runAs(withUser("user",
                         READ_TARGET + "/controllerId==" + permittedTarget.getControllerId() + " or controllerId==" + readOnlyTargetControllerId,

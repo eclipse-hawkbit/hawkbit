@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.TargetFields;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -59,10 +60,10 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet ds = testdataFactory.createDistributionSet("AssignedDs");
 
-        final TargetTag targetTag = targetTagManagement.create(entityFactory.tag().create().name("Tag1"));
-        final TargetTag targetTag2 = targetTagManagement.create(entityFactory.tag().create().name("Tag2"));
-        final TargetTag targetTag3 = targetTagManagement.create(entityFactory.tag().create().name("Tag3"));
-        targetTagManagement.create(entityFactory.tag().create().name("Tag4"));
+        final TargetTag targetTag = targetTagManagement.create(TargetTagManagement.Create.builder().name("Tag1").build());
+        final TargetTag targetTag2 = targetTagManagement.create(TargetTagManagement.Create.builder().name("Tag2").build());
+        final TargetTag targetTag3 = targetTagManagement.create(TargetTagManagement.Create.builder().name("Tag3").build());
+        targetTagManagement.create(TargetTagManagement.Create.builder().name("Tag4").build());
 
         target = targetManagement.create(
                 entityFactory.target().create()

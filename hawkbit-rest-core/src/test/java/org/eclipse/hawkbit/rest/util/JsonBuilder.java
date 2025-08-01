@@ -19,9 +19,11 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
@@ -65,6 +67,59 @@ public class JsonBuilder {
             createTagLine(builder, tag);
 
             if (++i < tags.size()) {
+                builder.append(",");
+            }
+        }
+        builder.append("]");
+
+        return builder.toString();
+    }
+    public static String targetTag(final TargetTagManagement.Update dsTagUpdate) throws JSONException {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(new JSONObject()
+                .put("name", dsTagUpdate.getName()).put("description", dsTagUpdate.getDescription())
+                .put("colour", dsTagUpdate.getColour()).toString());
+        return builder.toString();
+    }
+
+    public static String targetTags(final List<TargetTagManagement.Create> dsTagsCreate) throws JSONException {
+        final StringBuilder builder = new StringBuilder();
+
+        builder.append("[");
+        int i = 0;
+        for (final TargetTagManagement.Create tag : dsTagsCreate) {
+            builder.append(new JSONObject()
+                    .put("name", tag.getName()).put("description", tag.getDescription())
+                    .put("colour", tag.getColour()).toString());
+
+            if (++i < dsTagsCreate.size()) {
+                builder.append(",");
+            }
+        }
+        builder.append("]");
+
+        return builder.toString();
+    }
+
+    public static String dsTag(final DistributionSetTagManagement.Update dsTagUpdate) throws JSONException {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(new JSONObject()
+                .put("name", dsTagUpdate.getName()).put("description", dsTagUpdate.getDescription())
+                .put("colour", dsTagUpdate.getColour()).toString());
+        return builder.toString();
+    }
+
+    public static String dsTags(final List<DistributionSetTagManagement.Create> dsTagsCreate) throws JSONException {
+        final StringBuilder builder = new StringBuilder();
+
+        builder.append("[");
+        int i = 0;
+        for (final DistributionSetTagManagement.Create tag : dsTagsCreate) {
+            builder.append(new JSONObject()
+                    .put("name", tag.getName()).put("description", tag.getDescription())
+                    .put("colour", tag.getColour()).toString());
+
+            if (++i < dsTagsCreate.size()) {
                 builder.append(",");
             }
         }

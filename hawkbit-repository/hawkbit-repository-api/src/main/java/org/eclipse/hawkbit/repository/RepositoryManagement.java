@@ -83,7 +83,7 @@ public interface RepositoryManagement<T extends BaseEntity, C, U extends Identif
      * @return all {@link BaseEntity}s in the repository.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Slice<T> findAll(@NotNull Pageable pageable);
+    Page<T> findAll(@NotNull Pageable pageable);
 
     /**
      * Retrieves all {@link BaseEntity}s with a given specification.

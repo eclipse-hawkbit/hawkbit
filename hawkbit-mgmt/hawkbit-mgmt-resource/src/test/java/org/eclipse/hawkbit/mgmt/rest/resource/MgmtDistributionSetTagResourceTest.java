@@ -21,7 +21,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,7 @@ import java.util.Random;
 
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
@@ -188,14 +188,16 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
     @Test
     @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
     void createDistributionSetTags() throws Exception {
-        final Tag tagOne = entityFactory.tag().create().colour("testcol1").description("its a test1").name("thetest1")
+        final DistributionSetTagManagement.Create tagOne = DistributionSetTagManagement.Create.builder()
+                .colour("testcol1").description("its a test1").name("thetest1")
                 .build();
-        final Tag tagTwo = entityFactory.tag().create().colour("testcol2").description("its a test2").name("thetest2")
+        final DistributionSetTagManagement.Create tagTwo = DistributionSetTagManagement.Create.builder()
+                .colour("testcol2").description("its a test2").name("thetest2")
                 .build();
 
         final ResultActions result = mvc
                 .perform(post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING)
-                        .content(JsonBuilder.tags(Arrays.asList(tagOne, tagTwo)))
+                        .content(JsonBuilder.dsTags(List.of(tagOne, tagTwo)))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
@@ -210,8 +212,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
         assertThat(createdTwo.getDescription()).isEqualTo(tagTwo.getDescription());
         assertThat(createdTwo.getColour()).isEqualTo(tagTwo.getColour());
 
-        result.andExpect(applyTagMatcherOnArrayResult(createdOne))
-                .andExpect(applyTagMatcherOnArrayResult(createdTwo));
+        result.andExpect(applyTagMatcherOnArrayResult(createdOne)).andExpect(applyTagMatcherOnArrayResult(createdTwo));
     }
 
     /**
@@ -225,12 +226,13 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(1);
         final DistributionSetTag original = tags.get(0);
 
-        final Tag update = entityFactory.tag().create().name("updatedName").colour("updatedCol")
-                .description("updatedDesc").build();
+        final DistributionSetTagManagement.Update update = DistributionSetTagManagement.Update.builder()
+                .name("updatedName").colour("updatedCol").description("updatedDesc")
+                .build();
 
         final ResultActions result = mvc
                 .perform(put(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + original.getId())
-                        .content(JsonBuilder.tag(update)).contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonBuilder.dsTag(update)).contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
