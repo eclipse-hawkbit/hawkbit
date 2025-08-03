@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.event;
 
+import java.nio.ByteBuffer;
+
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtobufIOUtil;
 import io.protostuff.Schema;
@@ -22,20 +24,28 @@ import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.util.MimeType;
 
 /**
- * A customize message converter for the spring cloud events. The converter is registered for the application/binary+protostuff type.
- * <p/>
- * The clazz-type-information is encoded into the message payload infront with a length of {@link #EVENT_TYPE_LENGTH}. This is necessary
- * due in case of rabbitMQ batching the message headers will be merged together and custom message header information will get lost.
- * So in this implementation the information about the event-type is encoded in the payload of the message directly using the encoded
- * values of {@link EventType}.
+ * A custom message converter for Spring Cloud Stream using Protostuff serialization.
+ * The converter is registered for the {@code application/binary+protostuff} content type.
+ * It embeds the {@link EventType} metadata inside the message payload to preserve the type
+ * during deserialization — even when message headers may be lost (e.g. with RabbitMQ batching).
+ *
+ * <p>
+ * Message Structure:
+ * <ul>
+ *   <li>The first {@link #HEADER_LENGTH_PREFIX_SIZE} bytes are an integer indicating the length N (in bytes) of the serialized {@link EventType}.</li>
+ *   <li>Next N bytes contain the serialized {@link EventType} data itself.</li>
+ *   <li>The remaining bytes represent the serialized {@link AbstractRemoteEvent} payload.</li>
+ * </ul>
+ *
+ * This format allows decoding messages without relying on external headers, ensuring robustness
+ * in systems where header information may be merged or dropped.
  */
 @Slf4j
 public class EventProtoStuffMessageConverter extends AbstractMessageConverter {
 
     public static final MimeType APPLICATION_BINARY_PROTOSTUFF = new MimeType("application", "binary+protostuff");
+    private static final int HEADER_LENGTH_PREFIX_SIZE = 4;
 
-    /** The length of the class type length of the payload. */
-    private static final byte EVENT_TYPE_LENGTH = 2;
 
     public EventProtoStuffMessageConverter() {
         super(APPLICATION_BINARY_PROTOSTUFF);
@@ -47,11 +57,11 @@ public class EventProtoStuffMessageConverter extends AbstractMessageConverter {
     }
 
     @Override
-    public Object convertFromInternal(final Message<?> message, final Class<?> targetClass, final Object conversionHint) {
+    protected Object convertFromInternal(final Message<?> message, final Class<?> targetClass, final Object conversionHint) {
         final Object objectPayload = message.getPayload();
         if (objectPayload instanceof byte[] payload) {
             final byte[] clazzHeader = extractClazzHeader(payload);
-            final byte[] content = extraxtContent(payload);
+            final byte[] content = extractContent(payload);
 
             final EventType eventType = readClassHeader(clazzHeader);
             return readContent(eventType, content);
@@ -86,16 +96,22 @@ public class EventProtoStuffMessageConverter extends AbstractMessageConverter {
     }
 
     private static byte[] extractClazzHeader(final byte[] payload) {
-        final byte[] clazzHeader = new byte[EVENT_TYPE_LENGTH];
-        System.arraycopy(payload, 0, clazzHeader, 0, EVENT_TYPE_LENGTH);
+        ByteBuffer wrapper = ByteBuffer.wrap(payload);
+        int headerLength = wrapper.getInt();
+        byte[] clazzHeader = new byte[headerLength];
+        wrapper.get(clazzHeader);
         return clazzHeader;
     }
 
-    private static byte[] extraxtContent(final byte[] payload) {
-        final byte[] content = new byte[payload.length - EVENT_TYPE_LENGTH];
-        System.arraycopy(payload, EVENT_TYPE_LENGTH, content, 0, content.length);
+    private static byte[] extractContent(final byte[] payload) {
+        ByteBuffer wrapper = ByteBuffer.wrap(payload);
+        int headerLength = wrapper.getInt();
+        byte[] content = new byte[payload.length - HEADER_LENGTH_PREFIX_SIZE - headerLength];
+        wrapper.position(HEADER_LENGTH_PREFIX_SIZE + headerLength);
+        wrapper.get(content);
         return content;
     }
+
 
     private static EventType readClassHeader(final byte[] typeInformation) {
         final Schema<EventType> schema = RuntimeSchema.getSchema(EventType.class);
@@ -117,9 +133,16 @@ public class EventProtoStuffMessageConverter extends AbstractMessageConverter {
             log.error("There is no mapping to EventType for the given class {}", clazz);
             throw new MessageConversionException("Missing EventType for given class : " + clazz);
         }
-        @SuppressWarnings("unchecked") final Schema<Object> schema = (Schema<Object>) RuntimeSchema
-                .getSchema((Class<?>) EventType.class);
+
+        @SuppressWarnings("unchecked")
+        final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema((Class<?>) EventType.class);
         final LinkedBuffer buffer = LinkedBuffer.allocate();
-        return ProtobufIOUtil.toByteArray(clazzEventType, schema, buffer);
+        byte[] typeBytes = ProtobufIOUtil.toByteArray(clazzEventType, schema, buffer);
+
+        ByteBuffer result = ByteBuffer.allocate(HEADER_LENGTH_PREFIX_SIZE + typeBytes.length);
+        result.putInt(typeBytes.length);
+        result.put(typeBytes);
+        return result.array();
     }
+
 }
