@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,7 +37,11 @@ import java.util.stream.Stream;
 
 import com.jayway.jsonpath.JsonPath;
 import org.eclipse.hawkbit.exception.SpServerError;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPut;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssignment;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -60,7 +63,6 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
-import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -223,7 +225,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
         // post assignment
         mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM")
-                        .contentType(MediaType.APPLICATION_JSON).content(JsonBuilder.ids(smIDs)))
+                        .contentType(MediaType.APPLICATION_JSON).content(toJson(smIDs.stream().map(MgmtId::new).toList())))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
         // Test if size is 3
@@ -240,7 +242,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         }
 
         // post assignment
-        final String jsonIDs = JsonBuilder.ids(moduleIDs.subList(0, maxSoftwareModules - smIDs.size()));
+        final String jsonIDs = toJson(moduleIDs.subList(0, maxSoftwareModules - smIDs.size()).stream().map(MgmtId::new).toList());
         mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM")
                         .contentType(MediaType.APPLICATION_JSON).content(jsonIDs))
                 .andDo(MockMvcResultPrinter.print())
@@ -255,7 +257,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         // post one more to cause the quota to be exceeded
         mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonBuilder.ids(Collections.singletonList(moduleIDs.get(moduleIDs.size() - 1)))))
+                        .content(toJson(List.of(moduleIDs.get(moduleIDs.size() - 1)).stream().map(MgmtId::new).toList())))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
@@ -264,7 +266,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         // verify quota is also enforced for bulk uploads
         final DistributionSet disSet2 = testdataFactory.createDistributionSetWithNoSoftwareModules("Saturn", "4.0");
         mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet2.getId() + "/assignedSM")
-                        .contentType(MediaType.APPLICATION_JSON).content(JsonBuilder.ids(moduleIDs)))
+                        .contentType(MediaType.APPLICATION_JSON).content(toJson(moduleIDs.stream().map(MgmtId::new).toList())))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
@@ -291,10 +293,9 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size", equalTo(amountOfSM)));
         // test the removal of all software modules one by one
-        for (final Iterator<SoftwareModule> iter = set.getModules().iterator(); iter.hasNext(); ) {
-            final Long smId = iter.next().getId();
-            mvc.perform(delete(
-                            MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + set.getId() + "/assignedSM/" + smId))
+        for (final SoftwareModule softwareModule : set.getModules()) {
+            final Long smId = softwareModule.getId();
+            mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + set.getId() + "/assignedSM/" + smId))
                     .andExpect(status().isOk());
             mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + set.getId() + "/assignedSM"))
                     .andDo(MockMvcResultPrinter.print())
@@ -361,8 +362,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModule("exampleKey");
         final DistributionSetType type = testdataFactory.findOrCreateDistributionSetType(
                 "testKey", "testType", List.of(softwareModule.getType()), List.of());
-        final DistributionSet ds = testdataFactory.createDistributionSet("dsName", "dsVersion", type,
-                Collections.singletonList(softwareModule));
+        final DistributionSet ds = testdataFactory.createDistributionSet("dsName", "dsVersion", type, List.of(softwareModule));
         final Target target = testdataFactory.createTarget("exampleControllerId");
 
         assignDistributionSet(ds, target);
@@ -383,7 +383,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 "stanTest", "2", reloaded, Collections.singletonList(softwareModule));
         final MvcResult mvcResult = mvc
                 .perform(post("/rest/v1/distributionsets")
-                        .content(JsonBuilder.distributionSets(Collections.singletonList(generated)))
+                        .content(toJson(toMgmtDistributionSetPost(List.of(generated))))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -938,9 +938,9 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         final long current = System.currentTimeMillis();
 
         final MvcResult mvcResult = executeMgmtTargetPost(
-                testdataFactory.generateDistributionSet("one", "one", standardDsType, Arrays.asList(os, jvm, ah)),
-                testdataFactory.generateDistributionSet("two", "two", standardDsType, Arrays.asList(os, jvm, ah)),
-                testdataFactory.generateDistributionSet("three", "three", standardDsType, Arrays.asList(os, jvm, ah), true));
+                testdataFactory.generateDistributionSet("one", "one", standardDsType, List.of(os, jvm, ah)),
+                testdataFactory.generateDistributionSet("two", "two", standardDsType, List.of(os, jvm, ah)),
+                testdataFactory.generateDistributionSet("three", "three", standardDsType, List.of(os, jvm, ah), true));
 
         final DistributionSet one = distributionSetManagement
                 .getWithDetails(distributionSetManagement.findByRsql("name==one", PAGE).getContent().get(0).getId()).orElseThrow();
@@ -1136,20 +1136,20 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .andExpect(status().isBadRequest());
 
         final DistributionSetManagement.Create missingName = DistributionSetManagement.Create.builder().build();
-        mvc.perform(post("/rest/v1/distributionsets").content(JsonBuilder.distributionSets(Collections.singletonList(missingName)))
+        mvc.perform(post("/rest/v1/distributionsets").content(toJson(List.of(missingName)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
         final DistributionSetManagement.Create toLongName =
                 testdataFactory.generateDistributionSet(randomString(NamedEntity.NAME_MAX_SIZE + 1));
-        mvc.perform(post("/rest/v1/distributionsets").content(JsonBuilder.distributionSets(Collections.singletonList(toLongName)))
+        mvc.perform(post("/rest/v1/distributionsets").content(toJson(List.of(toLongName)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
         // unsupported media type
-        mvc.perform(post("/rest/v1/distributionsets").content(JsonBuilder.distributionSets(sets))
+        mvc.perform(post("/rest/v1/distributionsets").content(toJson(sets))
                         .contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isUnsupportedMediaType());
@@ -1828,8 +1828,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
             final DistributionSetManagement.Create two,
             final DistributionSetManagement.Create three) throws Exception {
         return mvc
-                .perform(post("/rest/v1/distributionsets")
-                        .content(JsonBuilder.distributionSets(Arrays.asList(one, two, three)))
+                .perform(post("/rest/v1/distributionsets").content(toJson(toMgmtDistributionSetPost(List.of(one, two, three))))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
@@ -1874,6 +1873,22 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                         contains(findFirstModuleByType(three, osType).get().getId().intValue())))
                 .andExpect(jsonPath("[2]requiredMigrationStep", equalTo(three.getRequiredMigrationStep())))
                 .andReturn();
+    }
+
+    private static List<MgmtDistributionSetRequestBodyPut> toMgmtDistributionSetPost(final List<DistributionSetManagement.Create> creates) {
+        return creates.stream()
+                .map(create ->
+                        new MgmtDistributionSetRequestBodyPost()
+                                .setType(create.getType().getKey())
+                                .setModules(create.getModules().stream()
+                                        .map(module -> new MgmtSoftwareModuleAssignment().setId(module.getId()))
+                                        .map(MgmtSoftwareModuleAssignment.class::cast)
+                                        .toList())
+                                .setName(create.getName())
+                                .setDescription(create.getDescription())
+                                .setVersion(create.getVersion())
+                                .setRequiredMigrationStep(create.getRequiredMigrationStep()))
+                .toList();
     }
 
     private Set<DistributionSet> createDistributionSetsAlphabetical(final int amount) {

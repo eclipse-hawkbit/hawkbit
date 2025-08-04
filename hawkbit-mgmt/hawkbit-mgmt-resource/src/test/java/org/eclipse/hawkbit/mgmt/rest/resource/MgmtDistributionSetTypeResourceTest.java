@@ -31,6 +31,8 @@ import java.util.Set;
 
 import com.jayway.jsonpath.JsonPath;
 import org.eclipse.hawkbit.exception.SpServerError;
+import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssignment;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
@@ -40,7 +42,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -669,8 +670,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
                 .optionalModuleTypes(Collections.emptySet())
                 .build();
 
-        mvc.perform(post("/rest/v1/distributionsettypes")
-                        .content(JsonBuilder.distributionSetTypes(List.of(testNewType)))
+        mvc.perform(post("/rest/v1/distributionsettypes").content(toJson(List.of(testNewType)))
                         .contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isUnsupportedMediaType());
@@ -696,8 +696,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
                 .key("test123")
                 .name(randomString(NamedEntity.NAME_MAX_SIZE + 1))
                 .build();
-        mvc.perform(post("/rest/v1/distributionsettypes")
-                        .content(JsonBuilder.distributionSetTypes(List.of(toLongName)))
+        mvc.perform(post("/rest/v1/distributionsettypes").content(toJson(List.of(toLongName)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
@@ -763,7 +762,23 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
 
     private MvcResult runPostDistributionSetType(final List<DistributionSetTypeManagement.Create> types) throws Exception {
         return mvc
-                .perform(post("/rest/v1/distributionsettypes").content(JsonBuilder.distributionSetTypes(types))
+                .perform(post("/rest/v1/distributionsettypes").content(toJson(types.stream()
+                                .map(type -> new MgmtDistributionSetTypeRequestBodyPost()
+                                        .setMandatorymodules(type.getMandatoryModuleTypes().stream()
+                                                .map(SoftwareModuleType::getId)
+                                                .map(id -> new MgmtSoftwareModuleTypeAssignment().setId(id))
+                                                .map(MgmtSoftwareModuleTypeAssignment.class::cast)
+                                                .toList())
+                                        .setOptionalmodules(type.getOptionalModuleTypes().stream()
+                                                .map(SoftwareModuleType::getId)
+                                                .map(id -> new MgmtSoftwareModuleTypeAssignment().setId(id))
+                                                .map(MgmtSoftwareModuleTypeAssignment.class::cast)
+                                                .toList())
+                                        .setKey(type.getKey())
+                                        .setName(type.getName())
+                                        .setDescription(type.getDescription())
+                                        .setColour(type.getColour()))
+                                .toList()))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
@@ -789,19 +804,19 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
         assertThat(distributionSetTypeManagement.count()).isEqualTo(DEFAULT_DS_TYPES);
 
         return Arrays.asList(
-                        DistributionSetTypeManagement.Create.builder()
-                                .key("testKey1").name("TestName1").description("Desc1").colour("col")
-                                .mandatoryModuleTypes(Set.of(osType))
-                                .optionalModuleTypes(Set.of(runtimeType))
-                                .build(),
-                        DistributionSetTypeManagement.Create.builder()
-                                .key("testKey2").name("TestName2").description("Desc2").colour("col")
-                                .optionalModuleTypes(Set.of(runtimeType, osType, appType))
-                                .build(),
-                        DistributionSetTypeManagement.Create.builder()
-                                .key("testKey3").name("TestName3").description("Desc3").colour("col")
-                                .mandatoryModuleTypes(Set.of(runtimeType, osType))
-                                .build());
+                DistributionSetTypeManagement.Create.builder()
+                        .key("testKey1").name("TestName1").description("Desc1").colour("col")
+                        .mandatoryModuleTypes(Set.of(osType))
+                        .optionalModuleTypes(Set.of(runtimeType))
+                        .build(),
+                DistributionSetTypeManagement.Create.builder()
+                        .key("testKey2").name("TestName2").description("Desc2").colour("col")
+                        .optionalModuleTypes(Set.of(runtimeType, osType, appType))
+                        .build(),
+                DistributionSetTypeManagement.Create.builder()
+                        .key("testKey3").name("TestName3").description("Desc3").colour("col")
+                        .mandatoryModuleTypes(Set.of(runtimeType, osType))
+                        .build());
     }
 
     private DistributionSetType generateTestType() {

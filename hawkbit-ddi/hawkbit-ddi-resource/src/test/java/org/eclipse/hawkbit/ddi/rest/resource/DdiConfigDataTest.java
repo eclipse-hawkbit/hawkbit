@@ -33,7 +33,6 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.MediaTypes;
@@ -42,12 +41,11 @@ import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Test config data from the controller.
- */
-@ActiveProfiles({ "im", "test" })
-/**
+ * </p>
  * Feature: Component Tests - Direct Device Integration API<br/>
  * Story: Config Data Resource
  */
+@ActiveProfiles({ "im", "test" })
 class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
     private static final String TARGET1_ID = "4717";

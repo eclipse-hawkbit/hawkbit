@@ -55,7 +55,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;

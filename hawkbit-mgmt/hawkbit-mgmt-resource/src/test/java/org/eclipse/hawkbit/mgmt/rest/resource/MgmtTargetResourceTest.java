@@ -55,7 +55,6 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.Identifiable;
-import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement.Create;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -79,7 +78,6 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
-import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.hamcrest.Matchers;
@@ -1018,10 +1016,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         final Target target = entityFactory.target().create().controllerId(randomString).build();
 
-        final String targetList = JsonBuilder.targets(Collections.singletonList(target), false);
+        final String targetList = JsonBuilder.targets(List.of(target), false);
 
-        final String expectedTargetName = randomString.substring(0,
-                Math.min(JpaTarget.CONTROLLER_ID_MAX_SIZE, NamedEntity.NAME_MAX_SIZE));
+        final String expectedTargetName = randomString.substring(0, Math.min(JpaTarget.CONTROLLER_ID_MAX_SIZE, NamedEntity.NAME_MAX_SIZE));
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING).content(targetList)
                         .contentType(MediaType.APPLICATION_JSON))

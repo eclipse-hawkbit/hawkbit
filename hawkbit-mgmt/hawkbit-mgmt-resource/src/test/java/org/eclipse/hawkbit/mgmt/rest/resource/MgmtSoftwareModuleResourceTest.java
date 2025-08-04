@@ -32,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +40,7 @@ import com.jayway.jsonpath.JsonPath;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
@@ -62,7 +62,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.HashGeneratorUtils;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
-import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.hamcrest.Matchers;
 import org.json.JSONArray;
@@ -1021,14 +1020,14 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         final SoftwareModuleManagement.Create toLongName = SoftwareModuleManagement.Create.builder().type(osType)
                 .name(randomString(80)).build();
-        mvc.perform(post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(Collections.singletonList(toLongName)))
+        mvc.perform(post("/rest/v1/softwaremodules").content(toJson(Collections.singletonList(toLongName)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
         // unsupported media type
         mvc.perform(post("/rest/v1/softwaremodules")
-                        .content(JsonBuilder.softwareModules(List.of(SoftwareModuleManagement.Create.builder()
+                        .content(toJson(List.of(SoftwareModuleManagement.Create.builder()
                                 .type(sm.getType())
                                 .name(sm.getName())
                                 .version(sm.getVersion())
@@ -1042,7 +1041,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .version("version").vendor("vendor").description("description").encrypted(true).build();
         // artifact decryption is not supported
         mvc.perform(
-                        post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(List.of(swm)))
+                        post("/rest/v1/softwaremodules").content(toJson(List.of(swm)))
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
@@ -1271,28 +1270,26 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     void createSoftwareModules() throws Exception {
-        final SoftwareModuleManagement.Create os = SoftwareModuleManagement.Create.builder()
-                .name("name1")
-                .type(osType)
-                .version("version1")
-                .vendor("vendor1")
-                .description("description1")
-                .build();
-        final SoftwareModuleManagement.Create ah = SoftwareModuleManagement.Create.builder()
-                .name("name3")
-                .type(appType)
-                .version("version3")
-                .vendor("vendor3")
-                .description("description3")
-                .build();
+        final MgmtSoftwareModuleRequestBodyPost os = new MgmtSoftwareModuleRequestBodyPost()
+                .setType(osType.getKey())
+                .setName("name1")
+                .setVersion("version1")
+                .setVendor("vendor1")
+                .setDescription("description1");
+        final MgmtSoftwareModuleRequestBodyPost ah = new MgmtSoftwareModuleRequestBodyPost()
+                .setType(appType.getKey())
+                .setName("name3")
+                .setVersion("version3")
+                .setVendor("vendor3")
+                .setDescription("description3");
 
-        final List<SoftwareModuleManagement.Create> modules = Arrays.asList(os, ah);
+        final List<MgmtSoftwareModuleRequestBodyPost> modules = List.of(os, ah);
 
         final long current = System.currentTimeMillis();
 
         final MvcResult mvcResult = mvc.perform(
                         post("/rest/v1/softwaremodules").accept(MediaType.APPLICATION_JSON_VALUE)
-                                .content(JsonBuilder.softwareModules(modules))
+                                .content(toJson(modules))
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
@@ -1312,30 +1309,26 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("[1].createdAt", not(equalTo(0))))
                 .andReturn();
 
-        final SoftwareModule osCreated = softwareModuleManagement.findByNameAndVersionAndType("name1", "version1",
-                osType.getId()).get();
-        final SoftwareModule appCreated = softwareModuleManagement.findByNameAndVersionAndType("name3", "version3",
-                appType.getId()).get();
+        final SoftwareModule osCreated = softwareModuleManagement.findByNameAndVersionAndType("name1", "version1", osType.getId()).get();
+        final SoftwareModule appCreated = softwareModuleManagement.findByNameAndVersionAndType("name3", "version3", appType.getId()).get();
 
-        assertThat(JsonPath.compile("[0]._links.self.href")
-                .read(mvcResult.getResponse().getContentAsString())
-                .toString()).as("Response contains invalid self href")
+        assertThat(JsonPath.compile("[0]._links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+                .as("Response contains invalid self href")
                 .isEqualTo("http://localhost/rest/v1/softwaremodules/" + osCreated.getId());
 
-        assertThat(JsonPath.compile("[1]._links.self.href")
-                .read(mvcResult.getResponse().getContentAsString())
-                .toString()).as("Response contains links self href")
+        assertThat(JsonPath.compile("[1]._links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+                .as("Response contains links self href")
                 .isEqualTo("http://localhost/rest/v1/softwaremodules/" + appCreated.getId());
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("Wrong softwaremodule size").hasSize(2);
-        assertThat(softwareModuleManagement.findByType(osType.getId(), PAGE).getContent().get(0).getName()).as(
-                "Softwaremoudle name is wrong").isEqualTo(os.getName());
-        assertThat(softwareModuleManagement.findByType(osType.getId(), PAGE).getContent().get(0).getCreatedBy()).as(
-                "Softwaremoudle created by is wrong").isEqualTo("uploadTester");
-        assertThat(softwareModuleManagement.findByType(osType.getId(), PAGE).getContent().get(0).getCreatedAt()).as(
-                "Softwaremoudle created at is wrong").isGreaterThanOrEqualTo(current);
-        assertThat(softwareModuleManagement.findByType(appType.getId(), PAGE).getContent().get(0).getName()).as(
-                "Softwaremoudle name is wrong").isEqualTo(ah.getName());
+        assertThat(softwareModuleManagement.findByType(osType.getId(), PAGE).getContent().get(0).getName())
+                .as("Softwaremoudle name is wrong").isEqualTo(os.getName());
+        assertThat(softwareModuleManagement.findByType(osType.getId(), PAGE).getContent().get(0).getCreatedBy())
+                .as("Softwaremoudle created by is wrong").isEqualTo("uploadTester");
+        assertThat(softwareModuleManagement.findByType(osType.getId(), PAGE).getContent().get(0).getCreatedAt())
+                .as("Softwaremoudle created at is wrong").isGreaterThanOrEqualTo(current);
+        assertThat(softwareModuleManagement.findByType(appType.getId(), PAGE).getContent().get(0).getName())
+                .as("Softwaremoudle name is wrong").isEqualTo(ah.getName());
     }
 
     /**

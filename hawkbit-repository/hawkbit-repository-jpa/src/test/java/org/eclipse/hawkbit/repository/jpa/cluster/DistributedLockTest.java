@@ -136,7 +136,7 @@ class DistributedLockTest extends AbstractJpaIntegrationTest {
                     try {
                         final Instant timeout = Instant.now().plus(4 * lockProperties.getTtl(), ChronoUnit.MILLIS);
                         while (Instant.now().isBefore(timeout)) {
-                            log.info("lockThread1: loop, timeout: {}", new Date(timeout.toEpochMilli()));
+                            log.debug("lockThread1: loop, timeout: {}", new Date(timeout.toEpochMilli()));
                             assertThat(lock01.tryLock()).isFalse();
                             assertThat(lockRepository1.isAcquired(path0)).isFalse(); // check db state
 
@@ -167,7 +167,7 @@ class DistributedLockTest extends AbstractJpaIntegrationTest {
             // asserts lockKey1 is kept by lock11 and could not be locked via lockRepository0
             final Instant timeout = Instant.now().plus(4 * lockProperties.getTtl(), ChronoUnit.MILLIS);
             while (Instant.now().isBefore(timeout)) {
-                log.info("main thread: loop, timeout: {}", new Date(timeout.toEpochMilli()));
+                log.debug("main thread: loop, timeout: {}", new Date(timeout.toEpochMilli()));
                 if (lock11Locked.get()) {
                     try {
                         assertThat(lock10.tryLock()).isFalse();
