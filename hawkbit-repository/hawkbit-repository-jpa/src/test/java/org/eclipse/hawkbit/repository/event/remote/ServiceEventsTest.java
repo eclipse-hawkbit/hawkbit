@@ -10,7 +10,10 @@
 package org.eclipse.hawkbit.repository.event.remote;
 
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.MultiActionAssignServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistributionSetServiceEvent;
@@ -66,13 +69,16 @@ class ServiceEventsTest {
     @Test
     void testExpectedServiceEvents(){
         var expected = Set.of(
+                TargetCreatedEvent.class,
+                TargetUpdatedEvent.class,
+                TargetDeletedEvent.class,
                 TargetAssignDistributionSetEvent.class,
+                CancelTargetAssignmentEvent.class,
+                TargetAttributesRequestedEvent.class,
                 MultiActionAssignEvent.class,
                 MultiActionCancelEvent.class,
-                CancelTargetAssignmentEvent.class,
-                TargetDeletedEvent.class,
-                TargetCreatedEvent.class,
-                TargetAttributesRequestedEvent.class
+                ActionCreatedEvent.class,
+                ActionUpdatedEvent.class
         );
         assertEquals(EventPublisherHolder.SERVICE_EVENTS, expected);
     }

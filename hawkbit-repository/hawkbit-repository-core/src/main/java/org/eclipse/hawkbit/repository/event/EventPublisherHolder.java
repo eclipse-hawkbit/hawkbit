@@ -21,7 +21,12 @@ import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.ActionCreatedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.ActionUpdatedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.MultiActionAssignServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.MultiActionCancelServiceEvent;
@@ -29,6 +34,7 @@ import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistribut
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetUpdatedServiceEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -65,12 +71,15 @@ public final class EventPublisherHolder {
 
     public static final Set<Class<?>> SERVICE_EVENTS = Set.of(
             TargetCreatedEvent.class,
+            TargetUpdatedEvent.class,
             TargetDeletedEvent.class,
+            TargetAssignDistributionSetEvent.class,
+            CancelTargetAssignmentEvent.class,
+            TargetAttributesRequestedEvent.class,
             MultiActionAssignEvent.class,
             MultiActionCancelEvent.class,
-            TargetAssignDistributionSetEvent.class,
-            TargetAttributesRequestedEvent.class,
-            CancelTargetAssignmentEvent.class
+            ActionCreatedEvent.class,
+            ActionUpdatedEvent.class
     );
 
     @Autowired
@@ -161,20 +170,26 @@ public final class EventPublisherHolder {
         }
 
         private AbstractRemoteEvent toServiceEvent(final AbstractRemoteEvent event) {
-            if (event instanceof TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
+            if (event instanceof TargetCreatedEvent targetCreatedEvent) {
+                return new TargetCreatedServiceEvent(targetCreatedEvent);
+            } else if (event instanceof TargetUpdatedEvent targetUpdatedEvent) {
+                return new TargetUpdatedServiceEvent(targetUpdatedEvent);
+            } else if (event instanceof TargetDeletedEvent targetDeletedEvent) {
+                return new TargetDeletedServiceEvent(targetDeletedEvent);
+            } else if (event instanceof TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
                 return new TargetAssignDistributionSetServiceEvent(targetAssignDistributionSetEvent);
+            }  else if (event instanceof CancelTargetAssignmentEvent cancelTargetAssignmentEvent) {
+                return new CancelTargetAssignmentServiceEvent(cancelTargetAssignmentEvent);
+            } else if (event instanceof TargetAttributesRequestedEvent targetAttributesRequestedEvent) {
+                return new TargetAttributesRequestedServiceEvent(targetAttributesRequestedEvent);
             } else if (event instanceof MultiActionAssignEvent multiActionAssignEvent) {
                 return new MultiActionAssignServiceEvent(multiActionAssignEvent);
             } else if (event instanceof MultiActionCancelEvent multiActionCancelEvent) {
                 return new MultiActionCancelServiceEvent(multiActionCancelEvent);
-            } else if (event instanceof CancelTargetAssignmentEvent cancelTargetAssignmentEvent) {
-                return new CancelTargetAssignmentServiceEvent(cancelTargetAssignmentEvent);
-            } else if (event instanceof TargetDeletedEvent targetDeletedEvent) {
-                return new TargetDeletedServiceEvent(targetDeletedEvent);
-            } else if (event instanceof TargetCreatedEvent targetCreatedEvent) {
-                return new TargetCreatedServiceEvent(targetCreatedEvent);
-            } else if (event instanceof TargetAttributesRequestedEvent targetAttributesRequestedEvent) {
-                return new TargetAttributesRequestedServiceEvent(targetAttributesRequestedEvent);
+            } else if (event instanceof ActionCreatedEvent actionCreatedEvent) {
+                return new ActionCreatedServiceEvent(actionCreatedEvent);
+            } else if (event instanceof ActionUpdatedEvent actionUpdatedEvent) {
+                return new ActionUpdatedServiceEvent(actionUpdatedEvent);
             }
             return null;
         }

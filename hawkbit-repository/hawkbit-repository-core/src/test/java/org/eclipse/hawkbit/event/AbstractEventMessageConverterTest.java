@@ -10,8 +10,11 @@
 package org.eclipse.hawkbit.event;
 
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.ActionCreatedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,9 +38,14 @@ abstract class AbstractEventMessageConverterTest {
     @Mock
     protected Target targetMock;
 
+    @Mock
+    protected Action actionMock;
+
     @BeforeEach
     void before() {
         when(targetMock.getId()).thenReturn(1L);
+        when(actionMock.getId()).thenReturn(1L);
+        when(actionMock.getTenant()).thenReturn("test_tenant");
     }
 
     AbstractEventMessageConverterTest(MessageConverter messageConverter) {
@@ -60,6 +68,15 @@ abstract class AbstractEventMessageConverterTest {
         final TargetCreatedEvent targetCreatedEvent = new TargetCreatedEvent(targetMock);
         final TargetCreatedServiceEvent targetCreatedServiceEvent = new TargetCreatedServiceEvent(targetCreatedEvent);
         assertSerializeAndDeserialize(targetCreatedServiceEvent, TargetCreatedServiceEvent.class);
+    }
+
+    @Test
+    void successfullySerializeAndDeserializeActionCreatedServiceEvent() {
+        final ActionCreatedEvent actionCreatedEvent =
+                new ActionCreatedEvent(actionMock, 1L, 2L, 3L);
+        final ActionCreatedServiceEvent actionCreatedServiceEvent =
+                new ActionCreatedServiceEvent(actionCreatedEvent);
+        assertSerializeAndDeserialize(actionCreatedServiceEvent,ActionCreatedServiceEvent.class);
     }
 
     <T extends AbstractRemoteEvent> void assertSerializeAndDeserialize(T event, Class<? extends AbstractRemoteEvent> expectedClass) {
