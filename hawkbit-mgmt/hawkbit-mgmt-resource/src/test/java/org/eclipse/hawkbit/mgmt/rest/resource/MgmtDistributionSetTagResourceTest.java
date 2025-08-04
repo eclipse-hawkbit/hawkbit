@@ -42,7 +42,6 @@ import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
-import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -197,7 +196,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
 
         final ResultActions result = mvc
                 .perform(post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING)
-                        .content(JsonBuilder.dsTags(List.of(tagOne, tagTwo)))
+                        .content(toJson(List.of(tagOne, tagTwo)))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
@@ -232,7 +231,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
 
         final ResultActions result = mvc
                 .perform(put(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + original.getId())
-                        .content(JsonBuilder.dsTag(update)).contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(update)).contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -372,7 +371,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
         final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(2);
 
         mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
-                        .content(JsonBuilder.toArray(sets.stream().map(DistributionSet::getId).toList()))
+                        .content(toJson(sets.stream().map(DistributionSet::getId).toList()))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
@@ -427,7 +426,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
         distributionSetManagement.assignTag(sets.stream().map(DistributionSet::getId).toList(), tag.getId());
 
         mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
-                        .content(JsonBuilder.toArray(List.of(unassigned0.getId(), unassigned1.getId())))
+                        .content(toJson(List.of(unassigned0.getId(), unassigned1.getId())))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
@@ -463,7 +462,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
 
         mvc.perform(
                         post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
-                                .content(JsonBuilder.toArray(withMissing))
+                                .content(toJson(withMissing))
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound())
@@ -472,7 +471,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                     final Map<String, Object> info = exceptionInfo.getInfo();
                     assertThat(info).isNotNull();
                     assertThat(info.get(EntityNotFoundException.TYPE)).isEqualTo(DistributionSet.class.getSimpleName());
-                    final List<String> notFound = (List<String>) info.get(EntityNotFoundException.ENTITY_ID);
+                    final List<String> notFound = (List<String>)info.get(EntityNotFoundException.ENTITY_ID);
                     Collections.sort(notFound);
                     assertThat(notFound).isEqualTo(missing);
                 });

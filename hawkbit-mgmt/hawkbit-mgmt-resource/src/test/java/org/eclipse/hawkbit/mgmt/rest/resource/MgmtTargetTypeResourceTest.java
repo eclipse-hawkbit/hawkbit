@@ -26,13 +26,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import com.jayway.jsonpath.JsonPath;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.TargetTypeManagement.Create;
 import org.eclipse.hawkbit.repository.TargetTypeManagement.Update;
@@ -41,7 +41,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -58,10 +57,8 @@ import org.springframework.test.web.servlet.ResultActions;
 class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String TARGETTYPES_ENDPOINT = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING;
-    private static final String TARGETTYPE_SINGLE_ENDPOINT = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING
-            + "/{typeid}";
-    private static final String TARGETTYPE_DSTYPES_ENDPOINT = TARGETTYPE_SINGLE_ENDPOINT + "/"
-            + MgmtRestConstants.TARGETTYPE_V1_DS_TYPES;
+    private static final String TARGETTYPE_SINGLE_ENDPOINT = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{typeid}";
+    private static final String TARGETTYPE_DSTYPES_ENDPOINT = TARGETTYPE_SINGLE_ENDPOINT + "/" + MgmtRestConstants.TARGETTYPE_V1_DS_TYPES;
     private static final String TARGETTYPE_DSTYPE_SINGLE_ENDPOINT = TARGETTYPE_DSTYPES_ENDPOINT + "/{dstypeid}";
 
     private static final String TEST_USER = "targetTypeTester";
@@ -527,7 +524,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         // target types at creation time invalid
         final TargetType testNewType = createTestTargetTypeInDB(typeName + "Another", Set.of(standardDsType));
 
-        mvc.perform(post(TARGETTYPES_ENDPOINT).content(JsonBuilder.targetTypes(Collections.singletonList(testNewType)))
+        mvc.perform(post(TARGETTYPES_ENDPOINT).content(toJson(List.of(testNewType)))
                         .contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isUnsupportedMediaType());
@@ -550,7 +547,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isBadRequest());
 
         final Create tooLongName = Create.builder().name(randomString(NamedEntity.NAME_MAX_SIZE + 1)).build();
-        mvc.perform(post(TARGETTYPES_ENDPOINT).content(JsonBuilder.targetTypesCreate(List.of(tooLongName)))
+        mvc.perform(post(TARGETTYPES_ENDPOINT).content(toJson(List.of(tooLongName)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
@@ -643,7 +640,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
         // verify quota enforcement for distribution set types
         mvc.perform(post(TARGETTYPE_DSTYPES_ENDPOINT, testType.getId())
-                        .content(JsonBuilder.ids(dsTypeIds.subList(0, dsTypeIds.size() - 1)))
+                        .content(toJson(dsTypeIds.subList(0, dsTypeIds.size() - 1).stream().map(MgmtId::new).toList()))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
@@ -696,7 +693,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
     private void runPostTargetTypeAndVerify(final List<Create> types) throws Exception {
         int size = types.size();
         ResultActions resultActions = mvc
-                .perform(post(TARGETTYPES_ENDPOINT).content(JsonBuilder.targetTypesCreate(types))
+                .perform(post(TARGETTYPES_ENDPOINT).content(toJson(types))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print());
 

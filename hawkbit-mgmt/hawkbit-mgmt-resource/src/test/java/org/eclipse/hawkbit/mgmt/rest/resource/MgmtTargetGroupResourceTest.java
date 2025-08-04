@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -90,7 +89,7 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
 
         mvc.perform(put(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/newGroup/assigned")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonBuilder.toArray(Arrays.asList("target1", "target2", "target3"))))
+                        .content(toJson(Arrays.asList("target1", "target2", "target3"))))
                 .andExpect(status().isOk());
 
 
@@ -108,7 +107,7 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
     void shouldReturnBadRequestWhenProvidingAnEmptyListOfControllerIds() throws Exception {
         mvc.perform(put(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/someGroup/assigned")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonBuilder.toArray(Collections.emptyList())))
+                        .content(toJson(Collections.emptyList())))
                 .andExpect(status().isBadRequest());
     }
 
@@ -120,7 +119,7 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
 
         mvc.perform(put(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonBuilder.toArray(Arrays.asList("target1", "target2", "target3")))
+                        .content(toJson(Arrays.asList("target1", "target2", "target3")))
                         .param("group", "Europe/East"))
                 .andExpect(status().isOk());
 
@@ -137,7 +136,7 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
         // expect bad request if empty controllerIds
         mvc.perform(put(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonBuilder.toArray(Collections.emptyList()))
+                        .content(toJson(Collections.emptyList()))
                         .param("group", "doesNotMatter"))
                 .andExpect(status().isBadRequest());
     }
@@ -170,7 +169,7 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
 
         mvc.perform(delete(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(JsonBuilder.toArray(Arrays.asList("target1", "target2"))))
+                .content(toJson(Arrays.asList("target1", "target2"))))
                 .andExpect(status().isOk());
 
         mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
@@ -183,7 +182,7 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
         // expect bad request if empty
         mvc.perform(delete(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonBuilder.toArray(Collections.emptyList())))
+                        .content(toJson(Collections.emptyList())))
                 .andExpect(status().isBadRequest());
     }
 

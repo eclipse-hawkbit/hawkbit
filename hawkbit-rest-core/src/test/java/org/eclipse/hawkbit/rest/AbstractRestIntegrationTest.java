@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
@@ -33,6 +35,8 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 @AutoConfigureMockMvc
 public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTest {
 
+    protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     protected MockMvc mvc;
     @Autowired
     protected WebApplicationContext webApplicationContext;
@@ -55,5 +59,9 @@ public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTes
                         "/api/v1/downloadserver/**"));
 
         return createMvcWebAppContext;
+    }
+
+    protected static String toJson(final Object obj) throws JsonProcessingException {
+        return OBJECT_MAPPER.writeValueAsString(obj);
     }
 }

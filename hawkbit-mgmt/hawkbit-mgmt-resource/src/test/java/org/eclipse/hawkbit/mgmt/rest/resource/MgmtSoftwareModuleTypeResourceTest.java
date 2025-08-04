@@ -24,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import com.jayway.jsonpath.JsonPath;
@@ -34,7 +33,6 @@ import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -166,7 +164,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
         final List<SoftwareModuleTypeManagement.Create> types = new ArrayList<>();
         types.add(SoftwareModuleTypeManagement.Create.builder().key("test-1").name("TestName-1").maxAssignments(-1).build());
 
-        mvc.perform(post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypeCreates(types))
+        mvc.perform(post("/rest/v1/softwaremoduletypes").content(toJson(types))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
@@ -174,7 +172,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
         types.clear();
         types.add(SoftwareModuleTypeManagement.Create.builder().key("test0").name("TestName0").maxAssignments(0).build());
 
-        mvc.perform(post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypeCreates(types))
+        mvc.perform(post("/rest/v1/softwaremoduletypes").content(toJson(types))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
@@ -196,7 +194,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                         .colour("col3‚").maxAssignments(3).build());
 
         final MvcResult mvcResult = mvc
-                .perform(post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypeCreates(types))
+                .perform(post("/rest/v1/softwaremoduletypes").content(toJson(types))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
@@ -446,14 +444,13 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                 .key("test123")
                 .name(randomString(NamedEntity.NAME_MAX_SIZE + 1))
                 .build();
-        mvc.perform(
-                        post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypeCreates(Collections.singletonList(toLongName)))
-                                .contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(post("/rest/v1/softwaremoduletypes").content(toJson(List.of(toLongName)))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
         // unsupported media type
-        mvc.perform(post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypeCreates(types))
+        mvc.perform(post("/rest/v1/softwaremoduletypes").content(toJson(types))
                         .contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isUnsupportedMediaType());

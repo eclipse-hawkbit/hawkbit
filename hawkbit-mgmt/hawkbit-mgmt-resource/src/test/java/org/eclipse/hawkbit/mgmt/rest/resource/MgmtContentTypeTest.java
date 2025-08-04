@@ -16,11 +16,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Collections;
+import java.util.List;
 
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,11 +45,14 @@ import org.springframework.test.web.servlet.MvcResult;
 public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
 
     private static final String DS_NAME = "DS-ö";
-    private DistributionSetManagement.Create dsCreate;
+    private MgmtDistributionSetRequestBodyPost dsCreatePost;
 
     @BeforeEach
     public void setupBeforeTest() {
-        dsCreate = DistributionSetManagement.Create.builder().type(defaultDsType()).name(DS_NAME).version("1.0").build();
+        dsCreatePost = (MgmtDistributionSetRequestBodyPost)new MgmtDistributionSetRequestBodyPost()
+                .setType(defaultDsType().getKey())
+                .setName(DS_NAME)
+                .setVersion("1.0");
     }
 
     /**
@@ -58,8 +61,7 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     @Test
      void postDistributionSet_ContentTypeJsonUtf8_woAccept() throws Exception {
         final MvcResult result = mvc.perform(
-                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(
-                                        Collections.singletonList(dsCreate)))
+                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(toJson(List.of(dsCreatePost)))
                                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
@@ -75,8 +77,7 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     @Test
      void postDistributionSet_ContentTypeJsonUtf8_wAcceptJson() throws Exception {
         final MvcResult result = mvc.perform(
-                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(
-                                        Collections.singletonList(dsCreate)))
+                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(toJson(List.of(dsCreatePost)))
                                 .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
@@ -92,8 +93,7 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     @Test
      void postDistributionSet_ContentTypeJsonUtf8_wAcceptJsonUtf8() throws Exception {
         final MvcResult result = mvc.perform(
-                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(
-                                        Collections.singletonList(dsCreate)))
+                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(toJson(List.of(dsCreatePost)))
                                 .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
@@ -109,8 +109,7 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     @Test
      void postDistributionSet_ContentTypeJsonUtf8_wAcceptHalJson() throws Exception {
         final MvcResult result = mvc.perform(
-                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(
-                                        Collections.singletonList(dsCreate)))
+                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(toJson(List.of(dsCreatePost)))
                                 .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaTypes.HAL_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
@@ -126,8 +125,7 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     @Test
      void postDistributionSet_ContentTypeJson_woAccept() throws Exception {
         final MvcResult result = mvc.perform(
-                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(
-                                        Collections.singletonList(dsCreate)))
+                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(toJson(List.of(dsCreatePost)))
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
@@ -143,8 +141,7 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     @Test
      void postDistributionSet_ContentTypeJson_wAcceptJson() throws Exception {
         final MvcResult result = mvc.perform(
-                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(
-                                        Collections.singletonList(dsCreate)))
+                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(toJson(List.of(dsCreatePost)))
                                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
@@ -159,9 +156,8 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
      */
     @Test
      void postDistributionSet_ContentTypeJson_wAcceptJsonUtf8() throws Exception {
-        final MvcResult result = mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING)
-                        .content(JsonBuilder.distributionSets(Collections.singletonList(dsCreate))).contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON_UTF8))
+        final MvcResult result = mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(toJson(List.of(dsCreatePost)))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("[0]name", equalTo(DS_NAME)))
@@ -176,7 +172,7 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     @Test
      void postDistributionSet_ContentTypeJson_wAcceptHalJson() throws Exception {
         final MvcResult result = mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING)
-                        .content(JsonBuilder.distributionSets(Collections.singletonList(dsCreate))).contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(List.of(dsCreatePost))).contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaTypes.HAL_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
