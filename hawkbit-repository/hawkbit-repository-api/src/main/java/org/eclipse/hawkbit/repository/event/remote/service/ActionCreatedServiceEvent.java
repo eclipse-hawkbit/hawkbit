@@ -12,18 +12,19 @@ package org.eclipse.hawkbit.repository.event.remote.service;
 import java.io.Serial;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 
 /**
  * Service event for {@link ActionCreatedEvent}. Event that needs single replica processing
  */
-public class ActionCreatedServiceEvent extends AbstractServiceRemoteEvent<ActionCreatedEvent>{
+public class ActionCreatedServiceEvent extends AbstractServiceRemoteEvent<ActionCreatedEvent> {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     @JsonCreator
-    public ActionCreatedServiceEvent(final ActionCreatedEvent remoteEvent) {
+    public ActionCreatedServiceEvent(@JsonProperty("payload") final ActionCreatedEvent remoteEvent) {
         super(remoteEvent);
     }
 }
