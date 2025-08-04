@@ -138,7 +138,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     // TODO - make it final
     private TargetRepository targetRepository;
-    private final TargetTypeManagement targetTypeManagement;
+    private final TargetTypeManagement<? extends TargetType> targetTypeManagement;
     private final DeploymentManagement deploymentManagement;
     private final ConfirmationManagement confirmationManagement;
     private final SoftwareModuleRepository softwareModuleRepository;
@@ -159,7 +159,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     protected JpaControllerManagement(
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
             final RepositoryProperties repositoryProperties,
-            final TargetRepository targetRepository, final TargetTypeManagement targetTypeManagement,
+            final TargetRepository targetRepository, final TargetTypeManagement<? extends TargetType> targetTypeManagement,
             final DeploymentManagement deploymentManagement, final ConfirmationManagement confirmationManagement,
             final SoftwareModuleRepository softwareModuleRepository,
             final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
@@ -764,10 +764,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     /**
-     * Stores target directly to DB in case either {@link Target#getAddress()}
-     * or {@link Target#getUpdateStatus()} or {@link Target#getName()} changes
-     * or the buffer queue is full.
+     * Stores target directly to DB in case either {@link Target#getAddress()} or {@link Target#getUpdateStatus()} or {@link Target#getName()}
+     * changes or the buffer queue is full.
      */
+    @SuppressWarnings("java:S3776") // it's just complex
     private Target updateTarget(final JpaTarget toUpdate, final URI address, final String name, final String type) {
         if (isStoreEager(toUpdate, address, name, type) || !queue.offer(new TargetPoll(toUpdate))) {
             if (isAddressChanged(toUpdate.getAddress(), address)) {
@@ -779,13 +779,14 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
             if (isTypeChanged(toUpdate.getTargetType(), type)) {
                 if (StringUtils.hasText(type)) {
-                    var targetTypeOptional = getTargetType(type);
+                    final Optional<TargetType> targetTypeOptional = getTargetType(type);
                     if (targetTypeOptional.isPresent()) {
                         log.debug("Updating target type for thing ID \"{}\" to \"{}\".", toUpdate.getControllerId(), type);
                         toUpdate.setTargetType(targetTypeOptional.get());
                     } else {
-                        log.error("Target type with the provided name \"{}\" was not found. Target type for thing ID" +
-                                " \"{}\" will not be updated", type, toUpdate.getControllerId());
+                        log.error(
+                                "Target type with the provided name \"{}\" was not found. Target type for thing ID \"{}\" will not be updated",
+                                type, toUpdate.getControllerId());
                     }
                 } else {
                     log.debug("Removing target type assignment for thing ID \"{}\".", toUpdate.getControllerId());

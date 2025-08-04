@@ -14,15 +14,16 @@ import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetType;
 
 /**
  * Builder implementation for {@link Target}.
  */
 public class JpaTargetBuilder implements TargetBuilder {
 
-    private final TargetTypeManagement targetTypeManagement;
+    private final TargetTypeManagement<? extends TargetType> targetTypeManagement;
 
-    public JpaTargetBuilder(TargetTypeManagement targetTypeManagement) {
+    public JpaTargetBuilder(final TargetTypeManagement<? extends TargetType> targetTypeManagement) {
         this.targetTypeManagement = targetTypeManagement;
     }
 

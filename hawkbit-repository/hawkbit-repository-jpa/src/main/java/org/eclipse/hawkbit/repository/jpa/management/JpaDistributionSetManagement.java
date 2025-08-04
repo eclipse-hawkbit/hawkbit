@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,11 +26,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.MapJoin;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.metamodel.MapAttribute;
 import jakarta.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.DistributionSetFields;
@@ -42,14 +36,12 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.DeletedException;
-import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
-import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
@@ -504,24 +496,6 @@ public class JpaDistributionSetManagement
             // No reason to save the tag
             entityManager.detach(tag);
         }
-    }
-
-    private Map<String, String> getMap(final long id, final MapAttribute<JpaDistributionSet, String, String> mapAttribute) {
-        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        final CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
-
-        final Root<JpaDistributionSet> targetRoot = query.from(JpaDistributionSet.class);
-        query.where(cb.equal(targetRoot.get(AbstractJpaBaseEntity_.ID), id));
-
-        final MapJoin<JpaDistributionSet, String, String> mapJoin = targetRoot.join(mapAttribute);
-        query.multiselect(mapJoin.key(), mapJoin.value());
-        query.orderBy(cb.asc(mapJoin.key()));
-
-        return entityManager
-                .createQuery(query)
-                .getResultList()
-                .stream()
-                .collect(Collectors.toMap(entry -> (String) entry[0], entry -> (String) entry[1], (v1, v2) -> v1, LinkedHashMap::new));
     }
 
     private JpaSoftwareModule findSoftwareModuleAndThrowExceptionIfNotFound(final Long softwareModuleId) {
