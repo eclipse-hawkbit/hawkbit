@@ -121,6 +121,7 @@ public interface TargetTypeManagement<T extends TargetType>
 
         private Set<DistributionSetType> distributionSetTypes;
 
+        @SuppressWarnings("java:S1144") // java:S1144 - constructor is actually used by SuperBuilder's build() method
         private Create(final CreateBuilder<?, ?> builder) {
             super(builder);
             if (builder.key == null && builder.name == null) {

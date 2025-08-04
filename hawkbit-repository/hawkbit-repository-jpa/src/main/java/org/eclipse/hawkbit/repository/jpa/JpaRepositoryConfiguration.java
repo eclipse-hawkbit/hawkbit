@@ -22,7 +22,6 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -99,7 +98,6 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGrou
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -305,7 +303,7 @@ public class JpaRepositoryConfiguration {
     }
 
     @Bean
-    TargetBuilder targetBuilder(final TargetTypeManagement targetTypeManagement) {
+    TargetBuilder targetBuilder(final TargetTypeManagement<? extends TargetType> targetTypeManagement) {
         return new JpaTargetBuilder(targetTypeManagement);
     }
 
