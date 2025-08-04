@@ -35,6 +35,11 @@ import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.ActionCreatedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.ActionUpdatedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.MultiActionAssignServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.MultiActionCancelServiceEvent;
@@ -48,6 +53,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEv
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetUpdatedServiceEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -110,6 +116,8 @@ public class EventVerifier extends AbstractTestExecutionListener {
                 final Class<?> type = event.type();
                 if (type.isAssignableFrom(TargetCreatedEvent.class)) {
                     modifiedEvents.add(toExpectServiceEvent(TargetCreatedServiceEvent.class, event.count()));
+                } else if (type.isAssignableFrom(TargetUpdatedEvent.class)) {
+                    modifiedEvents.add(toExpectServiceEvent(TargetUpdatedServiceEvent.class, event.count()));
                 } else if (type.isAssignableFrom(TargetDeletedEvent.class)) {
                     modifiedEvents.add(toExpectServiceEvent(TargetDeletedServiceEvent.class, event.count()));
                 } else if (type.isAssignableFrom(TargetAssignDistributionSetEvent.class)) {
@@ -122,6 +130,10 @@ public class EventVerifier extends AbstractTestExecutionListener {
                     modifiedEvents.add(toExpectServiceEvent(TargetAttributesRequestedServiceEvent.class, event.count()));
                 } else if (type.isAssignableFrom(CancelTargetAssignmentEvent.class)) {
                     modifiedEvents.add(toExpectServiceEvent(CancelTargetAssignmentServiceEvent.class, event.count()));
+                } else if (type.isAssignableFrom(ActionCreatedEvent.class)) {
+                    modifiedEvents.add(toExpectServiceEvent(ActionCreatedServiceEvent.class, event.count()));
+                } else if (type.isAssignableFrom(ActionUpdatedEvent.class)) {
+                    modifiedEvents.add(toExpectServiceEvent(ActionUpdatedServiceEvent.class, event.count()));
                 }
             }
             return Optional.of(modifiedEvents.toArray(new Expect[0]));
