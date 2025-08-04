@@ -64,11 +64,11 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
     @NotEmpty
     private String query;
 
-    @ManyToOne(optional = true, fetch = FetchType.LAZY, targetEntity = JpaDistributionSet.class)
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity = JpaDistributionSet.class)
     @JoinColumn(
             name = "auto_assign_distribution_set",
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_filter_query_auto_assign_distribution_set"))
-    private JpaDistributionSet autoAssignDistributionSet;
+    private DistributionSet autoAssignDistributionSet;
 
     @Column(name = "auto_assign_action_type")
     @Convert(converter = JpaAction.ActionTypeConverter.class)

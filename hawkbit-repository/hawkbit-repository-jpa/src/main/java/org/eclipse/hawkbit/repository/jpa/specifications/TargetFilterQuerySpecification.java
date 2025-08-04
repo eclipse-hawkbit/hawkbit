@@ -33,22 +33,7 @@ public final class TargetFilterQuerySpecification {
      * @return the {@link JpaTargetFilterQuery} {@link Specification}
      */
     public static Specification<JpaTargetFilterQuery> equalsQuery(final String queryValue) {
-        return (targetFilterQueryRoot, query, cb) -> cb.equal(targetFilterQueryRoot.get(JpaTargetFilterQuery_.query),
-                queryValue);
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based
-     * on is {@link JpaTargetFilterQuery#getName()}.
-     *
-     * @param searchText of the filter
-     * @return the {@link JpaTargetFilterQuery} {@link Specification}
-     */
-    public static Specification<JpaTargetFilterQuery> likeName(final String searchText) {
-        return (targetFilterQueryRoot, query, cb) -> {
-            final String searchTextToLower = searchText.toLowerCase();
-            return cb.like(cb.lower(targetFilterQueryRoot.get(JpaTargetFilterQuery_.name)), searchTextToLower);
-        };
+        return (targetFilterQueryRoot, query, cb) -> cb.equal(targetFilterQueryRoot.get(JpaTargetFilterQuery_.query), queryValue);
     }
 
     /**

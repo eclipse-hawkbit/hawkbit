@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -215,7 +216,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     void findTargetWithoutAssignedDistributionSet() {
         final DistributionSet assignedSet = testdataFactory.createDistributionSet("");
         final TargetFilterQuery tfq = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name("tfq").query("name==*"));
+                .create(TargetFilterQueryManagement.Create.builder().name("tfq").query("name==*").build());
         final List<Target> unassignedTargets = testdataFactory.createTargets(12, "unassigned", "unassigned");
         final List<Target> assignedTargets = testdataFactory.createTargets(10, "assigned", "assigned");
 
@@ -260,7 +261,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final DistributionSet testDs = testdataFactory.createDistributionSet();
         final TargetType targetType = testdataFactory.createTargetType("testType", Set.of(testDs.getType()));
         final TargetFilterQuery tfq = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name("test-filter").query("name==*"));
+                .create(TargetFilterQueryManagement.Create.builder().name("test-filter").query("name==*").build());
         final List<Target> targets = testdataFactory.createTargets(20, "withOutType");
         final List<Target> targetWithCompatibleTypes = testdataFactory.createTargetsWithType(20, "compatible",
                 targetType);
@@ -284,7 +285,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final TargetType incompatibleTargetType = testdataFactory.createTargetType(
                 "incompTestType", Set.of(testdataFactory.createDistributionSet().getType()));
         final TargetFilterQuery tfq = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name("test-filter").query("name==*"));
+                .create(TargetFilterQueryManagement.Create.builder().name("test-filter").query("name==*").build());
 
         final List<Target> targetsWithOutType = testdataFactory.createTargets(20, "withOutType");
         final List<Target> targetsWithCompatibleType = testdataFactory.createTargetsWithType(20, "compatible",

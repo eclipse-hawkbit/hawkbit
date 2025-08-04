@@ -14,7 +14,6 @@ import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_UP
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -29,7 +28,6 @@ import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
-import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
@@ -146,7 +144,7 @@ public interface DistributionSetManagement<T extends DistributionSet>
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
     @PreAuthorize(HAS_UPDATE_REPOSITORY)
-    void lock(final long id);
+    T lock(final long id);
 
     /**
      * Unlocks a distribution set.<br/>
@@ -157,7 +155,7 @@ public interface DistributionSetManagement<T extends DistributionSet>
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
     @PreAuthorize(HAS_UPDATE_REPOSITORY)
-    void unlock(final long id);
+    T unlock(final long id);
 
     /**
      * Find distribution set by id and throw an exception if it is deleted or invalidated.
@@ -310,11 +308,11 @@ public interface DistributionSetManagement<T extends DistributionSet>
     List<Statistic> countActionsByStatusForDistributionSet(@NotNull Long id);
 
     /**
-     * Count all {@link org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate}s
+     * Count all {@link TargetFilterQueryManagement.AutoAssignDistributionSetUpdate}s
      * for Distribution Set.
      *
      * @param id to look for
-     * @return number of {@link org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate}s
+     * @return number of {@link TargetFilterQueryManagement.AutoAssignDistributionSetUpdate}s
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
     Long countAutoAssignmentsForDistributionSet(@NotNull Long id);

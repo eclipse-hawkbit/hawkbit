@@ -24,8 +24,9 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetFilterQueryRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
-import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDistributionSetUpdate;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.Create;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -38,7 +39,7 @@ import org.springframework.util.CollectionUtils;
 public final class MgmtTargetFilterQueryMapper {
 
     public static List<MgmtTargetFilterQuery> toResponse(
-            final List<TargetFilterQuery> filters, final boolean confirmationFlowEnabled, final boolean isRepresentationFull) {
+            final List<? extends TargetFilterQuery> filters, final boolean confirmationFlowEnabled, final boolean isRepresentationFull) {
         if (CollectionUtils.isEmpty(filters)) {
             return Collections.emptyList();
         }
@@ -86,15 +87,14 @@ public final class MgmtTargetFilterQueryMapper {
                 .postAssignedDistributionSet(targetRest.getId(), null)).withRel("autoAssignDS").expand());
     }
 
-    public static TargetFilterQueryCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetFilterQueryRequestBody filterRest) {
-        return entityFactory.targetFilterQuery().create().name(filterRest.getName()).query(filterRest.getQuery());
+    public static Create fromRequest(final MgmtTargetFilterQueryRequestBody filterRest) {
+        return Create.builder().name(filterRest.getName()).query(filterRest.getQuery()).build();
     }
 
-    public static AutoAssignDistributionSetUpdate fromRequest(final EntityFactory entityFactory, final long filterId,
+    public static AutoAssignDistributionSetUpdate fromRequest(final long filterId,
             final MgmtDistributionSetAutoAssignment assignRest) {
         final ActionType type = MgmtRestModelMapper.convertActionType(assignRest.getType());
 
-        return entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(assignRest.getId()).actionType(type)
-                .weight(assignRest.getWeight());
+        return new AutoAssignDistributionSetUpdate(filterId).ds(assignRest.getId()).actionType(type).weight(assignRest.getWeight());
     }
 }

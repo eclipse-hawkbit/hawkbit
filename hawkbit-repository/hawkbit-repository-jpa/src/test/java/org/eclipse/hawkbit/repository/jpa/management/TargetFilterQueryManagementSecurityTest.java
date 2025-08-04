@@ -12,7 +12,8 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDistributionSetUpdate;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.Create;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +29,7 @@ class TargetFilterQueryManagementSecurityTest extends AbstractJpaIntegrationTest
     @Test
     void createPermissionsCheck() {
         assertPermissions(
-                () -> targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("name").query("controllerId==id")),
+                () -> targetFilterQueryManagement.create(Create.builder().name("name").query("controllerId==id").build()),
                 List.of(SpPermission.CREATE_TARGET));
     }
 
@@ -80,41 +81,8 @@ class TargetFilterQueryManagementSecurityTest extends AbstractJpaIntegrationTest
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void findByNamePermissionsCheck() {
-        assertPermissions(() -> targetFilterQueryManagement.findByName("filterName", PAGE), List.of(SpPermission.READ_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void countByNamePermissionsCheck() {
-        assertPermissions(() -> targetFilterQueryManagement.countByName("filterName"), List.of(SpPermission.READ_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
     void findByRsqlPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.findByRsql("name==id", PAGE), List.of(SpPermission.READ_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void findByQueryPermissionsCheck() {
-        assertPermissions(() -> targetFilterQueryManagement.findByQuery("controllerId==id", PAGE), List.of(SpPermission.READ_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void findByAutoAssignDistributionSetIdPermissionsCheck() {
-        assertPermissions(() -> targetFilterQueryManagement.findByAutoAssignDistributionSetId(1L, PAGE),
-                List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
     }
 
     /**
@@ -140,23 +108,6 @@ class TargetFilterQueryManagementSecurityTest extends AbstractJpaIntegrationTest
     @Test
     void getTargetFilterQueryByIdPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.get(1L), List.of(SpPermission.READ_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void getTargetFilterQueryByNamePermissionsCheck() {
-        assertPermissions(() -> targetFilterQueryManagement.getByName("filterName"), List.of(SpPermission.READ_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void updatePermissionsCheck() {
-        assertPermissions(() -> targetFilterQueryManagement.update(entityFactory.targetFilterQuery().update(1L)),
-                List.of(SpPermission.UPDATE_TARGET));
     }
 
     /**

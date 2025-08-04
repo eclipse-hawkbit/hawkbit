@@ -26,7 +26,7 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.Identifiable;
-import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -259,7 +259,7 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
         distributionSetManagement.lock(hidden.getId());
 
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name("test").query("id==*"));
+                .create(TargetFilterQueryManagement.Create.builder().name("test").query("id==*").build());
 
         runAs(withUser("user",
                 READ_REPOSITORY,
@@ -268,14 +268,14 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
                 // read / update target needed to update target filter query
                 READ_TARGET, UPDATE_TARGET), () -> {
             assertThat(targetFilterQueryManagement
-                    .updateAutoAssignDS(new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(permitted.getId())
+                    .updateAutoAssignDS(new TargetFilterQueryManagement.AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(permitted.getId())
                             .actionType(Action.ActionType.FORCED).confirmationRequired(false))
                     .getAutoAssignDistributionSet().getId()).isEqualTo(permitted.getId());
             targetFilterQueryManagement
-                    .updateAutoAssignDS(new AutoAssignDistributionSetUpdate(targetFilterQuery.getId())
+                    .updateAutoAssignDS(new TargetFilterQueryManagement.AutoAssignDistributionSetUpdate(targetFilterQuery.getId())
                             .ds(readOnly.getId()).actionType(Action.ActionType.FORCED).confirmationRequired(false))
                     .getAutoAssignDistributionSet().getId();
-            final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate = new AutoAssignDistributionSetUpdate(
+            final TargetFilterQueryManagement.AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate = new TargetFilterQueryManagement.AutoAssignDistributionSetUpdate(
                     targetFilterQuery.getId())
                     .ds(hidden.getId()).actionType(Action.ActionType.FORCED).confirmationRequired(false);
             assertThatThrownBy(() -> targetFilterQueryManagement.updateAutoAssignDS(autoAssignDistributionSetUpdate))

@@ -11,10 +11,9 @@ package org.eclipse.hawkbit.repository.jpa.utils;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -29,8 +28,8 @@ public final class WeightValidationHelper {
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final SystemSecurityContext systemSecurityContext;
 
-    private WeightValidationHelper(final SystemSecurityContext systemSecurityContext,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
+    private WeightValidationHelper(
+            final SystemSecurityContext systemSecurityContext, final TenantConfigurationManagement tenantConfigurationManagement) {
         this.systemSecurityContext = systemSecurityContext;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
     }
@@ -41,8 +40,8 @@ public final class WeightValidationHelper {
      * @param systemSecurityContext security context used to get the tenant and for execution
      * @param tenantConfigurationManagement to get the value from
      */
-    public static WeightValidationHelper usingContext(final SystemSecurityContext systemSecurityContext,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
+    public static WeightValidationHelper usingContext(
+            final SystemSecurityContext systemSecurityContext, final TenantConfigurationManagement tenantConfigurationManagement) {
         return new WeightValidationHelper(systemSecurityContext, tenantConfigurationManagement);
     }
 
@@ -74,9 +73,8 @@ public final class WeightValidationHelper {
      *
      * @param targetFilterQueryCreate the target filter query
      */
-    public void validate(final JpaTargetFilterQueryCreate targetFilterQueryCreate) {
-        validateWeight(targetFilterQueryCreate.getAutoAssignWeight().orElse(null));
-
+    public void validate(final TargetFilterQueryManagement.Create targetFilterQueryCreate) {
+        validateWeight(targetFilterQueryCreate.getAutoAssignWeight());
     }
 
     /**
@@ -84,16 +82,14 @@ public final class WeightValidationHelper {
      *
      * @param autoAssignDistributionSetUpdate the auto assignment distribution set update
      */
-    public void validate(final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate) {
-        validateWeight(autoAssignDistributionSetUpdate.getWeight());
-
+    public void validate(final TargetFilterQueryManagement.AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate) {
+        validateWeight(autoAssignDistributionSetUpdate.weight());
     }
 
     /**
      * Checks if the weight is valid
      *
-     * @param weight weight tied to the rollout, auto assignment, or online
-     *         assignment.
+     * @param weight weight tied to the rollout, auto assignment, or online assignment.
      */
     public void validateWeight(final Integer weight) {
         final boolean hasWeight = weight != null;
@@ -101,8 +97,7 @@ public final class WeightValidationHelper {
     }
 
     /**
-     * Checks if the weight is valid with the multi-assignments being turned
-     * off/on.
+     * Checks if the weight is valid with the multi-assignments being turned off/on.
      *
      * @param hasWeight indicator of the weight if it has numerical value
      * @param hasNoWeight indicator of the weight if it doesn't have a numerical value

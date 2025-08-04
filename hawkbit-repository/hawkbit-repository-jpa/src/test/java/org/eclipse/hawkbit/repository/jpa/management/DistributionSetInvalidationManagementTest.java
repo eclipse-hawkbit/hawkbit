@@ -15,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -145,12 +146,10 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
      */
     @Test
     void verifyInvalidateDistributionSetStopAll() {
-        final InvalidationTestData invalidationTestData = createInvalidationTestData(
-                "verifyInvalidateDistributionSetStopAll");
+        final InvalidationTestData invalidationTestData = createInvalidationTestData("verifyInvalidateDistributionSetStopAll");
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
-                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.SOFT,
-                true);
+                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.SOFT,true);
         final DistributionSetInvalidationCount distributionSetInvalidationCount = distributionSetInvalidationManagement
                 .countEntitiesForInvalidation(distributionSetInvalidation);
         assertDistributionSetInvalidationCount(distributionSetInvalidationCount, 1, 5, 1);
@@ -185,10 +184,11 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
 
     /**
      * Verify that invalidating an invalidated distribution set don't throws an exception
-     *  -> should be able to cancel actions again (if previous time there was a problem
+     * -> should be able to cancel actions again (if previous time there was a problem
      */
     @Test
-    @SuppressWarnings("java:S2699") // test that no exception is thrown
+    @SuppressWarnings("java:S2699")
+    // test that no exception is thrown
     void verifyInvalidateInvalidatedDistributionSetDontThrowsException() {
         final DistributionSet distributionSet = testdataFactory.createAndInvalidateDistributionSet();
         distributionSetInvalidationManagement.invalidateDistributionSet(
@@ -266,13 +266,13 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     }
 
     private InvalidationTestData createInvalidationTestData(final String testName) {
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final List<Target> targets = testdataFactory.createTargets(5, testName);
-        assignDistributionSet(distributionSet, targets);
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(entityFactory.targetFilterQuery()
-                .create().name(testName).query("name==*").autoAssignDistributionSet(distributionSet));
-        final Rollout rollout = testdataFactory.createRolloutByVariables(testName, "desc", 2, "name==*",
-                distributionSet, "50", "80");
+        // if implicitly locked - the old distribution set becomes stale
+        distributionSet = assignDistributionSet(distributionSet, targets).getDistributionSet();
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(TargetFilterQueryManagement.Create.builder()
+                        .name(testName).query("name==*").autoAssignDistributionSet(distributionSet).build());
+        final Rollout rollout = testdataFactory.createRolloutByVariables(testName, "desc", 2, "name==*", distributionSet, "50", "80");
 
         return new InvalidationTestData(distributionSet, targets, targetFilterQuery, rollout);
     }

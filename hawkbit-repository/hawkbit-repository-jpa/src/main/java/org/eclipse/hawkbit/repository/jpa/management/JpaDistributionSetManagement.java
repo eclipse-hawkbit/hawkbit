@@ -248,23 +248,27 @@ public class JpaDistributionSetManagement
     @Override
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
-    public void lock(final long id) {
+    public JpaDistributionSet lock(final long id) {
         final JpaDistributionSet distributionSet = getById(id);
-        if (!distributionSet.isLocked()) {
+        if (distributionSet.isLocked()) {
+            return distributionSet;
+        } else {
             lockSoftwareModules(distributionSet);
             distributionSet.lock();
-            jpaRepository.save(distributionSet);
+            return jpaRepository.save(distributionSet);
         }
     }
 
     @Override
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
-    public void unlock(final long id) {
+    public JpaDistributionSet unlock(final long id) {
         final JpaDistributionSet distributionSet = getById(id);
         if (distributionSet.isLocked()) {
             distributionSet.unlock();
-            jpaRepository.save(distributionSet);
+            return jpaRepository.save(distributionSet);
+        } else {
+            return distributionSet;
         }
     }
 

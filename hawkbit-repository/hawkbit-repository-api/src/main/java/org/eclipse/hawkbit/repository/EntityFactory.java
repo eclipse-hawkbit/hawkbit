@@ -13,13 +13,17 @@ import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
-import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 
 /**
  * Central {@link BaseEntity} generation service. Objects are created but not persisted.
  */
 public interface EntityFactory {
+
+    /**
+     * @return {@link TargetBuilder} object
+     */
+    TargetBuilder target();
 
     /**
      * @return {@link ActionStatusBuilder} object
@@ -35,14 +39,4 @@ public interface EntityFactory {
      * @return {@link RolloutBuilder} object
      */
     RolloutBuilder rollout();
-
-    /**
-     * @return {@link TargetBuilder} object
-     */
-    TargetBuilder target();
-
-    /**
-     * @return {@link TargetFilterQueryBuilder} object
-     */
-    TargetFilterQueryBuilder targetFilterQuery();
 }
