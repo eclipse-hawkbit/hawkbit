@@ -10,15 +10,15 @@
 package org.eclipse.hawkbit.repository.event.remote.service;
 
 import lombok.Getter;
-import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
+import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
 
 @Getter
-public abstract class AbstractServiceRemoteEvent<T extends AbstractRemoteEvent> extends AbstractRemoteEvent {
+public abstract class AbstractServiceRemoteEvent<T extends RemoteTenantAwareEvent> extends RemoteTenantAwareEvent {
 
     private final T remoteEvent;
 
     protected AbstractServiceRemoteEvent(T remoteEvent) {
-        super(remoteEvent == null ? "_empty_source_" : remoteEvent.getSource());
+        super(remoteEvent == null ? "_empty_tenant_" : remoteEvent.getTenant(), remoteEvent == null ? "_empty_source_" : remoteEvent.getSource());
         this.remoteEvent = remoteEvent;
     }
 
