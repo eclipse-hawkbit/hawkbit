@@ -27,9 +27,9 @@ import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
-import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
-import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDistributionSetUpdate;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.Create;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.Update;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
@@ -67,10 +67,9 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
      * Verifies that management get access reacts as specfied on calls for non existing entities by means of Optional not present.
      */
     @Test
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(targetFilterQueryManagement.get(NOT_EXIST_IDL)).isNotPresent();
-        assertThat(targetFilterQueryManagement.getByName(NOT_EXIST_ID)).isNotPresent();
     }
 
     /**
@@ -84,7 +83,7 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         final DistributionSet set = testdataFactory.createDistributionSet();
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name("test filter").query("name==PendingTargets001"));
+                Create.builder().name("test filter").query("name==PendingTargets001").build());
 
         verifyThrownExceptionBy(() -> targetFilterQueryManagement.delete(NOT_EXIST_IDL), "TargetFilterQuery");
 
@@ -93,20 +92,20 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
                 "DistributionSet");
 
         verifyThrownExceptionBy(
-                () -> targetFilterQueryManagement.update(entityFactory.targetFilterQuery().update(NOT_EXIST_IDL)),
+                () -> targetFilterQueryManagement.update(Update.builder().id(NOT_EXIST_IDL).build()),
                 "TargetFilterQuery");
 
         verifyThrownExceptionBy(() -> targetFilterQueryManagement.updateAutoAssignDS(
-                        entityFactory.targetFilterQuery().updateAutoAssign(targetFilterQuery.getId()).ds(NOT_EXIST_IDL)),
+                        new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(NOT_EXIST_IDL)),
                 "DistributionSet");
 
         verifyThrownExceptionBy(
                 () -> targetFilterQueryManagement.updateAutoAssignDS(
-                        entityFactory.targetFilterQuery().updateAutoAssign(NOT_EXIST_IDL).ds(set.getId())),
+                        new AutoAssignDistributionSetUpdate(NOT_EXIST_IDL).ds(set.getId())),
                 "TargetFilterQuery");
 
         verifyThrownExceptionBy(() -> targetFilterQueryManagement.updateAutoAssignDS(
-                        entityFactory.targetFilterQuery().updateAutoAssign(targetFilterQuery.getId()).ds(NOT_EXIST_IDL)),
+                        new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(NOT_EXIST_IDL)),
                 "DistributionSet");
     }
 
@@ -117,8 +116,8 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
     void createTargetFilterQuery() {
         final String filterName = "new target filter";
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
-        assertEquals(targetFilterQuery, targetFilterQueryManagement.getByName(filterName).get(),
+                .create(Create.builder().name(filterName).query("name==PendingTargets001").build());
+        assertEquals(targetFilterQuery, targetFilterQueryManagement.get(targetFilterQuery.getId()).get(),
                 "Retrieved newly created custom target filter");
     }
 
@@ -134,8 +133,8 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet set = testdataFactory.createDistributionSet();
 
         // creation is supposed to work as there is no distribution set
-        final TargetFilterQueryCreate targetFilterQueryCreate = entityFactory.targetFilterQuery().create()
-                .name("testfilter").autoAssignDistributionSet(set.getId()).query("name==target*");
+        final Create targetFilterQueryCreate = Create.builder()
+                .name("testfilter").autoAssignDistributionSet(set).query("name==target*").build();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> targetFilterQueryManagement.create(targetFilterQueryCreate));
     }
@@ -147,12 +146,11 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
     void searchTargetFilterQuery() {
         final String filterName = "targetFilterQueryName";
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
+                .create(Create.builder().name(filterName).query("name==PendingTargets001").build());
 
-        targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name("someOtherFilter").query("name==PendingTargets002"));
+        targetFilterQueryManagement.create(Create.builder().name("someOtherFilter").query("name==PendingTargets002").build());
 
-        final List<TargetFilterQuery> results = targetFilterQueryManagement
+        final List<? extends TargetFilterQuery> results = targetFilterQueryManagement
                 .findByRsql("name==" + filterName, PageRequest.of(0, 10)).getContent();
         assertEquals(1, results.size(), "Search result should have 1 result");
         assertEquals(targetFilterQuery, results.get(0), "Retrieved newly created custom target filter");
@@ -174,8 +172,7 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void createDuplicateTargetFilterQuery() {
         final String filterName = "new target filter duplicate";
-        final TargetFilterQueryCreate targetFilterQueryCreate = entityFactory.targetFilterQuery().create()
-                .name(filterName).query("name==PendingTargets001");
+        final Create targetFilterQueryCreate = Create.builder().name(filterName).query("name==PendingTargets001").build();
 
         targetFilterQueryManagement.create(targetFilterQueryCreate);
 
@@ -190,8 +187,8 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void deleteTargetFilterQuery() {
         final String filterName = "delete_target_filter_query";
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(entityFactory.targetFilterQuery()
-                .create().name(filterName).query("name==PendingTargets001"));
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
+                Create.builder().name(filterName).query("name==PendingTargets001").build());
         targetFilterQueryManagement.delete(targetFilterQuery.getId());
         assertFalse(
                 targetFilterQueryManagement.get(targetFilterQuery.getId()).isPresent(),
@@ -205,11 +202,11 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
     void updateTargetFilterQuery() {
         final String filterName = "target_filter_01";
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
+                .create(Create.builder().name(filterName).query("name==PendingTargets001").build());
 
-        final String newQuery = "status==UNKNOWN";
-        targetFilterQueryManagement.update(entityFactory.targetFilterQuery().update(targetFilterQuery.getId()).query(newQuery));
-        assertEquals(newQuery, targetFilterQueryManagement.getByName(filterName).get().getQuery(),
+        final String newQuery = "name==PendingTargets002";
+        targetFilterQueryManagement.update(Update.builder().id(targetFilterQuery.getId()).query(newQuery).build());
+        assertEquals(newQuery, targetFilterQueryManagement.get(targetFilterQuery.getId()).get().getQuery(),
                 "Returns updated target filter query");
     }
 
@@ -220,12 +217,12 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
     void assignDistributionSet() {
         final String filterName = "target_filter_02";
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
+                .create(Create.builder().name(filterName).query("name==PendingTargets001").build());
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
 
-        verifyAutoAssignmentWithDefaultActionType(filterName, targetFilterQuery, distributionSet);
-        verifyAutoAssignmentWithSoftActionType(filterName, targetFilterQuery, distributionSet);
-        verifyAutoAssignmentWithDownloadOnlyActionType(filterName, targetFilterQuery, distributionSet);
+        verifyAutoAssignmentWithDefaultActionType(targetFilterQuery, distributionSet);
+        verifyAutoAssignmentWithSoftActionType(targetFilterQuery, distributionSet);
+        verifyAutoAssignmentWithDownloadOnlyActionType(targetFilterQuery, distributionSet);
         verifyAutoAssignmentWithInvalidActionType(targetFilterQuery, distributionSet);
         verifyAutoAssignmentWithIncompleteDs(targetFilterQuery);
         verifyAutoAssignmentWithSoftDeletedDs(targetFilterQuery);
@@ -243,12 +240,12 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
 
         // creation is supposed to work as there is no distribution set
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name("testfilter").query("name==target*"));
+                .create(Create.builder().name("testfilter").query("name==target*").build());
 
         // assigning a distribution set is supposed to fail as the query
         // addresses too many targets
-        final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate = entityFactory.targetFilterQuery()
-                .updateAutoAssign(targetFilterQuery.getId()).ds(distributionSet.getId());
+        final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate =
+                new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(distributionSet.getId());
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> targetFilterQueryManagement.updateAutoAssignDS(autoAssignDistributionSetUpdate));
     }
@@ -264,12 +261,11 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet set = testdataFactory.createDistributionSet();
 
         // creation is supposed to work as the query does not exceed the quota
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(entityFactory.targetFilterQuery()
-                .create().name("testfilter").autoAssignDistributionSet(set.getId()).query("name==foo"));
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
+                Create.builder().name("testfilter").autoAssignDistributionSet(set).query("name==foo").build());
 
         // update with a query string that addresses too many targets
-        final TargetFilterQueryUpdate targetFilterQueryUpdate = entityFactory.targetFilterQuery().update(targetFilterQuery.getId())
-                .query("name==target*");
+        final Update targetFilterQueryUpdate = Update.builder().id(targetFilterQuery.getId()).query("name==target*").build();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> targetFilterQueryManagement.update(targetFilterQueryUpdate));
     }
@@ -281,23 +277,23 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
     void removeAssignDistributionSet() {
         final String filterName = "target_filter_03";
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
+                .create(Create.builder().name(filterName).query("name==PendingTargets001").build());
 
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
 
-        targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
-                .updateAutoAssign(targetFilterQuery.getId()).ds(distributionSet.getId()));
+        targetFilterQueryManagement.updateAutoAssignDS(
+                new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(distributionSet.getId()));
         implicitLock(distributionSet);
 
         // Check if target filter query is there
-        TargetFilterQuery tfq = targetFilterQueryManagement.getByName(filterName).get();
+        TargetFilterQuery tfq = targetFilterQueryManagement.get(targetFilterQuery.getId()).get();
         assertEquals(distributionSet, tfq.getAutoAssignDistributionSet(), "Returns correct distribution set");
         assertEquals(ActionType.FORCED, tfq.getAutoAssignActionType(), "Return correct action type");
 
         distributionSetManagement.delete(distributionSet.getId());
 
         // Check if auto assign distribution set is null
-        tfq = targetFilterQueryManagement.getByName(filterName).get();
+        tfq = targetFilterQueryManagement.get(targetFilterQuery.getId()).get();
         assertNotNull(tfq, "Returns target filter query");
         assertNull(tfq.getAutoAssignDistributionSet(), "Returns distribution set as null");
         assertNull(tfq.getAutoAssignActionType(), "Returns action type as null");
@@ -316,14 +312,14 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(distributionSet.getId(), target.getControllerId());
 
         final Long filterId = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"))
+                .create(Create.builder().name(filterName).query("name==PendingTargets001").build())
                 .getId();
         targetFilterQueryManagement.updateAutoAssignDS(
-                entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(distributionSet.getId()));
+                new AutoAssignDistributionSetUpdate(filterId).ds(distributionSet.getId()));
         implicitLock(distributionSet);
 
         // Check if target filter query is there with the distribution set
-        TargetFilterQuery tfq = targetFilterQueryManagement.getByName(filterName).get();
+        TargetFilterQuery tfq = targetFilterQueryManagement.get(filterId).get();
         assertEquals(distributionSet, tfq.getAutoAssignDistributionSet(), "Returns correct distribution set");
         assertEquals(ActionType.FORCED, tfq.getAutoAssignActionType(), "Return correct action type");
 
@@ -333,7 +329,7 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
         assertTrue(distributionSetManagement.get(distributionSet.getId()).get().isDeleted(), "Distribution set should be deleted");
 
         // Check if auto assign distribution set is null
-        tfq = targetFilterQueryManagement.getByName(filterName).get();
+        tfq = targetFilterQueryManagement.get(filterId).get();
         assertNotNull(tfq, "Returns target filter query");
         assertNull(tfq.getAutoAssignDistributionSet(), "Returns distribution set as null");
         assertNull(tfq.getAutoAssignActionType(), "Returns action type as null");
@@ -346,24 +342,23 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
     void findFiltersWithDistributionSet() {
         final String filterName = "d";
         assertEquals(0L, targetFilterQueryManagement.count());
-        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("a").query("name==*"));
-        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("b").query("name==*"));
+        targetFilterQueryManagement.create(Create.builder().name("a").query("name==*").build());
+        targetFilterQueryManagement.create(Create.builder().name("b").query("name==*").build());
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final DistributionSet distributionSet2 = testdataFactory.createDistributionSet("2");
 
         final TargetFilterQuery tfq = targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create()
-                        .name("c").query("name==x").autoAssignDistributionSet(distributionSet).autoAssignActionType(ActionType.SOFT));
+                Create.builder()
+                        .name("c").query("name==x").autoAssignDistributionSet(distributionSet).autoAssignActionType(ActionType.SOFT)
+                        .build());
         final TargetFilterQuery tfq2 = targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create()
-                        .name(filterName).query("name==z*").autoAssignDistributionSet(distributionSet2));
+                Create.builder().name(filterName).query("name==z*").autoAssignDistributionSet(distributionSet2).build());
         assertEquals(4L, targetFilterQueryManagement.count());
 
         // check if find works
         verifyFindByDistributionSetAndRsql(distributionSet, null, tfq);
 
-        targetFilterQueryManagement.updateAutoAssignDS(
-                entityFactory.targetFilterQuery().updateAutoAssign(tfq2.getId()).ds(distributionSet.getId()));
+        targetFilterQueryManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(tfq2.getId()).ds(distributionSet.getId()));
 
         // check if find works for two
         verifyFindByDistributionSetAndRsql(distributionSet, null, tfq, tfq2);
@@ -379,15 +374,13 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
     void weightNotRequiredInMultiAssignmentMode() {
         enableMultiAssignments();
         final DistributionSet ds = testdataFactory.createDistributionSet();
-        final Long filterId = targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("a").query("name==*")).getId();
+        final Long filterId = targetFilterQueryManagement.create(Create.builder().name("a").query("name==*").build()).getId();
 
         assertThat(
-                targetFilterQueryManagement.create(
-                        entityFactory.targetFilterQuery().create().name("b").query("name==*").autoAssignDistributionSet(ds)))
+                targetFilterQueryManagement.create(Create.builder().name("b").query("name==*").autoAssignDistributionSet(ds).build()))
                 .isNotNull();
         assertThat(
-                targetFilterQueryManagement
-                        .updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId())))
+                targetFilterQueryManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(filterId).ds(ds.getId())))
                 .isNotNull();
     }
 
@@ -397,16 +390,15 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void weightAllowedWhenMultiAssignmentModeNotEnabled() {
         final DistributionSet ds = testdataFactory.createDistributionSet();
-        final Long filterId = targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("a").query("name==*")).getId();
+        final Long filterId = targetFilterQueryManagement.create(Create.builder().name("a").query("name==*").build()).getId();
 
         assertThat(
                 targetFilterQueryManagement.create(
-                        entityFactory.targetFilterQuery().create()
-                                .name("b").query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(342)))
+                        Create.builder().name("b").query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(342).build()))
                 .isNotNull();
         assertThat(
                 targetFilterQueryManagement.updateAutoAssignDS(
-                        entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId()).weight(343)))
+                        new AutoAssignDistributionSetUpdate(filterId).ds(ds.getId()).weight(343)))
                 .isNotNull();
     }
 
@@ -418,10 +410,9 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
         enableMultiAssignments();
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final Long filterId = targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name("a")
-                        .query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(23)).getId();
+                Create.builder().name("a").query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(23).build()).getId();
         assertThat(targetFilterQueryManagement.updateAutoAssignDS(
-                entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(null).weight(null)))
+                new AutoAssignDistributionSetUpdate(filterId).ds(null).weight(null)))
                 .isNotNull();
     }
 
@@ -433,27 +424,27 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
         enableMultiAssignments();
         final DistributionSet ds = testdataFactory.createDistributionSet();
 
-        final TargetFilterQueryCreate targetFilterQueryCreate = entityFactory.targetFilterQuery().create().name("a")
-                .query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(Action.WEIGHT_MAX + 1);
+        final Create targetFilterQueryCreate = Create.builder().name("a")
+                .query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(Action.WEIGHT_MAX + 1).build();
         Assertions.assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
                 () -> targetFilterQueryManagement.create(targetFilterQueryCreate));
 
-        final Long filterId = targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("a")
-                .query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(Action.WEIGHT_MAX)).getId();
+        final Long filterId = targetFilterQueryManagement.create(Create.builder().name("a")
+                .query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(Action.WEIGHT_MAX).build()).getId();
         assertThat(targetFilterQueryManagement.get(filterId).get().getAutoAssignWeight()).contains(Action.WEIGHT_MAX);
 
-        final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate = entityFactory.targetFilterQuery().updateAutoAssign(filterId)
+        final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate = new AutoAssignDistributionSetUpdate(filterId)
                 .ds(ds.getId()).weight(Action.WEIGHT_MAX + 1);
         Assertions.assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetFilterQueryManagement.updateAutoAssignDS(autoAssignDistributionSetUpdate));
-        final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate2 = entityFactory.targetFilterQuery()
-                .updateAutoAssign(filterId).ds(ds.getId()).weight(Action.WEIGHT_MIN - 1);
+        final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate2 =
+                new AutoAssignDistributionSetUpdate(filterId).ds(ds.getId()).weight(Action.WEIGHT_MIN - 1);
         Assertions.assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetFilterQueryManagement.updateAutoAssignDS(autoAssignDistributionSetUpdate2));
         targetFilterQueryManagement.updateAutoAssignDS(
-                entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId()).weight(Action.WEIGHT_MAX));
+                new AutoAssignDistributionSetUpdate(filterId).ds(ds.getId()).weight(Action.WEIGHT_MAX));
         targetFilterQueryManagement.updateAutoAssignDS(
-                entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId()).weight(Action.WEIGHT_MIN));
+                new AutoAssignDistributionSetUpdate(filterId).ds(ds.getId()).weight(Action.WEIGHT_MIN));
         assertThat(targetFilterQueryManagement.get(filterId).get().getAutoAssignWeight()).contains(Action.WEIGHT_MIN);
     }
 
@@ -464,8 +455,9 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
     void createTargetFilterWithInvalidDistributionSet() {
         final DistributionSet distributionSet = testdataFactory.createAndInvalidateDistributionSet();
 
-        final TargetFilterQueryCreate targetFilterQueryCreate = entityFactory.targetFilterQuery().create()
-                .name("createTargetFilterWithInvalidDistributionSet").query("name==*").autoAssignDistributionSet(distributionSet);
+        final Create targetFilterQueryCreate = Create.builder()
+                .name("createTargetFilterWithInvalidDistributionSet").query("name==*").autoAssignDistributionSet(distributionSet)
+                .build();
         assertThatExceptionOfType(InvalidDistributionSetException.class)
                 .as("Invalid distributionSet should throw an exception")
                 .isThrownBy(() -> targetFilterQueryManagement.create(targetFilterQueryCreate));
@@ -478,9 +470,10 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
     void createTargetFilterWithIncompleteDistributionSet() {
         final DistributionSet distributionSet = testdataFactory.createIncompleteDistributionSet();
 
-        final TargetFilterQueryCreate targetFilterQueryCreate = entityFactory.targetFilterQuery().create()
+        final Create targetFilterQueryCreate = Create.builder()
                 .name("createTargetFilterWithIncompleteDistributionSet").query("name==*")
-                .autoAssignDistributionSet(distributionSet);
+                .autoAssignDistributionSet(distributionSet)
+                .build();
         assertThatExceptionOfType(IncompleteDistributionSetException.class)
                 .as("Incomplete distributionSet should throw an exception")
                 .isThrownBy(() -> targetFilterQueryManagement.create(targetFilterQueryCreate));
@@ -492,9 +485,8 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void updateAutoAssignDsWithInvalidDistributionSet() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name("updateAutoAssignDsWithInvalidDistributionSet")
-                        .query("name==*").autoAssignDistributionSet(distributionSet));
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(Create.builder()
+                .name("updateAutoAssignDsWithInvalidDistributionSet").query("name==*").autoAssignDistributionSet(distributionSet).build());
         final DistributionSet invalidDistributionSet = testdataFactory.createAndInvalidateDistributionSet();
 
         final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate = new AutoAssignDistributionSetUpdate(targetFilterQuery.getId())
@@ -511,8 +503,8 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
     void updateAutoAssignDsWithIncompleteDistributionSet() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name("updateAutoAssignDsWithIncompleteDistributionSet")
-                        .query("name==*").autoAssignDistributionSet(distributionSet));
+                Create.builder().name("updateAutoAssignDsWithIncompleteDistributionSet")
+                        .query("name==*").autoAssignDistributionSet(distributionSet).build());
         final DistributionSet incompleteDistributionSet = testdataFactory.createIncompleteDistributionSet();
 
         final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate = new AutoAssignDistributionSetUpdate(targetFilterQuery.getId())
@@ -530,11 +522,11 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
         for (final ActionType actionType : ActionType.values()) {
             final Supplier<Long> create = () ->
                     targetFilterQueryManagement.create(
-                                    entityFactory.targetFilterQuery()
-                                            .create()
+                                    Create.builder()
                                             .name("testAutoAssignActionTypeConvert_" + actionType)
                                             .query("name==*")
-                                            .autoAssignActionType(actionType))
+                                            .autoAssignActionType(actionType)
+                                            .build())
                             .getId();
             if (actionType == ActionType.TIMEFORCED) {
                 assertThatExceptionOfType(AbstractServerRtException.class).isThrownBy(create::get);
@@ -544,45 +536,36 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
         }
 
         final JpaTargetFilterQuery jpaTargetFilterQuery = (JpaTargetFilterQuery) targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery()
-                        .create()
-                        .name("testAutoAssignActionTypeConvert")
-                        .query("name==*"));
+                Create.builder().name("testAutoAssignActionTypeConvert").query("name==*").build());
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->
                 jpaTargetFilterQuery.setAutoAssignActionType(ActionType.TIMEFORCED));
     }
 
-    private void verifyAutoAssignmentWithDefaultActionType(final String filterName,
-            final TargetFilterQuery targetFilterQuery, final DistributionSet distributionSet) {
-        targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
-                .updateAutoAssign(targetFilterQuery.getId()).ds(distributionSet.getId()));
+    private void verifyAutoAssignmentWithDefaultActionType(final TargetFilterQuery targetFilterQuery, final DistributionSet distributionSet) {
+        targetFilterQueryManagement.updateAutoAssignDS(
+                new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(distributionSet.getId()));
         implicitLock(distributionSet);
-        verifyAutoAssignDsAndActionType(filterName, distributionSet, ActionType.FORCED);
+        verifyAutoAssignDsAndActionType(targetFilterQuery.getId(), distributionSet, ActionType.FORCED);
     }
 
-    private void verifyAutoAssignmentWithSoftActionType(final String filterName,
-            final TargetFilterQuery targetFilterQuery, final DistributionSet distributionSet) {
-        targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
-                .updateAutoAssign(targetFilterQuery.getId()).ds(distributionSet.getId()).actionType(ActionType.SOFT));
-        verifyAutoAssignDsAndActionType(filterName, distributionSet, ActionType.SOFT);
+    private void verifyAutoAssignmentWithSoftActionType(final TargetFilterQuery targetFilterQuery, final DistributionSet distributionSet) {
+        targetFilterQueryManagement.updateAutoAssignDS(
+                new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(distributionSet.getId()).actionType(ActionType.SOFT));
+        verifyAutoAssignDsAndActionType(targetFilterQuery.getId(), distributionSet, ActionType.SOFT);
     }
 
-    private void verifyAutoAssignmentWithDownloadOnlyActionType(final String filterName,
-            final TargetFilterQuery targetFilterQuery, final DistributionSet distributionSet) {
+    private void verifyAutoAssignmentWithDownloadOnlyActionType(final TargetFilterQuery targetFilterQuery, final DistributionSet distributionSet) {
         targetFilterQueryManagement
-                .updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(targetFilterQuery.getId())
+                .updateAutoAssignDS(new AutoAssignDistributionSetUpdate(targetFilterQuery.getId())
                         .ds(distributionSet.getId()).actionType(ActionType.DOWNLOAD_ONLY));
-        verifyAutoAssignDsAndActionType(filterName, distributionSet, ActionType.DOWNLOAD_ONLY);
+        verifyAutoAssignDsAndActionType(targetFilterQuery.getId(), distributionSet, ActionType.DOWNLOAD_ONLY);
     }
 
     private void verifyAutoAssignmentWithInvalidActionType(final TargetFilterQuery targetFilterQuery,
             final DistributionSet distributionSet) {
-        // assigning a distribution set with TIMEFORCED action is supposed to
-        // fail as only FORCED and SOFT action types are allowed
-        final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate = entityFactory.targetFilterQuery()
-                .updateAutoAssign(targetFilterQuery.getId())
-                .ds(distributionSet.getId())
-                .actionType(ActionType.TIMEFORCED);
+        // assigning a distribution set with TIMEFORCED action is supposed to fail as only FORCED and SOFT action types are allowed
+        final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate =
+                new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(distributionSet.getId()).actionType(ActionType.TIMEFORCED);
         assertThatExceptionOfType(InvalidAutoAssignActionTypeException.class)
                 .isThrownBy(() -> targetFilterQueryManagement.updateAutoAssignDS(autoAssignDistributionSetUpdate));
     }
@@ -594,8 +577,8 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
                         .name("incomplete").version("1")
                         .build());
 
-        final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate = entityFactory.targetFilterQuery()
-                .updateAutoAssign(targetFilterQuery.getId()).ds(incompleteDistributionSet.getId());
+        final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate =
+                new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(incompleteDistributionSet.getId());
         assertThatExceptionOfType(IncompleteDistributionSetException.class)
                 .isThrownBy(() -> targetFilterQueryManagement.updateAutoAssignDS(autoAssignDistributionSetUpdate));
     }
@@ -605,14 +588,14 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(softDeletedDs, testdataFactory.createTarget("forSoftDeletedDs"));
         distributionSetManagement.delete(softDeletedDs.getId());
 
-        final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate = entityFactory.targetFilterQuery()
-                .updateAutoAssign(targetFilterQuery.getId()).ds(softDeletedDs.getId());
+        final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate =
+                new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(softDeletedDs.getId());
         assertThatExceptionOfType(DeletedException.class)
                 .isThrownBy(() -> targetFilterQueryManagement.updateAutoAssignDS(autoAssignDistributionSetUpdate));
     }
 
-    private void verifyFindByDistributionSetAndRsql(final DistributionSet distributionSet, final String rsql,
-            final TargetFilterQuery... expectedFilterQueries) {
+    private void verifyFindByDistributionSetAndRsql(
+            final DistributionSet distributionSet, final String rsql, final TargetFilterQuery... expectedFilterQueries) {
         final Page<TargetFilterQuery> tfqList = targetFilterQueryManagement
                 .findByAutoAssignDSAndRsql(distributionSet.getId(), rsql, PageRequest.of(0, 500));
 
@@ -642,9 +625,8 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
                 Arrays.stream(expectedFilterQueries).map(TargetFilterQuery::getId).toArray(Long[]::new));
     }
 
-    private void verifyAutoAssignDsAndActionType(final String filterName, final DistributionSet distributionSet,
-            final ActionType actionType) {
-        final TargetFilterQuery tfq = targetFilterQueryManagement.getByName(filterName).get();
+    private void verifyAutoAssignDsAndActionType(final Long filterId, final DistributionSet distributionSet, final ActionType actionType) {
+        final TargetFilterQuery tfq = targetFilterQueryManagement.get(filterId).get();
 
         assertEquals(distributionSet, tfq.getAutoAssignDistributionSet(), "Returns correct distribution set");
         assertEquals(actionType, tfq.getAutoAssignActionType(), "Return correct action type");

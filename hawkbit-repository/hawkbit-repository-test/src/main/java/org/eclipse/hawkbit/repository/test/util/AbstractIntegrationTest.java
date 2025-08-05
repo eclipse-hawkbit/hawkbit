@@ -66,6 +66,7 @@ import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
@@ -144,7 +145,7 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected TargetTypeManagement<? extends TargetType> targetTypeManagement;
     @Autowired
-    protected TargetFilterQueryManagement targetFilterQueryManagement;
+    protected TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
     @Autowired
     protected TargetTagManagement<? extends TargetTag> targetTagManagement;
     @Autowired
@@ -316,34 +317,33 @@ public abstract class AbstractIntegrationTest {
         return assignDistributionSet(dsID, controllerId, ActionType.FORCED);
     }
 
-    protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId,
-            final ActionType actionType) {
+    protected DistributionSetAssignmentResult assignDistributionSet(
+            final long dsID, final String controllerId, final ActionType actionType) {
         return assignDistributionSet(dsID, Collections.singletonList(controllerId), actionType);
     }
 
-    protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId,
-            final ActionType actionType, final long forcedTime) {
-        return assignDistributionSet(dsID, Collections.singletonList(controllerId), actionType, forcedTime);
+    protected DistributionSetAssignmentResult assignDistributionSet(
+            final long dsId, final String controllerId, final ActionType actionType, final long forcedTime) {
+        return assignDistributionSet(dsId, Collections.singletonList(controllerId), actionType, forcedTime);
     }
 
-    protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final List<String> controllerIds,
-            final ActionType actionType) {
-        return assignDistributionSet(dsID, controllerIds, actionType, RepositoryModelConstants.NO_FORCE_TIME);
+    protected DistributionSetAssignmentResult assignDistributionSet(
+            final long dsId, final List<String> controllerIds, final ActionType actionType) {
+        return assignDistributionSet(dsId, controllerIds, actionType, RepositoryModelConstants.NO_FORCE_TIME);
     }
 
-    protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final List<String> controllerIds,
-            final ActionType actionType, final long forcedTime) {
+    protected DistributionSetAssignmentResult assignDistributionSet(
+            final long dsID, final List<String> controllerIds, final ActionType actionType, final long forcedTime) {
         return assignDistributionSet(dsID, controllerIds, actionType, forcedTime, null);
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(
-            final long dsID, final List<String> controllerIds,
-            final ActionType actionType, final long forcedTime, final Integer weight) {
+            final long dsId, final List<String> controllerIds, final ActionType actionType, final long forcedTime, final Integer weight) {
         final boolean confirmationFlowActive = isConfirmationFlowActive();
 
         final List<DeploymentRequest> deploymentRequests = controllerIds.stream()
-                .map(id -> DeploymentManagement.deploymentRequest(id, dsID).setActionType(actionType)
-                        .setForceTime(forcedTime).setWeight(weight).setConfirmationRequired(confirmationFlowActive)
+                .map(id -> DeploymentManagement.deploymentRequest(id, dsId)
+                        .setActionType(actionType).setForceTime(forcedTime).setWeight(weight).setConfirmationRequired(confirmationFlowActive)
                         .build())
                 .toList();
         final List<DistributionSetAssignmentResult> results = deploymentManagement.assignDistributionSets(deploymentRequests);
@@ -358,19 +358,15 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet ds, final List<Target> targets) {
-        final List<String> targetIds = targets.stream().map(Target::getControllerId).toList();
-        return assignDistributionSet(ds.getId(), targetIds, ActionType.FORCED);
+        return assignDistributionSet(ds.getId(), targets.stream().map(Target::getControllerId).toList(), ActionType.FORCED);
     }
 
-    protected DistributionSetAssignmentResult assignDistributionSet(final Long dsId, final List<String> targetIds,
-            final int weight) {
-        return assignDistributionSet(dsId, targetIds, ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME,
-                weight);
+    protected DistributionSetAssignmentResult assignDistributionSet(final Long dsId, final List<String> targetIds, final int weight) {
+        return assignDistributionSet(dsId, targetIds, ActionType.FORCED, RepositoryModelConstants.NO_FORCE_TIME, weight);
     }
 
     protected DistributionSetAssignmentResult makeAssignment(final DeploymentRequest request) {
-        final List<DistributionSetAssignmentResult> results = deploymentManagement
-                .assignDistributionSets(Collections.singletonList(request));
+        final List<DistributionSetAssignmentResult> results = deploymentManagement.assignDistributionSets(Collections.singletonList(request));
         assertThat(results).hasSize(1);
         return results.get(0);
     }

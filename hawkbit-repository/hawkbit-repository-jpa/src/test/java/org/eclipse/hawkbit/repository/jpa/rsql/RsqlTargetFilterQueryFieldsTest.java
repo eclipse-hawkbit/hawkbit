@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -41,12 +42,11 @@ class RsqlTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds1 = testdataFactory.createDistributionSet("AutoAssignedDs_1");
         final DistributionSet ds2 = testdataFactory.createDistributionSet("AutoAssignedDs_2");
 
-        filter1 = targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(filterName1)
-                .query("name==*").autoAssignDistributionSet(ds1).autoAssignActionType(ActionType.SOFT));
-        filter2 = targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(filterName2)
-                .query("name==*").autoAssignDistributionSet(ds2));
-        targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterName3).query("name==*"));
+        filter1 = targetFilterQueryManagement.create(TargetFilterQueryManagement.Create.builder().name(filterName1)
+                .query("name==*").autoAssignDistributionSet(ds1).autoAssignActionType(ActionType.SOFT).build());
+        filter2 = targetFilterQueryManagement.create(TargetFilterQueryManagement.Create.builder().name(filterName2)
+                .query("name==*").autoAssignDistributionSet(ds2).build());
+        targetFilterQueryManagement.create(TargetFilterQueryManagement.Create.builder().name(filterName3).query("name==*").build());
 
         assertEquals(3L, targetFilterQueryManagement.count());
     }
@@ -68,7 +68,6 @@ class RsqlTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest {
 
         assertRSQLQuery(TargetFilterQueryFields.ID.name() + "=in=(" + filter1.getId() + ",10000000)", 1);
         assertRSQLQuery(TargetFilterQueryFields.ID.name() + "=out=(" + filter1.getId() + ",10000000)", 2);
-
     }
 
     /**
@@ -117,7 +116,7 @@ class RsqlTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsql, final long expectedFilterQueriesSize) {
-        final Page<TargetFilterQuery> findTargetFilterQueryPage = targetFilterQueryManagement.findByRsql(rsql, PAGE);
+        final Page<? extends TargetFilterQuery> findTargetFilterQueryPage = targetFilterQueryManagement.findByRsql(rsql, PAGE);
         assertThat(findTargetFilterQueryPage).isNotNull();
         assertThat(findTargetFilterQueryPage.getTotalElements()).isEqualTo(expectedFilterQueriesSize);
     }

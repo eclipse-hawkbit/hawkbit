@@ -13,6 +13,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -92,8 +93,7 @@ public class ObjectCopyUtil {
     // java:S3776 - complexity is due to reflection and dynamic method invocation
     // java:S3011 - low-level, reflection utility. intentionally changes the accessibility
     @SuppressWarnings({ "java:S3776", "java:S3011" })
-    private static ToSetter toSetter(
-            final Class<?> toClass, final String setterName, final String fieldName, final Class<?> type) {
+    private static ToSetter toSetter(final Class<?> toClass, final String setterName, final String fieldName, final Class<?> type) {
         try {
             final Method toSetterMethod = getMethod(toClass, setterName, type);
             final Order order = toSetterMethod.getAnnotation(Order.class);
@@ -128,7 +128,7 @@ public class ObjectCopyUtil {
 
     private static UnaryOperator<Object> toGetter(final Class<?> toClass, final String getterName, final String fieldName) {
         try {
-            final Method toGetterMethod = getMethod(toClass, getterName);
+            final Method toGetterMethod = getMethod(toClass, toClass, getterName);
             return to -> {
                 try {
                     return toGetterMethod.invoke(to);
@@ -175,16 +175,25 @@ public class ObjectCopyUtil {
     }
 
     @NotNull
-    private static Method getMethod(final Class<?> clazz, final String methodName, final Class<?>... parameterTypes)
+    private static Method getMethod(final Class<?> clazz, final String methodName, final Class<?> parameterType)
             throws NoSuchMethodException {
         try {
-            return getMethod(clazz, clazz, methodName, parameterTypes);
+            return getMethod(clazz, clazz, methodName, parameterType);
         } catch (final NoSuchMethodException e) {
-            if (parameterTypes.length == 1 && parameterTypes[0] == Boolean.class) {
+            if (parameterType == Boolean.class) {
                 try {
                     return getMethod(clazz, methodName, boolean.class);
                 } catch (final NoSuchMethodException e2) {
                     throw e;
+                }
+            } else {
+                final Method assignable = getMethodAssignable(clazz, methodName, parameterType);
+                if (assignable != null) {
+                    return assignable;
+                }
+                final Method moreSpecific = getMethodMoreSpecific(clazz, methodName, parameterType);
+                if (moreSpecific != null) {
+                    return moreSpecific;
                 }
             }
             throw e;
@@ -192,6 +201,7 @@ public class ObjectCopyUtil {
     }
 
     @SuppressWarnings("java:S3011") // low-level, reflection utility. intentionally changes the accessibility
+    @NotNull
     private static Method getMethod(final Class<?> target, final Class<?> clazz, final String methodName, final Class<?>... parameterTypes)
             throws NoSuchMethodException {
         try {
@@ -206,6 +216,46 @@ public class ObjectCopyUtil {
                 return getMethod(target, superClass, methodName, parameterTypes);
             }
         }
+    }
+
+    @SuppressWarnings("java:S3011") // low-level, reflection utility. intentionally changes the accessibility
+    private static Method getMethodAssignable(final Class<?> clazz, final String methodName, final Class<?> parameterType) {
+        return Arrays.stream(clazz.getDeclaredMethods())
+                .filter(method -> methodName.equals(method.getName()))
+                .filter(method -> method.getParameterCount() == 1 && method.getParameterTypes()[0].isAssignableFrom(parameterType))
+                .findFirst()
+                .map(method -> {
+                    method.setAccessible(true);
+                    return method;
+                })
+                .orElseGet(() -> {
+                    final Class<?> superClass = clazz.getSuperclass();
+                    if (superClass == null) {
+                        return null;
+                    } else {
+                        return getMethodAssignable(superClass, methodName, parameterType);
+                    }
+                });
+    }
+
+    @SuppressWarnings("java:S3011") // low-level, reflection utility. intentionally changes the accessibility
+    private static Method getMethodMoreSpecific(final Class<?> clazz, final String methodName, final Class<?> parameterType) {
+        return Arrays.stream(clazz.getDeclaredMethods())
+                .filter(method -> methodName.equals(method.getName()))
+                .filter(method -> method.getParameterCount() == 1 && parameterType.isAssignableFrom(method.getParameterTypes()[0]))
+                .findFirst()
+                .map(method -> {
+                    method.setAccessible(true);
+                    return method;
+                })
+                .orElseGet(() -> {
+                    final Class<?> superClass = clazz.getSuperclass();
+                    if (superClass == null) {
+                        return null;
+                    } else {
+                        return getMethodMoreSpecific(superClass, methodName, parameterType);
+                    }
+                });
     }
 
     private static List<Method> getMethods(final Class<?> clazz) {

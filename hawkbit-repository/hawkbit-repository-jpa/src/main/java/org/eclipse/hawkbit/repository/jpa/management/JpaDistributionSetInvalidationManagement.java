@@ -78,8 +78,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     public void invalidateDistributionSet(final DistributionSetInvalidation distributionSetInvalidation) {
         log.debug("Invalidate distribution sets {}", distributionSetInvalidation.getDistributionSetIds());
         final String tenant = tenantAware.getCurrentTenant();
-        if (shouldRolloutsBeCanceled(distributionSetInvalidation.getCancelationType(),
-                distributionSetInvalidation.isCancelRollouts())) {
+        if (shouldRolloutsBeCanceled(distributionSetInvalidation.getCancelationType(), distributionSetInvalidation.isCancelRollouts())) {
             final String handlerId = JpaRolloutManagement.createRolloutLockKey(tenant);
             final Lock lock = lockRegistry.obtain(handlerId);
             try {
@@ -122,17 +121,15 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
         return cancelationType != CancelationType.NONE || cancelRollouts;
     }
 
-    private void invalidateDistributionSetsInTransaction(final DistributionSetInvalidation distributionSetInvalidation,
-            final String tenant) {
+    private void invalidateDistributionSetsInTransaction(final DistributionSetInvalidation distributionSetInvalidation, final String tenant) {
         DeploymentHelper.runInNewTransaction(txManager, tenant + "-invalidateDS", status -> {
-            distributionSetInvalidation.getDistributionSetIds().forEach(setId -> invalidateDistributionSet(setId,
-                    distributionSetInvalidation.getCancelationType(), distributionSetInvalidation.isCancelRollouts()));
+            distributionSetInvalidation.getDistributionSetIds().forEach(setId -> invalidateDistributionSet(
+                    setId, distributionSetInvalidation.getCancelationType(), distributionSetInvalidation.isCancelRollouts()));
             return 0;
         });
     }
 
-    private void invalidateDistributionSet(final long setId, final CancelationType cancelationType,
-            final boolean cancelRollouts) {
+    private void invalidateDistributionSet(final long setId, final CancelationType cancelationType, final boolean cancelRollouts) {
         final DistributionSet distributionSet = distributionSetManagement.getOrElseThrowException(setId);
         if (!distributionSet.isComplete()) {
             throw new IncompleteDistributionSetException("Distribution set of type "

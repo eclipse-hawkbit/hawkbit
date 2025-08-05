@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
@@ -994,10 +995,14 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         DistributionSet ds2 = testdataFactory.createDistributionSet("DS2");
         testdataFactory.createTargets("targets", 4);
         targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name("test filter 1").autoAssignDistributionSet(ds.getId()).query("name==targets*"));
+                TargetFilterQueryManagement.Create.builder()
+                        .name("test filter 1").autoAssignDistributionSet(ds).query("name==targets*")
+                        .build());
 
         targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name("test filter 2").autoAssignDistributionSet(ds.getId()).query("name==targets*"));
+                TargetFilterQueryManagement.Create.builder()
+                        .name("test filter 2").autoAssignDistributionSet(ds).query("name==targets*")
+                        .build());
 
         assertThat(distributionSetManagement.countAutoAssignmentsForDistributionSet(ds.getId())).isEqualTo(2);
         assertThat(distributionSetManagement.countAutoAssignmentsForDistributionSet(ds2.getId())).isNull();

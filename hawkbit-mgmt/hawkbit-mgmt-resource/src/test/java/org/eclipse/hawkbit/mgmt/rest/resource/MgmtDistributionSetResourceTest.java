@@ -45,6 +45,7 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssi
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.Create;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
@@ -257,7 +258,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         // post one more to cause the quota to be exceeded
         mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(List.of(moduleIDs.get(moduleIDs.size() - 1)).stream().map(MgmtId::new).toList())))
+                        .content(toJson(Stream.of(moduleIDs.get(moduleIDs.size() - 1)).map(MgmtId::new).toList())))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
@@ -711,12 +712,12 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         final String knownFilterName = "a";
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
 
-        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(knownFilterName)
-                .query("name==y").autoAssignDistributionSet(createdDs.getId()));
+        targetFilterQueryManagement.create(Create.builder().name(knownFilterName)
+                .query("name==y").autoAssignDistributionSet(createdDs).build());
 
         // create some dummy target filter queries
-        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("b").query("name==y"));
-        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("c").query("name==y"));
+        targetFilterQueryManagement.create(Create.builder().name("b").query("name==y").build());
+        targetFilterQueryManagement.create(Create.builder().name("c").query("name==y").build());
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId()
                         + "/autoAssignTargetFilters"))
@@ -731,8 +732,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     @Test
     void ggetAutoAssignTargetFiltersOfDistributionSetWithParameters() throws Exception {
         final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
-        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("filter1").query("name==a")
-                .autoAssignDistributionSet(set));
+        targetFilterQueryManagement.create(Create.builder().name("filter1").query("name==a").autoAssignDistributionSet(set).build());
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + set.getId() + "/autoAssignTargetFilters")
                         .param("offset", "1").param("limit", "2").param("sort", "name:DESC").param("q", "name==*1")
@@ -1622,12 +1622,10 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         DistributionSet ds2 = testdataFactory.createDistributionSet("DS2");
 
         targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name("test filter 1").autoAssignDistributionSet(ds1.getId())
-                        .query("name==targets*"));
+                Create.builder().name("test filter 1").autoAssignDistributionSet(ds1).query("name==targets*").build());
 
         targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name("test filter 2").autoAssignDistributionSet(ds1.getId())
-                        .query("name==targets*"));
+                Create.builder().name("test filter 2").autoAssignDistributionSet(ds1).query("name==targets*").build());
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{ds}/statistics/autoassignments", ds1.getId()).contentType(
                         MediaType.APPLICATION_JSON))
@@ -1657,8 +1655,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         DistributionSet ds2 = testdataFactory.createDistributionSet("DS2");
 
         targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name("test filter 1").autoAssignDistributionSet(ds1.getId())
-                        .query("name==autoAssignments*"));
+                Create.builder().name("test filter 1").autoAssignDistributionSet(ds1).query("name==autoAssignments*").build());
 
         Rollout rollout = testdataFactory.createRolloutByVariables("rollout", "description",
                 1, "name==targets*", ds1, "50", "5", false);
@@ -1689,14 +1686,14 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
      */
     @Test
     void invalidateDistributionSet() throws Exception {
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final List<Target> targets = testdataFactory.createTargets(5, "invalidateDistributionSet");
-        assignDistributionSet(distributionSet, targets);
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name("invalidateDistributionSet").query("name==*")
-                        .autoAssignDistributionSet(distributionSet));
-        final Rollout rollout = testdataFactory.createRolloutByVariables("invalidateDistributionSet", "desc", 2,
-                "name==*", distributionSet, "50", "80");
+        // the distribution set is locked and the old instance become stale
+        distributionSet = assignDistributionSet(distributionSet, targets).getDistributionSet();
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
+                Create.builder().name("invalidateDistributionSet").query("name==*").autoAssignDistributionSet(distributionSet).build());
+        final Rollout rollout = testdataFactory.createRolloutByVariables(
+                "invalidateDistributionSet", "desc", 2, "name==*", distributionSet, "50", "80");
 
         final JSONObject jsonObject = new JSONObject();
         jsonObject.put("actionCancelationType", "soft");
@@ -1812,15 +1809,13 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
     private void prepareTestFilters(final String filterNamePrefix, final DistributionSet createdDs) {
         // create target filter queries that should be found
-        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "1")
-                .query("name==y").autoAssignDistributionSet(createdDs.getId()));
-        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "2")
-                .query("name==y").autoAssignDistributionSet(createdDs.getId()));
+        targetFilterQueryManagement.create(Create.builder().name(filterNamePrefix + "1")
+                .query("name==y").autoAssignDistributionSet(createdDs).build());
+        targetFilterQueryManagement.create(Create.builder().name(filterNamePrefix + "2")
+                .query("name==y").autoAssignDistributionSet(createdDs).build());
         // create some dummy target filter queries
-        targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "b").query("name==y"));
-        targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name(filterNamePrefix + "c").query("name==y"));
+        targetFilterQueryManagement.create(Create.builder().name(filterNamePrefix + "b").query("name==y").build());
+        targetFilterQueryManagement.create(Create.builder().name(filterNamePrefix + "c").query("name==y").build());
     }
 
     private MvcResult executeMgmtTargetPost(

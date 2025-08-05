@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
-import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupBuilder;
 import org.springframework.validation.annotation.Validated;
@@ -26,17 +25,20 @@ import org.springframework.validation.annotation.Validated;
 public class JpaEntityFactory implements EntityFactory {
 
     private final TargetBuilder targetBuilder;
-    private final TargetFilterQueryBuilder targetFilterQueryBuilder;
     private final RolloutBuilder rolloutBuilder;
 
     @SuppressWarnings("java:S107")
     public JpaEntityFactory(
-            final TargetBuilder targetBuilder, final TargetFilterQueryBuilder targetFilterQueryBuilder,
-            final RolloutBuilder rolloutBuilder) {
+            final TargetBuilder targetBuilder, final RolloutBuilder rolloutBuilder) {
         this.targetBuilder = targetBuilder;
-        this.targetFilterQueryBuilder = targetFilterQueryBuilder;
         this.rolloutBuilder = rolloutBuilder;
     }
+
+    @Override
+    public TargetBuilder target() {
+        return targetBuilder;
+    }
+
     @Override
     public ActionStatusBuilder actionStatus() {
         return new JpaActionStatusBuilder();
@@ -50,15 +52,5 @@ public class JpaEntityFactory implements EntityFactory {
     @Override
     public RolloutBuilder rollout() {
         return rolloutBuilder;
-    }
-
-    @Override
-    public TargetBuilder target() {
-        return targetBuilder;
-    }
-
-    @Override
-    public TargetFilterQueryBuilder targetFilterQuery() {
-        return targetFilterQueryBuilder;
     }
 }

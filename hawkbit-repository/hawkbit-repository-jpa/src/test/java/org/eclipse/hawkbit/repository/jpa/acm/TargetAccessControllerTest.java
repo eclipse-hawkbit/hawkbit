@@ -25,6 +25,8 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.Identifiable;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -103,7 +105,7 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
         });
 
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name("test").query("id==*"));
+                .create(TargetFilterQueryManagement.Create.builder().name("test").query("id==*").build());
 
         runAs(withUser("user", READ_TARGET + "/controllerId==" + permittedTarget.getControllerId()), () -> {
             // verify targetManagement#findByTargetFilterQuery
@@ -314,7 +316,7 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
         final List<Target> hiddenTargets = testdataFactory.createTargets("hidden1", "hidden2", "hidden3", "hidden4", "hidden5");
 
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name("testName").query("id==*"));
+                .create(TargetFilterQueryManagement.Create.builder().name("testName").query("id==*").build());
 
         runAs(withUser("user",
                 READ_TARGET + "/controllerId=in=(" + String.join(", ", List.of(updateTargetControllerIds)) + ")" +
@@ -322,8 +324,8 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
                 UPDATE_TARGET + "/controllerId=in=(" + String.join(", ", List.of(updateTargetControllerIds)) + ")",
                 READ_REPOSITORY + "/id==" + distributionSet.getId()), () -> {
 
-            targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
-                    .updateAutoAssign(targetFilterQuery.getId()).ds(distributionSet.getId()));
+            targetFilterQueryManagement.updateAutoAssignDS(
+                    new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(distributionSet.getId()));
 
             autoAssignChecker.checkAllTargets();
 

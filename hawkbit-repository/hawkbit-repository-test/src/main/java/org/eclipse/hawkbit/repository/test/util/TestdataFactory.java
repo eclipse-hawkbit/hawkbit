@@ -45,6 +45,7 @@ import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
@@ -154,7 +155,7 @@ public class TestdataFactory {
     private final DistributionSetTypeManagement<?> distributionSetTypeManagement;
     private final DistributionSetInvalidationManagement distributionSetInvalidationManagement;
     private final TargetManagement targetManagement;
-    private final TargetFilterQueryManagement targetFilterQueryManagement;
+    private final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
     private final TargetTypeManagement<? extends TargetType> targetTypeManagement;
     private final TargetTagManagement<? extends TargetTag> targetTagManagement;
     private final DeploymentManagement deploymentManagement;
@@ -966,9 +967,9 @@ public class TestdataFactory {
     public TargetFilterQuery createTargetFilterWithTargetsAndActiveAutoAssignment() {
         createTargets(quotaManagement.getMaxTargetsPerAutoAssignment());
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name("testName").query("id==*"));
-        return targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
-                .updateAutoAssign(targetFilterQuery.getId()).ds(createDistributionSet().getId()));
+                .create(TargetFilterQueryManagement.Create.builder().name("testName").query("id==*").build());
+        return targetFilterQueryManagement.updateAutoAssignDS(
+                new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(createDistributionSet().getId()));
     }
 
     /**
@@ -1230,7 +1231,7 @@ public class TestdataFactory {
         final DistributionSet distributionSet = createDistributionSet();
         distributionSetInvalidationManagement.invalidateDistributionSet(
                 new DistributionSetInvalidation(List.of(distributionSet.getId()), CancelationType.NONE, false));
-        return distributionSet;
+        return distributionSetManagement.get(distributionSet.getId()).orElseThrow();
     }
 
     /**
