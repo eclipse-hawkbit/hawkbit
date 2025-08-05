@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.awaitility.Awaitility;
@@ -1474,6 +1475,50 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.deleted", equalTo(true)));
 
         assertStatusIs(rollout, RolloutStatus.DELETED);
+
+        // TODO: verify all actions are cancelled ...
+        List<Action> rolloutActions =
+                deploymentManagement.findActions("rollout.id==" + rollout.getId(), PAGE).getContent();
+        for (Action action : rolloutActions) {
+            Assertions.assertEquals(Status.CANCELED, action.getStatus());
+        }
+    }
+
+    @Test
+    void stopRunningRollout() throws Exception {
+        final Rollout rollout = testdataFactory.createAndStartRollout();
+        mvc.perform(post("/rest/v1/rollouts/{rolloutId}/stop", rollout.getId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        // force executor to retrigger
+        rolloutHandler.handleAll();
+
+        mvc.perform(get("/rest/v1/rollouts/{rolloutid}", rollout.getId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.status", equalTo("stopping")));
+
+        List<Action> rolloutActions =
+                deploymentManagement.findActions("rollout.id==" + rollout.getId(), PAGE).getContent();
+        for (Action action : rolloutActions) {
+            Awaitility.await()
+                    .atMost(30, TimeUnit.SECONDS)
+                    .untilAsserted(() -> Assertions.assertEquals(Status.CANCELING, action.getStatus()));
+        }
+
+        // assume that the targets have agreed to cancel the actions
+        rolloutActions.forEach(action -> controllerManagement.addCancelActionStatus(
+            entityFactory.actionStatus().create(action.getId()).status(Status.CANCELED)
+        ));
+
+        // force executor to retrigger
+        rolloutHandler.handleAll();
+        // rollout should be in stopped state after all actions are cancelled
+        mvc.perform(get("/rest/v1/rollouts/{rolloutid}", rollout.getId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status", equalTo("stopped")));
     }
 
     /**

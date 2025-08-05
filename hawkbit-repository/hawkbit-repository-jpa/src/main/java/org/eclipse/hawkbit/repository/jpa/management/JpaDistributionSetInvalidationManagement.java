@@ -78,7 +78,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     public void invalidateDistributionSet(final DistributionSetInvalidation distributionSetInvalidation) {
         log.debug("Invalidate distribution sets {}", distributionSetInvalidation.getDistributionSetIds());
         final String tenant = tenantAware.getCurrentTenant();
-        if (shouldRolloutsBeCanceled(distributionSetInvalidation.getCancelationType(), distributionSetInvalidation.isCancelRollouts())) {
+        if (shouldRolloutsBeCanceled(distributionSetInvalidation.getCancelationType())) {
             final String handlerId = JpaRolloutManagement.createRolloutLockKey(tenant);
             final Lock lock = lockRegistry.obtain(handlerId);
             try {
@@ -106,8 +106,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
             final DistributionSetInvalidation distributionSetInvalidation) {
         return systemSecurityContext.runAsSystem(() -> {
             final Collection<Long> setIds = distributionSetInvalidation.getDistributionSetIds();
-            final long rolloutsCount = shouldRolloutsBeCanceled(distributionSetInvalidation.getCancelationType(),
-                    distributionSetInvalidation.isCancelRollouts()) ? countRolloutsForInvalidation(setIds) : 0;
+            final long rolloutsCount = shouldRolloutsBeCanceled(distributionSetInvalidation.getCancelationType()) ? countRolloutsForInvalidation(setIds) : 0;
             final long autoAssignmentsCount = countAutoAssignmentsForInvalidation(setIds);
             final long actionsCount = countActionsForInvalidation(setIds,
                     distributionSetInvalidation.getCancelationType());
@@ -116,20 +115,21 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
         });
     }
 
-    private static boolean shouldRolloutsBeCanceled(final CancelationType cancelationType,
-            final boolean cancelRollouts) {
-        return cancelationType != CancelationType.NONE || cancelRollouts;
+    private static boolean shouldRolloutsBeCanceled(final CancelationType cancelationType) {
+        return cancelationType != CancelationType.NONE;
     }
 
-    private void invalidateDistributionSetsInTransaction(final DistributionSetInvalidation distributionSetInvalidation, final String tenant) {
+    private void invalidateDistributionSetsInTransaction(final DistributionSetInvalidation distributionSetInvalidation,
+            final String tenant) {
         DeploymentHelper.runInNewTransaction(txManager, tenant + "-invalidateDS", status -> {
-            distributionSetInvalidation.getDistributionSetIds().forEach(setId -> invalidateDistributionSet(
-                    setId, distributionSetInvalidation.getCancelationType(), distributionSetInvalidation.isCancelRollouts()));
+            distributionSetInvalidation.getDistributionSetIds().forEach(setId -> invalidateDistributionSet(setId,
+                    distributionSetInvalidation.getCancelationType()));
+
             return 0;
         });
     }
 
-    private void invalidateDistributionSet(final long setId, final CancelationType cancelationType, final boolean cancelRollouts) {
+    private void invalidateDistributionSet(final long setId, final CancelationType cancelationType) {
         final DistributionSet distributionSet = distributionSetManagement.getOrElseThrowException(setId);
         if (!distributionSet.isComplete()) {
             throw new IncompleteDistributionSetException("Distribution set of type "
@@ -139,9 +139,9 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
         log.debug("Distribution set {} marked as invalid.", setId);
 
         // rollout cancellation should only be permitted with UPDATE_ROLLOUT permission
-        if (shouldRolloutsBeCanceled(cancelationType, cancelRollouts)) {
+        if (shouldRolloutsBeCanceled(cancelationType)) {
             log.debug("Cancel rollouts after ds invalidation. ID: {}", setId);
-            rolloutManagement.cancelRolloutsForDistributionSet(distributionSet);
+            rolloutManagement.cancelRolloutsForDistributionSet(distributionSet, cancelationType);
         }
 
         // Do run as system to ensure all actions (even invisible) are canceled due to invalidation.

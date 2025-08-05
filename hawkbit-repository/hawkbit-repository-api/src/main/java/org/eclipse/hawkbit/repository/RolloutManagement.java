@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -364,6 +365,9 @@ public interface RolloutManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
     Rollout update(@NotNull @Valid RolloutUpdate update);
 
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
+    Rollout stop(long rolloutId);
+
     /**
      * Deletes a rollout. A rollout might be deleted asynchronously by
      * indicating the rollout by {@link RolloutStatus#DELETING}
@@ -382,7 +386,7 @@ public interface RolloutManagement {
      *         canceled
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
-    void cancelRolloutsForDistributionSet(DistributionSet set);
+    void cancelRolloutsForDistributionSet(DistributionSet set, DistributionSetInvalidation.CancelationType cancelationType);
 
     /**
      * Triggers next group of a rollout for processing even success threshold

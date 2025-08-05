@@ -184,6 +184,14 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         }
     }
 
+    void cancelAssignments(final List<JpaAction> actions, final String tenant) {
+        if(isMultiAssignmentsEnabled()) {
+            sendMultiActionCancelEvent(tenant, Collections.unmodifiableList(actions));
+        } else {
+            actions.forEach(this::cancelAssignDistributionSetEvent);
+        }
+    }
+
     private static Stream<Action> filterCancellations(final List<Action> actions) {
         return actions.stream().filter(action -> {
             final Status actionStatus = action.getStatus();

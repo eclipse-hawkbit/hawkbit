@@ -1930,7 +1930,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 10),
-            @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = ActionUpdatedEvent.class, count = 4),
             @Expect(type = RolloutCreatedEvent.class, count = 1),
             @Expect(type = RolloutUpdatedEvent.class, count = 6),
             @Expect(type = RolloutDeletedEvent.class, count = 1),
@@ -1978,8 +1978,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // verify that all scheduled actions are deleted
         assertThat(actionRepository.findByRolloutIdAndStatus(PAGE, deletedRollout.getId(), Status.SCHEDULED)
                 .getNumberOfElements()).isZero();
-        // verify that all running actions keep running
-        assertThat(actionRepository.findByRolloutIdAndStatus(PAGE, deletedRollout.getId(), Status.RUNNING)
+        // verify that all running actions are force cancelled
+        assertThat(actionRepository.findByRolloutIdAndStatus(PAGE, deletedRollout.getId(), Status.CANCELED)
                 .getNumberOfElements()).isEqualTo(2);
     }
 

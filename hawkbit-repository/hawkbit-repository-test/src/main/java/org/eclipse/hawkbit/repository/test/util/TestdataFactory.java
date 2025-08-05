@@ -1100,6 +1100,10 @@ public class TestdataFactory {
         return startAndReloadRollout(createRollout());
     }
 
+    public Rollout startRollout(final Rollout rollout) {
+        return startAndReloadRollout(rollout);
+    }
+
     /**
      * Create the data for a simple rollout scenario
      *
@@ -1230,7 +1234,7 @@ public class TestdataFactory {
     public DistributionSet createAndInvalidateDistributionSet() {
         final DistributionSet distributionSet = createDistributionSet();
         distributionSetInvalidationManagement.invalidateDistributionSet(
-                new DistributionSetInvalidation(List.of(distributionSet.getId()), CancelationType.NONE, false));
+                new DistributionSetInvalidation(List.of(distributionSet.getId()), CancelationType.NONE));
         return distributionSetManagement.get(distributionSet.getId()).orElseThrow();
     }
 

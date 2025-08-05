@@ -15,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.util.Collections;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
@@ -43,6 +44,7 @@ import org.springframework.data.repository.query.Param;
  * Feature: Component Tests - Repository<br/>
  * Story: Distribution set invalidation management
  */
+@Slf4j
 class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTest {
 
     /**
@@ -53,8 +55,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         final InvalidationTestData invalidationTestData = createInvalidationTestData("verifyInvalidateDistributionSetStopAutoAssignment");
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
-                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.NONE,
-                false);
+                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.NONE);
         final DistributionSetInvalidationCount distributionSetInvalidationCount = distributionSetInvalidationManagement
                 .countEntitiesForInvalidation(distributionSetInvalidation);
         assertDistributionSetInvalidationCount(distributionSetInvalidationCount, 1, 0, 0);
@@ -76,19 +77,18 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     }
 
     /**
-     * Verify invalidation of distribution sets that removes distribution sets from auto assignments and stops rollouts
+     * Verify invalidation of distribution sets that removes distribution sets from auto assignments but does not stop rollouts
      */
     @Test
-    void verifyInvalidateDistributionSetStopRollouts() {
+    void verifyInvalidateDistributionSetDoesNotStopRollouts() {
         final InvalidationTestData invalidationTestData = createInvalidationTestData(
                 "verifyInvalidateDistributionSetStopRollouts");
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
-                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.NONE,
-                true);
+                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.NONE);
         final DistributionSetInvalidationCount distributionSetInvalidationCount = distributionSetInvalidationManagement
                 .countEntitiesForInvalidation(distributionSetInvalidation);
-        assertDistributionSetInvalidationCount(distributionSetInvalidationCount, 1, 0, 1);
+        assertDistributionSetInvalidationCount(distributionSetInvalidationCount, 1, 0, 0);
 
         distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation);
         rolloutHandler.handleAll();
@@ -96,9 +96,10 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         assertThat(targetFilterQueryManagement.get(invalidationTestData.getTargetFilterQuery().getId()).get()
                 .getAutoAssignDistributionSet()).isNull();
         assertThat(rolloutRepository.findById(invalidationTestData.getRollout().getId()).get().getStatus())
-                .isEqualTo(RolloutStatus.FINISHED);
+                .isEqualTo(RolloutStatus.READY);
+
         assertNoScheduledActionsExist(invalidationTestData.getRollout());
-        assertRolloutGroupsAreFinished(invalidationTestData.getRollout());
+        //assertRolloutGroupsAreFinished(invalidationTestData.getRollout());
         for (final Target target : invalidationTestData.getTargets()) {
             // if status is pending, the assignment has not been canceled
             assertThat(
@@ -118,8 +119,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
                 "verifyInvalidateDistributionSetStopAllAndForceCancel");
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
-                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.FORCE,
-                true);
+                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.FORCE);
         final DistributionSetInvalidationCount distributionSetInvalidationCount = distributionSetInvalidationManagement
                 .countEntitiesForInvalidation(distributionSetInvalidation);
         assertDistributionSetInvalidationCount(distributionSetInvalidationCount, 1, 5, 1);
@@ -129,16 +129,10 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
 
         assertThat(targetFilterQueryManagement.get(invalidationTestData.getTargetFilterQuery().getId()).get()
                 .getAutoAssignDistributionSet()).isNull();
-        assertThat(rolloutRepository.findById(invalidationTestData.getRollout().getId()).get().getStatus())
-                .isEqualTo(RolloutStatus.FINISHED);
+        // rollout should be deleted when force invalidation
+        assertThat(rolloutRepository.findById(invalidationTestData.getRollout().getId())).isEmpty();
         assertNoScheduledActionsExist(invalidationTestData.getRollout());
-        assertRolloutGroupsAreFinished(invalidationTestData.getRollout());
-        for (final Target target : invalidationTestData.getTargets()) {
-            assertThat(targetRepository.findById(target.getId()).get().getUpdateStatus())
-                    .isEqualTo(TargetUpdateStatus.IN_SYNC);
-            assertThat(findActionsByTarget(target)).hasSize(1);
-            assertThat(findActionsByTarget(target).get(0).getStatus()).isEqualTo(Status.CANCELED);
-        }
+        assertAllRolloutActionsAreCancelled(invalidationTestData.getRollout());
     }
 
     /**
@@ -149,7 +143,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         final InvalidationTestData invalidationTestData = createInvalidationTestData("verifyInvalidateDistributionSetStopAll");
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
-                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.SOFT,true);
+                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.SOFT);
         final DistributionSetInvalidationCount distributionSetInvalidationCount = distributionSetInvalidationManagement
                 .countEntitiesForInvalidation(distributionSetInvalidation);
         assertDistributionSetInvalidationCount(distributionSetInvalidationCount, 1, 5, 1);
@@ -176,7 +170,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         final DistributionSet distributionSet = testdataFactory.createIncompleteDistributionSet();
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
-                List.of(distributionSet.getId()), CancelationType.SOFT, true);
+                List.of(distributionSet.getId()), CancelationType.SOFT);
         assertThatExceptionOfType(IncompleteDistributionSetException.class)
                 .as("Incomplete distributionSet should throw an exception")
                 .isThrownBy(() -> distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation));
@@ -193,7 +187,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         final DistributionSet distributionSet = testdataFactory.createAndInvalidateDistributionSet();
         distributionSetInvalidationManagement.invalidateDistributionSet(
                 new DistributionSetInvalidation(Collections.singletonList(distributionSet.getId()),
-                        CancelationType.SOFT, true));
+                        CancelationType.SOFT));
     }
 
     /**
@@ -206,8 +200,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
                 .runAsSystem(() -> createInvalidationTestData("verifyInvalidateWithUpdateRepoAuthority"));
 
         distributionSetInvalidationManagement.invalidateDistributionSet(new DistributionSetInvalidation(
-                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.NONE,
-                false));
+                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.NONE));
         assertThat(
                 distributionSetRepository.findById(invalidationTestData.getDistributionSet().getId()).get().isValid())
                 .isFalse();
@@ -223,14 +216,13 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
                 () -> createInvalidationTestData("verifyInvalidateWithUpdateRepoAndUpdateTargetAuthority"));
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
-                List.of(invalidationTestData.getDistributionSet().getId()), CancelationType.SOFT, true);
+                List.of(invalidationTestData.getDistributionSet().getId()), CancelationType.SOFT);
         assertThatExceptionOfType(InsufficientPermissionException.class)
                 .as("Insufficient permission exception expected")
                 .isThrownBy(() -> distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation));
 
         distributionSetInvalidationManagement.invalidateDistributionSet(new DistributionSetInvalidation(
-                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.NONE,
-                false));
+                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.NONE));
         assertThat(
                 distributionSetRepository.findById(invalidationTestData.getDistributionSet().getId()).get().isValid())
                 .isFalse();
@@ -246,8 +238,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
                 () -> createInvalidationTestData("verifyInvalidateWithUpdateRepoAndUpdateTargetAuthority"));
 
         distributionSetInvalidationManagement.invalidateDistributionSet(new DistributionSetInvalidation(
-                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.SOFT,
-                true));
+                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.SOFT));
         assertThat(
                 distributionSetRepository.findById(invalidationTestData.getDistributionSet().getId()).get().isValid())
                 .isFalse();
@@ -256,6 +247,12 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     private void assertNoScheduledActionsExist(final Rollout rollout) {
         assertThat(
                 actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Status.SCHEDULED).getTotalElements())
+                .isZero();
+    }
+
+    private void assertAllRolloutActionsAreCancelled(final Rollout rollout) {
+        assertThat(
+                actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Status.CANCELED).getTotalElements())
                 .isZero();
     }
 
