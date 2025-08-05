@@ -71,23 +71,6 @@ public interface TargetTypeManagement<T extends TargetType>
     Optional<TargetType> getByName(@NotEmpty String name);
 
     /**
-     * @param name as {@link TargetType#getName()}
-     * @return total count by name
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET_TYPE)
-    long countByName(String name);
-
-    /**
-     * Retrieves {@link TargetType}s by filtering on the given parameters.
-     *
-     * @param name has text of filters to be applied.
-     * @param pageable page parameter
-     * @return the page of found {@link TargetType}
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET_TYPE)
-    Slice<TargetType> findByName(String name, @NotNull Pageable pageable);
-
-    /**
      * @param id Target type ID
      * @param distributionSetTypeIds Distribution set ID
      * @return Target type

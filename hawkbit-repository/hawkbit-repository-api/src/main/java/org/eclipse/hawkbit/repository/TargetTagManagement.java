@@ -36,9 +36,6 @@ public interface TargetTagManagement<T extends TargetTag>
         return "TARGET";
     }
 
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<TargetTag> getByName(@NotEmpty String name);
-
     @SuperBuilder
     @Getter
     @EqualsAndHashCode(callSuper = true)

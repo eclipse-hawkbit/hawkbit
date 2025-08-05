@@ -56,22 +56,8 @@ class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
             assertThat(targetTypeManagement.findByRsql("name==*", Pageable.unpaged()).get().map(Identifiable::getId).toList())
                     .containsOnly(permittedTargetType.getId());
 
-            // verify targetTypeManagement#findByName
-            assertThat(targetTypeManagement.findByName(permittedTargetType.getName(), Pageable.unpaged()).getContent())
-                    .hasSize(1).satisfies(results ->
-                            assertThat(results.get(0).getId()).isEqualTo(permittedTargetType.getId()));
-            assertThat(targetTypeManagement.findByName(hiddenTargetType.getName(), Pageable.unpaged())).isEmpty();
-
             // verify targetTypeManagement#count
             assertThat(targetTypeManagement.count()).isEqualTo(1);
-
-            // verify targetTypeManagement#countByName
-            assertThat(targetTypeManagement.countByName(permittedTargetType.getName())).isEqualTo(1);
-            assertThat(targetTypeManagement.countByName(hiddenTargetType.getName())).isZero();
-
-            // verify targetTypeManagement#countByName
-            assertThat(targetTypeManagement.countByName(permittedTargetType.getName())).isEqualTo(1);
-            assertThat(targetTypeManagement.countByName(hiddenTargetType.getName())).isZero();
 
             // verify targetTypeManagement#get by id
             assertThat(targetTypeManagement.get(permittedTargetType.getId())).isPresent();

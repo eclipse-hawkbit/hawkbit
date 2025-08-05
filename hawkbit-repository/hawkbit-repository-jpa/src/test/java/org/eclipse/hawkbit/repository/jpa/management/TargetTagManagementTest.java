@@ -91,7 +91,6 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void nonExistingEntityAccessReturnsNotPresent() {
-        assertThat(targetTagManagement.getByName(NOT_EXIST_ID)).isNotPresent();
         assertThat(targetTagManagement.get(NOT_EXIST_IDL)).isNotPresent();
     }
 
@@ -176,8 +175,6 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void createTargetTag() {
         final Tag tag = targetTagManagement.create(Create.builder().name("k1").description("k2").colour("colour").build());
-        assertThat(targetTagRepository.findByNameEquals("k1").orElseThrow().getDescription()).as("wrong tag ed").isEqualTo("k2");
-        assertThat(targetTagManagement.getByName("k1").orElseThrow().getColour()).as("wrong tag found").isEqualTo("colour");
         assertThat(targetTagManagement.get(tag.getId()).orElseThrow().getColour()).as("wrong tag found").isEqualTo("colour");
     }
 

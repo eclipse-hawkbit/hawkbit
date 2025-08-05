@@ -28,14 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 public interface TargetTagRepository extends BaseEntityRepository<JpaTargetTag> {
 
     /**
-     * find {@link TargetTag} by its name.
-     *
-     * @param tagName to filter on
-     * @return the {@link TargetTag} if found, otherwise null
-     */
-    Optional<TargetTag> findByNameEquals(String tagName);
-
-    /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
      * reasons (this is a "delete everything" query after all) we add the tenant
      * manually to query even if this will by done by {@link EntityManager}

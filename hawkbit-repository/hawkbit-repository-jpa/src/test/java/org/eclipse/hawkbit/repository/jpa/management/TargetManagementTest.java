@@ -248,15 +248,14 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(assignedTargets).as("Assigned targets are wrong").hasSize(4);
         assignedTargets.forEach(target -> assertThat(getTargetTags(target.getControllerId())).hasSize(1));
 
-        final TargetTag findTargetTag = targetTagManagement.getByName("Tag1").orElseThrow(IllegalStateException::new);
+        final TargetTag findTargetTag = targetTagManagement.get(targetTag.getId()).orElseThrow(IllegalStateException::new);
         assertThat(assignedTargets).as("Assigned targets are wrong")
                 .hasSize(targetManagement.findByTag(targetTag.getId(), PAGE).getNumberOfElements());
 
         final Target unAssignTarget = targetManagement.unassignTag(List.of("targetId123"), findTargetTag.getId()).get(0);
         assertThat(unAssignTarget.getControllerId()).as("Controller id is wrong").isEqualTo("targetId123");
-        assertThat(getTargetTags(unAssignTarget.getControllerId())).as("Tag size is wrong")
-                .isEmpty();
-        targetTagManagement.getByName("Tag1").orElseThrow(NoSuchElementException::new);
+        assertThat(getTargetTags(unAssignTarget.getControllerId())).as("Tag size is wrong").isEmpty();
+        targetTagManagement.get(targetTag.getId()).orElseThrow(NoSuchElementException::new);
         assertThat(targetManagement.findByTag(targetTag.getId(), PAGE)).as("Assigned targets are wrong").hasSize(3);
         assertThat(targetManagement.findByRsqlAndTag("controllerId==targetId123", targetTag.getId(), PAGE))
                 .as("Assigned targets are wrong").isEmpty();

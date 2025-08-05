@@ -55,22 +55,22 @@ public interface SoftwareModuleManagement<T extends SoftwareModule>
     /**
      * Locks a software module.
      *
-     * @param id the software module id
+     * @param softwareModule the software module
      * @throws EntityNotFoundException if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    void lock(long id);
+    T lock(SoftwareModule softwareModule);
 
     /**
      * Unlocks a software module.<br/>
      * Use it with extreme care! In general once software module is locked
      * it shall not be unlocked. Note that it could have been assigned / deployed to targets.
      *
-     * @param id the software module id
+     * @param softwareModule the software module
      * @throws EntityNotFoundException if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    void unlock(long id);
+    T unlock(SoftwareModule softwareModule);
 
     /**
      * Returns all modules assigned to given {@link DistributionSet}.
@@ -82,52 +82,6 @@ public interface SoftwareModuleManagement<T extends SoftwareModule>
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Page<T> findByAssignedTo(long distributionSetId, @NotNull Pageable pageable);
-
-    /**
-     * Filter {@link SoftwareModule}s with given {@link SoftwareModule#getName()} or {@link SoftwareModule#getVersion()}
-     * and {@link SoftwareModule#getType()} that are not marked as deleted.
-     *
-     * @param searchText to be filtered as "like" on {@link SoftwareModule#getName()}
-     * @param typeId to be filtered as "like" on {@link SoftwareModule#getType()}
-     * @param pageable page parameter
-     * @return the page of found {@link SoftwareModule}
-     * @throws EntityNotFoundException if given software module type does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Slice<T> findByTextAndType(String searchText, Long typeId, @NotNull Pageable pageable);
-
-    /**
-     * Retrieves {@link SoftwareModule} by their name AND version AND type.
-     *
-     * @param name of the {@link SoftwareModule}
-     * @param version of the {@link SoftwareModule}
-     * @param typeId of the {@link SoftwareModule}
-     * @return the found {@link SoftwareModule}
-     * @throws EntityNotFoundException if software module type with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<T> findByNameAndVersionAndType(@NotEmpty String name, @NotEmpty String version, long typeId);
-
-    /**
-     * Retrieves the {@link SoftwareModule}s by their {@link SoftwareModuleType}
-     *
-     * @param typeId to be filtered on
-     * @param pageable page parameters
-     * @return the found {@link SoftwareModule}s
-     * @throws EntityNotFoundException if software module type with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Slice<T> findByType(long typeId, @NotNull Pageable pageable);
-
-    /**
-     * Returns count of all modules assigned to given {@link DistributionSet}.
-     *
-     * @param distributionSetId to search for
-     * @return count of {@link SoftwareModule}s that are assigned to given {@link DistributionSet}.
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    long countByAssignedTo(long distributionSetId);
 
     @SuperBuilder
     @Getter
