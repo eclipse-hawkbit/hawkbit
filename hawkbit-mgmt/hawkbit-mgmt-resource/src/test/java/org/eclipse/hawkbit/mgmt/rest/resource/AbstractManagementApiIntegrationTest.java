@@ -198,7 +198,7 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
     static void implicitLock(final DistributionSet set) {
         if (!set.isLocked()) {
             ((JpaDistributionSet) set).setOptLockRevision(set.getOptLockRevision() + 1);
-            ((JpaDistributionSet) set).lock();
+            ((JpaDistributionSet) set).setLocked(true);
         }
     }
 }

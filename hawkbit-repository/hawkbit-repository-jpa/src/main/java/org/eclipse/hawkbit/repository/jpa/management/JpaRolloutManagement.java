@@ -564,8 +564,8 @@ public class JpaRolloutManagement implements RolloutManagement {
             rollout.setTotalTargets(totalTargets);
         }
 
-        if (((JpaDistributionSetManagement) distributionSetManagement).isImplicitLockApplicable(distributionSet)) {
-            distributionSetManagement.lock(distributionSet.getId());
+        if (distributionSetManagement.shouldLockImplicitly(distributionSet)) {
+            distributionSetManagement.lock(distributionSet);
         }
 
         if (rollout.getWeight().isEmpty()) {

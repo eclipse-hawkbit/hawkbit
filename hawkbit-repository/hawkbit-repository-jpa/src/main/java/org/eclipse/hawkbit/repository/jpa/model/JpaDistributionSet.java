@@ -124,6 +124,7 @@ public class JpaDistributionSet
     @Column(name = "complete")
     private boolean complete;
 
+    @Setter
     @Column(name = "locked")
     private boolean locked;
 
@@ -213,31 +214,18 @@ public class JpaDistributionSet
         return tags.remove(tag);
     }
 
-    public void lock() {
-        if (!isComplete()) {
-            throw new IncompleteDistributionSetException("Could not be locked while incomplete!");
-        }
-        locked = true;
-    }
-
-    public void unlock() {
-        locked = false;
-    }
-
     public void invalidate() {
         this.valid = false;
     }
 
     @Override
     public void fireCreateEvent() {
-        publishEventWithEventPublisher(
-                new DistributionSetCreatedEvent(this));
+        publishEventWithEventPublisher(new DistributionSetCreatedEvent(this));
     }
 
     @Override
     public void fireUpdateEvent() {
-        publishEventWithEventPublisher(
-                new DistributionSetUpdatedEvent(this, complete));
+        publishEventWithEventPublisher(new DistributionSetUpdatedEvent(this, complete));
 
         if (deleted) {
             publishEventWithEventPublisher(new DistributionSetDeletedEvent(getTenant(), getId(), getClass()));

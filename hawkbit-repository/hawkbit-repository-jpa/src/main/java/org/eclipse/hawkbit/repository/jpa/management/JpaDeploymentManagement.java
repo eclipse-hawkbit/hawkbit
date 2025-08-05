@@ -180,40 +180,41 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<DistributionSetAssignmentResult> assignDistributionSets(final String initiatedBy,
-            final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
+    public List<DistributionSetAssignmentResult> assignDistributionSets(
+            final String initiatedBy, final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
         return assignDistributionSets0(initiatedBy, deploymentRequests, actionMessage);
     }
 
-    private List<DistributionSetAssignmentResult> assignDistributionSets0(final String initiatedBy,
-            final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
+    private List<DistributionSetAssignmentResult> assignDistributionSets0(
+            final String initiatedBy, final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
         WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(deploymentRequests);
         return assignDistributionSets(initiatedBy, deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
     }
 
     @Override
-    public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(final Collection<Entry<String, Long>> assignments,
-            final String initiatedBy) {
+    public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(
+            final String initiatedBy, final Collection<Entry<String, Long>> assignments) {
         final Collection<Entry<String, Long>> distinctAssignments = assignments.stream().distinct().toList();
         enforceMaxAssignmentsPerRequest(distinctAssignments.size());
 
         final List<DeploymentRequest> deploymentRequests = distinctAssignments.stream()
                 .map(entry -> DeploymentManagement.deploymentRequest(entry.getKey(), entry.getValue()).build()).toList();
 
-        return assignDistributionSets(auditorAware.getCurrentAuditor().orElse(tenantAware.getCurrentUsername()), deploymentRequests, null,
+        return assignDistributionSets(
+                auditorAware.getCurrentAuditor().orElse(tenantAware.getCurrentUsername()), deploymentRequests, null,
                 offlineDsAssignmentStrategy);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(final Collection<Entry<String, Long>> assignments) {
-        return offlineAssignedDistributionSets(assignments, tenantAware.getCurrentUsername());
+        return offlineAssignedDistributionSets(tenantAware.getCurrentUsername(), assignments);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(retryFor = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action cancelAction(final long actionId) {
         return cancelAction0(actionId);
     }
@@ -452,7 +453,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 startScheduledActions(groupScheduledActions.getContent());
                 return groupScheduledActions.getTotalElements();
             }
-        }) > 0) ;
+        }) > 0);
     }
 
     @Override
@@ -483,7 +484,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public int deleteActionsByStatusAndLastModifiedBefore(final Set<Status> status, final long lastModified) {
         if (status.isEmpty()) {
             return 0;
@@ -590,8 +591,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         return template;
     }
 
-    private List<DistributionSetAssignmentResult> assignDistributionSets(final String initiatedBy,
-            final List<DeploymentRequest> deploymentRequests, final String actionMessage, final AbstractDsAssignmentStrategy strategy) {
+    private List<DistributionSetAssignmentResult> assignDistributionSets(
+            final String initiatedBy, final List<DeploymentRequest> deploymentRequests, final String actionMessage,
+            final AbstractDsAssignmentStrategy strategy) {
         final List<DeploymentRequest> validatedRequests = validateAndFilterRequestForAssignments(deploymentRequests);
         final Map<Long, List<TargetWithActionType>> assignmentsByDsIds = convertRequest(validatedRequests);
 
@@ -720,10 +722,15 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private DistributionSetAssignmentResult assignDistributionSetToTargets(
             final String initiatedBy, final Long dsId, final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy) {
-        JpaDistributionSet distributionSet = distributionSetManagement.getValidAndComplete(dsId);
-        if (distributionSetManagement.isImplicitLockApplicable(distributionSet)) {
-            // without new transaction DS changed event is not thrown
-            distributionSet = DeploymentHelper.runInNewTransaction(txManager, "Implicit lock", status -> distributionSetManagement.lock(dsId));
+        final JpaDistributionSet dsValidAndComplete = distributionSetManagement.getValidAndComplete(dsId);
+        final JpaDistributionSet distributionSet;
+        if (distributionSetManagement.shouldLockImplicitly(dsValidAndComplete)) {
+            // implicitly lock, for some reason no update happen if lock in same transaction
+            distributionSet = DeploymentHelper.runInNewTransaction(
+                    txManager, "lockDistributionSet-" + dsId,
+                    status -> distributionSetManagement.lock(dsValidAndComplete));
+        } else {
+            distributionSet = dsValidAndComplete;
         }
 
         final List<String> providedTargetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId).distinct().toList();
@@ -766,8 +773,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         // not active before and the manual assignment which has been done cancels them
         targetEntitiesIdsChunks.forEach(this::cancelInactiveScheduledActionsForTargets);
         setAssignedDistributionSetAndTargetUpdateStatus(assignmentStrategy, distributionSetEntity, targetEntitiesIdsChunks);
-        final Map<TargetWithActionType, JpaAction> assignedActions = createActions(targetsWithActionType, targetEntities, distributionSetEntity,
-                assignmentStrategy, initiatedBy);
+        final Map<TargetWithActionType, JpaAction> assignedActions =
+                createActions(targetsWithActionType, targetEntities, distributionSetEntity, assignmentStrategy, initiatedBy);
         // create initial action status when action is created, so we remember
         // the initial running status because we will change the status
         // of the action itself and with this action status we have a nicer action history.
@@ -820,7 +827,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         return persistedActions;
     }
 
-    private void createActionsStatus(final Map<TargetWithActionType, JpaAction> actions, final AbstractDsAssignmentStrategy assignmentStrategy,
+    private void createActionsStatus(
+            final Map<TargetWithActionType, JpaAction> actions, final AbstractDsAssignmentStrategy assignmentStrategy,
             final String actionMessage) {
         actionStatusRepository.saveAll(actions.entrySet().stream().map(entry -> {
             final JpaAction action = entry.getValue();

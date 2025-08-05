@@ -25,6 +25,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Random;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -117,6 +118,7 @@ public abstract class AbstractIntegrationTest {
     protected static final Pageable PAGE = PageRequest.of(0, 500, Sort.by(Direction.ASC, "id"));
     protected static final URI LOCALHOST = URI.create("http://127.0.0.1");
     protected static final int DEFAULT_TEST_WEIGHT = 500;
+    protected static final Random RND = new Random();
 
     /**
      * Number of {@link DistributionSetType}s that exist in every test case. One
@@ -286,14 +288,12 @@ public abstract class AbstractIntegrationTest {
         return defaultDsType().getMandatoryModuleTypes().stream().findAny().orElseThrow();
     }
 
-    protected static Action getFirstAssignedAction(
-            final DistributionSetAssignmentResult distributionSetAssignmentResult) {
+    protected static Action getFirstAssignedAction(final DistributionSetAssignmentResult distributionSetAssignmentResult) {
         return distributionSetAssignmentResult.getAssignedEntity().stream().findFirst()
                 .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none"));
     }
 
-    protected static Long getFirstAssignedActionId(
-            final DistributionSetAssignmentResult distributionSetAssignmentResult) {
+    protected static Long getFirstAssignedActionId(final DistributionSetAssignmentResult distributionSetAssignmentResult) {
         return getFirstAssignedAction(distributionSetAssignmentResult).getId();
     }
 
@@ -313,13 +313,12 @@ public abstract class AbstractIntegrationTest {
         return TestdataFactory.randomBytes(len);
     }
 
-    protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId) {
-        return assignDistributionSet(dsID, controllerId, ActionType.FORCED);
+    protected DistributionSetAssignmentResult assignDistributionSet(final long dsId, final String controllerId) {
+        return assignDistributionSet(dsId, controllerId, ActionType.FORCED);
     }
 
-    protected DistributionSetAssignmentResult assignDistributionSet(
-            final long dsID, final String controllerId, final ActionType actionType) {
-        return assignDistributionSet(dsID, Collections.singletonList(controllerId), actionType);
+    protected DistributionSetAssignmentResult assignDistributionSet(final long dsId, final String controllerId, final ActionType actionType) {
+        return assignDistributionSet(dsId, Collections.singletonList(controllerId), actionType);
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(
@@ -333,8 +332,8 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(
-            final long dsID, final List<String> controllerIds, final ActionType actionType, final long forcedTime) {
-        return assignDistributionSet(dsID, controllerIds, actionType, forcedTime, null);
+            final long dsId, final List<String> controllerIds, final ActionType actionType, final long forcedTime) {
+        return assignDistributionSet(dsId, controllerIds, actionType, forcedTime, null);
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(

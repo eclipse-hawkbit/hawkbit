@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaStatistic;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -64,16 +63,6 @@ public interface DistributionSetRepository extends BaseEntityRepository<JpaDistr
      */
     @Query(value = "SELECT COUNT(f.autoAssignDistributionSet) FROM JpaTargetFilterQuery f WHERE f.autoAssignDistributionSet.id = :dsId GROUP BY f.autoAssignDistributionSet")
     Long countAutoAssignmentsForDistributionSet(@Param("dsId") Long dsId);
-
-    /**
-     * Finds {@link DistributionSet}s where given {@link SoftwareModule} is assigned.
-     * <p/>
-     * No access control applied.
-     *
-     * @param moduleId to search for
-     * @return {@link List} of found {@link DistributionSet}s
-     */
-    Long countByModulesId(Long moduleId);
 
     /**
      * Finds {@link DistributionSet}s based on given ID that are assigned yet to an {@link Action}, i.e. in use.

@@ -39,17 +39,6 @@ public interface DistributionSetTypeRepository extends BaseEntityRepository<JpaD
     long countByElementsSmType(JpaSoftwareModuleType softwareModuleType);
 
     /**
-     * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety reasons (this is a "delete everything" query after all) we add
-     * the tenant manually to query even if this will by done by {@link EntityManager} anyhow. The DB should take care of optimizing this away.
-     *
-     * @param tenant to delete data from
-     */
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM JpaDistributionSetType t WHERE t.tenant = :tenant")
-    void deleteByTenant(@Param("tenant") String tenant);
-
-    /**
      * Counts the {@link SoftwareModuleType}s which are associated with the addressed {@link DistributionSetType}.
      * <p/>
      * No access control applied
@@ -59,4 +48,15 @@ public interface DistributionSetTypeRepository extends BaseEntityRepository<JpaD
      */
     @Query("SELECT COUNT (e.smType) FROM DistributionSetTypeElement e WHERE e.dsType.id = :id")
     long countSmTypesById(@Param("id") Long id);
+
+    /**
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety reasons (this is a "delete everything" query after all) we add
+     * the tenant manually to query even if this will by done by {@link EntityManager} anyhow. The DB should take care of optimizing this away.
+     *
+     * @param tenant to delete data from
+     */
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM JpaDistributionSetType t WHERE t.tenant = :tenant")
+    void deleteByTenant(@Param("tenant") String tenant);
 }

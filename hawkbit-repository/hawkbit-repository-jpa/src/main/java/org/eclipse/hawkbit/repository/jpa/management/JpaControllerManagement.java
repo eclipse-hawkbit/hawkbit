@@ -588,7 +588,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 systemSecurityContext.runAsSystem(() ->
                         distributionSetManagement.findByNameAndVersion(distributionName, version).map(
                                         distributionSet -> deploymentManagement.offlineAssignedDistributionSets(
-                                                List.of(Map.entry(controllerId, distributionSet.getId())), controllerId))
+                                                controllerId, List.of(Map.entry(controllerId, distributionSet.getId()))))
                                 .orElseThrow(() ->
                                         new EntityNotFoundException(DistributionSet.class, Map.entry(distributionName, version))));
 

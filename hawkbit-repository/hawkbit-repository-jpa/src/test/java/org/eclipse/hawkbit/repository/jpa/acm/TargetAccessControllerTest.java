@@ -196,8 +196,8 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void verifyTargetAssignment() {
-        final Long dsId = testdataFactory.createDistributionSet("myDs").getId();
-        distributionSetManagement.lock(dsId);
+        final DistributionSet ds  = testdataFactory.createDistributionSet("myDs");
+        distributionSetManagement.lock(ds);
 
         final Target permittedTarget = targetManagement
                 .create(entityFactory.target().create().controllerId("device01").status(TargetUpdateStatus.REGISTERED));
@@ -214,6 +214,7 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
                 READ_TARGET + "/controllerId==" + permittedTarget.getControllerId(),
                 UPDATE_TARGET + "/controllerId==" + permittedTarget.getControllerId(),
                 READ_REPOSITORY), () -> {
+            final Long dsId = ds.getId();
             assertThat(assignDistributionSet(dsId, permittedTarget.getControllerId()).getAssigned()).isEqualTo(1);
             // assigning of not allowed target behaves as not found
             assertThatThrownBy(() -> assignDistributionSet(dsId, hiddenTargetControllerId)).isInstanceOf(AssertionError.class);
@@ -233,10 +234,10 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void verifyTargetAssignmentOnNonUpdatableTarget() {
-        final Long firstDsId = testdataFactory.createDistributionSet("myDs").getId();
-        distributionSetManagement.lock(firstDsId);
+        final DistributionSet firstDs = testdataFactory.createDistributionSet("myDs");
+        distributionSetManagement.lock(firstDs);
         final DistributionSet secondDs = testdataFactory.createDistributionSet("anotherDs");
-        distributionSetManagement.lock(secondDs.getId());
+        distributionSetManagement.lock(secondDs);
 
         final Target manageableTarget = targetManagement
                 .create(entityFactory.target().create().controllerId("device01").status(TargetUpdateStatus.REGISTERED));
@@ -247,6 +248,7 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
                 READ_TARGET + "/controllerId==" + manageableTarget.getControllerId() + " or controllerId==" + readOnlyTarget.getControllerId(),
                 UPDATE_TARGET + "/controllerId==" + manageableTarget.getControllerId(),
                 READ_REPOSITORY), () -> {
+            final Long firstDsId = firstDs.getId();
             // assignment is permitted for manageableTarget
             assertThat(assignDistributionSet(firstDsId, manageableTarget.getControllerId()).getAssigned()).isEqualTo(1);
 
@@ -267,7 +269,7 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
     @Test
     void verifyRolloutTargetScope() {
         final DistributionSet ds = testdataFactory.createDistributionSet("myDs");
-        distributionSetManagement.lock(ds.getId());
+        distributionSetManagement.lock(ds);
 
         final String[] updateTargetControllerIds = { "update1", "update2", "update3" };
         final List<Target> updateTargets = testdataFactory.createTargets(updateTargetControllerIds);
@@ -307,7 +309,7 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
     @Test
     void verifyAutoAssignmentTargetScope() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
-        distributionSetManagement.lock(distributionSet.getId());
+        distributionSetManagement.lock(distributionSet);
 
         final String[] updateTargetControllerIds = { "update1", "update2", "update3" };
         final List<Target> updateTargets = testdataFactory.createTargets(updateTargetControllerIds);

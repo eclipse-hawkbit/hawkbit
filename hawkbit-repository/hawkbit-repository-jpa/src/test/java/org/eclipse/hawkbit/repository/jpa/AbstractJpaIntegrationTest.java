@@ -14,8 +14,10 @@ import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.run
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withUser;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.StreamSupport;
@@ -50,9 +52,13 @@ import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TenantMetaDataRepository;
+import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
+import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -67,10 +73,15 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 @Slf4j
 @ContextConfiguration(classes = { JpaRepositoryConfiguration.class, TestConfiguration.class })
@@ -85,9 +96,6 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     private static final List<String> REPOSITORY_AND_TARGET_PERMISSIONS = List.of(SpPermission.READ_REPOSITORY, SpPermission.CREATE_REPOSITORY,
             SpPermission.UPDATE_REPOSITORY, SpPermission.DELETE_REPOSITORY, SpPermission.READ_TARGET, SpPermission.CREATE_TARGET,
             SpPermission.UPDATE_TARGET, SpPermission.DELETE_TARGET);
-
-    @PersistenceContext
-    protected EntityManager entityManager;
 
     @Autowired
     protected TargetRepository targetRepository;
@@ -306,5 +314,44 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     private JpaRollout refresh(final Rollout rollout) {
         return rolloutRepository.findById(rollout.getId()).get();
+    }
+
+    protected Slice<JpaDistributionSet> findDsByDistributionSetFilter(final DistributionSetFilter distributionSetFilter, final Pageable pageable) {
+        final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(distributionSetFilter);
+        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, specList, pageable);
+    }
+
+    private static List<Specification<JpaDistributionSet>> buildDistributionSetSpecifications(
+            final DistributionSetFilter distributionSetFilter) {
+        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>(10);
+
+        if (distributionSetFilter.getIsComplete() != null) {
+            specList.add(DistributionSetSpecification.isCompleted(distributionSetFilter.getIsComplete()));
+        }
+        if (distributionSetFilter.getIsDeleted() != null) {
+            specList.add(DistributionSetSpecification.isDeleted(distributionSetFilter.getIsDeleted()));
+        }
+        if (distributionSetFilter.getIsValid() != null) {
+            specList.add(DistributionSetSpecification.isValid(distributionSetFilter.getIsValid()));
+        }
+        if (distributionSetFilter.getTypeId() != null) {
+            specList.add(DistributionSetSpecification.byType(distributionSetFilter.getTypeId()));
+        }
+        if (!ObjectUtils.isEmpty(distributionSetFilter.getSearchText())) {
+            final String[] dsFilterNameAndVersionEntries = JpaManagementHelper
+                    .getFilterNameAndVersionEntries(distributionSetFilter.getSearchText().trim());
+            specList.add(DistributionSetSpecification.likeNameAndVersion(dsFilterNameAndVersionEntries[0], dsFilterNameAndVersionEntries[1]));
+        }
+        if (hasTagsFilterActive(distributionSetFilter)) {
+            specList.add(DistributionSetSpecification.hasTags(
+                    distributionSetFilter.getTagNames(), distributionSetFilter.getSelectDSWithNoTag()));
+        }
+        return specList;
+    }
+
+    private static boolean hasTagsFilterActive(final DistributionSetFilter distributionSetFilter) {
+        final boolean isNoTagActive = Boolean.TRUE.equals(distributionSetFilter.getSelectDSWithNoTag());
+        final boolean isAtLeastOneTagActive = !CollectionUtils.isEmpty(distributionSetFilter.getTagNames());
+        return isNoTagActive || isAtLeastOneTagActive;
     }
 }

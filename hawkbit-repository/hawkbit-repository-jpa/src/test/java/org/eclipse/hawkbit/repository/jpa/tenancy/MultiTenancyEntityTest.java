@@ -28,9 +28,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.data.domain.Slice;
 
 /**
- * Multi-Tenancy tests which testing the CRUD operations of entities that all
- * CRUD-Operations are tenant aware and cannot access or delete entities not
- * belonging to the current tenant.
+ * Multi-Tenancy tests which testing the CRUD operations of entities that all CRUD-Operations are tenant aware and cannot access
+ * or delete entities not belonging to the current tenant.
  * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Multi Tenancy
@@ -201,6 +200,6 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
     }
 
     private Slice<? extends DistributionSet> findDistributionSetForTenant(final String tenant) throws Exception {
-        return runAsTenant(tenant, () -> distributionSetManagement.findByCompleted(true, PAGE));
+        return runAsTenant(tenant, () -> distributionSetManagement.findAll(PAGE));
     }
 }

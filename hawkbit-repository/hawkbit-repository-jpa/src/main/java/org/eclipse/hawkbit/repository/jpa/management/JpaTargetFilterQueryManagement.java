@@ -33,7 +33,6 @@ import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeExcep
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
@@ -164,11 +163,10 @@ class JpaTargetFilterQueryManagement
         } else {
             WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(update);
             assertMaxTargetsQuota(targetFilterQuery.getQuery(), targetFilterQuery.getName(), update.dsId());
-            final JpaDistributionSet distributionSet = (JpaDistributionSet) distributionSetManagement
-                    .getValidAndComplete(update.dsId());
 
-            if (((JpaDistributionSetManagement) distributionSetManagement).isImplicitLockApplicable(distributionSet)) {
-                distributionSetManagement.lock(distributionSet.getId());
+            DistributionSet distributionSet = distributionSetManagement.getValidAndComplete(update.dsId());
+            if (distributionSetManagement.shouldLockImplicitly(distributionSet)) {
+                distributionSet = distributionSetManagement.lock(distributionSet);
             }
 
             targetFilterQuery.setAutoAssignDistributionSet(distributionSet);

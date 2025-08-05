@@ -1356,7 +1356,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         }
 
         // verify that deleted attribute is used correctly
-        List<? extends DistributionSet> allFoundDS = distributionSetManagement.findByCompleted(true, PAGE).getContent();
+        List<? extends DistributionSet> allFoundDS = distributionSetManagement.findAll(PAGE).getContent();
         assertThat(allFoundDS).as("no ds should be founded").isEmpty();
 
         assertThat(distributionSetRepository.findAll(SpecificationsBuilder.combineWithAnd(Arrays
@@ -1368,16 +1368,13 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         // try to delete again
         distributionSetManagement.delete(deploymentResult.getDistributionSetIDs());
-        // verify that the result is the same, even though distributionSet dsA
-        // has been installed
-        // successfully and no activeAction is referring to created distribution
-        // sets
-        allFoundDS = distributionSetManagement.findByCompleted(true, pageRequest).getContent();
+        // verify that the result is the same, even though distributionSet dsA has been installed
+        // successfully and no activeAction is referring to created distribution sets
+        allFoundDS = distributionSetManagement.findAll(pageRequest).getContent();
         assertThat(allFoundDS).as("no ds should be founded").isEmpty();
         assertThat(distributionSetRepository.findAll(SpecificationsBuilder.combineWithAnd(Arrays
                         .asList(DistributionSetSpecification.isDeleted(true), DistributionSetSpecification.isCompleted(true))),
                 PAGE).getContent()).as("wrong size of founded ds").hasSize(noOfDistributionSets);
-
     }
 
     /**

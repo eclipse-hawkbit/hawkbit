@@ -58,7 +58,6 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
         final DistributionSet hidden = testdataFactory.createDistributionSet();
 
         final Action permittedAction = testdataFactory.performAssignment(permitted);
-        final Action hiddenAction = testdataFactory.performAssignment(hidden);
 
         runAs(withUser("user",
                 READ_REPOSITORY,
@@ -74,15 +73,6 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
             assertThat(distributionSetManagement.findByRsql("name==*", Pageable.unpaged()).get().map(Identifiable::getId)
                     .toList()).containsOnly(permittedActionId);
 
-            // verify distributionSetManagement#findByCompleted
-            assertThat(distributionSetManagement.findByCompleted(true, Pageable.unpaged()).get().map(Identifiable::getId)
-                    .toList()).containsOnly(permittedActionId);
-
-            // verify distributionSetManagement#findByDistributionSetFilter
-            assertThat(distributionSetManagement
-                    .findByDistributionSetFilter(DistributionSetFilter.builder().isDeleted(false).build(), Pageable.unpaged())
-                    .get().map(Identifiable::getId).toList()).containsOnly(permittedActionId);
-
             // verify distributionSetManagement#get
             assertThat(distributionSetManagement.get(permittedActionId)).isPresent();
             final Long hiddenId = hidden.getId();
@@ -93,11 +83,6 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
             assertThat(distributionSetManagement.getWithDetails(hiddenId)).isEmpty();
 
             // verify distributionSetManagement#get
-            assertThat(distributionSetManagement.getValid(permittedActionId).getId()).isEqualTo(permittedActionId);
-            assertThatThrownBy(() -> distributionSetManagement.getValid(hiddenId))
-                    .as("Distribution set should not be found.").isInstanceOf(EntityNotFoundException.class);
-
-            // verify distributionSetManagement#get
             final List<Long> allActionIds = Arrays.asList(permittedActionId, hiddenId);
             assertThatThrownBy(() -> distributionSetManagement.get(allActionIds))
                     .as("Fail if request hidden.").isInstanceOf(EntityNotFoundException.class);
@@ -105,12 +90,6 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
             // verify distributionSetManagement#getByNameAndVersion
             assertThat(distributionSetManagement.findByNameAndVersion(permitted.getName(), permitted.getVersion())).isPresent();
             assertThat(distributionSetManagement.findByNameAndVersion(hidden.getName(), hidden.getVersion())).isEmpty();
-
-            // verify distributionSetManagement#getByAction
-            assertThat(distributionSetManagement.findByAction(permittedAction.getId())).isPresent();
-            final Long hiddenActionId = hiddenAction.getId();
-            assertThatThrownBy(() -> distributionSetManagement.findByAction(hiddenActionId))
-                    .as("Action is hidden.").isInstanceOf(InsufficientPermissionException.class);
         });
     }
 
@@ -254,9 +233,9 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
         final DistributionSet readOnly = testdataFactory.createDistributionSet();
         final DistributionSet hidden = testdataFactory.createDistributionSet();
         // has to lock them, otherwise implicit lock shall be made which require DistributionSet update permissions
-        distributionSetManagement.lock(permitted.getId());
-        distributionSetManagement.lock(readOnly.getId());
-        distributionSetManagement.lock(hidden.getId());
+        distributionSetManagement.lock(permitted);
+        distributionSetManagement.lock(readOnly);
+        distributionSetManagement.lock(hidden);
 
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
                 .create(TargetFilterQueryManagement.Create.builder().name("test").query("id==*").build());

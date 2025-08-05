@@ -194,18 +194,16 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(softwareModuleManagement.findByTextAndType("oracle", runtimeType.getId(), PAGE).getContent())
                 .hasSize(1);
         assertThat(
-                softwareModuleManagement.findByTextAndType("oracle", runtimeType.getId(), PAGE).getContent().get(0))
-                .isEqualTo(jvm);
+                softwareModuleManagement.findByTextAndType("oracle", runtimeType.getId(), PAGE).getContent().get(0)).isEqualTo(jvm);
         assertThat(softwareModuleManagement.findByTextAndType(":1.0.1", appType.getId(), PAGE).getContent()).hasSize(1)
                 .first().isEqualTo(ah);
         assertThat(softwareModuleManagement.findByTextAndType(":1.0", appType.getId(), PAGE).getContent()).hasSize(2);
 
-        distributionSetManagement.unlock(ds.getId()); // otherwise delete will be rejected as a part of a locked DS
+        distributionSetManagement.unlock(ds); // otherwise delete will be rejected as a part of a locked DS
         softwareModuleManagement.delete(ah2.getId());
 
         assertThat(softwareModuleManagement.findByTextAndType(":1.0", appType.getId(), PAGE).getContent()).hasSize(1);
-        assertThat(softwareModuleManagement.findByTextAndType(":1.0", appType.getId(), PAGE).getContent().get(0))
-                .isEqualTo(ah);
+        assertThat(softwareModuleManagement.findByTextAndType(":1.0", appType.getId(), PAGE).getContent().get(0)).isEqualTo(ah);
     }
 
     /**
@@ -429,16 +427,16 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
         // [STEP3]: Assign SoftwareModuleX to DistributionSetX and to target
-        final DistributionSet disSetX = testdataFactory.createDistributionSet(Set.of(moduleX), "X");
-        assignDistributionSet(disSetX, Collections.singletonList(target));
+        final DistributionSet disSetX = assignDistributionSet(testdataFactory.createDistributionSet(Set.of(moduleX), "X"), List.of(target))
+                .getDistributionSet();
 
         // [STEP4]: Assign SoftwareModuleY to DistributionSet and to target
-        final DistributionSet disSetY = testdataFactory.createDistributionSet(Set.of(moduleY), "Y");
-        assignDistributionSet(disSetY, Collections.singletonList(target));
+        final DistributionSet disSetY = assignDistributionSet(testdataFactory.createDistributionSet(Set.of(moduleY), "Y"), List.of(target))
+                .getDistributionSet();
 
         // [STEP5]: Delete SoftwareModuleX
-        distributionSetManagement.unlock(disSetX.getId()); // otherwise delete will be rejected as a part of a locked DS
-        distributionSetManagement.unlock(disSetY.getId()); // otherwise delete will be rejected as a part of a locked DS
+        distributionSetManagement.unlock(disSetX); // otherwise delete will be rejected as a part of a locked DS
+        distributionSetManagement.unlock(disSetY); // otherwise delete will be rejected as a part of a locked DS
         softwareModuleManagement.delete(moduleX.getId());
 
         // [STEP6]: Delete SoftwareModuleY
@@ -757,10 +755,8 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // try to delete while DS is not locked
         softwareModuleManagement.delete(modules.get(0).getId());
 
-        distributionSetManagement.lock(distributionSet.getId());
-        assertThat(
-                distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false))
-                .isTrue();
+        distributionSetManagement.lock(distributionSet);
+        assertThat(distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false)).isTrue();
 
         // try to delete SM of a locked DS
         final Long moduleId = modules.get(1).getId();
@@ -772,7 +768,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     private Action assignSet(final JpaTarget target, final JpaDistributionSet ds) {
         assignDistributionSet(ds.getId(), target.getControllerId());
         implicitLock(ds);
-        assertThat(targetManagement.getByControllerID(target.getControllerId()).get().getUpdateStatus())
+        assertThat(targetManagement.getByControllerID(target.getControllerId()).orElseThrow().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
         final Optional<DistributionSet> assignedDistributionSet = deploymentManagement
                 .getAssignedDistributionSet(target.getControllerId());

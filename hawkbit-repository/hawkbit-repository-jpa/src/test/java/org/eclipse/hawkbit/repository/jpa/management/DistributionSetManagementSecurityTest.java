@@ -14,11 +14,8 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractRepositoryManagementSecurityTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -119,10 +116,8 @@ class DistributionSetManagementSecurityTest
      */
     @Test
     void lockPermissionsCheck() {
-        assertPermissions(() -> {
-            distributionSetManagement.lock(1L);
-            return null;
-        }, List.of(SpPermission.UPDATE_REPOSITORY));
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        assertPermissions(() -> distributionSetManagement.lock(ds), List.of(SpPermission.UPDATE_REPOSITORY));
     }
 
     /**
@@ -130,18 +125,8 @@ class DistributionSetManagementSecurityTest
      */
     @Test
     void unlockPermissionsCheck() {
-        assertPermissions(() -> {
-            distributionSetManagement.unlock(1L);
-            return null;
-        }, List.of(SpPermission.UPDATE_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void getByActionPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.findByAction(1L), List.of(SpPermission.READ_REPOSITORY));
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        assertPermissions(() -> distributionSetManagement.unlock(ds), List.of(SpPermission.UPDATE_REPOSITORY));
     }
 
     /**
@@ -172,50 +157,8 @@ class DistributionSetManagementSecurityTest
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void getValidPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.getValid(1L), List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
     void getOrElseThrowExceptionPermissionsCheck() {
         assertPermissions(() -> distributionSetManagement.getOrElseThrowException(1L), List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void findByCompletedPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.findByCompleted(true, PAGE), List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void countByCompletedPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.countByCompleted(true), List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void findByDistributionSetFilterPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.findByDistributionSetFilter(DistributionSetFilter.builder().build(), PAGE),
-                List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void countByDistributionSetFilterPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.countByDistributionSetFilter(DistributionSetFilter.builder().build()),
-                List.of(SpPermission.READ_REPOSITORY));
     }
 
     /**
@@ -238,24 +181,8 @@ class DistributionSetManagementSecurityTest
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void isInUsePermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.isInUse(1L), List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
     void unassignSoftwareModulePermissionsCheck() {
         assertPermissions(() -> distributionSetManagement.unassignSoftwareModule(1L, 1L), List.of(SpPermission.UPDATE_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void countByTypeIdPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.countByTypeId(1L), List.of(SpPermission.READ_REPOSITORY));
     }
 
     /**
@@ -287,13 +214,8 @@ class DistributionSetManagementSecurityTest
      */
     @Test
     void invalidatePermissionsCheck() {
-        final DistributionSetType dsType = distributionSetTypeManagement.create(DistributionSetTypeManagement.Create.builder()
-                .key("type").name("name").build());
-        final DistributionSet ds = distributionSetManagement.create(DistributionSetManagement.Create.builder()
-                .type(dsType).name("test").version("1.0.0").build());
-        assertPermissions(() -> {
-            ((DistributionSetManagement) distributionSetManagement).invalidate(ds);
-            return null;
-        }, List.of(SpPermission.UPDATE_REPOSITORY, SpPermission.READ_REPOSITORY));
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        assertPermissions(() -> distributionSetManagement.invalidate(ds),
+                List.of(SpPermission.UPDATE_REPOSITORY, SpPermission.READ_REPOSITORY));
     }
 }

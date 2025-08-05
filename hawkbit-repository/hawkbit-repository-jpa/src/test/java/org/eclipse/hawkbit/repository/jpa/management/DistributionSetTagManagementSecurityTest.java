@@ -41,32 +41,4 @@ class DistributionSetTagManagementSecurityTest
     protected DistributionSetTagManagement.Update getUpdateObject() {
         return DistributionSetTagManagement.Update.builder().id(1L).name("tag").build();
     }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void getByNameWitPermissionWorks() {
-        assertPermissions(() -> distributionSetTagManagement.findByName("tagName"), List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void findByDistributionSetPermissionsCheck() {
-        assertPermissions(() -> distributionSetTagManagement.findByDistributionSet(1L, Pageable.unpaged()),
-                List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void deleteDistributionSetTagPermissionsCheck() {
-        assertPermissions(() -> {
-            distributionSetTagManagement.delete("tagName");
-            return null;
-        }, List.of(SpPermission.DELETE_REPOSITORY));
-    }
 }
