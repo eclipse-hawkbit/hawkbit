@@ -1476,7 +1476,6 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         assertStatusIs(rollout, RolloutStatus.DELETED);
 
-        // TODO: verify all actions are cancelled ...
         List<Action> rolloutActions =
                 deploymentManagement.findActions("rollout.id==" + rollout.getId(), PAGE).getContent();
         for (Action action : rolloutActions) {

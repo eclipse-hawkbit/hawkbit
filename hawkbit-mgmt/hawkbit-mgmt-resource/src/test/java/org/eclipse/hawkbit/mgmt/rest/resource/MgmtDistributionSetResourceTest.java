@@ -1760,10 +1760,6 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     void invalidateDistributionSetWithNoneCancellation() throws Exception {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final List<Target> targets = testdataFactory.createTargets(5, "invalidateDistributionSet");
-//        assignDistributionSet(distributionSet, targets);
-//        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-//                .create(entityFactory.targetFilterQuery().create().name("invalidateDistributionSet").query("name==*")
-//                        .autoAssignDistributionSet(distributionSet));
         Rollout rollout = testdataFactory.createRolloutByVariables("invalidateDistributionSet", "desc", 1,
                 "name==*", distributionSet, "50", "80");
         rollout = testdataFactory.startRollout(rollout);
@@ -1774,9 +1770,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         mvc.perform(post("/rest/v1/distributionsets/{ds}/invalidate", distributionSet.getId())
                         .content(jsonObject.toString()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-
-//        assertThat(targetFilterQueryManagement.get(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
-//                .isNull();
+        
         assertThat(rolloutManagement.get(rollout.getId()).get().getStatus()).isIn(RolloutStatus.RUNNING);
 
         for (final Target target : targets) {
