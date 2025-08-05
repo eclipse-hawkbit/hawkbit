@@ -26,6 +26,8 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetTypeDeletedEve
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.ActionCreatedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.ActionUpdatedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.MultiActionAssignServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.MultiActionCancelServiceEvent;
@@ -72,6 +74,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeUpdatedEvent
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetUpdatedServiceEvent;
 
 /**
  * The {@link EventType} class declares the event-type and it's corresponding
@@ -178,12 +181,15 @@ public class EventType {
 
         // processing events - start from 1000 to leave room for future db events
         TYPES.put(1000, TargetCreatedServiceEvent.class);
-        TYPES.put(1001, TargetDeletedServiceEvent.class);
-        TYPES.put(1002, TargetAssignDistributionSetServiceEvent.class);
-        TYPES.put(1003, TargetAttributesRequestedServiceEvent.class);
-        TYPES.put(1004, CancelTargetAssignmentServiceEvent.class);
-        TYPES.put(1005, MultiActionAssignServiceEvent.class);
-        TYPES.put(1006, MultiActionCancelServiceEvent.class);
+        TYPES.put(1001, TargetUpdatedServiceEvent.class);
+        TYPES.put(1002, TargetDeletedServiceEvent.class);
+        TYPES.put(1003, TargetAssignDistributionSetServiceEvent.class);
+        TYPES.put(1004, TargetAttributesRequestedServiceEvent.class);
+        TYPES.put(1005, CancelTargetAssignmentServiceEvent.class);
+        TYPES.put(1006, MultiActionAssignServiceEvent.class);
+        TYPES.put(1007, MultiActionCancelServiceEvent.class);
+        TYPES.put(1008, ActionCreatedServiceEvent.class);
+        TYPES.put(1009, ActionUpdatedServiceEvent.class);
     }
 
     /**

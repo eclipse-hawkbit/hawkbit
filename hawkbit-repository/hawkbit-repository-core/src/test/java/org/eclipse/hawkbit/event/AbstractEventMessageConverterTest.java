@@ -10,8 +10,17 @@
 package org.eclipse.hawkbit.event;
 
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.ActionCreatedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.ActionUpdatedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetUpdatedServiceEvent;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,10 +44,8 @@ abstract class AbstractEventMessageConverterTest {
     @Mock
     protected Target targetMock;
 
-    @BeforeEach
-    void before() {
-        when(targetMock.getId()).thenReturn(1L);
-    }
+    @Mock
+    protected Action actionMock;
 
     AbstractEventMessageConverterTest(MessageConverter messageConverter) {
         this.messageConverter = messageConverter;
@@ -48,18 +55,62 @@ abstract class AbstractEventMessageConverterTest {
      * Verifies that the TargetCreatedEvent can be successfully serialized and deserialized
      */
     @Test
-    void successfullySerializeAndDeserializeEvent() {
-        final TargetCreatedEvent targetCreatedEvent = new TargetCreatedEvent(targetMock);
-        // serialize
-        assertSerializeAndDeserialize(targetCreatedEvent, TargetCreatedEvent.class);
-        assertSerializeAndDeserialize(targetCreatedEvent, TargetCreatedEvent.class);
+    void successfullySerializeAndDeserializeTargetEvent() {
+        assertSerializeAndDeserialize(createTargetCreatedEvent(), TargetCreatedEvent.class);
+        assertSerializeAndDeserialize(createTargetUpdatedEvent(), TargetUpdatedEvent.class);
+        assertSerializeAndDeserialize(createTargetDeletedEvent(), TargetDeletedEvent.class);
     }
 
     @Test
-    void successfullySerializeAndDeserializeServiceEvent() {
-        final TargetCreatedEvent targetCreatedEvent = new TargetCreatedEvent(targetMock);
-        final TargetCreatedServiceEvent targetCreatedServiceEvent = new TargetCreatedServiceEvent(targetCreatedEvent);
+    void successfullySerializeAndDeserializeTargetServiceEvent() {
+        final TargetCreatedServiceEvent targetCreatedServiceEvent = new TargetCreatedServiceEvent(createTargetCreatedEvent());
+        final TargetUpdatedServiceEvent targetUpdatedServiceEvent = new TargetUpdatedServiceEvent(createTargetUpdatedEvent());
+        final TargetDeletedServiceEvent targetDeletedServiceEvent = new TargetDeletedServiceEvent(createTargetDeletedEvent());
+
         assertSerializeAndDeserialize(targetCreatedServiceEvent, TargetCreatedServiceEvent.class);
+        assertSerializeAndDeserialize(targetUpdatedServiceEvent, TargetUpdatedServiceEvent.class);
+        assertSerializeAndDeserialize(targetDeletedServiceEvent, TargetDeletedServiceEvent.class);
+    }
+
+    @Test
+    void successfullySerializeAndDeserializeActionEvent() {
+        final ActionCreatedEvent actionCreatedEvent = createActionCreatedEvent();
+        final ActionUpdatedEvent actionUpdatedEvent = createActionUpdatedEvent();
+
+        assertSerializeAndDeserialize(actionCreatedEvent, ActionCreatedEvent.class);
+        assertSerializeAndDeserialize(actionUpdatedEvent, ActionUpdatedEvent.class);
+    }
+
+    @Test
+    void successfullySerializeAndDeserializeActionServiceEvent() {
+        final ActionCreatedServiceEvent actionCreatedServiceEvent =
+                new ActionCreatedServiceEvent(createActionCreatedEvent());
+
+        final ActionUpdatedServiceEvent actionUpdatedServiceEvent =
+                new ActionUpdatedServiceEvent(createActionUpdatedEvent());
+
+        assertSerializeAndDeserialize(actionCreatedServiceEvent, ActionCreatedServiceEvent.class);
+        assertSerializeAndDeserialize(actionUpdatedServiceEvent, ActionUpdatedServiceEvent.class);
+    }
+
+    private TargetCreatedEvent createTargetCreatedEvent() {
+        return new TargetCreatedEvent(targetMock);
+    }
+
+    private TargetUpdatedEvent createTargetUpdatedEvent() {
+        return new TargetUpdatedEvent(targetMock);
+    }
+
+    private TargetDeletedEvent createTargetDeletedEvent() {
+        return new TargetDeletedEvent("test_tenant", 1L, Target.class, "test_target", "test_reason");
+    }
+
+    private ActionCreatedEvent createActionCreatedEvent() {
+        return new ActionCreatedEvent(actionMock, 1L, 2L, 3L);
+    }
+
+    private ActionUpdatedEvent createActionUpdatedEvent() {
+        return new ActionUpdatedEvent(actionMock, 1L, 2L, 3L);
     }
 
     <T extends AbstractRemoteEvent> void assertSerializeAndDeserialize(T event, Class<? extends AbstractRemoteEvent> expectedClass) {
@@ -70,6 +121,7 @@ abstract class AbstractEventMessageConverterTest {
         } else if (messageConverter instanceof EventJacksonMessageConverter jackson) {
             serializedEvent = jackson.convertToInternal(event, new MessageHeaders(new HashMap<>()), null);
         }
+
         assertThat(serializedEvent).isInstanceOf(byte[].class);
 
         // deserialize
