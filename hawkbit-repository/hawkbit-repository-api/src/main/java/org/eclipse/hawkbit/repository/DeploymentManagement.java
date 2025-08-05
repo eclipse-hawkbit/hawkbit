@@ -119,7 +119,7 @@ public interface DeploymentManagement {
      *         target and multi-assignment is disabled
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(Collection<Entry<String, Long>> assignments, String initiatedBy);
+    List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(String initiatedBy, Collection<Entry<String, Long>> assignments);
 
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(Collection<Entry<String, Long>> assignments);

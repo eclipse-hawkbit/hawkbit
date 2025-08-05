@@ -187,7 +187,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(countActionStatusAll()).isEqualTo(2);
 
-        final DistributionSet findDistributionSetByAction = distributionSetManagement.findByAction(action.getId()).get();
+        final DistributionSet findDistributionSetByAction = findDsByAction(action.getId()).get();
         getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, artifact,
                 artifactSignature, action.getId(),
                 findFirstModuleByType(findDistributionSetByAction, osType).orElseThrow().getId(), "forced", "forced");
@@ -287,7 +287,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(countActionStatusAll()).isEqualTo(2);
 
-        final DistributionSet findDistributionSetByAction = distributionSetManagement.findByAction(action.getId()).get();
+        final DistributionSet findDistributionSetByAction = findDsByAction(action.getId()).get();
 
         getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, visibleMetadataOsKey,
                 visibleMetadataOsValue, artifact, artifactSignature, action.getId(), "attempt", "attempt",
@@ -344,7 +344,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(countActionStatusAll()).isEqualTo(2);
 
-        final DistributionSet findDistributionSetByAction = distributionSetManagement.findByAction(action.getId()).get();
+        final DistributionSet findDistributionSetByAction = findDsByAction(action.getId()).get();
         getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, artifact,
                 artifactSignature, action.getId(),
                 findFirstModuleByType(findDistributionSetByAction, osType).orElseThrow().getId(), "forced", "forced");
@@ -409,7 +409,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(countActionStatusAll()).isEqualTo(2);
 
-        final DistributionSet findDistributionSetByAction = distributionSetManagement.findByAction(action.getId()).get();
+        final DistributionSet findDistributionSetByAction = findDsByAction(action.getId()).get();
         getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, "metaDataVisible",
                 "withValue", artifact, artifactSignature, action.getId(), "forced", "skip",
                 getOsModule(findDistributionSetByAction));

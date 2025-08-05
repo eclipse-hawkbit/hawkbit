@@ -31,14 +31,6 @@ public interface DistributionSetTagRepository
         extends BaseEntityRepository<JpaDistributionSetTag> {
 
     /**
-     * find {@link DistributionSetTag} by its name.
-     *
-     * @param tagName to filter on
-     * @return the {@link DistributionSetTag} if found, otherwise null
-     */
-    Optional<JpaDistributionSetTag> findByNameEquals(String tagName);
-
-    /**
      * Returns all instances of the type.
      *
      * @return all entities

@@ -43,39 +43,9 @@ public class JpaDistributionSetTagManagement
         extends AbstractJpaRepositoryManagement<JpaDistributionSetTag, DistributionSetTagManagement.Create, DistributionSetTagManagement.Update, DistributionSetTagRepository, DistributionSetTagFields>
         implements DistributionSetTagManagement<JpaDistributionSetTag> {
 
-    private final DistributionSetRepository distributionSetRepository;
-
     protected JpaDistributionSetTagManagement(
             final DistributionSetTagRepository distributionSetTagRepository,
-            final EntityManager entityManager,
-            final DistributionSetRepository distributionSetRepository) {
+            final EntityManager entityManager) {
         super(distributionSetTagRepository, entityManager);
-        this.distributionSetRepository = distributionSetRepository;
-    }
-
-    @Override
-    public Optional<JpaDistributionSetTag> findByName(final String name) {
-        return jpaRepository.findByNameEquals(name);
-    }
-
-    @Override
-    public Page<JpaDistributionSetTag> findByDistributionSet(final long distributionSetId, final Pageable pageable) {
-        if (!distributionSetRepository.existsById(distributionSetId)) {
-            throw new EntityNotFoundException(DistributionSet.class, distributionSetId);
-        }
-
-        return JpaManagementHelper.findAllWithCountBySpec(jpaRepository,
-                Collections.singletonList(TagSpecification.ofDistributionSet(distributionSetId)), pageable
-        );
-    }
-
-    @Override
-    @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
-    public void delete(final String tagName) {
-        final JpaDistributionSetTag dsTag = jpaRepository
-                .findOne(DistributionSetTagSpecifications.byName(tagName))
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName));
-        jpaRepository.delete(dsTag);
     }
 }

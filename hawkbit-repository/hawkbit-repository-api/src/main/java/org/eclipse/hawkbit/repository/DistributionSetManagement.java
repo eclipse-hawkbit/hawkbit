@@ -79,13 +79,36 @@ public interface DistributionSetManagement<T extends DistributionSet>
     @PreAuthorize(HAS_READ_REPOSITORY)
     T getOrElseThrowException(long id);
 
+    @PreAuthorize(HAS_READ_REPOSITORY)
+    boolean shouldLockImplicitly(final DistributionSet distributionSet);
+
+    /**
+     * Locks a distribution set. From then on its functional properties could not be changed, and it could be assigned to targets
+     *
+     * @param distributionSet the distribution set
+     * @throws EntityNotFoundException if distribution set with given ID does not exist
+     */
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
+    T lock(final DistributionSet distributionSet);
+
+    /**
+     * Unlocks a distribution set.<br/>
+     * Use it with extreme care! In general once distribution set is locked it shall not be unlocked. Note that it could have been assigned /
+     * deployed to targets.
+     *
+     * @param distributionSet the distribution set
+     * @throws EntityNotFoundException if distribution set with given ID does not exist
+     */
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
+    T unlock(final DistributionSet distributionSet);
+
     /**
      * Sets the specified {@link DistributionSet} as invalidated.
      *
      * @param distributionSet the ID of the {@link DistributionSet} to be set to invalid
      */
     @PreAuthorize(HAS_UPDATE_REPOSITORY)
-    void invalidate(T distributionSet);
+    T invalidate(DistributionSet distributionSet);
 
     /**
      * Assigns {@link SoftwareModule} to existing {@link DistributionSet}.
@@ -138,37 +161,6 @@ public interface DistributionSetManagement<T extends DistributionSet>
     List<T> unassignTag(@NotEmpty Collection<Long> ids, long tagId);
 
     /**
-     * Locks a distribution set. From then on its functional properties could not be changed, and it could be assigned to targets
-     *
-     * @param id the distribution set id
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     */
-    @PreAuthorize(HAS_UPDATE_REPOSITORY)
-    T lock(final long id);
-
-    /**
-     * Unlocks a distribution set.<br/>
-     * Use it with extreme care! In general once distribution set is locked it shall not be unlocked. Note that it could have been assigned /
-     * deployed to targets.
-     *
-     * @param id the distribution set id
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     */
-    @PreAuthorize(HAS_UPDATE_REPOSITORY)
-    T unlock(final long id);
-
-    /**
-     * Find distribution set by id and throw an exception if it is deleted or invalidated.
-     *
-     * @param id id of {@link DistributionSet}
-     * @return the found valid {@link DistributionSet}
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     * @throws InvalidDistributionSetException if distribution set with given ID is invalidated
-     */
-    @PreAuthorize(HAS_READ_REPOSITORY)
-    T getValid(long id);
-
-    /**
      * Find distribution set by id and throw an exception if it is deleted, incomplete or invalidated.
      *
      * @param id id of {@link DistributionSet}
@@ -181,16 +173,6 @@ public interface DistributionSetManagement<T extends DistributionSet>
     T getValidAndComplete(long id);
 
     /**
-     * Retrieves the distribution set for a given action.
-     *
-     * @param actionId the action associated with the distribution set
-     * @return the distribution set which is associated with the action
-     * @throws EntityNotFoundException if action with given ID does not exist
-     */
-    @PreAuthorize(HAS_READ_REPOSITORY)
-    Optional<T> findByAction(long actionId);
-
-    /**
      * Find distribution set by name and version.
      *
      * @param distributionName name of {@link DistributionSet}; case insensitive
@@ -199,27 +181,6 @@ public interface DistributionSetManagement<T extends DistributionSet>
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
     Optional<T> findByNameAndVersion(@NotEmpty String distributionName, @NotEmpty String version);
-
-    /**
-     * Finds all {@link DistributionSet}s based on completeness.
-     *
-     * @param complete to <code>true</code> for returning only completed distribution sets or <code>false</code> for only incomplete ones nor
-     *         <code>null</code> to return both.
-     * @param pageable the pagination parameter
-     * @return all found {@link DistributionSet}s
-     */
-    @PreAuthorize(HAS_READ_REPOSITORY)
-    Slice<T> findByCompleted(Boolean complete, @NotNull Pageable pageable);
-
-    /**
-     * Retrieves {@link DistributionSet}s by filtering on the given parameters.
-     *
-     * @param distributionSetFilter has details of filters to be applied.
-     * @param pageable page parameter
-     * @return the page of found {@link DistributionSet}
-     */
-    @PreAuthorize(HAS_READ_REPOSITORY)
-    Slice<T> findByDistributionSetFilter(@NotNull DistributionSetFilter distributionSetFilter, @NotNull Pageable pageable);
 
     /**
      * Retrieves {@link DistributionSet}s by filtering on the given parameters.
@@ -248,46 +209,6 @@ public interface DistributionSetManagement<T extends DistributionSet>
     Page<T> findByRsqlAndTag(@NotNull String rsql, long tagId, @NotNull Pageable pageable);
 
     /**
-     * Counts all {@link DistributionSet}s based on completeness.
-     *
-     * @param complete to <code>true</code> for counting only completed distribution sets or <code>false</code> for only incomplete ones
-     *         nor <code>null</code> to count both.
-     * @return count of all found {@link DistributionSet}s
-     */
-    @PreAuthorize(HAS_READ_REPOSITORY)
-    long countByCompleted(Boolean complete);
-
-    /**
-     * Counts all {@link DistributionSet}s in repository based on given filter.
-     *
-     * @param distributionSetFilter has details of filters to be applied.
-     * @return count of {@link DistributionSet}s
-     */
-    @PreAuthorize(HAS_READ_REPOSITORY)
-    long countByDistributionSetFilter(@NotNull DistributionSetFilter distributionSetFilter);
-
-    /**
-     * Count all {@link DistributionSet}s in the repository that are not marked
-     * as deleted.
-     *
-     * @param typeId to look for
-     * @return number of {@link DistributionSet}s
-     * @throws EntityNotFoundException if type with given ID does not exist
-     */
-    @PreAuthorize(HAS_READ_REPOSITORY)
-    long countByTypeId(long typeId);
-
-    /**
-     * Checks if a {@link DistributionSet} is currently in use by a target in
-     * the repository.
-     *
-     * @param id to check
-     * @return <code>true</code> if in use
-     */
-    @PreAuthorize(HAS_READ_REPOSITORY)
-    boolean isInUse(long id);
-
-    /**
      * Count all {@link org.eclipse.hawkbit.repository.model.Rollout}s by status for
      * Distribution Set.
      *
@@ -298,8 +219,7 @@ public interface DistributionSetManagement<T extends DistributionSet>
     List<Statistic> countRolloutsByStatusForDistributionSet(@NotNull Long id);
 
     /**
-     * Count all {@link org.eclipse.hawkbit.repository.model.Action}s by status for
-     * Distribution Set.
+     * Count all {@link org.eclipse.hawkbit.repository.model.Action}s by status for Distribution Set.
      *
      * @param id to look for
      * @return List of Statistics for {@link org.eclipse.hawkbit.repository.model.Action}s status counts
@@ -308,8 +228,7 @@ public interface DistributionSetManagement<T extends DistributionSet>
     List<Statistic> countActionsByStatusForDistributionSet(@NotNull Long id);
 
     /**
-     * Count all {@link TargetFilterQueryManagement.AutoAssignDistributionSetUpdate}s
-     * for Distribution Set.
+     * Count all {@link TargetFilterQueryManagement.AutoAssignDistributionSetUpdate}s for Distribution Set.
      *
      * @param id to look for
      * @return number of {@link TargetFilterQueryManagement.AutoAssignDistributionSetUpdate}s

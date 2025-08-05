@@ -132,10 +132,10 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     private void invalidateDistributionSet(final long setId, final CancelationType cancelationType, final boolean cancelRollouts) {
         final DistributionSet distributionSet = distributionSetManagement.getOrElseThrowException(setId);
         if (!distributionSet.isComplete()) {
-            throw new IncompleteDistributionSetException("Distribution set of type "
-                    + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
+            throw new IncompleteDistributionSetException(
+                    "Distribution set of type " + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
         }
-        ((DistributionSetManagement)distributionSetManagement).invalidate(distributionSet);
+        distributionSetManagement.invalidate(distributionSet);
         log.debug("Distribution set {} marked as invalid.", setId);
 
         // rollout cancellation should only be permitted with UPDATE_ROLLOUT permission

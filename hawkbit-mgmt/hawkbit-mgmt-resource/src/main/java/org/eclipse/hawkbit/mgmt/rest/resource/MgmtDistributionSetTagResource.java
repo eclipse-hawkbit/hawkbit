@@ -107,10 +107,7 @@ class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRestApi {
     @AuditLog(entity = "DistributionSetTag", type = AuditLog.Type.DELETE, description = "Delete Distribution Set Tag")
     public ResponseEntity<Void> deleteDistributionSetTag(final Long distributionsetTagId) {
         log.debug("Delete {} distribution set tag", distributionsetTagId);
-        final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
-
-        distributionSetTagManagement.delete(tag.getName());
-
+        distributionSetTagManagement.delete(distributionsetTagId);
         return ResponseEntity.ok().build();
     }
 

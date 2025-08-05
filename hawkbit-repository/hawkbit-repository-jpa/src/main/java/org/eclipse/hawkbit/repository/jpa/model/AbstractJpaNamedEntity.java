@@ -20,6 +20,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
@@ -29,6 +30,7 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // Default constructor needed for JPA entities
 @Setter
 @Getter
+@ToString(callSuper = true)
 @MappedSuperclass
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")

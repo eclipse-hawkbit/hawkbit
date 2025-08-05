@@ -173,7 +173,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " [id=" + getId() + "]";
+        return getClass().getSimpleName() + " [id=" + getId() + " / optLockRevision=" + getOptLockRevision() + "]";
     }
 
     @PostPersist
@@ -203,9 +203,9 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     }
 
     protected boolean isController() {
-        return SecurityContextHolder.getContext().getAuthentication() != null
-                && SecurityContextHolder.getContext().getAuthentication()
-                .getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails
-                && tenantAwareDetails.isController();
+        return SecurityContextHolder.getContext().getAuthentication() != null &&
+                SecurityContextHolder.getContext().getAuthentication().getDetails()
+                        instanceof TenantAwareAuthenticationDetails tenantAwareDetails &&
+                tenantAwareDetails.isController();
     }
 }

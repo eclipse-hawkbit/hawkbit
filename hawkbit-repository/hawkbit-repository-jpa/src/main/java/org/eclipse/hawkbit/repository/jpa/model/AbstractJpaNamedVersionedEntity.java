@@ -16,12 +16,18 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 
 /**
  * Extension for {@link NamedEntity} that are versioned.
  */
+@Setter
+@Getter
+@ToString(callSuper = true)
 @MappedSuperclass
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
@@ -49,14 +55,5 @@ public abstract class AbstractJpaNamedVersionedEntity extends AbstractJpaNamedEn
 
     AbstractJpaNamedVersionedEntity() {
         // Default constructor needed for JPA entities
-    }
-
-    @Override
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(final String version) {
-        this.version = version;
     }
 }
