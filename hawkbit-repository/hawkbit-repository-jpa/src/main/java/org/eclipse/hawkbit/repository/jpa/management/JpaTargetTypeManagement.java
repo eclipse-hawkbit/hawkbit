@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.ToLongFunction;
 
@@ -22,7 +21,6 @@ import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.TargetTypeInUseException;
-import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
@@ -35,8 +33,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -87,16 +83,6 @@ public class JpaTargetTypeManagement
     @Override
     public Optional<TargetType> getByName(final String name) {
         return jpaRepository.findOne(TargetTypeSpecification.hasName(name)).map(TargetType.class::cast);
-    }
-
-    @Override
-    public Slice<TargetType> findByName(final String name, final Pageable pageable) {
-        return JpaManagementHelper.findAllWithoutCountBySpec(jpaRepository, List.of(TargetTypeSpecification.likeName(name)), pageable);
-    }
-
-    @Override
-    public long countByName(final String name) {
-        return jpaRepository.count(TargetTypeSpecification.hasName(name));
     }
 
     @Override
