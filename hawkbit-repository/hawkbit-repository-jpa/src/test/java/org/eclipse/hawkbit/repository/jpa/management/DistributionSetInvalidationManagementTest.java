@@ -99,7 +99,6 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
                 .isEqualTo(RolloutStatus.READY);
 
         assertNoScheduledActionsExist(invalidationTestData.getRollout());
-        //assertRolloutGroupsAreFinished(invalidationTestData.getRollout());
         for (final Target target : invalidationTestData.getTargets()) {
             // if status is pending, the assignment has not been canceled
             assertThat(
@@ -254,12 +253,6 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         assertThat(
                 actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Status.CANCELED).getTotalElements())
                 .isZero();
-    }
-
-    private void assertRolloutGroupsAreFinished(final Rollout rollout) {
-        assertThat(rolloutGroupRepository.findByRolloutId(rollout.getId(), PAGE))
-                .isNotEmpty()
-                .allMatch(rolloutGroup -> rolloutGroup.getStatus().equals(RolloutGroupStatus.FINISHED));
     }
 
     private InvalidationTestData createInvalidationTestData(final String testName) {

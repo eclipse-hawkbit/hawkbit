@@ -1744,7 +1744,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         //then enforce executor to stop the rollout and check
         rolloutHandler.handleAll();
         // assert rollout is deleted
-        assertThat(rolloutManagement.get(rollout.getId()).isEmpty());
+        assertThat(rolloutManagement.get(rollout.getId())).isEmpty();
 
         for (final Target target : targets) {
             assertThat(targetManagement.get(target.getId()).get().getUpdateStatus())

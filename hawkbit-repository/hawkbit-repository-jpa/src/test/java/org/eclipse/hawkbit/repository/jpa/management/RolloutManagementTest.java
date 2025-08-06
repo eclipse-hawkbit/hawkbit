@@ -1424,7 +1424,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
      * Verify the creation and the start of a rollout.
      */
     @Test
-    void createScheduledRollout() throws Exception {
+    void createScheduledRollout() {
         final String rolloutName = "scheduledRolloutTest";
         testdataFactory.createTargets(50, rolloutName + "-", rolloutName);
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
