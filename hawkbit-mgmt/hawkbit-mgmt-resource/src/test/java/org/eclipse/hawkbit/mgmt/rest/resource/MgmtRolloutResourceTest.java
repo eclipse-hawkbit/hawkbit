@@ -1490,13 +1490,13 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        // force executor to retrigger
-        rolloutHandler.handleAll();
-
         mvc.perform(get("/rest/v1/rollouts/{rolloutid}", rollout.getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.status", equalTo("stopping")));
+                .andExpect(jsonPath("$.status", equalTo("stopping")));
+
+        // force executor to retrigger
+        rolloutHandler.handleAll();
 
         List<Action> rolloutActions =
                 deploymentManagement.findActions("rollout.id==" + rollout.getId(), PAGE).getContent();
