@@ -1722,9 +1722,9 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
     @Test
     void forceInvalidateDistributionSet() throws Exception {
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final List<Target> targets = testdataFactory.createTargets(5, "invalidateDistributionSet");
-        assignDistributionSet(distributionSet, targets);
+        distributionSet = assignDistributionSet(distributionSet, targets).getDistributionSet();
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
                 Create.builder().name("invalidateDistributionSet").query("name==*").autoAssignDistributionSet(distributionSet).build());
         final Rollout rollout = testdataFactory.createRolloutByVariables("invalidateDistributionSet", "desc", 2,
@@ -1770,7 +1770,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         mvc.perform(post("/rest/v1/distributionsets/{ds}/invalidate", distributionSet.getId())
                         .content(jsonObject.toString()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-        
+
         assertThat(rolloutManagement.get(rollout.getId()).get().getStatus()).isIn(RolloutStatus.RUNNING);
 
         for (final Target target : targets) {
