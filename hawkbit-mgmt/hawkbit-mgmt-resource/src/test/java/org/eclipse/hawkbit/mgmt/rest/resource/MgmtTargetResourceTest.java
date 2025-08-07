@@ -31,7 +31,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -55,7 +54,8 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.Identifiable;
-import org.eclipse.hawkbit.repository.TargetTypeManagement.Create;
+import org.eclipse.hawkbit.repository.TargetManagement.Create;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -89,6 +89,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort.Direction;
@@ -153,13 +154,14 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String knownNameNotModify = "controllerName";
         final Long unassignTargetTypeValue = -1L;
 
-        final TargetType targetType = targetTypeManagement.create(Create.builder().name("targettype1").description("targettypedes1").build());
+        final TargetType targetType = targetTypeManagement.create(
+                TargetTypeManagement.Create.builder().name("targettype1").description("targettypedes1").build());
 
         final String body = new JSONObject().put("targetType", unassignTargetTypeValue).toString();
 
         // create a target with the created TargetType
-        targetManagement.create(entityFactory.target().create().controllerId(knownControllerId).name(knownNameNotModify)
-                .address(knownNewAddress).targetType(targetType.getId()));
+        targetManagement.create(Create.builder().controllerId(knownControllerId).name(knownNameNotModify)
+                .address(knownNewAddress).targetType(targetType).build());
 
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -192,15 +194,16 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final Long unassignTargetTypeValue = -1L;
         final String controllerNewName = "controllerNewName";
 
-        final TargetType targetType = targetTypeManagement.create(Create.builder().name("targettype1").description("targettypedes1").build());
+        final TargetType targetType = targetTypeManagement.create(
+                TargetTypeManagement.Create.builder().name("targettype1").description("targettypedes1").build());
 
         final String body = new JSONObject()
                 .put("targetType", unassignTargetTypeValue).put("name", "controllerNewName")
                 .toString();
 
         // create a target with the created TargetType
-        targetManagement.create(entityFactory.target().create().controllerId(knownControllerId).name(knownNameNotModify)
-                .address(knownNewAddress).targetType(targetType.getId()));
+        targetManagement.create(Create.builder().controllerId(knownControllerId).name(knownNameNotModify)
+                .address(knownNewAddress).targetType(targetType).build());
 
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -616,7 +619,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId))
                 .andExpect(status().isOk());
 
-        assertThat(targetManagement.getByControllerID(knownControllerId)).isNotPresent();
+        assertThat(targetManagement.getByControllerId(knownControllerId)).isNotPresent();
     }
 
     /**
@@ -653,8 +656,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String body = new JSONObject().put("description", knownNewDescription).toString();
 
         // prepare
-        targetManagement.create(entityFactory.target().create().controllerId(knownControllerId).name(knownNameNotModify)
-                .description("old description"));
+        targetManagement.create(
+                Create.builder().controllerId(knownControllerId).name(knownNameNotModify).description("old description").build());
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -664,7 +667,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.description", equalTo(knownNewDescription)))
                 .andExpect(jsonPath("$.name", equalTo(knownNameNotModify)));
 
-        final Target findTargetByControllerID = targetManagement.getByControllerID(knownControllerId).get();
+        final Target findTargetByControllerID = targetManagement.getByControllerId(knownControllerId).get();
         assertThat(findTargetByControllerID.getDescription()).isEqualTo(knownNewDescription);
         assertThat(findTargetByControllerID.getName()).isEqualTo(knownNameNotModify);
     }
@@ -680,15 +683,15 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String body = new JSONObject().put("description", knownNewDescription).toString();
 
         // prepare
-        targetManagement.create(entityFactory.target().create().controllerId(knownControllerId).name(knownNameNotModify)
-                .description("old description"));
+        targetManagement.create(
+                Create.builder().controllerId(knownControllerId).name(knownNameNotModify).description("old description").build());
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
-        final Target findTargetByControllerID = targetManagement.getByControllerID(knownControllerId).get();
+        final Target findTargetByControllerID = targetManagement.getByControllerId(knownControllerId).get();
         assertThat(findTargetByControllerID.getDescription()).isEqualTo("old description");
     }
 
@@ -703,8 +706,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String body = new JSONObject().put("securityToken", knownNewToken).toString();
 
         // prepare
-        targetManagement
-                .create(entityFactory.target().create().controllerId(knownControllerId).name(knownNameNotModify));
+        targetManagement.create(Create.builder().controllerId(knownControllerId).name(knownNameNotModify).build());
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -714,7 +716,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.securityToken", equalTo(knownNewToken)))
                 .andExpect(jsonPath("$.name", equalTo(knownNameNotModify)));
 
-        final Target findTargetByControllerID = targetManagement.getByControllerID(knownControllerId).get();
+        final Target findTargetByControllerID = targetManagement.getByControllerId(knownControllerId).get();
         assertThat(findTargetByControllerID.getSecurityToken()).isEqualTo(knownNewToken);
         assertThat(findTargetByControllerID.getName()).isEqualTo(knownNameNotModify);
     }
@@ -730,8 +732,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String body = new JSONObject().put("address", knownNewAddress).toString();
 
         // prepare
-        targetManagement.create(entityFactory.target().create().controllerId(knownControllerId).name(knownNameNotModify)
-                .address(knownNewAddress));
+        targetManagement.create(Create.builder().controllerId(knownControllerId).name(knownNameNotModify).address(knownNewAddress).build());
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -741,7 +742,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.address", equalTo(knownNewAddress)))
                 .andExpect(jsonPath("$.name", equalTo(knownNameNotModify)));
 
-        final Target findTargetByControllerID = targetManagement.getByControllerID(knownControllerId).get();
+        final Target findTargetByControllerID = targetManagement.getByControllerId(knownControllerId).get();
         assertThat(findTargetByControllerID.getAddress()).hasToString(knownNewAddress);
         assertThat(findTargetByControllerID.getName()).isEqualTo(knownNameNotModify);
     }
@@ -1014,7 +1015,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     void createTargetWithEmptyNameAndLongControllerId() throws Exception {
         final String randomString = randomString(JpaTarget.CONTROLLER_ID_MAX_SIZE);
 
-        final Target target = entityFactory.target().create().controllerId(randomString).build();
+        final Create target = Create.builder().controllerId(randomString).build();
 
         final String targetList = JsonBuilder.targets(List.of(target), false);
 
@@ -1026,7 +1027,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("[0].controllerId", equalTo(randomString)))
                 .andExpect(jsonPath("[0].name", equalTo(expectedTargetName)));
 
-        assertThat(targetManagement.getByControllerID(randomString).get().getName()).isEqualTo(expectedTargetName);
+        assertThat(targetManagement.getByControllerId(randomString).get().getName()).isEqualTo(expectedTargetName);
     }
 
     /**
@@ -1099,12 +1100,11 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
      */
     @Test
     void createTargetWithInvalidPropertyBadRequest() throws Exception {
-        final Target test1 = entityFactory.target().create().controllerId("id1")
-                .name(randomString(NamedEntity.NAME_MAX_SIZE + 1)).build();
+        final Create test1 = Create.builder().controllerId("id1").name(randomString(NamedEntity.NAME_MAX_SIZE + 1)).build();
 
         final MvcResult mvcResult = mvc
                 .perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
-                        .content(JsonBuilder.targets(Collections.singletonList(test1), true))
+                        .content(JsonBuilder.targets(List.of(test1), true))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest())
@@ -1124,14 +1124,14 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
      */
     @Test
     void createTargetsListReturnsSuccessful() throws Exception {
-        final Target test1 = entityFactory.target().create().controllerId("id1").name("testname1")
+        final Create test1 = Create.builder().controllerId("id1").name("testname1")
                 .securityToken("token").address("amqp://test123/foobar").description("testid1").build();
-        final Target test2 = entityFactory.target().create().controllerId("id2").name("testname2")
+        final Create test2 = Create.builder().controllerId("id2").name("testname2")
                 .description("testid2").build();
-        final Target test3 = entityFactory.target().create().controllerId("id3").name("testname3")
+        final Create test3 = Create.builder().controllerId("id3").name("testname3")
                 .description("testid3").build();
 
-        final List<Target> targets = Arrays.asList(test1, test2, test3);
+        final List<Create> targets = List.of(test1, test2, test3);
 
         final MvcResult mvcResult = mvc
                 .perform(post("/rest/v1/targets").content(JsonBuilder.targets(targets, true))
@@ -1189,7 +1189,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().is2xxSuccessful());
 
-        final Slice<Target> findTargetsAll = targetManagement.findAll(PageRequest.of(0, 100));
+        final Page<? extends Target> findTargetsAll = targetManagement.findAll(PageRequest.of(0, 100));
         final Target target = findTargetsAll.getContent().get(0);
         assertThat(targetManagement.count()).isEqualTo(1);
         assertThat(target.getControllerId()).isEqualTo(knownControllerId);
@@ -1639,7 +1639,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         implicitLock(set);
 
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(set);
-        target = targetManagement.getByControllerID(target.getControllerId()).get();
+        target = targetManagement.getByControllerId(target.getControllerId()).get();
 
         // repeating DS assignment leads again to OK
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
@@ -1651,7 +1651,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("total", equalTo(1)));
 
         // ...but does not change the target
-        assertThat(targetManagement.getByControllerID(target.getControllerId()).get()).isEqualTo(target);
+        assertThat(targetManagement.getByControllerId(target.getControllerId()).get()).isEqualTo(target);
     }
 
     /**
@@ -1743,7 +1743,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(set);
         assertThat(deploymentManagement.getInstalledDistributionSet(target.getControllerId()).get()).isEqualTo(set);
-        target = targetManagement.getByControllerID(target.getControllerId()).get();
+        target = targetManagement.getByControllerId(target.getControllerId()).get();
         assertThat(target.getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         // repeating DS assignment leads again to OK
@@ -1757,7 +1757,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("total", equalTo(1)));
 
         // ...but does not change the target
-        assertThat(targetManagement.getByControllerID(target.getControllerId()).get()).isEqualTo(target);
+        assertThat(targetManagement.getByControllerId(target.getControllerId()).get()).isEqualTo(target);
     }
 
     @Test
@@ -2460,15 +2460,15 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final TargetType type1 = testdataFactory.createTargetType("typeWithDs", Set.of(standardDsType));
         final TargetType type2 = testdataFactory.createTargetType("typeWithOutDs", Set.of(standardDsType));
 
-        final Target test1 = entityFactory.target().create().controllerId("id1").name("targetWithoutType")
+        final Create test1 = Create.builder().controllerId("id1").name("targetWithoutType")
                 .securityToken("token").address("amqp://test123/foobar").description("testid1").build();
-        final Target test2 = entityFactory.target().create().controllerId("id2").name("targetOfType1")
-                .targetType(type1.getId()).description("testid2").build();
-        final Target test3 = entityFactory.target().create().controllerId("id3").name("targetOfType2")
-                .targetType(type2.getId()).description("testid3").build();
+        final Create test2 = Create.builder().controllerId("id2").name("targetOfType1")
+                .targetType(type1).description("testid2").build();
+        final Create test3 = Create.builder().controllerId("id3").name("targetOfType2")
+                .targetType(type2).description("testid3").build();
         final String hrefType1 = "http://localhost/rest/v1/targettypes/" + type1.getId();
 
-        final List<Target> targets = Arrays.asList(test1, test2, test3);
+        final List<Create> targets = List.of(test1, test2, test3);
 
         mvc
                 .perform(post("/rest/v1/targets").content(JsonBuilder.targets(targets, true))
@@ -2530,10 +2530,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final List<? extends TargetType> targetTypes = testdataFactory.createTargetTypes("targettype", 1);
         assertThat(targetTypes).hasSize(1);
 
-        final Target target = entityFactory.target().create().controllerId("targetcontroller").name("testtarget")
-                .targetType(targetTypes.get(0).getId()).build();
+        final Create target = Create.builder().controllerId("targetcontroller").name("testtarget").targetType(targetTypes.get(0)).build();
 
-        final String targetList = JsonBuilder.targets(Collections.singletonList(target), false);
+        final String targetList = JsonBuilder.targets(List.of(target), false);
 
         // test query target over rest resource
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING).content(targetList)
@@ -2542,7 +2541,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("[0].controllerId", equalTo("targetcontroller")))
                 .andExpect(jsonPath("[0].targetType", equalTo(targetTypes.get(0).getId().intValue())));
 
-        assertThat(targetManagement.getByControllerID("targetcontroller").get().getTargetType().getId())
+        assertThat(targetManagement.getByControllerId("targetcontroller").get().getTargetType().getId())
                 .isEqualTo(targetTypes.get(0).getId());
     }
 
@@ -2556,7 +2555,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         assertThat(targetTypes).hasSize(2);
 
         final String controllerId = "targetcontroller";
-        final Target target = testdataFactory.createTarget(controllerId, "testtarget", targetTypes.get(0).getId());
+        final Target target = testdataFactory.createTarget(controllerId, "testtarget", targetTypes.get(0));
 
         assertThat(target).isNotNull();
         assertThat(target.getTargetType().getId()).isEqualTo(targetTypes.get(0).getId());
@@ -2583,13 +2582,12 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         assertThat(targetType).isNotPresent();
 
         final String controllerId = "targetcontroller";
-        final Target target = entityFactory.target().create().controllerId(controllerId).name("testtarget").build();
+        final Create target = Create.builder().controllerId(controllerId).name("testtarget").build();
 
-        final String targetList = JsonBuilder.targets(Collections.singletonList(target), false, unknownTargetTypeId);
+        final String targetList = JsonBuilder.targets(List.of(target), false, unknownTargetTypeId);
 
         // post target over rest resource
-        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING).content(targetList)
-                        .contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING).content(targetList).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("message", Matchers.containsString(errorMsg)));
     }
@@ -2614,7 +2612,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(targetManagement.getByControllerID(targetControllerId).get().getTargetType().getId())
+        assertThat(targetManagement.getByControllerId(targetControllerId).get().getTargetType().getId())
                 .isEqualTo(targetType.getId());
     }
 
@@ -2663,8 +2661,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         assertThat(targetTypes).hasSize(1);
 
         final String targetControllerId = "targetcontroller";
-        final Target target = testdataFactory.createTarget(targetControllerId, "testtarget",
-                targetTypes.get(0).getId());
+        final Target target = testdataFactory.createTarget(targetControllerId, "testtarget", targetTypes.get(0));
 
         assertThat(target).isNotNull();
         assertThat(target.getTargetType().getId()).isEqualTo(targetTypes.get(0).getId());
@@ -2674,7 +2671,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        assertThat(targetManagement.getByControllerID(targetControllerId).get().getTargetType()).isNull();
+        assertThat(targetManagement.getByControllerId(targetControllerId).get().getTargetType()).isNull();
     }
 
     @Test
@@ -2874,12 +2871,11 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     private void createTarget(final String controllerId) {
-        targetManagement.create(entityFactory.target().create().controllerId(controllerId)
-                .address(IpUtil.createHttpUri("127.0.0.1").toString()));
+        targetManagement.create(Create.builder().controllerId(controllerId).address(IpUtil.createHttpUri("127.0.0.1").toString()).build());
     }
 
     private Target assertTarget(final String controllerId, final String name, final String description) {
-        final Optional<Target> target1 = targetManagement.getByControllerID(controllerId);
+        final Optional<Target> target1 = targetManagement.getByControllerId(controllerId);
         assertThat(target1).isPresent();
         final Target t = target1.get();
         assertThat(t.getName()).isEqualTo(name);
@@ -3020,7 +3016,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     private Target createSingleTarget(final String controllerId, final String name) {
-        targetManagement.create(entityFactory.target().create().controllerId(controllerId).name(name).description(TARGET_DESCRIPTION_TEST));
+        targetManagement.create(Create.builder().controllerId(controllerId).name(name).description(TARGET_DESCRIPTION_TEST).build());
         return controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, LOCALHOST);
     }
 
@@ -3034,7 +3030,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         char character = 'a';
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
-            targetManagement.create(entityFactory.target().create().controllerId(str).name(str).description(str));
+            targetManagement.create(Create.builder().controllerId(str).name(str).description(str).build());
             controllerManagement.findOrRegisterTargetIfItDoesNotExist(str, LOCALHOST);
             character++;
         }
@@ -3054,7 +3050,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         // verify active action
         final Slice<Action> actionsByTarget = deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE);
         assertThat(actionsByTarget.getContent()).hasSize(1);
-        return targetManagement.getByControllerID(tA.getControllerId()).get();
+        return targetManagement.getByControllerId(tA.getControllerId()).get();
     }
 
     private void setupTargetWithMetadata(final String knownControllerId, final String knownKey, final String knownValue) {

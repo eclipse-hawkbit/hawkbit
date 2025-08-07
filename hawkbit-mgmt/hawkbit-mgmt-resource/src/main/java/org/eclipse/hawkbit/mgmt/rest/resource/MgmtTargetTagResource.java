@@ -51,11 +51,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
     private final TargetTagManagement<? extends TargetTag> tagManagement;
-    private final TargetManagement targetManagement;
+    private final TargetManagement<? extends Target> targetManagement;
     private final TenantConfigHelper tenantConfigHelper;
 
     MgmtTargetTagResource(
-            final TargetTagManagement<? extends TargetTag> tagManagement, final TargetManagement targetManagement,
+            final TargetTagManagement<? extends TargetTag> tagManagement, final TargetManagement<? extends Target> targetManagement,
             final SystemSecurityContext securityContext, final TenantConfigurationManagement configurationManagement) {
         this.tagManagement = tagManagement;
         this.targetManagement = targetManagement;
@@ -172,7 +172,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     @AuditLog(entity = "TargetTag", type = AuditLog.Type.UPDATE, description = "Unassign Target From Target Tag")
     public ResponseEntity<Void> unassignTarget(final Long targetTagId, final String controllerId) {
         log.debug("Unassign target {} for target tag {}", controllerId, targetTagId);
-        this.targetManagement.unassignTag(List.of(controllerId), targetTagId);
+        targetManagement.unassignTag(List.of(controllerId), targetTagId);
         return ResponseEntity.ok().build();
     }
 
@@ -182,10 +182,10 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
             final Long targetTagId, final OnNotFoundPolicy onNotFoundPolicy, final List<String> controllerIds) {
         log.debug("Unassign {} targets for target tag {}", controllerIds.size(), targetTagId);
         if (onNotFoundPolicy == OnNotFoundPolicy.FAIL) {
-            this.targetManagement.unassignTag(controllerIds, targetTagId);
+            targetManagement.unassignTag(controllerIds, targetTagId);
         } else {
             final AtomicReference<Collection<String>> notFound = new AtomicReference<>();
-            this.targetManagement.unassignTag(controllerIds, targetTagId, notFound::set);
+            targetManagement.unassignTag(controllerIds, targetTagId, notFound::set);
             if (notFound.get() != null && onNotFoundPolicy == OnNotFoundPolicy.ON_WHAT_FOUND_AND_FAIL) {
                 // has not found and ON_WHAT_FOUND_AND_FAIL
                 throw new EntityNotFoundException(Target.class, notFound.get());

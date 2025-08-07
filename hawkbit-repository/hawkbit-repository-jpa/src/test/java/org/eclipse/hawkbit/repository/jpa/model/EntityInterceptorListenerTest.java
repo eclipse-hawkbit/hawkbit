@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.repository.TargetManagement.Update;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.EntityInterceptor;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
@@ -59,7 +60,7 @@ class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
 
         final Target targetToBeCreated = testdataFactory.createTarget("targetToBeCreated");
 
-        final Target loadedTarget = targetManagement.getByControllerID(targetToBeCreated.getControllerId()).get();
+        final Target loadedTarget = targetManagement.getByControllerId(targetToBeCreated.getControllerId()).get();
         assertThat(postLoadEntityListener.getEntity()).isNotNull();
         assertThat(postLoadEntityListener.getEntity()).isEqualTo(loadedTarget);
     }
@@ -105,9 +106,8 @@ class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
 
     private void executeUpdateAndAssertCallbackResult(final AbstractEntityListener entityInterceptor) {
         final Target updateTarget = targetManagement.update(
-                entityFactory.target()
-                        .update(addListenerAndCreateTarget(entityInterceptor, "targetToBeCreated").getControllerId())
-                        .name("New"));
+                Update.builder().id(addListenerAndCreateTarget(entityInterceptor, "targetToBeCreated").getId())
+                        .name("New").build());
 
         assertThat(entityInterceptor.getEntity()).isNotNull();
         assertThat(entityInterceptor.getEntity()).isEqualTo(updateTarget);

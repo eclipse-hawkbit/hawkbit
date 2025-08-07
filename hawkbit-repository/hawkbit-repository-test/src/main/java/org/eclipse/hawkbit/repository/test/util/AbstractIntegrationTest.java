@@ -143,7 +143,7 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected ControllerManagement controllerManagement;
     @Autowired
-    protected TargetManagement targetManagement;
+    protected TargetManagement<? extends Target> targetManagement;
     @Autowired
     protected TargetTypeManagement<? extends TargetType> targetTypeManagement;
     @Autowired

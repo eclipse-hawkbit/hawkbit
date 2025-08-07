@@ -18,12 +18,13 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 
 /**
- * A utility which determines the correct IP of a connected {@link Target}. E.g
- * from a {@link HttpServletRequest}.
+ * A utility which determines the correct IP of a connected {@link Target}. E.g from a {@link HttpServletRequest}.
  */
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 // Exception squid:S2083 - false positive, file paths not handled here
 @SuppressWarnings("squid:S2083")
@@ -43,15 +44,30 @@ public final class IpUtil {
             "\\[(?<address>([0-9a-f]{1,4}:){7}([0-9a-f]){1,4})](:[0-9]{1,5})?");
 
     /**
+     * Converts address to URI. If the address is not parsable, it will log and return <code>null</code>.
+     * @param address the address to convert
+     * @return the {@link URI} or <code>null</code> if the address is not parsable
+     */
+    public static URI addressToUri(final String address) {
+        if (address == null) {
+            return null;
+        }
+        try {
+            return URI.create(address);
+        } catch (final IllegalArgumentException e) {
+            log.debug("Failed to parse URI: {}", address, e);
+            return null;
+        }
+    }
+
+    /**
      * Retrieves the string based IP address from a given
      * {@link HttpServletRequest} by either the configured {@link HawkbitSecurityProperties.Clients#getRemoteIpHeader()}
      * (by default X-Forwarded-For) or by the {@link HttpServletRequest#getRemoteAddr()} method.
      *
-     * @param request the {@link HttpServletRequest} to determine the IP address
-     *         where this request has been sent from
+     * @param request the {@link HttpServletRequest} to determine the IP address where this request has been sent from
      * @param securityProperties hawkBit security properties.
-     * @return the {@link URI} based IP address from the client which sent the
-     *         request
+     * @return the {@link URI} based IP address from the client which sent the request
      */
     public static URI getClientIpFromRequest(final HttpServletRequest request, final HawkbitSecurityProperties securityProperties) {
         return getClientIpFromRequest(

@@ -35,8 +35,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.Type;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -112,7 +110,7 @@ public interface TargetTypeManagement<T extends TargetType>
             }
             key = builder.key == null ? builder.name : builder.key;
             name = builder.name == null ? builder.key : builder.name;
-            this.distributionSetTypes = builder.distributionSetTypes == null ? Collections.emptySet() : builder.distributionSetTypes;
+            distributionSetTypes = builder.distributionSetTypes == null ? Collections.emptySet() : builder.distributionSetTypes;
         }
     }
 

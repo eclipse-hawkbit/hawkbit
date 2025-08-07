@@ -717,7 +717,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     private Action assignSet(final JpaTarget target, final JpaDistributionSet ds) {
         assignDistributionSet(ds.getId(), target.getControllerId());
         implicitLock(ds);
-        assertThat(targetManagement.getByControllerID(target.getControllerId()).orElseThrow().getUpdateStatus())
+        assertThat(targetManagement.getByControllerId(target.getControllerId()).orElseThrow().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
         final Optional<DistributionSet> assignedDistributionSet = deploymentManagement
                 .getAssignedDistributionSet(target.getControllerId());

@@ -85,7 +85,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement;
     private final DistributionSetInvalidationManagement distributionSetInvalidationManagement;
-    private final TargetManagement targetManagement;
+    private final TargetManagement<? extends Target> targetManagement;
     private final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
     private final DeploymentManagement deployManagement;
     private final SystemManagement systemManagement;
@@ -99,7 +99,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement,
             final DistributionSetInvalidationManagement distributionSetInvalidationManagement,
-            final TargetManagement targetManagement, final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
+            final TargetManagement<? extends Target> targetManagement,
+            final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
             final DeploymentManagement deployManagement, final TenantConfigurationManagement tenantConfigurationManagement,
             final MgmtDistributionSetMapper mgmtDistributionSetMapper,
             final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext) {
@@ -120,18 +121,15 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<PagedList<MgmtDistributionSet>> getDistributionSets(
             final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
-        final Slice<? extends DistributionSet> findDsPage;
-        final long countModulesAll;
+        final Page<? extends DistributionSet> findDsPage;
         if (rsqlParam != null) {
             findDsPage = distributionSetManagement.findByRsql(rsqlParam, pageable);
-            countModulesAll = ((Page<? extends DistributionSet>) findDsPage).getTotalElements();
         } else {
             findDsPage = distributionSetManagement.findAll(pageable);
-            countModulesAll = distributionSetManagement.count();
         }
 
         final List<MgmtDistributionSet> rest = MgmtDistributionSetMapper.toResponseFromDsList(findDsPage.getContent());
-        return ResponseEntity.ok(new PagedList<>(rest, countModulesAll));
+        return ResponseEntity.ok(new PagedList<>(rest, findDsPage.getTotalElements()));
     }
 
     @Override
@@ -201,9 +199,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
         final Page<Target> targetsAssignedDS;
         if (rsqlParam != null) {
-            targetsAssignedDS = this.targetManagement.findByAssignedDistributionSetAndRsql(distributionSetId, rsqlParam, pageable);
+            targetsAssignedDS = targetManagement.findByAssignedDistributionSetAndRsql(distributionSetId, rsqlParam, pageable);
         } else {
-            targetsAssignedDS = this.targetManagement.findByAssignedDistributionSet(distributionSetId, pageable);
+            targetsAssignedDS = targetManagement.findByAssignedDistributionSet(distributionSetId, pageable);
         }
 
         return ResponseEntity.ok(new PagedList<>(

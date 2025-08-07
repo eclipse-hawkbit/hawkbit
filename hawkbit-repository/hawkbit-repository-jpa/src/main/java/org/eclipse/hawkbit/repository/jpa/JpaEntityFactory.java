@@ -13,7 +13,6 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupBuilder;
-import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupBuilder;
 import org.springframework.validation.annotation.Validated;
@@ -24,19 +23,11 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class JpaEntityFactory implements EntityFactory {
 
-    private final TargetBuilder targetBuilder;
     private final RolloutBuilder rolloutBuilder;
 
     @SuppressWarnings("java:S107")
-    public JpaEntityFactory(
-            final TargetBuilder targetBuilder, final RolloutBuilder rolloutBuilder) {
-        this.targetBuilder = targetBuilder;
+    public JpaEntityFactory(final RolloutBuilder rolloutBuilder) {
         this.rolloutBuilder = rolloutBuilder;
-    }
-
-    @Override
-    public TargetBuilder target() {
-        return targetBuilder;
     }
 
     @Override

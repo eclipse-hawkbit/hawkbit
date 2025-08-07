@@ -113,9 +113,9 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$._links.confirmationBase.href", containsString(expectedConfirmationBaseLink)))
                 .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist());
 
-        assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
+        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
-        assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
+        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(actionStatusRepository.count()).isEqualTo(2);
 

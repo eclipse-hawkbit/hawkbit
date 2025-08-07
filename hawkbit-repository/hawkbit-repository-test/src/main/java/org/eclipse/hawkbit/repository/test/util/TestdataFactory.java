@@ -50,7 +50,6 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
-import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -154,7 +153,7 @@ public class TestdataFactory {
     private final DistributionSetTagManagement<?> distributionSetTagManagement;
     private final DistributionSetTypeManagement<?> distributionSetTypeManagement;
     private final DistributionSetInvalidationManagement distributionSetInvalidationManagement;
-    private final TargetManagement targetManagement;
+    private final TargetManagement<? extends Target> targetManagement;
     private final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
     private final TargetTypeManagement<? extends TargetType> targetTypeManagement;
     private final TargetTagManagement<? extends TargetTag> targetTagManagement;
@@ -173,7 +172,8 @@ public class TestdataFactory {
             final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement,
             final DistributionSetTagManagement<? extends DistributionSetTag> distributionSetTagManagement,
             final DistributionSetInvalidationManagement distributionSetInvalidationManagement,
-            final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetManagement<? extends Target> targetManagement,
+            final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
             final TargetTypeManagement<? extends TargetType> targetTypeManagement,
             final TargetTagManagement<? extends TargetTag> targetTagManagement,
             final DeploymentManagement deploymentManagement,
@@ -594,27 +594,21 @@ public class TestdataFactory {
      * @return persisted {@link Target}
      */
     public Target createTarget(final String controllerId, final String targetName) {
-        final Target target = targetManagement.create(entityFactory.target().create().controllerId(controllerId).name(targetName));
+        final Target target = targetManagement.create(TargetManagement.Create.builder().controllerId(controllerId).name(targetName).build());
         assertTargetProperlyCreated(target);
         return target;
     }
 
     public Target createTarget(final String controllerId, final String targetName, final String address) {
         final Target target = targetManagement.create(
-                entityFactory.target().create().controllerId(controllerId).name(targetName).address(address));
+                TargetManagement.Create.builder().controllerId(controllerId).name(targetName).address(address).build());
         assertTargetProperlyCreated(target);
         return target;
     }
 
-    /**
-     * @param controllerId of the target
-     * @param targetName name of the target
-     * @param targetTypeId target type id
-     * @return persisted {@link Target}
-     */
-    public Target createTarget(final String controllerId, final String targetName, final Long targetTypeId) {
+    public Target createTarget(final String controllerId, final String targetName, final TargetType targetType) {
         final Target target = targetManagement.create(
-                entityFactory.target().create().controllerId(controllerId).name(targetName).targetType(targetTypeId));
+                TargetManagement.Create.builder().controllerId(controllerId).name(targetName).targetType(targetType).build());
         assertTargetProperlyCreated(target);
         return target;
     }
@@ -809,9 +803,9 @@ public class TestdataFactory {
     }
 
     public List<Target> createTargets(final String prefix, final int offset, final int number) {
-        final List<TargetCreate> targets = new ArrayList<>(number);
+        final List<TargetManagement.Create> targets = new ArrayList<>(number);
         for (int i = 0; i < number; i++) {
-            targets.add(entityFactory.target().create().controllerId(prefix + (offset + i)));
+            targets.add(TargetManagement.Create.builder().controllerId(prefix + (offset + i)).build());
         }
         return createTargets(targets);
     }
@@ -825,9 +819,9 @@ public class TestdataFactory {
      * @return {@link List} of {@link Target} entities
      */
     public List<Target> createTargetsWithType(final int number, final String controllerIdPrefix, final TargetType targetType) {
-        final List<TargetCreate> targets = new ArrayList<>(number);
+        final List<TargetManagement.Create> targets = new ArrayList<>(number);
         for (int i = 0; i < number; i++) {
-            targets.add(entityFactory.target().create().controllerId(controllerIdPrefix + i).targetType(targetType.getId()));
+            targets.add(TargetManagement.Create.builder().controllerId(controllerIdPrefix + i).targetType(targetType).build());
         }
         return createTargets(targets);
     }
@@ -839,23 +833,11 @@ public class TestdataFactory {
      * @return {@link List} of {@link Target} entities
      */
     public List<Target> createTargets(final String... targetIds) {
-        final List<TargetCreate> targets = new ArrayList<>();
+        final List<TargetManagement.Create> targets = new ArrayList<>();
         for (final String targetId : targetIds) {
-            targets.add(entityFactory.target().create().controllerId(targetId));
+            targets.add(TargetManagement.Create.builder().controllerId(targetId).build());
         }
         return createTargets(targets);
-    }
-
-    /**
-     * Builds {@link Target} objects with given prefix for
-     * {@link Target#getControllerId()} followed by a number suffix starting with 0.
-     *
-     * @param numberOfTargets of {@link Target}s to generate
-     * @param controllerIdPrefix for {@link Target#getControllerId()} generation.
-     * @return list of {@link Target} objects
-     */
-    public List<Target> generateTargets(final int numberOfTargets, final String controllerIdPrefix) {
-        return generateTargets(0, numberOfTargets, controllerIdPrefix);
     }
 
     /**
@@ -878,10 +860,12 @@ public class TestdataFactory {
      * @return list of {@link Target}
      */
     public List<Target> createTargets(final int numberOfTargets, final String controllerIdPrefix, final String descriptionPrefix) {
-        final List<TargetCreate> targets = IntStream.range(0, numberOfTargets)
-                .mapToObj(i -> entityFactory.target().create()
+        final List<TargetManagement.Create> targets = IntStream.range(0, numberOfTargets)
+                .mapToObj(i -> TargetManagement.Create.builder()
                         .controllerId(String.format("%s-%05d", controllerIdPrefix, i))
-                        .description(descriptionPrefix + i))
+                        .description(descriptionPrefix + i)
+                        .build())
+                .map(TargetManagement.Create.class::cast)
                 .toList();
         return createTargets(targets);
     }
@@ -897,10 +881,12 @@ public class TestdataFactory {
      */
     public List<Target> createTargets(
             final int numberOfTargets, final String controllerIdPrefix, final String descriptionPrefix, final Long lastTargetQuery) {
-        final List<TargetCreate> targets = IntStream.range(0, numberOfTargets)
-                .mapToObj(i -> entityFactory.target().create()
+        final List<TargetManagement.Create> targets = IntStream.range(0, numberOfTargets)
+                .mapToObj(i -> TargetManagement.Create.builder()
                         .controllerId(String.format("%s-%05d", controllerIdPrefix, i))
-                        .description(descriptionPrefix + i).lastTargetQuery(lastTargetQuery))
+                        .description(descriptionPrefix + i).lastTargetQuery(lastTargetQuery)
+                        .build())
+                .map(TargetManagement.Create.class::cast)
                 .toList();
         return createTargets(targets);
     }
@@ -941,10 +927,9 @@ public class TestdataFactory {
      * @param targets to add {@link ActionStatus}
      * @param status to add
      * @param message to add
-     * @return updated {@link Action}.
      */
-    public List<Action> sendUpdateActionStatusToTargets(final Collection<Target> targets, final Status status, final String message) {
-        return sendUpdateActionStatusToTargets(targets, status, List.of(message));
+    public void sendUpdateActionStatusToTargets(final Collection<Target> targets, final Status status, final String message) {
+        sendUpdateActionStatusToTargets(targets, status, List.of(message));
     }
 
     /**
@@ -1089,15 +1074,6 @@ public class TestdataFactory {
         return createRolloutByVariables(prefix, prefix + SPACE_AND_DESCRIPTION,
                 quotaManagement.getMaxRolloutGroupsPerRollout(), "controllerId==" + prefix + "*",
                 createDistributionSet(prefix), "50", "5");
-    }
-
-    /**
-     * Create {@link Rollout} with a new {@link DistributionSet} and {@link Target}s.
-     *
-     * @return created {@link Rollout}
-     */
-    public Rollout createAndStartRollout() {
-        return startAndReloadRollout(createRollout());
     }
 
     /**
@@ -1277,23 +1253,7 @@ public class TestdataFactory {
         assertThat(target.getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
     }
 
-    /**
-     * Builds {@link Target} objects with given prefix for {@link Target#getControllerId()} followed by a number suffix.
-     *
-     * @param start value for the controllerId suffix
-     * @param numberOfTargets of {@link Target}s to generate
-     * @param controllerIdPrefix for {@link Target#getControllerId()} generation.
-     * @return list of {@link Target} objects
-     */
-    private List<Target> generateTargets(final int start, final int numberOfTargets, final String controllerIdPrefix) {
-        final List<Target> targets = new ArrayList<>(numberOfTargets);
-        for (int i = start; i < start + numberOfTargets; i++) {
-            targets.add(entityFactory.target().create().controllerId(controllerIdPrefix + i).build());
-        }
-        return targets;
-    }
-
-    private List<Target> createTargets(final Collection<TargetCreate> targetCreates) {
+    private List<Target> createTargets(final Collection<TargetManagement.Create> targetCreates) {
         // init new instance of array list since the TargetManagement#create will provide an unmodifiable list
         return new ArrayList<>(targetManagement.create(targetCreates));
     }

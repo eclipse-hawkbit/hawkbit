@@ -20,6 +20,7 @@ import java.util.Set;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -90,7 +91,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         targAs = assignTag(targAs, targTagX);
 
         final Target targSpecialName = targetManagement
-                .update(entityFactory.target().update(targAs.get(0).getControllerId()).name("targ-A-special"));
+                .update(TargetManagement.Update.builder().id(targAs.get(0).getId()).name("targ-A-special").build());
 
         final String targetDsBIdPref = "targ-B";
         List<Target> targBs = testdataFactory.createTargets(100, targetDsBIdPref,
@@ -134,58 +135,58 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final List<TargetUpdateStatus> both = List.of(TargetUpdateStatus.UNKNOWN, TargetUpdateStatus.PENDING);
 
         // get final updated version of targets
-        targAs = targetManagement.getByControllerID(targAs.stream().map(Target::getControllerId).toList());
-        targBs = targetManagement.getByControllerID(targBs.stream().map(Target::getControllerId).toList());
-        targCs = targetManagement.getByControllerID(targCs.stream().map(Target::getControllerId).toList());
+        targAs = targetManagement.getByControllerId(targAs.stream().map(Target::getControllerId).toList());
+        targBs = targetManagement.getByControllerId(targBs.stream().map(Target::getControllerId).toList());
+        targCs = targetManagement.getByControllerId(targCs.stream().map(Target::getControllerId).toList());
 
         // try to find several targets with different filter settings
         verifyThat1TargetHasNameAndId("targ-A-special", targSpecialName.getControllerId());
         verifyThatRepositoryContains500Targets();
         verifyThat200TargetsHaveTagD(targTagW, concat(targBs, targCs));
         verifyThat100TargetsContainsGivenTextAndHaveTagAssigned(targTagY, targTagW, targBs);
-        verifyThat1TargetHasTagHasDescOrNameAndDs(targTagW, setA, targetManagement.getByControllerID(assignedC).get());
+        verifyThat1TargetHasTagHasDescOrNameAndDs(targTagW, setA, targetManagement.getByControllerId(assignedC).get());
         verifyThat0TargetsWithTagAndDescOrNameHasDS(targTagW, setA);
         verifyThat0TargetsWithNameOrdescAndDSHaveTag(targTagX, setA);
-        verifyThat3TargetsHaveDSAssigned(setA, targetManagement.getByControllerID(Arrays.asList(assignedA, assignedB, assignedC)));
-        verifyThat1TargetWithDescOrNameHasDS(setA, targetManagement.getByControllerID(assignedA).get());
+        verifyThat3TargetsHaveDSAssigned(setA, targetManagement.getByControllerId(Arrays.asList(assignedA, assignedB, assignedC)));
+        verifyThat1TargetWithDescOrNameHasDS(setA, targetManagement.getByControllerId(assignedA).get());
         List<Target> expected = concat(targAs, targBs, targCs, targDs);
-        expected.removeAll(targetManagement.getByControllerID(Arrays.asList(assignedA, assignedB, assignedC)));
+        expected.removeAll(targetManagement.getByControllerId(Arrays.asList(assignedA, assignedB, assignedC)));
         verifyThat496TargetsAreInStatusUnknown(unknown, expected);
         expected = concat(targBs, targCs);
-        expected.removeAll(targetManagement.getByControllerID(Arrays.asList(assignedB, assignedC)));
+        expected.removeAll(targetManagement.getByControllerId(Arrays.asList(assignedB, assignedC)));
         verifyThat198TargetsAreInStatusUnknownAndHaveGivenTags(targTagY, targTagW, unknown, expected);
         verifyThat0TargetsAreInStatusUnknownAndHaveDSAssigned(setA, unknown);
         expected = concat(targAs);
-        expected.remove(targetManagement.getByControllerID(assignedA).get());
+        expected.remove(targetManagement.getByControllerId(assignedA).get());
         verifyThat99TargetsWithNameOrDescriptionAreInGivenStatus(unknown, expected);
         expected = concat(targBs);
-        expected.remove(targetManagement.getByControllerID(assignedB).get());
+        expected.remove(targetManagement.getByControllerId(assignedB).get());
         verifyThat99TargetsWithGivenNameOrDescAndTagAreInStatusUnknown(targTagW, unknown, expected);
         verifyThat4TargetsAreInStatusPending(pending,
-                targetManagement.getByControllerID(Arrays.asList(assignedA, assignedB, assignedC, assignedE)));
+                targetManagement.getByControllerId(Arrays.asList(assignedA, assignedB, assignedC, assignedE)));
         verifyThat3TargetsWithGivenDSAreInPending(setA, pending,
-                targetManagement.getByControllerID(Arrays.asList(assignedA, assignedB, assignedC)));
+                targetManagement.getByControllerId(Arrays.asList(assignedA, assignedB, assignedC)));
         verifyThat1TargetWithGivenNameOrDescAndDSIsInPending(setA, pending,
-                targetManagement.getByControllerID(assignedA).get());
+                targetManagement.getByControllerId(assignedA).get());
         verifyThat1TargetWithGivenNameOrDescAndTagAndDSIsInPending(targTagW, setA, pending,
-                targetManagement.getByControllerID(assignedB).get());
+                targetManagement.getByControllerId(assignedB).get());
         verifyThat2TargetsWithGivenTagAndDSIsInPending(targTagW, setA, pending,
-                targetManagement.getByControllerID(Arrays.asList(assignedB, assignedC)));
+                targetManagement.getByControllerId(Arrays.asList(assignedB, assignedC)));
         verifyThat2TargetsWithGivenTagAreInPending(targTagW, pending,
-                targetManagement.getByControllerID(Arrays.asList(assignedB, assignedC)));
+                targetManagement.getByControllerId(Arrays.asList(assignedB, assignedC)));
         verifyThat200targetsWithGivenTagAreInStatusPendingOrUnknown(targTagW, both, concat(targBs, targCs));
         verifyThat1TargetAIsInStatusPendingAndHasDSInstalled(installedSet, pending,
-                targetManagement.getByControllerID(installedC).get());
-        verifyThat1TargetHasTypeAndDSAssigned(targetTypeX, setB, targetManagement.getByControllerID(assignedE).get());
+                targetManagement.getByControllerId(installedC).get());
+        verifyThat1TargetHasTypeAndDSAssigned(targetTypeX, setB, targetManagement.getByControllerId(assignedE).get());
         verifyThatTargetsHasNoTypeAndDSAssignedOrInstalled(setA,
-                targetManagement.getByControllerID(Arrays.asList(assignedA, assignedB, assignedC)));
+                targetManagement.getByControllerId(Arrays.asList(assignedA, assignedB, assignedC)));
         verifyThatTargetsHasNoTypeAndDSAssignedOrInstalled(installedSet,
-                targetManagement.getByControllerID(Collections.singletonList(installedC)));
+                targetManagement.getByControllerId(Collections.singletonList(installedC)));
         verifyThat100TargetsContainsGivenTextAndHaveTypeAssigned(targetTypeX, targEs);
         verifyThat400TargetsContainsGivenTextAndHaveNoTypeAssigned(concat(targAs, targBs, targCs, targDs));
 
         expected = concat(targBs, targCs);
-        expected.removeAll(targetManagement.getByControllerID(Arrays.asList(assignedB, assignedC)));
+        expected.removeAll(targetManagement.getByControllerId(Arrays.asList(assignedB, assignedC)));
         verifyThat198TargetsAreInStatusUnknownAndOverdue(unknown, expected);
     }
 
@@ -201,7 +202,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(assignedSet, assignedtargets);
 
         // get final updated version of targets
-        assignedtargets = targetManagement.getByControllerID(assignedtargets.stream().map(Target::getControllerId).toList());
+        assignedtargets = targetManagement.getByControllerId(assignedtargets.stream().map(Target::getControllerId).toList());
 
         assertThat(targetManagement.findByAssignedDistributionSet(assignedSet.getId(), PAGE))
                 .as("Contains the assigned targets").containsAll(assignedtargets)
@@ -245,7 +246,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(assignedSet, installedtargets);
 
         // get final updated version of targets
-        installedtargets = targetManagement.getByControllerID(installedtargets.stream().map(Target::getControllerId).toList());
+        installedtargets = targetManagement.getByControllerId(installedtargets.stream().map(Target::getControllerId).toList());
 
         assertThat(targetManagement.findByInstalledDistributionSet(installedSet.getId(), PAGE))
                 .as("Contains the assigned targets").containsAll(installedtargets)

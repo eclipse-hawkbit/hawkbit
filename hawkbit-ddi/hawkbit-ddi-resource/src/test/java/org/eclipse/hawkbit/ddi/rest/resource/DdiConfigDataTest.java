@@ -90,10 +90,10 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
                         "http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/4712/configData")));
         Thread.sleep(1); // is required: otherwise processing the next line is
         // often too fast and // the following assert will fail
-        assertThat(targetManagement.getByControllerID("4712").orElseThrow(NoSuchElementException::new)
+        assertThat(targetManagement.getByControllerId("4712").orElseThrow(NoSuchElementException::new)
                 .getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(targetManagement.getByControllerID("4712").orElseThrow(NoSuchElementException::new)
+        assertThat(targetManagement.getByControllerId("4712").orElseThrow(NoSuchElementException::new)
                 .getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 

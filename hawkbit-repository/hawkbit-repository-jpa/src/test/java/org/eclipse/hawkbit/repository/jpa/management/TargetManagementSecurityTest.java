@@ -15,6 +15,8 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.FilterParams;
+import org.eclipse.hawkbit.repository.TargetManagement.Create;
+import org.eclipse.hawkbit.repository.TargetManagement.Update;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
@@ -91,15 +93,6 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void countByRsqlAndCompatibleAndUpdatablePermissionsCheck() {
-        assertPermissions(() -> targetManagement.countByRsqlAndCompatibleAndUpdatable("controllerId==id", 1L),
-                List.of(SpPermission.READ_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
     void countByFailedInRolloutPermissionsCheck() {
         assertPermissions(() -> targetManagement.countByFailedInRollout("1", 1L), List.of(SpPermission.READ_TARGET));
     }
@@ -117,7 +110,7 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void createPermissionsCheck() {
-        assertPermissions(() -> targetManagement.create(entityFactory.target().create().controllerId("controller").name("name")),
+        assertPermissions(() -> targetManagement.create(Create.builder().controllerId("controller").name("name").build()),
                 List.of(SpPermission.CREATE_TARGET));
     }
 
@@ -126,7 +119,7 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void createCollectionPermissionsCheck() {
-        assertPermissions(() -> targetManagement.create(List.of(entityFactory.target().create().controllerId("controller").name("name"))),
+        assertPermissions(() -> targetManagement.create(List.of(Create.builder().controllerId("controller").name("name").build())),
                 List.of(SpPermission.CREATE_TARGET));
     }
 
@@ -258,15 +251,15 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void getByControllerCollectionIDPermissionsCheck() {
-        assertPermissions(() -> targetManagement.getByControllerID(List.of("controllerId")), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> targetManagement.getByControllerId(List.of("controllerId")), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void getByControllerIDPermissionsCheck() {
-        assertPermissions(() -> targetManagement.getByControllerID("controllerId"), List.of(SpPermission.READ_TARGET));
+    void getByControllerIdPermissionsCheck() {
+        assertPermissions(() -> targetManagement.getByControllerId("controllerId"), List.of(SpPermission.READ_TARGET));
     }
 
     /**
@@ -416,7 +409,7 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void updatePermissionsCheck() {
-        assertPermissions(() -> targetManagement.update(entityFactory.target().update("controllerId")), List.of(SpPermission.UPDATE_TARGET));
+        assertPermissions(() -> targetManagement.update(Update.builder().id(1L).build()), List.of(SpPermission.UPDATE_TARGET));
     }
 
     /**

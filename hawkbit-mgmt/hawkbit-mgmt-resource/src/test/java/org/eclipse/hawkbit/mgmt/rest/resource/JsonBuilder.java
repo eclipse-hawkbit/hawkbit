@@ -17,6 +17,8 @@ import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
@@ -33,22 +35,22 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 class JsonBuilder {
 
-    static String targets(final List<Target> targets, final boolean withToken) throws JSONException {
+    static String targets(final List<Create> creates, final boolean withToken) throws JSONException {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("[");
         int i = 0;
-        for (final Target target : targets) {
-            final String address = target.getAddress() != null ? target.getAddress().toString() : null;
-            final String targetType = target.getTargetType() != null ? target.getTargetType().getId().toString() : null;
-            final String token = withToken ? target.getSecurityToken() : null;
+        for (final Create create : creates) {
+            final String address = create.getAddress() != null ? create.getAddress() : null;
+            final String targetType = create.getTargetType() != null ? create.getTargetType().getId().toString() : null;
+            final String token = withToken ? create.getSecurityToken() : null;
 
-            builder.append(new JSONObject().put("controllerId", target.getControllerId())
-                    .put("description", target.getDescription()).put("name", target.getName()).put("createdAt", "0")
+            builder.append(new JSONObject().put("controllerId", create.getControllerId())
+                    .put("description", create.getDescription()).put("name", create.getName()).put("createdAt", "0")
                     .put("updatedAt", "0").put("createdBy", "systemtest").put("updatedBy", "systemtest")
                     .put("address", address).put("securityToken", token).put("targetType", targetType).toString());
 
-            if (++i < targets.size()) {
+            if (++i < creates.size()) {
                 builder.append(",");
             }
         }
@@ -58,21 +60,21 @@ class JsonBuilder {
         return builder.toString();
     }
 
-    static String targets(final List<Target> targets, final boolean withToken, final long targetTypeId) throws JSONException {
+    static String targets(final List<Create> creates, final boolean withToken, final long targetTypeId) throws JSONException {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("[");
         int i = 0;
-        for (final Target target : targets) {
-            final String address = target.getAddress() != null ? target.getAddress().toString() : null;
-            final String token = withToken ? target.getSecurityToken() : null;
+        for (final Create create : creates) {
+            final String address = create.getAddress() != null ? create.getAddress() : null;
+            final String token = withToken ? create.getSecurityToken() : null;
 
-            builder.append(new JSONObject().put("controllerId", target.getControllerId())
-                    .put("description", target.getDescription()).put("name", target.getName()).put("createdAt", "0")
+            builder.append(new JSONObject().put("controllerId", create.getControllerId())
+                    .put("description", create.getDescription()).put("name", create.getName()).put("createdAt", "0")
                     .put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
                     .put("address", address).put("securityToken", token).put("targetType", targetTypeId).toString());
 
-            if (++i < targets.size()) {
+            if (++i < creates.size()) {
                 builder.append(",");
             }
         }
