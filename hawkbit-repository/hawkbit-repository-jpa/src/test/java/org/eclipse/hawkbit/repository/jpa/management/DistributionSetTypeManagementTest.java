@@ -50,7 +50,7 @@ import org.junit.jupiter.api.Test;
 class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
 
     /**
-     * Verifies that management get access react as specfied on calls for non existing entities by means 
+     * Verifies that management get access react as specified on calls for non existing entities by means
      * of Optional not present.
      */
     @Test
@@ -62,7 +62,7 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Verifies that management queries react as specfied on calls for non existing entities 
+     * Verifies that management queries react as specified on calls for non existing entities
      *  by means of throwing EntityNotFoundException.
      */
     @Test

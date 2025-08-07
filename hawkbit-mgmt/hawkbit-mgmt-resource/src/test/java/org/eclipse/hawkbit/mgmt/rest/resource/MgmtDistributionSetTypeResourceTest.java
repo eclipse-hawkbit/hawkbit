@@ -811,11 +811,13 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
                         .build(),
                 DistributionSetTypeManagement.Create.builder()
                         .key("testKey2").name("TestName2").description("Desc2").colour("col")
+                        .mandatoryModuleTypes(Set.of())
                         .optionalModuleTypes(Set.of(runtimeType, osType, appType))
                         .build(),
                 DistributionSetTypeManagement.Create.builder()
                         .key("testKey3").name("TestName3").description("Desc3").colour("col")
                         .mandatoryModuleTypes(Set.of(runtimeType, osType))
+                        .optionalModuleTypes(Set.of())
                         .build());
     }
 
