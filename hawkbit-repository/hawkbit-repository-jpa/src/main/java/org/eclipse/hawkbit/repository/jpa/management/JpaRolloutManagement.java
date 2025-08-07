@@ -69,6 +69,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -428,27 +429,49 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final long rolloutId) {
+    public Rollout stop(long rolloutId) {
         final JpaRollout jpaRollout = rolloutRepository.findById(rolloutId)
                 .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
 
-        if (RolloutStatus.DELETING == jpaRollout.getStatus()) {
-            return;
+        if (!ROLLOUT_STATUS_STOPPABLE.contains(jpaRollout.getStatus())) {
+            log.debug("Failed to stop rollout {} because it is in {} status.", rolloutId, jpaRollout.getStatus());
+            throw new RolloutIllegalStateException("Rollout can only be stopped into the following statuses " + ROLLOUT_STATUS_STOPPABLE);
         }
-        jpaRollout.setStatus(RolloutStatus.DELETING);
-        rolloutRepository.save(jpaRollout);
+
+        log.debug("Stopping Rollout {}", jpaRollout.getId());
+        jpaRollout.setStatus(RolloutStatus.STOPPING);
+        return rolloutRepository.save(jpaRollout);
     }
 
     @Override
     @Transactional
-    public void cancelRolloutsForDistributionSet(final DistributionSet set) {
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void delete(final long rolloutId) {
+        final JpaRollout jpaRollout = rolloutRepository.findById(rolloutId)
+                .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
+        this.delete0(jpaRollout);
+    }
+
+    @Override
+    @Transactional
+    public void cancelRolloutsForDistributionSet(final DistributionSet set, final DistributionSetInvalidation.CancelationType cancelationType) {
         // stop all rollouts for this distribution set
-        rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
-            final JpaRollout jpaRollout = (JpaRollout) rollout;
-            jpaRollout.setStatus(RolloutStatus.STOPPING);
-            rolloutRepository.save(jpaRollout);
-            log.debug("Rollout {} stopped", jpaRollout.getId());
-        });
+        if (cancelationType.equals(DistributionSetInvalidation.CancelationType.SOFT)) {
+            rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
+                final JpaRollout jpaRollout = (JpaRollout) rollout;
+                jpaRollout.setStatus(RolloutStatus.STOPPING);
+                rolloutRepository.save(jpaRollout);
+                log.debug("Rollout {} stopping", jpaRollout.getId());
+            });
+        } else if (cancelationType.equals(DistributionSetInvalidation.CancelationType.FORCE)) {
+            // Use same status filter here like in the soft case ? Seems they make sense
+            rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
+                final JpaRollout jpaRollout = (JpaRollout) rollout;
+                this.delete0(jpaRollout);
+                log.debug("Rollout {} deleting", jpaRollout.getId());
+            });
+        }
     }
 
     @Override
@@ -476,6 +499,14 @@ public class JpaRolloutManagement implements RolloutManagement {
                 .orElseThrow(() -> new RolloutIllegalStateException("No group is running"));
 
         startNextRolloutGroupAction.exec(rollout, latestRunning);
+    }
+
+    private void delete0(final JpaRollout jpaRollout) {
+        if (RolloutStatus.DELETING == jpaRollout.getStatus()) {
+            return;
+        }
+        jpaRollout.setStatus(RolloutStatus.DELETING);
+        rolloutRepository.save(jpaRollout);
     }
 
     private Page<Rollout> appendStatusDetails(final Page<Rollout> rollouts) {

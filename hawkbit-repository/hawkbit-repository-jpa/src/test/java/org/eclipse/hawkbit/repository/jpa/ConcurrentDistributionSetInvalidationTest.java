@@ -77,7 +77,7 @@ class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTe
                                 () -> rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getSize() > 0)));
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
-                Collections.singletonList(distributionSet.getId()), CancelationType.SOFT, true);
+                Collections.singletonList(distributionSet.getId()), CancelationType.SOFT);
         assertThatExceptionOfType(StopRolloutException.class)
                 .as("Invalidation of distributionSet should throw an exception")
                 .isThrownBy(() -> distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation));

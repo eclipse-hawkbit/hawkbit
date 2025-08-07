@@ -184,6 +184,25 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     Long countByRolloutIdAndStatus(Long rolloutId, Action.Status status);
 
     /**
+     * Returns the number of active/non-active actions for a rollout
+     *
+     * @param rolloutId - the ID of the rollout the actions belong to
+     * @param active - wether the actions should be active or not
+     * @return number of actions which match the criteria
+     */
+    Long countByRolloutIdAndActive(Long rolloutId, boolean active);
+
+    /**
+     * Returns the number of active/non-active actions for a rollout which status is not the provided one.
+     *
+     * @param rolloutId - the ID of the rollout the actions belong to
+     * @param active - wether the actions should be active or not
+     * @param status - the status that matched actions should not be.
+     * @return number of actions which match the criteria
+     */
+    Long countByRolloutIdAndActiveAndStatusNot(Long rolloutId, boolean active, Action.Status status);
+
+    /**
      * Returns {@code true} if actions for the given rollout exists, otherwise {@code false}
      * <p/>
      * No access control applied

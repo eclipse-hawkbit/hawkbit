@@ -1685,7 +1685,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
      * Verify invalidation of distribution sets that removes distribution sets from auto assignments, stops rollouts and cancels assignments
      */
     @Test
-    void invalidateDistributionSet() throws Exception {
+    void softInvalidateDistributionSet() throws Exception {
         DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final List<Target> targets = testdataFactory.createTargets(5, "invalidateDistributionSet");
         // the distribution set is locked and the old instance become stale
@@ -1697,7 +1697,6 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
         final JSONObject jsonObject = new JSONObject();
         jsonObject.put("actionCancelationType", "soft");
-        jsonObject.put("cancelRollouts", true);
 
         mvc.perform(post("/rest/v1/distributionsets/{ds}/invalidate", distributionSet.getId())
                         .content(jsonObject.toString()).contentType(MediaType.APPLICATION_JSON))
@@ -1706,7 +1705,11 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         assertThat(targetFilterQueryManagement.get(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
                 .isNull();
         assertThat(rolloutManagement.get(rollout.getId()).get().getStatus()).isIn(RolloutStatus.STOPPING,
-                RolloutStatus.FINISHED);
+                RolloutStatus.STOPPED);
+        //then enforce executor to stop the rollout and check
+        rolloutHandler.handleAll();
+        assertThat(rolloutManagement.get(rollout.getId()).get().getStatus()).isIn(RolloutStatus.STOPPED);
+
         for (final Target target : targets) {
             assertThat(targetManagement.get(target.getId()).get().getUpdateStatus())
                     .isEqualTo(TargetUpdateStatus.PENDING);
@@ -1714,6 +1717,69 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                     .getNumberOfElements()).isEqualTo(1);
             assertThat(deploymentManagement.findActionsByTarget(target.getControllerId(), PageRequest.of(0, 100))
                     .getContent().get(0).getStatus()).isEqualTo(Status.CANCELING);
+        }
+    }
+
+    @Test
+    void forceInvalidateDistributionSet() throws Exception {
+        DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        final List<Target> targets = testdataFactory.createTargets(5, "invalidateDistributionSet");
+        distributionSet = assignDistributionSet(distributionSet, targets).getDistributionSet();
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
+                Create.builder().name("invalidateDistributionSet").query("name==*").autoAssignDistributionSet(distributionSet).build());
+        final Rollout rollout = testdataFactory.createRolloutByVariables("invalidateDistributionSet", "desc", 2,
+                "name==*", distributionSet, "50", "80");
+
+        final JSONObject jsonObject = new JSONObject();
+        jsonObject.put("actionCancelationType", "force");
+
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/invalidate", distributionSet.getId())
+                        .content(jsonObject.toString()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        assertThat(targetFilterQueryManagement.get(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
+                .isNull();
+        assertThat(rolloutManagement.get(rollout.getId()).get().getStatus()).isIn(RolloutStatus.DELETING,
+                RolloutStatus.DELETED);
+        //then enforce executor to stop the rollout and check
+        rolloutHandler.handleAll();
+        // assert rollout is deleted
+        assertThat(rolloutManagement.get(rollout.getId())).isEmpty();
+
+        for (final Target target : targets) {
+            assertThat(targetManagement.get(target.getId()).get().getUpdateStatus())
+                    .isEqualTo(TargetUpdateStatus.IN_SYNC);
+            assertThat(deploymentManagement.findActionsByTarget(target.getControllerId(), PageRequest.of(0, 100))
+                    .getNumberOfElements()).isEqualTo(1);
+            assertThat(deploymentManagement.findActionsByTarget(target.getControllerId(), PageRequest.of(0, 100))
+                    .getContent().get(0).getStatus()).isEqualTo(Status.CANCELED);
+        }
+    }
+
+    @Test
+    void invalidateDistributionSetWithNoneCancellation() throws Exception {
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        final List<Target> targets = testdataFactory.createTargets(5, "invalidateDistributionSet");
+        Rollout rollout = testdataFactory.createRolloutByVariables("invalidateDistributionSet", "desc", 1,
+                "name==*", distributionSet, "50", "80");
+        rollout = testdataFactory.startRollout(rollout);
+
+        final JSONObject jsonObject = new JSONObject();
+        jsonObject.put("actionCancelationType", "none");
+
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/invalidate", distributionSet.getId())
+                        .content(jsonObject.toString()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        assertThat(rolloutManagement.get(rollout.getId()).get().getStatus()).isIn(RolloutStatus.RUNNING);
+
+        for (final Target target : targets) {
+            assertThat(targetManagement.get(target.getId()).get().getUpdateStatus())
+                    .isEqualTo(TargetUpdateStatus.PENDING);
+            assertThat(deploymentManagement.findActionsByTarget(target.getControllerId(), PageRequest.of(0, 100))
+                    .getNumberOfElements()).isEqualTo(1);
+            assertThat(deploymentManagement.findActionsByTarget(target.getControllerId(), PageRequest.of(0, 100))
+                    .getContent().get(0).getStatus()).isEqualTo(Status.RUNNING);
         }
     }
 
