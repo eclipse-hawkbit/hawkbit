@@ -21,7 +21,11 @@ public enum SoftwareModuleTypeFields implements RsqlQueryField {
     KEY("key"),
     NAME("name"),
     DESCRIPTION("description"),
-    MAXASSIGNMENTS("maxAssignments");
+    MAXASSIGNMENTS("maxAssignments"),
+    CREATEDAT("createdAt"),
+    CREATEDBY("createdBy"),
+    LASTMODIFIEDAT("lastModifiedAt"),
+    LASTMODIFIEDBY("lastModifiedBy");
 
     private final String jpaEntityFieldName;
 
