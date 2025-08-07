@@ -49,15 +49,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestApi {
 
     private final TargetFilterQueryManagement<? extends TargetFilterQuery> filterManagement;
-    private final EntityFactory entityFactory;
     private final TenantConfigHelper tenantConfigHelper;
 
     MgmtTargetFilterQueryResource(
-            final TargetFilterQueryManagement<? extends TargetFilterQuery> filterManagement, final EntityFactory entityFactory,
+            final TargetFilterQueryManagement<? extends TargetFilterQuery> filterManagement,
             final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         this.filterManagement = filterManagement;
-        this.entityFactory = entityFactory;
         this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
     }
 

@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.Page;
@@ -65,14 +66,14 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     private final RolloutManagement rolloutManagement;
     private final RolloutGroupManagement rolloutGroupManagement;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
-    private final TargetFilterQueryManagement targetFilterQueryManagement;
+    private final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
     private final EntityFactory entityFactory;
     private final TenantConfigHelper tenantConfigHelper;
 
     MgmtRolloutResource(
             final RolloutManagement rolloutManagement, final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
-            final TargetFilterQueryManagement targetFilterQueryManagement, final EntityFactory entityFactory,
+            final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement, final EntityFactory entityFactory,
             final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         this.rolloutManagement = rolloutManagement;

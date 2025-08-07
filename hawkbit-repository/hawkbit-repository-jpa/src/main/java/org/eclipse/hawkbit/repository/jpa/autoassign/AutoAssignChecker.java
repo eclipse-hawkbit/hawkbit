@@ -49,7 +49,8 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
      * @param transactionManager to run transactions
      * @param contextAware to handle the context
      */
-    public AutoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
+    public AutoAssignChecker(
+            final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final PlatformTransactionManager transactionManager, final ContextAware contextAware) {
         super(targetFilterQueryManagement, deploymentManagement, transactionManager, contextAware);
