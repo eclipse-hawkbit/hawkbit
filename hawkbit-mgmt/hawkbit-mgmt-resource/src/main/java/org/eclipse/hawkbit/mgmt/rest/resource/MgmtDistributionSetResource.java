@@ -86,7 +86,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     private final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement;
     private final DistributionSetInvalidationManagement distributionSetInvalidationManagement;
     private final TargetManagement targetManagement;
-    private final TargetFilterQueryManagement targetFilterQueryManagement;
+    private final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
     private final DeploymentManagement deployManagement;
     private final SystemManagement systemManagement;
     private final MgmtDistributionSetMapper mgmtDistributionSetMapper;
@@ -99,7 +99,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement,
             final DistributionSetInvalidationManagement distributionSetInvalidationManagement,
-            final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetManagement targetManagement, final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
             final DeploymentManagement deployManagement, final TenantConfigurationManagement tenantConfigurationManagement,
             final MgmtDistributionSetMapper mgmtDistributionSetMapper,
             final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext) {

@@ -46,7 +46,7 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
      */
     private static final int PAGE_SIZE = 1000;
 
-    private final TargetFilterQueryManagement targetFilterQueryManagement;
+    private final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
     private final DeploymentManagement deploymentManagement;
     private final PlatformTransactionManager transactionManager;
     private final ContextAware contextAware;
@@ -59,9 +59,10 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
      * @param transactionManager to run transactions
      * @param contextAware to handle the context
      */
-    protected AbstractAutoAssignExecutor(final TargetFilterQueryManagement targetFilterQueryManagement,
-            final DeploymentManagement deploymentManagement, final PlatformTransactionManager transactionManager,
-            final ContextAware contextAware) {
+    protected AbstractAutoAssignExecutor(
+            final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
+            final DeploymentManagement deploymentManagement,
+            final PlatformTransactionManager transactionManager, final ContextAware contextAware) {
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.deploymentManagement = deploymentManagement;
         this.transactionManager = transactionManager;

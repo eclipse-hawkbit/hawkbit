@@ -463,11 +463,11 @@ public class JpaRepositoryConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    AutoAssignExecutor autoAssignExecutor(final TargetFilterQueryManagement targetFilterQueryManagement,
-            final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
+    AutoAssignExecutor autoAssignExecutor(
+            final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement, final TargetManagement targetManagement,
+            final DeploymentManagement deploymentManagement,
             final PlatformTransactionManager transactionManager, final ContextAware contextAware) {
-        return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
-                transactionManager, contextAware);
+        return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement, transactionManager, contextAware);
     }
 
     /**

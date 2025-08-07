@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidationCount;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
@@ -47,7 +48,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final RolloutManagement rolloutManagement;
     private final DeploymentManagement deploymentManagement;
-    private final TargetFilterQueryManagement targetFilterQueryManagement;
+    private final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
     private final ActionRepository actionRepository;
     private final PlatformTransactionManager txManager;
     private final RepositoryProperties repositoryProperties;
@@ -56,9 +57,10 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     private final SystemSecurityContext systemSecurityContext;
 
     @SuppressWarnings("java:S107")
-    protected JpaDistributionSetInvalidationManagement(final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
+    protected JpaDistributionSetInvalidationManagement(
+            final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final RolloutManagement rolloutManagement, final DeploymentManagement deploymentManagement,
-            final TargetFilterQueryManagement targetFilterQueryManagement, final ActionRepository actionRepository,
+            final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement, final ActionRepository actionRepository,
             final PlatformTransactionManager txManager, final RepositoryProperties repositoryProperties,
             final TenantAware tenantAware, final LockRegistry lockRegistry,
             final SystemSecurityContext systemSecurityContext) {
