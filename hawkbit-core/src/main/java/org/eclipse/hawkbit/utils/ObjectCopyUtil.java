@@ -99,12 +99,12 @@ public class ObjectCopyUtil {
             final Order order = toSetterMethod.getAnnotation(Order.class);
             return new ToSetter((to, value) -> {
                 try {
-                    toSetterMethod.invoke(to, value);
+                    toSetterMethod.invoke(to, value instanceof String str ? str.trim() : value);
                 } catch (final InvocationTargetException e) {
                     final Throwable targetException = e.getTargetException() == null ? e : e.getTargetException();
                     throw targetException instanceof RuntimeException re
-                            ? re :
-                            new IllegalStateException("Error invoking " + toSetterMethod, targetException);
+                            ? re
+                            : new IllegalStateException("Error invoking " + toSetterMethod, targetException);
                 } catch (final IllegalAccessException | IllegalArgumentException e) {
                     throw new IllegalStateException("Error invoking " + toSetterMethod, e);
                 }
