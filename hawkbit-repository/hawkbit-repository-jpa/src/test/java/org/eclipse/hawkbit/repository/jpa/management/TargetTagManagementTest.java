@@ -133,7 +133,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         List<Target> result = assignTag(groupA, tag);
         assertThat(result)
                 .containsAll(
-                        targetManagement.getByControllerID(groupA.stream().map(Target::getControllerId).toList()))
+                        targetManagement.getByControllerId(groupA.stream().map(Target::getControllerId).toList()))
                 .size().isEqualTo(20);
         assertThat(targetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent().stream().map(Target::getControllerId).sorted()
                 .toList())
@@ -144,7 +144,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         result = assignTag(groupAB, tag);
         assertThat(result)
                 .containsAll(
-                        targetManagement.getByControllerID(groupAB.stream().map(Target::getControllerId).toList()))
+                        targetManagement.getByControllerId(groupAB.stream().map(Target::getControllerId).toList()))
                 .size().isEqualTo(40);
         assertThat(targetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent().stream().map(Target::getControllerId).sorted()
                 .toList())
@@ -153,7 +153,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         // toggle A+B -> both unassigned
         result = unassignTag(groupAB, tag);
         assertThat(result)
-                .containsAll(targetManagement.getByControllerID(groupAB.stream().map(Target::getControllerId).toList()))
+                .containsAll(targetManagement.getByControllerId(groupAB.stream().map(Target::getControllerId).toList()))
                 .size().isEqualTo(40);
         assertThat(targetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent()).isEmpty();
     }

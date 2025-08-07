@@ -97,30 +97,18 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private final AmqpMessageSenderService amqpSenderService;
     private final SystemSecurityContext systemSecurityContext;
     private final SystemManagement systemManagement;
-    private final TargetManagement targetManagement;
+    private final TargetManagement<? extends Target> targetManagement;
     private final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final DeploymentManagement deploymentManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
 
-    /**
-     * Constructor.
-     *
-     * @param rabbitTemplate the rabbitTemplate
-     * @param amqpSenderService to send AMQP message
-     * @param artifactUrlHandler for generating download URLs
-     * @param systemSecurityContext for execution with system permissions
-     * @param systemManagement the systemManagement
-     * @param targetManagement to access target information
-     * @param distributionSetManagement to retrieve modules
-     * @param tenantConfigurationManagement to access tenant configuration
-     */
     @SuppressWarnings("java:S107")
     protected AmqpMessageDispatcherService(
             final RabbitTemplate rabbitTemplate,
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
-            final TargetManagement targetManagement,
+            final TargetManagement<? extends Target> targetManagement,
             final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final DeploymentManagement deploymentManagement,
@@ -209,15 +197,13 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     protected void targetCancelAssignmentToDistributionSet(final CancelTargetAssignmentServiceEvent cancelTargetAssignmentServiceEvent) {
         final CancelTargetAssignmentEvent cancelEvent = cancelTargetAssignmentServiceEvent.getRemoteEvent();
         final List<Target> eventTargets = partitionedParallelExecution(
-                cancelEvent.getActions().keySet(), targetManagement::getByControllerID);
+                cancelEvent.getActions().keySet(), targetManagement::getByControllerId);
 
         eventTargets.forEach(target ->
                 cancelEvent.getActionPropertiesForController(target.getControllerId())
                         .map(ActionProperties::getId)
-                        .ifPresent(actionId ->
-                                sendCancelMessageToTarget(cancelEvent.getTenant(), target.getControllerId(), actionId, target.getAddress())
-                        )
-        );
+                        .ifPresent(actionId -> sendCancelMessageToTarget
+                                (cancelEvent.getTenant(), target.getControllerId(), actionId, IpUtil.addressToUri(target.getAddress()))));
     }
 
     /**
@@ -280,7 +266,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     void sendMultiActionRequestToTarget(
             final Target target, final List<Action> actions,
             final Function<SoftwareModule, Map<String, String>> getSoftwareModuleMetaData) {
-        final URI targetAddress = target.getAddress();
+        final URI targetAddress = IpUtil.addressToUri(target.getAddress());
         if (!IpUtil.isAmqpUri(targetAddress) || CollectionUtils.isEmpty(actions)) {
             return;
         }
@@ -406,7 +392,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private List<Target> getTargetsWithoutPendingCancellations(final Set<String> controllerIds) {
         return partitionedParallelExecution(controllerIds, partition ->
-                targetManagement.getByControllerID(partition).stream()
+                targetManagement.getByControllerId(partition).stream()
                         .filter(target -> {
                             if (hasPendingCancellations(target.getId())) {
                                 log.debug("Target {} has pending cancellations. Will not send update message to it.",
@@ -456,7 +442,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                         ? Collections.emptyMap()
                         : softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(allSmIds);
 
-        targetManagement.getByControllerID(controllerIds).forEach(target ->
+        targetManagement.getByControllerId(controllerIds).forEach(target ->
                 sendMultiActionRequestToTarget(
                         target, controllerIdToActions.get(target.getControllerId()), module -> getSoftwareModuleMetadata.get(module.getId())));
     }
@@ -476,7 +462,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final ActionProperties action, final Target target, final Map<SoftwareModule, Map<String, String>> modules) {
         final String tenant = action.getTenant();
 
-        final URI targetAddress = target.getAddress();
+        final URI targetAddress = IpUtil.addressToUri(target.getAddress());
         if (!IpUtil.isAmqpUri(targetAddress)) {
             return;
         }
@@ -575,7 +561,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         );
     }
 
-    @SuppressWarnings("unchecked")
     private Map<SoftwareModule, Map<String, String>> getSoftwareModulesWithMetadata(final DistributionSet distributionSet) {
         final Map<Long, Map<String, String>> softwareModuleMetadata =
                 softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(
@@ -592,7 +577,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final Map<String, ActionProperties> actions, final List<Target> targets,
             final Map<SoftwareModule, Map<String, String>> modules) {
         final List<DmfTarget> dmfTargets = targets.stream()
-                .filter(target -> IpUtil.isAmqpUri(target.getAddress()))
+                .filter(target -> IpUtil.isAmqpUri(IpUtil.addressToUri(target.getAddress())))
                 .map(t -> convertToDmfTarget(t, actions.get(t.getControllerId()).getId()))
                 .toList();
 
@@ -613,6 +598,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         final Message message = getMessageConverter().toMessage(
                 batchRequest,
                 createMessagePropertiesBatch(firstAction.getTenant(), getBatchEventTopicForAction(firstAction)));
-        amqpSenderService.sendMessage(message, firstTarget.getAddress());
+        amqpSenderService.sendMessage(message, IpUtil.addressToUri(firstTarget.getAddress()));
     }
 }

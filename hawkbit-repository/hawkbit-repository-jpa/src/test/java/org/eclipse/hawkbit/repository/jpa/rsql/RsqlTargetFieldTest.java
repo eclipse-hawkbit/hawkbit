@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.hawkbit.repository.TargetFields;
+import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeFields;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
@@ -31,7 +32,7 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Page;
 
 /**
  * Feature: Component Tests - Repository<br/>
@@ -67,20 +68,14 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
         targetTagManagement.create(TargetTagManagement.Create.builder().name("Tag4").build());
 
         target = targetManagement.create(
-                entityFactory.target().create()
-                        .controllerId("targetId123")
-                        .name("targetName123")
-                        .description("targetDesc123"));
+                Create.builder().controllerId("targetId123").name("targetName123").description("targetDesc123").build());
         target = controllerManagement.updateControllerAttributes(target.getControllerId(), Map.of("revision", "1.1"), null);
         target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(target.getControllerId(), LOCALHOST);
         targetManagement.createMetadata(target.getControllerId(), Map.of("metaKey", "metaValue"));
         assignDistributionSet(ds.getId(), target.getControllerId());
         targetManagement.assignType(target.getControllerId(), targetType1.getId());
 
-        target2 = targetManagement.create(
-                entityFactory.target().create()
-                        .controllerId("targetId1234")
-                        .description("targetId1234"));
+        target2 = targetManagement.create(Create.builder().controllerId("targetId1234").description("targetId1234").build());
         target2 = controllerManagement.updateControllerAttributes(target2.getControllerId(), Map.of("revision", "1.2"), null);
         targetManagement.assignType(target2.getControllerId(), targetType2.getId());
         targetManagement.createMetadata(target2.getControllerId(), Map.of("metaKey", "value"));
@@ -435,7 +430,7 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsql, final long expectedTargets) {
-        final Slice<Target> findTargetPage = targetManagement.findByRsql(rsql, PAGE);
+        final Page<? extends Target> findTargetPage = targetManagement.findByRsql(rsql, PAGE);
         assertThat(findTargetPage).isNotNull();
         assertThat(findTargetPage.getNumberOfElements()).isEqualTo(expectedTargets);
         assertThat(targetManagement.countByRsql(rsql)).isEqualTo(expectedTargets);

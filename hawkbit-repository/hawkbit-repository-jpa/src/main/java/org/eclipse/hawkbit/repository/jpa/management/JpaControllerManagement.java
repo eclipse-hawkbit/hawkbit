@@ -54,6 +54,7 @@ import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.repository.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -105,6 +106,7 @@ import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
+import org.eclipse.hawkbit.util.IpUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -666,13 +668,15 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     private Target createTarget(final String controllerId, final URI address, final String name, final String type) {
-
         log.debug("Creating target for thing ID \"{}\".", controllerId);
-        JpaTarget jpaTarget = (JpaTarget) entityFactory.target().create()
-                .controllerId(controllerId).description("Plug and Play target: " + controllerId)
-                .name((StringUtils.hasText(name) ? name : controllerId)).status(TargetUpdateStatus.REGISTERED)
-                .lastTargetQuery(System.currentTimeMillis())
-                .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build();
+        final JpaTarget jpaTarget = new JpaTarget();
+        jpaTarget.setControllerId(controllerId);
+        jpaTarget.setDescription("Plug and Play target: " + controllerId);
+        jpaTarget.setName((StringUtils.hasText(name) ? name : controllerId));
+        jpaTarget.setSecurityToken(SecurityTokenGeneratorHolder.getInstance().generateToken());
+        jpaTarget.setUpdateStatus(TargetUpdateStatus.REGISTERED);
+        jpaTarget.setLastTargetQuery(System.currentTimeMillis());
+        jpaTarget.setAddress(Optional.ofNullable(address).map(URI::toString).orElse(null));
 
         if (StringUtils.hasText(type)) {
             var targetTypeOptional = getTargetType(type);
@@ -770,7 +774,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @SuppressWarnings("java:S3776") // it's just complex
     private Target updateTarget(final JpaTarget toUpdate, final URI address, final String name, final String type) {
         if (isStoreEager(toUpdate, address, name, type) || !queue.offer(new TargetPoll(toUpdate))) {
-            if (isAddressChanged(toUpdate.getAddress(), address)) {
+            if (isAddressChanged(IpUtil.addressToUri(toUpdate.getAddress()), address)) {
                 toUpdate.setAddress(address.toString());
             }
             if (isNameChanged(toUpdate.getName(), name)) {
@@ -804,16 +808,14 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     private boolean isStoreEager(final JpaTarget toUpdate, final URI address, final String name, final String type) {
-        return repositoryProperties.isEagerPollPersistence() || isAddressChanged(toUpdate.getAddress(), address)
+        return repositoryProperties.isEagerPollPersistence() || isAddressChanged(IpUtil.addressToUri(toUpdate.getAddress()), address)
                 || isNameChanged(toUpdate.getName(), name) || isTypeChanged(toUpdate.getTargetType(), type)
                 || isStatusUnknown(toUpdate.getUpdateStatus());
     }
 
     private void handleFinishedCancelation(final JpaActionStatus actionStatus, final JpaAction action) {
-        // in case of successful cancellation we also report the success at
-        // the canceled action itself.
-        actionStatus.addMessage(
-                RepositoryConstants.SERVER_MESSAGE_PREFIX + "Cancellation completion is finished sucessfully.");
+        // in case of successful cancellation we also report the success at the canceled action itself.
+        actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Cancellation completion is finished successfully.");
         DeploymentHelper.successCancellation(action, actionRepository, targetRepository);
     }
 

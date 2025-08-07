@@ -46,6 +46,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.Create;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
@@ -1374,8 +1375,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         // prepare targets
         final Collection<String> knownTargetIds = Arrays.asList("1", "2", "3", "4", "5");
 
-        knownTargetIds.forEach(
-                controllerId -> targetManagement.create(entityFactory.target().create().controllerId(controllerId)));
+        knownTargetIds.forEach(controllerId -> targetManagement.create(TargetManagement.Create.builder().controllerId(controllerId).build()));
 
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds.iterator().next());

@@ -749,13 +749,10 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetPollEvent.class, count = 2) })
     void findOrRegisterTargetIfItDoesNotExistWithExistingTypeAndUpdateToNonExistingType() {
         createTargetType("knownTargetTypeName");
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST,
-                null, "knownTargetTypeName");
-        final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST,
-                null, "unknownTargetTypeName");
+        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST, null, "knownTargetTypeName");
+        final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST, null, "unknownTargetTypeName");
         assertThat(target.getId()).as("Target should be the same").isEqualTo(sameTarget.getId());
-        assertThat(sameTarget.getTargetType().getName()).as("Target type should be unchanged")
-                .isEqualTo("knownTargetTypeName");
+        assertThat(sameTarget.getTargetType().getName()).as("Target type should be unchanged").isEqualTo("knownTargetTypeName");
         assertThat(targetRepository.count()).as("Only 1 target should be registred").isEqualTo(1L);
     }
 
@@ -1109,7 +1106,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                         entityFactory.actionStatus().create(action.getId()).status(Action.Status.RUNNING)));
 
         // nothing changed as "feedback after close" is disabled
-        assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
+        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.IN_SYNC);
         assertThat(actionRepository.findById(action.getId()))
                 .hasValueSatisfying(a -> assertThat(a.getStatus()).isEqualTo(Status.FINISHED));
@@ -1141,7 +1138,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                         entityFactory.actionStatus().create(action.getId()).status(Action.Status.RUNNING)));
 
         // nothing changed as "feedback after close" is disabled
-        assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
+        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).get().getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
         // however, additional action status has been stored
         assertThat(actionStatusRepository.findAll(PAGE).getNumberOfElements()).isEqualTo(4);
         assertThat(controllerManagement.findActionStatusByAction(action.getId(), PAGE).getNumberOfElements()).isEqualTo(4);
@@ -1168,7 +1165,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         });
 
         // verify that audit information has not changed
-        final Target targetVerify = targetManagement.getByControllerID(controllerId).get();
+        final Target targetVerify = targetManagement.getByControllerId(controllerId).get();
         assertThat(targetVerify.getCreatedBy()).isEqualTo(target.getCreatedBy());
         assertThat(targetVerify.getCreatedAt()).isEqualTo(target.getCreatedAt());
         assertThat(targetVerify.getLastModifiedBy()).isEqualTo(target.getLastModifiedBy());
@@ -1730,7 +1727,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long dsId = testdataFactory.createDistributionSet().getId();
         testdataFactory.createTarget();
         assignDistributionSet(dsId, DEFAULT_CONTROLLER_ID);
-        assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
+        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
 
         return deploymentManagement.findActiveActionsByTarget(DEFAULT_CONTROLLER_ID, PAGE).getContent().get(0).getId();
@@ -1740,7 +1737,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet(dsName);
         final Long dsId = ds.getId();
         assignDistributionSet(dsId, defaultControllerId, DOWNLOAD_ONLY);
-        assertThat(targetManagement.getByControllerID(defaultControllerId).get().getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
+        assertThat(targetManagement.getByControllerId(defaultControllerId).get().getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
 
         final Long id = deploymentManagement.findActiveActionsByTarget(defaultControllerId, PAGE).getContent().get(0).getId();
         assertThat(id).isNotNull();
@@ -1749,7 +1746,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     private Long assignDs(final Long dsId, final String defaultControllerId, final Action.ActionType actionType) {
         assignDistributionSet(dsId, defaultControllerId, actionType);
-        assertThat(targetManagement.getByControllerID(defaultControllerId).get().getUpdateStatus())
+        assertThat(targetManagement.getByControllerId(defaultControllerId).get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
 
         final Long id = deploymentManagement.findActiveActionsByTarget(defaultControllerId, PAGE).getContent().get(0)
@@ -1817,7 +1814,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             final Long actionId, final String controllerId,
             final TargetUpdateStatus expectedTargetUpdateStatus, final Action.Status expectedActionActionStatus,
             final Action.Status expectedActionStatus, final boolean actionActive) {
-        final TargetUpdateStatus targetStatus = targetManagement.getByControllerID(controllerId).get().getUpdateStatus();
+        final TargetUpdateStatus targetStatus = targetManagement.getByControllerId(controllerId).get().getUpdateStatus();
         assertThat(targetStatus).isEqualTo(expectedTargetUpdateStatus);
         final Action action = deploymentManagement.findAction(actionId).get();
         assertThat(action.getStatus()).isEqualTo(expectedActionActionStatus);

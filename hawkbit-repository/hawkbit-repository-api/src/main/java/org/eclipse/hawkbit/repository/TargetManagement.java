@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.repository;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.BRACKET_CLOSE;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.BRACKET_OPEN;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_AND;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_CREATE_TARGET;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_DELETE_TARGET;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_PREFIX;
 import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET;
@@ -28,15 +27,17 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
-import org.eclipse.hawkbit.repository.builder.TargetCreate;
-import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -44,6 +45,7 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -55,16 +57,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Management service for {@link Target}s.
  */
-public interface TargetManagement extends PermissionSupport {
+public interface TargetManagement<T extends Target>
+        extends RepositoryManagement<T, TargetManagement.Create, TargetManagement.Update> {
 
     String DETAILS_BASE = "base";
     String DETAILS_AUTO_CONFIRMATION_STATUS = "autoConfirmationStatus";
     String DETAILS_TAGS = "tags";
-    String DETAILS_ACTIONS = "actions";
 
     String HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET = BRACKET_OPEN +
             HAS_AUTH_PREFIX + SpPermission.READ_DISTRIBUTION_SET + HAS_AUTH_SUFFIX +
@@ -120,15 +123,6 @@ public interface TargetManagement extends PermissionSupport {
     boolean existsByInstalledOrAssignedDistributionSet(long distributionSetId);
 
     /**
-     * Count {@link TargetFilterQuery}s for given target filter query.
-     *
-     * @param rsql filter definition in RSQL syntax
-     * @return the found number of {@link Target}s
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    long countByRsql(@NotEmpty String rsql);
-
-    /**
      * Count {@link TargetFilterQuery}s for given target filter query with UPDATE permission.
      *
      * @param rsql filter definition in RSQL syntax
@@ -148,18 +142,6 @@ public interface TargetManagement extends PermissionSupport {
      */
     @PreAuthorize(HAS_AUTH_READ_TARGET)
     long countByRsqlAndCompatible(@NotEmpty String rsql, @NotNull Long distributionSetIdTypeId);
-
-    /**
-     * Count all targets for given {@link TargetFilterQuery} and that are compatible
-     * with the passed {@link DistributionSetType} and UPDATE permission.
-     *
-     * @param rsql filter definition in RSQL syntax
-     * @param distributionSetIdTypeId ID of the {@link DistributionSetType} the targets need to be
-     *         compatible with
-     * @return the found number of{@link Target}s
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    long countByRsqlAndCompatibleAndUpdatable(@NotEmpty String rsql, @NotNull Long distributionSetIdTypeId);
 
     /**
      * Count all targets with failed actions for specific Rollout and that are
@@ -183,48 +165,6 @@ public interface TargetManagement extends PermissionSupport {
      */
     @PreAuthorize(HAS_AUTH_READ_TARGET)
     long countByTargetFilterQuery(long targetFilterQueryId);
-
-    /**
-     * Counts all {@link Target}s in the repository.
-     *
-     * @return number of targets
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    long count();
-
-    /**
-     * creating a new {@link Target}.
-     *
-     * @param create to be created
-     * @return the created {@link Target}
-     * @throws EntityAlreadyExistsException given target already exists.
-     * @throws ConstraintViolationException if fields are not filled as specified. Check {@link TargetCreate} for field constraints.
-     */
-    @PreAuthorize(HAS_AUTH_CREATE_TARGET)
-    Target create(@NotNull @Valid TargetCreate create);
-
-    /**
-     * creates multiple {@link Target}s. If the given {@link Target}s already exists
-     * in the DB an {@link EntityAlreadyExistsException} is thrown. {@link Target}s
-     * contain all objects of the parameter targets, including duplicates.
-     *
-     * @param creates to be created.
-     * @return the created {@link Target}s
-     * @throws EntityAlreadyExistsException of one of the given targets already exist.
-     * @throws ConstraintViolationException if fields are not filled as specified. Check {@link TargetCreate}
-     *         for field constraints.
-     */
-    @PreAuthorize(HAS_AUTH_CREATE_TARGET)
-    List<Target> create(@NotNull @Valid Collection<TargetCreate> creates);
-
-    /**
-     * Deletes all targets with the given IDs.
-     *
-     * @param ids the IDs of the targets to be deleted
-     * @throws EntityNotFoundException if (at least one) of the given target IDs does not exist
-     */
-    @PreAuthorize(HAS_AUTH_DELETE_TARGET)
-    void delete(@NotEmpty Collection<Long> ids);
 
     /**
      * Deletes target with the given controller ID.
@@ -372,7 +312,7 @@ public interface TargetManagement extends PermissionSupport {
      * @return List of found{@link Target}s
      */
     @PreAuthorize(HAS_AUTH_READ_TARGET)
-    List<Target> getByControllerID(@NotEmpty Collection<String> controllerIDs);
+    List<Target> getByControllerId(@NotEmpty Collection<String> controllerIDs);
 
     /**
      * Find a {@link Target} based a given ID.
@@ -381,7 +321,7 @@ public interface TargetManagement extends PermissionSupport {
      * @return {@link Target}
      */
     @PreAuthorize(HAS_AUTH_READ_TARGET)
-    Optional<Target> getByControllerID(@NotEmpty String controllerId);
+    Optional<Target> getByControllerId(@NotEmpty String controllerId);
 
     /**
      * Gets a {@link Target} based a given controller id and includes the details specified by the details key.
@@ -406,11 +346,6 @@ public interface TargetManagement extends PermissionSupport {
     @PreAuthorize(HAS_AUTH_READ_TARGET)
     default Target getWithTags(@NotEmpty String controllerId) {
         return getWithDetails(controllerId, DETAILS_TAGS);
-    }
-
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    default Target getWithActions(@NotEmpty String controllerId) {
-        return getWithDetails(controllerId, DETAILS_ACTIONS);
     }
 
     /**
@@ -462,28 +397,6 @@ public interface TargetManagement extends PermissionSupport {
      */
     @PreAuthorize(HAS_AUTH_READ_TARGET)
     Page<Target> findByUpdateStatus(@NotNull TargetUpdateStatus status, @NotNull Pageable pageable);
-
-    /**
-     * Retrieves all targets.
-     *
-     * @param pageable pagination parameter
-     * @return the found {@link Target}s
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    Slice<Target> findAll(@NotNull Pageable pageable);
-
-    /**
-     * Retrieves all targets.
-     *
-     * @param rsql in RSQL notation
-     * @param pageable pagination parameter
-     * @return the found {@link Target}s, never {@code null}
-     * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
-     *         given {@code fieldNameProvider}
-     * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    Slice<Target> findByRsql(@NotNull String rsql, @NotNull Pageable pageable);
 
     /**
      * Retrieves all target based on {@link TargetFilterQuery}.
@@ -627,6 +540,7 @@ public interface TargetManagement extends PermissionSupport {
 
     /**
      * Finds targets by group or subgroup.
+     *
      * @param group - provided group/subgroup to filter for
      * @param withSubgroups - whether is a subgroup or not e.g. x/y/z
      * @param pageable - page parameter
@@ -634,6 +548,7 @@ public interface TargetManagement extends PermissionSupport {
      */
     @PreAuthorize(HAS_AUTH_READ_TARGET)
     Page<Target> findTargetsByGroup(@NotEmpty String group, boolean withSubgroups, @NotNull Pageable pageable);
+
     /**
      * Finds all the distinct target groups in the scope of a tenant
      *
@@ -659,36 +574,6 @@ public interface TargetManagement extends PermissionSupport {
      */
     @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
     void assignTargetsWithGroup(String group, @NotEmpty List<String> controllerIds);
-
-    /**
-     * updates the {@link Target}.
-     *
-     * @param update to be updated
-     * @return the updated {@link Target}
-     * @throws EntityNotFoundException if given target does not exist
-     * @throws ConstraintViolationException if fields are not filled as specified. Check {@link TargetUpdate}
-     *         for field constraints.
-     */
-    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
-    Target update(@NotNull @Valid TargetUpdate update);
-
-    /**
-     * Find a {@link Target} based a given ID.
-     *
-     * @param id to look for
-     * @return {@link Target}
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    Optional<Target> get(long id);
-
-    /**
-     * Retrieves all targets.
-     *
-     * @param ids the ids to for
-     * @return the found {@link Target}s
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    List<Target> get(@NotNull Collection<Long> ids);
 
     /**
      * Verifies that {@link Target} with given controller ID exists in the repository.
@@ -801,4 +686,85 @@ public interface TargetManagement extends PermissionSupport {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     void deleteMetadata(@NotNull String controllerId, @NotEmpty String key);
+
+    @SuperBuilder
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    final class Create extends UpdateCreate {
+
+        @ValidString
+        @Size(min = 1, max = Target.CONTROLLER_ID_MAX_SIZE)
+        @NotNull
+        private String controllerId;
+
+        @ValidString
+        @Size(min = 1, max = NamedEntity.NAME_MAX_SIZE)
+        @NotNull(groups = Create.class)
+        private String name;
+
+        @ValidString
+        @Size(min = 1, max = Target.SECURITY_TOKEN_MAX_SIZE)
+        @NotNull
+        @ToString.Exclude
+        private String securityToken;
+
+        // java:S1144 - constructor is actually used by SuperBuilder's build() method
+        // java:S3358 - better readable that way
+        @SuppressWarnings({ "java:S1144", "java:S3358" })
+        private Create(final CreateBuilder<?, ?> builder) {
+            super(builder);
+            controllerId = builder.controllerId;
+            // truncate controller ID to max name length (if too big)
+            name = ObjectUtils.isEmpty(builder.name)
+                    ? controllerId != null && controllerId.length() > NamedEntity.NAME_MAX_SIZE
+                            ? controllerId.substring(0, NamedEntity.NAME_MAX_SIZE)
+                            : controllerId
+                    : builder.name;
+            securityToken = ObjectUtils.isEmpty(builder.securityToken)
+                    ? SecurityTokenGeneratorHolder.getInstance().generateToken()
+                    : builder.securityToken;
+        }
+    }
+
+    @SuperBuilder
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    final class Update extends UpdateCreate implements Identifiable<Long> {
+
+        @NotNull
+        private Long id;
+
+        @ValidString
+        @Size(min = 1, max = NamedEntity.NAME_MAX_SIZE)
+        private String name;
+
+        @ValidString
+        @Size(min = 1, max = Target.SECURITY_TOKEN_MAX_SIZE)
+        @ToString.Exclude
+        private String securityToken;
+
+        private Boolean requestControllerAttributes;
+    }
+
+    @SuperBuilder
+    @Getter
+    class UpdateCreate {
+
+        @ValidString
+        @Size(max = NamedEntity.DESCRIPTION_MAX_SIZE)
+        private String description;
+
+        private TargetType targetType;
+
+        @Size(max = Target.ADDRESS_MAX_SIZE)
+        private String address;
+
+        private Long lastTargetQuery;
+        private TargetUpdateStatus updateStatus;
+
+        @ValidString
+        private String group;
+    }
 }

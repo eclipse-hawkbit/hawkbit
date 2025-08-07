@@ -188,7 +188,7 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
     protected void assertDmfDownloadAndUpdateRequest(
             final DmfDownloadAndUpdateRequest request, final Set<SoftwareModule> softwareModules, final String controllerId) {
         assertSoftwareModules(softwareModules, request.getSoftwareModules());
-        final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.getByControllerID(controllerId));
+        final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.getByControllerId(controllerId));
         assertThat(updatedTarget).isNotNull();
         assertThat(updatedTarget.getSecurityToken()).isEqualTo(request.getTargetSecurityToken());
     }
@@ -267,7 +267,7 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
             final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus,
             final String createdBy, final Map<String, String> attributes) {
         registerAndAssertTargetWithExistingTenant(controllerId, name, existingTargetsAfterCreation,
-                expectedTargetStatus, createdBy, attributes, () -> targetManagement.getByControllerID(controllerId));
+                expectedTargetStatus, createdBy, attributes, () -> targetManagement.getByControllerId(controllerId));
     }
 
     protected void registerSameTargetAndAssertBasedOnVersion(final String controllerId,
@@ -413,7 +413,7 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
 
     protected void assertConfirmRequest(final DmfConfirmRequest request, final Set<SoftwareModule> softwareModules, final String controllerId) {
         assertSoftwareModules(softwareModules, request.getSoftwareModules());
-        final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.getByControllerID(controllerId));
+        final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.getByControllerId(controllerId));
         assertThat(updatedTarget).isNotNull();
         assertThat(updatedTarget.getSecurityToken()).isEqualTo(request.getTargetSecurityToken());
     }
@@ -459,7 +459,7 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
         assertThat(target.getDescription()).contains(target.getControllerId());
         assertThat(target.getCreatedBy()).isEqualTo(createdBy);
         assertThat(target.getUpdateStatus()).isEqualTo(updateStatus);
-        assertThat(target.getAddress()).isEqualTo(IpUtil.createAmqpUri(getVirtualHost(), DmfTestConfiguration.REPLY_TO_EXCHANGE));
+        assertThat(target.getAddress()).isEqualTo(IpUtil.createAmqpUri(getVirtualHost(), DmfTestConfiguration.REPLY_TO_EXCHANGE).toString());
         assertThat(targetManagement.getControllerAttributes(target.getControllerId())).isEqualTo(attributes);
     }
 }
