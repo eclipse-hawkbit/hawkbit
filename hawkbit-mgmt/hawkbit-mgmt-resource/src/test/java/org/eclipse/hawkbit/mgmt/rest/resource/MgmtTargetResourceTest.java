@@ -3015,15 +3015,12 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         assertThat(targetManagement.isControllerAttributesRequested(knownTargetId)).isTrue();
     }
 
-    private String getCreateTargetsListJsonString(final String controllerId, final String name,
-            final String description) {
-        return "[{\"name\":\"" + name + "\",\"controllerId\":\"" + controllerId + "\",\"description\":\"" + description
-                + "\"}]";
+    private String getCreateTargetsListJsonString(final String controllerId, final String name, final String description) {
+        return "[{\"name\":\"" + name + "\",\"controllerId\":\"" + controllerId + "\",\"description\":\"" + description + "\"}]";
     }
 
     private Target createSingleTarget(final String controllerId, final String name) {
-        targetManagement.create(entityFactory.target().create().controllerId(controllerId).name(name)
-                .description(TARGET_DESCRIPTION_TEST));
+        targetManagement.create(entityFactory.target().create().controllerId(controllerId).name(name).description(TARGET_DESCRIPTION_TEST));
         return controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, LOCALHOST);
     }
 
