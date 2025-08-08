@@ -31,8 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionFactory;
-import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
-import org.eclipse.hawkbit.repository.artifact.exception.ArtifactStoreException;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -55,6 +53,8 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
+import org.eclipse.hawkbit.repository.artifact.exception.ArtifactStoreException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -70,6 +70,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -436,7 +437,8 @@ public abstract class AbstractIntegrationTest {
         return ds.getModules().stream().filter(module -> module.getType().equals(type)).findAny();
     }
 
-    protected Optional<? extends SoftwareModule> findFirstModuleByType(final DistributionSetManagement.Create dsCreate, final SoftwareModuleType type) {
+    protected Optional<? extends SoftwareModule> findFirstModuleByType(final DistributionSetManagement.Create dsCreate,
+            final SoftwareModuleType type) {
         return dsCreate.getModules().stream().filter(module -> module.getType().equals(type)).findAny();
     }
 
@@ -511,5 +513,9 @@ public abstract class AbstractIntegrationTest {
         } catch (final IOException e) {
             throw new ArtifactStoreException("Cannot create temp file", e);
         }
+    }
+
+    protected List<? extends Target> findByUpdateStatus(final TargetUpdateStatus status, final Pageable pageable) {
+        return targetManagement.findAll(pageable).stream().filter(target -> status.equals(target.getUpdateStatus())).toList();
     }
 }

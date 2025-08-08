@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -16,25 +18,10 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
- * Specifications class for {@link TargetFilterQuery}s. The class provides
- * Spring Data JPQL Specifications.
+ * Specifications class for {@link TargetFilterQuery}s. The class provides Spring Data JPQL Specifications.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TargetFilterQuerySpecification {
-
-    private TargetFilterQuerySpecification() {
-        // utility class
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based
-     * on is {@link JpaTargetFilterQuery#getQuery()}.
-     *
-     * @param queryValue the query of the filter
-     * @return the {@link JpaTargetFilterQuery} {@link Specification}
-     */
-    public static Specification<JpaTargetFilterQuery> equalsQuery(final String queryValue) {
-        return (targetFilterQueryRoot, query, cb) -> cb.equal(targetFilterQueryRoot.get(JpaTargetFilterQuery_.query), queryValue);
-    }
 
     /**
      * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based

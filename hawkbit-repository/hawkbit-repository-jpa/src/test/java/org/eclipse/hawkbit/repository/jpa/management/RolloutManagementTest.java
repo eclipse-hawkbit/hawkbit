@@ -958,11 +958,12 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 9L);
         validateRolloutActionStatus(rolloutTwo.getId(), expectedTargetCountStatus);
         changeStatusForAllRunningActions(rolloutTwo, Status.FINISHED);
-        final Page<Target> targetPage = targetManagement.findByUpdateStatus(TargetUpdateStatus.IN_SYNC, PAGE);
-        final List<Target> targetList = targetPage.getContent();
+        final List<? extends Target> targetList = findByUpdateStatus(TargetUpdateStatus.IN_SYNC, PAGE);
         // 15 targets in finished/IN_SYNC status and same DS assigned
         assertThat(targetList).hasSize(amountTargetsForRollout);
-        targetList.stream().map(Target::getControllerId).map(deploymentManagement::getAssignedDistributionSet)
+        targetList.stream()
+                .map(Target::getControllerId)
+                .map(deploymentManagement::getAssignedDistributionSet)
                 .forEach(d -> assertThat(d).contains(distributionSet));
     }
 

@@ -32,7 +32,9 @@ import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
@@ -58,14 +60,12 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
-import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
@@ -191,9 +191,8 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
         return distributionSetManagement.unassignTag(sets.stream().map(DistributionSet::getId).toList(), tag.getId());
     }
 
-    protected TargetTypeAssignmentResult initiateTypeAssignment(final Collection<Target> targets, final TargetType type) {
-        return targetManagement.assignType(
-                targets.stream().map(Target::getControllerId).toList(), type.getId());
+    protected void initiateTypeAssignment(final Collection<Target> targets, final TargetType type) {
+        targets.stream().map(Target::getControllerId).forEach(id -> targetManagement.assignType(id, type.getId()));
     }
 
     protected void assertRollout(final Rollout rollout, final boolean dynamic, final Rollout.RolloutStatus status, final int groupCreated,
@@ -310,6 +309,10 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     protected JpaRolloutGroup refresh(final RolloutGroup group) {
         return rolloutGroupRepository.findById(group.getId()).get();
+    }
+
+    protected static Specification<JpaAction> byDistributionSetId(final Long distributionSetId) {
+        return (root, query, cb) -> cb.equal(root.get(JpaAction_.distributionSet).get(AbstractJpaBaseEntity_.id), distributionSetId);
     }
 
     private JpaRollout refresh(final Rollout rollout) {

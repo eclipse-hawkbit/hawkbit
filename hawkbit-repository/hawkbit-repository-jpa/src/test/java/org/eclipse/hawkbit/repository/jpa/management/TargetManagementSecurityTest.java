@@ -14,11 +14,9 @@ import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.TargetManagement.Update;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 
@@ -33,52 +31,8 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void countByAssignedDistributionSetPermissionsCheck() {
-        assertPermissions(() -> targetManagement.countByAssignedDistributionSet(1L),
-                List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void countByFiltersPermissionsCheck() {
-        assertPermissions(() -> targetManagement.countByFilters(new FilterParams(null, null, null, null, null, null)),
-                List.of(SpPermission.READ_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void countByInstalledDistributionSetPermissionsCheck() {
-        assertPermissions(() -> targetManagement.countByInstalledDistributionSet(1L),
-                List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void existsByInstalledOrAssignedDistributionSetPermissionsCheck() {
-        assertPermissions(() -> targetManagement.existsByInstalledOrAssignedDistributionSet(1L),
-                List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
     void countByRsqlPermissionsCheck() {
         assertPermissions(() -> targetManagement.countByRsql("controllerId==id"), List.of(SpPermission.READ_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void countByRsqlAndUpdatablePermissionsCheck() {
-        assertPermissions(() -> targetManagement.countByRsqlAndUpdatable("controllerId==id"), List.of(SpPermission.READ_TARGET));
     }
 
     /**
@@ -138,19 +92,11 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void deleteByControllerIDPermissionsCheck() {
+    void deleteByControllerIdPermissionsCheck() {
         assertPermissions(() -> {
-            targetManagement.deleteByControllerID("controllerId");
+            targetManagement.deleteByControllerId("controllerId");
             return null;
         }, List.of(SpPermission.DELETE_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void countByTargetFilterQueryPermissionsCheck() {
-        assertPermissions(() -> targetManagement.countByTargetFilterQuery(1L), List.of(SpPermission.READ_TARGET));
     }
 
     /**
@@ -166,8 +112,8 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void countByRsqlAndNonDSAndCompatibleAndUpdatablePermissionsCheck() {
-        assertPermissions(() -> targetManagement.countByRsqlAndNonDSAndCompatibleAndUpdatable(1L, "controllerId==id"),
+    void countByRsqlAndNonDsAndCompatibleAndUpdatablePermissionsCheck() {
+        assertPermissions(() -> targetManagement.countByRsqlAndNonDsAndCompatibleAndUpdatable(1L, "controllerId==id"),
                 List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
     }
 
@@ -266,15 +212,6 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void findByFiltersPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findByFilters(new FilterParams(null, null, null, null, null, null), PAGE),
-                List.of(SpPermission.READ_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
     void findByInstalledDistributionSetPermissionsCheck() {
         assertPermissions(() -> targetManagement.findByInstalledDistributionSet(1L, PAGE),
                 List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
@@ -287,14 +224,6 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
     void findByInstalledDistributionSetAndRsqlPermissionsCheck() {
         assertPermissions(() -> targetManagement.findByInstalledDistributionSetAndRsql(1L, "controllerId==id", PAGE),
                 List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void findByUpdateStatusPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findByUpdateStatus(TargetUpdateStatus.IN_SYNC, PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     /**
@@ -317,14 +246,6 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void findByTargetFilterQueryPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findByTargetFilterQuery(1L, PAGE), List.of(SpPermission.READ_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
     void findByTagPermissionsCheck() {
         assertPermissions(() -> targetManagement.findByTag(1L, PAGE), List.of(SpPermission.READ_TARGET));
     }
@@ -335,14 +256,6 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     void findByRsqlAndTagPermissionsCheck() {
         assertPermissions(() -> targetManagement.findByRsqlAndTag("controllerId==id", 1L, PAGE), List.of(SpPermission.READ_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void assignTypePermissionsCheck() {
-        assertPermissions(() -> targetManagement.assignType(List.of("controllerId"), 1L), List.of(SpPermission.UPDATE_TARGET));
     }
 
     /**
@@ -392,14 +305,6 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void unassignTypePermissionsCheck() {
-        assertPermissions(() -> targetManagement.unassignType(List.of("controllerId")), List.of(SpPermission.UPDATE_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
     void assignTypeByIdPermissionsCheck() {
         assertPermissions(() -> targetManagement.assignType("controllerId", 1L), List.of(SpPermission.UPDATE_TARGET));
     }
@@ -432,14 +337,6 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void existsByControllerIdPermissionsCheck() {
-        assertPermissions(() -> targetManagement.existsByControllerId("controllerId"), List.of(SpPermission.READ_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
     void isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatablePermissionsCheck() {
         assertPermissions(
                 () -> targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable("controllerId", 1L, "controllerId==id"),
@@ -460,33 +357,6 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     void getControllerAttributesPermissionsCheck() {
         assertPermissions(() -> targetManagement.getControllerAttributes("controllerId"), List.of(SpPermission.READ_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void requestControllerAttributesPermissionsCheck() {
-        assertPermissions(() -> {
-            targetManagement.requestControllerAttributes("controllerId");
-            return null;
-        }, List.of(SpPermission.UPDATE_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void isControllerAttributesRequestedPermissionsCheck() {
-        assertPermissions(() -> targetManagement.isControllerAttributesRequested("controllerId"), List.of(SpPermission.READ_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void findByControllerAttributesRequestedPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findByControllerAttributesRequested(PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     /**

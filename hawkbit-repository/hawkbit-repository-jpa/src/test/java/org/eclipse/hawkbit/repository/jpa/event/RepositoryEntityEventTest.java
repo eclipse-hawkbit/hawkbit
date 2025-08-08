@@ -95,7 +95,7 @@ class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     void targetDeletedEventIsPublished() throws InterruptedException {
         final Target createdTarget = testdataFactory.createTarget("12345");
 
-        targetManagement.deleteByControllerID("12345");
+        targetManagement.deleteByControllerId("12345");
 
         final TargetDeletedEvent targetDeletedEvent = eventListener.waitForEvent(TargetDeletedEvent.class);
         assertThat(targetDeletedEvent).isNotNull();

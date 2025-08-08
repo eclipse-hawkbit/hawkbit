@@ -1687,7 +1687,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         assertThat(
                 actionRepository
-                        .findAll(ActionSpecifications.byDistributionSetId(set.getId()), PAGE)
+                        .findAll(byDistributionSetId(set.getId()), PAGE)
                         .map(Action.class::cast).getContent()).hasSize(1)
                 .allMatch(action -> {
                     if (!confirmationFlowActive) {
@@ -2038,12 +2038,10 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         knownControllerAttrs.put("b.2", "2");
         testdataFactory.createTarget(knownTargetId);
         controllerManagement.updateControllerAttributes(knownTargetId, knownControllerAttrs, null);
-        assertThat(targetManagement.isControllerAttributesRequested(knownTargetId)).isFalse();
+        assertThat(targetManagement.getByControllerId(knownTargetId).orElseThrow().isRequestControllerAttributes()).isFalse();
 
         verifyAttributeUpdateCanBeRequested(knownTargetId);
-
         verifyRequestAttributesAttributeIsOptional(knownTargetId);
-
         verifyResettingRequestAttributesIsNotAllowed(knownTargetId);
     }
 
@@ -2988,7 +2986,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(targetManagement.isControllerAttributesRequested(knownTargetId)).isTrue();
+        assertThat(targetManagement.getByControllerId(knownTargetId).orElseThrow().isRequestControllerAttributes()).isTrue();
     }
 
     private void verifyRequestAttributesAttributeIsOptional(final String knownTargetId) throws Exception {
@@ -3008,7 +3006,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
-        assertThat(targetManagement.isControllerAttributesRequested(knownTargetId)).isTrue();
+        assertThat(targetManagement.getByControllerId(knownTargetId).orElseThrow().isRequestControllerAttributes()).isTrue();
     }
 
     private String getCreateTargetsListJsonString(final String controllerId, final String name, final String description) {

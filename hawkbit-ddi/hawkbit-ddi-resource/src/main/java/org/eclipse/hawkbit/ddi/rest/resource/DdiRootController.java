@@ -334,8 +334,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Target target = findTarget(controllerId);
         final Action action = findActionForTarget(actionId, target);
 
-        controllerManagement
-                .addCancelActionStatus(generateActionCancelStatus(feedback, target, action.getId(), entityFactory));
+        controllerManagement.addCancelActionStatus(generateActionCancelStatus(feedback, target, action.getId(), entityFactory));
         return ResponseEntity.ok().build();
     }
 

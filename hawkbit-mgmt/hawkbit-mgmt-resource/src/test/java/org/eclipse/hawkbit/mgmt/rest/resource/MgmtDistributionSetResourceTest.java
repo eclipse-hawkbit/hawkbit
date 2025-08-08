@@ -1440,7 +1440,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
         assertThat(
                 actionRepository
-                        .findAll(ActionSpecifications.byDistributionSetId(createdDs.getId()), PAGE)
+                        .findAll(byDistributionSetId(createdDs.getId()), PAGE)
                         .map(Action.class::cast).getContent()).hasSize(1)
                 .allMatch(action -> {
                     if (!confirmationFlowActive) {

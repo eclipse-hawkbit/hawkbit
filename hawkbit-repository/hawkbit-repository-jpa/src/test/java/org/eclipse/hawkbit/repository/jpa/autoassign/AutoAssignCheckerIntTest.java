@@ -145,7 +145,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(10, 20), targetsCount);
 
         // Count the number of targets that will be assigned with setA
-        assertThat(targetManagement.countByRsqlAndNonDSAndCompatibleAndUpdatable(setA.getId(), targetFilterQuery.getQuery()))
+        assertThat(targetManagement.countByRsqlAndNonDsAndCompatibleAndUpdatable(setA.getId(), targetFilterQuery.getQuery()))
                 .isEqualTo(15);
 
         // Run the check
@@ -405,7 +405,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         final List<Long> compatibleTargets = Stream
                 .of(compatibleTargetsSingleType, compatibleTargetsMultiType, compatibleTargetsWithoutType)
                 .flatMap(Collection::stream).map(Target::getId).toList();
-        final long compatibleCount = targetManagement.countByRsqlAndNonDSAndCompatibleAndUpdatable(testDs.getId(),
+        final long compatibleCount = targetManagement.countByRsqlAndNonDsAndCompatibleAndUpdatable(testDs.getId(),
                 testFilter.getQuery());
         assertThat(compatibleCount).isEqualTo(compatibleTargets.size());
 
@@ -498,7 +498,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
     private Slice<Action> findActionsByDistributionSet(final Pageable pageable, final long distributionSetId) {
         return actionRepository
-                .findAll(ActionSpecifications.byDistributionSetId(distributionSetId), pageable)
+                .findAll(byDistributionSetId(distributionSetId), pageable)
                 .map(Action.class::cast);
     }
 }
