@@ -10,8 +10,6 @@
 package org.eclipse.hawkbit.repository;
 
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
-import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
-import org.eclipse.hawkbit.repository.builder.RolloutGroupBuilder;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 
 /**
@@ -23,14 +21,4 @@ public interface EntityFactory {
      * @return {@link ActionStatusBuilder} object
      */
     ActionStatusBuilder actionStatus();
-
-    /**
-     * @return {@link RolloutGroupBuilder} object
-     */
-    RolloutGroupBuilder rolloutGroup();
-
-    /**
-     * @return {@link RolloutBuilder} object
-     */
-    RolloutBuilder rollout();
 }

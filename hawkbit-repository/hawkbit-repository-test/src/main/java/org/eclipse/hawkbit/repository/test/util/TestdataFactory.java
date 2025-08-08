@@ -229,6 +229,10 @@ public class TestdataFactory {
         return createDistributionSet(prefix, DEFAULT_VERSION, false);
     }
 
+    public DistributionSet createDistributionSetLocked(final String prefix) {
+        return distributionSetManagement.lock(createDistributionSet(prefix));
+    }
+
     /**
      * Creates {@link DistributionSet} in repository including three
      * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
@@ -239,6 +243,11 @@ public class TestdataFactory {
      */
     public DistributionSet createDistributionSet() {
         return createDistributionSet(UUID.randomUUID().toString(), DEFAULT_VERSION, false);
+    }
+
+
+    public DistributionSet createDistributionSetLocked() {
+        return distributionSetManagement.lock(createDistributionSet());
     }
 
     /**
@@ -1034,14 +1043,15 @@ public class TestdataFactory {
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create()
+                RolloutManagement.Create.builder()
                         .name(rolloutName)
                         .description(rolloutDescription)
                         .targetFilterQuery(filterQuery)
-                        .distributionSetId(distributionSet)
-                        .actionType(actionType)
+                        .distributionSet(distributionSet)
+                        .actionType(actionType == null ? Action.ActionType.FORCED : actionType)
                         .weight(weight)
-                        .dynamic(dynamic),
+                        .dynamic(dynamic)
+                        .build(),
                 groupSize, confirmationRequired, conditions, dynamicRolloutGroupTemplate);
 
         // Run here, because Scheduler is disabled during tests

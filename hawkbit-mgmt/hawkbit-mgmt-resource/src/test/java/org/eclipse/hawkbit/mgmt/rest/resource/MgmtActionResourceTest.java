@@ -284,7 +284,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     void filterActionsByRollout() throws Exception {
         // prepare test
-        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final DistributionSet ds = testdataFactory.createDistributionSetLocked();
         final Target target0 = testdataFactory.createTarget("t0");
 
         // manual assignment

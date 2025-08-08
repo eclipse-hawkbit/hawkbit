@@ -17,12 +17,11 @@ import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.RolloutManagement.GroupCreate;
 import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -93,14 +92,14 @@ class JsonBuilder {
 
     static String rolloutWithGroups(final String name, final String description, final Integer groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
-            final List<RolloutGroup> groups) {
+            final List<GroupCreate> groups) {
         return rolloutWithGroups(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, groups,
                 null, null, null);
     }
 
     static String rolloutWithGroups(final String name, final String description, final Integer groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
-            final List<RolloutGroup> groups, final String type, final Integer weight,
+            final List<GroupCreate> groups, final String type, final Integer weight,
             final Boolean confirmationRequired) {
         final List<String> rolloutGroupsJson = groups.stream().map(JsonBuilder::rolloutGroup).toList();
         return rollout(
@@ -198,10 +197,14 @@ class JsonBuilder {
         return json.toString();
     }
 
-    static String rolloutGroup(final RolloutGroup rolloutGroup) {
+    static String rolloutGroup(final GroupCreate create) {
+        return rolloutGroup(create, null);
+    }
+
+    static String rolloutGroup(final GroupCreate create, final RolloutGroup rolloutGroup) {
         final RolloutGroupConditions conditions = getConditions(rolloutGroup);
-        return rolloutGroup(rolloutGroup.getName(), rolloutGroup.getDescription(), rolloutGroup.getTargetFilterQuery(),
-                rolloutGroup.getTargetPercentage(), rolloutGroup.isConfirmationRequired(), conditions);
+        return rolloutGroup(create.getName(), create.getDescription(), create.getTargetFilterQuery(),
+                create.getTargetPercentage(), create.isConfirmationRequired(), conditions);
 
     }
 
@@ -278,10 +281,14 @@ class JsonBuilder {
     }
 
     private static RolloutGroupConditions getConditions(final RolloutGroup rolloutGroup) {
-        return new RolloutGroupConditionBuilder()
-                .errorCondition(rolloutGroup.getErrorCondition(), rolloutGroup.getErrorConditionExp())
-                .errorAction(rolloutGroup.getErrorAction(), rolloutGroup.getErrorActionExp())
-                .successAction(rolloutGroup.getSuccessAction(), rolloutGroup.getSuccessActionExp())
-                .successCondition(rolloutGroup.getSuccessCondition(), rolloutGroup.getSuccessConditionExp()).build();
+        if (rolloutGroup == null) {
+            return  new RolloutGroupConditionBuilder().withDefaults().build();
+        } else {
+            return new RolloutGroupConditionBuilder()
+                    .errorCondition(rolloutGroup.getErrorCondition(), rolloutGroup.getErrorConditionExp())
+                    .errorAction(rolloutGroup.getErrorAction(), rolloutGroup.getErrorActionExp())
+                    .successAction(rolloutGroup.getSuccessAction(), rolloutGroup.getSuccessActionExp())
+                    .successCondition(rolloutGroup.getSuccessCondition(), rolloutGroup.getSuccessConditionExp()).build();
+        }
     }
 }
