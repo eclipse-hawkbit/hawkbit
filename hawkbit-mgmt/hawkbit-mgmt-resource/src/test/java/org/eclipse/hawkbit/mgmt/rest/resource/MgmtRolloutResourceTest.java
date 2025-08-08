@@ -1982,10 +1982,9 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$._links.start.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/start"))))
                 .andExpect(jsonPath("$._links.pause.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/pause"))))
                 .andExpect(jsonPath("$.dynamic", equalTo(isDynamic)))
-                .andExpect(
-                        jsonPath("$._links.resume.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/resume"))))
-                .andExpect(jsonPath("$._links.groups.href",
-                        allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))));
+                .andExpect(jsonPath("$._links.resume.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/resume"))))
+                .andExpect(jsonPath(
+                        "$._links.groups.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))));
     }
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,

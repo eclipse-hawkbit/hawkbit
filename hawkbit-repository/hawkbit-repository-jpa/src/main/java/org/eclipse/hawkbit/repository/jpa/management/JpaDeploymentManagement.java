@@ -728,7 +728,13 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             // implicitly lock, for some reason no update happen if lock in same transaction
             distributionSet = DeploymentHelper.runInNewTransaction(
                     txManager, "lockDistributionSet-" + dsId,
-                    status -> distributionSetManagement.lock(dsValidAndComplete));
+                    status -> {
+                        if (entityManager.contains(dsValidAndComplete)) {
+                            return distributionSetManagement.lock(dsValidAndComplete);
+                        } else {
+                            return distributionSetManagement.lock(entityManager.merge(dsValidAndComplete));
+                        }
+                    });
         } else {
             distributionSet = dsValidAndComplete;
         }
