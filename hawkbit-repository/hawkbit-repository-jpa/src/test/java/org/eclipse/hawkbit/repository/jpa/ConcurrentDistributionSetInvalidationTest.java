@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
+import org.eclipse.hawkbit.repository.RolloutManagement.Create;
 import org.eclipse.hawkbit.repository.exception.StopRolloutException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
@@ -92,9 +93,10 @@ class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTe
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, "80")
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
-        return rolloutManagement.create(entityFactory.rollout().create()
+        return rolloutManagement.create(Create.builder()
                         .name("verifyInvalidateDistributionSetWithLargeRolloutThrowsException").description("desc")
-                        .targetFilterQuery("name==*").distributionSetId(distributionSet).actionType(ActionType.FORCED),
+                        .targetFilterQuery("name==*").distributionSet(distributionSet).actionType(ActionType.FORCED)
+                        .build(),
                 quotaManagement.getMaxRolloutGroupsPerRollout(), false, conditions);
     }
 
