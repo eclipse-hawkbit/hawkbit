@@ -69,7 +69,7 @@ class JpaTargetFilterQueryManagement
         extends AbstractJpaRepositoryManagement<JpaTargetFilterQuery, TargetFilterQueryManagement.Create, TargetFilterQueryManagement.Update, TargetFilterQueryRepository, TargetFilterQueryFields>
         implements TargetFilterQueryManagement<JpaTargetFilterQuery>{
 
-    private final TargetManagement targetManagement;
+    private final TargetManagement<? extends Target> targetManagement;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final QuotaManagement quotaManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
@@ -80,7 +80,7 @@ class JpaTargetFilterQueryManagement
 
     protected JpaTargetFilterQueryManagement(
             final TargetFilterQueryRepository targetFilterQueryRepository, final EntityManager entityManager,
-            final TargetManagement targetManagement, final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
+            final TargetManagement<? extends Target> targetManagement, final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final QuotaManagement quotaManagement, final TenantConfigurationManagement tenantConfigurationManagement,
             final RepositoryProperties repositoryProperties,
             final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final AuditorAware<String> auditorAware) {

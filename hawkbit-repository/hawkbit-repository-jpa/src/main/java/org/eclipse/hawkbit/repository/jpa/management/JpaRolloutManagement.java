@@ -118,7 +118,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     private final StartNextGroupRolloutGroupSuccessAction startNextRolloutGroupAction;
     private final RolloutStatusCache rolloutStatusCache;
     private final ActionRepository actionRepository;
-    private final TargetManagement targetManagement;
+    private final TargetManagement<? extends Target> targetManagement;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final QuotaManagement quotaManagement;
@@ -134,7 +134,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             final StartNextGroupRolloutGroupSuccessAction startNextRolloutGroupAction,
             final RolloutStatusCache rolloutStatusCache,
             final ActionRepository actionRepository,
-            final TargetManagement targetManagement,
+            final TargetManagement<? extends Target> targetManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final QuotaManagement quotaManagement,

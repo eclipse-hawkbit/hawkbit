@@ -103,7 +103,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private final RolloutGroupRepository rolloutGroupRepository;
     private final RolloutTargetGroupRepository rolloutTargetGroupRepository;
     private final RolloutRepository rolloutRepository;
-    private final TargetManagement targetManagement;
+    private final TargetManagement<? extends Target> targetManagement;
     private final DeploymentManagement deploymentManagement;
     private final RolloutGroupManagement rolloutGroupManagement;
     private final RolloutManagement rolloutManagement;
@@ -121,7 +121,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     public JpaRolloutExecutor(
             final ActionRepository actionRepository, final RolloutGroupRepository rolloutGroupRepository,
             final RolloutTargetGroupRepository rolloutTargetGroupRepository,
-            final RolloutRepository rolloutRepository, final TargetManagement targetManagement,
+            final RolloutRepository rolloutRepository, final TargetManagement<? extends Target> targetManagement,
             final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
             final RolloutManagement rolloutManagement, final QuotaManagement quotaManagement,
             final RolloutGroupEvaluationManager evaluationManager, final RolloutApprovalStrategy rolloutApprovalStrategy,
