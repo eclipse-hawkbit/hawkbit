@@ -9,16 +9,14 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
-import static org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate.addSuccessAndErrorConditionsAndActions;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import jakarta.validation.ConstraintDeclarationException;
@@ -41,18 +39,15 @@ import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
-import org.eclipse.hawkbit.repository.builder.GenericRolloutUpdate;
-import org.eclipse.hawkbit.repository.builder.RolloutCreate;
-import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
-import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
@@ -80,6 +75,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.utils.ObjectCopyUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -89,7 +85,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -181,14 +176,15 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout create(
-            final RolloutCreate rollout, final int amountGroup, final boolean confirmationRequired,
+            final Create rollout, final int amountGroup, final boolean confirmationRequired,
             final RolloutGroupConditions conditions, final DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
         return create0(rollout, amountGroup, confirmationRequired, conditions, dynamicRolloutGroupTemplate);
     }
 
     private Rollout create0(
-            final RolloutCreate rollout, final int amountGroup, final boolean confirmationRequired,
+            final Create rollout, final int amountGroup, final boolean confirmationRequired,
             final RolloutGroupConditions conditions, final DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
+        validateDs(rollout);
         if (amountGroup < 0) {
             throw new ValidationException("The amount of groups cannot be lower than or equal to zero for static rollouts");
         } else if (amountGroup == 0) {
@@ -200,7 +196,9 @@ public class JpaRolloutManagement implements RolloutManagement {
             RolloutHelper.verifyRolloutGroupAmount(amountGroup, quotaManagement);
         }
 
-        final JpaRollout rolloutRequest = (JpaRollout) rollout.build();
+        final JpaRollout rolloutRequest = new JpaRollout();
+        ObjectCopyUtil.copy(rollout, rolloutRequest, false, UnaryOperator.identity());
+        rolloutRequest.setDynamic(rollout.isDynamic()); // TODO - copy compares isDynamic == false and don't set it to false - remain null
         // scheduled rollout, the creator shall have permissions to start rollout
         if (rolloutRequest.getStartAt() != null && rolloutRequest.getStartAt() != Long.MAX_VALUE && // if scheduled rollout
                 !systemSecurityContext.hasPermission(SpPermission.HANDLE_ROLLOUT) &&
@@ -220,7 +218,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout create(
-            @NotNull @Valid RolloutCreate create, int amountGroup, boolean confirmationRequired,
+            @NotNull @Valid Create create, int amountGroup, boolean confirmationRequired,
             @NotNull RolloutGroupConditions conditions) {
         return create0(create, amountGroup, confirmationRequired, conditions, null);
     }
@@ -229,29 +227,16 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Rollout create(final RolloutCreate rollout, final List<RolloutGroupCreate> groups, final RolloutGroupConditions conditions) {
+    public Rollout create(final Create rollout, final List<GroupCreate> groups, final RolloutGroupConditions conditions) {
         if (groups.isEmpty()) {
             throw new ValidationException("The amount of groups cannot be 0");
         }
+        validateDs(rollout);
         RolloutHelper.verifyRolloutGroupAmount(groups.size(), quotaManagement);
-        return createRolloutGroups(groups, conditions, createRollout((JpaRollout) rollout.build(), false));
-    }
-
-    @Override
-    @Async
-    public CompletableFuture<RolloutGroupsValidation> validateTargetsInGroups(
-            final List<RolloutGroupCreate> groups, final String targetFilter, final Long createdAt, final Long dsTypeId) {
-
-        final TargetCount targets = calculateTargets(targetFilter, createdAt, dsTypeId);
-        long totalTargets = targets.total();
-        final String baseFilter = targets.filter();
-
-        if (totalTargets == 0) {
-            throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
-        }
-
-        return CompletableFuture.completedFuture(
-                validateTargetsInGroups(groups.stream().map(RolloutGroupCreate::build).toList(), baseFilter, totalTargets, dsTypeId));
+        final JpaRollout rolloutRequest = new JpaRollout();
+        ObjectCopyUtil.copy(rollout, rolloutRequest, false, UnaryOperator.identity());
+        rolloutRequest.setDynamic(rollout.isDynamic()); // TODO - copy compares isDynamic == false and don't set it to false - remain null
+        return createRolloutGroups(groups, conditions, createRollout(rolloutRequest, false));
     }
 
     @Override
@@ -413,14 +398,11 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Rollout update(final RolloutUpdate u) {
-        final GenericRolloutUpdate update = (GenericRolloutUpdate) u;
+    public Rollout update(final Update update) {
         final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(update.getId());
-
         checkIfDeleted(update.getId(), rollout.getStatus());
 
-        update.getName().ifPresent(rollout::setName);
-        update.getDescription().ifPresent(rollout::setDescription);
+        ObjectCopyUtil.copy(update, rollout, false, UnaryOperator.identity());
         return rolloutRepository.save(rollout);
     }
 
@@ -492,15 +474,24 @@ public class JpaRolloutManagement implements RolloutManagement {
         return rollouts;
     }
 
+    private static void validateDs(final Create rollout) {
+        if (!rollout.getDistributionSet().isValid()) {
+            throw new InvalidDistributionSetException("The distribution set is not valid");
+        }
+        if (!rollout.getDistributionSet().isComplete()) {
+            throw new IncompleteDistributionSetException("The distribution set is not complete");
+        }
+    }
+
     /**
      * In case the given group is missing conditions or actions, they will be set from the supplied default conditions.
      *
      * @param create group to check
      * @param conditions default conditions and actions
      */
-    private static JpaRolloutGroup prepareRolloutGroupWithDefaultConditions(
-            final RolloutGroupCreate create, final RolloutGroupConditions conditions) {
-        final JpaRolloutGroup group = ((JpaRolloutGroupCreate) create).build();
+    private static JpaRolloutGroup prepareRolloutGroupWithDefaultConditions(final GroupCreate create, final RolloutGroupConditions conditions) {
+        final JpaRolloutGroup group = new JpaRolloutGroup();
+        ObjectCopyUtil.copy(create, group, false, UnaryOperator.identity());
 
         if (group.getSuccessCondition() == null) {
             group.setSuccessCondition(conditions.getSuccessCondition());
@@ -554,8 +545,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                         distributionSet.getType().getId());
                 errMsg = "No failed targets in Rollout";
             } else {
-                totalTargets = targetManagement.countByRsqlAndCompatible(rollout.getTargetFilterQuery(),
-                        distributionSet.getType().getId());
+                totalTargets = targetManagement.countByRsqlAndCompatible(rollout.getTargetFilterQuery(), distributionSet.getType().getId());
                 errMsg = "Rollout does not match any existing targets";
             }
             if (totalTargets == 0) {
@@ -573,6 +563,13 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
         contextAware.getCurrentContext().ifPresent(rollout::setAccessControlContext);
         return rollout;
+    }
+
+    private static void addSuccessAndErrorConditionsAndActions(final JpaRolloutGroup group, final RolloutGroupConditions conditions) {
+        addSuccessAndErrorConditionsAndActions(group, conditions.getSuccessCondition(),
+                conditions.getSuccessConditionExp(), conditions.getSuccessAction(), conditions.getSuccessActionExp(),
+                conditions.getErrorCondition(), conditions.getErrorConditionExp(), conditions.getErrorAction(),
+                conditions.getErrorActionExp());
     }
 
     @SuppressWarnings("java:S2259") // java:S2259 - false positive, see the java:S2259 comment in code
@@ -649,7 +646,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private Rollout createRolloutGroups(
-            final List<RolloutGroupCreate> groupList, final RolloutGroupConditions conditions, final JpaRollout rollout) {
+            final List<GroupCreate> groupList, final RolloutGroupConditions conditions, final JpaRollout rollout) {
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.CREATING);
         final DistributionSetType distributionSetType = rollout.getDistributionSet().getType();
 
@@ -704,6 +701,24 @@ public class JpaRolloutManagement implements RolloutManagement {
         final JpaRollout savedRollout = rolloutRepository.save(rollout);
         rolloutGroupRepository.saveAll(groups);
         return savedRollout;
+    }
+
+    public static void addSuccessAndErrorConditionsAndActions(final JpaRolloutGroup group,
+            final RolloutGroup.RolloutGroupSuccessCondition successCondition, final String successConditionExp,
+            final RolloutGroup.RolloutGroupSuccessAction successAction, final String successActionExp,
+            final RolloutGroup.RolloutGroupErrorCondition errorCondition, final String errorConditionExp,
+            final RolloutGroup.RolloutGroupErrorAction errorAction, final String errorActionExp) {
+        group.setSuccessCondition(successCondition);
+        group.setSuccessConditionExp(successConditionExp);
+
+        group.setSuccessAction(successAction);
+        group.setSuccessActionExp(successActionExp);
+
+        group.setErrorCondition(errorCondition);
+        group.setErrorConditionExp(errorConditionExp);
+
+        group.setErrorAction(errorAction);
+        group.setErrorActionExp(errorActionExp);
     }
 
     private JpaRollout getRolloutOrThrowExceptionIfNotFound(final Long rolloutId) {

@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.RolloutManagement.Create;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -93,7 +94,7 @@ class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<RolloutGroup> 
                         .build());
 
         final Rollout entity = rolloutManagement.create(
-                entityFactory.rollout().create().name("exampleRollout").targetFilterQuery("controllerId==*").distributionSetId(ds),
+                Create.builder().name("exampleRollout").targetFilterQuery("controllerId==*").distributionSet(ds).build(),
                 5,
                 false,
                 new RolloutGroupConditionBuilder().withDefaults().successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10").build());
