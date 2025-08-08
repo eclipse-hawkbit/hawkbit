@@ -430,7 +430,7 @@ public class JpaDistributionSetManagement
 
     private JpaDistributionSet toJpaDistributionSet(final DistributionSet distributionSet) {
         if (distributionSet instanceof JpaDistributionSet jpaDistributionSet) {
-            return entityManager.merge(jpaDistributionSet); // if from
+            return jpaDistributionSet;
         } else {
             return getById(distributionSet.getId());
         }

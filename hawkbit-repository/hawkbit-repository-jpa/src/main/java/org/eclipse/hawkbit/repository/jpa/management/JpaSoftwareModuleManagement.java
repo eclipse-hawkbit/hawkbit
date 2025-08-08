@@ -211,7 +211,7 @@ public class JpaSoftwareModuleManagement
 
     private JpaSoftwareModule toJpaSoftwareModule(final SoftwareModule softwareModule) {
         if (softwareModule instanceof JpaSoftwareModule jpaSoftwareModule) {
-            return entityManager.merge(jpaSoftwareModule); // if from
+            return jpaSoftwareModule;
         } else {
             return getById(softwareModule.getId());
         }
