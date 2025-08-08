@@ -12,12 +12,16 @@ package org.eclipse.hawkbit.rest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -63,5 +67,9 @@ public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTes
 
     protected static String toJson(final Object obj) throws JsonProcessingException {
         return OBJECT_MAPPER.writeValueAsString(obj);
+    }
+
+    protected static Specification<JpaAction> byDistributionSetId(final Long distributionSetId) {
+        return (root, query, cb) -> cb.equal(root.get(JpaAction_.distributionSet).get(AbstractJpaBaseEntity_.id), distributionSetId);
     }
 }

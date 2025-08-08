@@ -142,14 +142,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     @AuditLog(entity = "Target", type = AuditLog.Type.UPDATE, description = "Update Target")
     public ResponseEntity<MgmtTarget> updateTarget(final String targetId, final MgmtTargetRequestBody targetRest) {
-        if (targetRest.getRequestAttributes() != null) {
-            if (Boolean.TRUE.equals(targetRest.getRequestAttributes())) {
-                targetManagement.requestControllerAttributes(targetId);
-            } else {
-                return ResponseEntity.badRequest().build();
-            }
+        if (targetRest.getRequestAttributes() != null && !Boolean.TRUE.equals(targetRest.getRequestAttributes())) {
+            return ResponseEntity.badRequest().build();
         }
-
         final Target targetToUpdate = targetManagement.getByControllerId(targetId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, targetId));
         final TargetType targetType = Optional.ofNullable(targetRest.getTargetType())
@@ -180,7 +175,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     @AuditLog(entity = "Target", type = AuditLog.Type.DELETE, description = "Delete Target")
     public ResponseEntity<Void> deleteTarget(final String targetId) {
-        this.targetManagement.deleteByControllerID(targetId);
+        this.targetManagement.deleteByControllerId(targetId);
         log.debug("{} target deleted, return status {}", targetId, HttpStatus.OK);
         return ResponseEntity.ok().build();
     }

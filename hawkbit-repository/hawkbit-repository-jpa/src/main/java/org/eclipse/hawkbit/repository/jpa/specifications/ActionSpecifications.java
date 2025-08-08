@@ -78,10 +78,6 @@ public final class ActionSpecifications {
                 isNull ? cb.isNull(root.get(JpaAction_.weight)) : cb.isNotNull(root.get(JpaAction_.weight)));
     }
 
-    public static Specification<JpaAction> byDistributionSetId(final Long distributionSetId) {
-        return (root, query, cb) -> cb.equal(root.get(JpaAction_.distributionSet).get(AbstractJpaBaseEntity_.id), distributionSetId);
-    }
-
     public static Specification<JpaAction> byDistributionSetIdAndActive(final Long distributionSetId) {
         return (root, query, cb) -> cb.and(
                 cb.equal(root.get(JpaAction_.distributionSet).get(AbstractJpaBaseEntity_.id), distributionSetId),

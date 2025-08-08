@@ -1788,7 +1788,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         distributionSetManagement.get(distributionSetId).orElseThrow(() ->
                 new EntityNotFoundException(DistributionSet.class, distributionSetId));
         return actionRepository
-                .findAll(ActionSpecifications.byDistributionSetId(distributionSetId), pageable)
+                .findAll(byDistributionSetId(distributionSetId), pageable)
                 .map(Action.class::cast);
     }
 

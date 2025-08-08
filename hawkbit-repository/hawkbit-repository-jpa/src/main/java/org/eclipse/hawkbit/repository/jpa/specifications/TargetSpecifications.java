@@ -9,11 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.ListJoin;
@@ -27,7 +25,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
-import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaNamedEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -109,16 +106,6 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s that have the
-     * request controller attributes flag set
-     *
-     * @return the {@link Target} {@link Specification}
-     */
-    public static Specification<JpaTarget> hasRequestControllerAttributesTrue() {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.requestControllerAttributes), true);
-    }
-
-    /**
      * {@link Specification} for retrieving {@link JpaTarget}s including {@link JpaTarget#getAssignedDistributionSet()}.
      *
      * @param controllerIDs to search for
@@ -133,26 +120,6 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "equal to any given {@link TargetUpdateStatus}".
-     *
-     * @param updateStatus to be filtered on
-     * @return the {@link Target} {@link Specification}
-     */
-    public static Specification<JpaTarget> hasTargetUpdateStatus(final Collection<TargetUpdateStatus> updateStatus) {
-        return (targetRoot, query, cb) -> targetRoot.get(JpaTarget_.updateStatus).in(updateStatus);
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link Target}s by "equal to given {@link TargetUpdateStatus}".
-     *
-     * @param updateStatus to be filtered on
-     * @return the {@link Target} {@link Specification}
-     */
-    public static Specification<JpaTarget> hasTargetUpdateStatus(final TargetUpdateStatus updateStatus) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.updateStatus), updateStatus);
-    }
-
-    /**
      * {@link Specification} for retrieving {@link Target}s by "not equal to given {@link TargetUpdateStatus}".
      *
      * @param updateStatus to be filtered on
@@ -160,36 +127,6 @@ public final class TargetSpecifications {
      */
     public static Specification<JpaTarget> notEqualToTargetUpdateStatus(final TargetUpdateStatus updateStatus) {
         return (targetRoot, query, cb) -> cb.not(cb.equal(targetRoot.get(JpaTarget_.updateStatus), updateStatus));
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link Target}s that are overdue. A target is overdue if it did not respond during the configured
-     * intervals:<br>
-     * <em>poll_itvl + overdue_itvl</em>
-     *
-     * @param overdueTimestamp the calculated timestamp to compare with the last response of a target (lastTargetQuery).<br>
-     *         The <code>overdueTimestamp</code> has to be calculated with the following expression:<br>
-     *         <em>overdueTimestamp = nowTimestamp - poll_itvl - overdue_itvl</em>
-     * @return the {@link Target} {@link Specification}
-     */
-    public static Specification<JpaTarget> isOverdue(final long overdueTimestamp) {
-        return (targetRoot, query, cb) ->
-                cb.lessThanOrEqualTo(targetRoot.get(JpaTarget_.lastTargetQuery), overdueTimestamp);
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link Target}s by "like controllerId or like name".
-     *
-     * @param searchText to be filtered on
-     * @return the {@link Target} {@link Specification}
-     */
-    public static Specification<JpaTarget> likeControllerIdOrName(final String searchText) {
-        return (targetRoot, query, cb) -> {
-            final String searchTextToLower = searchText.toLowerCase();
-            return cb.or(
-                    cb.like(cb.lower(targetRoot.get(JpaTarget_.controllerId)), searchTextToLower),
-                    cb.like(cb.lower(targetRoot.get(AbstractJpaNamedEntity_.name)), searchTextToLower));
-        };
     }
 
     public  static Specification<JpaTarget> eqTargetGroup(final String targetGroup) {
@@ -209,56 +146,18 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "like controllerId".
-     *
-     * @param distributionId to be filtered on
-     * @return the {@link Target} {@link Specification}
-     */
-    public static Specification<JpaTarget> hasInstalledOrAssignedDistributionSet(@NotNull final Long distributionId) {
-        return hasInstalledDistributionSet(distributionId).or(hasAssignedDistributionSet(distributionId));
-    }
-
-    /**
      * Finds all targets by given {@link Target#getControllerId()}s and which are not yet assigned to given {@link DistributionSet}.
      *
      * @param tIDs to search for.
      * @param distributionId set that is not yet assigned
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<JpaTarget> hasControllerIdAndAssignedDistributionSetIdNot(final List<String> tIDs,
-            @NotNull final Long distributionId) {
+    public static Specification<JpaTarget> hasControllerIdAndAssignedDistributionSetIdNot(
+            final List<String> tIDs, @NotNull final Long distributionId) {
         return (targetRoot, query, cb) -> cb.and(targetRoot.get(JpaTarget_.controllerId).in(tIDs),
                 cb.or(
                         cb.notEqual(targetRoot.get(JpaTarget_.assignedDistributionSet).get(AbstractJpaBaseEntity_.id), distributionId),
                         cb.isNull(targetRoot.get(JpaTarget_.assignedDistributionSet))));
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link Target}s based on a {@link TargetTag} name.
-     *
-     * @param tagName to search for
-     * @return the {@link Target} {@link Specification}
-     */
-    public static Specification<JpaTarget> hasTagName(final String tagName) {
-        return (targetRoot, query, cb) -> {
-            final SetJoin<JpaTarget, JpaTargetTag> join = targetRoot.join(JpaTarget_.tags);
-            return cb.equal(join.get(AbstractJpaNamedEntity_.name), tagName);
-        };
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link Target}s by "has no tag names"or "has at least on of the given tag names".
-     *
-     * @param tagNames to be filtered on
-     * @param selectTargetWithNoTag flag to get targets with no tag assigned
-     * @return the {@link Target} {@link Specification}
-     */
-    public static Specification<JpaTarget> hasTags(final String[] tagNames, final Boolean selectTargetWithNoTag) {
-        return (targetRoot, query, cb) -> {
-            final Predicate predicate = getHasTagsPredicate(targetRoot, cb, selectTargetWithNoTag, tagNames);
-            query.distinct(true);
-            return predicate;
-        };
     }
 
     /**
@@ -297,7 +196,7 @@ public final class TargetSpecifications {
     public static Specification<JpaTarget> isCompatibleWithDistributionSetType(final Long distributionSetTypeId) {
         return (targetRoot, query, cb) -> {
             // Since the targetRoot is changed by joining we need to get the isNull predicate first
-            final Predicate targetTypeIsNull = getTargetTypeIsNullPredicate(targetRoot);
+            final Predicate targetTypeIsNull = targetRoot.get(JpaTarget_.targetType).isNull();
             return cb.or(targetTypeIsNull, cb.equal(getDsTypeIdPath(targetRoot), distributionSetTypeId));
         };
     }
@@ -409,36 +308,6 @@ public final class TargetSpecifications {
         };
     }
 
-    /**
-     * {@link Specification} for retrieving {@link Target}s by target type id
-     *
-     * @param typeId the id of the target type
-     * @return the {@link Target} {@link Specification}
-     */
-    public static Specification<JpaTarget> hasTargetType(final long typeId) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.targetType).get(AbstractJpaBaseEntity_.id), typeId);
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link Target}s by target type id is equal to null
-     *
-     * @return the {@link Target} {@link Specification}
-     */
-    public static Specification<JpaTarget> hasNoTargetType() {
-        return (targetRoot, query, cb) -> cb.isNull(targetRoot.get(JpaTarget_.targetType));
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link Target}s that don't have target type assigned
-     *
-     * @param typeId the id of the target type
-     * @return the {@link Target} {@link Specification}
-     */
-    public static Specification<JpaTarget> hasTargetTypeNot(final Long typeId) {
-        return (targetRoot, query, cb) -> cb.or(getTargetTypeIsNullPredicate(targetRoot),
-                cb.notEqual(targetRoot.get(JpaTarget_.targetType).get(AbstractJpaBaseEntity_.id), typeId));
-    }
-
     public static Specification<JpaTarget> failedActionsForRollout(final String rolloutId) {
         return (targetRoot, query, cb) -> {
             final Join<JpaTarget, Action> targetActions = targetRoot.join("actions");
@@ -459,35 +328,6 @@ public final class TargetSpecifications {
             actionsJoin.on(cb.ge(actionsJoin.get(JpaAction_.rollout).get(AbstractJpaBaseEntity_.id), rolloutId));
             return cb.isNull(actionsJoin.get(AbstractJpaBaseEntity_.id));
         };
-    }
-
-    private static Predicate getHasTagsPredicate(final Root<JpaTarget> targetRoot, final CriteriaBuilder cb,
-            final Boolean selectTargetWithNoTag, final String[] tagNames) {
-        final SetJoin<JpaTarget, JpaTargetTag> tags = targetRoot.join(JpaTarget_.tags, JoinType.LEFT);
-        final Path<String> exp = tags.get(AbstractJpaNamedEntity_.name);
-
-        final List<Predicate> hasTagsPredicates = new ArrayList<>();
-        if (isNoTagActive(selectTargetWithNoTag)) {
-            hasTagsPredicates.add(exp.isNull());
-        }
-        if (isAtLeastOneTagActive(tagNames)) {
-            hasTagsPredicates.add(exp.in((Object[]) tagNames));
-        }
-
-        return hasTagsPredicates.stream().reduce(cb::or)
-                .orElseThrow(() -> new RuntimeException("Neither NO_TAG, nor TAG target tag filter was provided!"));
-    }
-
-    private static boolean isNoTagActive(final Boolean selectTargetWithNoTag) {
-        return Boolean.TRUE.equals(selectTargetWithNoTag);
-    }
-
-    private static boolean isAtLeastOneTagActive(final String[] tagNames) {
-        return tagNames != null && tagNames.length > 0;
-    }
-
-    private static Predicate getTargetTypeIsNullPredicate(final Root<JpaTarget> targetRoot) {
-        return targetRoot.get(JpaTarget_.targetType).isNull();
     }
 
     private static Path<Long> getDsTypeIdPath(final Root<JpaTarget> root) {

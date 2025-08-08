@@ -51,7 +51,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
-import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -81,104 +80,60 @@ public interface TargetManagement<T extends Target>
     }
 
     /**
-     * Counts number of targets with the given distribution set assigned.
+     * Get controller attributes of given {@link Target}.
      *
-     * @param distributionSetId to search for
-     * @return number of found {@link Target}s.
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     */
-    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
-    long countByAssignedDistributionSet(long distributionSetId);
-
-    /**
-     * Count {@link Target}s for all the given filter parameters.
-     *
-     * @param filterParams the filters to apply; only filters are enabled that have non-null
-     *         value; filters are AND-gated
-     * @return the found number {@link Target}s
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    long countByFilters(@NotNull final FilterParams filterParams);
-
-    /**
-     * Get the count of targets with the given distribution set id.
-     *
-     * @param distributionSetId to search for
-     * @return number of found {@link Target}s.
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     */
-    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
-    long countByInstalledDistributionSet(long distributionSetId);
-
-    /**
-     * Checks if there is already a {@link Target} that has the given distribution
-     * set Id assigned or installed.
-     *
-     * @param distributionSetId to search for
-     * @return <code>true</code> if a {@link Target} exists.
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     */
-    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
-    boolean existsByInstalledOrAssignedDistributionSet(long distributionSetId);
-
-    /**
-     * Count {@link TargetFilterQuery}s for given target filter query with UPDATE permission.
-     *
-     * @param rsql filter definition in RSQL syntax
-     * @return the found number of {@link Target}s
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    long countByRsqlAndUpdatable(@NotEmpty String rsql);
-
-    /**
-     * Count all targets for given {@link TargetFilterQuery} and that are compatible
-     * with the passed {@link DistributionSetType}.
-     *
-     * @param rsql filter definition in RSQL syntax
-     * @param distributionSetIdTypeId ID of the {@link DistributionSetType} the targets need to be
-     *         compatible with
-     * @return the found number of{@link Target}s
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    long countByRsqlAndCompatible(@NotEmpty String rsql, @NotNull Long distributionSetIdTypeId);
-
-    /**
-     * Count all targets with failed actions for specific Rollout and that are
-     * compatible with the passed {@link DistributionSetType} and created after
-     * given timestamp
-     *
-     * @param rolloutId rolloutId of the rollout to be retried.
-     * @param dsTypeId ID of the {@link DistributionSetType} the targets need to be
-     *         compatible with
-     * @return the found number of{@link Target}s
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    long countByFailedInRollout(@NotEmpty String rolloutId, @NotNull Long dsTypeId);
-
-    /**
-     * Count {@link TargetFilterQuery}s for given target filter query.
-     *
-     * @param targetFilterQueryId {@link TargetFilterQuery#getId()}
-     * @return the found number of {@link Target}s
-     * @throws EntityNotFoundException if {@link TargetFilterQuery} with given ID does not exist
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    long countByTargetFilterQuery(long targetFilterQueryId);
-
-    /**
-     * Deletes target with the given controller ID.
-     *
-     * @param controllerId the controller ID of the target to be deleted
+     * @param controllerId of the target
+     * @return controller attributes as key/value pairs
      * @throws EntityNotFoundException if target with given ID does not exist
      */
-    @PreAuthorize(HAS_AUTH_DELETE_TARGET)
-    void deleteByControllerID(@NotEmpty String controllerId);
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    Map<String, String> getControllerAttributes(@NotEmpty String controllerId);
 
     /**
-     * Finds all targets for all the given parameter {@link TargetFilterQuery} and
-     * that don't have the specified distribution set in their action history and
-     * are compatible with the passed {@link DistributionSetType}.
+     * Verify if a target matches a specific target filter query, does not have a
+     * specific DS already assigned and is compatible with it.
+     *
+     * @param controllerId of the {@link org.eclipse.hawkbit.repository.model.Target} to check
+     * @param distributionSetId of the {@link org.eclipse.hawkbit.repository.model.DistributionSet} to consider
+     * @param targetFilterQuery to execute
+     * @return true if it matches
+     */
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
+    boolean isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(
+            @NotNull String controllerId, long distributionSetId, @NotNull String targetFilterQuery);
+
+    /**
+     * Find {@link Target}s based a given IDs.
+     *
+     * @param controllerIDs to look for.
+     * @return List of found{@link Target}s
+     */
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    List<Target> getByControllerId(@NotEmpty Collection<String> controllerIDs);
+
+    /**
+     * Gets a {@link Target} based a given controller id and includes the details specified by the details key.
+     *
+     * @param controllerId to look for.
+     * @param detailsKey the key of the details to include, e.g. {@link #DETAILS_AUTO_CONFIRMATION_STATUS}
+     * @return {@link Target}
+     */
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    Target getWithDetails(@NotEmpty String controllerId, String detailsKey);
+
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    default Target getWithDetails(@NotEmpty String controllerId) {
+        return getWithDetails(controllerId, DETAILS_BASE);
+    }
+
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    default Target getWithAutoConfigurationStatus(@NotEmpty String controllerId) {
+        return getWithDetails(controllerId, DETAILS_AUTO_CONFIRMATION_STATUS);
+    }
+
+    /**
+     * Finds all targets for all the given parameter {@link TargetFilterQuery} and that don't have the specified distribution
+     * set in their action history and are compatible with the passed {@link DistributionSetType}.
      *
      * @param distributionSetId id of the {@link DistributionSet}
      * @param rsql filter definition in RSQL syntax
@@ -191,27 +146,12 @@ public interface TargetManagement<T extends Target>
             long distributionSetId, @NotNull String rsql, @NotNull Pageable pageable);
 
     /**
-     * Counts all targets for all the given parameter {@link TargetFilterQuery} and
-     * that don't have the specified distribution set in their action history and
-     * are compatible with the passed {@link DistributionSetType}.
-     *
-     * @param distributionSetId id of the {@link DistributionSet}
-     * @param rsql filter definition in RSQL syntax
-     * @return the count of found {@link Target}s
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     */
-    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
-    long countByRsqlAndNonDSAndCompatibleAndUpdatable(long distributionSetId, @NotNull String rsql);
-
-    /**
-     * Finds all targets for all the given parameter {@link TargetFilterQuery} and
-     * that are not assigned to one of the {@link RolloutGroup}s and are compatible
-     * with the passed {@link DistributionSetType}.
+     * Finds all targets for all the given parameter {@link TargetFilterQuery} and that are not assigned to one of the {@link RolloutGroup}s
+     * and are compatible with the passed {@link DistributionSetType}.
      *
      * @param groups the list of {@link RolloutGroup}s
      * @param rsql filter definition in RSQL syntax
-     * @param distributionSetType type of the {@link DistributionSet} the targets must be compatible
-     *         withs
+     * @param distributionSetType type of the {@link DistributionSet} the targets must be compatible withs
      * @param pageable the pageable to enhance the query for paging and sorting
      * @return a page of the found {@link Target}s
      */
@@ -221,23 +161,8 @@ public interface TargetManagement<T extends Target>
             @NotNull Pageable pageable);
 
     /**
-     * Counts all targets for all the given parameter {@link TargetFilterQuery} and
-     * that are not assigned to one of the {@link RolloutGroup}s and are compatible
-     * with the passed {@link DistributionSetType}.
-     *
-     * @param rsql filter definition in RSQL syntax
-     * @param groups the list of {@link RolloutGroup}s
-     * @param distributionSetType type of the {@link DistributionSet} the targets must be compatible with
-     * @return count of the found {@link Target}s
-     */
-    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-            @NotNull String rsql, @NotEmpty Collection<Long> groups, @NotNull DistributionSetType distributionSetType);
-
-    /**
-     * Finds all targets with failed actions for specific Rollout and that are not
-     * assigned to one of the retried {@link RolloutGroup}s and are compatible with
-     * the passed {@link DistributionSetType}.
+     * Finds all targets with failed actions for specific Rollout and that are not assigned to one of the retried {@link RolloutGroup}s and
+     * are compatible with the passed {@link DistributionSetType}.
      *
      * @param rolloutId rolloutId of the rollout to be retried.
      * @param groups the list of {@link RolloutGroup}s
@@ -248,28 +173,12 @@ public interface TargetManagement<T extends Target>
     Slice<Target> findByFailedRolloutAndNotInRolloutGroups(
             @NotNull String rolloutId, @NotEmpty Collection<Long> groups, @NotNull Pageable pageable);
 
-    /**
-     * Counts all targets with failed actions for specific Rollout and that are not
-     * assigned to one of the {@link RolloutGroup}s and are compatible with the
-     * passed {@link DistributionSetType}.
-     *
-     * @param rolloutId rolloutId of the rollout to be retried.
-     * @param groups the list of {@link RolloutGroup}s
-     * @return count of the found {@link Target}s
-     */
-    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    long countByFailedRolloutAndNotInRolloutGroups(@NotNull String rolloutId, @NotEmpty Collection<Long> groups);
-
     @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     Slice<Target> findByRsqlAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
             final long rolloutId, @NotNull String rsql, @NotNull DistributionSetType distributionSetType, @NotNull Pageable pageable);
 
-    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    long countByActionsInRolloutGroup(final long rolloutGroupId);
-
     /**
-     * Finds all targets of the provided {@link RolloutGroup} that have no Action
-     * for the RolloutGroup.
+     * Finds all targets of the provided {@link RolloutGroup} that have no Action for the RolloutGroup.
      *
      * @param group the {@link RolloutGroup}
      * @param pageable the pageable to enhance the query for paging and sorting
@@ -297,8 +206,8 @@ public interface TargetManagement<T extends Target>
      * @param rsql the specification to filter the result set
      * @param pageable page parameter
      * @return the found {@link Target}s, never {@code null}
-     * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
-     *         given {@code fieldNameProvider}
+     * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided
+     *         by the given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
@@ -306,13 +215,66 @@ public interface TargetManagement<T extends Target>
     Page<Target> findByAssignedDistributionSetAndRsql(long distributionSetId, @NotNull String rsql, @NotNull Pageable pageable);
 
     /**
-     * Find {@link Target}s based a given IDs.
+     * Count all targets for given {@link TargetFilterQuery} and that are compatible
+     * with the passed {@link DistributionSetType}.
      *
-     * @param controllerIDs to look for.
-     * @return List of found{@link Target}s
+     * @param rsql filter definition in RSQL syntax
+     * @param distributionSetIdTypeId ID of the {@link DistributionSetType} the targets need to be
+     *         compatible with
+     * @return the found number of{@link Target}s
      */
     @PreAuthorize(HAS_AUTH_READ_TARGET)
-    List<Target> getByControllerId(@NotEmpty Collection<String> controllerIDs);
+    long countByRsqlAndCompatible(@NotEmpty String rsql, @NotNull Long distributionSetIdTypeId);
+
+    /**
+     * Count all targets with failed actions for specific Rollout and that are compatible with the passed {@link DistributionSetType} and
+     * created after given timestamp
+     *
+     * @param rolloutId rolloutId of the rollout to be retried.
+     * @param dsTypeId ID of the {@link DistributionSetType} the targets need to be compatible with
+     * @return the found number of{@link Target}s
+     */
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    long countByFailedInRollout(@NotEmpty String rolloutId, @NotNull Long dsTypeId);
+
+    /**
+     * Counts all targets for all the given parameter {@link TargetFilterQuery} and that don't have the specified distribution set in their
+     * action history and are compatible with the passed {@link DistributionSetType}.
+     *
+     * @param distributionSetId id of the {@link DistributionSet}
+     * @param rsql filter definition in RSQL syntax
+     * @return the count of found {@link Target}s
+     * @throws EntityNotFoundException if distribution set with given ID does not exist
+     */
+    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
+    long countByRsqlAndNonDsAndCompatibleAndUpdatable(long distributionSetId, @NotNull String rsql);
+
+    /**
+     * Counts all targets for all the given parameter {@link TargetFilterQuery} and that are not assigned to one of the {@link RolloutGroup}s
+     * and are compatible with the passed {@link DistributionSetType}.
+     *
+     * @param rsql filter definition in RSQL syntax
+     * @param groups the list of {@link RolloutGroup}s
+     * @param distributionSetType type of the {@link DistributionSet} the targets must be compatible with
+     * @return count of the found {@link Target}s
+     */
+    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
+            @NotNull String rsql, @NotEmpty Collection<Long> groups, @NotNull DistributionSetType distributionSetType);
+
+    /**
+     * Counts all targets with failed actions for specific Rollout and that are not assigned to one of the {@link RolloutGroup}s and are
+     * compatible with the passed {@link DistributionSetType}.
+     *
+     * @param rolloutId rolloutId of the rollout to be retried.
+     * @param groups the list of {@link RolloutGroup}s
+     * @return count of the found {@link Target}s
+     */
+    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    long countByFailedRolloutAndNotInRolloutGroups(@NotNull String rolloutId, @NotEmpty Collection<Long> groups);
+
+    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    long countByActionsInRolloutGroup(final long rolloutGroupId);
 
     /**
      * Find a {@link Target} based a given ID.
@@ -322,44 +284,6 @@ public interface TargetManagement<T extends Target>
      */
     @PreAuthorize(HAS_AUTH_READ_TARGET)
     Optional<Target> getByControllerId(@NotEmpty String controllerId);
-
-    /**
-     * Gets a {@link Target} based a given controller id and includes the details specified by the details key.
-     *
-     * @param controllerId to look for.
-     * @param detailsKey the key of the details to include, e.g. {@link #DETAILS_AUTO_CONFIRMATION_STATUS}
-     * @return {@link Target}
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    Target getWithDetails(@NotEmpty String controllerId, String detailsKey);
-
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    default Target getWithDetails(@NotEmpty String controllerId) {
-        return getWithDetails(controllerId, DETAILS_BASE);
-    }
-
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    default Target getWithAutoConfigurationStatus(@NotEmpty String controllerId) {
-        return getWithDetails(controllerId, DETAILS_AUTO_CONFIRMATION_STATUS);
-    }
-
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    default Target getWithTags(@NotEmpty String controllerId) {
-        return getWithDetails(controllerId, DETAILS_TAGS);
-    }
-
-    /**
-     * Filter {@link Target}s for all the given parameters. If all parameters except
-     * pageable are null, all available {@link Target}s are returned.
-     *
-     * @param filterParams the filters to apply; only filters are enabled that have non-null
-     *         value; filters are AND-gated
-     * @param pageable page parameters
-     * @return the found {@link Target}s
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    Slice<Target> findByFilters(@NotNull FilterParams filterParams, @NotNull Pageable pageable);
 
     /**
      * retrieves {@link Target}s by the installed {@link DistributionSet}.
@@ -389,30 +313,6 @@ public interface TargetManagement<T extends Target>
     Page<Target> findByInstalledDistributionSetAndRsql(long distributionSetId, @NotNull String rsql, @NotNull Pageable pageReq);
 
     /**
-     * Retrieves the {@link Target} which have a certain {@link TargetUpdateStatus}.
-     *
-     * @param status the {@link TargetUpdateStatus} to be filtered on
-     * @param pageable page parameter
-     * @return the found {@link Target}s
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    Page<Target> findByUpdateStatus(@NotNull TargetUpdateStatus status, @NotNull Pageable pageable);
-
-    /**
-     * Retrieves all target based on {@link TargetFilterQuery}.
-     *
-     * @param targetFilterQueryId {@link TargetFilterQuery#getId()}
-     * @param pageable pagination parameter
-     * @return the found {@link Target}s, never {@code null}
-     * @throws EntityNotFoundException if {@link TargetFilterQuery} with given ID does not exist.
-     * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
-     *         given {@code fieldNameProvider}
-     * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    Slice<Target> findByTargetFilterQuery(long targetFilterQueryId, @NotNull Pageable pageable);
-
-    /**
      * Find targets by tag name.
      *
      * @param tagId tag ID
@@ -438,39 +338,35 @@ public interface TargetManagement<T extends Target>
     @PreAuthorize(HAS_AUTH_READ_TARGET)
     Page<Target> findByRsqlAndTag(@NotNull String rsql, long tagId, @NotNull Pageable pageable);
 
-    /**
-     * Verify if a target matches a specific target filter query, does not have a
-     * specific DS already assigned and is compatible with it.
-     *
-     * @param controllerId of the {@link org.eclipse.hawkbit.repository.model.Target} to check
-     * @param distributionSetId of the {@link org.eclipse.hawkbit.repository.model.DistributionSet} to consider
-     * @param targetFilterQuery to execute
-     * @return true if it matches
-     */
-    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
-    boolean isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(
-            @NotNull String controllerId, long distributionSetId, @NotNull String targetFilterQuery);
 
     /**
-     * Initiates {@link TargetType} assignment to given {@link Target}s. If some targets in the list have the {@link TargetType}
-     * not yet assigned, they will get assigned. If all targets are already of that type, there will be no un-assignment.
+     * Deletes target with the given controller ID.
      *
-     * @param controllerIds to set the type to
-     * @param typeId to assign targets to
-     * @return {@link TargetTypeAssignmentResult} with all meta-data of the assignment outcome.
-     * @throws EntityNotFoundException if target type with given id does not exist
+     * @param controllerId the controller ID of the target to be deleted
+     * @throws EntityNotFoundException if target with given ID does not exist
      */
-    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
-    TargetTypeAssignmentResult assignType(@NotEmpty Collection<String> controllerIds, @NotNull Long typeId);
+    @PreAuthorize(HAS_AUTH_DELETE_TARGET)
+    void deleteByControllerId(@NotEmpty String controllerId);
 
     /**
-     * Initiates {@link TargetType} un-assignment to given {@link Target}s. The type of the targets will be set to {@code null}
+     * Assign a {@link TargetType} assignment to given {@link Target}.
      *
-     * @param controllerIds to remove the type from
-     * @return {@link TargetTypeAssignmentResult} with all meta-data of the assignment outcome.
+     * @param controllerId to un-assign for
+     * @param targetTypeId Target type id
+     * @return the unassigned target
+     * @throws EntityNotFoundException if TargetType with given target ID does not exist
      */
     @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
-    TargetTypeAssignmentResult unassignType(@NotEmpty Collection<String> controllerIds);
+    Target assignType(@NotEmpty String controllerId, @NotNull Long targetTypeId);
+
+    /**
+     * Un-assign a {@link TargetType} assignment to given {@link Target}.
+     *
+     * @param controllerId to un-assign for
+     * @return the unassigned target
+     */
+    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
+    Target unassignType(@NotEmpty String controllerId);
 
     /**
      * Assign a {@link TargetTag} assignment to given {@link Target}s.
@@ -496,6 +392,16 @@ public interface TargetManagement<T extends Target>
     List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long targetTagId);
 
     /**
+     * Finds a single target tags its id.
+     *
+     * @param controllerId of the {@link Target}
+     * @return the found Tag set
+     * @throws EntityNotFoundException if target with given ID does not exist
+     */
+    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    Set<TargetTag> getTags(@NotEmpty String controllerId);
+
+    /**
      * Un-assign a {@link TargetTag} assignment to given {@link Target}s.
      *
      * @param controllerIds to un-assign for
@@ -519,24 +425,22 @@ public interface TargetManagement<T extends Target>
     List<Target> unassignTag(@NotEmpty Collection<String> controllerIds, long targetTagId);
 
     /**
-     * Un-assign a {@link TargetType} assignment to given {@link Target}.
+     * Assigns the target group of the targets matching the provided rsql filter.
      *
-     * @param controllerId to un-assign for
-     * @return the unassigned target
+     * @param group target group parameter
+     * @param rsql rsql filter for {@link Target}
      */
     @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
-    Target unassignType(@NotEmpty String controllerId);
+    void assignTargetGroupWithRsql(String group, @NotNull String rsql);
 
     /**
-     * Assign a {@link TargetType} assignment to given {@link Target}.
+     * Assigns the provided group to the targets which are in the provided list of controllerIds.
      *
-     * @param controllerId to un-assign for
-     * @param targetTypeId Target type id
-     * @return the unassigned target
-     * @throws EntityNotFoundException if TargetType with given target ID does not exist
+     * @param group target group parameter
+     * @param controllerIds list of targets
      */
     @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
-    Target assignType(@NotEmpty String controllerId, @NotNull Long targetTypeId);
+    void assignTargetsWithGroup(String group, @NotEmpty List<String> controllerIds);
 
     /**
      * Finds targets by group or subgroup.
@@ -556,82 +460,6 @@ public interface TargetManagement<T extends Target>
      */
     @PreAuthorize(HAS_AUTH_READ_TARGET)
     List<String> findGroups();
-
-    /**
-     * Assigns the target group of the targets matching the provided rsql filter.
-     *
-     * @param group target group parameter
-     * @param rsql rsql filter for {@link Target}
-     */
-    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
-    void assignTargetGroupWithRsql(String group, @NotNull String rsql);
-
-    /**
-     * Assigns the provided group to the targets which are in the provided list of controllerIds.
-     *
-     * @param group target group parameter
-     * @param controllerIds list of targets
-     */
-    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
-    void assignTargetsWithGroup(String group, @NotEmpty List<String> controllerIds);
-
-    /**
-     * Verifies that {@link Target} with given controller ID exists in the repository.
-     *
-     * @param controllerId of target
-     * @return {@code true} if target with given ID exists
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    boolean existsByControllerId(@NotEmpty String controllerId);
-
-    /**
-     * Finds a single target tags its id.
-     *
-     * @param controllerId of the {@link Target}
-     * @return the found Tag set
-     * @throws EntityNotFoundException if target with given ID does not exist
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    Set<TargetTag> getTags(@NotEmpty String controllerId);
-
-    /**
-     * Get controller attributes of given {@link Target}.
-     *
-     * @param controllerId of the target
-     * @return controller attributes as key/value pairs
-     * @throws EntityNotFoundException if target with given ID does not exist
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    Map<String, String> getControllerAttributes(@NotEmpty String controllerId);
-
-    /**
-     * Trigger given {@link Target} to update its attributes.
-     *
-     * @param controllerId of the target
-     * @throws EntityNotFoundException if target with given ID does not exist
-     */
-    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
-    void requestControllerAttributes(@NotEmpty String controllerId);
-
-    /**
-     * Check if update of given {@link Target} attributes is already requested.
-     *
-     * @param controllerId of target
-     * @return {@code true}: update of controller attributes triggered.
-     *         {@code false}: update of controller attributes not requested.
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    boolean isControllerAttributesRequested(@NotEmpty String controllerId);
-
-    /**
-     * Retrieves {@link Target}s where
-     * {@link #isControllerAttributesRequested(String)}.
-     *
-     * @param pageable page parameter
-     * @return the found {@link Target}s
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
-    Page<Target> findByControllerAttributesRequested(@NotNull Pageable pageable);
 
     /**
      * Creates or updates a meta-data value.
@@ -718,8 +546,8 @@ public interface TargetManagement<T extends Target>
             // truncate controller ID to max name length (if too big)
             name = ObjectUtils.isEmpty(builder.name)
                     ? controllerId != null && controllerId.length() > NamedEntity.NAME_MAX_SIZE
-                            ? controllerId.substring(0, NamedEntity.NAME_MAX_SIZE)
-                            : controllerId
+                    ? controllerId.substring(0, NamedEntity.NAME_MAX_SIZE)
+                    : controllerId
                     : builder.name;
             securityToken = ObjectUtils.isEmpty(builder.securityToken)
                     ? SecurityTokenGeneratorHolder.getInstance().generateToken()

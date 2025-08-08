@@ -26,13 +26,18 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.SetJoin;
 import jakarta.validation.ConstraintViolationException;
 
 import org.assertj.core.api.Assertions;
 import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpRole;
-import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.TargetManagement.Update;
@@ -54,12 +59,16 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaNamedEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -70,9 +79,7 @@ import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
-import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
@@ -81,6 +88,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.domain.Specification;
 
 /**
  * Feature: Component Tests - Repository<br/>
@@ -91,7 +99,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     private static final String WHITESPACE_ERROR = "target with whitespaces in controller id should not be created";
 
     /**
-     * Verifies that management get access react as specified on calls for non existing entities by means 
+     * Verifies that management get access react as specified on calls for non existing entities by means
      * of Optional not present.
      */
     @Test
@@ -104,8 +112,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Verifies that management queries react as specified on calls for non existing entities 
-     *  by means of throwing EntityNotFoundException.
+     * Verifies that management queries react as specified on calls for non existing entities
+     * by means of throwing EntityNotFoundException.
      */
     @Test
     @ExpectEvents({
@@ -122,15 +130,10 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> targetManagement.findByTag(NOT_EXIST_IDL, PAGE), "TargetTag");
         verifyThrownExceptionBy(() -> targetManagement.findByRsqlAndTag("name==*", NOT_EXIST_IDL, PAGE), "TargetTag");
 
-        verifyThrownExceptionBy(() -> targetManagement.countByAssignedDistributionSet(NOT_EXIST_IDL), "DistributionSet");
-        verifyThrownExceptionBy(() -> targetManagement.countByInstalledDistributionSet(NOT_EXIST_IDL), "DistributionSet");
-        verifyThrownExceptionBy(() -> targetManagement.existsByInstalledOrAssignedDistributionSet(NOT_EXIST_IDL), "DistributionSet");
-
-        verifyThrownExceptionBy(() -> targetManagement.countByTargetFilterQuery(NOT_EXIST_IDL), "TargetFilterQuery");
-        verifyThrownExceptionBy(() -> targetManagement.countByRsqlAndNonDSAndCompatibleAndUpdatable(NOT_EXIST_IDL, "name==*"),
+        verifyThrownExceptionBy(() -> targetManagement.countByRsqlAndNonDsAndCompatibleAndUpdatable(NOT_EXIST_IDL, "name==*"),
                 "DistributionSet");
 
-        verifyThrownExceptionBy(() -> targetManagement.deleteByControllerID(NOT_EXIST_ID), "Target");
+        verifyThrownExceptionBy(() -> targetManagement.deleteByControllerId(NOT_EXIST_ID), "Target");
         verifyThrownExceptionBy(() -> targetManagement.delete(Collections.singletonList(NOT_EXIST_IDL)), "Target");
 
         verifyThrownExceptionBy(
@@ -166,7 +169,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
-    void getTargetSecurityTokenOnlyWithCorrectPermission() throws Exception {
+    void getTargetSecurityTokenOnlyWithCorrectPermission() {
         final Target createdTarget = targetManagement
                 .create(Create.builder().controllerId("targetWithSecurityToken").securityToken("token").build());
 
@@ -280,10 +283,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         target = createTargetWithAttributes("4711");
         assertThat(targetManagement.count()).as("target count is wrong").isEqualTo(1);
-        assertThat(targetManagement.existsByControllerId("4711")).isTrue();
         targetManagement.delete(Collections.singletonList(target.getId()));
         assertThat(targetManagement.count()).as("target count is wrong").isZero();
-        assertThat(targetManagement.existsByControllerId("4711")).isFalse();
 
         final List<Long> targets = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
@@ -316,19 +317,6 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet testDs1 = testdataFactory.createDistributionSet("test");
         final DistributionSet testDs2 = testdataFactory.createDistributionSet("test2");
 
-        assertThat(targetManagement.countByAssignedDistributionSet(testDs1.getId()))
-                .as("For newly created distributions sets the assigned target count should be zero").isZero();
-        assertThat(targetManagement.countByInstalledDistributionSet(testDs1.getId()))
-                .as("For newly created distributions sets the installed target count should be zero").isZero();
-        assertThat(targetManagement.existsByInstalledOrAssignedDistributionSet(testDs1.getId()))
-                .as("Exists assigned or installed query should return false for new distribution sets").isFalse();
-        assertThat(targetManagement.countByAssignedDistributionSet(testDs2.getId()))
-                .as("For newly created distributions sets the assigned target count should be zero").isZero();
-        assertThat(targetManagement.countByInstalledDistributionSet(testDs2.getId()))
-                .as("For newly created distributions sets the installed target count should be zero").isZero();
-        assertThat(targetManagement.existsByInstalledOrAssignedDistributionSet(testDs2.getId()))
-                .as("For newly created distributions sets the assigned target count should be zero").isFalse();
-
         createTargetWithAttributes("4711");
 
         final long current = System.currentTimeMillis();
@@ -344,19 +332,6 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         Target target = targetManagement.getByControllerId("4711").orElseThrow(IllegalStateException::new);
         // read data
-
-        assertThat(targetManagement.countByAssignedDistributionSet(testDs1.getId())).as("Target count is wrong")
-                .isZero();
-        assertThat(targetManagement.countByInstalledDistributionSet(testDs1.getId())).as("Target count is wrong")
-                .isEqualTo(1);
-        assertThat(targetManagement.existsByInstalledOrAssignedDistributionSet(testDs1.getId()))
-                .as("Target count is wrong").isTrue();
-        assertThat(targetManagement.countByAssignedDistributionSet(testDs2.getId())).as("Target count is wrong")
-                .isEqualTo(1);
-        assertThat(targetManagement.countByInstalledDistributionSet(testDs2.getId())).as("Target count is wrong")
-                .isZero();
-        assertThat(targetManagement.existsByInstalledOrAssignedDistributionSet(testDs2.getId()))
-                .as("Target count is wrong").isTrue();
         assertThat(target.getLastTargetQuery()).as("Target query is not work").isGreaterThanOrEqualTo(current);
 
         final DistributionSet assignedDs = deploymentManagement.getAssignedDistributionSet("4711")
@@ -401,8 +376,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1) })
-    void singleTargetIsInsertedIntoRepo() throws Exception {
-
+    void singleTargetIsInsertedIntoRepo() {
         final String myCtrlID = "myCtrlID";
 
         Target savedTarget = testdataFactory.createTarget(myCtrlID);
@@ -482,7 +456,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
             }
         }
 
-        targetManagement.deleteByControllerID(extra.getControllerId());
+        targetManagement.deleteByControllerId(extra.getControllerId());
 
         final int numberToDelete = 50;
         final Collection<? extends Target> targetsToDelete = firstList.subList(0, numberToDelete);
@@ -495,7 +469,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(firstList.spliterator().getExactSizeIfKnown() - numberToDelete).as("Size of split list")
                 .isEqualTo(targetsLeft.spliterator().getExactSizeIfKnown());
 
-       Assertions.<Target>assertThat(targetsLeft).as("Not all undeleted found").doesNotContain(deletedTargets);
+        Assertions.<Target> assertThat(targetsLeft).as("Not all undeleted found").doesNotContain(deletedTargets);
     }
 
     /**
@@ -567,7 +541,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assignTag(tagABCTargets, tagB);
         assignTag(tagABCTargets, tagC);
 
-        assertThat(targetManagement.countByFilters(new FilterParams(null, null, null, null, Boolean.FALSE, "X")))
+        assertThat(countByFilters(new FilterParams(Boolean.FALSE, "X")))
                 .as("Target count is wrong").isZero();
 
         // search for targets with tag tagA
@@ -597,11 +571,11 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         checkTargetHasNotTags(tagCTargets, tagA, tagB);
 
         // check again target lists refreshed from DB
-        assertThat(targetManagement.countByFilters(new FilterParams(null, null, null, null, Boolean.FALSE, "A")))
+        assertThat(countByFilters(new FilterParams(Boolean.FALSE, "A")))
                 .as("Target count is wrong").isEqualTo(targetWithTagA.size());
-        assertThat(targetManagement.countByFilters(new FilterParams(null, null, null, null, Boolean.FALSE, "B")))
+        assertThat(countByFilters(new FilterParams(Boolean.FALSE, "B")))
                 .as("Target count is wrong").isEqualTo(targetWithTagB.size());
-        assertThat(targetManagement.countByFilters(new FilterParams(null, null, null, null, Boolean.FALSE, "C")))
+        assertThat(countByFilters(new FilterParams(Boolean.FALSE, "C")))
                 .as("Target count is wrong").isEqualTo(targetWithTagC.size());
     }
 
@@ -682,12 +656,10 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         testdataFactory.createTargets(25, "target-id-B", "first description");
 
         final String[] tagNames = null;
-        final List<Target> targetsListWithNoTag = targetManagement
-                .findByFilters(new FilterParams(null, null, null, null, Boolean.TRUE, tagNames), PAGE).getContent();
+        final long targetsListWithNoTag = countByFilters(new FilterParams(Boolean.TRUE, tagNames));
 
         assertThat(targetManagement.count()).as("Total targets").isEqualTo(50L);
-        assertThat(targetsListWithNoTag).as("Targets with no tag").hasSize(25);
-
+        assertThat(targetsListWithNoTag).as("Targets with no tag").isEqualTo(25);
     }
 
     /**
@@ -758,16 +730,11 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     void verifyRequestControllerAttributes() {
         final String knownControllerId = "KnownControllerId";
         final Target target = createTargetWithAttributes(knownControllerId);
-
-        assertThat(targetManagement.findByControllerAttributesRequested(PAGE)).isEmpty();
-        assertThat(targetManagement.isControllerAttributesRequested(knownControllerId)).isFalse();
-
-        targetManagement.requestControllerAttributes(knownControllerId);
-        final Target updated = targetManagement.getByControllerId(knownControllerId).get();
-
         assertThat(target.isRequestControllerAttributes()).isFalse();
-        assertThat(targetManagement.findByControllerAttributesRequested(PAGE).getContent()).contains(updated);
-        assertThat(targetManagement.isControllerAttributesRequested(knownControllerId)).isTrue();
+
+        targetManagement.update(Update.builder().id(target.getId()).requestControllerAttributes(true).build());
+        final Target updated = targetManagement.getByControllerId(knownControllerId).orElseThrow();
+        assertThat(updated.isRequestControllerAttributes()).isTrue();
     }
 
     /**
@@ -949,8 +916,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 20),
             @Expect(type = TargetTypeCreatedEvent.class, count = 2),
-            @Expect(type = TargetUpdatedEvent.class, count = 29),
-            @Expect(type = TargetDeletedEvent.class, count = 1) })
+            @Expect(type = TargetUpdatedEvent.class, count = 20) })
     void targetTypeBulkAssignments() {
         final List<Target> typeATargets = testdataFactory.createTargets(10, "typeATargets", "first description");
         final List<Target> typeBTargets = testdataFactory.createTargets(10, "typeBTargets", "first description");
@@ -960,30 +926,16 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final TargetType typeB = testdataFactory.createTargetType("B", Set.of(standardDsType));
 
         // assign target type to target
-        TargetTypeAssignmentResult resultA = initiateTypeAssignment(typeATargets, typeA);
-        TargetTypeAssignmentResult resultB = initiateTypeAssignment(typeBTargets, typeB);
-        assertThat(resultA.getAssigned()).isEqualTo(10);
-        assertThat(resultB.getAssigned()).isEqualTo(10);
+        initiateTypeAssignment(typeATargets, typeA);
+        initiateTypeAssignment(typeBTargets, typeB);
         checkTargetsHaveType(typeATargets, typeA);
         checkTargetsHaveType(typeBTargets, typeB);
 
         // double assignment does not unassign
-        resultA = initiateTypeAssignment(typeATargets, typeA);
-        resultB = initiateTypeAssignment(typeBTargets, typeB);
-        assertThat(resultA.getAssigned()).isZero();
-        assertThat(resultB.getAssigned()).isZero();
-        assertThat(resultA.getAlreadyAssigned()).isEqualTo(10);
-        assertThat(resultB.getAlreadyAssigned()).isEqualTo(10);
+        initiateTypeAssignment(typeATargets, typeA);
+        initiateTypeAssignment(typeBTargets, typeB);
         checkTargetsHaveType(typeATargets, typeA);
         checkTargetsHaveType(typeBTargets, typeB);
-
-        // verify that type assignment does not throw an error if target list
-        // includes an unknown id
-        targetManagement.deleteByControllerID(typeATargets.get(0).getControllerId());
-        final TargetTypeAssignmentResult resultC = initiateTypeAssignment(typeATargets, typeB);
-        assertThat(resultC.getAssigned()).isEqualTo(9);
-        assertThat(resultC.getAlreadyAssigned()).isZero();
-        checkTargetsHaveType(typeATargets, typeB);
     }
 
     /**
@@ -1170,13 +1122,11 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet();
 
         assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(
-                "notExisting", ds.getId(),"name==*")).isFalse();
+                "notExisting", ds.getId(), "name==*")).isFalse();
     }
 
     /**
      * Tests action based aspects of the dynamic group assignment filters.
-     */
-    /**
      * Target matches filter no active action with ge weight.
      */
     @Test
@@ -1344,6 +1294,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .as("target with too long address should not be updated")
                 .isThrownBy(() -> targetManagement.update(targetUpdate));
     }
+
     private void createTargetWithInvalidControllerId() {
         final Create targetCreateEmpty = Create.builder().controllerId("").build();
         assertThatExceptionOfType(ConstraintViolationException.class)
@@ -1424,8 +1375,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     private void checkTargetHasNotTags(final Iterable<Target> targets, final TargetTag... tags) {
         for (final Target tl : targets) {
-            targetManagement.getByControllerId(tl.getControllerId()).get();
-
+            targetManagement.getByControllerId(tl.getControllerId()).orElseThrow();
             for (final Tag tag : tags) {
                 for (final Tag tt : getTargetTags(tl.getControllerId())) {
                     if (tag.getName().equals(tt.getName())) {
@@ -1438,7 +1388,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     private void insertMetadata(final String knownKey, final String knownValue, final Target target) {
         targetManagement.createMetadata(target.getControllerId(), Map.of(knownKey, knownValue));
-        assertThat(targetManagement.getMetadata(target.getControllerId()).get(knownKey)).isEqualTo(knownValue);
+        assertThat(targetManagement.getMetadata(target.getControllerId())).containsEntry(knownKey, knownValue);
     }
 
     private void checkTargetsHaveType(final List<Target> targets, final TargetType type) {
@@ -1461,14 +1411,11 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         return target;
     }
 
-    private Target createTargetWithTargetTypeAndMetadata(final String controllerId, final TargetType targetType, final int count) {
+    private void createTargetWithTargetTypeAndMetadata(final String controllerId, final TargetType targetType, final int count) {
         final Target target = testdataFactory.createTarget(controllerId, controllerId, targetType);
-
         for (int index = 1; index <= count; index++) {
             insertMetadata("key" + index, controllerId + "-value" + index, target);
         }
-
-        return target;
     }
 
     private void createAction(final Target target, final Rollout rollout, final Integer weight, final Action.Status status,
@@ -1499,4 +1446,65 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(foundTargetsByMetadataAndControllerId.getContent().stream().map(Target::getControllerId))
                 .as("Targets found by RSQL filter have wrong controller ids").containsExactlyInAnyOrder(controllerIds);
     }
+
+    private long countByFilters(final FilterParams filterParams) {
+        final List<Specification<JpaTarget>> specList = buildSpecificationList(filterParams);
+        return JpaManagementHelper.countBySpec(targetRepository, specList);
+    }
+
+    private List<Specification<JpaTarget>> buildSpecificationList(final FilterParams filterParams) {
+        final List<Specification<JpaTarget>> specList = new ArrayList<>();
+        if (hasTagsFilterActive(filterParams)) {
+            specList.add(hasTags(filterParams.filterByTagNames(), filterParams.selectTargetWithNoTag()));
+        }
+        return specList;
+    }
+
+    private static boolean hasTagsFilterActive(final FilterParams filterParams) {
+        final boolean isNoTagActive = Boolean.TRUE.equals(filterParams.selectTargetWithNoTag());
+        final boolean isAtLeastOneTagActive = filterParams.filterByTagNames() != null && filterParams.filterByTagNames().length > 0;
+        return isNoTagActive || isAtLeastOneTagActive;
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s by "has no tag names"or "has at least on of the given tag names".
+     *
+     * @param tagNames to be filtered on
+     * @param selectTargetWithNoTag flag to get targets with no tag assigned
+     * @return the {@link Target} {@link Specification}
+     */
+    private static Specification<JpaTarget> hasTags(final String[] tagNames, final Boolean selectTargetWithNoTag) {
+        return (targetRoot, query, cb) -> {
+            final Predicate predicate = getHasTagsPredicate(targetRoot, cb, selectTargetWithNoTag, tagNames);
+            query.distinct(true);
+            return predicate;
+        };
+    }
+
+    private static Predicate getHasTagsPredicate(
+            final Root<JpaTarget> targetRoot, final CriteriaBuilder cb, final Boolean selectTargetWithNoTag, final String[] tagNames) {
+        final SetJoin<JpaTarget, JpaTargetTag> tags = targetRoot.join(JpaTarget_.tags, JoinType.LEFT);
+        final Path<String> exp = tags.get(AbstractJpaNamedEntity_.name);
+
+        final List<Predicate> hasTagsPredicates = new ArrayList<>();
+        if (isNoTagActive(selectTargetWithNoTag)) {
+            hasTagsPredicates.add(exp.isNull());
+        }
+        if (isAtLeastOneTagActive(tagNames)) {
+            hasTagsPredicates.add(exp.in((Object[]) tagNames));
+        }
+
+        return hasTagsPredicates.stream().reduce(cb::or)
+                .orElseThrow(() -> new RuntimeException("Neither NO_TAG, nor TAG target tag filter was provided!"));
+    }
+
+    private static boolean isNoTagActive(final Boolean selectTargetWithNoTag) {
+        return Boolean.TRUE.equals(selectTargetWithNoTag);
+    }
+
+    private static boolean isAtLeastOneTagActive(final String[] tagNames) {
+        return tagNames != null && tagNames.length > 0;
+    }
+
+    private record FilterParams(Boolean selectTargetWithNoTag, String... filterByTagNames) {}
 }

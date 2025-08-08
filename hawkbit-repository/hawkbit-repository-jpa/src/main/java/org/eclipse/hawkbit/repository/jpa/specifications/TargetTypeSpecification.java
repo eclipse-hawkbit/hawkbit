@@ -32,16 +32,6 @@ import org.springframework.data.jpa.domain.Specification;
 public final class TargetTypeSpecification {
 
     /**
-     * {@link Specification} for retrieving {@link TargetType}s by controllerId
-     *
-     * @param ids to search for
-     * @return the {@link TargetType} {@link Specification}
-     */
-    public static Specification<JpaTargetType> hasIdIn(final Collection<Long> ids) {
-        return (targetRoot, query, cb) -> targetRoot.get(AbstractJpaBaseEntity_.id).in(ids);
-    }
-
-    /**
      * {@link Specification} for retrieving {@link TargetType}s based on a {@link DistributionSetType} name.
      *
      * @param dsTypeId to search for
@@ -72,15 +62,5 @@ public final class TargetTypeSpecification {
      */
     public static Specification<JpaTargetType> hasName(final String name) {
         return (targetRoot, query, cb) -> cb.equal(targetRoot.get(AbstractJpaNamedEntity_.name), name);
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link TargetType}s by "like name".
-     *
-     * @param name to be filtered on
-     * @return the {@link TargetType} {@link Specification}
-     */
-    public static Specification<JpaTargetType> likeName(final String name) {
-        return (targetRoot, query, cb) -> cb.like(cb.lower(targetRoot.get(AbstractJpaNamedEntity_.name)), name.toLowerCase());
     }
 }

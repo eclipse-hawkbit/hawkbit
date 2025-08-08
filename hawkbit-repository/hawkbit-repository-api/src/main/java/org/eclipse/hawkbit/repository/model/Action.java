@@ -55,9 +55,7 @@ public interface Action extends TenantAwareBaseEntity {
     DistributionSet getDistributionSet();
 
     /**
-     * @return <code>true</code> when action is in state
-     *         {@link Status#CANCELING} or {@link Status#CANCELED}, false
-     *         otherwise
+     * @return <code>true</code> when action is in state {@link Status#CANCELING} or {@link Status#CANCELED}, false otherwise
      */
     default boolean isCancelingOrCanceled() {
         return Status.CANCELING == getStatus() || Status.CANCELED == getStatus();

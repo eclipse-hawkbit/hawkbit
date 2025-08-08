@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDistributionSetUpdate;
@@ -76,10 +75,6 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
             assertThat(targetManagement.findByRsql("id==*", Pageable.unpaged()).get().map(Identifiable::getId).toList())
                     .containsOnly(permittedTarget.getId());
 
-            // verify targetManagement#findByUpdateStatus
-            assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.REGISTERED, Pageable.unpaged()).get()
-                    .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
-
             // verify targetManagement#getByControllerID
             assertThat(targetManagement.getByControllerId(permittedTarget.getControllerId())).isPresent();
             final String hiddenTargetControllerId = hiddenTarget.getControllerId();
@@ -105,19 +100,6 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
             assertThatThrownBy(() -> targetManagement.getControllerAttributes(hiddenTargetControllerId))
                     .as("Target should not be found.")
                     .isInstanceOf(InsufficientPermissionException.class);
-        });
-
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(TargetFilterQueryManagement.Create.builder().name("test").query("id==*").build());
-
-        runAs(withUser("user", READ_TARGET + "/controllerId==" + permittedTarget.getControllerId()), () -> {
-            // verify targetManagement#findByTargetFilterQuery
-            assertThat(targetManagement.findByTargetFilterQuery(targetFilterQuery.getId(), Pageable.unpaged()).get()
-                    .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
-
-            // verify targetManagement#findByTargetFilterQuery (used by UI)
-            assertThat(targetManagement.findByFilters(new FilterParams(null, null, null, null), Pageable.unpaged()).get()
-                    .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
         });
     }
 
@@ -208,11 +190,6 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
                 .create(Create.builder().controllerId("device02").updateStatus(TargetUpdateStatus.REGISTERED).build())
                 .getControllerId();
 
-        runAs(withUser("user", READ_TARGET + "/controllerId==" + permittedTarget.getControllerId()), () ->
-                // verify targetManagement#findByUpdateStatus before assignment
-                assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.REGISTERED, Pageable.unpaged()).get()
-                        .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId()));
-
         runAs(withUser("user",
                 READ_TARGET + "/controllerId==" + permittedTarget.getControllerId(),
                 UPDATE_TARGET + "/controllerId==" + permittedTarget.getControllerId(),
@@ -221,14 +198,6 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
             assertThat(assignDistributionSet(dsId, permittedTarget.getControllerId()).getAssigned()).isEqualTo(1);
             // assigning of not allowed target behaves as not found
             assertThatThrownBy(() -> assignDistributionSet(dsId, hiddenTargetControllerId)).isInstanceOf(AssertionError.class);
-
-            // verify targetManagement#findByUpdateStatus(REGISTERED) after assignment
-            assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.REGISTERED, Pageable.unpaged())
-                    .getTotalElements()).isZero();
-
-            // verify targetManagement#findByUpdateStatus(PENDING) after assignment
-            assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.PENDING, Pageable.unpaged()).get()
-                    .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
         });
     }
 

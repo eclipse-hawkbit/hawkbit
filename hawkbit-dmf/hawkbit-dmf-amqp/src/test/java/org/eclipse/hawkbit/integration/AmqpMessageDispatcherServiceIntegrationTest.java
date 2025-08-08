@@ -538,7 +538,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         final String controllerId = TARGET_PREFIX + "sendDeleteMessage";
 
         registerAndAssertTargetWithExistingTenant(controllerId);
-        targetManagement.deleteByControllerID(controllerId);
+        targetManagement.deleteByControllerId(controllerId);
         assertDeleteMessage(controllerId);
     }
 

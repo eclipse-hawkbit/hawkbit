@@ -531,7 +531,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         implicitLock(ds3);
 
         findTargetAndAssertUpdateStatus(Optional.of(ds3), TargetUpdateStatus.PENDING, 3, Optional.empty());
-        assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.UNKNOWN, PageRequest.of(0, 10))).hasSize(2);
+        assertThat(findByUpdateStatus(TargetUpdateStatus.UNKNOWN, PageRequest.of(0, 10))).hasSize(2);
 
         // action1 done
         postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId1, getJsonClosedDeploymentActionFeedback(), status().isOk());
@@ -563,7 +563,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).get().getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
         assignDistributionSet(ds, Collections.singletonList(savedTarget));
         final Action action = actionRepository
-                .findAll(ActionSpecifications.byDistributionSetId(ds.getId()), PAGE)
+                .findAll(byDistributionSetId(ds.getId()), PAGE)
                 .map(Action.class::cast).getContent().get(0);
 
         postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action.getId(),
@@ -804,9 +804,9 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     private void assertTargetCountByStatus(final int pending, final int error, final int inSync) {
-        assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.PENDING, PageRequest.of(0, 10))).hasSize(pending);
-        assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.ERROR, PageRequest.of(0, 10))).hasSize(error);
-        assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.IN_SYNC, PageRequest.of(0, 10))).hasSize(inSync);
+        assertThat(findByUpdateStatus(TargetUpdateStatus.PENDING, PageRequest.of(0, 10))).hasSize(pending);
+        assertThat(findByUpdateStatus(TargetUpdateStatus.ERROR, PageRequest.of(0, 10))).hasSize(error);
+        assertThat(findByUpdateStatus(TargetUpdateStatus.IN_SYNC, PageRequest.of(0, 10))).hasSize(inSync);
     }
 
     private void assertActionStatusCount(final int total, final int running, final int warning, final int finished, final int canceled) {
