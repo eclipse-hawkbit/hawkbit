@@ -33,11 +33,11 @@ import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitize
 @RestController
 public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
 
-    private final TargetManagement targetManagement;
+    private final TargetManagement<? extends Target> targetManagement;
     private final TenantConfigHelper tenantConfigHelper;
 
     public MgmtTargetGroupResource(
-            final TargetManagement targetManagement,
+            final TargetManagement <? extends Target>targetManagement,
             final TenantConfigurationManagement tenantConfigurationManagement, final SystemSecurityContext systemSecurityContext) {
         this.targetManagement = targetManagement;
         this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);

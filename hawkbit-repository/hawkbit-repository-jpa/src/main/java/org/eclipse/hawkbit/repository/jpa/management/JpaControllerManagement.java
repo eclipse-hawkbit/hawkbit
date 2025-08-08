@@ -151,7 +151,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private final Duration minPollingTime;
     private final Duration maxPollingTime;
     private final PlatformTransactionManager txManager;
-    private final EntityFactory entityFactory;
     private final EntityManager entityManager;
     private final AfterTransactionCommitExecutor afterCommit;
     private final SystemSecurityContext systemSecurityContext;
@@ -167,7 +166,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final TenantConfigurationManagement tenantConfigurationManagement, final ControllerPollProperties controllerPollProperties,
-            final PlatformTransactionManager txManager, final EntityFactory entityFactory, final EntityManager entityManager,
+            final PlatformTransactionManager txManager, final EntityManager entityManager,
             final AfterTransactionCommitExecutor afterCommit,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
             final ScheduledExecutorService executorService) {
@@ -189,7 +188,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 ? Duration.of(100, ChronoUnit.YEARS)
                 : DurationHelper.fromString(controllerPollProperties.getMaxPollingTime());
         this.txManager = txManager;
-        this.entityFactory = entityFactory;
         this.entityManager = entityManager;
         this.afterCommit = afterCommit;
         this.systemSecurityContext = systemSecurityContext;
@@ -847,8 +845,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new TargetAttributesRequestedEvent(tenantAware.getCurrentTenant(), target.getId(),
-                        JpaTarget.class, target.getControllerId(), target.getAddress() != null ? target.getAddress().toString() : null
-                ));
+                        JpaTarget.class, target.getControllerId(), target.getAddress() != null ? target.getAddress() : null));
     }
 
     private void handleErrorOnAction(final JpaAction mergedAction, final JpaTarget mergedTarget) {
