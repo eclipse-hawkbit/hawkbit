@@ -26,6 +26,10 @@ public enum DistributionSetTagFields implements RsqlQueryField {
     NAME(TagFields.NAME.getJpaEntityFieldName()),
     DESCRIPTION(TagFields.DESCRIPTION.getJpaEntityFieldName()),
     COLOUR(TagFields.COLOUR.getJpaEntityFieldName()),
+    CREATEDAT("createdAt"),
+    CREATEDBY("createdBy"),
+    LASTMODIFIEDAT("lastModifiedAt"),
+    LASTMODIFIEDBY("lastModifiedBy"),
     DISTRIBUTIONSET(
             "assignedToDistributionSet",
             DistributionSetFields.ID.getJpaEntityFieldName(), DistributionSetFields.NAME.getJpaEntityFieldName());

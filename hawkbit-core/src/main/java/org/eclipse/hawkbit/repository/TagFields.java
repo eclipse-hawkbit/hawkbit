@@ -20,7 +20,11 @@ public enum TagFields implements RsqlQueryField {
     ID("id"),
     NAME("name"),
     DESCRIPTION("description"),
-    COLOUR("colour");
+    COLOUR("colour"),
+    CREATEDAT("createdAt"),
+    CREATEDBY("createdBy"),
+    LASTMODIFIEDAT("lastModifiedAt"),
+    LASTMODIFIEDBY("lastModifiedBy");
 
     private final String jpaEntityFieldName;
 

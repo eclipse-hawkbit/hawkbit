@@ -24,7 +24,11 @@ public enum SoftwareModuleFields implements RsqlQueryField {
     NAME("name"),
     DESCRIPTION("description"),
     VERSION("version"),
-    METADATA("metadata");
+    METADATA("metadata"),
+    CREATEDAT("createdAt"),
+    CREATEDBY("createdBy"),
+    LASTMODIFIEDAT("lastModifiedAt"),
+    LASTMODIFIEDBY("lastModifiedBy");
 
     private final String jpaEntityFieldName;
     private final List<String> subEntityAttributes;

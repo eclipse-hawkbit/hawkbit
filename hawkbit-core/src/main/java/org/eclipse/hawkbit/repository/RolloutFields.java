@@ -23,6 +23,10 @@ public enum RolloutFields implements RsqlQueryField {
     NAME("name"),
     DESCRIPTION("description"),
     STATUS("status"),
+    CREATEDAT("createdAt"),
+    CREATEDBY("createdBy"),
+    LASTMODIFIEDAT("lastModifiedAt"),
+    LASTMODIFIEDBY("lastModifiedBy"),
     DISTRIBUTIONSET(
             "distributionSet",
             DistributionSetFields.ID.getJpaEntityFieldName(),

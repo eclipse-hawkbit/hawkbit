@@ -21,7 +21,11 @@ public enum TargetTagFields implements RsqlQueryField {
     ID(TagFields.ID.getJpaEntityFieldName()),
     NAME(TagFields.NAME.getJpaEntityFieldName()),
     DESCRIPTION(TagFields.DESCRIPTION.getJpaEntityFieldName()),
-    COLOUR(TagFields.COLOUR.getJpaEntityFieldName());
+    COLOUR(TagFields.COLOUR.getJpaEntityFieldName()),
+    CREATEDAT("createdAt"),
+    CREATEDBY("createdBy"),
+    LASTMODIFIEDAT("lastModifiedAt"),
+    LASTMODIFIEDBY("lastModifiedBy");
 
     private final String jpaEntityFieldName;
 
