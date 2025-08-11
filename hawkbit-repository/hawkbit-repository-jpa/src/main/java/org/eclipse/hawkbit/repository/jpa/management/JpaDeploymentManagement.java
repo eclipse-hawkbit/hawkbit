@@ -74,13 +74,12 @@ import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetType;
@@ -516,7 +515,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     @Transactional
-    public void cancelActionsForDistributionSet(final CancelationType cancelationType, final DistributionSet distributionSet) {
+    public void cancelActionsForDistributionSet(final ActionCancellationType cancelationType, final DistributionSet distributionSet) {
         actionRepository.findAll(ActionSpecifications.byDistributionSetIdAndActiveAndStatusIsNot(distributionSet.getId(), Status.CANCELING))
                 .forEach(action -> {
                     try {
@@ -529,7 +528,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                         log.trace("Could not cancel action {} due to entity not found exception.", action.getId(), e);
                     }
                 });
-        if (cancelationType == CancelationType.FORCE) {
+        if (cancelationType == ActionCancellationType.FORCE) {
             actionRepository.findAll(ActionSpecifications.byDistributionSetIdAndActive(distributionSet.getId())).forEach(action -> {
                 try {
                     assertTargetUpdateAllowed(action);
@@ -544,123 +543,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         }
     }
 
-    @Override
-    @Transactional
-    public void cancelActiveActionsForRollouts(Rollout rollout, CancelationType cancelationType) {
-        // check cancellation type
-        if (CancelationType.FORCE.equals(cancelationType)) {
-            forceQuitActionsOfRollout(rollout);
-        } else if (CancelationType.SOFT.equals(cancelationType)) {
-            softCancelActionsOfRollout(rollout);
-        }
-    }
-
-    protected ActionRepository getActionRepository() {
-        return actionRepository;
-    }
-
     protected boolean isActionsAutocloseEnabled() {
         return getConfigValue(REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class);
-    }
-
-    private void softCancelActionsOfRollout(final Rollout rollout) {
-        final List<JpaAction> actions = actionRepository.findAll(
-                ActionSpecifications
-                        .byRolloutIdAndActiveAndStatusIsNot(rollout.getId(),
-                                Arrays.asList(Status.CANCELING, Status.CANCELED)), // avoid cancelling state here, because it is count as still active
-                Pageable.ofSize(999))
-                .getContent();
-        log.info("Found {} active actions for rollout {}, performing soft cancel.", actions.size(), rollout.getId());
-
-        final List<JpaActionStatus> cancellingStatuses = new ArrayList<>(actions.size());
-        actions.forEach(action -> {
-            action.setStatus(Status.CANCELING);
-
-            JpaActionStatus status = new JpaActionStatus();
-            status.setAction(action);
-            status.setStatus(Status.CANCELING);
-            status.setOccurredAt(System.currentTimeMillis());
-            status.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "A cancellation has been performed.");
-            cancellingStatuses.add(status);
-        });
-
-        log.info("Storing actions...");
-        actionStatusRepository.saveAll(cancellingStatuses);
-        actionRepository.saveAll(actions);
-
-        // send cancellation messages to event publisher
-        onlineDsAssignmentStrategy.cancelAssignments(actions, tenantAware.getCurrentTenant());
-    }
-
-    private void forceQuitActionsOfRollout(final Rollout rollout) {
-        final List<JpaAction> actions = findActiveActionsForRollout(rollout.getId(), Pageable.ofSize(999))
-                .getContent();
-        log.info("Found {} active actions for rollout {}", actions.size(), rollout.getId());
-
-        final List<JpaActionStatus> cancelledStatuses = new ArrayList<>(actions.size());
-        actions.forEach(action -> {
-
-            action.setStatus(Status.CANCELED);
-            action.setActive(false);
-
-            JpaActionStatus status = new JpaActionStatus();
-            status.setAction(action);
-            status.setStatus(Status.CANCELED);
-            status.setOccurredAt(System.currentTimeMillis());
-            status.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "A force quit has been performed.");
-            cancelledStatuses.add(status);
-        });
-
-        log.info("Storing actions ...");
-        actionStatusRepository.saveAll(cancelledStatuses);
-        actionRepository.saveAll(actions);
-
-        // find next active actions - filter by targetId list and isActive
-        final List<Long> targetIds = actions.stream()
-                .map(action -> action.getTarget().getId())
-                .toList();
-        entityManager.flush();
-
-        updateTargetAssignedDsWithFirstActiveAction(targetIds);
-
-        // if no active actions
-        // set assignedDs to previously installedDs and status to IN_SYNC
-        // otherwise set assigned ds to the active action ...
-        updateTargetAssignedDsWithInstalledIfNoActiveActions(targetIds);
-    }
-
-    private int updateTargetAssignedDsWithFirstActiveAction(List<Long> targetIds) {
-        final Query updateQuery = entityManager.createNativeQuery(
-                "UPDATE sp_target t " +
-                        "SET t.assigned_distribution_set = ( " +
-                        "SELECT a.distribution_set" +
-                        "   FROM sp_action a" +
-                        "   WHERE a.target = t.id AND a.active = 1" +
-                        "   ORDER BY a.id ASC" +
-                        "   LIMIT 1" +
-                        ") " +
-                        "WHERE t.id IN (" + Jpa.formatNativeQueryInClause("tid", targetIds) + ")"
-        );
-        Jpa.setNativeQueryInParameter(updateQuery, "tid", targetIds);
-        final int updated = updateQuery.executeUpdate();
-        log.info("{} of target assigned distribution values updated for tenant {}",
-                updated, tenantAware.getCurrentTenant());
-        return updated;
-    }
-
-    private int updateTargetAssignedDsWithInstalledIfNoActiveActions(List<Long> targetIds) {
-        final Query updateQuery = entityManager.createNativeQuery(
-               "UPDATE sp_target t " +
-                       "SET t.assigned_distribution_set = t.installed_distribution_set, t.update_status = 1 " +
-                       "WHERE t.id IN (" + Jpa.formatNativeQueryInClause("tid", targetIds) + ") " +
-                       "    AND (SELECT count(*) FROM sp_action a " +
-                       "        WHERE a.target=t.id and a.active=1) = 0"
-        );
-        Jpa.setNativeQueryInParameter(updateQuery, "tid", targetIds);
-        final int updated = updateQuery.executeUpdate();
-        log.info("{} of target assigned distribution set to previously installed distribution value for tenant {}",
-                updated, tenantAware.getCurrentTenant());
-        return updated;
     }
 
     private static Map<Long, List<TargetWithActionType>> convertRequest(final Collection<DeploymentRequest> deploymentRequests) {

@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -108,7 +109,7 @@ class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
                 DistributionSetManagement.Create.builder().type(defaultDsType()).name("name").version("1.0.0").build();
         final DistributionSet ds = distributionSetManagement.create(dsCreate);
         assertPermissions(() -> {
-            rolloutManagement.cancelRolloutsForDistributionSet(ds, DistributionSetInvalidation.CancelationType.SOFT);
+            rolloutManagement.cancelRolloutsForDistributionSet(ds, ActionCancellationType.SOFT);
             return null;
         }, List.of(SpPermission.UPDATE_ROLLOUT, SpPermission.READ_REPOSITORY, SpPermission.CREATE_REPOSITORY));
     }

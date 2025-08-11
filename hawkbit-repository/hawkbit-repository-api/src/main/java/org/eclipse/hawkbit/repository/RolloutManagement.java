@@ -29,8 +29,8 @@ import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
+import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -386,7 +386,7 @@ public interface RolloutManagement {
      *         canceled
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
-    void cancelRolloutsForDistributionSet(DistributionSet set, DistributionSetInvalidation.CancelationType cancelationType);
+    void cancelRolloutsForDistributionSet(DistributionSet set, ActionCancellationType cancelationType);
 
     /**
      * Triggers next group of a rollout for processing even success threshold
@@ -398,4 +398,13 @@ public interface RolloutManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
     void triggerNextGroup(long rolloutId);
+
+    /**
+     * Cancels all actions that refer to a given rollout.
+     *
+     * @param cancelationType - type of cancellation - FORCE or SOFT (NONE is ignored)
+     * @param rollout - the rollout which actions are about to be cancelled
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
+    void cancelActiveActionsForRollouts(final Rollout rollout, final ActionCancellationType cancelationType);
 }

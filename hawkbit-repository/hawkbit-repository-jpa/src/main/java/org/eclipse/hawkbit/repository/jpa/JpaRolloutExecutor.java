@@ -55,6 +55,7 @@ import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -277,7 +278,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             return;
         }
 
-        deploymentManagement.cancelActiveActionsForRollouts(rollout, DistributionSetInvalidation.CancelationType.FORCE);
+        rolloutManagement.cancelActiveActionsForRollouts(rollout, ActionCancellationType.FORCE);
         entityManager.flush();
 
         boolean hasActiveActionsLeft = actionRepository.countByRolloutIdAndActive(rollout.getId(), true) > 0;
@@ -313,7 +314,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 });
 
         // Soft cancel all active rollouts actions
-        deploymentManagement.cancelActiveActionsForRollouts(rollout, DistributionSetInvalidation.CancelationType.SOFT);
+        rolloutManagement.cancelActiveActionsForRollouts(rollout, ActionCancellationType.SOFT);
         // check if all actions are non-active and then finish or finish once all are processed.
         boolean hasActiveActions = actionRepository.countByRolloutIdAndActiveAndStatusNot(rollout.getId(), true, Status.CANCELING) > 0;
         if (!hasActiveActions) {

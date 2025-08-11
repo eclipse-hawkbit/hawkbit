@@ -54,6 +54,7 @@ import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
@@ -61,7 +62,6 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
@@ -1234,7 +1234,7 @@ public class TestdataFactory {
     public DistributionSet createAndInvalidateDistributionSet() {
         final DistributionSet distributionSet = createDistributionSet();
         distributionSetInvalidationManagement.invalidateDistributionSet(
-                new DistributionSetInvalidation(List.of(distributionSet.getId()), CancelationType.NONE));
+                new DistributionSetInvalidation(List.of(distributionSet.getId()), ActionCancellationType.NONE));
         return distributionSetManagement.get(distributionSet.getId()).orElseThrow();
     }
 

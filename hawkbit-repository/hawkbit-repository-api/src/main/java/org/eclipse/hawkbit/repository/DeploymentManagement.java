@@ -30,14 +30,13 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -413,14 +412,5 @@ public interface DeploymentManagement {
      * @param set the distribution set for that the actions should be canceled
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    void cancelActionsForDistributionSet(final CancelationType cancelationType, final DistributionSet set);
-
-    /**
-     * Cancels all actions that refer to a given rollout.
-     *
-     * @param cancelationType - type of cancellation - FORCE or SOFT (NONE is ignored)
-     * @param rollout - the rollout which actions are about to be cancelled
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
-    void cancelActiveActionsForRollouts(final Rollout rollout, final CancelationType cancelationType);
+    void cancelActionsForDistributionSet(final ActionCancellationType cancelationType, final DistributionSet set);
 }

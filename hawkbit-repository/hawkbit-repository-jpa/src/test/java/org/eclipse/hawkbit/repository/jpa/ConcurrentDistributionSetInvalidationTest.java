@@ -24,9 +24,9 @@ import org.eclipse.hawkbit.repository.exception.StopRolloutException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
@@ -77,7 +77,7 @@ class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTe
                                 () -> rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getSize() > 0)));
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
-                Collections.singletonList(distributionSet.getId()), CancelationType.SOFT);
+                Collections.singletonList(distributionSet.getId()), ActionCancellationType.SOFT);
         assertThatExceptionOfType(StopRolloutException.class)
                 .as("Invalidation of distributionSet should throw an exception")
                 .isThrownBy(() -> distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation));
