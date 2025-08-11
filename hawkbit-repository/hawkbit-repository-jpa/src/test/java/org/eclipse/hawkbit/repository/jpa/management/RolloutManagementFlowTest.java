@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
-import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
+import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -217,7 +217,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         final Rollout rollout = testdataFactory.createRolloutByVariables(rolloutName, rolloutName, amountGroups,
                 "controllerid==" + targetPrefix + "*", distributionSet, "60", "30",
                 Action.ActionType.FORCED, 1000, false, true,
-                DynamicRolloutGroupTemplate.builder().nameSuffix("-dyn").targetCount(6).build());
+                RolloutManagement.DynamicRolloutGroupTemplate.builder().nameSuffix("-dyn").targetCount(6).build());
 
         // rollout is READY, amountGroups + 1 (dynamic) rollout groups and amountGroups * 3 targets in static groups
         assertRollout(rollout, true, RolloutStatus.READY, amountGroups + 1, amountGroups * 3);
@@ -314,7 +314,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         final Rollout rollout = testdataFactory.createRolloutByVariables(rolloutName, rolloutName, 0,
                 "controllerid==" + targetPrefix + "*", distributionSet, "60", "30",
                 Action.ActionType.FORCED, 1000, false, true,
-                DynamicRolloutGroupTemplate.builder().nameSuffix("-dyn").targetCount(6).build());
+                RolloutManagement.DynamicRolloutGroupTemplate.builder().nameSuffix("-dyn").targetCount(6).build());
 
         // rollout is READY, amountGroups + 1 (dynamic) rollout groups and amountGroups * 3 targets in static groups
         assertRollout(rollout, true, RolloutStatus.READY, 1, 0);

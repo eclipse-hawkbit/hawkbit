@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.repository.RolloutFields;
+import org.eclipse.hawkbit.repository.RolloutManagement.Create;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -58,8 +59,9 @@ class RsqlRolloutFieldTest extends AbstractJpaIntegrationTest {
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId, final String targetFilterQuery) {
         return rolloutManagement.create(
-                entityFactory.rollout().create().distributionSetId(
-                        distributionSetManagement.get(distributionSetId).get()).name(name).targetFilterQuery(targetFilterQuery),
+                Create.builder()
+                        .distributionSet(distributionSetManagement.get(distributionSetId).get()).name(name).targetFilterQuery(targetFilterQuery)
+                        .build(),
                 amountGroups,
                 false,
                 new RolloutGroupConditionBuilder().withDefaults().successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());

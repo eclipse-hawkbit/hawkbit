@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate.addSuccessAndErrorConditionsAndActions;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.util.Collection;
@@ -719,7 +717,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         group.setTargetPercentage(lastGroup.isDynamic() ? lastGroup.getTargetPercentage() : lastGroup.getTotalTargets());
         group.setTargetFilterQuery(lastGroup.getTargetFilterQuery());
 
-        addSuccessAndErrorConditionsAndActions(group, lastGroup.getSuccessCondition(),
+        JpaRolloutManagement.addSuccessAndErrorConditionsAndActions(group, lastGroup.getSuccessCondition(),
                 lastGroup.getSuccessConditionExp(), lastGroup.getSuccessAction(),
                 lastGroup.getSuccessActionExp(), lastGroup.getErrorCondition(),
                 lastGroup.getErrorConditionExp(), lastGroup.getErrorAction(),

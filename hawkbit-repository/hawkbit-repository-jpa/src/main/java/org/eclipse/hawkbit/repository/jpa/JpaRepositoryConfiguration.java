@@ -21,8 +21,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConfiguration;
@@ -41,7 +39,6 @@ import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryptionSecretsStore;
 import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
-import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
@@ -53,7 +50,6 @@ import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoActionCleanup;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoCleanupScheduler;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.CleanupTask;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutBuilder;
 import org.eclipse.hawkbit.repository.jpa.cluster.DistributedLockRepository;
 import org.eclipse.hawkbit.repository.jpa.cluster.LockProperties;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
@@ -92,8 +88,6 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRollou
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -298,15 +292,6 @@ public class JpaRepositoryConfiguration {
     }
 
     /**
-     * @param distributionSetManagement for loading {@link Rollout#getDistributionSet()}
-     * @return RolloutBuilder bean
-     */
-    @Bean
-    RolloutBuilder rolloutBuilder(final DistributionSetManagement<? extends DistributionSet> distributionSetManagement) {
-        return new JpaRolloutBuilder(distributionSetManagement);
-    }
-
-    /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
      *         accessible in beans which cannot access the service directly, e.g.
      *         JPA entities.
@@ -407,17 +392,6 @@ public class JpaRepositoryConfiguration {
             final TenantConfigurationManagement tenantConfigurationManagement,
             final SystemSecurityContext systemSecurityContext) {
         return new DefaultRolloutApprovalStrategy(userAuthoritiesResolver, tenantConfigurationManagement, systemSecurityContext);
-    }
-
-    /**
-     * {@link JpaEntityFactory} bean.
-     *
-     * @return a new {@link EntityFactory}
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    EntityFactory entityFactory(final RolloutBuilder rolloutBuilder) {
-        return new JpaEntityFactory(rolloutBuilder);
     }
 
     /**

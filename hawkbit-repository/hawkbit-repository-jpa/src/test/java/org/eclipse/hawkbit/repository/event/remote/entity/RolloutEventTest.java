@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.RolloutManagement.Create;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -52,7 +53,7 @@ class RolloutEventTest extends AbstractRemoteEntityEventTest<Rollout> {
                         .build());
 
         return rolloutManagement.create(
-                entityFactory.rollout().create().name("exampleRollout").targetFilterQuery("controllerId==*").distributionSetId(ds),
+                Create.builder().name("exampleRollout").targetFilterQuery("controllerId==*").distributionSet(ds).build(),
                 5,
                 false,
                 new RolloutGroupConditionBuilder().withDefaults().successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10").build());

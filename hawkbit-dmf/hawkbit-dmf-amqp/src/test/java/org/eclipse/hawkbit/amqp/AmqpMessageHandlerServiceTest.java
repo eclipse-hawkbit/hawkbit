@@ -37,14 +37,9 @@ import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
-import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
-import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusBuilder;
-import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
@@ -96,8 +91,6 @@ class AmqpMessageHandlerServiceTest {
     @Mock
     private ConfirmationManagement confirmationManagementMock;
     @Mock
-    private EntityFactory entityFactoryMock;
-    @Mock
     private TenantConfigurationManagement tenantConfigurationManagement;
     @Mock
     private RabbitTemplate rabbitTemplate;
@@ -137,7 +130,7 @@ class AmqpMessageHandlerServiceTest {
         final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
-                controllerManagementMock, entityFactoryMock, systemSecurityContext, tenantConfigurationManagement,
+                controllerManagementMock, systemSecurityContext, tenantConfigurationManagement,
                 confirmationManagementMock);
     }
 
@@ -439,12 +432,6 @@ class AmqpMessageHandlerServiceTest {
         final Message message = createMessage(actionUpdateStatus, messageProperties);
         final Action action = mock(Action.class);
         when(action.getId()).thenReturn(2L);
-        final ActionStatusBuilder builder = mock(ActionStatusBuilder.class);
-        final ActionStatusCreate create = mock(ActionStatusCreate.class);
-        when(builder.create(2L)).thenReturn(create);
-        when(create.status(any())).thenReturn(create);
-        when(create.messages(any())).thenReturn(create);
-        when(entityFactoryMock.actionStatus()).thenReturn(builder);
 
         when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.of(action));
         when(controllerManagementMock.addUpdateActionStatus(any())).thenThrow(new AssignmentQuotaExceededException());
@@ -464,12 +451,6 @@ class AmqpMessageHandlerServiceTest {
         final Action action = createActionWithTarget(22L);
         when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.of(action));
         when(controllerManagementMock.addUpdateActionStatus(any())).thenReturn(action);
-        final ActionStatusBuilder builder = mock(ActionStatusBuilder.class);
-        final ActionStatusCreate create = mock(ActionStatusCreate.class);
-        when(builder.create(22L)).thenReturn(create);
-        when(create.status(any())).thenReturn(create);
-        when(create.messages(any())).thenReturn(create);
-        when(entityFactoryMock.actionStatus()).thenReturn(builder);
         // for the test the same action can be used
         when(controllerManagementMock.findActiveActionWithHighestWeight(any())).thenReturn(Optional.of(action));
 
@@ -502,8 +483,6 @@ class AmqpMessageHandlerServiceTest {
         final Action action = createActionWithTarget(22L);
         when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.of(action));
         when(controllerManagementMock.addUpdateActionStatus(any())).thenReturn(action);
-        final ActionStatusBuilder builder = new JpaActionStatusBuilder();
-        when(entityFactoryMock.actionStatus()).thenReturn(builder);
         // for the test the same action can be used
         when(controllerManagementMock.findActiveActionWithHighestWeight(any())).thenReturn(Optional.of(action));
 
@@ -517,16 +496,6 @@ class AmqpMessageHandlerServiceTest {
 
         // test
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST);
-
-        final ArgumentCaptor<ActionStatusCreate> actionPropertiesCaptor = ArgumentCaptor.forClass(ActionStatusCreate.class);
-
-        verify(controllerManagementMock, times(1)).addUpdateActionStatus(actionPropertiesCaptor.capture());
-
-        final JpaActionStatus jpaActionStatus = (JpaActionStatus) actionPropertiesCaptor.getValue().build();
-        assertThat(jpaActionStatus.getCode()).as("Action status for reported code is missing").contains(12);
-        assertThat(jpaActionStatus.getMessages())
-                .as("Action status message for reported code is missing")
-                .contains("Device reported status code: 12");
     }
 
     /**

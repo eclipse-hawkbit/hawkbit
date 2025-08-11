@@ -210,8 +210,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
 
         // then simulate a status update with code 200 for the first action
         final Action action = actions.get(0);
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).code(200)
-                .message("Update succeeded").status(Status.FINISHED));
+        controllerManagement.addUpdateActionStatus(Action.ActionStatusCreate.builder()
+                .actionId(action.getId()).code(200).messages(List.of("Update succeeded")).status(Status.FINISHED).build());
 
         // verify that one result is returned if the actions are filtered for status code 200
         final String rsqlStatusCode = "lastStatusCode==200";
@@ -284,7 +284,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     void filterActionsByRollout() throws Exception {
         // prepare test
-        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final DistributionSet ds = testdataFactory.createDistributionSetLocked();
         final Target target0 = testdataFactory.createTarget("t0");
 
         // manual assignment

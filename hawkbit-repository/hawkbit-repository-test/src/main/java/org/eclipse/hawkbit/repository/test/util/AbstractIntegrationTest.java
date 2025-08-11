@@ -39,7 +39,6 @@ import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -57,6 +56,7 @@ import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
 import org.eclipse.hawkbit.repository.artifact.exception.ArtifactStoreException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -129,8 +129,6 @@ public abstract class AbstractIntegrationTest {
      */
     protected static final int DEFAULT_DS_TYPES = RepositoryConstants.DEFAULT_DS_TYPES_IN_TENANT + 1;
 
-    @Autowired
-    protected EntityFactory entityFactory;
     @Autowired
     protected SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement;
     @Autowired
@@ -457,9 +455,9 @@ public abstract class AbstractIntegrationTest {
         }
 
         controllerManagement.addUpdateActionStatus(
-                entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.RUNNING));
+                ActionStatusCreate.builder().actionId(savedAction.getId()).status(Action.Status.RUNNING).build());
         controllerManagement.addUpdateActionStatus(
-                entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.FINISHED));
+                ActionStatusCreate.builder().actionId(savedAction.getId()).status(Action.Status.FINISHED).build());
 
         return controllerManagement.findActionWithDetails(savedAction.getId())
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, savedAction.getId()));

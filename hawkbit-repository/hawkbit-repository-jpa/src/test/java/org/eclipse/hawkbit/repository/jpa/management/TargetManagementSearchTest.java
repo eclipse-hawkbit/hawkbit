@@ -18,6 +18,7 @@ import java.util.Set;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -84,7 +85,8 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         // set on installed and assign another one
         assignDistributionSet(installedSet, installedtargets).getAssignedEntity().forEach(action ->
-                controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Status.FINISHED)));
+                controllerManagement.addUpdateActionStatus(
+                        ActionStatusCreate.builder().actionId(action.getId()).status(Status.FINISHED).build()));
         assignDistributionSet(assignedSet, installedtargets);
 
         // get final updated version of targets

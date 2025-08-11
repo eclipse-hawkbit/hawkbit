@@ -38,7 +38,6 @@ import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -49,8 +48,8 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDist
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
-import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -161,7 +160,6 @@ public class TestdataFactory {
     private final RolloutManagement rolloutManagement;
     private final RolloutHandler rolloutHandler;
     private final QuotaManagement quotaManagement;
-    private final EntityFactory entityFactory;
     private final TenantAware tenantAware;
 
     public TestdataFactory(
@@ -178,8 +176,7 @@ public class TestdataFactory {
             final TargetTagManagement<? extends TargetTag> targetTagManagement,
             final DeploymentManagement deploymentManagement,
             final RolloutManagement rolloutManagement, final RolloutHandler rolloutHandler,
-            final QuotaManagement quotaManagement,
-            final EntityFactory entityFactory, final TenantAware tenantAware) {
+            final QuotaManagement quotaManagement, final TenantAware tenantAware) {
         this.controllerManagement = controllerManagement;
         this.softwareModuleManagement = softwareModuleManagement;
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
@@ -192,7 +189,6 @@ public class TestdataFactory {
         this.targetTypeManagement = targetTypeManagement;
         this.targetTagManagement = targetTagManagement;
         this.deploymentManagement = deploymentManagement;
-        this.entityFactory = entityFactory;
         this.artifactManagement = artifactManagement;
         this.rolloutManagement = rolloutManagement;
         this.rolloutHandler = rolloutHandler;
@@ -229,6 +225,10 @@ public class TestdataFactory {
         return createDistributionSet(prefix, DEFAULT_VERSION, false);
     }
 
+    public DistributionSet createDistributionSetLocked(final String prefix) {
+        return distributionSetManagement.lock(createDistributionSet(prefix));
+    }
+
     /**
      * Creates {@link DistributionSet} in repository including three
      * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
@@ -239,6 +239,11 @@ public class TestdataFactory {
      */
     public DistributionSet createDistributionSet() {
         return createDistributionSet(UUID.randomUUID().toString(), DEFAULT_VERSION, false);
+    }
+
+
+    public DistributionSet createDistributionSetLocked() {
+        return distributionSetManagement.lock(createDistributionSet());
     }
 
     /**
@@ -1027,21 +1032,22 @@ public class TestdataFactory {
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
             final String successCondition, final String errorCondition, final Action.ActionType actionType,
             final Integer weight, final boolean confirmationRequired, final boolean dynamic,
-            final DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
+            final RolloutManagement.DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create()
+                RolloutManagement.Create.builder()
                         .name(rolloutName)
                         .description(rolloutDescription)
                         .targetFilterQuery(filterQuery)
-                        .distributionSetId(distributionSet)
-                        .actionType(actionType)
+                        .distributionSet(distributionSet)
+                        .actionType(actionType == null ? Action.ActionType.FORCED : actionType)
                         .weight(weight)
-                        .dynamic(dynamic),
+                        .dynamic(dynamic)
+                        .build(),
                 groupSize, confirmationRequired, conditions, dynamicRolloutGroupTemplate);
 
         // Run here, because Scheduler is disabled during tests
@@ -1259,7 +1265,8 @@ public class TestdataFactory {
     }
 
     private Action sendUpdateActionStatusToTarget(final Status status, final Action updActA, final Collection<String> msgs) {
-        return controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(updActA.getId()).status(status).messages(msgs));
+        return controllerManagement.addUpdateActionStatus(
+                ActionStatusCreate.builder().actionId(updActA.getId()).status(status).messages(msgs).build());
     }
 
     private Rollout startAndReloadRollout(final Rollout rollout) {
