@@ -18,10 +18,8 @@ import lombok.Getter;
 public enum ActionStatusFields implements RsqlQueryField {
 
     ID("id"),
-    REPORTEDAT("createdAt"),
-    REPORTEDBY("createdBy"),
-    LASTMODIFIEDAT("lastModifiedAt"),
-    LASTMODIFIEDBY("lastModifiedBy");
+    CREATEDAT("createdAt"),
+    CREATEDBY("createdBy");
 
     private final String jpaEntityFieldName;
 
