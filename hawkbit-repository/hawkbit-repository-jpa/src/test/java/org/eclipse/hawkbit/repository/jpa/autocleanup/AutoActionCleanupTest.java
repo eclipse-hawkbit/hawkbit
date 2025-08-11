@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -202,7 +203,7 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
     }
 
     private void setActionToFailed(final Long id) {
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(id).status(Status.ERROR));
+        controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(id).status(Status.ERROR).build());
     }
 
     private void setupCleanupConfiguration(final boolean cleanupEnabled, final long expiry, final Status... status) {

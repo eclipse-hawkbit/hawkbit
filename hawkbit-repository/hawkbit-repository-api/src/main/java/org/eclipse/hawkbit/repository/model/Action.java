@@ -10,10 +10,16 @@
 package org.eclipse.hawkbit.repository.model;
 
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+
+import lombok.Builder;
+import lombok.Getter;
+import org.eclipse.hawkbit.repository.ValidString;
 
 /**
  * Update operations to be executed by the target.
@@ -338,4 +344,17 @@ public interface Action extends TenantAwareBaseEntity {
         DOWNLOAD_ONLY
     }
 
+    @Getter
+    @Builder
+    class ActionStatusCreate {
+
+        private long actionId;
+
+        @NotNull
+        private Status status;
+        private Integer code;
+        private Collection<@ValidString String> messages;
+
+        private Long occurredAt;
+    }
 }

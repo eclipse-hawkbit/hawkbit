@@ -18,6 +18,7 @@ import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -91,7 +92,7 @@ class ActionTest extends AbstractJpaIntegrationTest {
     void testActionsStatusStatusConvert() {
         for (final Status status : Status.values()) {
             final long id = createAction().getId();
-            controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(id).status(status));
+            controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(id).status(status).build());
             final List<ActionStatus> actionStatuses = actionRepository
                     .findById(id).orElseThrow(() -> new IllegalStateException("Action not found"))
                     .getActionStatus();

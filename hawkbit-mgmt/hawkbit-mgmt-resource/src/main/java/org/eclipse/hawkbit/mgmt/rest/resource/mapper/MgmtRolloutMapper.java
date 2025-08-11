@@ -35,10 +35,10 @@ import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
+import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement.Create;
 import org.eclipse.hawkbit.repository.RolloutManagement.GroupCreate;
 import org.eclipse.hawkbit.repository.RolloutManagement.Update;
-import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -168,11 +168,11 @@ public final class MgmtRolloutMapper {
                 .build();
     }
 
-    public static DynamicRolloutGroupTemplate fromRequest(final MgmtDynamicRolloutGroupTemplate restRequest) {
+    public static RolloutManagement.DynamicRolloutGroupTemplate fromRequest(final MgmtDynamicRolloutGroupTemplate restRequest) {
         if (restRequest == null) {
             return null;
         }
-        return DynamicRolloutGroupTemplate.builder()
+        return RolloutManagement.DynamicRolloutGroupTemplate.builder()
                 .nameSuffix(Optional.ofNullable(restRequest.getNameSuffix()).orElse(""))
                 .targetCount(restRequest.getTargetCount())
                 .build();

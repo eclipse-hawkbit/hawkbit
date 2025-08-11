@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -220,7 +219,6 @@ public class DmfApiConfiguration {
      * @param rabbitTemplate for converting messages
      * @param amqpMessageDispatcherService to sending events to DMF client
      * @param controllerManagement for target repo access
-     * @param entityFactory to create entities
      * @return handler service bean
      */
     @Bean
@@ -228,13 +226,12 @@ public class DmfApiConfiguration {
     public AmqpMessageHandlerService amqpMessageHandlerService(
             final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
-            final ControllerManagement controllerManagement, final EntityFactory entityFactory,
-            final SystemSecurityContext systemSecurityContext,
+            final ControllerManagement controllerManagement, final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final ConfirmationManagement confirmationManagement) {
         return new AmqpMessageHandlerService(
                 rabbitTemplate, amqpMessageDispatcherService, controllerManagement,
-                entityFactory, systemSecurityContext, tenantConfigurationManagement, confirmationManagement);
+                systemSecurityContext, tenantConfigurationManagement, confirmationManagement);
     }
 
     /**

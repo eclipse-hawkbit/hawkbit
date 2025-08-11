@@ -56,13 +56,11 @@ import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
-import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
-import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -287,7 +285,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String expectedStatusMessage2 = "some-custom-message2";
         final Status expectedStatusAfterActionConfirmationCall = Status.RUNNING;
         final long actionId = doAssignmentAndTestConfirmation("targetId");
-        testActionConfirmation("targetId", actionId, MgmtActionConfirmationRequestBodyPut.Confirmation.CONFIRMED, expectedStatusCode, new String[]{expectedStatusMessage1, expectedStatusMessage2}, HttpStatus.OK ,expectedStatusAfterActionConfirmationCall);
+        testActionConfirmation("targetId", actionId, MgmtActionConfirmationRequestBodyPut.Confirmation.CONFIRMED, expectedStatusCode,
+                new String[] { expectedStatusMessage1, expectedStatusMessage2 }, HttpStatus.OK, expectedStatusAfterActionConfirmationCall);
     }
 
     /**
@@ -300,7 +299,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String expectedStatusMessage2 = "some-error-custom-message2";
         final Status expectedStatusAfterActionConfirmationCall = Status.WAIT_FOR_CONFIRMATION;
         final long actionId = doAssignmentAndTestConfirmation("targetId");
-        testActionConfirmation("targetId", actionId, MgmtActionConfirmationRequestBodyPut.Confirmation.DENIED, expectedStatusCode, new String[]{expectedStatusMessage1, expectedStatusMessage2}, HttpStatus.OK, expectedStatusAfterActionConfirmationCall);
+        testActionConfirmation("targetId", actionId, MgmtActionConfirmationRequestBodyPut.Confirmation.DENIED, expectedStatusCode,
+                new String[] { expectedStatusMessage1, expectedStatusMessage2 }, HttpStatus.OK, expectedStatusAfterActionConfirmationCall);
     }
 
     /**
@@ -316,10 +316,10 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         // test that target id and action id are checked correctly and only actions assigned to given targets are confirmed/denied
         // if action is not assigned to the target, confirmation call must fail
         testActionConfirmation("controller1", controller2Action, MgmtActionConfirmationRequestBodyPut.Confirmation.CONFIRMED,
-                payloadCallCode, new String[]{payloadCallMessage1, payloadCallMessage2}, HttpStatus.NOT_FOUND,
+                payloadCallCode, new String[] { payloadCallMessage1, payloadCallMessage2 }, HttpStatus.NOT_FOUND,
                 Status.WAIT_FOR_CONFIRMATION);
         testActionConfirmation("controller2", controller1Action, MgmtActionConfirmationRequestBodyPut.Confirmation.CONFIRMED,
-                payloadCallCode, new String[]{payloadCallMessage1, payloadCallMessage2}, HttpStatus.NOT_FOUND,
+                payloadCallCode, new String[] { payloadCallMessage1, payloadCallMessage2 }, HttpStatus.NOT_FOUND,
                 Status.WAIT_FOR_CONFIRMATION);
     }
 
@@ -339,10 +339,11 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         return action.getId();
     }
 
-    void testActionConfirmation(final String controllerId, final long actionId, final MgmtActionConfirmationRequestBodyPut.Confirmation payloadConfirmation, final int payloadCode, final String[] payloadMessages, final HttpStatus expectedHttpResponseStatus,final Status expectedGeneratedStatus) throws Exception {
+    void testActionConfirmation(final String controllerId, final long actionId,
+            final MgmtActionConfirmationRequestBodyPut.Confirmation payloadConfirmation, final int payloadCode, final String[] payloadMessages,
+            final HttpStatus expectedHttpResponseStatus, final Status expectedGeneratedStatus) throws Exception {
         String url = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + controllerId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId + "/confirmation";
-        mvc.perform(put(url)
-                        .content(String.format("{\"confirmation\":\"%s\",\"details\":[\"%s\",\"%s\"],\"code\":%d}",
+        mvc.perform(put(url).content(String.format("{\"confirmation\":\"%s\",\"details\":[\"%s\",\"%s\"],\"code\":%d}",
                                 payloadConfirmation.getName(),
                                 payloadMessages[0],
                                 payloadMessages[1],
@@ -351,7 +352,6 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().is(expectedHttpResponseStatus.value()));
-
 
         // check status after confirmation is done (either confirmed or denied)
         final List<Action> actionHistory = deploymentManagement.findActionsByTarget(controllerId, PAGE).getContent();
@@ -362,18 +362,18 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         // confirmation call was successful, check if Action status ,status code and messages are updated appropriately
         if (expectedHttpResponseStatus == HttpStatus.OK) {
             assertThat(jpaAction.getStatus()).isEqualTo(expectedGeneratedStatus);
-            assertThat(jpaAction.getLastActionStatusCode().get()).isEqualTo(payloadCode);
+            assertThat(jpaAction.getLastActionStatusCode()).hasValue(payloadCode);
 
             actionStatuses.sort(Comparator.comparingLong(Identifiable::getId));
-            assertThat(actionStatuses.size()).isEqualTo(2);
+            assertThat(actionStatuses).hasSize(2);
             assertThat((actionStatuses.get(0)).getStatus()).isEqualTo(Status.WAIT_FOR_CONFIRMATION);
-            assertThat((actionStatuses.get(0)).getCode().isEmpty()).isTrue();
+            assertThat((actionStatuses.get(0)).getCode()).isEmpty();
             assertThat((actionStatuses.get(1)).getStatus()).isEqualTo(expectedGeneratedStatus);
-            assertThat((actionStatuses.get(1)).getCode().get()).isEqualTo(payloadCode);
+            assertThat((actionStatuses.get(1)).getCode()).hasValue(payloadCode);
             assertThat(((JpaActionStatus) actionStatuses.get(1)).getMessages()).contains(payloadMessages[0], payloadMessages[1]);
         } else { // confirmation call not successful, check if Action status is not updated, no new Action status added as well.
             assertThat(jpaAction.getStatus()).isEqualTo(Status.WAIT_FOR_CONFIRMATION);
-            assertThat(jpaAction.getLastActionStatusCode().isEmpty()).isTrue();
+            assertThat(jpaAction.getLastActionStatusCode()).isEmpty();
             assertThat(jpaAction.getActionStatus()).hasSize(1);
         }
     }
@@ -949,7 +949,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         final SoftwareModule os = findFirstModuleByType(ds, osType).orElseThrow();
         final SoftwareModule jvm = findFirstModuleByType(ds, runtimeType).orElseThrow();
-        final SoftwareModule bApp = findFirstModuleByType(ds,appType).orElseThrow();
+        final SoftwareModule bApp = findFirstModuleByType(ds, appType).orElseThrow();
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId + "/assignedDS"))
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())
@@ -1161,9 +1161,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         assertThat((Object) JsonPath.compile("[0]._links.self.href").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/targets/id1");
-        assertThat((Object)JsonPath.compile("[1]._links.self.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat((Object) JsonPath.compile("[1]._links.self.href").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/targets/id2");
-        assertThat((Object)JsonPath.compile("[2]._links.self.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat((Object) JsonPath.compile("[2]._links.self.href").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/targets/id3");
 
         final Target t1 = assertTarget("id1", "testname1", "testid1");
@@ -1723,7 +1723,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     /**
-     * Verifies that an offline DS to target assignment is reflected by the repository and that repeating 
+     * Verifies that an offline DS to target assignment is reflected by the repository and that repeating
      * the assignment does not change the target.
      */
     @Test
@@ -3066,15 +3066,15 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         assertThat(action).isNotNull();
         assertThat(status).isNotNull();
 
-        final ActionStatusCreate actionStatus = entityFactory.actionStatus().create(action.getId());
+        final Action.ActionStatusCreate.ActionStatusCreateBuilder actionStatus = Action.ActionStatusCreate.builder().actionId(action.getId());
         actionStatus.status(status);
         if (statusCode != null) {
             actionStatus.code(statusCode);
         }
         if (message != null) {
-            actionStatus.message(message);
+            actionStatus.messages(List.of(message));
         }
 
-        return controllerManagement.addUpdateActionStatus(actionStatus);
+        return controllerManagement.addUpdateActionStatus(actionStatus.build());
     }
 }

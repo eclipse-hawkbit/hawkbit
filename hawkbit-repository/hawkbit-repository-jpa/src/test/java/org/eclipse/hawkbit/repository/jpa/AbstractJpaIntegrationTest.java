@@ -57,6 +57,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.TenantMetaDataRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -300,7 +301,8 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     }
 
     protected void finishAction(final Action action) {
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Action.Status.FINISHED));
+        controllerManagement.addUpdateActionStatus(
+                ActionStatusCreate.builder().actionId(action.getId()).status(Action.Status.FINISHED).build());
     }
 
     protected Set<TargetTag> getTargetTags(final String controllerId) {

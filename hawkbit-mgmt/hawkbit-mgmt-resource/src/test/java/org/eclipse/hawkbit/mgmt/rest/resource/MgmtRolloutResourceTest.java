@@ -45,6 +45,7 @@ import org.eclipse.hawkbit.repository.RolloutManagement.Create;
 import org.eclipse.hawkbit.repository.RolloutManagement.GroupCreate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -2000,7 +2001,8 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     private void setTargetsStatus(final List<Target> targets, final Status status) {
         for (final Target target : targets) {
             final Long action = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).toList().get(0).getId();
-            controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(action).status(status).message("test"));
+            controllerManagement.addUpdateActionStatus(
+                    ActionStatusCreate.builder().actionId(action).status(status).messages(List.of("test")).build());
         }
     }
 

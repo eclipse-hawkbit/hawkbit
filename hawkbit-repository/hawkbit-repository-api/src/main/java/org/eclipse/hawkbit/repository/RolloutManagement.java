@@ -21,6 +21,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,7 +29,6 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
-import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
@@ -490,5 +490,34 @@ public interface RolloutManagement {
                         confirmationRequired);
             }
         }
+    }
+
+    /**
+     * Builder to create a new dynamic rollout group secret
+     */
+    @Data
+    @Builder
+    class DynamicRolloutGroupTemplate {
+
+        /**
+         * The name suffix, by default "" is used.
+         */
+        @NotNull
+        private String nameSuffix = "";
+
+        /**
+         * The count of matching Targets that should be assigned to this Group
+         */
+        private long targetCount;
+
+        /**
+         * The group conditions
+         */
+        private RolloutGroupConditions conditions;
+
+        /**
+         * If confirmation is required for this rollout group (considered with confirmation flow active)
+         */
+        private boolean confirmationRequired;
     }
 }

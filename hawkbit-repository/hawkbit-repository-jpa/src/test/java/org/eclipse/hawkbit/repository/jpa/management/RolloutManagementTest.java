@@ -61,6 +61,7 @@ import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -399,7 +400,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // 50%
         final JpaAction action = (JpaAction) runningActions.get(0);
         controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Status.FINISHED));
+                .addUpdateActionStatus(ActionStatusCreate.builder().actionId(action.getId()).status(Status.FINISHED).build());
 
         // check running rollouts again, now the finish condition should be hit
         // and should start the next group
@@ -467,7 +468,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // finish actions with error
         for (final Action action : runningActions) {
             controllerManagement
-                    .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Status.ERROR));
+                    .addUpdateActionStatus(ActionStatusCreate.builder().actionId(action.getId()).status(Status.ERROR).build());
         }
 
         // check running rollouts again, now the error condition should be hit
@@ -512,7 +513,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // finish actions with error
         for (final Action action : runningActions) {
             controllerManagement
-                    .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Status.ERROR));
+                    .addUpdateActionStatus(ActionStatusCreate.builder().actionId(action.getId()).status(Status.ERROR).build());
         }
 
         // check running rollouts again, now the error condition should be hit
@@ -2460,7 +2461,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final List<Action> runningActions = findActionsByRolloutAndStatus(rollout, Status.RUNNING);
         for (final Action action : runningActions) {
             controllerManagement
-                    .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(status));
+                    .addUpdateActionStatus(ActionStatusCreate.builder().actionId(action.getId()).status(status).build());
         }
         return runningActions.size();
     }
@@ -2471,7 +2472,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(runningActions).hasSizeGreaterThanOrEqualTo(amountOfTargetsToGetChanged);
         for (int i = 0; i < amountOfTargetsToGetChanged; i++) {
             controllerManagement.addUpdateActionStatus(
-                    entityFactory.actionStatus().create(runningActions.get(i).getId()).status(status));
+                    ActionStatusCreate.builder().actionId(runningActions.get(i).getId()).status(status).build());
         }
         return runningActions.size();
     }

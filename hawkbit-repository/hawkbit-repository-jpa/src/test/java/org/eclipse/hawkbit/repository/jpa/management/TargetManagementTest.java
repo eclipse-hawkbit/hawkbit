@@ -70,6 +70,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
@@ -326,7 +327,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         implicitLock(testDs1);
 
         controllerManagement.addUpdateActionStatus(
-                entityFactory.actionStatus().create(getFirstAssignedActionId(result)).status(Status.FINISHED));
+                ActionStatusCreate.builder().actionId(getFirstAssignedActionId(result)).status(Status.FINISHED).build());
         assignDistributionSet(testDs2.getId(), "4711");
         implicitLock(testDs2);
 

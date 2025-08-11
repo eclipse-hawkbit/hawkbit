@@ -49,7 +49,6 @@ import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -59,7 +58,6 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
-import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -70,7 +68,6 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
@@ -91,6 +88,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
@@ -240,17 +238,13 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Action addCancelActionStatus(final ActionStatusCreate c) {
-        final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
-
+    public Action addCancelActionStatus(final ActionStatusCreate create) {
         final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
-
         if (!action.isCancelingOrCanceled()) {
             throw new CancelActionNotAllowedException("The action is not in canceling state.");
         }
 
-        final JpaActionStatus actionStatus = create.build();
-
+        final JpaActionStatus actionStatus = buildJpaActionStatus(create);
         switch (actionStatus.getStatus()) {
             case CANCELED, FINISHED: {
                 handleFinishedCancelation(actionStatus, action);
@@ -263,7 +257,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             }
             default: {
                 // information status entry - check for a potential DOS attack
-                assertActionStatusQuota(actionStatus, action);
+                assertActionStatusQuota(create, action);
                 assertActionStatusMessageQuota(actionStatus);
                 break;
             }
@@ -289,16 +283,15 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public ActionStatus addInformationalActionStatus(final ActionStatusCreate c) {
-        final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
+    public ActionStatus addInformationalActionStatus(final ActionStatusCreate create) {
         final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
-        final JpaActionStatus statusMessage = create.build();
-        statusMessage.setAction(action);
+        assertActionStatusQuota(create, action);
 
-        assertActionStatusQuota(statusMessage, action);
-        assertActionStatusMessageQuota(statusMessage);
+        final JpaActionStatus actionStatus = buildJpaActionStatus(create);
+        actionStatus.setAction(action);
+        assertActionStatusMessageQuota(actionStatus);
 
-        return actionStatusRepository.save(statusMessage);
+        return actionStatusRepository.save(actionStatus);
     }
 
     @Override
@@ -306,7 +299,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action addUpdateActionStatus(final ActionStatusCreate statusCreate) {
-        return addActionStatus((JpaActionStatusCreate) statusCreate);
+        return addActionStatus(statusCreate);
     }
 
     @Override

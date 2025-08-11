@@ -15,10 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement.Create;
 import org.eclipse.hawkbit.repository.RolloutManagement.GroupCreate;
 import org.eclipse.hawkbit.repository.RolloutManagement.Update;
-import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -148,7 +148,7 @@ class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
                 permissions);
         assertPermissions(() -> rolloutManagement.create(
                         Create.builder().name("createPermissionsCheck2").distributionSet(ds).targetFilterQuery("controllerid==*").dynamic(true).build(),
-                        1, false, new RolloutGroupConditionBuilder().withDefaults().build(), DynamicRolloutGroupTemplate.builder().build()),
+                        1, false, new RolloutGroupConditionBuilder().withDefaults().build(), RolloutManagement.DynamicRolloutGroupTemplate.builder().build()),
                 permissions);
         assertPermissions(
                 () -> rolloutManagement.create(

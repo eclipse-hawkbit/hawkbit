@@ -69,6 +69,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -270,8 +271,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // one action with one action status is generated
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(testDs, testTarget));
         // create action-status entry with one message
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
-                .status(Action.Status.FINISHED).messages(Collections.singletonList("finished message")));
+        controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId)
+                .status(Action.Status.FINISHED).messages(List.of("finished message")).build());
         final Page<ActionStatus> actionStates = deploymentManagement.findActionStatusByAction(actionId, PAGE);
 
         // find newly created action-status entry with message
@@ -365,7 +366,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         deploymentManagement.cancelAction(secondAction.getId());
         secondAction = (JpaAction) deploymentManagement.findActionWithDetails(secondAction.getId()).get();
         // confirm cancellation
-        controllerManagement.addCancelActionStatus(entityFactory.actionStatus().create(secondAction.getId()).status(Status.CANCELED));
+        controllerManagement.addCancelActionStatus(ActionStatusCreate.builder()
+                .actionId(secondAction.getId()).status(Status.CANCELED).build());
         assertThat(actionStatusRepository.findAll()).as("wrong size of actions status").hasSize(7);
         assertThat(deploymentManagement.getAssignedDistributionSet("4712")).as("wrong ds").contains(dsFirst);
         assertThat(targetManagement.getByControllerId("4712").get().getUpdateStatus())
@@ -377,7 +379,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         firstAction = (JpaAction) deploymentManagement.findActionWithDetails(firstAction.getId()).get();
         // confirm cancellation
         controllerManagement.addCancelActionStatus(
-                entityFactory.actionStatus().create(firstAction.getId()).status(Status.CANCELED));
+                ActionStatusCreate.builder().actionId(firstAction.getId()).status(Status.CANCELED).build());
         assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(9);
         assertThat(deploymentManagement.getAssignedDistributionSet("4712")).as("wrong assigned ds")
                 .contains(dsInstalled);
@@ -414,7 +416,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // confirm cancellation
         firstAction = (JpaAction) deploymentManagement.findActionWithDetails(firstAction.getId()).get();
         controllerManagement.addCancelActionStatus(
-                entityFactory.actionStatus().create(firstAction.getId()).status(Status.CANCELED));
+                ActionStatusCreate.builder().actionId(firstAction.getId()).status(Status.CANCELED).build());
         assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(7);
         assertThat(deploymentManagement.getAssignedDistributionSet("4712")).as("wrong assigned ds").contains(dsSecond);
         assertThat(targetManagement.getByControllerId("4712").get().getUpdateStatus()).as("wrong target update status")
@@ -427,7 +429,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(deploymentManagement.getAssignedDistributionSet("4712")).as("wrong assigned ds").contains(dsSecond);
         // confirm cancellation
         controllerManagement.addCancelActionStatus(
-                entityFactory.actionStatus().create(secondAction.getId()).status(Status.CANCELED));
+                ActionStatusCreate.builder().actionId(secondAction.getId()).status(Status.CANCELED).build());
         // cancelled success -> back to dsInstalled
         assertThat(deploymentManagement.getAssignedDistributionSet("4712"))
                 .as("wrong installed ds")
@@ -1444,7 +1446,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final Slice<Action> updAct = findActionsByDistributionSet(PAGE, dsA.getId());
         controllerManagement.addUpdateActionStatus(
-                entityFactory.actionStatus().create(updAct.getContent().get(0).getId()).status(Status.FINISHED));
+                ActionStatusCreate.builder().actionId(updAct.getContent().get(0).getId()).status(Status.FINISHED).build());
 
         targ = targetManagement.getByControllerId(targ.getControllerId()).get();
 
