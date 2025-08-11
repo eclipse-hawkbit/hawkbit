@@ -17,10 +17,11 @@ import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.repository.RolloutManagement.GroupCreate;
+import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,22 +34,22 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 class JsonBuilder {
 
-    static String targets(final List<Target> targets, final boolean withToken) throws JSONException {
+    static String targets(final List<Create> creates, final boolean withToken) throws JSONException {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("[");
         int i = 0;
-        for (final Target target : targets) {
-            final String address = target.getAddress() != null ? target.getAddress().toString() : null;
-            final String targetType = target.getTargetType() != null ? target.getTargetType().getId().toString() : null;
-            final String token = withToken ? target.getSecurityToken() : null;
+        for (final Create create : creates) {
+            final String address = create.getAddress() != null ? create.getAddress() : null;
+            final String targetType = create.getTargetType() != null ? create.getTargetType().getId().toString() : null;
+            final String token = withToken ? create.getSecurityToken() : null;
 
-            builder.append(new JSONObject().put("controllerId", target.getControllerId())
-                    .put("description", target.getDescription()).put("name", target.getName()).put("createdAt", "0")
+            builder.append(new JSONObject().put("controllerId", create.getControllerId())
+                    .put("description", create.getDescription()).put("name", create.getName()).put("createdAt", "0")
                     .put("updatedAt", "0").put("createdBy", "systemtest").put("updatedBy", "systemtest")
                     .put("address", address).put("securityToken", token).put("targetType", targetType).toString());
 
-            if (++i < targets.size()) {
+            if (++i < creates.size()) {
                 builder.append(",");
             }
         }
@@ -58,21 +59,21 @@ class JsonBuilder {
         return builder.toString();
     }
 
-    static String targets(final List<Target> targets, final boolean withToken, final long targetTypeId) throws JSONException {
+    static String targets(final List<Create> creates, final boolean withToken, final long targetTypeId) throws JSONException {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("[");
         int i = 0;
-        for (final Target target : targets) {
-            final String address = target.getAddress() != null ? target.getAddress().toString() : null;
-            final String token = withToken ? target.getSecurityToken() : null;
+        for (final Create create : creates) {
+            final String address = create.getAddress() != null ? create.getAddress() : null;
+            final String token = withToken ? create.getSecurityToken() : null;
 
-            builder.append(new JSONObject().put("controllerId", target.getControllerId())
-                    .put("description", target.getDescription()).put("name", target.getName()).put("createdAt", "0")
+            builder.append(new JSONObject().put("controllerId", create.getControllerId())
+                    .put("description", create.getDescription()).put("name", create.getName()).put("createdAt", "0")
                     .put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
                     .put("address", address).put("securityToken", token).put("targetType", targetTypeId).toString());
 
-            if (++i < targets.size()) {
+            if (++i < creates.size()) {
                 builder.append(",");
             }
         }
@@ -91,14 +92,14 @@ class JsonBuilder {
 
     static String rolloutWithGroups(final String name, final String description, final Integer groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
-            final List<RolloutGroup> groups) {
+            final List<GroupCreate> groups) {
         return rolloutWithGroups(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, groups,
                 null, null, null);
     }
 
     static String rolloutWithGroups(final String name, final String description, final Integer groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
-            final List<RolloutGroup> groups, final String type, final Integer weight,
+            final List<GroupCreate> groups, final String type, final Integer weight,
             final Boolean confirmationRequired) {
         final List<String> rolloutGroupsJson = groups.stream().map(JsonBuilder::rolloutGroup).toList();
         return rollout(
@@ -196,10 +197,14 @@ class JsonBuilder {
         return json.toString();
     }
 
-    static String rolloutGroup(final RolloutGroup rolloutGroup) {
+    static String rolloutGroup(final GroupCreate create) {
+        return rolloutGroup(create, null);
+    }
+
+    static String rolloutGroup(final GroupCreate create, final RolloutGroup rolloutGroup) {
         final RolloutGroupConditions conditions = getConditions(rolloutGroup);
-        return rolloutGroup(rolloutGroup.getName(), rolloutGroup.getDescription(), rolloutGroup.getTargetFilterQuery(),
-                rolloutGroup.getTargetPercentage(), rolloutGroup.isConfirmationRequired(), conditions);
+        return rolloutGroup(create.getName(), create.getDescription(), create.getTargetFilterQuery(),
+                create.getTargetPercentage(), create.isConfirmationRequired(), conditions);
 
     }
 
@@ -276,10 +281,14 @@ class JsonBuilder {
     }
 
     private static RolloutGroupConditions getConditions(final RolloutGroup rolloutGroup) {
-        return new RolloutGroupConditionBuilder()
-                .errorCondition(rolloutGroup.getErrorCondition(), rolloutGroup.getErrorConditionExp())
-                .errorAction(rolloutGroup.getErrorAction(), rolloutGroup.getErrorActionExp())
-                .successAction(rolloutGroup.getSuccessAction(), rolloutGroup.getSuccessActionExp())
-                .successCondition(rolloutGroup.getSuccessCondition(), rolloutGroup.getSuccessConditionExp()).build();
+        if (rolloutGroup == null) {
+            return  new RolloutGroupConditionBuilder().withDefaults().build();
+        } else {
+            return new RolloutGroupConditionBuilder()
+                    .errorCondition(rolloutGroup.getErrorCondition(), rolloutGroup.getErrorConditionExp())
+                    .errorAction(rolloutGroup.getErrorAction(), rolloutGroup.getErrorActionExp())
+                    .successAction(rolloutGroup.getSuccessAction(), rolloutGroup.getSuccessActionExp())
+                    .successCondition(rolloutGroup.getSuccessCondition(), rolloutGroup.getSuccessConditionExp()).build();
+        }
     }
 }

@@ -39,10 +39,4 @@ public class JpaTargetTagManagement
             final EntityManager entityManager) {
         super(targetTagRepository, entityManager);
     }
-
-
-    @Override
-    public Optional<TargetTag> getByName(final String name) {
-        return jpaRepository.findByNameEquals(name);
-    }
 }

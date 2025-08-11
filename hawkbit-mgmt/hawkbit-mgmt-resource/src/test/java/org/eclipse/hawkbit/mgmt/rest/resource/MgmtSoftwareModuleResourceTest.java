@@ -40,6 +40,7 @@ import com.jayway.jsonpath.JsonPath;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -339,7 +340,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     void unlockSoftwareModule() throws Exception {
         final SoftwareModule sm = softwareModuleManagement.create(
                 SoftwareModuleManagement.Create.builder().type(osType).name("name1").version("version1").build());
-        softwareModuleManagement.lock(sm.getId());
+        softwareModuleManagement.lock(sm);
         assertThat(softwareModuleManagement.get(sm.getId())
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, sm.getId())).isLocked())
                 .as("Software module is locked")
@@ -1309,26 +1310,34 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("[1].createdAt", not(equalTo(0))))
                 .andReturn();
 
-        final SoftwareModule osCreated = softwareModuleManagement.findByNameAndVersionAndType("name1", "version1", osType.getId()).get();
-        final SoftwareModule appCreated = softwareModuleManagement.findByNameAndVersionAndType("name3", "version3", appType.getId()).get();
+        final List<MgmtSoftwareModule> softwareModules = OBJECT_MAPPER.readerForListOf(MgmtSoftwareModule.class)
+                .readValue(mvcResult.getResponse().getContentAsString());
+        final long osCreatedId = softwareModules.stream()
+                .filter(softwareModule -> osType.getKey().equals(softwareModule.getType()))
+                .findFirst()
+                .map(MgmtSoftwareModule::getId)
+                .orElseThrow();
+        final long appCreatedId = softwareModules.stream()
+                .filter(softwareModule -> appType.getKey().equals(softwareModule.getType()))
+                .findFirst()
+                .map(MgmtSoftwareModule::getId)
+                .orElseThrow();
 
         assertThat(JsonPath.compile("[0]._links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
                 .as("Response contains invalid self href")
-                .isEqualTo("http://localhost/rest/v1/softwaremodules/" + osCreated.getId());
+                .isEqualTo("http://localhost/rest/v1/softwaremodules/" + osCreatedId);
 
         assertThat(JsonPath.compile("[1]._links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
                 .as("Response contains links self href")
-                .isEqualTo("http://localhost/rest/v1/softwaremodules/" + appCreated.getId());
+                .isEqualTo("http://localhost/rest/v1/softwaremodules/" + appCreatedId);
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("Wrong softwaremodule size").hasSize(2);
-        assertThat(softwareModuleManagement.findByType(osType.getId(), PAGE).getContent().get(0).getName())
-                .as("Softwaremoudle name is wrong").isEqualTo(os.getName());
-        assertThat(softwareModuleManagement.findByType(osType.getId(), PAGE).getContent().get(0).getCreatedBy())
-                .as("Softwaremoudle created by is wrong").isEqualTo("uploadTester");
-        assertThat(softwareModuleManagement.findByType(osType.getId(), PAGE).getContent().get(0).getCreatedAt())
-                .as("Softwaremoudle created at is wrong").isGreaterThanOrEqualTo(current);
-        assertThat(softwareModuleManagement.findByType(appType.getId(), PAGE).getContent().get(0).getName())
-                .as("Softwaremoudle name is wrong").isEqualTo(ah.getName());
+        final SoftwareModule osCreated = softwareModuleManagement.get(osCreatedId).orElseThrow();
+        final SoftwareModule appCreated = softwareModuleManagement.get(appCreatedId).orElseThrow();
+        assertThat(osCreated.getName()).as("Softwaremoudle name is wrong").isEqualTo(os.getName());
+        assertThat(osCreated.getCreatedBy()).as("Softwaremoudle created by is wrong").isEqualTo("uploadTester");
+        assertThat(osCreated.getCreatedAt()).as("Softwaremoudle created at is wrong").isGreaterThanOrEqualTo(current);
+        assertThat(appCreated.getName()).as("Softwaremoudle name is wrong").isEqualTo(ah.getName());
     }
 
     /**

@@ -25,12 +25,12 @@ import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 
 /**
- * Multi-Tenancy tests which testing the CRUD operations of entities that all
- * CRUD-Operations are tenant aware and cannot access or delete entities not
- * belonging to the current tenant.
+ * Multi-Tenancy tests which testing the CRUD operations of entities that all CRUD-Operations are tenant aware and cannot access
+ * or delete entities not belonging to the current tenant.
  * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Multi Tenancy
@@ -54,10 +54,10 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         createTargetForTenant(knownControllerId, anotherTenant);
 
         // ensure both tenants see their target
-        final Slice<Target> findTargetsForTenant = findTargetsForTenant(tenant);
+        final Page<? extends Target> findTargetsForTenant = findTargetsForTenant(tenant);
         assertThat(findTargetsForTenant).hasSize(1);
         assertThat(findTargetsForTenant.getContent().get(0).getTenant().toUpperCase()).isEqualTo(tenant.toUpperCase());
-        final Slice<Target> findTargetsForAnotherTenant = findTargetsForTenant(anotherTenant);
+        final Page<? extends Target> findTargetsForAnotherTenant = findTargetsForTenant(anotherTenant);
         assertThat(findTargetsForAnotherTenant).hasSize(1);
         assertThat(findTargetsForAnotherTenant.getContent().get(0).getTenant().toUpperCase())
                 .isEqualTo(anotherTenant.toUpperCase());
@@ -75,12 +75,12 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         createTargetForTenant(controllerAnotherTenant, anotherTenant);
 
         // find all targets for current tenant "mytenant"
-        final Slice<Target> findTargetsAll = targetManagement.findAll(PAGE);
+        final Page<? extends Target> findTargetsAll = targetManagement.findAll(PAGE);
         // no target has been created for "mytenant"
         assertThat(findTargetsAll).isEmpty();
 
         // find all targets for anotherTenant
-        final Slice<Target> findTargetsForTenant = findTargetsForTenant(anotherTenant);
+        final Page<? extends Target> findTargetsForTenant = findTargetsForTenant(anotherTenant);
         // another tenant should have targets
         assertThat(findTargetsForTenant).hasSize(1);
     }
@@ -144,7 +144,7 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
             // ok
         }
 
-        Slice<Target> targetsForAnotherTenant = findTargetsForTenant(anotherTenant);
+        Page<? extends Target> targetsForAnotherTenant = findTargetsForTenant(anotherTenant);
         assertThat(targetsForAnotherTenant).hasSize(1);
 
         // ensure another tenant can delete the target
@@ -185,7 +185,7 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         return runAsTenant(tenant, () -> testdataFactory.createTarget(controllerId));
     }
 
-    private Slice<Target> findTargetsForTenant(final String tenant) throws Exception {
+    private Page<? extends Target> findTargetsForTenant(final String tenant) throws Exception {
         return runAsTenant(tenant, () -> targetManagement.findAll(PAGE));
     }
 
@@ -196,11 +196,11 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         });
     }
 
-    private DistributionSet createDistributionSetForTenant(final String tenant) throws Exception {
-        return runAsTenant(tenant, () -> testdataFactory.createDistributionSet());
+    private void createDistributionSetForTenant(final String tenant) throws Exception {
+        runAsTenant(tenant, () -> testdataFactory.createDistributionSet());
     }
 
     private Slice<? extends DistributionSet> findDistributionSetForTenant(final String tenant) throws Exception {
-        return runAsTenant(tenant, () -> distributionSetManagement.findByCompleted(true, PAGE));
+        return runAsTenant(tenant, () -> distributionSetManagement.findAll(PAGE));
     }
 }

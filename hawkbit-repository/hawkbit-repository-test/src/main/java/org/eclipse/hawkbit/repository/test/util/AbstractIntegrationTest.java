@@ -25,13 +25,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Random;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionFactory;
-import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
-import org.eclipse.hawkbit.repository.artifact.exception.ArtifactStoreException;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -40,7 +39,6 @@ import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -54,8 +52,11 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
+import org.eclipse.hawkbit.repository.artifact.exception.ArtifactStoreException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -69,6 +70,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -117,6 +119,7 @@ public abstract class AbstractIntegrationTest {
     protected static final Pageable PAGE = PageRequest.of(0, 500, Sort.by(Direction.ASC, "id"));
     protected static final URI LOCALHOST = URI.create("http://127.0.0.1");
     protected static final int DEFAULT_TEST_WEIGHT = 500;
+    protected static final Random RND = new Random();
 
     /**
      * Number of {@link DistributionSetType}s that exist in every test case. One
@@ -126,8 +129,6 @@ public abstract class AbstractIntegrationTest {
      */
     protected static final int DEFAULT_DS_TYPES = RepositoryConstants.DEFAULT_DS_TYPES_IN_TENANT + 1;
 
-    @Autowired
-    protected EntityFactory entityFactory;
     @Autowired
     protected SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement;
     @Autowired
@@ -141,7 +142,7 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected ControllerManagement controllerManagement;
     @Autowired
-    protected TargetManagement targetManagement;
+    protected TargetManagement<? extends Target> targetManagement;
     @Autowired
     protected TargetTypeManagement<? extends TargetType> targetTypeManagement;
     @Autowired
@@ -286,14 +287,12 @@ public abstract class AbstractIntegrationTest {
         return defaultDsType().getMandatoryModuleTypes().stream().findAny().orElseThrow();
     }
 
-    protected static Action getFirstAssignedAction(
-            final DistributionSetAssignmentResult distributionSetAssignmentResult) {
+    protected static Action getFirstAssignedAction(final DistributionSetAssignmentResult distributionSetAssignmentResult) {
         return distributionSetAssignmentResult.getAssignedEntity().stream().findFirst()
                 .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none"));
     }
 
-    protected static Long getFirstAssignedActionId(
-            final DistributionSetAssignmentResult distributionSetAssignmentResult) {
+    protected static Long getFirstAssignedActionId(final DistributionSetAssignmentResult distributionSetAssignmentResult) {
         return getFirstAssignedAction(distributionSetAssignmentResult).getId();
     }
 
@@ -313,13 +312,12 @@ public abstract class AbstractIntegrationTest {
         return TestdataFactory.randomBytes(len);
     }
 
-    protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId) {
-        return assignDistributionSet(dsID, controllerId, ActionType.FORCED);
+    protected DistributionSetAssignmentResult assignDistributionSet(final long dsId, final String controllerId) {
+        return assignDistributionSet(dsId, controllerId, ActionType.FORCED);
     }
 
-    protected DistributionSetAssignmentResult assignDistributionSet(
-            final long dsID, final String controllerId, final ActionType actionType) {
-        return assignDistributionSet(dsID, Collections.singletonList(controllerId), actionType);
+    protected DistributionSetAssignmentResult assignDistributionSet(final long dsId, final String controllerId, final ActionType actionType) {
+        return assignDistributionSet(dsId, Collections.singletonList(controllerId), actionType);
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(
@@ -333,8 +331,8 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(
-            final long dsID, final List<String> controllerIds, final ActionType actionType, final long forcedTime) {
-        return assignDistributionSet(dsID, controllerIds, actionType, forcedTime, null);
+            final long dsId, final List<String> controllerIds, final ActionType actionType, final long forcedTime) {
+        return assignDistributionSet(dsId, controllerIds, actionType, forcedTime, null);
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(
@@ -437,7 +435,8 @@ public abstract class AbstractIntegrationTest {
         return ds.getModules().stream().filter(module -> module.getType().equals(type)).findAny();
     }
 
-    protected Optional<? extends SoftwareModule> findFirstModuleByType(final DistributionSetManagement.Create dsCreate, final SoftwareModuleType type) {
+    protected Optional<? extends SoftwareModule> findFirstModuleByType(final DistributionSetManagement.Create dsCreate,
+            final SoftwareModuleType type) {
         return dsCreate.getModules().stream().filter(module -> module.getType().equals(type)).findAny();
     }
 
@@ -456,9 +455,9 @@ public abstract class AbstractIntegrationTest {
         }
 
         controllerManagement.addUpdateActionStatus(
-                entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.RUNNING));
+                ActionStatusCreate.builder().actionId(savedAction.getId()).status(Action.Status.RUNNING).build());
         controllerManagement.addUpdateActionStatus(
-                entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.FINISHED));
+                ActionStatusCreate.builder().actionId(savedAction.getId()).status(Action.Status.FINISHED).build());
 
         return controllerManagement.findActionWithDetails(savedAction.getId())
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, savedAction.getId()));
@@ -512,5 +511,9 @@ public abstract class AbstractIntegrationTest {
         } catch (final IOException e) {
             throw new ArtifactStoreException("Cannot create temp file", e);
         }
+    }
+
+    protected List<? extends Target> findByUpdateStatus(final TargetUpdateStatus status, final Pageable pageable) {
+        return targetManagement.findAll(pageable).stream().filter(target -> status.equals(target.getUpdateStatus())).toList();
     }
 }

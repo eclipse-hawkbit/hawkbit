@@ -39,10 +39,14 @@ import org.awaitility.core.ConditionFactory;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtRestModelMapper;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.RolloutManagement.Create;
+import org.eclipse.hawkbit.repository.RolloutManagement.GroupCreate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -91,6 +95,8 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     private RolloutGroupManagement rolloutGroupManagement;
     @Autowired
     private RolloutTestApprovalStrategy approvalStrategy;
+    @Autowired
+    private DistributionSetManagement distributionSetManagement;
 
     /**
      * Handles the GET request of retrieving a single rollout.
@@ -106,12 +112,11 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
             final DistributionSet dsA = testdataFactory.createDistributionSet("");
             // create a running rollout for the created targets
             final Rollout rollout = rolloutManagement.create(
-                    entityFactory
-                            .rollout()
-                            .create()
+                    Create.builder()
                             .name("rollout1")
-                            .distributionSetId(dsA.getId())
-                            .targetFilterQuery("controllerId==rollout*"),
+                            .distributionSet(dsA)
+                            .targetFilterQuery("controllerId==rollout*")
+                            .build(),
                     4, false, new RolloutGroupConditionBuilder().withDefaults()
                             .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
@@ -136,7 +141,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     void getRolloutDeployGroupTargetsWithParameters() throws Exception {
         testdataFactory.createTargets(4, "rollout", "description");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
-        final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
+        final Rollout rollout = createRollout("rollout1", 2, dsA, "controllerId==rollout*");
         final RolloutGroup firstRolloutGroup = rolloutGroupManagement
                 .findByRollout(rollout.getId(), PageRequest.of(0, 1)).getContent().get(0);
 
@@ -158,7 +163,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         try {
             testdataFactory.createTargets(4, "rollout", "description");
             final DistributionSet dsA = testdataFactory.createDistributionSet("");
-            final Rollout rollout = createRollout("rollout1", 3, dsA.getId(), "controllerId==rollout*", false);
+            final Rollout rollout = createRollout("rollout1", 3, dsA, "controllerId==rollout*", false);
             mvc.perform(post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/approve", rollout.getId())
                             .accept(MediaTypes.HAL_JSON_VALUE))
                     .andDo(MockMvcResultPrinter.print())
@@ -177,7 +182,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         try {
             testdataFactory.createTargets(4, "rollout", "description");
             final DistributionSet dsA = testdataFactory.createDistributionSet("");
-            final Rollout rollout = createRollout("rollout1", 3, dsA.getId(), "controllerId==rollout*", false);
+            final Rollout rollout = createRollout("rollout1", 3, dsA, "controllerId==rollout*", false);
             mvc.perform(post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deny", rollout.getId())
                             .accept(MediaTypes.HAL_JSON_VALUE))
                     .andDo(MockMvcResultPrinter.print())
@@ -198,7 +203,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final String remark = "Some remark";
         testdataFactory.createTargets(amountTargets, "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
-        final Rollout rollout = createRollout("rollout1", 3, dsA.getId(), "controllerId==rollout*", false);
+        final Rollout rollout = createRollout("rollout1", 3, dsA, "controllerId==rollout*", false);
 
         rolloutHandler.handleAll();
 
@@ -460,11 +465,9 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final float percentTargetsInGroup1 = 20;
         final float percentTargetsInGroup2 = 100;
 
-        final List<RolloutGroup> rolloutGroups = Arrays.asList(
-                entityFactory.rolloutGroup().create().name("Group1").description("Group1desc")
-                        .targetPercentage(percentTargetsInGroup1).build(),
-                entityFactory.rolloutGroup().create().name("Group2").description("Group2desc")
-                        .targetPercentage(percentTargetsInGroup2).build());
+        final List<GroupCreate> rolloutGroups = List.of(
+                GroupCreate.builder().name("Group1").description("Group1desc").targetPercentage(percentTargetsInGroup1).build(),
+                GroupCreate.builder().name("Group2").description("Group2desc").targetPercentage(percentTargetsInGroup2).build());
 
         final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
 
@@ -573,11 +576,9 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "ro-target", "rollout");
 
-        final List<RolloutGroup> rolloutGroups = Arrays.asList(
-                entityFactory.rolloutGroup().create().name("Group1").description("Group1desc").targetPercentage(0F)
-                        .build(),
-                entityFactory.rolloutGroup().create().name("Group2").description("Group2desc").targetPercentage(100F)
-                        .build());
+        final List<GroupCreate> rolloutGroups = List.of(
+                GroupCreate.builder().name("Group1").description("Group1desc").targetPercentage(0F).build(),
+                GroupCreate.builder().name("Group2").description("Group2desc").targetPercentage(100F).build());
 
         final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
 
@@ -601,11 +602,9 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "ro-target", "rollout");
 
-        final List<RolloutGroup> rolloutGroups = Arrays.asList(
-                entityFactory.rolloutGroup().create().name("Group1").description("Group1desc").targetPercentage(1F)
-                        .build(),
-                entityFactory.rolloutGroup().create().name("Group2").description("Group2desc").targetPercentage(101F)
-                        .build());
+        final List<GroupCreate> rolloutGroups = List.of(
+                GroupCreate.builder().name("Group1").description("Group1desc").targetPercentage(1F).build(),
+                GroupCreate.builder().name("Group2").description("Group2desc").targetPercentage(101F).build());
 
         final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
 
@@ -628,12 +627,11 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         // create a running rollout for the created targets
         final Rollout rollout = rolloutManagement.create(
-                entityFactory
-                        .rollout()
-                        .create()
+                Create.builder()
                         .name("rollout1")
-                        .distributionSetId(dsA.getId())
-                        .targetFilterQuery("controllerId==rollout*"),
+                        .distributionSet(dsA)
+                        .targetFilterQuery("controllerId==rollout*")
+                        .build(),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
@@ -670,8 +668,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
-                        .targetFilterQuery("controllerId==rollout*"),
+                Create.builder().name("rollout1").distributionSet(dsA).targetFilterQuery("controllerId==rollout*").build(),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
@@ -691,8 +688,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create a running rollout for the created targets
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
-                        .targetFilterQuery("controllerId==rollout*"),
+                Create.builder().name("rollout1").distributionSet(dsA).targetFilterQuery("controllerId==rollout*").build(),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
@@ -731,18 +727,16 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     void retrieveRolloutListFullRepresentationWithFilter() throws Exception {
         testdataFactory.createTargets(20, "rollout", "rollout");
-        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+        final DistributionSet dsA = testdataFactory.createDistributionSetLocked("");
 
         // create a running rollout for the created targets
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
-                        .targetFilterQuery("controllerId==rollout*"),
+                Create.builder().name("rollout1").distributionSet(dsA).targetFilterQuery("controllerId==rollout*").build(),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
         rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout2").distributionSetId(dsA.getId())
-                        .targetFilterQuery("controllerId==rollout*"),
+                Create.builder().name("rollout2").distributionSet(dsA).targetFilterQuery("controllerId==rollout*").build(),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
@@ -790,8 +784,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
-                        .targetFilterQuery("controllerId==rollout*"),
+                Create.builder().name("rollout1").distributionSet(dsA).targetFilterQuery("controllerId==rollout*").build(),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
@@ -888,11 +881,9 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
 
-        final List<String> rolloutGroups = Arrays.asList(
-                JsonBuilder.rolloutGroup("Group1", "Group1desc", null, percentTargetsInGroup1, false,
-                        rolloutGroupConditions),
-                JsonBuilder.rolloutGroup("Group2", "Group1desc", null, percentTargetsInGroup2, null,
-                        rolloutGroupConditions));
+        final List<String> rolloutGroups = List.of(
+                JsonBuilder.rolloutGroup("Group1", "Group1desc", null, percentTargetsInGroup1, false, rolloutGroupConditions),
+                JsonBuilder.rolloutGroup("Group2", "Group1desc", null, percentTargetsInGroup2, null, rolloutGroupConditions));
 
         mvc.perform(post("/rest/v1/rollouts")
                         .content(JsonBuilder.rollout("rollout2", "desc", null, dsA.getId(), "id==ro-target*",
@@ -1041,7 +1032,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         }
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*",
+        final Rollout rollout = createRollout("rollout1", 4, dsA, "controllerId==rollout*",
                 confirmationRequired);
 
         // retrieve rollout groups from created rollout
@@ -1078,14 +1069,11 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         // setup
         final int amountTargets = 8;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
-        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+        final DistributionSet dsA = testdataFactory.createDistributionSetLocked("");
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout1 = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*",
-                false);
-
-        final Rollout rollout2 = createRollout("rollout2", 1, dsA.getId(), "controllerId==rollout*",
-                false);
+        final Rollout rollout1 = createRollout("rollout1", 4, dsA, "controllerId==rollout*",false);
+        final Rollout rollout2 = createRollout("rollout2", 1, dsA, "controllerId==rollout*", false);
 
         rolloutManagement.start(rollout1.getId());
         rolloutManagement.start(rollout2.getId());
@@ -1112,7 +1100,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
+        final Rollout rollout = createRollout("rollout1", 4, dsA, "controllerId==rollout*");
 
         // starting rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId()))
@@ -1150,7 +1138,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
+        final Rollout rollout = createRollout("rollout1", 4, dsA, "controllerId==rollout*");
 
         // starting rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId()))
@@ -1185,7 +1173,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
+        final Rollout rollout = createRollout("rollout1", 4, dsA, "controllerId==rollout*");
 
         // starting rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId()))
@@ -1225,7 +1213,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
+        final Rollout rollout = createRollout("rollout1", 4, dsA, "controllerId==rollout*");
 
         // starting rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId()))
@@ -1253,7 +1241,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
+        final Rollout rollout = createRollout("rollout1", 4, dsA, "controllerId==rollout*");
 
         // resume not yet started rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/resume", rollout.getId()))
@@ -1273,7 +1261,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
+        final Rollout rollout = createRollout("rollout1", 2, dsA, "controllerId==rollout*");
 
         // starting rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId()))
@@ -1314,8 +1302,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
-                        .targetFilterQuery("controllerId==rollout*"),
+                Create.builder().name("rollout1").distributionSet(dsA).targetFilterQuery("controllerId==rollout*").build(),
                 4, confirmationRequired, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
@@ -1340,7 +1327,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
+        final Rollout rollout = createRollout("rollout1", 2, dsA, "controllerId==rollout*");
 
         final RolloutGroup firstGroup = rolloutGroupManagement
                 .findByRollout(rollout.getId(), PageRequest.of(0, 1, Direction.ASC, "id")).getContent().get(0);
@@ -1367,7 +1354,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
+        final Rollout rollout = createRollout("rollout1", 2, dsA, "controllerId==rollout*");
 
         final RolloutGroup firstGroup = rolloutGroupManagement
                 .findByRollout(rollout.getId(), PageRequest.of(0, 1, Direction.ASC, "id")).getContent().get(0);
@@ -1397,7 +1384,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
+        final Rollout rollout = createRollout("rollout1", 2, dsA, "controllerId==rollout*");
 
         rolloutManagement.start(rollout.getId());
 
@@ -1429,7 +1416,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
+        final Rollout rollout = createRollout("rollout1", 4, dsA, "controllerId==rollout*");
 
         // starting rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId()))
@@ -1453,7 +1440,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = createRollout("rolloutDelete", 4, dsA.getId(), "controllerId==rolloutDelete*");
+        final Rollout rollout = createRollout("rolloutDelete", 4, dsA, "controllerId==rolloutDelete*");
 
         mvc.perform(delete("/rest/v1/rollouts/{rolloutid}", rollout.getId()))
                 .andDo(MockMvcResultPrinter.print())
@@ -1525,7 +1512,6 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
      */
     @Test
     void getRolloutWithRSQLParam() throws Exception {
-
         final int amountTargetsRollout1 = 25;
         final int amountTargetsRollout2 = 25;
         final int amountTargetsRollout3 = 25;
@@ -1534,12 +1520,12 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         testdataFactory.createTargets(amountTargetsRollout2, "rollout2", "rollout2");
         testdataFactory.createTargets(amountTargetsRollout3, "rollout3", "rollout3");
         testdataFactory.createTargets(amountTargetsOther, "other1", "other1");
-        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+        final DistributionSet dsA = testdataFactory.createDistributionSetLocked("");
 
-        createRollout("rollout1", 5, dsA.getId(), "controllerId==rollout1*");
-        final Rollout rollout2 = createRollout("rollout2", 5, dsA.getId(), "controllerId==rollout2*");
-        createRollout("rollout3", 5, dsA.getId(), "controllerId==rollout3*");
-        createRollout("other1", 5, dsA.getId(), "controllerId==other1*");
+        createRollout("rollout1", 5, dsA, "controllerId==rollout1*");
+        final Rollout rollout2 = createRollout("rollout2", 5, dsA, "controllerId==rollout2*");
+        createRollout("rollout3", 5, dsA, "controllerId==rollout3*");
+        createRollout("other1", 5, dsA, "controllerId==other1*");
 
         mvc.perform(get("/rest/v1/rollouts").param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, "name==*2")
                         .accept(MediaType.APPLICATION_JSON))
@@ -1579,7 +1565,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
+        final Rollout rollout = createRollout("rollout1", 4, dsA, "controllerId==rollout*");
 
         // retrieve rollout groups from created rollout
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups", rollout.getId())
@@ -1624,8 +1610,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create a running rollout for the created targets
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
-                        .targetFilterQuery("controllerId==rollout*"),
+                Create.builder().name("rollout1").distributionSet(dsA).targetFilterQuery("controllerId==rollout*").build(),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
@@ -1711,7 +1696,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
-        final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
+        final Rollout rollout = createRollout("rollout1", 4, dsA, "controllerId==rollout*");
         rolloutManagement.start(rollout.getId());
         rolloutHandler.handleAll();
 
@@ -1735,7 +1720,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // CREATING state
-        final Rollout rollout = createRollout("rollout1", 3, dsA.getId(), "controllerId==rollout*", false);
+        final Rollout rollout = createRollout("rollout1", 3, dsA, "controllerId==rollout*", false);
         triggerNextGroupAndExpect(rollout, status().isBadRequest());
 
         // READY state
@@ -1764,7 +1749,6 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         setTargetsStatus(targets, Status.FINISHED);
         rolloutHandler.handleAll();
         triggerNextGroupAndExpect(rollout, status().isBadRequest());
-
     }
 
     private static Stream<Arguments> confirmationOptions() {
@@ -1967,8 +1951,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     private static final Duration ROLLOUT_AT_LEAST = Duration.ofMillis(Integer.getInteger("hawkbit.it.rest.await.rolloutAtLeastMs", 50));
-    private static final Duration ROLLOUT_POLL_INTERVAL = Duration.ofMillis(Integer.getInteger("hawkbit.it.rest.await.rolloutPollIntervalMs", 100));
+    private static final Duration ROLLOUT_POLL_INTERVAL = Duration.ofMillis(
+            Integer.getInteger("hawkbit.it.rest.await.rolloutPollIntervalMs", 100));
     private static final Duration ROLLOUT_TIMEOUT = Duration.ofMillis(Integer.getInteger("hawkbit.it.rest.await.rolloutTimeoutMs", 60_000));
+
     private ConditionFactory awaitRollout() {
         return Awaitility.await().atLeast(ROLLOUT_AT_LEAST).pollInterval(ROLLOUT_POLL_INTERVAL).atMost(ROLLOUT_TIMEOUT);
     }
@@ -2026,21 +2012,21 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$._links.start.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/start"))))
                 .andExpect(jsonPath("$._links.pause.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/pause"))))
                 .andExpect(jsonPath("$.dynamic", equalTo(isDynamic)))
-                .andExpect(
-                        jsonPath("$._links.resume.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/resume"))))
-                .andExpect(jsonPath("$._links.groups.href",
-                        allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))));
+                .andExpect(jsonPath("$._links.resume.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/resume"))))
+                .andExpect(jsonPath(
+                        "$._links.groups.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))));
     }
 
-    private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
-            final String targetFilterQuery) {
-        return createRollout(name, amountGroups, distributionSetId, targetFilterQuery, false);
+    private Rollout createRollout(
+            final String name, final int amountGroups, final DistributionSet distributionSet, final String targetFilterQuery) {
+        return createRollout(name, amountGroups, distributionSet, targetFilterQuery, false);
     }
 
-    private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
-            final String targetFilterQuery, final boolean confirmationRequired) {
+    private Rollout createRollout(
+            final String name, final int amountGroups, final DistributionSet distributionSet, final String targetFilterQuery,
+            final boolean confirmationRequired) {
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name(name).distributionSetId(distributionSetId).targetFilterQuery(targetFilterQuery),
+                Create.builder().name(name).distributionSet(distributionSet).targetFilterQuery(targetFilterQuery).build(),
                 amountGroups, confirmationRequired, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
@@ -2058,10 +2044,9 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     private void setTargetsStatus(final List<Target> targets, final Status status) {
         for (final Target target : targets) {
-            final Long action = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).toList().get(0)
-                    .getId();
-            controllerManagement
-                    .addUpdateActionStatus(entityFactory.actionStatus().create(action).status(status).message("test"));
+            final Long action = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).toList().get(0).getId();
+            controllerManagement.addUpdateActionStatus(
+                    ActionStatusCreate.builder().actionId(action).status(status).messages(List.of("test")).build());
         }
     }
 

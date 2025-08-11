@@ -91,7 +91,6 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void nonExistingEntityAccessReturnsNotPresent() {
-        assertThat(targetTagManagement.getByName(NOT_EXIST_ID)).isNotPresent();
         assertThat(targetTagManagement.get(NOT_EXIST_IDL)).isNotPresent();
     }
 
@@ -134,7 +133,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         List<Target> result = assignTag(groupA, tag);
         assertThat(result)
                 .containsAll(
-                        targetManagement.getByControllerID(groupA.stream().map(Target::getControllerId).toList()))
+                        targetManagement.getByControllerId(groupA.stream().map(Target::getControllerId).toList()))
                 .size().isEqualTo(20);
         assertThat(targetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent().stream().map(Target::getControllerId).sorted()
                 .toList())
@@ -145,7 +144,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         result = assignTag(groupAB, tag);
         assertThat(result)
                 .containsAll(
-                        targetManagement.getByControllerID(groupAB.stream().map(Target::getControllerId).toList()))
+                        targetManagement.getByControllerId(groupAB.stream().map(Target::getControllerId).toList()))
                 .size().isEqualTo(40);
         assertThat(targetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent().stream().map(Target::getControllerId).sorted()
                 .toList())
@@ -154,7 +153,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         // toggle A+B -> both unassigned
         result = unassignTag(groupAB, tag);
         assertThat(result)
-                .containsAll(targetManagement.getByControllerID(groupAB.stream().map(Target::getControllerId).toList()))
+                .containsAll(targetManagement.getByControllerId(groupAB.stream().map(Target::getControllerId).toList()))
                 .size().isEqualTo(40);
         assertThat(targetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent()).isEmpty();
     }
@@ -176,8 +175,6 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void createTargetTag() {
         final Tag tag = targetTagManagement.create(Create.builder().name("k1").description("k2").colour("colour").build());
-        assertThat(targetTagRepository.findByNameEquals("k1").orElseThrow().getDescription()).as("wrong tag ed").isEqualTo("k2");
-        assertThat(targetTagManagement.getByName("k1").orElseThrow().getColour()).as("wrong tag found").isEqualTo("colour");
         assertThat(targetTagManagement.get(tag.getId()).orElseThrow().getColour()).as("wrong tag found").isEqualTo("colour");
     }
 

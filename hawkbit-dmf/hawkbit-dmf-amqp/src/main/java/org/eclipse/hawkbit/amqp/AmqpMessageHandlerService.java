@@ -39,14 +39,14 @@ import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
-import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate.ActionStatusCreateBuilder;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -81,7 +81,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private final AmqpMessageDispatcherService amqpMessageDispatcherService;
     private final ConfirmationManagement confirmationManagement;
-    private final EntityFactory entityFactory;
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final SystemSecurityContext systemSecurityContext;
     private ControllerManagement controllerManagement;
@@ -92,7 +91,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * @param rabbitTemplate for converting messages
      * @param amqpMessageDispatcherService to sending events to DMF client
      * @param controllerManagement for target repo access
-     * @param entityFactory to create entities
      * @param systemSecurityContext the system Security Context
      * @param tenantConfigurationManagement the tenant configuration Management
      * @param confirmationManagement the confirmation management
@@ -100,13 +98,11 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     public AmqpMessageHandlerService(
             final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
-            final ControllerManagement controllerManagement, final EntityFactory entityFactory,
-            final SystemSecurityContext systemSecurityContext,
+            final ControllerManagement controllerManagement, final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement tenantConfigurationManagement, final ConfirmationManagement confirmationManagement) {
         super(rabbitTemplate);
         this.amqpMessageDispatcherService = amqpMessageDispatcherService;
         this.controllerManagement = controllerManagement;
-        this.entityFactory = entityFactory;
         this.systemSecurityContext = systemSecurityContext;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.confirmationManagement = confirmationManagement;
@@ -365,7 +361,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final Action action = actionOptional.get();
         if (action.isCancelingOrCanceled()) {
             amqpMessageDispatcherService.sendCancelMessageToTarget(
-                    target.getTenant(), target.getControllerId(), action.getId(), target.getAddress());
+                    target.getTenant(), target.getControllerId(), action.getId(), IpUtil.addressToUri(target.getAddress()));
         } else {
             amqpMessageDispatcherService.sendUpdateMessageToTarget(
                     new ActionProperties(action), action.getTarget(), getSoftwareModulesWithMetadata(action.getDistributionSet()));
@@ -459,14 +455,15 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         } else if (actionUpdateStatus.getActionStatus() == DmfActionStatus.DENIED) {
             updatedAction = confirmationManagement.denyAction(action.getId(), actionUpdateStatus.getCode(), messages);
         } else {
-            final ActionStatusCreate actionStatus = entityFactory.actionStatus().create(action.getId()).status(status).messages(messages);
+            final ActionStatusCreateBuilder actionStatus = ActionStatusCreate.builder()
+                    .actionId(action.getId()).status(status).messages(messages);
             Optional.ofNullable(actionUpdateStatus.getCode()).ifPresent(code -> {
                 actionStatus.code(code);
-                actionStatus.message("Device reported status code: " + code);
+                actionStatus.messages(List.of("Device reported status code: " + code));
             });
             updatedAction = Status.CANCELED == status || Status.CANCEL_REJECTED == status
-                    ? controllerManagement.addCancelActionStatus(actionStatus)
-                    : controllerManagement.addUpdateActionStatus(actionStatus);
+                    ? controllerManagement.addCancelActionStatus(actionStatus.build())
+                    : controllerManagement.addUpdateActionStatus(actionStatus.build());
         }
 
         if (shouldTargetProceed(updatedAction) || actionUpdateStatus.getActionStatus() == DmfActionStatus.CONFIRMED) {

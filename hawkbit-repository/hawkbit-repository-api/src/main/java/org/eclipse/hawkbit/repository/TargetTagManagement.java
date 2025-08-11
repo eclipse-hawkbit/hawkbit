@@ -9,9 +9,6 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.util.Optional;
-
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -19,11 +16,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * Management service for {@link TargetTag}s.
@@ -35,9 +30,6 @@ public interface TargetTagManagement<T extends TargetTag>
     default String permissionGroup() {
         return "TARGET";
     }
-
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<TargetTag> getByName(@NotEmpty String name);
 
     @SuperBuilder
     @Getter
@@ -61,7 +53,7 @@ public interface TargetTagManagement<T extends TargetTag>
 
         @ValidString
         @Size(min = 1, max = NamedEntity.NAME_MAX_SIZE)
-        @NotNull(groups = DistributionSetTagManagement.Create.class)
+        @NotNull(groups = Create.class)
         private String name;
 
         @ValidString

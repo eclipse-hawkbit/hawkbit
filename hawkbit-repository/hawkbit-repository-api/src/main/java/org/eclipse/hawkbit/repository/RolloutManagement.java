@@ -11,47 +11,55 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+import lombok.experimental.SuperBuilder;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
-import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
-import org.eclipse.hawkbit.repository.builder.RolloutCreate;
-import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
-import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
-import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
- * RolloutManagement to control rollouts e.g. like creating, starting, resuming
- * and pausing rollouts. This service secures all the functionality based on the
- * {@link PreAuthorize} annotation on methods.
+ * RolloutManagement to control rollouts e.g. like creating, starting, resuming and pausing rollouts. This service secures all the
+ * functionality based on the {@link PreAuthorize} annotation on methods.
  */
 public interface RolloutManagement {
 
     /**
      * Counts all {@link Rollout}s in the repository that are not marked as deleted.
      *
-     * @return number of roll outs
+     * @return number of rollouts
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     long count();
@@ -97,7 +105,7 @@ public interface RolloutManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE)
     Rollout create(
-            @NotNull @Valid RolloutCreate create, int amountGroup, boolean confirmationRequired,
+            @NotNull @Valid Create create, int amountGroup, boolean confirmationRequired,
             @NotNull RolloutGroupConditions conditions, DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate);
 
     /**
@@ -127,7 +135,7 @@ public interface RolloutManagement {
      *         exceeded.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE)
-    Rollout create(@NotNull @Valid RolloutCreate create, int amountGroup, boolean confirmationRequired,
+    Rollout create(@NotNull @Valid Create create, int amountGroup, boolean confirmationRequired,
             @NotNull RolloutGroupConditions conditions);
 
     /**
@@ -158,25 +166,7 @@ public interface RolloutManagement {
      *         exceeded.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE)
-    Rollout create(@Valid @NotNull RolloutCreate rollout, @NotNull @Valid List<RolloutGroupCreate> groups,
-            RolloutGroupConditions conditions);
-
-    /**
-     * Calculates how many targets are addressed by each rollout group and
-     * returns the validation information.
-     *
-     * @param groups a list of rollout groups
-     * @param targetFilter the rollout
-     * @param createdAt timestamp when the rollout was created
-     * @param dsTypeId ID of the type of distribution set of the rollout
-     * @return the validation information
-     * @throws RolloutIllegalStateException thrown when no targets are targeted by the rollout
-     * @throws ConstraintViolationException if fields are not filled as specified. Check
-     *         {@link RolloutGroupCreate} for field constraints.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    CompletableFuture<RolloutGroupsValidation> validateTargetsInGroups(
-            @Valid List<RolloutGroupCreate> groups, String targetFilter, Long createdAt, @NotNull Long dsTypeId);
+    Rollout create(@Valid @NotNull Create rollout, @NotNull @Valid List<GroupCreate> groups, RolloutGroupConditions conditions);
 
     /**
      * Retrieves all rollouts.
@@ -275,45 +265,36 @@ public interface RolloutManagement {
      * running will be untouched. {@link RolloutGroup}s which are
      * {@link RolloutGroupStatus#SCHEDULED} will not be started and keep in
      * {@link RolloutGroupStatus#SCHEDULED} state until the rollout is
-     * {@link RolloutManagement#resumeRollout(Rollout)}.
-     *
-     * Switching the rollout status to {@link RolloutStatus#PAUSED} is
-     * sufficient due the {@link #checkRunningRollouts(long)} will not check
-     * this rollout anymore.
+     * {@link RolloutManagement#resumeRollout(long)}.
+     * <p/>
+     * Switching the rollout status to {@link RolloutStatus#PAUSED} is sufficient.
      *
      * @param rolloutId the rollout to be paused.
      * @throws EntityNotFoundException if rollout or group with given ID does not exist
-     * @throws RolloutIllegalStateException if given rollout is not in {@link RolloutStatus#RUNNING}.
-     *         Only running rollouts can be paused.
+     * @throws RolloutIllegalStateException if given rollout is not in {@link RolloutStatus#RUNNING}. Only running rollouts can be paused.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE)
     void pauseRollout(long rolloutId);
 
     /**
-     * Resumes a paused rollout. The rollout switches back to
-     * {@link RolloutStatus#RUNNING} state which is then picked up again by the
-     * {@link #checkRunningRollouts(long)}.
+     * Resumes a paused rollout. The rollout switches back to {@link RolloutStatus#RUNNING} state which is then picked up again executor.
      *
      * @param rolloutId the rollout to be resumed
      * @throws EntityNotFoundException if rollout with given ID does not exist
-     * @throws RolloutIllegalStateException if given rollout is not in {@link RolloutStatus#PAUSED}. Only
-     *         paused rollouts can be resumed.
+     * @throws RolloutIllegalStateException if given rollout is not in {@link RolloutStatus#PAUSED}. Only paused rollouts can be resumed.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE)
     void resumeRollout(long rolloutId);
 
     /**
-     * Approves or denies a created rollout being in state
-     * {@link RolloutStatus#WAITING_FOR_APPROVAL}. If the rollout is approved,
-     * it switches state to {@link RolloutStatus#READY}, otherwise it switches
-     * to state {@link RolloutStatus#APPROVAL_DENIED}
+     * Approves or denies a created rollout being in state {@link RolloutStatus#WAITING_FOR_APPROVAL}. If the rollout is approved,
+     * it switches state to {@link RolloutStatus#READY}, otherwise it switches to state {@link RolloutStatus#APPROVAL_DENIED}
      *
      * @param rolloutId the rollout to be approved or denied.
      * @param decision decision whether a rollout is approved or denied.
      * @return approved or denied rollout
      * @throws EntityNotFoundException if rollout with given ID does not exist
-     * @throws RolloutIllegalStateException if given rollout is not in
-     *         {@link RolloutStatus#WAITING_FOR_APPROVAL}. Only rollouts
+     * @throws RolloutIllegalStateException if given rollout is not in {@link RolloutStatus#WAITING_FOR_APPROVAL}. Only rollouts
      *         waiting for approval can be acted upon.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_APPROVE)
@@ -363,8 +344,13 @@ public interface RolloutManagement {
      *         reference
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
-    Rollout update(@NotNull @Valid RolloutUpdate update);
+    Rollout update(@NotNull @Valid Update update);
 
+    /**
+     * Stop a rollout
+     * @param rolloutId of the rollout to be stopped
+     * @return stopped rollout
+     */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
     Rollout stop(long rolloutId);
 
@@ -407,4 +393,149 @@ public interface RolloutManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
     void cancelActiveActionsForRollouts(final Rollout rollout, final ActionCancellationType cancelationType);
+
+    @SuperBuilder
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    final class Create extends UpdateCreate {
+
+        @ValidString
+        @Size(min = 1, max = TargetFilterQuery.QUERY_MAX_SIZE)
+        @NotNull
+        private String targetFilterQuery;
+        @NotNull
+        private DistributionSet distributionSet;
+        private boolean dynamic;
+        @Builder.Default
+        @NotNull
+        private Action.ActionType actionType = Action.ActionType.FORCED;
+        private Long forcedTime;
+        private Long startAt;
+        @Min(Action.WEIGHT_MIN)
+        @Max(Action.WEIGHT_MAX)
+        private Integer weight;
+    }
+
+    @SuperBuilder
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    final class Update extends UpdateCreate implements Identifiable<Long> {
+
+        @NotNull
+        private Long id;
+    }
+
+    @SuperBuilder
+    @Getter
+    class UpdateCreate {
+
+        @ValidString
+        @Size(min = 1, max = NamedEntity.NAME_MAX_SIZE)
+        @NotNull(groups = Create.class)
+        private String name;
+        @ValidString
+        @Size(max = NamedEntity.DESCRIPTION_MAX_SIZE)
+        private String description;
+    }
+
+    @Getter
+    class GroupCreate {
+
+        @ValidString
+        @Size(min = 1, max = NamedEntity.NAME_MAX_SIZE)
+        @NotNull
+        private final String name;
+        @ValidString
+        @Size(max = NamedEntity.DESCRIPTION_MAX_SIZE)
+        private final String description;
+        @ValidString
+        @Size(min = 1, max = TargetFilterQuery.QUERY_MAX_SIZE)
+        private final String targetFilterQuery;
+        private final Float targetPercentage;
+        private final boolean confirmationRequired;
+
+        // Conditions and actions for the rollout group
+        private final RolloutGroup.RolloutGroupSuccessCondition successCondition;
+        private final String successConditionExp;
+        private final RolloutGroup.RolloutGroupSuccessAction successAction;
+        private final String successActionExp;
+        private final RolloutGroup.RolloutGroupErrorCondition errorCondition;
+        private final String errorConditionExp;
+        private final RolloutGroup.RolloutGroupErrorAction errorAction;
+        private final String errorActionExp;
+
+        private GroupCreate(
+                final String name, final String description, final String targetFilterQuery, final Float targetPercentage,
+                final RolloutGroupConditions conditions, final boolean confirmationRequired) {
+            this.name = name;
+            this.description = description;
+            this.targetFilterQuery = targetFilterQuery;
+            this.targetPercentage = targetPercentage;
+
+            this.successCondition = conditions.getSuccessCondition();
+            this.successConditionExp = conditions.getSuccessConditionExp();
+            this.successAction = conditions.getSuccessAction();
+            this.successActionExp = conditions.getSuccessActionExp();
+            this.errorCondition = conditions.getErrorCondition();
+            this.errorConditionExp = conditions.getErrorConditionExp();
+            this.errorAction = conditions.getErrorAction();
+            this.errorActionExp = conditions.getErrorActionExp();
+
+            this.confirmationRequired = confirmationRequired;
+        }
+
+        public static GroupCreateBuilder builder() {
+            return new GroupCreateBuilder();
+        }
+
+        @Setter
+        @Accessors(fluent = true)
+        public static class GroupCreateBuilder {
+
+            private String name;
+            private String description;
+            private String targetFilterQuery;
+            private Float targetPercentage;
+            private RolloutGroupConditions conditions;
+            private boolean confirmationRequired;
+
+            public GroupCreate build() {
+                return new GroupCreate(
+                        name, description, targetFilterQuery, targetPercentage,
+                        conditions == null ? new RolloutGroupConditionBuilder().withDefaults().build() : conditions,
+                        confirmationRequired);
+            }
+        }
+    }
+
+    /**
+     * Builder to create a new dynamic rollout group secret
+     */
+    @Data
+    @Builder
+    class DynamicRolloutGroupTemplate {
+
+        /**
+         * The name suffix, by default "" is used.
+         */
+        @NotNull
+        private String nameSuffix = "";
+
+        /**
+         * The count of matching Targets that should be assigned to this Group
+         */
+        private long targetCount;
+
+        /**
+         * The group conditions
+         */
+        private RolloutGroupConditions conditions;
+
+        /**
+         * If confirmation is required for this rollout group (considered with confirmation flow active)
+         */
+        private boolean confirmationRequired;
+    }
 }

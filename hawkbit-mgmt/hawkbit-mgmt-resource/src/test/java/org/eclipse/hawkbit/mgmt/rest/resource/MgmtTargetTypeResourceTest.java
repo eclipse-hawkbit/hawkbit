@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement.Create;
 import org.eclipse.hawkbit.repository.TargetTypeManagement.Update;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
@@ -458,8 +459,8 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         String typeName = "TestTypeUsedDelete";
         final TargetType testType = createTestTargetTypeInDB(typeName);
 
-        targetManagement.create(entityFactory.target().create().controllerId("target").name("TargetOfTestType")
-                .description("target description").targetType(testType.getId()));
+        targetManagement.create(TargetManagement.Create.builder()
+                .controllerId("target").name("TargetOfTestType").description("target description").targetType(testType).build());
 
         assertThat(targetTypeManagement.count()).isEqualTo(1);
         assertThat(targetManagement.count()).isEqualTo(1);

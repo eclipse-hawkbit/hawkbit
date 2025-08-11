@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.eclipse.hawkbit.repository.ActionFields;
+import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -39,8 +40,7 @@ class RsqlActionFieldsTest extends AbstractJpaIntegrationTest {
     @BeforeEach
     void setupBeforeTest() {
         final DistributionSet dsA = testdataFactory.createDistributionSet("daA");
-        target = (JpaTarget) targetManagement
-                .create(entityFactory.target().create().controllerId("targetId123").description("targetId123"));
+        target = (JpaTarget) targetManagement.create(Create.builder().controllerId("targetId123").description("targetId123").build());
 
         action = newJpaAction(dsA, false, null);
         for (int i = 0; i < 10; i++) {

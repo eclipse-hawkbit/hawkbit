@@ -154,7 +154,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     private Boolean dynamic;
 
     @Setter
-    @Column(name = "access_control_context", nullable = true)
+    @Column(name = "access_control_context")
     private String accessControlContext;
 
     @Setter

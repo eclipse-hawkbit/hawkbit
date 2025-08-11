@@ -46,6 +46,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.Create;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
@@ -851,7 +852,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     void getDistributionSets() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
+        assertThat(distributionSetManagement.findAll(PAGE)).isEmpty();
 
         DistributionSet set = testdataFactory.createDistributionSet("one");
         set = distributionSetManagement.update(DistributionSetManagement.Update.builder().id(set.getId())
@@ -860,7 +861,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         // load also lazy stuff
         set = distributionSetManagement.getWithDetails(set.getId()).get();
 
-        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).hasSize(1);
+        assertThat(distributionSetManagement.findAll(PAGE)).hasSize(1);
 
         // perform request
         mvc.perform(get("/rest/v1/distributionsets").accept(MediaType.APPLICATION_JSON))
@@ -930,7 +931,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     void createDistributionSets() throws Exception {
-        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
+        assertThat(distributionSetManagement.findAll(PAGE)).isEmpty();
         final SoftwareModule ah = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_APP);
         final SoftwareModule jvm = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_RT);
         final SoftwareModule os = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_OS);
@@ -966,7 +967,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .hasToString(String.valueOf(three.getId()));
 
         // check in database
-        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).hasSize(3);
+        assertThat(distributionSetManagement.findAll(PAGE)).hasSize(3);
         assertThat(one.isRequiredMigrationStep()).isFalse();
         assertThat(two.isRequiredMigrationStep()).isFalse();
         assertThat(three.isRequiredMigrationStep()).isTrue();
@@ -982,11 +983,11 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     @Test
     void deleteUnassignedistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
+        assertThat(distributionSetManagement.findAll(PAGE)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
-        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).hasSize(1);
+        assertThat(distributionSetManagement.findAll(PAGE)).hasSize(1);
 
         // perform request
         mvc.perform(delete("/rest/v1/distributionsets/{smId}", set.getId()))
@@ -994,7 +995,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .andExpect(status().isOk());
 
         // check repository content
-        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
+        assertThat(distributionSetManagement.findAll(PAGE)).isEmpty();
         assertThat(distributionSetManagement.count()).isZero();
     }
 
@@ -1014,13 +1015,13 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     @Test
     void deleteAssignedDistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
+        assertThat(distributionSetManagement.findAll(PAGE)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         testdataFactory.createTarget("test");
         assignDistributionSet(set.getId(), "test");
 
-        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).hasSize(1);
+        assertThat(distributionSetManagement.findAll(PAGE)).hasSize(1);
 
         mvc.perform(get("/rest/v1/distributionsets/{dsId}", set.getId()))
                 .andDo(MockMvcResultPrinter.print())
@@ -1037,7 +1038,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .andExpect(jsonPath("$.deleted", equalTo(true)));
 
         // check repository content
-        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
+        assertThat(distributionSetManagement.findAll(PAGE)).isEmpty();
     }
 
     /**
@@ -1046,7 +1047,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     @Test
     void updateDistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
+        assertThat(distributionSetManagement.findAll(PAGE)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         assertThat(distributionSetManagement.count()).isEqualTo(1);
@@ -1081,7 +1082,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     void updateRequiredMigrationStepFailsIfDistributionSetisInUse() throws Exception {
 
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
+        assertThat(distributionSetManagement.findAll(PAGE)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         assignDistributionSet(set.getId(), testdataFactory.createTarget().getControllerId());
@@ -1374,8 +1375,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         // prepare targets
         final Collection<String> knownTargetIds = Arrays.asList("1", "2", "3", "4", "5");
 
-        knownTargetIds.forEach(
-                controllerId -> targetManagement.create(entityFactory.target().create().controllerId(controllerId)));
+        knownTargetIds.forEach(controllerId -> targetManagement.create(TargetManagement.Create.builder().controllerId(controllerId).build()));
 
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds.iterator().next());
@@ -1440,7 +1440,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
         assertThat(
                 actionRepository
-                        .findAll(ActionSpecifications.byDistributionSetId(createdDs.getId()), PAGE)
+                        .findAll(byDistributionSetId(createdDs.getId()), PAGE)
                         .map(Action.class::cast).getContent()).hasSize(1)
                 .allMatch(action -> {
                     if (!confirmationFlowActive) {
@@ -1789,7 +1789,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     @Test
     void lockDistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
+        assertThat(distributionSetManagement.findAll(PAGE)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         assertThat(distributionSetManagement.count()).isEqualTo(1);
@@ -1813,11 +1813,11 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     @Test
     void unlockDistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
+        assertThat(distributionSetManagement.findAll(PAGE)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         assertThat(distributionSetManagement.count()).isEqualTo(1);
-        distributionSetManagement.lock(set.getId());
+        distributionSetManagement.lock(set);
         assertThat(distributionSetManagement.get(set.getId())
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, set.getId())).isLocked())
                 .as("Distribution set should be locked")

@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.acm;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.CREATE_ROLLOUT;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_REPOSITORY;
@@ -23,11 +24,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDistributionSetUpdate;
+import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
@@ -59,10 +61,10 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
     @Test
     void verifyTargetReadOperations() {
         final Target permittedTarget = targetManagement
-                .create(entityFactory.target().create().controllerId("device01").status(TargetUpdateStatus.REGISTERED));
+                .create(Create.builder().controllerId("device01").updateStatus(TargetUpdateStatus.REGISTERED).build());
 
         final Target hiddenTarget = targetManagement
-                .create(entityFactory.target().create().controllerId("device02").status(TargetUpdateStatus.REGISTERED));
+                .create(Create.builder().controllerId("device02").updateStatus(TargetUpdateStatus.REGISTERED).build());
 
         runAs(withUser("user", READ_TARGET + "/controllerId==" + permittedTarget.getControllerId()), () -> {
             // verify targetManagement#findAll
@@ -73,20 +75,16 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
             assertThat(targetManagement.findByRsql("id==*", Pageable.unpaged()).get().map(Identifiable::getId).toList())
                     .containsOnly(permittedTarget.getId());
 
-            // verify targetManagement#findByUpdateStatus
-            assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.REGISTERED, Pageable.unpaged()).get()
-                    .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
-
             // verify targetManagement#getByControllerID
-            assertThat(targetManagement.getByControllerID(permittedTarget.getControllerId())).isPresent();
+            assertThat(targetManagement.getByControllerId(permittedTarget.getControllerId())).isPresent();
             final String hiddenTargetControllerId = hiddenTarget.getControllerId();
-            assertThatThrownBy(() -> targetManagement.getByControllerID(hiddenTargetControllerId))
+            assertThatThrownBy(() -> targetManagement.getByControllerId(hiddenTargetControllerId))
                     .as("Missing read permissions for hidden target.")
                     .isInstanceOf(InsufficientPermissionException.class);
 
-            // verify targetManagement#getByControllerID
+            // verify targetManagement#getByControllerId
             assertThat(targetManagement
-                    .getByControllerID(Arrays.asList(permittedTarget.getControllerId(), hiddenTargetControllerId))
+                    .getByControllerId(List.of(permittedTarget.getControllerId(), hiddenTargetControllerId))
                     .stream().map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
 
             // verify targetManagement#get
@@ -94,8 +92,8 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
             assertThat(targetManagement.get(hiddenTarget.getId())).isEmpty();
 
             // verify targetManagement#get
-            assertThat(targetManagement.get(Arrays.asList(permittedTarget.getId(), hiddenTarget.getId())).stream()
-                    .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
+            final List<Long> withHidden = List.of(permittedTarget.getId(), hiddenTarget.getId());
+            assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> targetManagement.get(withHidden));
 
             // verify targetManagement#getControllerAttributes
             assertThat(targetManagement.getControllerAttributes(permittedTarget.getControllerId())).isEmpty();
@@ -103,32 +101,19 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
                     .as("Target should not be found.")
                     .isInstanceOf(InsufficientPermissionException.class);
         });
-
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(TargetFilterQueryManagement.Create.builder().name("test").query("id==*").build());
-
-        runAs(withUser("user", READ_TARGET + "/controllerId==" + permittedTarget.getControllerId()), () -> {
-            // verify targetManagement#findByTargetFilterQuery
-            assertThat(targetManagement.findByTargetFilterQuery(targetFilterQuery.getId(), Pageable.unpaged()).get()
-                    .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
-
-            // verify targetManagement#findByTargetFilterQuery (used by UI)
-            assertThat(targetManagement.findByFilters(new FilterParams(null, null, null, null), Pageable.unpaged()).get()
-                    .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
-        });
     }
 
     @Test
     void verifyTagFilteringAndManagement() {
         final Target permittedTarget = targetManagement
-                .create(entityFactory.target().create().controllerId("device01").status(TargetUpdateStatus.REGISTERED));
+                .create(Create.builder().controllerId("device01").updateStatus(TargetUpdateStatus.REGISTERED).build());
 
         final Target readOnlyTarget = targetManagement
-                .create(entityFactory.target().create().controllerId("device02").status(TargetUpdateStatus.REGISTERED));
+                .create(Create.builder().controllerId("device02").updateStatus(TargetUpdateStatus.REGISTERED).build());
         final String readOnlyTargetControllerId = readOnlyTarget.getControllerId();
 
         final Target hiddenTarget = targetManagement
-                .create(entityFactory.target().create().controllerId("device03").status(TargetUpdateStatus.REGISTERED));
+                .create(Create.builder().controllerId("device03").updateStatus(TargetUpdateStatus.REGISTERED).build());
 
         final Long myTagId = targetTagManagement.create(TargetTagManagement.Create.builder().name("myTag").build()).getId();
 
@@ -196,35 +181,23 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void verifyTargetAssignment() {
-        final Long dsId = testdataFactory.createDistributionSet("myDs").getId();
-        distributionSetManagement.lock(dsId);
+        final DistributionSet ds  = testdataFactory.createDistributionSet("myDs");
+        distributionSetManagement.lock(ds);
 
         final Target permittedTarget = targetManagement
-                .create(entityFactory.target().create().controllerId("device01").status(TargetUpdateStatus.REGISTERED));
+                .create(Create.builder().controllerId("device01").updateStatus(TargetUpdateStatus.REGISTERED).build());
         final String hiddenTargetControllerId = targetManagement
-                .create(entityFactory.target().create().controllerId("device02").status(TargetUpdateStatus.REGISTERED))
+                .create(Create.builder().controllerId("device02").updateStatus(TargetUpdateStatus.REGISTERED).build())
                 .getControllerId();
-
-        runAs(withUser("user", READ_TARGET + "/controllerId==" + permittedTarget.getControllerId()), () ->
-                // verify targetManagement#findByUpdateStatus before assignment
-                assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.REGISTERED, Pageable.unpaged()).get()
-                        .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId()));
 
         runAs(withUser("user",
                 READ_TARGET + "/controllerId==" + permittedTarget.getControllerId(),
                 UPDATE_TARGET + "/controllerId==" + permittedTarget.getControllerId(),
                 READ_REPOSITORY), () -> {
+            final Long dsId = ds.getId();
             assertThat(assignDistributionSet(dsId, permittedTarget.getControllerId()).getAssigned()).isEqualTo(1);
             // assigning of not allowed target behaves as not found
             assertThatThrownBy(() -> assignDistributionSet(dsId, hiddenTargetControllerId)).isInstanceOf(AssertionError.class);
-
-            // verify targetManagement#findByUpdateStatus(REGISTERED) after assignment
-            assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.REGISTERED, Pageable.unpaged())
-                    .getTotalElements()).isZero();
-
-            // verify targetManagement#findByUpdateStatus(PENDING) after assignment
-            assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.PENDING, Pageable.unpaged()).get()
-                    .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
         });
     }
 
@@ -233,20 +206,21 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void verifyTargetAssignmentOnNonUpdatableTarget() {
-        final Long firstDsId = testdataFactory.createDistributionSet("myDs").getId();
-        distributionSetManagement.lock(firstDsId);
+        final DistributionSet firstDs = testdataFactory.createDistributionSet("myDs");
+        distributionSetManagement.lock(firstDs);
         final DistributionSet secondDs = testdataFactory.createDistributionSet("anotherDs");
-        distributionSetManagement.lock(secondDs.getId());
+        distributionSetManagement.lock(secondDs);
 
         final Target manageableTarget = targetManagement
-                .create(entityFactory.target().create().controllerId("device01").status(TargetUpdateStatus.REGISTERED));
+                .create(Create.builder().controllerId("device01").updateStatus(TargetUpdateStatus.REGISTERED).build());
         final Target readOnlyTarget = targetManagement
-                .create(entityFactory.target().create().controllerId("device02").status(TargetUpdateStatus.REGISTERED));
+                .create(Create.builder().controllerId("device02").updateStatus(TargetUpdateStatus.REGISTERED).build());
 
         runAs(withUser("user",
                 READ_TARGET + "/controllerId==" + manageableTarget.getControllerId() + " or controllerId==" + readOnlyTarget.getControllerId(),
                 UPDATE_TARGET + "/controllerId==" + manageableTarget.getControllerId(),
                 READ_REPOSITORY), () -> {
+            final Long firstDsId = firstDs.getId();
             // assignment is permitted for manageableTarget
             assertThat(assignDistributionSet(firstDsId, manageableTarget.getControllerId()).getAssigned()).isEqualTo(1);
 
@@ -267,7 +241,7 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
     @Test
     void verifyRolloutTargetScope() {
         final DistributionSet ds = testdataFactory.createDistributionSet("myDs");
-        distributionSetManagement.lock(ds.getId());
+        distributionSetManagement.lock(ds);
 
         final String[] updateTargetControllerIds = { "update1", "update2", "update3" };
         final List<Target> updateTargets = testdataFactory.createTargets(updateTargetControllerIds);
@@ -307,7 +281,7 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
     @Test
     void verifyAutoAssignmentTargetScope() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
-        distributionSetManagement.lock(distributionSet.getId());
+        distributionSetManagement.lock(distributionSet);
 
         final String[] updateTargetControllerIds = { "update1", "update2", "update3" };
         final List<Target> updateTargets = testdataFactory.createTargets(updateTargetControllerIds);

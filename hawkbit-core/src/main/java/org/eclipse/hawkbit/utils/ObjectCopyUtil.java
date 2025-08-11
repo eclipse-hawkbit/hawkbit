@@ -99,12 +99,12 @@ public class ObjectCopyUtil {
             final Order order = toSetterMethod.getAnnotation(Order.class);
             return new ToSetter((to, value) -> {
                 try {
-                    toSetterMethod.invoke(to, value);
+                    toSetterMethod.invoke(to, value instanceof String str ? str.trim() : value);
                 } catch (final InvocationTargetException e) {
                     final Throwable targetException = e.getTargetException() == null ? e : e.getTargetException();
                     throw targetException instanceof RuntimeException re
-                            ? re :
-                            new IllegalStateException("Error invoking " + toSetterMethod, targetException);
+                            ? re
+                            : new IllegalStateException("Error invoking " + toSetterMethod, targetException);
                 } catch (final IllegalAccessException | IllegalArgumentException e) {
                     throw new IllegalStateException("Error invoking " + toSetterMethod, e);
                 }
@@ -175,26 +175,17 @@ public class ObjectCopyUtil {
     }
 
     @NotNull
-    private static Method getMethod(final Class<?> clazz, final String methodName, final Class<?> parameterType)
-            throws NoSuchMethodException {
+    private static Method getMethod(final Class<?> clazz, final String methodName, final Class<?> parameterType) throws NoSuchMethodException {
         try {
             return getMethod(clazz, clazz, methodName, parameterType);
         } catch (final NoSuchMethodException e) {
-            if (parameterType == Boolean.class) {
-                try {
-                    return getMethod(clazz, methodName, boolean.class);
-                } catch (final NoSuchMethodException e2) {
-                    throw e;
-                }
-            } else {
-                final Method assignable = getMethodAssignable(clazz, methodName, parameterType);
-                if (assignable != null) {
-                    return assignable;
-                }
-                final Method moreSpecific = getMethodMoreSpecific(clazz, methodName, parameterType);
-                if (moreSpecific != null) {
-                    return moreSpecific;
-                }
+            final Method assignable = getMethodAssignable(clazz, methodName, parameterType);
+            if (assignable != null) {
+                return assignable;
+            }
+            final Method moreSpecific = getMethodMoreSpecific(clazz, methodName, parameterType);
+            if (moreSpecific != null) {
+                return moreSpecific;
             }
             throw e;
         }
@@ -218,11 +209,26 @@ public class ObjectCopyUtil {
         }
     }
 
-    @SuppressWarnings("java:S3011") // low-level, reflection utility. intentionally changes the accessibility
+    // java:S3011 - low-level, reflection utility. intentionally changes the accessibility
+    // java:S3776 - complexity is due to reflection and dynamic method invocation
+    @SuppressWarnings({"java:S3011", "java:S3776"})
     private static Method getMethodAssignable(final Class<?> clazz, final String methodName, final Class<?> parameterType) {
         return Arrays.stream(clazz.getDeclaredMethods())
                 .filter(method -> methodName.equals(method.getName()))
-                .filter(method -> method.getParameterCount() == 1 && method.getParameterTypes()[0].isAssignableFrom(parameterType))
+                .filter(method -> {
+                    if (method.getParameterCount() == 1) {
+                        if (method.getParameterTypes()[0].isAssignableFrom(parameterType)) {
+                            return true;
+                        }
+                        if ((parameterType == boolean.class && method.getParameterTypes()[0] == Boolean.class) ||
+                                (parameterType == Boolean.class && method.getParameterTypes()[0] == boolean.class) ||
+                                (parameterType == long.class && method.getParameterTypes()[0] == Long.class) ||
+                                (parameterType == Long.class && method.getParameterTypes()[0] == long.class)) {
+                            return true; // in/out boxing
+                        }
+                    }
+                    return false;
+                })
                 .findFirst()
                 .map(method -> {
                     method.setAccessible(true);

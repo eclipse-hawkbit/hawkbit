@@ -144,7 +144,7 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.getInstalledDistributionSet(TestdataFactory.DEFAULT_CONTROLLER_ID).get())
                 .isEqualTo(ds);
         assertThat(
-                targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getInstallationDate())
+                targetManagement.getByControllerId(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getInstallationDate())
                 .isGreaterThanOrEqualTo(current);
 
     }
@@ -171,7 +171,7 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                         startsWith("http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/"
                                 + TestdataFactory.DEFAULT_CONTROLLER_ID + "/deploymentBase/" + actionId)));
         final long timeAfterFirstPoll = System.currentTimeMillis() + 1;
-        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
+        assertThat(targetManagement.getByControllerId(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
                 .isBetween(timeBeforeFirstPoll, timeAfterFirstPoll);
 
         // Retrieved is reported
@@ -202,7 +202,7 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                         equalTo("http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/"
                                 + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/" + cancelAction.getId())));
         final long timeAfter2ndPoll = System.currentTimeMillis() + 1;
-        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
+        assertThat(targetManagement.getByControllerId(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
                 .isBetween(timeBefore2ndPoll, timeAfter2ndPoll);
 
         mvc.perform(get("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
@@ -212,7 +212,7 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", equalTo(String.valueOf(cancelAction.getId()))))
                 .andExpect(jsonPath("$.cancelAction.stopId", equalTo(String.valueOf(actionId))));
-        assertThat(targetManagement.getByControllerID(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
+        assertThat(targetManagement.getByControllerId(TestdataFactory.DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
 
         // controller confirmed cancelled action, should not be active anymore

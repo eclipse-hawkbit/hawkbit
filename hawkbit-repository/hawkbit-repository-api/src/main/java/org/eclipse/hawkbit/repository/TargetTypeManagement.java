@@ -35,8 +35,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.Type;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -69,23 +67,6 @@ public interface TargetTypeManagement<T extends TargetType>
      */
     @PreAuthorize(HAS_AUTH_READ_TARGET_TYPE)
     Optional<TargetType> getByName(@NotEmpty String name);
-
-    /**
-     * @param name as {@link TargetType#getName()}
-     * @return total count by name
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET_TYPE)
-    long countByName(String name);
-
-    /**
-     * Retrieves {@link TargetType}s by filtering on the given parameters.
-     *
-     * @param name has text of filters to be applied.
-     * @param pageable page parameter
-     * @return the page of found {@link TargetType}
-     */
-    @PreAuthorize(HAS_AUTH_READ_TARGET_TYPE)
-    Slice<TargetType> findByName(String name, @NotNull Pageable pageable);
 
     /**
      * @param id Target type ID
@@ -129,7 +110,7 @@ public interface TargetTypeManagement<T extends TargetType>
             }
             key = builder.key == null ? builder.name : builder.key;
             name = builder.name == null ? builder.key : builder.name;
-            this.distributionSetTypes = builder.distributionSetTypes == null ? Collections.emptySet() : builder.distributionSetTypes;
+            distributionSetTypes = builder.distributionSetTypes == null ? Collections.emptySet() : builder.distributionSetTypes;
         }
     }
 

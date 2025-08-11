@@ -85,28 +85,6 @@ class SoftwareManagementSecurityTest
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void countByAssignedToPermissionsCheck() {
-        assertPermissions(() -> softwareModuleManagement.countByAssignedTo(1L), List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
-    void findByTextAndTypePermissionsCheck() {
-        assertPermissions(() -> softwareModuleManagement.findByTextAndType("text", 1L, PAGE), List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    @Test
-    void getByNameAndVersionAndTypePermissionsCheck() {
-        assertPermissions(() -> softwareModuleManagement.findByNameAndVersionAndType("name", "version", 1L),
-                List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
     void getMetaDataBySoftwareModuleIdPermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.getMetadata(1L, "key"), List.of(SpPermission.READ_REPOSITORY));
     }
@@ -123,17 +101,10 @@ class SoftwareManagementSecurityTest
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void findByTypePermissionsCheck() {
-        assertPermissions(() -> softwareModuleManagement.findByType(1L, PAGE), List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
     void lockPermissionsCheck() {
+        final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleOs();
         assertPermissions(() -> {
-            softwareModuleManagement.lock(1L);
+            softwareModuleManagement.lock(softwareModule);
             return null;
         }, List.of(SpPermission.UPDATE_REPOSITORY));
     }
@@ -143,8 +114,9 @@ class SoftwareManagementSecurityTest
      */
     @Test
     void unlockPermissionsCheck() {
+        final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleOs();
         assertPermissions(() -> {
-            softwareModuleManagement.unlock(1L);
+            softwareModuleManagement.unlock(softwareModule);
             return null;
         }, List.of(SpPermission.UPDATE_REPOSITORY));
     }

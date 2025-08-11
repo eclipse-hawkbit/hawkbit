@@ -33,7 +33,6 @@ import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeExcep
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
@@ -70,7 +69,7 @@ class JpaTargetFilterQueryManagement
         extends AbstractJpaRepositoryManagement<JpaTargetFilterQuery, TargetFilterQueryManagement.Create, TargetFilterQueryManagement.Update, TargetFilterQueryRepository, TargetFilterQueryFields>
         implements TargetFilterQueryManagement<JpaTargetFilterQuery>{
 
-    private final TargetManagement targetManagement;
+    private final TargetManagement<? extends Target> targetManagement;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final QuotaManagement quotaManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
@@ -81,7 +80,7 @@ class JpaTargetFilterQueryManagement
 
     protected JpaTargetFilterQueryManagement(
             final TargetFilterQueryRepository targetFilterQueryRepository, final EntityManager entityManager,
-            final TargetManagement targetManagement, final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
+            final TargetManagement<? extends Target> targetManagement, final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final QuotaManagement quotaManagement, final TenantConfigurationManagement tenantConfigurationManagement,
             final RepositoryProperties repositoryProperties,
             final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final AuditorAware<String> auditorAware) {
@@ -164,11 +163,10 @@ class JpaTargetFilterQueryManagement
         } else {
             WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(update);
             assertMaxTargetsQuota(targetFilterQuery.getQuery(), targetFilterQuery.getName(), update.dsId());
-            final JpaDistributionSet distributionSet = (JpaDistributionSet) distributionSetManagement
-                    .getValidAndComplete(update.dsId());
 
-            if (((JpaDistributionSetManagement) distributionSetManagement).isImplicitLockApplicable(distributionSet)) {
-                distributionSetManagement.lock(distributionSet.getId());
+            DistributionSet distributionSet = distributionSetManagement.getValidAndComplete(update.dsId());
+            if (distributionSetManagement.shouldLockImplicitly(distributionSet)) {
+                distributionSet = distributionSetManagement.lock(distributionSet);
             }
 
             targetFilterQuery.setAutoAssignDistributionSet(distributionSet);
@@ -213,7 +211,7 @@ class JpaTargetFilterQueryManagement
 
     private void assertMaxTargetsQuota(final String query, final String filterName, final long dsId) {
         QuotaHelper.assertAssignmentQuota(filterName,
-                targetManagement.countByRsqlAndNonDSAndCompatibleAndUpdatable(dsId, query),
+                targetManagement.countByRsqlAndNonDsAndCompatibleAndUpdatable(dsId, query),
                 quotaManagement.getMaxTargetsPerAutoAssignment(), Target.class, TargetFilterQuery.class, null);
     }
 

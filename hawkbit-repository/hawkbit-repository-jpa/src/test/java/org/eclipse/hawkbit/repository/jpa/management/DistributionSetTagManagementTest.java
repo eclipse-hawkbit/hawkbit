@@ -45,15 +45,12 @@ import org.springframework.data.domain.Pageable;
  */
 class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
 
-    private static final Random RND = new Random();
-
     /**
      * Verifies that management get access reacts as specified on calls for non existing entities by means of Optional not present.
      */
     @Test
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void nonExistingEntityAccessReturnsNotPresent() {
-        assertThat(distributionSetTagManagement.findByName(NOT_EXIST_ID)).isNotPresent();
         assertThat(distributionSetTagManagement.get(NOT_EXIST_IDL)).isNotPresent();
     }
 
@@ -66,8 +63,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = DistributionSetTagUpdatedEvent.class, count = 0),
             @Expect(type = TargetTagUpdatedEvent.class, count = 0) })
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
-        verifyThrownExceptionBy(() -> distributionSetTagManagement.delete(NOT_EXIST_ID), "DistributionSetTag");
-        verifyThrownExceptionBy(() -> distributionSetTagManagement.findByDistributionSet(NOT_EXIST_IDL, PAGE), "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetTagManagement.delete(NOT_EXIST_IDL), "DistributionSetTag");
         verifyThrownExceptionBy(() -> distributionSetTagManagement.update(
                 DistributionSetTagManagement.Update.builder().id(NOT_EXIST_IDL).build()), "DistributionSetTag");
     }
@@ -95,18 +91,18 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
         assignTag(dsBs, tagB);
         assignTag(dsCs, tagC);
 
-        assignTag(dsABs, distributionSetTagManagement.findByName(tagA.getName()).get());
-        assignTag(dsABs, distributionSetTagManagement.findByName(tagB.getName()).get());
+        assignTag(dsABs, distributionSetTagManagement.get(tagA.getId()).orElseThrow());
+        assignTag(dsABs, distributionSetTagManagement.get(tagB.getId()).orElseThrow());
 
-        assignTag(dsACs, distributionSetTagManagement.findByName(tagA.getName()).get());
-        assignTag(dsACs, distributionSetTagManagement.findByName(tagC.getName()).get());
+        assignTag(dsACs, distributionSetTagManagement.get(tagA.getId()).orElseThrow());
+        assignTag(dsACs, distributionSetTagManagement.get(tagC.getId()).orElseThrow());
 
-        assignTag(dsBCs, distributionSetTagManagement.findByName(tagB.getName()).get());
-        assignTag(dsBCs, distributionSetTagManagement.findByName(tagC.getName()).get());
+        assignTag(dsBCs, distributionSetTagManagement.get(tagB.getId()).orElseThrow());
+        assignTag(dsBCs, distributionSetTagManagement.get(tagC.getId()).orElseThrow());
 
-        assignTag(dsABCs, distributionSetTagManagement.findByName(tagA.getName()).get());
-        assignTag(dsABCs, distributionSetTagManagement.findByName(tagB.getName()).get());
-        assignTag(dsABCs, distributionSetTagManagement.findByName(tagC.getName()).get());
+        assignTag(dsABCs, distributionSetTagManagement.get(tagA.getId()).orElseThrow());
+        assignTag(dsABCs, distributionSetTagManagement.get(tagB.getId()).orElseThrow());
+        assignTag(dsABCs, distributionSetTagManagement.get(tagC.getId()).orElseThrow());
 
         // search for not deleted
         final DistributionSetFilter.DistributionSetFilterBuilder distributionSetFilterBuilder = getDistributionSetFilterBuilder()
@@ -121,11 +117,11 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
                 Stream.empty());
 
         assertThat(distributionSetTagRepository.findAll()).hasSize(5);
-        distributionSetTagManagement.delete(tagY.getName());
+        distributionSetTagManagement.delete(tagY.getId());
         assertThat(distributionSetTagRepository.findAll()).hasSize(4);
-        distributionSetTagManagement.delete(tagX.getName());
+        distributionSetTagManagement.delete(tagX.getId());
         assertThat(distributionSetTagRepository.findAll()).hasSize(3);
-        distributionSetTagManagement.delete(tagB.getName());
+        distributionSetTagManagement.delete(tagB.getId());
         assertThat(distributionSetTagRepository.findAll()).hasSize(2);
 
         verifyExpectedFilteredDistributionSets(distributionSetFilterBuilder.tagNames(Arrays.asList(tagA.getName())),
@@ -217,11 +213,11 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
         final Tag tag = distributionSetTagManagement
                 .create(DistributionSetTagManagement.Create.builder().name("kai1").description("kai2").colour("colour").build());
 
-        assertThat(distributionSetTagRepository.findByNameEquals("kai1").get().getDescription()).as("wrong tag found")
+        assertThat(distributionSetTagRepository.findById(tag.getId()).orElseThrow().getDescription()).as("wrong tag found")
                 .isEqualTo("kai2");
-        assertThat(distributionSetTagManagement.findByName("kai1").get().getColour()).as("wrong tag found")
+        assertThat(distributionSetTagManagement.get(tag.getId()).orElseThrow().getColour()).as("wrong tag found")
                 .isEqualTo("colour");
-        assertThat(distributionSetTagManagement.get(tag.getId()).get().getColour()).as("wrong tag found")
+        assertThat(distributionSetTagManagement.get(tag.getId()).orElseThrow().getColour()).as("wrong tag found")
                 .isEqualTo("colour");
     }
 
@@ -240,7 +236,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
         }
 
         // delete
-        distributionSetTagManagement.delete(tags.iterator().next().getName());
+        distributionSetTagManagement.delete(tags.iterator().next().getId());
 
         // check
         assertThat(distributionSetTagRepository.findById(toDelete.getId())).as("Deleted tag should be null")
@@ -321,8 +317,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
 
     private void verifyExpectedFilteredDistributionSets(final DistributionSetFilter.DistributionSetFilterBuilder distributionSetFilterBuilder,
             final Stream<Collection<DistributionSet>> expectedFilteredDistributionSets) {
-        final Collection<Long> retrievedFilteredDsIds = distributionSetManagement
-                .findByDistributionSetFilter(distributionSetFilterBuilder.build(), PAGE).stream()
+        final Collection<Long> retrievedFilteredDsIds = findDsByDistributionSetFilter(distributionSetFilterBuilder.build(), PAGE).stream()
                 .map(DistributionSet::getId).toList();
         final Collection<Long> expectedFilteredDsIds = expectedFilteredDistributionSets.flatMap(Collection::stream)
                 .map(DistributionSet::getId).toList();

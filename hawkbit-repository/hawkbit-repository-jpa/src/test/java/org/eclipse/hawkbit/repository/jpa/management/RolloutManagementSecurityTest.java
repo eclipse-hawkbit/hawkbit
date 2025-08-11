@@ -11,21 +11,24 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.util.List;
 
-import jakarta.validation.ConstraintDeclarationException;
-
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
+import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.RolloutManagement.Create;
+import org.eclipse.hawkbit.repository.RolloutManagement.GroupCreate;
+import org.eclipse.hawkbit.repository.RolloutManagement.Update;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
+import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Feature: SecurityTests - RolloutManagement<br/>
@@ -33,6 +36,9 @@ import org.junit.jupiter.api.Test;
  */
 @Slf4j
 class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
+
+    @Autowired
+    private TestdataFactory testdataFactory;
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
@@ -135,16 +141,22 @@ class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void createPermissionsCheck() {
-        assertPermissions(() -> rolloutManagement.create(entityFactory.rollout().create().distributionSetId(1L), 1, false,
-                new RolloutGroupConditionBuilder().withDefaults().build()), List.of(SpPermission.CREATE_ROLLOUT, SpPermission.READ_REPOSITORY));
-        assertPermissions(() -> rolloutManagement.create(entityFactory.rollout().create().distributionSetId(1L), 1, false,
-                        new RolloutGroupConditionBuilder().withDefaults().build(), DynamicRolloutGroupTemplate.builder().build()),
-                List.of(SpPermission.CREATE_ROLLOUT, SpPermission.READ_REPOSITORY));
+        testdataFactory.createTarget(); // to have matching
+        final DistributionSet ds = testdataFactory.createDistributionSetLocked("createPermissionsCheck");
+        final List<String> permissions = List.of(SpPermission.CREATE_ROLLOUT, SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY);
+        assertPermissions(() -> rolloutManagement.create(
+                        Create.builder().name("createPermissionsCheck").distributionSet(ds).targetFilterQuery("controllerid==*").build(),
+                        1, false, new RolloutGroupConditionBuilder().withDefaults().build()),
+                permissions);
+        assertPermissions(() -> rolloutManagement.create(
+                        Create.builder().name("createPermissionsCheck2").distributionSet(ds).targetFilterQuery("controllerid==*").dynamic(true).build(),
+                        1, false, new RolloutGroupConditionBuilder().withDefaults().build(), RolloutManagement.DynamicRolloutGroupTemplate.builder().build()),
+                permissions);
         assertPermissions(
-                () -> rolloutManagement.create(entityFactory.rollout().create().distributionSetId(1L),
-                        List.of(entityFactory.rolloutGroup().create()),
-                        new RolloutGroupConditionBuilder().withDefaults().build()),
-                List.of(SpPermission.CREATE_ROLLOUT, SpPermission.READ_REPOSITORY));
+                () -> rolloutManagement.create(
+                        Create.builder().name("createPermissionsCheck3").distributionSet(ds).targetFilterQuery("controllerid==*").build(),
+                        List.of(GroupCreate.builder().name("group").build()), new RolloutGroupConditionBuilder().withDefaults().build()),
+                permissions);
     }
 
     /**
@@ -193,7 +205,7 @@ class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void updatePermissionsCheck() {
-        assertPermissions(() -> rolloutManagement.update(entityFactory.rollout().update(1L)), List.of(SpPermission.UPDATE_ROLLOUT));
+        assertPermissions(() -> rolloutManagement.update(Update.builder().id(1L).build()), List.of(SpPermission.UPDATE_ROLLOUT));
     }
 
     /**
@@ -216,25 +228,6 @@ class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
             rolloutManagement.triggerNextGroup(1L);
             return null;
         }, List.of(SpPermission.UPDATE_ROLLOUT));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test//    @WithUser(principal = "user", authorities = { SpPermission.CREATE_TARGET, SpPermission.CREATE_ROLLOUT, SpPermission.READ_ROLLOUT,
-//            SpPermission.READ_TARGET })
-    void validateTargetsInGroupsPermissionsCheck() {
-        try {
-            assertPermissions(
-                    () -> rolloutManagement.validateTargetsInGroups(List.of(entityFactory.rolloutGroup().create()), "name==dummy", 1L, 1L),
-                    List.of(SpPermission.READ_ROLLOUT, SpPermission.READ_TARGET));
-        } catch (Error e) {
-            if (e.getCause() instanceof ConstraintDeclarationException) {
-                log.info("ConstraintDeclarationException thrown expected");
-            } else {
-                throw e;
-            }
-        }
     }
 
     /**

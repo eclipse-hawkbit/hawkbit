@@ -24,13 +24,13 @@ import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -219,7 +219,6 @@ public class DmfApiConfiguration {
      * @param rabbitTemplate for converting messages
      * @param amqpMessageDispatcherService to sending events to DMF client
      * @param controllerManagement for target repo access
-     * @param entityFactory to create entities
      * @return handler service bean
      */
     @Bean
@@ -227,13 +226,12 @@ public class DmfApiConfiguration {
     public AmqpMessageHandlerService amqpMessageHandlerService(
             final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
-            final ControllerManagement controllerManagement, final EntityFactory entityFactory,
-            final SystemSecurityContext systemSecurityContext,
+            final ControllerManagement controllerManagement, final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final ConfirmationManagement confirmationManagement) {
         return new AmqpMessageHandlerService(
                 rabbitTemplate, amqpMessageDispatcherService, controllerManagement,
-                entityFactory, systemSecurityContext, tenantConfigurationManagement, confirmationManagement);
+                systemSecurityContext, tenantConfigurationManagement, confirmationManagement);
     }
 
     /**
@@ -268,7 +266,7 @@ public class DmfApiConfiguration {
             final RabbitTemplate rabbitTemplate,
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
-            final TargetManagement targetManagement, final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
+            final TargetManagement<? extends Target> targetManagement, final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement, final DeploymentManagement deploymentManagement,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,

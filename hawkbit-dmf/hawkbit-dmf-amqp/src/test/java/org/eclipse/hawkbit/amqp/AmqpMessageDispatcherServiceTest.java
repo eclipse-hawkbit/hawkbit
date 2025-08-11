@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.artifact.ArtifactFilesystem;
 import org.eclipse.hawkbit.repository.artifact.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
@@ -91,8 +93,8 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void beforeEach() {
-        testTarget = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID)
-                .securityToken(TEST_TOKEN).address(AMQP_URI.toString()));
+        testTarget = targetManagement.create(
+                Create.builder().controllerId(CONTROLLER_ID).securityToken(TEST_TOKEN).address(AMQP_URI.toString()).build());
 
         this.rabbitTemplate = Mockito.mock(RabbitTemplate.class);
         when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());
@@ -308,9 +310,8 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     private Message getCaptureAddressEvent(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
-        final Target target = targetManagement
-                .getByControllerID(targetAssignDistributionSetEvent.getActions().keySet().iterator().next()).get();
-        return createArgumentCapture(target.getAddress());
+        final Target target = targetManagement.getByControllerId(targetAssignDistributionSetEvent.getActions().keySet().iterator().next()).get();
+        return createArgumentCapture(IpUtil.addressToUri(target.getAddress()));
     }
 
     private Action createAction(final DistributionSet testDs) {

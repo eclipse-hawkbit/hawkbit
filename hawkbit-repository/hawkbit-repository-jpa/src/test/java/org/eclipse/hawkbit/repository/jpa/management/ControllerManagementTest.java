@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +40,6 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
-import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -67,6 +65,8 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate.ActionStatusCreateBuilder;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -202,14 +202,14 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(testDs, testTarget));
 
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
-                .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis())
-                .messages(List.of("proceeding message 1")));
+        controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId)
+                .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis()).messages(List.of("proceeding message 1"))
+                .build());
 
         waitNextMillis();
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
-                .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis())
-                .messages(List.of("proceeding message 2")));
+        controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId)
+                .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis()).messages(List.of("proceeding message 2"))
+                .build());
 
         final List<String> messages = controllerManagement.getActionHistoryMessages(actionId, 2);
 
@@ -240,23 +240,23 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId1 = getFirstAssignedActionId(assignDistributionSet(
                 testdataFactory.createDistributionSet("ds1"), testdataFactory.createTargets(1, "t1")));
         assertThat(actionId1).isNotNull();
-        final ActionStatusCreate status = entityFactory.actionStatus().create(actionId1).status(Status.WARNING);
+        final ActionStatusCreateBuilder status = ActionStatusCreate.builder().actionId(actionId1).status(Status.WARNING);
         for (int i = 0; i < maxStatusEntries; ++i) {
-            controllerManagement.addInformationalActionStatus(status.message("Msg " + i).occurredAt(System.currentTimeMillis()));
+            controllerManagement.addInformationalActionStatus(status.messages(List.of("Msg " + i)).occurredAt(System.currentTimeMillis()).build());
         }
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> controllerManagement.addInformationalActionStatus(status));
+                .isThrownBy(() -> controllerManagement.addInformationalActionStatus(status.build()));
 
         // test for update status (and mixed case)
         final Long actionId2 = getFirstAssignedActionId(assignDistributionSet(
                 testdataFactory.createDistributionSet("ds2"), testdataFactory.createTargets(1, "t2")));
         assertThat(actionId2).isNotEqualTo(actionId1);
-        final ActionStatusCreate statusWarning = entityFactory.actionStatus().create(actionId2).status(Status.WARNING);
+        final ActionStatusCreateBuilder statusWarning = ActionStatusCreate.builder().actionId(actionId2).status(Status.WARNING);
         for (int i = 0; i < maxStatusEntries; ++i) {
-            controllerManagement.addUpdateActionStatus(statusWarning.message("Msg " + i).occurredAt(System.currentTimeMillis()));
+            controllerManagement.addUpdateActionStatus(statusWarning.messages(List.of("Msg " + i)).occurredAt(System.currentTimeMillis()).build());
         }
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> controllerManagement.addInformationalActionStatus(statusWarning));
+                .isThrownBy(() -> controllerManagement.addInformationalActionStatus(statusWarning.build()));
     }
 
     /**
@@ -283,10 +283,11 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         IntStream.range(0, maxMessages).forEach(i -> messages.add(i, "msg"));
 
         assertThat(controllerManagement.addInformationalActionStatus(
-                entityFactory.actionStatus().create(actionId).messages(messages).status(Status.WARNING))).isNotNull();
+                ActionStatusCreate.builder().actionId(actionId).messages(messages).status(Status.WARNING).build())).isNotNull();
 
         messages.add("msg");
-        final ActionStatusCreate statusToManyMessages = entityFactory.actionStatus().create(actionId).messages(messages).status(Status.WARNING);
+        final ActionStatusCreate statusToManyMessages = ActionStatusCreate.builder()
+                .actionId(actionId).messages(messages).status(Status.WARNING).build();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> controllerManagement.addInformationalActionStatus(statusToManyMessages));
     }
@@ -308,8 +309,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testdataFactory.createTarget();
         final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
         assertThat(actionId).isNotNull();
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOAD));
+        controllerManagement.addUpdateActionStatus(
+                ActionStatusCreate.builder().actionId(actionId).status(Status.DOWNLOAD).build());
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING,
                 Action.Status.DOWNLOAD, true);
 
@@ -355,13 +356,13 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule module = testdataFactory.createSoftwareModuleOs();
 
         verifyThrownExceptionBy(() -> controllerManagement.addCancelActionStatus(
-                entityFactory.actionStatus().create(NOT_EXIST_IDL).status(Action.Status.FINISHED)), "Action");
+                ActionStatusCreate.builder().actionId(NOT_EXIST_IDL).status(Action.Status.FINISHED).build()), "Action");
 
         verifyThrownExceptionBy(() -> controllerManagement.addInformationalActionStatus(
-                entityFactory.actionStatus().create(NOT_EXIST_IDL).status(Action.Status.RUNNING)), "Action");
+                ActionStatusCreate.builder().actionId(NOT_EXIST_IDL).status(Action.Status.RUNNING).build()), "Action");
 
         verifyThrownExceptionBy(() -> controllerManagement.addUpdateActionStatus(
-                entityFactory.actionStatus().create(NOT_EXIST_IDL).status(Action.Status.FINISHED)), "Action");
+                ActionStatusCreate.builder().actionId(NOT_EXIST_IDL).status(Action.Status.FINISHED).build()), "Action");
 
         verifyThrownExceptionBy(() -> controllerManagement
                         .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), NOT_EXIST_IDL),
@@ -403,7 +404,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         simulateIntermediateStatusOnUpdate(actionId);
 
         controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
+                .addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Action.Status.FINISHED).build());
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC, Action.Status.FINISHED,
                 Action.Status.FINISHED, false);
 
@@ -429,14 +430,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         simulateIntermediateStatusOnUpdate(actionId);
 
-        final ActionStatusCreate statusSingleMessage = entityFactory.actionStatus().create(actionId)
-                .status(Status.FINISHED).message(INVALID_TEXT_HTML);
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("set invalid description text should not be created")
-                .isThrownBy(() -> controllerManagement.addUpdateActionStatus(statusSingleMessage));
-
-        final ActionStatusCreate statusMulipleMessages = entityFactory.actionStatus().create(actionId)
-                .status(Status.FINISHED).messages(Arrays.asList("this is valid.", INVALID_TEXT_HTML));
+        final ActionStatusCreate statusMulipleMessages = ActionStatusCreate.builder().actionId(actionId)
+                .status(Status.FINISHED).messages(List.of("this is valid.", INVALID_TEXT_HTML)).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("set invalid description text should not be created")
                 .isThrownBy(() -> controllerManagement.addUpdateActionStatus(statusMulipleMessages));
@@ -467,7 +462,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         deploymentManagement.cancelAction(actionId);
 
         controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
+                .addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Action.Status.FINISHED).build());
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC, Action.Status.FINISHED,
                 Action.Status.FINISHED, false);
 
@@ -491,7 +486,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     void cancellationFeedbackRejectedIfActionIsNotInCanceling() {
         final Long actionId = createTargetAndAssignDs();
 
-        final ActionStatusCreate status = entityFactory.actionStatus().create(actionId).status(Status.FINISHED);
+        final ActionStatusCreate status = ActionStatusCreate.builder().actionId(actionId).status(Status.FINISHED).build();
         assertThatExceptionOfType(CancelActionNotAllowedException.class)
                 .as("Expected " + CancelActionNotAllowedException.class.getName())
                 .isThrownBy(() -> controllerManagement.addCancelActionStatus(status));
@@ -527,7 +522,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         simulateIntermediateStatusOnCancellation(actionId);
 
         controllerManagement
-                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
+                .addCancelActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Action.Status.FINISHED).build());
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC, Action.Status.CANCELED,
                 Action.Status.FINISHED, false);
 
@@ -560,7 +555,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         simulateIntermediateStatusOnCancellation(actionId);
 
         controllerManagement
-                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.CANCELED));
+                .addCancelActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Action.Status.CANCELED).build());
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC, Action.Status.CANCELED,
                 Action.Status.CANCELED, false);
 
@@ -594,7 +589,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         simulateIntermediateStatusOnCancellation(actionId);
 
         controllerManagement.addCancelActionStatus(
-                entityFactory.actionStatus().create(actionId).status(Action.Status.CANCEL_REJECTED));
+                ActionStatusCreate.builder().actionId(actionId).status(Action.Status.CANCEL_REJECTED).build());
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING,
                 Action.Status.CANCEL_REJECTED, true);
 
@@ -628,7 +623,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         simulateIntermediateStatusOnCancellation(actionId);
 
         controllerManagement
-                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.ERROR));
+                .addCancelActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Action.Status.ERROR).build());
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING,
                 Action.Status.ERROR, true);
 
@@ -749,13 +744,10 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetPollEvent.class, count = 2) })
     void findOrRegisterTargetIfItDoesNotExistWithExistingTypeAndUpdateToNonExistingType() {
         createTargetType("knownTargetTypeName");
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST,
-                null, "knownTargetTypeName");
-        final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST,
-                null, "unknownTargetTypeName");
+        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST, null, "knownTargetTypeName");
+        final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST, null, "unknownTargetTypeName");
         assertThat(target.getId()).as("Target should be the same").isEqualTo(sameTarget.getId());
-        assertThat(sameTarget.getTargetType().getName()).as("Target type should be unchanged")
-                .isEqualTo("knownTargetTypeName");
+        assertThat(sameTarget.getTargetType().getName()).as("Target type should be unchanged").isEqualTo("knownTargetTypeName");
         assertThat(targetRepository.count()).as("Only 1 target should be registred").isEqualTo(1L);
     }
 
@@ -1027,23 +1019,27 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createTargetAndAssignDs();
 
         // test and verify
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RUNNING));
+        controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Action.Status.RUNNING).build());
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING, Action.Status.RUNNING, true);
 
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.ERROR));
+        controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Action.Status.ERROR).build());
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR, Action.Status.ERROR, Action.Status.ERROR, false);
 
         // try with disabled late feedback
-        withRejectActionStatusForClosedAction(true, () ->
-                controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED)));
+        withRejectActionStatusForClosedAction(
+                true,
+                () -> controllerManagement.addUpdateActionStatus(
+                        ActionStatusCreate.builder().actionId(actionId).status(Action.Status.FINISHED).build()));
 
         // test
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR, Action.Status.ERROR, Action.Status.ERROR, false);
 
         // try with enabled late feedback - should not make a difference as it
         // only allows intermediate feedback and not multiple close
-        withRejectActionStatusForClosedAction(false,
-                () -> controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED)));
+        withRejectActionStatusForClosedAction(
+                false,
+                () -> controllerManagement.addUpdateActionStatus(
+                        ActionStatusCreate.builder().actionId(actionId).status(Action.Status.FINISHED).build()));
 
         // test
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR, Action.Status.ERROR, Action.Status.ERROR, false);
@@ -1071,14 +1067,16 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = prepareFinishedUpdate().getId();
 
         withRejectActionStatusForClosedAction(true,
-                () -> controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED)));
+                () -> controllerManagement.addUpdateActionStatus(
+                        ActionStatusCreate.builder().actionId(actionId).status(Action.Status.FINISHED).build()));
 
         // test
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC, Action.Status.FINISHED,
                 Action.Status.FINISHED, false);
 
         withRejectActionStatusForClosedAction(false,
-                () -> controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED)));
+                () -> controllerManagement.addUpdateActionStatus(
+                        ActionStatusCreate.builder().actionId(actionId).status(Action.Status.FINISHED).build()));
 
         // test
         assertActionStatus(
@@ -1106,10 +1104,10 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Action action = prepareFinishedUpdate();
         withRejectActionStatusForClosedAction(true,
                 () -> controllerManagement.addUpdateActionStatus(
-                        entityFactory.actionStatus().create(action.getId()).status(Action.Status.RUNNING)));
+                        ActionStatusCreate.builder().actionId(action.getId()).status(Action.Status.RUNNING).build()));
 
         // nothing changed as "feedback after close" is disabled
-        assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
+        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.IN_SYNC);
         assertThat(actionRepository.findById(action.getId()))
                 .hasValueSatisfying(a -> assertThat(a.getStatus()).isEqualTo(Status.FINISHED));
@@ -1138,10 +1136,10 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         Action action = prepareFinishedUpdate();
         withRejectActionStatusForClosedAction(false,
                 () -> controllerManagement.addUpdateActionStatus(
-                        entityFactory.actionStatus().create(action.getId()).status(Action.Status.RUNNING)));
+                        ActionStatusCreate.builder().actionId(action.getId()).status(Action.Status.RUNNING).build()));
 
         // nothing changed as "feedback after close" is disabled
-        assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
+        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).get().getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
         // however, additional action status has been stored
         assertThat(actionStatusRepository.findAll(PAGE).getNumberOfElements()).isEqualTo(4);
         assertThat(controllerManagement.findActionStatusByAction(action.getId(), PAGE).getNumberOfElements()).isEqualTo(4);
@@ -1168,7 +1166,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         });
 
         // verify that audit information has not changed
-        final Target targetVerify = targetManagement.getByControllerID(controllerId).get();
+        final Target targetVerify = targetManagement.getByControllerId(controllerId).get();
         assertThat(targetVerify.getCreatedBy()).isEqualTo(target.getCreatedBy());
         assertThat(targetVerify.getCreatedAt()).isEqualTo(target.getCreatedAt());
         assertThat(targetVerify.getLastModifiedBy()).isEqualTo(target.getLastModifiedBy());
@@ -1218,7 +1216,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testdataFactory.createTarget();
         final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
         assertThat(actionId).isNotNull();
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED));
+        controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Status.DOWNLOADED).build());
         assertActionStatus(
                 actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC, Action.Status.DOWNLOADED, Action.Status.DOWNLOADED, false);
 
@@ -1276,7 +1274,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
         assertThat(actionId).isNotNull();
         IntStream.range(0, 3).forEach(i -> controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED)));
+                .addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Status.DOWNLOADED).build()));
 
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC, Status.DOWNLOADED,
                 Status.DOWNLOADED, false);
@@ -1309,7 +1307,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionId).isNotNull();
 
         final IntConsumer op = i -> controllerManagement.addUpdateActionStatus(
-                entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED));
+                ActionStatusCreate.builder().actionId(actionId).status(Status.DOWNLOADED).build());
         Assertions.assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> forNTimes(maxMessages, op));
     }
@@ -1337,7 +1335,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // assert that too many intermediate statuses will throw quota exception
         final IntConsumer op = i -> controllerManagement.addUpdateActionStatus(
-                entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED));
+                ActionStatusCreate.builder().actionId(actionId).status(Status.DOWNLOADED).build());
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .as("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates")
                 .isThrownBy(() -> forNTimes(maxMessages, op));
@@ -1345,7 +1343,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         // assert that Final result is accepted even if quota is reached
         assertThatNoException().isThrownBy(() -> {
             Action updatedAction = controllerManagement.addUpdateActionStatus(
-                    entityFactory.actionStatus().create(actionId).status(Status.FINISHED));
+                    ActionStatusCreate.builder().actionId(actionId).status(Status.FINISHED).build());
             // check if action really finished
             assertThat(updatedAction.isActive()).isFalse();
             // check if final status is updated accordingly
@@ -1355,7 +1353,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         // assert that additional final result is not accepted
         assertThatNoException().isThrownBy(() -> {
             Action updatedAction = controllerManagement
-                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.ERROR));
+                    .addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Status.ERROR).build());
             // check if action really finished
             assertThat(updatedAction.isActive()).isFalse();
             // check if final status is not changed - e.g. ERROR is not updated because action has already finished
@@ -1385,7 +1383,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // assert that too many intermediate statuses will throw quota exception
         final IntConsumer op = i -> controllerManagement.addUpdateActionStatus(
-                entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED));
+                ActionStatusCreate.builder().actionId(actionId).status(Status.DOWNLOADED).build());
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .as("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates")
                 .isThrownBy(() -> forNTimes(maxMessages, op));
@@ -1393,7 +1391,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         // assert that Final result is accepted even if quota is reached
         assertThatNoException().isThrownBy(() -> {
             Action updatedAction = controllerManagement
-                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED));
+                    .addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Status.FINISHED).build());
             // check if action really finished
             assertThat(updatedAction.isActive()).isFalse();
             // check if final status is updated accordingly
@@ -1403,7 +1401,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         // assert that additional final result is not accepted
         assertThatNoException().isThrownBy(() -> {
             Action updatedAction = controllerManagement
-                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.ERROR));
+                    .addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Status.ERROR).build());
             // check if action really finished
             assertThat(updatedAction.isActive()).isFalse();
             // check if final status is not changed - e.g. ERROR is not updated because action has already finished
@@ -1623,19 +1621,19 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
                 .isEqualTo(actionWeightNull);
         controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeightNull).status(Status.FINISHED));
+                .addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionWeightNull).status(Status.FINISHED).build());
         assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
                 .isEqualTo(actionWeight1000);
         controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight1000).status(Status.FINISHED));
+                .addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionWeight1000).status(Status.FINISHED).build());
         assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
                 .isEqualTo(actionWeight500old);
         controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight500old).status(Status.FINISHED));
+                .addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionWeight500old).status(Status.FINISHED).build());
         assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
                 .isEqualTo(actionWeight500new);
         controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight500new).status(Status.FINISHED));
+                .addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionWeight500new).status(Status.FINISHED).build());
         assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId)).isEmpty();
     }
 
@@ -1730,7 +1728,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long dsId = testdataFactory.createDistributionSet().getId();
         testdataFactory.createTarget();
         assignDistributionSet(dsId, DEFAULT_CONTROLLER_ID);
-        assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
+        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
 
         return deploymentManagement.findActiveActionsByTarget(DEFAULT_CONTROLLER_ID, PAGE).getContent().get(0).getId();
@@ -1740,7 +1738,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet(dsName);
         final Long dsId = ds.getId();
         assignDistributionSet(dsId, defaultControllerId, DOWNLOAD_ONLY);
-        assertThat(targetManagement.getByControllerID(defaultControllerId).get().getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
+        assertThat(targetManagement.getByControllerId(defaultControllerId).get().getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
 
         final Long id = deploymentManagement.findActiveActionsByTarget(defaultControllerId, PAGE).getContent().get(0).getId();
         assertThat(id).isNotNull();
@@ -1749,7 +1747,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     private Long assignDs(final Long dsId, final String defaultControllerId, final Action.ActionType actionType) {
         assignDistributionSet(dsId, defaultControllerId, actionType);
-        assertThat(targetManagement.getByControllerID(defaultControllerId).get().getUpdateStatus())
+        assertThat(targetManagement.getByControllerId(defaultControllerId).get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
 
         final Long id = deploymentManagement.findActiveActionsByTarget(defaultControllerId, PAGE).getContent().get(0)
@@ -1760,40 +1758,36 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     private void simulateIntermediateStatusOnCancellation(final Long actionId) {
         controllerManagement
-                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RUNNING));
+                .addCancelActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Action.Status.RUNNING).build());
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.CANCELING,
                 Action.Status.RUNNING, true);
 
         controllerManagement
-                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOAD));
+                .addCancelActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Action.Status.DOWNLOAD).build());
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.CANCELING,
                 Action.Status.DOWNLOAD, true);
 
         controllerManagement
-                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOADED));
+                .addCancelActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Action.Status.DOWNLOADED).build());
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.CANCELING,
                 Action.Status.DOWNLOADED, true);
 
         controllerManagement
-                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RETRIEVED));
+                .addCancelActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Action.Status.RETRIEVED).build());
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.CANCELING,
                 Action.Status.RETRIEVED, true);
 
         controllerManagement
-                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.WARNING));
+                .addCancelActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Action.Status.WARNING).build());
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.CANCELING,
                 Action.Status.WARNING, true);
     }
 
     private void simulateIntermediateStatusOnUpdate(final Long actionId) {
         addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING);
-
         addUpdateActionStatusAndAssert(actionId, Action.Status.DOWNLOAD);
-
         addUpdateActionStatusAndAssert(actionId, Action.Status.DOWNLOADED);
-
         addUpdateActionStatusAndAssert(actionId, Action.Status.RETRIEVED);
-
         addUpdateActionStatusAndAssert(actionId, Action.Status.WARNING);
     }
 
@@ -1801,14 +1795,12 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         addUpdateActionStatusAndAssert(actionId, actionStatus, null);
     }
 
-    private void addUpdateActionStatusAndAssert(final Long actionId, final Action.Status actionStatus,
-            final Integer code) {
-        final ActionStatusCreate status = entityFactory.actionStatus().create(actionId).status(actionStatus);
+    private void addUpdateActionStatusAndAssert(final Long actionId, final Action.Status actionStatus, final Integer code) {
+        final ActionStatusCreateBuilder status = ActionStatusCreate.builder().actionId(actionId).status(actionStatus);
         if (code != null) {
-            status.code(code.intValue());
+            status.code(code);
         }
-        controllerManagement
-                .addUpdateActionStatus(status);
+        controllerManagement.addUpdateActionStatus(status.build());
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING,
                 actionStatus, true);
     }
@@ -1817,7 +1809,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             final Long actionId, final String controllerId,
             final TargetUpdateStatus expectedTargetUpdateStatus, final Action.Status expectedActionActionStatus,
             final Action.Status expectedActionStatus, final boolean actionActive) {
-        final TargetUpdateStatus targetStatus = targetManagement.getByControllerID(controllerId).get().getUpdateStatus();
+        final TargetUpdateStatus targetStatus = targetManagement.getByControllerId(controllerId).get().getUpdateStatus();
         assertThat(targetStatus).isEqualTo(expectedTargetUpdateStatus);
         final Action action = deploymentManagement.findAction(actionId).get();
         assertThat(action.getStatus()).isEqualTo(expectedActionActionStatus);
@@ -1941,21 +1933,21 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     private void writeStatus(final Long actionId, final int allowedStatusEntries) {
         for (int i = 0; i < allowedStatusEntries; i++) {
             controllerManagement.addInformationalActionStatus(
-                    entityFactory.actionStatus().create(actionId).status(Status.RUNNING).message("test" + i));
+                    ActionStatusCreate.builder().actionId(actionId).status(Status.RUNNING).messages(List.of("test" + i)).build());
         }
     }
 
     private void finishDownloadOnlyUpdateAndSendUpdateActionStatus(final Long actionId, final Status status) {
         // finishing action
         controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED));
+                .addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId).status(Status.DOWNLOADED).build());
 
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(status));
+        controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId).status(status).build());
         assertThat(activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID)).isFalse();
     }
 
     private void addUpdateActionStatus(final Long actionId, final String controllerId, final Status actionStatus) {
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(actionStatus));
+        controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId).status(actionStatus).build());
         assertActionStatus(actionId, controllerId, TargetUpdateStatus.IN_SYNC, actionStatus, actionStatus, false);
     }
 

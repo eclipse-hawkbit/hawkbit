@@ -25,7 +25,6 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetFilterQueryRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtDistributionSetMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetFilterQueryMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -36,7 +35,6 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,15 +47,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestApi {
 
     private final TargetFilterQueryManagement<? extends TargetFilterQuery> filterManagement;
-    private final EntityFactory entityFactory;
     private final TenantConfigHelper tenantConfigHelper;
 
     MgmtTargetFilterQueryResource(
-            final TargetFilterQueryManagement<? extends TargetFilterQuery> filterManagement, final EntityFactory entityFactory,
+            final TargetFilterQueryManagement<? extends TargetFilterQuery> filterManagement,
             final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         this.filterManagement = filterManagement;
-        this.entityFactory = entityFactory;
         this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
     }
 

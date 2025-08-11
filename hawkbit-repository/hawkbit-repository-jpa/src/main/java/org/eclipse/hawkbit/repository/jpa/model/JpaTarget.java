@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serial;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -54,7 +53,6 @@ import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
-import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.jpa.utils.MapAttributeConverter;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.PollStatus;
@@ -101,6 +99,8 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @Setter
+    @Getter
     @Column(name = "controller_id", length = Target.CONTROLLER_ID_MAX_SIZE, updatable = false, nullable = false)
     @Size(min = 1, max = Target.CONTROLLER_ID_MAX_SIZE)
     @NotNull
@@ -115,6 +115,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     private String securityToken;
 
     @Setter
+    @Getter
     @Column(name = "address", length = Target.ADDRESS_MAX_SIZE)
     @Size(max = Target.ADDRESS_MAX_SIZE)
     private String address;
@@ -212,18 +213,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
     private List<RolloutTargetGroup> rolloutTargetGroup;
 
-    public JpaTarget(final String controllerId, final String securityToken) {
-        this.controllerId = controllerId;
-        // truncate controller ID to max name length (if too big)
-        setName(controllerId != null && controllerId.length() > NAME_MAX_SIZE ? controllerId.substring(0, NAME_MAX_SIZE) : controllerId);
-        this.securityToken = ObjectUtils.isEmpty(securityToken) ? SecurityTokenGeneratorHolder.getInstance().generateToken() : securityToken;
-    }
-
-    @Override
-    public String getControllerId() {
-        return controllerId;
-    }
-
     @Override
     public String getSecurityToken() {
         final SystemSecurityContext systemSecurityContext = SystemSecurityContextHolder.getInstance().getSystemSecurityContext();
@@ -231,22 +220,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
             return securityToken;
         }
         return null;
-    }
-
-    /**
-     * @return the ipAddress
-     */
-    @Override
-    public URI getAddress() {
-        if (address == null) {
-            return null;
-        }
-        try {
-            return URI.create(address);
-        } catch (final IllegalArgumentException e) {
-            log.warn("Invalid address provided. Cloud not be configured to URI", e);
-            return null;
-        }
     }
 
     /**

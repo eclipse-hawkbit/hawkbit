@@ -38,7 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class AutoAssignChecker extends AbstractAutoAssignExecutor {
 
-    private final TargetManagement targetManagement;
+    private final TargetManagement<? extends Target> targetManagement;
 
     /**
      * Instantiates a new auto assign checker
@@ -49,8 +49,9 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
      * @param transactionManager to run transactions
      * @param contextAware to handle the context
      */
-    public AutoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
-            final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
+    public AutoAssignChecker(
+            final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
+            final TargetManagement<? extends Target> targetManagement, final DeploymentManagement deploymentManagement,
             final PlatformTransactionManager transactionManager, final ContextAware contextAware) {
         super(targetFilterQueryManagement, deploymentManagement, transactionManager, contextAware);
         this.targetManagement = targetManagement;

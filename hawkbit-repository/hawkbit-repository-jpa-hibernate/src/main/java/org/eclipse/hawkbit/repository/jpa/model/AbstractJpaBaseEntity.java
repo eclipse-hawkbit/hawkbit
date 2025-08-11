@@ -173,7 +173,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " [id=" + getId() + "]";
+        return getClass().getSimpleName() + " [id=" + getId() + " / optLockRevision=" + getOptLockRevision() + "]";
     }
 
     @PostPersist

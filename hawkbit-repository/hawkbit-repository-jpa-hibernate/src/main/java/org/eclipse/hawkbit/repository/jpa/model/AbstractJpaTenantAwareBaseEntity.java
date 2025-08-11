@@ -71,7 +71,7 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " [tenant=" + getTenant() + ", id=" + getId() + "]";
+        return getClass().getSimpleName() + " [tenant=" + getTenant() + ", id=" + getId() + " / optLockRevision=" + getOptLockRevision() + "]";
     }
 
     /**

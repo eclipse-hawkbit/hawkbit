@@ -68,7 +68,6 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     void nonExistingEntityAccessReturnsNotPresent() {
         final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
         assertThat(softwareModuleManagement.get(1234L)).isNotPresent();
-        assertThat(softwareModuleManagement.findByNameAndVersionAndType(NOT_EXIST_ID, NOT_EXIST_ID, osType.getId())).isNotPresent();
         final Long moduleId = module.getId();
         assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> softwareModuleManagement.getMetadata(moduleId, NOT_EXIST_ID));
     }
@@ -93,27 +92,18 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
                         NOT_EXIST_IDL, "xxx", new MetadataValueCreate("xxx")), "SoftwareModule");
         verifyThrownExceptionBy(
                 () -> softwareModuleManagement.createMetadata(
-                        NOT_EXIST_IDL,
-                        Map.of("xxx", new MetadataValueCreate("xxx"))), "SoftwareModule");
+                        NOT_EXIST_IDL, Map.of("xxx", new MetadataValueCreate("xxx"))), "SoftwareModule");
 
         verifyThrownExceptionBy(() -> softwareModuleManagement.delete(NOT_EXIST_IDL), "SoftwareModule");
         verifyThrownExceptionBy(() -> softwareModuleManagement.delete(Collections.singletonList(NOT_EXIST_IDL)), "SoftwareModule");
         verifyThrownExceptionBy(() -> softwareModuleManagement.deleteMetadata(NOT_EXIST_IDL, "xxx"), "SoftwareModule");
 
         verifyThrownExceptionBy(
-                () -> softwareModuleManagement.createMetadata(
-                        NOT_EXIST_IDL, "xxx", new MetadataValueCreate("xxx")), "SoftwareModule");
+                () -> softwareModuleManagement.createMetadata(NOT_EXIST_IDL, "xxx", new MetadataValueCreate("xxx")), "SoftwareModule");
 
         verifyThrownExceptionBy(() -> softwareModuleManagement.findByAssignedTo(NOT_EXIST_IDL, PAGE), "DistributionSet");
-
-        verifyThrownExceptionBy(() -> softwareModuleManagement.findByNameAndVersionAndType("xxx", "xxx", NOT_EXIST_IDL),
-                "SoftwareModuleType");
-
         verifyThrownExceptionBy(() -> softwareModuleManagement.getMetadata(NOT_EXIST_IDL, NOT_EXIST_ID), "SoftwareModule");
-
         verifyThrownExceptionBy(() -> softwareModuleManagement.getMetadata(NOT_EXIST_IDL), "SoftwareModule");
-        verifyThrownExceptionBy(() -> softwareModuleManagement.findByType(NOT_EXIST_IDL, PAGE), "SoftwareModule");
-
         verifyThrownExceptionBy(() -> softwareModuleManagement.update(SoftwareModuleManagement.Update.builder().id(NOT_EXIST_IDL).build()),
                 "SoftwareModule");
     }
@@ -166,7 +156,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void findSoftwareModuleByFilters() {
-        final SoftwareModule ah = softwareModuleManagement
+        softwareModuleManagement
                 .create(SoftwareModuleManagement.Create.builder().type(appType).name("agent-hub").version("1.0.1").build());
         final SoftwareModule jvm = softwareModuleManagement
                 .create(SoftwareModuleManagement.Create.builder().type(runtimeType).name("oracle-jre").version("1.7.2").build());
@@ -187,25 +177,8 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         implicitLock(os);
         implicitLock(jvm);
 
-        // standard searches
-        assertThat(softwareModuleManagement.findByTextAndType("poky", osType.getId(), PAGE).getContent()).hasSize(1);
-        assertThat(softwareModuleManagement.findByTextAndType("poky", osType.getId(), PAGE).getContent().get(0))
-                .isEqualTo(os);
-        assertThat(softwareModuleManagement.findByTextAndType("oracle", runtimeType.getId(), PAGE).getContent())
-                .hasSize(1);
-        assertThat(
-                softwareModuleManagement.findByTextAndType("oracle", runtimeType.getId(), PAGE).getContent().get(0))
-                .isEqualTo(jvm);
-        assertThat(softwareModuleManagement.findByTextAndType(":1.0.1", appType.getId(), PAGE).getContent()).hasSize(1)
-                .first().isEqualTo(ah);
-        assertThat(softwareModuleManagement.findByTextAndType(":1.0", appType.getId(), PAGE).getContent()).hasSize(2);
-
-        distributionSetManagement.unlock(ds.getId()); // otherwise delete will be rejected as a part of a locked DS
+        distributionSetManagement.unlock(ds); // otherwise delete will be rejected as a part of a locked DS
         softwareModuleManagement.delete(ah2.getId());
-
-        assertThat(softwareModuleManagement.findByTextAndType(":1.0", appType.getId(), PAGE).getContent()).hasSize(1);
-        assertThat(softwareModuleManagement.findByTextAndType(":1.0", appType.getId(), PAGE).getContent().get(0))
-                .isEqualTo(ah);
     }
 
     /**
@@ -215,23 +188,6 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     void findSoftwareModulesById() {
         final List<Long> modules = List.of(testdataFactory.createSoftwareModuleOs().getId(), testdataFactory.createSoftwareModuleApp().getId());
         assertThat(softwareModuleManagement.get(modules)).hasSize(2);
-    }
-
-    /**
-     * Searches for software modules by type.
-     */
-    @Test
-    void findSoftwareModulesByType() {
-        // found in test
-        final SoftwareModule one = testdataFactory.createSoftwareModuleOs("one");
-        final SoftwareModule two = testdataFactory.createSoftwareModuleOs("two");
-        // ignored
-        softwareModuleManagement.delete(testdataFactory.createSoftwareModuleOs("deleted").getId());
-        testdataFactory.createSoftwareModuleApp();
-
-        assertThat((List) softwareModuleManagement.findByType(osType.getId(), PAGE).getContent())
-                .as("Expected to find the following number of modules:").hasSize(2)
-                .as("with the following elements").contains(two, one);
     }
 
     /**
@@ -246,8 +202,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // ignored
         softwareModuleManagement.delete(deleted.getId());
 
-        assertThat(softwareModuleManagement.count()).as("Expected to find the following number of modules:")
-                .isEqualTo(2);
+        assertThat(softwareModuleManagement.count()).as("Expected to find the following number of modules:").isEqualTo(2);
     }
 
     /**
@@ -429,16 +384,16 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
         // [STEP3]: Assign SoftwareModuleX to DistributionSetX and to target
-        final DistributionSet disSetX = testdataFactory.createDistributionSet(Set.of(moduleX), "X");
-        assignDistributionSet(disSetX, Collections.singletonList(target));
+        final DistributionSet disSetX = assignDistributionSet(testdataFactory.createDistributionSet(Set.of(moduleX), "X"), List.of(target))
+                .getDistributionSet();
 
         // [STEP4]: Assign SoftwareModuleY to DistributionSet and to target
-        final DistributionSet disSetY = testdataFactory.createDistributionSet(Set.of(moduleY), "Y");
-        assignDistributionSet(disSetY, Collections.singletonList(target));
+        final DistributionSet disSetY = assignDistributionSet(testdataFactory.createDistributionSet(Set.of(moduleY), "Y"), List.of(target))
+                .getDistributionSet();
 
         // [STEP5]: Delete SoftwareModuleX
-        distributionSetManagement.unlock(disSetX.getId()); // otherwise delete will be rejected as a part of a locked DS
-        distributionSetManagement.unlock(disSetY.getId()); // otherwise delete will be rejected as a part of a locked DS
+        distributionSetManagement.unlock(disSetX); // otherwise delete will be rejected as a part of a locked DS
+        distributionSetManagement.unlock(disSetY); // otherwise delete will be rejected as a part of a locked DS
         softwareModuleManagement.delete(moduleX.getId());
 
         // [STEP6]: Delete SoftwareModuleY
@@ -683,13 +638,9 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void lockSoftwareModule() {
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModule("sm-1");
-        assertThat(
-                softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(true))
-                .isFalse();
-        softwareModuleManagement.lock(softwareModule.getId());
-        assertThat(
-                softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(false))
-                .isTrue();
+        assertThat(softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(true)).isFalse();
+        softwareModuleManagement.lock(softwareModule);
+        assertThat(softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(false)).isTrue();
     }
 
     /**
@@ -697,15 +648,11 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void unlockSoftwareModule() {
-        final SoftwareModule softwareModule = testdataFactory.createSoftwareModule("sm-1");
-        softwareModuleManagement.lock(softwareModule.getId());
-        assertThat(
-                softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(false))
-                .isTrue();
-        softwareModuleManagement.unlock(softwareModule.getId());
-        assertThat(
-                softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(true))
-                .isFalse();
+        SoftwareModule softwareModule = testdataFactory.createSoftwareModule("sm-1");
+        softwareModule = softwareModuleManagement.lock(softwareModule);
+        assertThat(softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(false)).isTrue();
+        softwareModule = softwareModuleManagement.unlock(softwareModule);
+        assertThat(softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(true)).isFalse();
     }
 
     /**
@@ -713,14 +660,14 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void lockSoftwareModuleApplied() {
-        final Long softwareModuleId = testdataFactory.createSoftwareModule("sm-1").getId();
-        artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(new byte[] { 1 }), softwareModuleId, "artifact1", false, 1));
-        final int artifactCount = softwareModuleManagement.get(softwareModuleId).get().getArtifacts().size();
+        SoftwareModule softwareModule = testdataFactory.createSoftwareModule("sm-1");
+        final Long softwareModuleId = softwareModule.getId();
+        artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(new byte[] { 1 }), softwareModuleId, "artifact1", false, 1));
+        // update software module reference since it is modified, old reference is stale
+        final int artifactCount = (softwareModule = softwareModuleManagement.get(softwareModuleId).orElseThrow()).getArtifacts().size();
         assertThat(artifactCount).isNotZero();
-        softwareModuleManagement.lock(softwareModuleId);
-        assertThat(softwareModuleManagement.get(softwareModuleId).map(SoftwareModule::isLocked).orElse(false))
-                .isTrue();
+        softwareModuleManagement.lock(softwareModule);
+        assertThat(softwareModuleManagement.get(softwareModuleId).map(SoftwareModule::isLocked).orElse(false)).isTrue();
 
         // try add
         final ArtifactUpload artifactUpload = new ArtifactUpload(new ByteArrayInputStream(new byte[] { 2 }), softwareModuleId, "artifact2",
@@ -757,10 +704,8 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // try to delete while DS is not locked
         softwareModuleManagement.delete(modules.get(0).getId());
 
-        distributionSetManagement.lock(distributionSet.getId());
-        assertThat(
-                distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false))
-                .isTrue();
+        distributionSetManagement.lock(distributionSet);
+        assertThat(distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false)).isTrue();
 
         // try to delete SM of a locked DS
         final Long moduleId = modules.get(1).getId();
@@ -772,7 +717,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     private Action assignSet(final JpaTarget target, final JpaDistributionSet ds) {
         assignDistributionSet(ds.getId(), target.getControllerId());
         implicitLock(ds);
-        assertThat(targetManagement.getByControllerID(target.getControllerId()).get().getUpdateStatus())
+        assertThat(targetManagement.getByControllerId(target.getControllerId()).orElseThrow().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
         final Optional<DistributionSet> assignedDistributionSet = deploymentManagement
                 .getAssignedDistributionSet(target.getControllerId());
@@ -811,7 +756,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(artifacts).hasSize(numberArtifacts);
         if (numberArtifacts != 0) {
-            assertArtifactNotNull(artifacts.toArray(new Artifact[artifacts.size()]));
+            assertArtifactNotNull(artifacts.toArray(new Artifact[0]));
         }
 
         artifacts.forEach(artifact -> assertThat(artifactRepository.findById(artifact.getId())).isNotNull());

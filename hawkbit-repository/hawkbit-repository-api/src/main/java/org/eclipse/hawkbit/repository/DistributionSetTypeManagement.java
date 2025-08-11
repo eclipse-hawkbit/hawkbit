@@ -17,7 +17,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -125,9 +124,7 @@ public interface DistributionSetTypeManagement<T extends DistributionSetType>
         @Size(max = Type.COLOUR_MAX_SIZE)
         private String colour;
 
-        @Builder.Default
-        private Set<? extends SoftwareModuleType> mandatoryModuleTypes = Set.of();
-        @Builder.Default
-        private Set<? extends SoftwareModuleType> optionalModuleTypes = Set.of();
+        private Set<? extends SoftwareModuleType> mandatoryModuleTypes;
+        private Set<? extends SoftwareModuleType> optionalModuleTypes;
     }
 }

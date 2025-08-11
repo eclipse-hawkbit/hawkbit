@@ -83,14 +83,6 @@ class TargetTagManagementSecurityTest extends AbstractJpaIntegrationTest {
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void getByNamePermissionsCheck() {
-        assertPermissions(() -> targetTagManagement.getByName("tag"), List.of(SpPermission.READ_TARGET));
-    }
-
-    /**
-     * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
-     */
-    @Test
     void getPermissionsCheck() {
         assertPermissions(() -> targetTagManagement.get(1L), List.of(SpPermission.READ_TARGET));
     }

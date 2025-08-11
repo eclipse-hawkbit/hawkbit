@@ -13,17 +13,18 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtPollStatus;
@@ -41,8 +42,9 @@ import org.eclipse.hawkbit.mgmt.rest.api.SortDirection;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.builder.TargetCreate;
+import org.eclipse.hawkbit.repository.TargetManagement.Create;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -51,17 +53,26 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.rest.json.model.ResponseList;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 /**
  * A mapper which maps repository model to RESTful model representation and back.
  */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Slf4j
+@Service
 public final class MgmtTargetMapper {
+
+    private final TargetTypeManagement<? extends TargetType> targetTypeManagement;
+
+    MgmtTargetMapper(final TargetTypeManagement<? extends TargetType> targetTypeManagement) {
+        this.targetTypeManagement = targetTypeManagement;
+    }
 
     /**
      * Add links to a target response.
@@ -114,7 +125,7 @@ public final class MgmtTargetMapper {
      * @param targets list of targets
      * @return the response
      */
-    public static List<MgmtTarget> toResponse(final Collection<Target> targets, final TenantConfigHelper configHelper) {
+    public static List<MgmtTarget> toResponse(final Collection<? extends Target> targets, final TenantConfigHelper configHelper) {
         if (targets == null) {
             return Collections.emptyList();
         }
@@ -142,12 +153,17 @@ public final class MgmtTargetMapper {
         targetRest.setUpdateStatus(target.getUpdateStatus().name().toLowerCase());
         targetRest.setGroup(target.getGroup());
 
-        final URI address = target.getAddress();
+        final String address = target.getAddress();
         if (address != null) {
-            if (IpUtil.isIpAddresKnown(address)) {
-                targetRest.setIpAddress(address.getHost());
+            try {
+                final URI addressURI = new URI(address);
+                if (IpUtil.isIpAddresKnown(addressURI)) {
+                    targetRest.setIpAddress(addressURI.getHost());
+                }
+            } catch (final URISyntaxException e) {
+                log.warn("Fail to parse address to URI: {}", e.getMessage());
             }
-            targetRest.setAddress(address.toString());
+            targetRest.setAddress(address);
         }
 
         targetRest.setCreatedBy(target.getCreatedBy());
@@ -184,12 +200,12 @@ public final class MgmtTargetMapper {
         return targetRest;
     }
 
-    public static List<TargetCreate> fromRequest(final EntityFactory entityFactory, final Collection<MgmtTargetRequestBody> targetsRest) {
+    public List<Create> fromRequest(final Collection<MgmtTargetRequestBody> targetsRest) {
         if (targetsRest == null) {
             return Collections.emptyList();
         }
 
-        return targetsRest.stream().map(targetRest -> fromRequest(entityFactory, targetRest)).toList();
+        return targetsRest.stream().map(this::fromRequest).toList();
     }
 
     public static Map<String, String> fromRequestMetadata(final List<MgmtMetadata> metadata) {
@@ -207,7 +223,7 @@ public final class MgmtTargetMapper {
         return actionStatus.stream()
                 .map(status -> toResponse(status,
                         deploymentManagement.findMessagesByActionStatusId(
-                                status.getId(), PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT))
+                                        status.getId(), PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT))
                                 .getContent()))
                 .toList();
     }
@@ -323,10 +339,18 @@ public final class MgmtTargetMapper {
         }
     }
 
-    private static TargetCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
-        return entityFactory.target().create().controllerId(targetRest.getControllerId()).name(targetRest.getName())
+    private Create fromRequest(final MgmtTargetRequestBody targetRest) {
+        return Create.builder()
+                .controllerId(targetRest.getControllerId()).name(targetRest.getName())
                 .description(targetRest.getDescription()).securityToken(targetRest.getSecurityToken())
-                .address(targetRest.getAddress()).targetType(targetRest.getTargetType()).group(targetRest.getGroup());
+                .address(targetRest.getAddress())
+                .targetType(Optional.ofNullable(targetRest.getTargetType())
+                        .map(targetTypeId -> targetTypeManagement.get(targetTypeId)
+                                .orElseThrow(() -> new EntityNotFoundException(TargetType.class, targetTypeId)))
+                        .map(TargetType.class::cast)
+                        .orElse(null))
+                .group(targetRest.getGroup())
+                .build();
     }
 
     private static String getType(final Action action) {

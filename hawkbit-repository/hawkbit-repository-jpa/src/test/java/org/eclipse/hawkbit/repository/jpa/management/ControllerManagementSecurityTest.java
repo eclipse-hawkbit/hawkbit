@@ -18,6 +18,8 @@ import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +35,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void addCancelActionStatusPermissionsCheck() {
-        assertPermissions(() -> controllerManagement.addCancelActionStatus(entityFactory.actionStatus().create(0L)),
+        assertPermissions(() -> controllerManagement.addCancelActionStatus(
+                ActionStatusCreate.builder().actionId(0L).status(Action.Status.DOWNLOADED).build()),
                 List.of(SpringEvalExpressions.CONTROLLER_ROLE));
     }
 
@@ -59,7 +62,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void addInformationalActionStatusPermissionsCheck() {
-        assertPermissions(() -> controllerManagement.addInformationalActionStatus(entityFactory.actionStatus().create(0L)),
+        assertPermissions(() -> controllerManagement.addInformationalActionStatus(
+                ActionStatusCreate.builder().actionId(0L).status(Action.Status.DOWNLOADED).build()),
                 List.of(SpringEvalExpressions.CONTROLLER_ROLE));
     }
 
@@ -68,7 +72,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void addUpdateActionStatusPermissionsCheck() {
-        assertPermissions(() -> controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(0L)),
+        assertPermissions(() -> controllerManagement.addUpdateActionStatus(
+                ActionStatusCreate.builder().actionId(0L).status(Action.Status.DOWNLOADED).build()),
                 List.of(SpringEvalExpressions.CONTROLLER_ROLE));
     }
 
