@@ -14,7 +14,6 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpRole;
-import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.junit.jupiter.api.Test;
 
@@ -79,7 +78,7 @@ class SystemManagementSecurityTest extends AbstractJpaIntegrationTest {
         assertPermissions(() -> systemManagement.getTenantMetadata(), List.of(SpPermission.READ_REPOSITORY), List.of(SpPermission.CREATE_REPOSITORY));
         assertPermissions(() -> systemManagement.getTenantMetadata(), List.of(SpPermission.READ_TARGET), List.of(SpPermission.CREATE_REPOSITORY));
         assertPermissions(() -> systemManagement.getTenantMetadata(), List.of(SpPermission.READ_TENANT_CONFIGURATION), List.of(SpPermission.CREATE_REPOSITORY));
-        assertPermissions(() -> systemManagement.getTenantMetadata(), List.of(SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
+        assertPermissions(() -> systemManagement.getTenantMetadata(), List.of(SpRole.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
     }
 
     /**
@@ -90,7 +89,7 @@ class SystemManagementSecurityTest extends AbstractJpaIntegrationTest {
         assertPermissions(() -> systemManagement.getTenantMetadataWithoutDetails(), List.of(SpPermission.READ_REPOSITORY), List.of(SpPermission.CREATE_REPOSITORY));
         assertPermissions(() -> systemManagement.getTenantMetadataWithoutDetails(), List.of(SpPermission.READ_TARGET), List.of(SpPermission.CREATE_REPOSITORY));
         assertPermissions(() -> systemManagement.getTenantMetadataWithoutDetails(), List.of(SpPermission.READ_TENANT_CONFIGURATION), List.of(SpPermission.CREATE_REPOSITORY));
-        assertPermissions(() -> systemManagement.getTenantMetadataWithoutDetails(), List.of(SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
+        assertPermissions(() -> systemManagement.getTenantMetadataWithoutDetails(), List.of(SpRole.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
     }
 
     /**

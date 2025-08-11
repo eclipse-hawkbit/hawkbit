@@ -9,12 +9,7 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.BRACKET_CLOSE;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.BRACKET_OPEN;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_AND;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_PREFIX;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_READ_TARGET_TYPE;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_SUFFIX;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_READ_REPOSITORY;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -30,6 +25,7 @@ import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.TargetTypeKeyOrNameRequiredException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
@@ -43,29 +39,25 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface TargetTypeManagement<T extends TargetType>
         extends RepositoryManagement<T, TargetTypeManagement.Create, TargetTypeManagement.Update> {
 
-    String HAS_AUTH_READ_DISTRIBUTION_SET_AND_UPDATE_TARGET_TYPE = BRACKET_OPEN +
-            HAS_AUTH_PREFIX + SpPermission.READ_DISTRIBUTION_SET + HAS_AUTH_SUFFIX +
-            HAS_AUTH_AND +
-            HAS_AUTH_PREFIX + SpPermission.UPDATE_TARGET_TYPE + HAS_AUTH_SUFFIX +
-            BRACKET_CLOSE;
+    String HAS_UPDATE_TARGET_TYPE_AND_READ_DISTRIBUTION_SET = SpringEvalExpressions.HAS_UPDATE_REPOSITORY + " and hasAuthority('READ_" + SpPermission.DISTRIBUTION_SET + "')";
 
     @Override
     default String permissionGroup() {
-        return "TARGET_TYPE";
+        return SpPermission.TARGET_TYPE;
     }
 
     /**
      * @param key as {@link TargetType#getKey()}
      * @return {@link TargetType}
      */
-    @PreAuthorize(HAS_AUTH_READ_TARGET_TYPE)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Optional<TargetType> getByKey(@NotEmpty String key);
 
     /**
      * @param name as {@link TargetType#getName()}
      * @return {@link TargetType}
      */
-    @PreAuthorize(HAS_AUTH_READ_TARGET_TYPE)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Optional<TargetType> getByName(@NotEmpty String name);
 
     /**
@@ -73,7 +65,7 @@ public interface TargetTypeManagement<T extends TargetType>
      * @param distributionSetTypeIds Distribution set ID
      * @return Target type
      */
-    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_UPDATE_TARGET_TYPE)
+    @PreAuthorize(HAS_UPDATE_TARGET_TYPE_AND_READ_DISTRIBUTION_SET)
     TargetType assignCompatibleDistributionSetTypes(long id, @NotEmpty Collection<Long> distributionSetTypeIds);
 
     /**
@@ -81,7 +73,7 @@ public interface TargetTypeManagement<T extends TargetType>
      * @param distributionSetTypeIds Distribution set ID
      * @return Target type
      */
-    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_UPDATE_TARGET_TYPE)
+    @PreAuthorize(HAS_UPDATE_TARGET_TYPE_AND_READ_DISTRIBUTION_SET)
     TargetType unassignDistributionSetType(long id, long distributionSetTypeIds);
 
     @SuperBuilder

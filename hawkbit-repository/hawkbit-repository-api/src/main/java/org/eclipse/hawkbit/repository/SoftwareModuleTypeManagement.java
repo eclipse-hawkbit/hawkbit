@@ -20,6 +20,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -31,6 +32,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface SoftwareModuleTypeManagement<T extends SoftwareModuleType>
         extends RepositoryManagement<T, SoftwareModuleTypeManagement.Create, SoftwareModuleTypeManagement.Update> {
+
+    @Override
+    default String permissionGroup() {
+        return SpPermission.SOFTWARE_MODULE;
+    }
 
     /**
      * @param key to search for

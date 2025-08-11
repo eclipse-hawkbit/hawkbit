@@ -27,6 +27,7 @@ import java.util.concurrent.Callable;
 import jakarta.validation.ConstraintViolationException;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
 import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
@@ -425,7 +426,8 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
      * Trys and fails to load an artifact without required permission. Checks if expected InsufficientPermissionException is thrown.
      */
     @Test
-    @WithUser(allSpPermissions = true, removeFromAllPermission = { SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT })
+    @WithUser(allSpPermissions = true, removeFromAllPermission = {
+            SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT, SpRole.CONTROLLER_ROLE, SpRole.CONTROLLER_ROLE_ANONYMOUS })
     void loadArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
         assertThatExceptionOfType(InsufficientPermissionException.class)
                 .as("Should not have worked with missing permission.")

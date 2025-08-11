@@ -267,7 +267,7 @@ public interface ControllerManagement {
      * @return {@link Target} or {@code null} if it does not exist
      * @see Target#getControllerId()
      */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + SpringEvalExpressions.HAS_AUTH_OR + SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + " or " + SpringEvalExpressions.IS_SYSTEM_CODE)
     Optional<Target> getByControllerId(@NotEmpty String controllerId);
 
     /**
@@ -279,7 +279,7 @@ public interface ControllerManagement {
      * @return {@link Target} or {@code null} if it does not exist
      * @see Target#getId()
      */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + SpringEvalExpressions.HAS_AUTH_OR + SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + " or " + SpringEvalExpressions.IS_SYSTEM_CODE)
     Optional<Target> get(long targetId);
 
     /**

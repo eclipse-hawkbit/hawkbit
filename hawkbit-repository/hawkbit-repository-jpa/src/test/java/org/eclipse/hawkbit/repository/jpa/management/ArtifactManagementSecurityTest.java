@@ -13,7 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
+import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
@@ -60,7 +60,7 @@ class ArtifactManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     void getPermissionCheck() {
         assertPermissions(() -> artifactManagement.get(1L), List.of(SpPermission.READ_REPOSITORY));
-        assertPermissions(() -> artifactManagement.get(1L), List.of(SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
+        assertPermissions(() -> artifactManagement.get(1L), List.of(SpRole.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
     }
 
     /**
@@ -71,7 +71,7 @@ class ArtifactManagementSecurityTest extends AbstractJpaIntegrationTest {
         assertPermissions(() -> artifactManagement.getByFilenameAndSoftwareModule("filename", 1L),
                 List.of(SpPermission.READ_REPOSITORY), List.of(SpPermission.CREATE_REPOSITORY));
         assertPermissions(() -> artifactManagement.getByFilenameAndSoftwareModule("filename", 1L),
-                List.of(SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
+                List.of(SpRole.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
     }
 
     /**
@@ -80,7 +80,7 @@ class ArtifactManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     void findFirstBySHA1PermissionCheck() {
         assertPermissions(() -> artifactManagement.findFirstBySHA1("sha1"), List.of(SpPermission.READ_REPOSITORY));
-        assertPermissions(() -> artifactManagement.findFirstBySHA1("sha1"), List.of(SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
+        assertPermissions(() -> artifactManagement.findFirstBySHA1("sha1"), List.of(SpRole.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
     }
 
     /**
@@ -89,7 +89,7 @@ class ArtifactManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     void getByFilenamePermissionCheck() {
         assertPermissions(() -> artifactManagement.getByFilename("filename"), List.of(SpPermission.READ_REPOSITORY));
-        assertPermissions(() -> artifactManagement.getByFilename("filename"), List.of(SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
+        assertPermissions(() -> artifactManagement.getByFilename("filename"), List.of(SpRole.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
     }
 
     /**
@@ -114,7 +114,7 @@ class ArtifactManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     void loadArtifactBinaryPermissionCheck() {
         assertPermissions(() -> artifactManagement.loadArtifactBinary("sha1", 1L, false), List.of(SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT), List.of(SpPermission.CREATE_REPOSITORY));
-        assertPermissions(() -> artifactManagement.loadArtifactBinary("sha1", 1L, false), List.of(SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
+        assertPermissions(() -> artifactManagement.loadArtifactBinary("sha1", 1L, false), List.of(SpRole.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
     }
 
 }

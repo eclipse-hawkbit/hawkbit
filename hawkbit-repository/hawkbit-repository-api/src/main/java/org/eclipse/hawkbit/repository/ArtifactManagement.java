@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
@@ -34,11 +35,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 /**
  * Service for {@link Artifact} management operations.
  */
-public interface ArtifactManagement {
+public interface ArtifactManagement extends PermissionSupport {
+
+    @Override
+    default String permissionGroup() {
+        return SpPermission.SOFTWARE_MODULE;
+    }
 
     /**
-     * @return the total amount of local artifacts stored in the artifact
-     *         management
+     * @return the total amount of local artifacts stored in the artifact management
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     long count();
@@ -75,8 +80,7 @@ public interface ArtifactManagement {
      * @param id to search for
      * @return found {@link Artifact}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_CONTROLLER)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY + " or " + SpringEvalExpressions.IS_CONTROLLER)
     Optional<Artifact> get(long id);
 
     /**
@@ -87,8 +91,7 @@ public interface ArtifactManagement {
      * @return found {@link Artifact}
      * @throws EntityNotFoundException if software module with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_CONTROLLER)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY + " or " + SpringEvalExpressions.IS_CONTROLLER)
     Optional<Artifact> getByFilenameAndSoftwareModule(@NotNull String filename, long softwareModuleId);
 
     /**
@@ -97,8 +100,7 @@ public interface ArtifactManagement {
      * @param sha1 the sha1
      * @return the first local artifact
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_CONTROLLER)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY + " or " + SpringEvalExpressions.IS_CONTROLLER)
     Optional<Artifact> findFirstBySHA1(@NotNull String sha1);
 
     /**
@@ -107,8 +109,7 @@ public interface ArtifactManagement {
      * @param filename to search for
      * @return found List of {@link Artifact}s.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_CONTROLLER)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY + " or " + SpringEvalExpressions.IS_CONTROLLER)
     Optional<Artifact> getByFilename(@NotNull String filename);
 
     /**
@@ -140,9 +141,7 @@ public interface ArtifactManagement {
      * @param isEncrypted flag to indicate if artifact is encrypted.
      * @return loaded {@link DbArtifact}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DOWNLOAD_ARTIFACT + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.IS_CONTROLLER)
+    @PreAuthorize("hasAuthority('" + SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT + "')" + " or " + SpringEvalExpressions.IS_CONTROLLER)
     Optional<DbArtifact> loadArtifactBinary(@NotEmpty String sha1Hash, long softwareModuleId,
             final boolean isEncrypted);
-
 }
