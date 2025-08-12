@@ -54,7 +54,9 @@ import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -288,10 +290,19 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             return;
         }
 
-        // set soft delete
-        rollout.setStatus(RolloutStatus.DELETED);
-        rollout.setDeleted(true);
-        rolloutRepository.save(rollout);
+        finishRolloutGroups(rollout);
+
+        rolloutManagement.cancelActiveActionsForRollouts(rollout, ActionCancellationType.FORCE);
+        entityManager.flush();
+
+        boolean hasActiveActionsLeft = actionRepository.countByRolloutIdAndActive(rollout.getId(), true) > 0;
+        log.trace("rollout {} has active actions left : {}  ", rollout.getId(), hasActiveActionsLeft);
+        if (!hasActiveActionsLeft) {
+            // set soft delete
+            rollout.setStatus(RolloutStatus.DELETED);
+            rollout.setDeleted(true);
+            rolloutRepository.save(rollout);
+        }
     }
 
     private void handleStopRollout(final JpaRollout rollout) {
@@ -309,18 +320,20 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             return;
         }
 
-        rolloutGroupRepository.findByRolloutAndStatusNotIn(rollout, List.of(RolloutGroupStatus.FINISHED, RolloutGroupStatus.ERROR))
-                .forEach(rolloutGroup -> {
-                    rolloutGroup.setStatus(RolloutGroupStatus.FINISHED);
-                    rolloutGroupRepository.save(rolloutGroup);
-                });
+        finishRolloutGroups(rollout);
 
-        rollout.setStatus(RolloutStatus.FINISHED);
-        rolloutRepository.save(rollout);
+        // Soft cancel all active rollouts actions
+        rolloutManagement.cancelActiveActionsForRollouts(rollout, ActionCancellationType.SOFT);
+        // check if all actions are non-active and then finish or finish once all are processed.
+        boolean hasActiveActions = actionRepository.countByRolloutIdAndActiveAndStatusNot(rollout.getId(), true, Status.CANCELING) > 0;
+        if (!hasActiveActions) {
+            rollout.setStatus(RolloutStatus.STOPPED);
+            rolloutRepository.save(rollout);
 
-        final List<Long> groupIds = rollout.getRolloutGroups().stream().map(RolloutGroup::getId).toList();
-        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutStoppedEvent(
-                tenantAware.getCurrentTenant(), rollout.getId(), groupIds)));
+            final List<Long> groupIds = rollout.getRolloutGroups().stream().map(RolloutGroup::getId).toList();
+            afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutStoppedEvent(
+                    tenantAware.getCurrentTenant(), rollout.getId(), groupIds)));
+        }
     }
 
     private void handleReadyRollout(final Rollout rollout) {
@@ -390,6 +403,14 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 log.error("Exception during deletion of actions of rollout {}", rollout, e);
             }
         }
+    }
+
+    private void finishRolloutGroups(final JpaRollout rollout) {
+        rolloutGroupRepository.findByRolloutAndStatusNotIn(rollout, List.of(RolloutGroupStatus.FINISHED, RolloutGroupStatus.ERROR))
+                .forEach(rolloutGroup -> {
+                    rolloutGroup.setStatus(RolloutGroupStatus.FINISHED);
+                    rolloutGroupRepository.save(rolloutGroup);
+                });
     }
 
     private Slice<JpaAction> findScheduledActionsByRollout(final JpaRollout rollout) {

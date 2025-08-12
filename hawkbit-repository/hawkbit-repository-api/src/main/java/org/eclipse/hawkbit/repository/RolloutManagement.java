@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -355,6 +356,14 @@ public interface RolloutManagement extends PermissionSupport {
     Rollout update(@NotNull @Valid Update update);
 
     /**
+     * Stop a rollout
+     * @param rolloutId of the rollout to be stopped
+     * @return stopped rollout
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    Rollout stop(long rolloutId);
+
+    /**
      * Deletes a rollout. A rollout might be deleted asynchronously by
      * indicating the rollout by {@link RolloutStatus#DELETING}
      *
@@ -372,7 +381,7 @@ public interface RolloutManagement extends PermissionSupport {
      *         canceled
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    void cancelRolloutsForDistributionSet(DistributionSet set);
+    void cancelRolloutsForDistributionSet(DistributionSet set, ActionCancellationType cancelationType);
 
     /**
      * Triggers next group of a rollout for processing even success threshold
@@ -384,6 +393,15 @@ public interface RolloutManagement extends PermissionSupport {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     void triggerNextGroup(long rolloutId);
+
+    /**
+     * Cancels all actions that refer to a given rollout.
+     *
+     * @param cancelationType - type of cancellation - FORCE or SOFT (NONE is ignored)
+     * @param rollout - the rollout which actions are about to be cancelled
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    void cancelActiveActionsForRollouts(final Rollout rollout, final ActionCancellationType cancelationType);
 
     @SuperBuilder
     @Getter

@@ -19,6 +19,8 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.validation.ConstraintDeclarationException;
 import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
@@ -30,6 +32,7 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutFields;
@@ -46,22 +49,30 @@ import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetExcepti
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
+import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
+import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -75,6 +86,9 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.ObjectCopyUtil;
+import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -106,6 +120,10 @@ public class JpaRolloutManagement implements RolloutManagement {
             RolloutStatus.CREATING, RolloutStatus.READY, RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.STARTING, RolloutStatus.RUNNING,
             RolloutStatus.PAUSED, RolloutStatus.APPROVAL_DENIED);
 
+    @Value("${org.eclipse.hawkbit.repository.jpa.management.rollout.max.actions.per.transaction:5000}")
+    private int MAX_ACTIONS;
+
+    private final EntityManager entityManager;
     private final RolloutRepository rolloutRepository;
     private final RolloutGroupRepository rolloutGroupRepository;
     private final RolloutApprovalStrategy rolloutApprovalStrategy;
@@ -113,42 +131,55 @@ public class JpaRolloutManagement implements RolloutManagement {
     private final RolloutStatusCache rolloutStatusCache;
     private final ActionRepository actionRepository;
     private final TargetManagement<? extends Target> targetManagement;
+    private final ActionStatusRepository actionStatusRepository;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
+    private final TenantAware tenantAware;
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final QuotaManagement quotaManagement;
     private final AfterTransactionCommitExecutor afterCommit;
     private final SystemSecurityContext systemSecurityContext;
     private final ContextAware contextAware;
     private final RepositoryProperties repositoryProperties;
+    private final OnlineDsAssignmentStrategy onlineDsAssignmentStrategy;
 
     protected JpaRolloutManagement(
+            final EntityManager entityManager,
             final RolloutRepository rolloutRepository,
             final RolloutGroupRepository rolloutGroupRepository,
             final RolloutApprovalStrategy rolloutApprovalStrategy,
             final StartNextGroupRolloutGroupSuccessAction startNextRolloutGroupAction,
             final RolloutStatusCache rolloutStatusCache,
             final ActionRepository actionRepository,
+            final ActionStatusRepository actionStatusRepository,
+            final TargetRepository targetRepository,
             final TargetManagement<? extends Target> targetManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
+            final TenantAware tenantAware,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final QuotaManagement quotaManagement,
             final AfterTransactionCommitExecutor afterCommit,
             final SystemSecurityContext systemSecurityContext, final ContextAware contextAware,
             final RepositoryProperties repositoryProperties) {
+        this.entityManager = entityManager;
         this.rolloutRepository = rolloutRepository;
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.rolloutApprovalStrategy = rolloutApprovalStrategy;
         this.startNextRolloutGroupAction = startNextRolloutGroupAction;
         this.rolloutStatusCache = rolloutStatusCache;
         this.actionRepository = actionRepository;
+        this.actionStatusRepository = actionStatusRepository;
         this.targetManagement = targetManagement;
         this.distributionSetManagement = distributionSetManagement;
+        this.tenantAware = tenantAware;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.quotaManagement = quotaManagement;
         this.afterCommit = afterCommit;
         this.systemSecurityContext = systemSecurityContext;
         this.contextAware = contextAware;
         this.repositoryProperties = repositoryProperties;
+
+        this.onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, actionRepository, actionStatusRepository,
+                quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties);
     }
 
     public static String createRolloutLockKey(final String tenant) {
@@ -409,27 +440,49 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final long rolloutId) {
+    public Rollout stop(long rolloutId) {
         final JpaRollout jpaRollout = rolloutRepository.findById(rolloutId)
                 .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
 
-        if (RolloutStatus.DELETING == jpaRollout.getStatus()) {
-            return;
+        if (!ROLLOUT_STATUS_STOPPABLE.contains(jpaRollout.getStatus())) {
+            log.debug("Failed to stop rollout {} because it is in {} status.", rolloutId, jpaRollout.getStatus());
+            throw new RolloutIllegalStateException("Rollout can only be stopped into the following statuses " + ROLLOUT_STATUS_STOPPABLE);
         }
-        jpaRollout.setStatus(RolloutStatus.DELETING);
-        rolloutRepository.save(jpaRollout);
+
+        log.debug("Stopping Rollout {}", jpaRollout.getId());
+        jpaRollout.setStatus(RolloutStatus.STOPPING);
+        return rolloutRepository.save(jpaRollout);
     }
 
     @Override
     @Transactional
-    public void cancelRolloutsForDistributionSet(final DistributionSet set) {
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void delete(final long rolloutId) {
+        final JpaRollout jpaRollout = rolloutRepository.findById(rolloutId)
+                .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
+        this.delete0(jpaRollout);
+    }
+
+    @Override
+    @Transactional
+    public void cancelRolloutsForDistributionSet(final DistributionSet set, final ActionCancellationType cancelationType) {
         // stop all rollouts for this distribution set
-        rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
-            final JpaRollout jpaRollout = (JpaRollout) rollout;
-            jpaRollout.setStatus(RolloutStatus.STOPPING);
-            rolloutRepository.save(jpaRollout);
-            log.debug("Rollout {} stopped", jpaRollout.getId());
-        });
+        if (cancelationType.equals(ActionCancellationType.SOFT)) {
+            rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
+                final JpaRollout jpaRollout = (JpaRollout) rollout;
+                jpaRollout.setStatus(RolloutStatus.STOPPING);
+                rolloutRepository.save(jpaRollout);
+                log.debug("Rollout {} stopping", jpaRollout.getId());
+            });
+        } else if (cancelationType.equals(ActionCancellationType.FORCE)) {
+            // Use same status filter here like in the soft case ? Seems they make sense
+            rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
+                final JpaRollout jpaRollout = (JpaRollout) rollout;
+                this.delete0(jpaRollout);
+                log.debug("Rollout {} deleting", jpaRollout.getId());
+            });
+        }
     }
 
     @Override
@@ -457,6 +510,124 @@ public class JpaRolloutManagement implements RolloutManagement {
                 .orElseThrow(() -> new RolloutIllegalStateException("No group is running"));
 
         startNextRolloutGroupAction.exec(rollout, latestRunning);
+    }
+
+    @Override
+    @Transactional
+    public void cancelActiveActionsForRollouts(Rollout rollout, ActionCancellationType cancelationType) {
+        // check cancellation type
+        if (ActionCancellationType.FORCE.equals(cancelationType)) {
+            forceQuitActionsOfRollout(rollout);
+        } else if (ActionCancellationType.SOFT.equals(cancelationType)) {
+            softCancelActionsOfRollout(rollout);
+        }
+    }
+
+    private void softCancelActionsOfRollout(final Rollout rollout) {
+        final List<JpaAction> actions = actionRepository.findAll(
+                        ActionSpecifications
+                                .byRolloutIdAndActiveAndStatusIsNot(rollout.getId(),
+                                        List.of(Action.Status.CANCELING)), // avoid cancelling state here, because it is count as still active
+                        Pageable.ofSize(MAX_ACTIONS))
+                .getContent();
+        log.info("Found {} active actions for rollout {}, performing soft cancel.", actions.size(), rollout.getId());
+
+        storeActionsAndStatuses(actions, Action.Status.CANCELING);
+
+        // send cancellation messages to event publisher
+        onlineDsAssignmentStrategy.sendCancellationMessages(actions, tenantAware.getCurrentTenant());
+    }
+
+    private void forceQuitActionsOfRollout(final Rollout rollout) {
+        final List<JpaAction> actions = findActiveActionsForRollout(rollout.getId(), Pageable.ofSize(MAX_ACTIONS))
+                .getContent();
+        log.info("Found {} active actions for rollout {}", actions.size(), rollout.getId());
+
+        storeActionsAndStatuses(actions, Action.Status.CANCELED);
+
+        // find next active actions - filter by targetId list and isActive
+        final List<Long> targetIds = actions.stream()
+                .map(action -> action.getTarget().getId())
+                .toList();
+        entityManager.flush();
+
+        int modifiedRows = updateTargetAssignedDsWithFirstActiveAction(targetIds);
+        log.debug("Updated {} targets with their previously active action", modifiedRows);
+
+        // if no active actions
+        // set assignedDs to previously installedDs and status to IN_SYNC
+        // otherwise set assigned ds to the active action ...
+        modifiedRows = updateTargetAssignedDsWithInstalledIfNoActiveActions(targetIds);
+        log.debug("Updated assignDs to previously installed to {} number of targets.", modifiedRows);
+    }
+
+    private void storeActionsAndStatuses(List<JpaAction> actions, Action.Status status) {
+        final List<JpaActionStatus> cancellingStatuses = new ArrayList<>(actions.size());
+        final long currentTimestamp = System.currentTimeMillis();
+        final boolean active = Action.Status.CANCELING.equals(status);
+        final String typeOfCancellation = active ? "cancellation" : "force quit";
+
+        actions.forEach(action -> {
+            action.setStatus(status);
+            action.setActive(active);
+
+            JpaActionStatus actionStatus = new JpaActionStatus();
+            actionStatus.setAction(action);
+            actionStatus.setStatus(status);
+            actionStatus.setOccurredAt(currentTimestamp);
+            actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "A " + typeOfCancellation + " has been performed by server.");
+            cancellingStatuses.add(actionStatus);
+        });
+
+        actionStatusRepository.saveAll(cancellingStatuses);
+        actionRepository.saveAll(actions);
+    }
+
+    private int updateTargetAssignedDsWithFirstActiveAction(List<Long> targetIds) {
+        final Query updateQuery = entityManager.createNativeQuery(
+                "UPDATE sp_target t " +
+                        "SET t.assigned_distribution_set = ( " +
+                        "SELECT a.distribution_set" +
+                        "   FROM sp_action a" +
+                        "   WHERE a.target = t.id AND a.active = 1" +
+                        "   ORDER BY a.id ASC" +
+                        "   LIMIT 1" +
+                        ") " +
+                        "WHERE t.id IN (" + Jpa.formatNativeQueryInClause("tid", targetIds) + ")"
+        );
+        Jpa.setNativeQueryInParameter(updateQuery, "tid", targetIds);
+        final int updated = updateQuery.executeUpdate();
+        log.info("{} of target assigned distribution values updated for tenant {}",
+                updated, tenantAware.getCurrentTenant());
+        return updated;
+    }
+
+    private int updateTargetAssignedDsWithInstalledIfNoActiveActions(List<Long> targetIds) {
+        final Query updateQuery = entityManager.createNativeQuery(
+                "UPDATE sp_target t " +
+                        "SET t.assigned_distribution_set = t.installed_distribution_set, t.update_status = 1 " +
+                        "WHERE t.id IN (" + Jpa.formatNativeQueryInClause("tid", targetIds) + ") " +
+                        "    AND (SELECT count(*) FROM sp_action a " +
+                        "        WHERE a.target=t.id and a.active=1) = 0"
+        );
+        Jpa.setNativeQueryInParameter(updateQuery, "tid", targetIds);
+        final int updated = updateQuery.executeUpdate();
+        log.info("{} of target assigned distribution set to previously installed distribution value for tenant {}",
+                updated, tenantAware.getCurrentTenant());
+        return updated;
+    }
+
+    private Page<JpaAction> findActiveActionsForRollout(long rolloutId, Pageable pageable) {
+        return actionRepository
+                .findAll(ActionSpecifications.byRolloutIdAndActive(rolloutId), pageable);
+    }
+
+    private void delete0(final JpaRollout jpaRollout) {
+        if (RolloutStatus.DELETING == jpaRollout.getStatus()) {
+            return;
+        }
+        jpaRollout.setStatus(RolloutStatus.DELETING);
+        rolloutRepository.save(jpaRollout);
     }
 
     private Page<Rollout> appendStatusDetails(final Page<Rollout> rollouts) {
@@ -849,6 +1020,14 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
 
         return new TargetCount(totalTargets, baseFilter);
+    }
+
+    private boolean isMultiAssignmentsEnabled() {
+        return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).isMultiAssignmentsEnabled();
+    }
+
+    private boolean isConfirmationFlowEnabled() {
+        return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).isConfirmationFlowEnabled();
     }
 
     private record TargetCount(long total, String filter) {}

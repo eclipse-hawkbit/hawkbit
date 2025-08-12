@@ -74,11 +74,11 @@ import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -239,7 +239,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                     RepositoryConstants.SERVER_MESSAGE_PREFIX + "manual cancelation requested"));
             final Action saveAction = actionRepository.save(action);
 
-            onlineDsAssignmentStrategy.cancelAssignment(action);
+            onlineDsAssignmentStrategy.sendCancellationMessage(action);
 
             return saveAction;
         } else {
@@ -516,7 +516,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     @Transactional
-    public void cancelActionsForDistributionSet(final CancelationType cancelationType, final DistributionSet distributionSet) {
+    public void cancelActionsForDistributionSet(final ActionCancellationType cancelationType, final DistributionSet distributionSet) {
         actionRepository.findAll(ActionSpecifications.byDistributionSetIdAndActiveAndStatusIsNot(distributionSet.getId(), Status.CANCELING))
                 .forEach(action -> {
                     try {
@@ -529,7 +529,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                         log.trace("Could not cancel action {} due to entity not found exception.", action.getId(), e);
                     }
                 });
-        if (cancelationType == CancelationType.FORCE) {
+        if (cancelationType == ActionCancellationType.FORCE) {
             actionRepository.findAll(ActionSpecifications.byDistributionSetIdAndActive(distributionSet.getId())).forEach(action -> {
                 try {
                     assertTargetUpdateAllowed(action);
@@ -542,10 +542,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 }
             });
         }
-    }
-
-    protected ActionRepository getActionRepository() {
-        return actionRepository;
     }
 
     protected boolean isActionsAutocloseEnabled() {
@@ -1000,5 +996,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         }).isEmpty()) {
             throw new EntityNotFoundException(Action.class, actionId);
         }
+    }
+
+    private Page<JpaAction> findActiveActionsForRollout(long rolloutId, Pageable pageable) {
+        return actionRepository
+                .findAll(ActionSpecifications.byRolloutIdAndActive(rolloutId), pageable);
     }
 }

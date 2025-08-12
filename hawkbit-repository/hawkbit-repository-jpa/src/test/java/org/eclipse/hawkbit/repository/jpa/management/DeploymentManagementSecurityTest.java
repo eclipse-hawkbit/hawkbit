@@ -17,8 +17,8 @@ import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 
@@ -294,7 +294,7 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     void cancelActionsForDistributionSetPermissionsCheck() {
         assertPermissions(() -> {
             deploymentManagement.cancelActionsForDistributionSet(
-                    DistributionSetInvalidation.CancelationType.FORCE, new JpaDistributionSet());
+                    ActionCancellationType.FORCE, new JpaDistributionSet());
             return null;
         }, List.of(SpPermission.UPDATE_TARGET));
     }

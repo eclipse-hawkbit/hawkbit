@@ -186,6 +186,13 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
+    @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, description = "Stop Rollout")
+    public ResponseEntity<Void> stop(Long rolloutId) {
+        this.rolloutManagement.stop(rolloutId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
     @AuditLog(entity = "Rollout", type = AuditLog.Type.DELETE, description = "Delete Rollout")
     public ResponseEntity<Void> delete(final Long rolloutId) {
         this.rolloutManagement.delete(rolloutId);

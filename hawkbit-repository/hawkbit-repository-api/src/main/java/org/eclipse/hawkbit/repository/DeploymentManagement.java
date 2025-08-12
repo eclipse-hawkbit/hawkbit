@@ -31,12 +31,12 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -421,5 +421,5 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param set the distribution set for that the actions should be canceled
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    void cancelActionsForDistributionSet(final CancelationType cancelationType, final DistributionSet set);
+    void cancelActionsForDistributionSet(final ActionCancellationType cancelationType, final DistributionSet set);
 }

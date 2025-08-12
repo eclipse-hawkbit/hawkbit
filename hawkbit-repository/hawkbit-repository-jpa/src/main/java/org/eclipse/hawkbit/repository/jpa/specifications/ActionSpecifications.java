@@ -28,6 +28,8 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.List;
+
 /**
  * Utility class for {@link Action}s {@link Specification}s. The class provides Spring Data JPQL Specifications.
  */
@@ -82,6 +84,21 @@ public final class ActionSpecifications {
         return (root, query, cb) -> cb.and(
                 cb.equal(root.get(JpaAction_.distributionSet).get(AbstractJpaBaseEntity_.id), distributionSetId),
                 cb.equal(root.get(JpaAction_.active), true));
+    }
+
+    public static Specification<JpaAction> byRolloutIdAndActive(final Long rolloutId) {
+        return (root,  query,  cb) -> cb.and(
+                cb.equal(root.get(JpaAction_.rollout).get(AbstractJpaBaseEntity_.id), rolloutId),
+                cb.equal(root.get(JpaAction_.active), true)
+        );
+    }
+
+    public static Specification<JpaAction> byRolloutIdAndActiveAndStatusIsNot(final Long rolloutId, final List<Action.Status> statuses) {
+        return (root, query, cb) -> cb.and(
+                cb.equal(root.get(JpaAction_.rollout).get(AbstractJpaBaseEntity_.id), rolloutId),
+                cb.equal(root.get(JpaAction_.active), true),
+                cb.not(root.get(JpaAction_.status).in(statuses))
+        );
     }
 
     public static Specification<JpaAction> byDistributionSetIdAndActiveAndStatusIsNot(final Long distributionSetId, final Action.Status status) {

@@ -360,8 +360,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         distributionSetInvalidationManagement
                 .invalidateDistributionSet(
                         new DistributionSetInvalidation(Collections.singletonList(distributionSetId),
-                                MgmtRestModelMapper.convertCancelationType(invalidateRequestBody.getActionCancelationType()),
-                                invalidateRequestBody.isCancelRollouts()));
+                                MgmtRestModelMapper.convertCancelationType(invalidateRequestBody.getActionCancelationType())));
         return ResponseEntity.ok().build();
     }
 }

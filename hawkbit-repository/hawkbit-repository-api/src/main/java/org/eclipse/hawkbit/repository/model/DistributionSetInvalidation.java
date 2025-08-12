@@ -20,28 +20,16 @@ import lombok.Data;
 public class DistributionSetInvalidation {
 
     private Collection<Long> distributionSetIds;
-    private CancelationType cancelationType;
-    private boolean cancelRollouts;
+    private ActionCancellationType actionCancellationType;
 
     /**
      * Parametric constructor
      *
      * @param distributionSetIds defines which distribution sets should be canceled
-     * @param cancelationType defines if actions should be canceled
-     * @param cancelRollouts defines if rollouts should be canceled
+     * @param actionCancellationType defines if actions should be canceled
      */
-    public DistributionSetInvalidation(final Collection<Long> distributionSetIds, final CancelationType cancelationType,
-            final boolean cancelRollouts) {
+    public DistributionSetInvalidation(final Collection<Long> distributionSetIds, final ActionCancellationType actionCancellationType) {
         this.distributionSetIds = distributionSetIds;
-        this.cancelationType = cancelationType;
-        this.cancelRollouts = cancelRollouts;
-    }
-
-    /**
-     * Defines if and how actions should be canceled when invalidating a
-     * distribution set
-     */
-    public enum CancelationType {
-        FORCE, SOFT, NONE
+        this.actionCancellationType = actionCancellationType;
     }
 }

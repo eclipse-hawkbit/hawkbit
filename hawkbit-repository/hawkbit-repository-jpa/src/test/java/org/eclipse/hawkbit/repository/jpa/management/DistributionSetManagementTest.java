@@ -50,11 +50,11 @@ import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThis
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
@@ -482,7 +482,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final Long softwareModuleId = testdataFactory.createSoftwareModuleOs().getId();
         distributionSetManagement.assignSoftwareModules(distributionSetId, singletonList(softwareModuleId));
         distributionSetInvalidationManagement.invalidateDistributionSet(
-                new DistributionSetInvalidation(singletonList(distributionSetId), CancelationType.NONE, false));
+                new DistributionSetInvalidation(singletonList(distributionSetId), ActionCancellationType.NONE));
 
         assertThatExceptionOfType(InvalidDistributionSetException.class)
                 .as("Invalid distributionSet should throw an exception").isThrownBy(() -> distributionSetManagement
@@ -876,7 +876,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         distributionSetManagement.createMetadata(dsId, Map.of(knownKey1, knownValue));
 
         distributionSetInvalidationManagement.invalidateDistributionSet(
-                new DistributionSetInvalidation(singletonList(dsId), CancelationType.NONE, false));
+                new DistributionSetInvalidation(singletonList(dsId), ActionCancellationType.NONE));
 
         // assert that no new metadata can be created
         assertThatExceptionOfType(InvalidDistributionSetException.class)

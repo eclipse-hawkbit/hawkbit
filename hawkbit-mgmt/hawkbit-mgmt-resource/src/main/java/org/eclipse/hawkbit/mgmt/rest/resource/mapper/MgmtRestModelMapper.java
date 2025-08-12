@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtCancelationType;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
+import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.Type;
@@ -67,20 +67,20 @@ public final class MgmtRestModelMapper {
     }
 
     /**
-     * Converts the given repository {@link CancelationType} into a corresponding {@link MgmtCancelationType}.
+     * Converts the given repository {@link ActionCancellationType} into a corresponding {@link MgmtCancelationType}.
      *
      * @param cancelationType the repository representation of the cancellation type
      * @return <null> or the REST cancellation type
      */
-    public static CancelationType convertCancelationType(final MgmtCancelationType cancelationType) {
+    public static ActionCancellationType convertCancelationType(final MgmtCancelationType cancelationType) {
         if (cancelationType == null) {
             return null;
         }
 
         return switch (cancelationType) {
-            case SOFT -> CancelationType.SOFT;
-            case FORCE -> CancelationType.FORCE;
-            case NONE -> CancelationType.NONE;
+            case SOFT -> ActionCancellationType.SOFT;
+            case FORCE -> ActionCancellationType.FORCE;
+            case NONE -> ActionCancellationType.NONE;
         };
     }
 
