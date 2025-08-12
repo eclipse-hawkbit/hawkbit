@@ -1495,7 +1495,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // assume that the targets have agreed to cancel the actions
         rolloutActions.forEach(action -> controllerManagement.addCancelActionStatus(
-            entityFactory.actionStatus().create(action.getId()).status(Status.CANCELED)
+                Action.ActionStatusCreate.builder().actionId(action.getId()).status(Status.CANCELED).build()
         ));
 
         // force executor to retrigger

@@ -134,7 +134,6 @@ public class JpaRolloutManagement implements RolloutManagement {
     private final ActionRepository actionRepository;
     private final TargetManagement<? extends Target> targetManagement;
     private final ActionStatusRepository actionStatusRepository;
-    private final TargetManagement targetManagement;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final TenantAware tenantAware;
     private final TenantConfigurationManagement tenantConfigurationManagement;
