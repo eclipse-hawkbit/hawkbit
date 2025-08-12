@@ -239,7 +239,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                     RepositoryConstants.SERVER_MESSAGE_PREFIX + "manual cancelation requested"));
             final Action saveAction = actionRepository.save(action);
 
-            onlineDsAssignmentStrategy.cancelAssignment(action);
+            onlineDsAssignmentStrategy.sendCancellationMessage(action);
 
             return saveAction;
         } else {

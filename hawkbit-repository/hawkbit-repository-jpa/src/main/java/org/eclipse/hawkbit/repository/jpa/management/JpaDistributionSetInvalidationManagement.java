@@ -146,13 +146,13 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
             rolloutManagement.cancelRolloutsForDistributionSet(distributionSet, cancelationType);
         }
 
+        if (cancelationType != ActionCancellationType.NONE) {
+            log.debug("Cancel actions after ds invalidation. ID: {}", setId);
+            deploymentManagement.cancelActionsForDistributionSet(cancelationType, distributionSet);
+        }
+
         // Do run as system to ensure all actions (even invisible) are canceled due to invalidation.
         systemSecurityContext.runAsSystem(() -> {
-            if (cancelationType != ActionCancellationType.NONE) {
-                log.debug("Cancel actions after ds invalidation. ID: {}", setId);
-                deploymentManagement.cancelActionsForDistributionSet(cancelationType, distributionSet);
-            }
-
             log.debug("Cancel auto assignments after ds invalidation. ID: {}", setId);
             targetFilterQueryManagement.cancelAutoAssignmentForDistributionSet(setId);
             return null;

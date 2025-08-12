@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -75,7 +74,6 @@ import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -529,7 +527,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         final List<JpaAction> actions = actionRepository.findAll(
                         ActionSpecifications
                                 .byRolloutIdAndActiveAndStatusIsNot(rollout.getId(),
-                                        Arrays.asList(Action.Status.CANCELING, Action.Status.CANCELED)), // avoid cancelling state here, because it is count as still active
+                                        List.of(Action.Status.CANCELING)), // avoid cancelling state here, because it is count as still active
                         Pageable.ofSize(MAX_ACTIONS))
                 .getContent();
         log.info("Found {} active actions for rollout {}, performing soft cancel.", actions.size(), rollout.getId());
@@ -537,7 +535,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         storeActionsAndStatuses(actions, Action.Status.CANCELING);
 
         // send cancellation messages to event publisher
-        onlineDsAssignmentStrategy.cancelAssignments(actions, tenantAware.getCurrentTenant());
+        onlineDsAssignmentStrategy.sendCancellationMessages(actions, tenantAware.getCurrentTenant());
     }
 
     private void forceQuitActionsOfRollout(final Rollout rollout) {
