@@ -18,7 +18,10 @@ import lombok.Getter;
 public enum ActionStatusFields implements RsqlQueryField {
 
     ID("id"),
-    REPORTEDAT("createdAt");
+    @Deprecated
+    REPORTEDAT("createdAt"),
+    CREATEDAT("createdAt"),
+    CREATEDBY("createdBy");
 
     private final String jpaEntityFieldName;
 
