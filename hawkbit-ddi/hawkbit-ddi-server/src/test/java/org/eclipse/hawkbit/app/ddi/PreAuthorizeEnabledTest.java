@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
+import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -40,7 +40,7 @@ class PreAuthorizeEnabledTest extends AbstractSecurityTest {
      * Tests whether request succeed if a role is granted for the user
      */
     @Test
-    @WithUser(authorities = { SpringEvalExpressions.CONTROLLER_ROLE }, autoCreateTenant = false)
+    @WithUser(authorities = { SpRole.CONTROLLER_ROLE }, autoCreateTenant = false)
     void successIfHasRole() throws Exception {
         mvc.perform(get("/DEFAULT/controller/v1/controllerId"))
                 .andExpect(result -> assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value()));

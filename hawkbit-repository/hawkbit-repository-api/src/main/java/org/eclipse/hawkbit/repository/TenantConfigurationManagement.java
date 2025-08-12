@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
 import org.eclipse.hawkbit.repository.model.PollStatus;
@@ -25,7 +26,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 /**
  * Management service for tenant configurations.
  */
-public interface TenantConfigurationManagement {
+public interface TenantConfigurationManagement extends PermissionSupport {
+
+    @Override
+    default String permissionGroup() {
+        return SpPermission.TENANT_CONFIGURATION;
+    }
 
     /**
      * Adds or updates a specific configuration for a specific tenant.
@@ -37,7 +43,7 @@ public interface TenantConfigurationManagement {
      *         format defined by the Key
      * @throws ConversionFailedException if the property cannot be converted to the given
      */
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
+    @PreAuthorize(value = SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     <T extends Serializable> TenantConfigurationValue<T> addOrUpdateConfiguration(String configurationKeyName, T value);
 
     /**
@@ -49,7 +55,7 @@ public interface TenantConfigurationManagement {
      *         match the expected type and format defined by the Key
      * @throws ConversionFailedException if the property cannot be converted to the given
      */
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
+    @PreAuthorize(value = SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     <T extends Serializable> Map<String, TenantConfigurationValue<T>> addOrUpdateConfiguration(Map<String, T> configurations);
 
     /**
@@ -58,7 +64,7 @@ public interface TenantConfigurationManagement {
      *
      * @param configurationKey the configuration key to be deleted
      */
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
+    @PreAuthorize(value = SpringEvalExpressions.HAS_DELETE_REPOSITORY)
     void deleteConfiguration(String configurationKey);
 
     /**
@@ -76,7 +82,7 @@ public interface TenantConfigurationManagement {
      * @throws ConversionFailedException if the property cannot be converted to the given
      *         {@code propertyType}
      */
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION_READ)
+    @PreAuthorize(value = SpringEvalExpressions.HAS_READ_REPOSITORY)
     <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(String configurationKeyName);
 
     /**
@@ -97,7 +103,7 @@ public interface TenantConfigurationManagement {
      * @throws ConversionFailedException if the property cannot be converted to the given
      *         {@code propertyType}
      */
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION_READ)
+    @PreAuthorize(value = SpringEvalExpressions.HAS_READ_REPOSITORY)
     <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(String configurationKeyName,
             Class<T> propertyType);
 
@@ -116,9 +122,9 @@ public interface TenantConfigurationManagement {
      * @throws ConversionFailedException if the property cannot be converted to the given
      *         {@code propertyType}
      */
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION_READ)
+    @PreAuthorize(value = SpringEvalExpressions.HAS_READ_REPOSITORY)
     <T> T getGlobalConfigurationValue(String configurationKeyName, Class<T> propertyType);
 
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(value = "hasAuthority('READ_" + SpPermission.TARGET + "')")
     Function<Target, PollStatus> pollStatusResolver();
 }

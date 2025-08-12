@@ -374,11 +374,11 @@ public class JpaRepositoryConfiguration {
             final RolloutGroupEvaluationManager evaluationManager, final RolloutApprovalStrategy rolloutApprovalStrategy,
             final EntityManager entityManager, final PlatformTransactionManager txManager,
             final AfterTransactionCommitExecutor afterCommit,
-            final TenantAware tenantAware, final RepositoryProperties repositoryProperties) {
+            final TenantAware tenantAware, final ContextAware contextAware, final RepositoryProperties repositoryProperties) {
         return new JpaRolloutExecutor(actionRepository, rolloutGroupRepository, rolloutTargetGroupRepository,
                 rolloutRepository, targetManagement, deploymentManagement, rolloutGroupManagement, rolloutManagement,
                 quotaManagement, evaluationManager, rolloutApprovalStrategy, entityManager, txManager, afterCommit,
-                tenantAware, repositoryProperties);
+                tenantAware, contextAware, repositoryProperties);
     }
 
     /**

@@ -24,7 +24,6 @@ import jakarta.validation.constraints.NotNull;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpRole;
-import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -107,7 +106,7 @@ public class SystemSecurityContext {
      */
     public <T> T runAsControllerAsTenant(@NotEmpty final String tenant, @NotNull final Callable<T> callable) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
-        final List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS));
+        final List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(SpRole.CONTROLLER_ROLE_ANONYMOUS));
         try {
             return tenantAware.runAsTenant(tenant, () -> {
                 setCustomSecurityContext(tenant, oldContext.getAuthentication().getPrincipal(), authorities);

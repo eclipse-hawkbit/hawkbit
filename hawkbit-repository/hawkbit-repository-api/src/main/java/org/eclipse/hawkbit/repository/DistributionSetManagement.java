@@ -27,6 +27,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
@@ -56,7 +57,7 @@ public interface DistributionSetManagement<T extends DistributionSet>
 
     @Override
     default String permissionGroup() {
-        return "DISTRIBUTION_SET";
+        return SpPermission.DISTRIBUTION_SET;
     }
 
     /**

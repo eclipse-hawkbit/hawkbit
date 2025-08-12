@@ -9,16 +9,9 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.BRACKET_CLOSE;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.BRACKET_OPEN;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_AND;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_DELETE_TARGET;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_PREFIX;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_READ_TARGET;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_SUFFIX;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_DELETE_REPOSITORY;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_READ_REPOSITORY;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_UPDATE_REPOSITORY;
 
 import java.util.Collection;
 import java.util.List;
@@ -64,19 +57,16 @@ import org.springframework.util.ObjectUtils;
 public interface TargetManagement<T extends Target>
         extends RepositoryManagement<T, TargetManagement.Create, TargetManagement.Update> {
 
+    String HAS_READ_TARGET_AND_READ_ROLLOUT = HAS_READ_REPOSITORY + " and hasAuthority('READ_" + SpPermission.ROLLOUT + "')";
+    String HAS_READ_TARGET_AND_READ_DISTRIBUTION_SET = HAS_READ_REPOSITORY + " and hasAuthority('READ_" + SpPermission.DISTRIBUTION_SET + "')";
+
     String DETAILS_BASE = "base";
     String DETAILS_AUTO_CONFIRMATION_STATUS = "autoConfirmationStatus";
     String DETAILS_TAGS = "tags";
 
-    String HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET = BRACKET_OPEN +
-            HAS_AUTH_PREFIX + SpPermission.READ_DISTRIBUTION_SET + HAS_AUTH_SUFFIX +
-            HAS_AUTH_AND +
-            HAS_AUTH_PREFIX + SpPermission.READ_TARGET + HAS_AUTH_SUFFIX +
-            BRACKET_CLOSE;
-
     @Override
     default String permissionGroup() {
-        return "TARGET";
+        return SpPermission.TARGET;
     }
 
     /**
@@ -86,7 +76,7 @@ public interface TargetManagement<T extends Target>
      * @return controller attributes as key/value pairs
      * @throws EntityNotFoundException if target with given ID does not exist
      */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Map<String, String> getControllerAttributes(@NotEmpty String controllerId);
 
     /**
@@ -98,7 +88,7 @@ public interface TargetManagement<T extends Target>
      * @param targetFilterQuery to execute
      * @return true if it matches
      */
-    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
+    @PreAuthorize(HAS_READ_TARGET_AND_READ_DISTRIBUTION_SET)
     boolean isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(
             @NotNull String controllerId, long distributionSetId, @NotNull String targetFilterQuery);
 
@@ -108,7 +98,7 @@ public interface TargetManagement<T extends Target>
      * @param controllerIDs to look for.
      * @return List of found{@link Target}s
      */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     List<Target> getByControllerId(@NotEmpty Collection<String> controllerIDs);
 
     /**
@@ -118,15 +108,15 @@ public interface TargetManagement<T extends Target>
      * @param detailsKey the key of the details to include, e.g. {@link #DETAILS_AUTO_CONFIRMATION_STATUS}
      * @return {@link Target}
      */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Target getWithDetails(@NotEmpty String controllerId, String detailsKey);
 
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     default Target getWithDetails(@NotEmpty String controllerId) {
         return getWithDetails(controllerId, DETAILS_BASE);
     }
 
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     default Target getWithAutoConfigurationStatus(@NotEmpty String controllerId) {
         return getWithDetails(controllerId, DETAILS_AUTO_CONFIRMATION_STATUS);
     }
@@ -141,7 +131,7 @@ public interface TargetManagement<T extends Target>
      * @return a page of the found {@link Target}s
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
+    @PreAuthorize(HAS_READ_TARGET_AND_READ_DISTRIBUTION_SET)
     Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(
             long distributionSetId, @NotNull String rsql, @NotNull Pageable pageable);
 
@@ -155,7 +145,7 @@ public interface TargetManagement<T extends Target>
      * @param pageable the pageable to enhance the query for paging and sorting
      * @return a page of the found {@link Target}s
      */
-    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
     Slice<Target> findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
             @NotEmpty Collection<Long> groups, @NotNull String rsql, @NotNull DistributionSetType distributionSetType,
             @NotNull Pageable pageable);
@@ -169,11 +159,11 @@ public interface TargetManagement<T extends Target>
      * @param pageable the pageable to enhance the query for paging and sorting
      * @return a page of the found {@link Target}s
      */
-    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
     Slice<Target> findByFailedRolloutAndNotInRolloutGroups(
             @NotNull String rolloutId, @NotEmpty Collection<Long> groups, @NotNull Pageable pageable);
 
-    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
     Slice<Target> findByRsqlAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
             final long rolloutId, @NotNull String rsql, @NotNull DistributionSetType distributionSetType, @NotNull Pageable pageable);
 
@@ -185,7 +175,7 @@ public interface TargetManagement<T extends Target>
      * @return the found {@link Target}s
      * @throws EntityNotFoundException if rollout group with given ID does not exist
      */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Slice<Target> findByInRolloutGroupWithoutAction(long group, @NotNull Pageable pageable);
 
     /**
@@ -196,7 +186,7 @@ public interface TargetManagement<T extends Target>
      * @return the found {@link Target}s
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
+    @PreAuthorize(HAS_READ_TARGET_AND_READ_DISTRIBUTION_SET)
     Page<Target> findByAssignedDistributionSet(long distributionSetId, @NotNull Pageable pageable);
 
     /**
@@ -211,7 +201,7 @@ public interface TargetManagement<T extends Target>
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
+    @PreAuthorize(HAS_READ_TARGET_AND_READ_DISTRIBUTION_SET)
     Page<Target> findByAssignedDistributionSetAndRsql(long distributionSetId, @NotNull String rsql, @NotNull Pageable pageable);
 
     /**
@@ -223,7 +213,7 @@ public interface TargetManagement<T extends Target>
      *         compatible with
      * @return the found number of{@link Target}s
      */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     long countByRsqlAndCompatible(@NotEmpty String rsql, @NotNull Long distributionSetIdTypeId);
 
     /**
@@ -234,7 +224,7 @@ public interface TargetManagement<T extends Target>
      * @param dsTypeId ID of the {@link DistributionSetType} the targets need to be compatible with
      * @return the found number of{@link Target}s
      */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     long countByFailedInRollout(@NotEmpty String rolloutId, @NotNull Long dsTypeId);
 
     /**
@@ -246,7 +236,7 @@ public interface TargetManagement<T extends Target>
      * @return the count of found {@link Target}s
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
+    @PreAuthorize(HAS_READ_TARGET_AND_READ_DISTRIBUTION_SET)
     long countByRsqlAndNonDsAndCompatibleAndUpdatable(long distributionSetId, @NotNull String rsql);
 
     /**
@@ -258,7 +248,7 @@ public interface TargetManagement<T extends Target>
      * @param distributionSetType type of the {@link DistributionSet} the targets must be compatible with
      * @return count of the found {@link Target}s
      */
-    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
     long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
             @NotNull String rsql, @NotEmpty Collection<Long> groups, @NotNull DistributionSetType distributionSetType);
 
@@ -270,10 +260,10 @@ public interface TargetManagement<T extends Target>
      * @param groups the list of {@link RolloutGroup}s
      * @return count of the found {@link Target}s
      */
-    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
     long countByFailedRolloutAndNotInRolloutGroups(@NotNull String rolloutId, @NotEmpty Collection<Long> groups);
 
-    @PreAuthorize(HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
     long countByActionsInRolloutGroup(final long rolloutGroupId);
 
     /**
@@ -282,7 +272,7 @@ public interface TargetManagement<T extends Target>
      * @param controllerId to look for.
      * @return {@link Target}
      */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Optional<Target> getByControllerId(@NotEmpty String controllerId);
 
     /**
@@ -293,7 +283,7 @@ public interface TargetManagement<T extends Target>
      * @return the found {@link Target}s
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
+    @PreAuthorize(HAS_READ_TARGET_AND_READ_DISTRIBUTION_SET)
     Page<Target> findByInstalledDistributionSet(long distributionSetId, @NotNull Pageable pageReq);
 
     /**
@@ -309,7 +299,7 @@ public interface TargetManagement<T extends Target>
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(HAS_AUTH_READ_DISTRIBUTION_SET_AND_READ_TARGET)
+    @PreAuthorize(HAS_READ_TARGET_AND_READ_DISTRIBUTION_SET)
     Page<Target> findByInstalledDistributionSetAndRsql(long distributionSetId, @NotNull String rsql, @NotNull Pageable pageReq);
 
     /**
@@ -320,7 +310,7 @@ public interface TargetManagement<T extends Target>
      * @return list of matching targets
      * @throws EntityNotFoundException if target tag with given ID does not exist
      */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Page<Target> findByTag(long tagId, @NotNull Pageable pageable);
 
     /**
@@ -335,7 +325,7 @@ public interface TargetManagement<T extends Target>
      *         given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Page<Target> findByRsqlAndTag(@NotNull String rsql, long tagId, @NotNull Pageable pageable);
 
 
@@ -345,7 +335,7 @@ public interface TargetManagement<T extends Target>
      * @param controllerId the controller ID of the target to be deleted
      * @throws EntityNotFoundException if target with given ID does not exist
      */
-    @PreAuthorize(HAS_AUTH_DELETE_TARGET)
+    @PreAuthorize(HAS_DELETE_REPOSITORY)
     void deleteByControllerId(@NotEmpty String controllerId);
 
     /**
@@ -356,7 +346,7 @@ public interface TargetManagement<T extends Target>
      * @return the unassigned target
      * @throws EntityNotFoundException if TargetType with given target ID does not exist
      */
-    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
     Target assignType(@NotEmpty String controllerId, @NotNull Long targetTypeId);
 
     /**
@@ -365,7 +355,7 @@ public interface TargetManagement<T extends Target>
      * @param controllerId to un-assign for
      * @return the unassigned target
      */
-    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
     Target unassignType(@NotEmpty String controllerId);
 
     /**
@@ -377,7 +367,7 @@ public interface TargetManagement<T extends Target>
      * @return list of assigned targets
      * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
      */
-    @PreAuthorize(HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
     List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long targetTagId, final Consumer<Collection<String>> notFoundHandler);
 
     /**
@@ -388,7 +378,7 @@ public interface TargetManagement<T extends Target>
      * @return list of assigned targets
      * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
      */
-    @PreAuthorize(HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
     List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long targetTagId);
 
     /**
@@ -398,7 +388,7 @@ public interface TargetManagement<T extends Target>
      * @return the found Tag set
      * @throws EntityNotFoundException if target with given ID does not exist
      */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Set<TargetTag> getTags(@NotEmpty String controllerId);
 
     /**
@@ -410,7 +400,7 @@ public interface TargetManagement<T extends Target>
      * @return list of unassigned targets
      * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
      */
-    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
     List<Target> unassignTag(@NotEmpty Collection<String> controllerIds, long targetTagId, final Consumer<Collection<String>> notFoundHandler);
 
     /**
@@ -421,7 +411,7 @@ public interface TargetManagement<T extends Target>
      * @return list of unassigned targets
      * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
      */
-    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
     List<Target> unassignTag(@NotEmpty Collection<String> controllerIds, long targetTagId);
 
     /**
@@ -430,7 +420,7 @@ public interface TargetManagement<T extends Target>
      * @param group target group parameter
      * @param rsql rsql filter for {@link Target}
      */
-    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
     void assignTargetGroupWithRsql(String group, @NotNull String rsql);
 
     /**
@@ -439,7 +429,7 @@ public interface TargetManagement<T extends Target>
      * @param group target group parameter
      * @param controllerIds list of targets
      */
-    @PreAuthorize(HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
     void assignTargetsWithGroup(String group, @NotEmpty List<String> controllerIds);
 
     /**
@@ -450,7 +440,7 @@ public interface TargetManagement<T extends Target>
      * @param pageable - page parameter
      * @return all matching targets to provided group/subgroup
      */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Page<Target> findTargetsByGroup(@NotEmpty String group, boolean withSubgroups, @NotNull Pageable pageable);
 
     /**
@@ -458,7 +448,7 @@ public interface TargetManagement<T extends Target>
      *
      * @return list of all distinct target groups
      */
-    @PreAuthorize(HAS_AUTH_READ_TARGET)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     List<String> findGroups();
 
     /**

@@ -21,6 +21,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -37,6 +38,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface DistributionSetTypeManagement<T extends DistributionSetType>
         extends RepositoryManagement<T, DistributionSetTypeManagement.Create, DistributionSetTypeManagement.Update> {
+
+    @Override
+    default String permissionGroup() {
+        return SpPermission.DISTRIBUTION_SET;
+    }
 
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Optional<T> findByKey(@NotEmpty String key);

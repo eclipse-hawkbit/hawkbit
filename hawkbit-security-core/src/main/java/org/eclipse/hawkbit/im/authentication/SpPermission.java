@@ -36,25 +36,38 @@ import org.springframework.util.function.SingletonSupplier;
 @Slf4j
 public final class SpPermission {
 
-    public static final String CREATE_TARGET = "CREATE_TARGET";
-    public static final String READ_TARGET = "READ_TARGET";
-    public static final String UPDATE_TARGET = "UPDATE_TARGET";
-    public static final String DELETE_TARGET = "DELETE_TARGET";
+    // Permission prefixes
+    public static final String CREATE_PREFIX = "CREATE_";
+    public static final String READ_PREFIX = "READ_";
+    public static final String UPDATE_PREFIX = "UPDATE_";
+    public static final String DELETE_PREFIX = "DELETE_";
+
+    // Permission groups
+    public static final String TARGET = "TARGET";
+    public static final String TARGET_TYPE = "TARGET_TYPE";
+    public static final String SOFTWARE_MODULE = "SOFTWARE_MODULE";
+    public static final String DISTRIBUTION_SET = "DISTRIBUTION_SET";
+    public static final String ROLLOUT = "ROLLOUT";
+    public static final String TENANT_CONFIGURATION = "TENANT_CONFIGURATION";
+
+    public static final String CREATE_TARGET = CREATE_PREFIX + TARGET;
+    public static final String READ_TARGET = READ_PREFIX + TARGET;
+    public static final String UPDATE_TARGET = UPDATE_PREFIX + TARGET;
+    public static final String DELETE_TARGET = DELETE_PREFIX + TARGET;
     /**
      * Permission to read the target security token. The security token is security
      * concerned and should be protected. So the combination
      * {@linkplain #READ_TARGET} and {@code READ_TARGET_SEC_TOKEN} is necessary to
      * be able to read the security token of a target.
      */
-    public static final String READ_TARGET_SEC_TOKEN = "READ_TARGET_SECURITY_TOKEN";
+    public static final String READ_TARGET_SEC_TOKEN = READ_TARGET + "_SECURITY_TOKEN";
 
-    public static final String CREATE_TARGET_TYPE = "CREATE_TARGET_TYPE";
-    public static final String READ_TARGET_TYPE = "READ_TARGET_TYPE";
-    public static final String UPDATE_TARGET_TYPE = "UPDATE_TARGET_TYPE";
-    public static final String DELETE_TARGET_TYPE = "DELETE_TARGET_TYPE";
+    public static final String READ_TARGET_TYPE = READ_PREFIX + TARGET_TYPE;
+    public static final String UPDATE_TARGET_TYPE = UPDATE_PREFIX + TARGET_TYPE;
+    public static final String DELETE_TARGET_TYPE = DELETE_PREFIX + TARGET_TYPE;
 
-    public static final String READ_DISTRIBUTION_SET = "READ_DISTRIBUTION_SET";
-    public static final String UPDATE_DISTRIBUTION_SET = "UPDATE_DISTRIBUTION_SET";
+    public static final String READ_DISTRIBUTION_SET = READ_PREFIX + DISTRIBUTION_SET;
+    public static final String UPDATE_DISTRIBUTION_SET = UPDATE_PREFIX + DISTRIBUTION_SET;
 
     public static final String READ_REPOSITORY = "READ_REPOSITORY";
     public static final String UPDATE_REPOSITORY = "UPDATE_REPOSITORY";
@@ -66,7 +79,8 @@ public final class SpPermission {
     /**
      * Permission to read the tenant settings.
      */
-    public static final String READ_TENANT_CONFIGURATION = "READ_TENANT_CONFIGURATION";
+    public static final String READ_TENANT_CONFIGURATION = READ_PREFIX + TENANT_CONFIGURATION;
+
     /**
      * Permission to read the gateway security token. The gateway security token is security
      * concerned and should be protected. So in addition to {@linkplain #READ_TENANT_CONFIGURATION},
@@ -74,19 +88,15 @@ public final class SpPermission {
      * implies both permissions - so it is sufficient to read the gateway security token.
      */
     public static final String READ_GATEWAY_SEC_TOKEN = "READ_GATEWAY_SECURITY_TOKEN";
-    /**
-     * Permission to administrate the tenant settings.
-     */
-    public static final String TENANT_CONFIGURATION = "TENANT_CONFIGURATION";
 
-    public static final String CREATE_ROLLOUT = "CREATE_ROLLOUT";
-    public static final String READ_ROLLOUT = "READ_ROLLOUT";
-    public static final String UPDATE_ROLLOUT = "UPDATE_ROLLOUT";
-    public static final String DELETE_ROLLOUT = "DELETE_ROLLOUT";
+    public static final String CREATE_ROLLOUT = CREATE_PREFIX + ROLLOUT;
+    public static final String READ_ROLLOUT = READ_PREFIX + ROLLOUT;
+    public static final String UPDATE_ROLLOUT = UPDATE_PREFIX + ROLLOUT;
+    public static final String DELETE_ROLLOUT = DELETE_PREFIX + ROLLOUT;
     /** Permission to approve or deny a rollout prior to starting. */
-    public static final String APPROVE_ROLLOUT = "APPROVE_ROLLOUT";
+    public static final String APPROVE_ROLLOUT = "APPROVE_" + ROLLOUT;
     /** Permission to start/stop/resume a rollout. */
-    public static final String HANDLE_ROLLOUT = "HANDLE_ROLLOUT";
+    public static final String HANDLE_ROLLOUT = "HANDLE_" + ROLLOUT;
 
     /** Permission to administrate the system on a global, i.e. tenant independent scale. That includes the deletion of tenants. */
     public static final String SYSTEM_ADMIN = "SYSTEM_ADMIN";
@@ -108,7 +118,10 @@ public final class SpPermission {
             DELETE_REPOSITORY > DELETE_SOFTWARE_MODULE
             """;
     public static final String TENANT_CONFIGURATION_HIERARCHY = """
+            TENANT_CONFIGURATION > CREATE_TENANT_CONFIGURATION
             TENANT_CONFIGURATION > READ_TENANT_CONFIGURATION
+            TENANT_CONFIGURATION > UPDATE_TENANT_CONFIGURATION
+            TENANT_CONFIGURATION > DELETE_TENANT_CONFIGURATION
             TENANT_CONFIGURATION > READ_GATEWAY_SECURITY_TOKEN
             """;
 

@@ -28,6 +28,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -54,14 +55,22 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * RolloutManagement to control rollouts e.g. like creating, starting, resuming and pausing rollouts. This service secures all the
  * functionality based on the {@link PreAuthorize} annotation on methods.
  */
-public interface RolloutManagement {
+public interface RolloutManagement extends PermissionSupport {
+
+    String HAS_ROLLOUT_APPROVE = "hasPermission(#root, 'APPROVE')";
+    String HAS_ROLLOUT_HANDLE = "hasPermission(#root, 'HANDLE')";
+
+    @Override
+    default String permissionGroup() {
+        return SpPermission.ROLLOUT;
+    }
 
     /**
      * Counts all {@link Rollout}s in the repository that are not marked as deleted.
      *
      * @return number of rollouts
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     long count();
 
     /**
@@ -73,7 +82,7 @@ public interface RolloutManagement {
      * @param setId the distribution set
      * @return the count
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     long countByDistributionSetIdAndRolloutIsStoppable(long setId);
 
     /**
@@ -103,7 +112,7 @@ public interface RolloutManagement {
      * @throws AssignmentQuotaExceededException if the maximum number of allowed targets per rollout group is
      *         exceeded.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE)
+    @PreAuthorize(SpringEvalExpressions.HAS_CREATE_REPOSITORY)
     Rollout create(
             @NotNull @Valid Create create, int amountGroup, boolean confirmationRequired,
             @NotNull RolloutGroupConditions conditions, DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate);
@@ -134,7 +143,7 @@ public interface RolloutManagement {
      * @throws AssignmentQuotaExceededException if the maximum number of allowed targets per rollout group is
      *         exceeded.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE)
+    @PreAuthorize(SpringEvalExpressions.HAS_CREATE_REPOSITORY)
     Rollout create(@NotNull @Valid Create create, int amountGroup, boolean confirmationRequired,
             @NotNull RolloutGroupConditions conditions);
 
@@ -165,7 +174,7 @@ public interface RolloutManagement {
      * @throws AssignmentQuotaExceededException if the maximum number of allowed targets per rollout group is
      *         exceeded.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE)
+    @PreAuthorize(SpringEvalExpressions.HAS_CREATE_REPOSITORY)
     Rollout create(@Valid @NotNull Create rollout, @NotNull @Valid List<GroupCreate> groups, RolloutGroupConditions conditions);
 
     /**
@@ -175,7 +184,7 @@ public interface RolloutManagement {
      * @param pageable the page request to sort and limit the result
      * @return a page of found rollouts
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Page<Rollout> findAll(boolean deleted, @NotNull Pageable pageable);
 
     /**
@@ -186,7 +195,7 @@ public interface RolloutManagement {
      * @return a list of rollouts with details of targets count for different
      *         statuses
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Page<Rollout> findAllWithDetailedStatus(boolean deleted, @NotNull Pageable pageable);
 
     /**
@@ -200,7 +209,7 @@ public interface RolloutManagement {
      *         given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Page<Rollout> findByRsql(@NotNull String rsql, boolean deleted, @NotNull Pageable pageable);
 
     /**
@@ -211,7 +220,7 @@ public interface RolloutManagement {
      * @param pageable the page request to sort and limit the result
      * @return the founded rollout or {@code null} if rollout with given ID does not exists
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Page<Rollout> findByRsqlWithDetailedStatus(@NotEmpty String rsql, boolean deleted, @NotNull Pageable pageable);
 
     /**
@@ -219,7 +228,7 @@ public interface RolloutManagement {
      *
      * @return a list of active rollouts
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     List<Long> findActiveRollouts();
 
     /**
@@ -229,7 +238,7 @@ public interface RolloutManagement {
      * @return the founded rollout or {@code null} if rollout with given ID does
      *         not exists
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Optional<Rollout> get(long rolloutId);
 
     /**
@@ -239,7 +248,7 @@ public interface RolloutManagement {
      * @return the founded rollout or {@code null} if rollout with given name
      *         does not exists
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Optional<Rollout> getByName(@NotEmpty String rolloutName);
 
     /**
@@ -248,7 +257,7 @@ public interface RolloutManagement {
      * @param rolloutId rollout id
      * @return rollout details of targets count for different statuses
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Optional<Rollout> getWithDetailedStatus(long rolloutId);
 
     /**
@@ -273,7 +282,7 @@ public interface RolloutManagement {
      * @throws EntityNotFoundException if rollout or group with given ID does not exist
      * @throws RolloutIllegalStateException if given rollout is not in {@link RolloutStatus#RUNNING}. Only running rollouts can be paused.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE)
+    @PreAuthorize(HAS_ROLLOUT_HANDLE)
     void pauseRollout(long rolloutId);
 
     /**
@@ -283,7 +292,7 @@ public interface RolloutManagement {
      * @throws EntityNotFoundException if rollout with given ID does not exist
      * @throws RolloutIllegalStateException if given rollout is not in {@link RolloutStatus#PAUSED}. Only paused rollouts can be resumed.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE)
+    @PreAuthorize(HAS_ROLLOUT_HANDLE)
     void resumeRollout(long rolloutId);
 
     /**
@@ -297,7 +306,7 @@ public interface RolloutManagement {
      * @throws RolloutIllegalStateException if given rollout is not in {@link RolloutStatus#WAITING_FOR_APPROVAL}. Only rollouts
      *         waiting for approval can be acted upon.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_APPROVE)
+    @PreAuthorize(HAS_ROLLOUT_APPROVE)
     Rollout approveOrDeny(long rolloutId, Rollout.ApprovalDecision decision);
 
     /**
@@ -315,7 +324,7 @@ public interface RolloutManagement {
      *         {@link RolloutStatus#WAITING_FOR_APPROVAL}. Only rollouts
      *         waiting for approveOrDeny can be acted upon.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_APPROVE)
+    @PreAuthorize(HAS_ROLLOUT_APPROVE)
     Rollout approveOrDeny(long rolloutId, Rollout.ApprovalDecision decision, String remark);
 
     /**
@@ -331,7 +340,7 @@ public interface RolloutManagement {
      * @throws RolloutIllegalStateException if given rollout is not in {@link RolloutStatus#READY}. Only
      *         ready rollouts can be started.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE)
+    @PreAuthorize(HAS_ROLLOUT_HANDLE)
     Rollout start(long rolloutId);
 
     /**
@@ -343,7 +352,7 @@ public interface RolloutManagement {
      * @throws EntityReadOnlyException if rollout is in soft deleted state, i.e. only kept as
      *         reference
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     Rollout update(@NotNull @Valid Update update);
 
     /**
@@ -351,7 +360,7 @@ public interface RolloutManagement {
      * @param rolloutId of the rollout to be stopped
      * @return stopped rollout
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     Rollout stop(long rolloutId);
 
     /**
@@ -360,7 +369,7 @@ public interface RolloutManagement {
      *
      * @param rolloutId the ID of the rollout to be deleted
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_DELETE)
+    @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
     void delete(long rolloutId);
 
     /**
@@ -371,7 +380,7 @@ public interface RolloutManagement {
      * @param set the {@link DistributionSet} for that the rollouts should be
      *         canceled
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     void cancelRolloutsForDistributionSet(DistributionSet set, ActionCancellationType cancelationType);
 
     /**
@@ -382,7 +391,7 @@ public interface RolloutManagement {
      * @throws EntityNotFoundException if rollout or group with given ID does not exist
      * @throws RolloutIllegalStateException if given rollout is not in {@link RolloutStatus#RUNNING}.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     void triggerNextGroup(long rolloutId);
 
     /**
@@ -391,7 +400,7 @@ public interface RolloutManagement {
      * @param cancelationType - type of cancellation - FORCE or SOFT (NONE is ignored)
      * @param rollout - the rollout which actions are about to be cancelled
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     void cancelActiveActionsForRollouts(final Rollout rollout, final ActionCancellationType cancelationType);
 
     @SuperBuilder

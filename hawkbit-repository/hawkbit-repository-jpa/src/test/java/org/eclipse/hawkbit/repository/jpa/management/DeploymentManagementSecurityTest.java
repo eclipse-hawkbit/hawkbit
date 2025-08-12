@@ -55,7 +55,8 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void offlineAssignedDistributionSetsPermissionsCheck() {
-        assertPermissions(() -> deploymentManagement.offlineAssignedDistributionSets(List.of()), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> deploymentManagement.offlineAssignedDistributionSets(List.of()),
+                List.of(SpPermission.READ_REPOSITORY, SpPermission.UPDATE_TARGET));
     }
 
     /**

@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.test.util;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TENANT_CONFIGURATION;
 import static org.eclipse.hawkbit.im.authentication.SpRole.SYSTEM_ROLE;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.CONTROLLER_ROLE;
+import static org.eclipse.hawkbit.im.authentication.SpRole.CONTROLLER_ROLE;
 
 import java.io.File;
 import java.io.IOException;
