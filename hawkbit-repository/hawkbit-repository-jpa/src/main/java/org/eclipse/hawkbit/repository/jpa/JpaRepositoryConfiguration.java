@@ -359,8 +359,8 @@ public class JpaRepositoryConfiguration {
     @ConditionalOnMissingBean
     RolloutHandler rolloutHandler(final TenantAware tenantAware, final RolloutManagement rolloutManagement,
             final RolloutExecutor rolloutExecutor, final LockRegistry lockRegistry,
-            final PlatformTransactionManager txManager, final ContextAware contextAware, final Optional<MeterRegistry> meterRegistry) {
-        return new JpaRolloutHandler(tenantAware, rolloutManagement, rolloutExecutor, lockRegistry, txManager, contextAware, meterRegistry);
+            final PlatformTransactionManager txManager, final Optional<MeterRegistry> meterRegistry) {
+        return new JpaRolloutHandler(tenantAware, rolloutManagement, rolloutExecutor, lockRegistry, txManager, meterRegistry);
     }
 
     @Bean

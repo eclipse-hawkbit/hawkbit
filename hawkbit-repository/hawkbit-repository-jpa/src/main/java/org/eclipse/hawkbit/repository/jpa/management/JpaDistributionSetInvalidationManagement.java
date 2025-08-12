@@ -49,7 +49,6 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     private final RolloutManagement rolloutManagement;
     private final DeploymentManagement deploymentManagement;
     private final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
-    private final ActionRepository actionRepository;
     private final PlatformTransactionManager txManager;
     private final RepositoryProperties repositoryProperties;
     private final TenantAware tenantAware;
@@ -60,7 +59,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     protected JpaDistributionSetInvalidationManagement(
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final RolloutManagement rolloutManagement, final DeploymentManagement deploymentManagement,
-            final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement, final ActionRepository actionRepository,
+            final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
             final PlatformTransactionManager txManager, final RepositoryProperties repositoryProperties,
             final TenantAware tenantAware, final LockRegistry lockRegistry,
             final SystemSecurityContext systemSecurityContext) {
@@ -68,7 +67,6 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
         this.rolloutManagement = rolloutManagement;
         this.deploymentManagement = deploymentManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
-        this.actionRepository = actionRepository;
         this.txManager = txManager;
         this.repositoryProperties = repositoryProperties;
         this.tenantAware = tenantAware;
@@ -103,26 +101,11 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
         }
     }
 
-    @Override
-    public DistributionSetInvalidationCount countEntitiesForInvalidation(
-            final DistributionSetInvalidation distributionSetInvalidation) {
-        return systemSecurityContext.runAsSystem(() -> {
-            final Collection<Long> setIds = distributionSetInvalidation.getDistributionSetIds();
-            final long rolloutsCount = shouldRolloutsBeCanceled(distributionSetInvalidation.getActionCancellationType()) ? countRolloutsForInvalidation(setIds) : 0;
-            final long autoAssignmentsCount = countAutoAssignmentsForInvalidation(setIds);
-            final long actionsCount = countActionsForInvalidation(setIds,
-                    distributionSetInvalidation.getActionCancellationType());
-
-            return new DistributionSetInvalidationCount(rolloutsCount, autoAssignmentsCount, actionsCount);
-        });
-    }
-
     private static boolean shouldRolloutsBeCanceled(final ActionCancellationType cancelationType) {
         return cancelationType != ActionCancellationType.NONE;
     }
 
-    private void invalidateDistributionSetsInTransaction(final DistributionSetInvalidation distributionSetInvalidation,
-            final String tenant) {
+    private void invalidateDistributionSetsInTransaction(final DistributionSetInvalidation distributionSetInvalidation, final String tenant) {
         DeploymentHelper.runInNewTransaction(txManager, tenant + "-invalidateDS", status -> {
             distributionSetInvalidation.getDistributionSetIds().forEach(setId -> invalidateDistributionSet(setId,
                     distributionSetInvalidation.getActionCancellationType()));
@@ -157,34 +140,5 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
             targetFilterQueryManagement.cancelAutoAssignmentForDistributionSet(setId);
             return null;
         });
-    }
-
-    private long countRolloutsForInvalidation(final Collection<Long> setIds) {
-        return setIds.stream().mapToLong(rolloutManagement::countByDistributionSetIdAndRolloutIsStoppable).sum();
-    }
-
-    private long countAutoAssignmentsForInvalidation(final Collection<Long> setIds) {
-        return setIds.stream().mapToLong(targetFilterQueryManagement::countByAutoAssignDistributionSetId).sum();
-    }
-
-    private long countActionsForInvalidation(final Collection<Long> setIds, final ActionCancellationType cancelationType) {
-        long affectedActionsByDSInvalidation = 0;
-        if (cancelationType == ActionCancellationType.FORCE) {
-            affectedActionsByDSInvalidation = countActionsForForcedInvalidation(setIds);
-        } else if (cancelationType == ActionCancellationType.SOFT) {
-            affectedActionsByDSInvalidation = countActionsForSoftInvalidation(setIds);
-        }
-        return affectedActionsByDSInvalidation;
-    }
-
-    private long countActionsForForcedInvalidation(final Collection<Long> setIds) {
-        return setIds.stream().mapToLong(actionRepository::countByDistributionSetIdAndActiveIsTrue).sum();
-    }
-
-    private long countActionsForSoftInvalidation(final Collection<Long> setIds) {
-        return setIds.stream()
-                .mapToLong(distributionSet -> actionRepository
-                        .countByDistributionSetIdAndActiveIsTrueAndStatusIsNot(distributionSet, Status.CANCELING))
-                .sum();
     }
 }

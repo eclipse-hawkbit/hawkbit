@@ -37,7 +37,6 @@ public class JpaRolloutHandler implements RolloutHandler {
     private final RolloutExecutor rolloutExecutor;
     private final LockRegistry lockRegistry;
     private final PlatformTransactionManager txManager;
-    private final ContextAware contextAware;
     private final Optional<MeterRegistry> meterRegistry;
 
     /**
@@ -51,14 +50,12 @@ public class JpaRolloutHandler implements RolloutHandler {
      */
     public JpaRolloutHandler(final TenantAware tenantAware, final RolloutManagement rolloutManagement,
             final RolloutExecutor rolloutExecutor, final LockRegistry lockRegistry,
-            final PlatformTransactionManager txManager,
-            final ContextAware contextAware, final Optional<MeterRegistry> meterRegistry) {
+            final PlatformTransactionManager txManager, final Optional<MeterRegistry> meterRegistry) {
         this.tenantAware = tenantAware;
         this.rolloutManagement = rolloutManagement;
         this.rolloutExecutor = rolloutExecutor;
         this.lockRegistry = lockRegistry;
         this.txManager = txManager;
-        this.contextAware = contextAware;
         this.meterRegistry = meterRegistry;
     }
 

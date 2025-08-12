@@ -14,7 +14,6 @@ import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitize
 import java.text.MessageFormat;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -69,7 +68,6 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -316,7 +314,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
         final Page<? extends SoftwareModule> softwareModules = softwareModuleManagement.findByAssignedTo(distributionSetId, pageable);
-        return ResponseEntity.ok(new PagedList<>(MgmtSoftwareModuleMapper.toResponse(softwareModules.getContent()), softwareModules.getTotalElements()));
+        return ResponseEntity.ok(
+                new PagedList<>(MgmtSoftwareModuleMapper.toResponse(softwareModules.getContent()), softwareModules.getTotalElements()));
     }
 
     @Override
@@ -357,10 +356,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     @AuditLog(entity = "DistributionSet", type = AuditLog.Type.DELETE, description = "Invalidate Distribution Set")
     public ResponseEntity<Void> invalidateDistributionSet(
             final Long distributionSetId, final MgmtInvalidateDistributionSetRequestBody invalidateRequestBody) {
-        distributionSetInvalidationManagement
-                .invalidateDistributionSet(
-                        new DistributionSetInvalidation(Collections.singletonList(distributionSetId),
-                                MgmtRestModelMapper.convertCancelationType(invalidateRequestBody.getActionCancelationType())));
+        distributionSetInvalidationManagement.invalidateDistributionSet(new DistributionSetInvalidation(
+                List.of(distributionSetId),
+                MgmtRestModelMapper.convertCancelationType(invalidateRequestBody.getActionCancelationType())));
         return ResponseEntity.ok().build();
     }
 }
