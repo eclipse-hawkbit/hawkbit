@@ -284,9 +284,10 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         if (!hasActiveActionsLeft) {
             // set soft delete
             rollout.setStatus(RolloutStatus.DELETED);
-            // and directly delete it ?
             rollout.setDeleted(true);
             rolloutRepository.save(rollout);
+
+            finishRolloutGroups(rollout);
         }
     }
 
@@ -392,6 +393,17 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 log.error("Exception during deletion of actions of rollout {}", rollout, e);
             }
         }
+    }
+
+    private void finishRolloutGroups(final JpaRollout rollout) {
+        final List<JpaRolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutOrderByIdAsc(rollout);
+        rolloutGroups.forEach(group -> {
+            if (group.getStatus() != RolloutGroupStatus.ERROR) {
+                group.setStatus(RolloutGroupStatus.FINISHED);
+            }
+        });
+
+        rolloutGroupRepository.saveAll(rolloutGroups);
     }
 
     private Slice<JpaAction> findScheduledActionsByRollout(final JpaRollout rollout) {

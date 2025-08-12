@@ -1468,6 +1468,12 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         for (Action action : rolloutActions) {
             Assertions.assertEquals(Status.CANCELED, action.getStatus());
         }
+
+        // ensure groups are in final state
+        List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getContent();
+        for (RolloutGroup rolloutGroup : groups) {
+            Assertions.assertEquals(RolloutGroupStatus.FINISHED, rolloutGroup.getStatus());
+        }
     }
 
     @Test
