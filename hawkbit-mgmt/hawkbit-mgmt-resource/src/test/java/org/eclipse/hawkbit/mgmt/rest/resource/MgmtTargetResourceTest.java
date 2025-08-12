@@ -1467,7 +1467,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
                         + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/"
                         + MgmtRestConstants.TARGET_V1_ACTION_STATUS).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING,
-                        "REPORTEDAT:DESC"))
+                        "CREATEDAT:DESC"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(1).getId().intValue())))
@@ -1486,7 +1486,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
                         + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/"
                         + MgmtRestConstants.TARGET_V1_ACTION_STATUS).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING,
-                        "REPORTEDAT:ASC"))
+                        "CREATEDAT:ASC"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("content.[1].id", equalTo(actionStatus.get(1).getId().intValue())))

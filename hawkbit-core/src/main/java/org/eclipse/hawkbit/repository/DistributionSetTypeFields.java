@@ -21,7 +21,11 @@ public enum DistributionSetTypeFields implements RsqlQueryField {
     ID("id"),
     KEY("key"),
     NAME("name"),
-    DESCRIPTION("description");
+    DESCRIPTION("description"),
+    CREATEDAT("createdAt"),
+    CREATEDBY("createdBy"),
+    LASTMODIFIEDAT("lastModifiedAt"),
+    LASTMODIFIEDBY("lastModifiedBy");
 
     private final String jpaEntityFieldName;
 

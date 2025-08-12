@@ -22,6 +22,10 @@ public enum TargetFilterQueryFields implements RsqlQueryField {
 
     ID("id"),
     NAME("name"),
+    CREATEDAT("createdAt"),
+    CREATEDBY("createdBy"),
+    LASTMODIFIEDAT("lastModifiedAt"),
+    LASTMODIFIEDBY("lastModifiedBy"),
     AUTOASSIGNDISTRIBUTIONSET("autoAssignDistributionSet", "name", "version");
 
     private final String jpaEntityFieldName;
