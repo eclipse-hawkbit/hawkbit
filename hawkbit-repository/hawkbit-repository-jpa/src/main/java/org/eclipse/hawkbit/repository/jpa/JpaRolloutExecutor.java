@@ -276,6 +276,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             return;
         }
 
+        finishRolloutGroups(rollout);
+
         rolloutManagement.cancelActiveActionsForRollouts(rollout, ActionCancellationType.FORCE);
         entityManager.flush();
 
@@ -286,8 +288,6 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             rollout.setStatus(RolloutStatus.DELETED);
             rollout.setDeleted(true);
             rolloutRepository.save(rollout);
-
-            finishRolloutGroups(rollout);
         }
     }
 
@@ -306,11 +306,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             return;
         }
 
-        rolloutGroupRepository.findByRolloutAndStatusNotIn(rollout, List.of(RolloutGroupStatus.FINISHED, RolloutGroupStatus.ERROR))
-                .forEach(rolloutGroup -> {
-                    rolloutGroup.setStatus(RolloutGroupStatus.FINISHED);
-                    rolloutGroupRepository.save(rolloutGroup);
-                });
+        finishRolloutGroups(rollout);
 
         // Soft cancel all active rollouts actions
         rolloutManagement.cancelActiveActionsForRollouts(rollout, ActionCancellationType.SOFT);
@@ -396,14 +392,11 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private void finishRolloutGroups(final JpaRollout rollout) {
-        final List<JpaRolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutOrderByIdAsc(rollout);
-        rolloutGroups.forEach(group -> {
-            if (group.getStatus() != RolloutGroupStatus.ERROR) {
-                group.setStatus(RolloutGroupStatus.FINISHED);
-            }
-        });
-
-        rolloutGroupRepository.saveAll(rolloutGroups);
+        rolloutGroupRepository.findByRolloutAndStatusNotIn(rollout, List.of(RolloutGroupStatus.FINISHED, RolloutGroupStatus.ERROR))
+                .forEach(rolloutGroup -> {
+                    rolloutGroup.setStatus(RolloutGroupStatus.FINISHED);
+                    rolloutGroupRepository.save(rolloutGroup);
+                });
     }
 
     private Slice<JpaAction> findScheduledActionsByRollout(final JpaRollout rollout) {
