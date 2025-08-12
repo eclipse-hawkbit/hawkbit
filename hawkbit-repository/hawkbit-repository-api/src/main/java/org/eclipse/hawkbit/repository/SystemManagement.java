@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 
 import jakarta.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -28,7 +29,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * Central system management operations of the update server.
  */
 public interface SystemManagement {
-
 
     /**
      * Deletes all data related to a given tenant.
@@ -76,18 +76,18 @@ public interface SystemManagement {
     /**
      * @return {@link TenantMetaData} of {@link TenantAware#getCurrentTenant()}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION_READ + SpringEvalExpressions.HAS_AUTH_OR
+    @PreAuthorize("hasAuthority('" + SpPermission.READ_REPOSITORY + "')" + " or "
+            + "hasAuthority('READ_" + SpPermission.TARGET + "')" + " or "
+            + "hasAuthority('READ_" + SpPermission.TENANT_CONFIGURATION + "')" + " or "
             + SpringEvalExpressions.IS_CONTROLLER)
     TenantMetaData getTenantMetadata();
 
     /**
      * @return {@link TenantMetaData} of {@link TenantAware#getCurrentTenant()} without details ({@link TenantMetaData#getDefaultDsType()})
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION_READ + SpringEvalExpressions.HAS_AUTH_OR
+    @PreAuthorize("hasAuthority('" + SpPermission.READ_REPOSITORY + "')" + " or "
+            + "hasAuthority('READ_" + SpPermission.TARGET + "')" + " or "
+            + "hasAuthority('READ_" + SpPermission.TENANT_CONFIGURATION + "')" + " or "
             + SpringEvalExpressions.IS_CONTROLLER)
     TenantMetaData getTenantMetadataWithoutDetails();
 
@@ -113,7 +113,7 @@ public interface SystemManagement {
      * @param defaultDsType to update
      * @return updated {@link TenantMetaData} entity
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
+    @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TENANT_CONFIGURATION + "')")
     TenantMetaData updateTenantMetadata(long defaultDsType);
 
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)

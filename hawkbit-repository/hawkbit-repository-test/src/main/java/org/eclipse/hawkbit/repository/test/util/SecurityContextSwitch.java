@@ -45,10 +45,10 @@ public class SecurityContextSwitch {
     public static <T> T callAs(final WithUser withUser, final Callable<T> callable) throws Exception {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         setSecurityContext(withUser);
-        if (withUser.autoCreateTenant()) {
-            createTenant(withUser.tenantId());
-        }
         try {
+            if (withUser.autoCreateTenant()) {
+                createTenant(withUser.tenantId());
+            }
             return callable.call();
         } finally {
             SecurityContextHolder.setContext(oldContext);

@@ -36,7 +36,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfAutoConfirmation;
 import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
-import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
+import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -192,7 +192,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private static void setTenantSecurityContext(final String tenantId) {
         final AnonymousAuthenticationToken authenticationToken = new AnonymousAuthenticationToken(
                 UUID.randomUUID().toString(), "AMQP-Controller",
-                Collections.singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS)));
+                List.of(new SimpleGrantedAuthority(SpRole.CONTROLLER_ROLE_ANONYMOUS)));
         authenticationToken.setDetails(new TenantAwareAuthenticationDetails(tenantId, true));
         setSecurityContext(authenticationToken);
     }

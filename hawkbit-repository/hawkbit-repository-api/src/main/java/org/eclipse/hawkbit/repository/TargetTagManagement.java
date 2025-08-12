@@ -16,6 +16,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -28,7 +29,7 @@ public interface TargetTagManagement<T extends TargetTag>
 
     @Override
     default String permissionGroup() {
-        return "TARGET";
+        return SpPermission.TARGET;
     }
 
     @SuperBuilder

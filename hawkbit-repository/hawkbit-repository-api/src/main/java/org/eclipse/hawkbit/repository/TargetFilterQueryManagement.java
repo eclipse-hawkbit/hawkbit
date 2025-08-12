@@ -22,6 +22,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -48,7 +49,7 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
 
     @Override
     default String permissionGroup() {
-        return "TARGET";
+        return SpPermission.TARGET;
     }
 
     /**
@@ -60,7 +61,7 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
      *         given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     boolean verifyTargetFilterQuerySyntax(@NotNull String query);
 
     /**
@@ -72,7 +73,7 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
      * @param autoAssignDistributionSetId the id of the distribution set
      * @return the count
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     long countByAutoAssignDistributionSetId(long autoAssignDistributionSetId);
 
     /**
@@ -84,7 +85,7 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
      * @return the page with the found {@link TargetFilterQuery}s
      * @throws EntityNotFoundException if DS with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Page<TargetFilterQuery> findByAutoAssignDSAndRsql(long setId, String rsql, @NotNull Pageable pageable);
 
     /**
@@ -93,7 +94,7 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
      * @param pageable pagination information
      * @return the page with the found {@link TargetFilterQuery}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Slice<TargetFilterQuery> findWithAutoAssignDS(@NotNull Pageable pageable);
 
     /**
@@ -112,7 +113,7 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
      * @throws InvalidDistributionSetException if the provided auto-assign {@link DistributionSet} is
      *         invalidated
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     TargetFilterQuery updateAutoAssignDS(@NotNull @Valid AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate);
 
     /**
@@ -121,7 +122,7 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
      * @param setId the {@link DistributionSet} to be removed from auto
      *         assignments.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     void cancelAutoAssignmentForDistributionSet(long setId);
 
     @SuperBuilder

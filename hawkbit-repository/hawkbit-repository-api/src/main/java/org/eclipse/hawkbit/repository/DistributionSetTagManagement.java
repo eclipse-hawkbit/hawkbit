@@ -19,6 +19,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -36,6 +37,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface DistributionSetTagManagement<T extends DistributionSetTag>
         extends RepositoryManagement<T, DistributionSetTagManagement.Create, DistributionSetTagManagement.Update> {
+
+    @Override
+    default String permissionGroup() {
+        return SpPermission.DISTRIBUTION_SET;
+    }
 
     @SuperBuilder
     @Getter

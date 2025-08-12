@@ -22,6 +22,7 @@ import java.util.stream.StreamSupport;
 import jakarta.persistence.EntityManager;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -112,6 +113,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private final PlatformTransactionManager txManager;
     private final AfterTransactionCommitExecutor afterCommit;
     private final TenantAware tenantAware;
+    private final ContextAware contextAware;
     private final RepositoryProperties repositoryProperties;
     private final Map<Long, AtomicLong> lastDynamicGroupFill = new ConcurrentHashMap<>();
 
@@ -125,7 +127,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final RolloutGroupEvaluationManager evaluationManager, final RolloutApprovalStrategy rolloutApprovalStrategy,
             final EntityManager entityManager, final PlatformTransactionManager txManager,
             final AfterTransactionCommitExecutor afterCommit,
-            final TenantAware tenantAware, final RepositoryProperties repositoryProperties) {
+            final TenantAware tenantAware, final ContextAware contextAware, final RepositoryProperties repositoryProperties) {
         this.actionRepository = actionRepository;
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.rolloutTargetGroupRepository = rolloutTargetGroupRepository;
@@ -141,11 +143,23 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         this.txManager = txManager;
         this.afterCommit = afterCommit;
         this.tenantAware = tenantAware;
+        this.contextAware = contextAware;
         this.repositoryProperties = repositoryProperties;
     }
 
     @Override
     public void execute(final Rollout rollout) {
+        rollout.getAccessControlContext().ifPresentOrElse(
+                context -> // has stored context - executes it with it
+                        contextAware.runInContext(context, () -> execute0(rollout)),
+                () -> // has no stored context - executes it in the tenant & user scope
+                        contextAware.runAsTenantAsUser(contextAware.getCurrentTenant(), rollout.getCreatedBy(), () -> {
+                            execute0(rollout);
+                            return null;
+                        }));
+    }
+
+    private void execute0(final Rollout rollout) {
         log.debug("Processing rollout {}", rollout.getId());
 
         switch (rollout.getStatus()) {

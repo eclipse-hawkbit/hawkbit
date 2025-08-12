@@ -49,6 +49,6 @@ public interface RolloutExecutor {
      * change {@link RolloutStatus#DELETED} or hard delete from the persistence
      * otherwise.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE)
+    @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     void execute(Rollout rollout);
 }

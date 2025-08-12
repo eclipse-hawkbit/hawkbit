@@ -62,11 +62,11 @@ public class RepositoryConfiguration {
 
             @Override
             public boolean hasPermission(final Authentication authentication, final Object targetDomainObject, final Object permission) {
-                if (targetDomainObject instanceof MethodSecurityExpressionOperations root) {
-                    final String neededPermission =
-                            permission + "_" + (root.getThis() instanceof PermissionSupport permissionSupport
-                                    ? permissionSupport.permissionGroup()
-                                    : "REPOSITORY"); // TODO - should not fall back here - all using permissions should extend repository management interface
+                if (targetDomainObject instanceof MethodSecurityExpressionOperations root &&
+                        root.getThis() instanceof PermissionSupport permissionSupport) {
+                    final String neededPermission = permission + "_" + permissionSupport.permissionGroup();
+
+                    // do permissions check
                     final boolean hasPermission = roleHierarchy.getReachableGrantedAuthorities(authentication.getAuthorities()).stream()
                             .map(GrantedAuthority::getAuthority)
                             .anyMatch(authority -> authority.equals(neededPermission));
@@ -75,9 +75,11 @@ public class RepositoryConfiguration {
                                 "User {} does not have permission {} for target {}",
                                 authentication.getName(), neededPermission, targetDomainObject);
                     }
+
                     return hasPermission;
+                } else {
+                    return super.hasPermission(authentication, targetDomainObject, permission);
                 }
-                return super.hasPermission(authentication, targetDomainObject, permission);
             }
         };
     }

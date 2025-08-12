@@ -112,22 +112,8 @@ public class JpaRolloutHandler implements RolloutHandler {
 
         DeploymentHelper.runInNewTransaction(txManager, handlerId + "-" + rolloutId, status -> {
             rolloutManagement.get(rolloutId).ifPresentOrElse(
-                    rollout ->
-                            // auditor is retrieved and set on transaction commit if not overridden, the system user will be the auditor
-                            rollout.getAccessControlContext().ifPresentOrElse(
-                                    context -> // has stored context - executes it with it
-                                            contextAware.runInContext(
-                                                    context,
-                                                    () -> rolloutExecutor.execute(rollout)),
-                                    () -> // has no stored context - executes it in the tenant & user scope
-                                            contextAware.runAsTenantAsUser(
-                                                    contextAware.getCurrentTenant(),
-                                                    rollout.getCreatedBy(), () -> {
-                                                        rolloutExecutor.execute(rollout);
-                                                        return null;
-                                                    })),
-                    () -> log.error("Could not retrieve rollout with id {}. Will not continue with execution.",
-                            rolloutId));
+                    rolloutExecutor::execute,
+                    () -> log.error("Could not retrieve rollout with id {}. Will not continue with execution.", rolloutId));
             return 0L;
         });
 

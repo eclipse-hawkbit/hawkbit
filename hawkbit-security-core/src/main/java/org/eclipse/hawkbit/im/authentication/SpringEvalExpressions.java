@@ -36,35 +36,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SpringEvalExpressions {
 
-    public static final String BRACKET_OPEN = "(";
-    public static final String BRACKET_CLOSE = ")";
-    public static final String HAS_AUTH_PREFIX = "hasAuthority" + BRACKET_OPEN + "'";
-    public static final String HAS_AUTH_SUFFIX = "'" + BRACKET_CLOSE;
-    public static final String HAS_AUTH_AND = " and ";
-    public static final String HAS_AUTH_OR = " or ";
-
-    /**
-     * The role which contains in the spring security context in case ancontroller is authenticated.
-     */
-    public static final String CONTROLLER_ROLE = "ROLE_CONTROLLER";
-    /**
-     * The role which contained in the spring security context in case that a controller is authenticated, but only as 'anonymous'.
-     */
-    public static final String CONTROLLER_ROLE_ANONYMOUS = "ROLE_CONTROLLER_ANONYMOUS";
-
-    public static final String IS_SYSTEM_CODE = HAS_AUTH_PREFIX + SpRole.SYSTEM_ROLE + HAS_AUTH_SUFFIX;
-
-    public static final String HAS_AUTH_SYSTEM_ADMIN = HAS_AUTH_PREFIX + SpPermission.SYSTEM_ADMIN + HAS_AUTH_SUFFIX;
-
-    public static final String HAS_AUTH_CREATE_TARGET = HAS_AUTH_PREFIX + SpPermission.CREATE_TARGET + HAS_AUTH_SUFFIX;
-    public static final String HAS_AUTH_UPDATE_TARGET = HAS_AUTH_PREFIX + SpPermission.UPDATE_TARGET + HAS_AUTH_SUFFIX;
-    public static final String HAS_AUTH_READ_TARGET = HAS_AUTH_PREFIX + SpPermission.READ_TARGET + HAS_AUTH_SUFFIX;
-    public static final String HAS_AUTH_DELETE_TARGET = HAS_AUTH_PREFIX + SpPermission.DELETE_TARGET + HAS_AUTH_SUFFIX;
-
-    public static final String HAS_AUTH_CREATE_TARGET_TYPE = HAS_AUTH_PREFIX + SpPermission.CREATE_TARGET_TYPE + HAS_AUTH_SUFFIX;
-    public static final String HAS_AUTH_UPDATE_TARGET_TYPE = HAS_AUTH_PREFIX + SpPermission.UPDATE_TARGET_TYPE + HAS_AUTH_SUFFIX;
-    public static final String HAS_AUTH_READ_TARGET_TYPE = HAS_AUTH_PREFIX + SpPermission.READ_TARGET_TYPE + HAS_AUTH_SUFFIX;
-    public static final String HAS_AUTH_DELETE_TARGET_TYPE = HAS_AUTH_PREFIX + SpPermission.DELETE_TARGET_TYPE + HAS_AUTH_SUFFIX;
+    public static final String IS_SYSTEM_CODE = "hasAuthority('ROLE_SYSTEM_CODE')";
+    public static final String HAS_AUTH_SYSTEM_ADMIN = "hasAuthority('SYSTEM_ADMIN')";
 
     // evaluated to <permission>_<permissionGroup> (e.g. DISTRIBUTION_SET_CREATE)
     public static final String HAS_CREATE_REPOSITORY = "hasPermission(#root, 'CREATE')";
@@ -72,25 +45,5 @@ public final class SpringEvalExpressions {
     public static final String HAS_UPDATE_REPOSITORY = "hasPermission(#root, 'UPDATE')";
     public static final String HAS_DELETE_REPOSITORY = "hasPermission(#root, 'DELETE')";
 
-    public static final String HAS_AUTH_DOWNLOAD_ARTIFACT = HAS_AUTH_PREFIX + SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT + HAS_AUTH_SUFFIX;
-    public static final String HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET = BRACKET_OPEN + HAS_AUTH_PREFIX
-            + SpPermission.READ_REPOSITORY + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + SpPermission.UPDATE_TARGET + HAS_AUTH_SUFFIX
-            + BRACKET_CLOSE;
-
-    public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE = HAS_AUTH_PREFIX + SpPermission.CREATE_ROLLOUT + HAS_AUTH_SUFFIX;
-    public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_READ = HAS_AUTH_PREFIX + SpPermission.READ_ROLLOUT + HAS_AUTH_SUFFIX;
-    public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE = HAS_AUTH_PREFIX + SpPermission.UPDATE_ROLLOUT + HAS_AUTH_SUFFIX;
-    public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_DELETE = HAS_AUTH_PREFIX + SpPermission.DELETE_ROLLOUT + HAS_AUTH_SUFFIX;
-    public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_APPROVE = HAS_AUTH_PREFIX + SpPermission.APPROVE_ROLLOUT + HAS_AUTH_SUFFIX;
-    public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE = HAS_AUTH_PREFIX + SpPermission.HANDLE_ROLLOUT + HAS_AUTH_SUFFIX;
-
-    public static final String HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ = BRACKET_OPEN + HAS_AUTH_PREFIX
-            + SpPermission.READ_ROLLOUT + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + SpPermission.READ_TARGET + HAS_AUTH_SUFFIX
-            + BRACKET_CLOSE;
-
-    public static final String HAS_AUTH_TENANT_CONFIGURATION_READ = HAS_AUTH_PREFIX + SpPermission.READ_TENANT_CONFIGURATION + HAS_AUTH_SUFFIX;
-    public static final String HAS_AUTH_TENANT_CONFIGURATION = HAS_AUTH_PREFIX + SpPermission.TENANT_CONFIGURATION + HAS_AUTH_SUFFIX;
-
-    public static final String IS_CONTROLLER = "hasAnyRole('" + CONTROLLER_ROLE_ANONYMOUS + "', '" + CONTROLLER_ROLE + "')";
-    public static final String IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET = IS_CONTROLLER + HAS_AUTH_OR + HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET;
+    public static final String IS_CONTROLLER = "hasAnyRole('" + SpRole.CONTROLLER_ROLE_ANONYMOUS + "', '" + SpRole.CONTROLLER_ROLE + "')";
 }

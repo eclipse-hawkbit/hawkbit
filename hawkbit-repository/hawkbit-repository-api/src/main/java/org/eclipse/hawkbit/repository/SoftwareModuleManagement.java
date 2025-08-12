@@ -23,6 +23,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -46,7 +47,7 @@ public interface SoftwareModuleManagement<T extends SoftwareModule>
 
     @Override
     default String permissionGroup() {
-        return "SOFTWARE_MODULE";
+        return SpPermission.SOFTWARE_MODULE;
     }
 
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
