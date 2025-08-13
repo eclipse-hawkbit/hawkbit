@@ -255,7 +255,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                     ? tenantConfigHelper.isConfirmationFlowEnabled()
                     : dsAssignment.getConfirmationRequired();
             return MgmtDeploymentRequestMapper.createAssignmentRequestBuilder(dsAssignment, distributionSetId)
-                    .setConfirmationRequired(isConfirmationRequired).build();
+                    .confirmationRequired(isConfirmationRequired).build();
         }).toList();
 
         final List<DistributionSetAssignmentResult> assignmentResults = deployManagement.assignDistributionSets(deploymentRequests);

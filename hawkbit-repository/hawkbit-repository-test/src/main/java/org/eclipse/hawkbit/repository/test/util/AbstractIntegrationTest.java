@@ -340,8 +340,8 @@ public abstract class AbstractIntegrationTest {
         final boolean confirmationFlowActive = isConfirmationFlowActive();
 
         final List<DeploymentRequest> deploymentRequests = controllerIds.stream()
-                .map(id -> DeploymentManagement.deploymentRequest(id, dsId)
-                        .setActionType(actionType).setForceTime(forcedTime).setWeight(weight).setConfirmationRequired(confirmationFlowActive)
+                .map(id -> DeploymentRequest.builder(id, dsId)
+                        .actionType(actionType).forceTime(forcedTime).weight(weight).confirmationRequired(confirmationFlowActive)
                         .build())
                 .toList();
         final List<DistributionSetAssignmentResult> results = deploymentManagement.assignDistributionSets(deploymentRequests);
@@ -393,9 +393,9 @@ public abstract class AbstractIntegrationTest {
             final String controllerId, final String maintenanceWindowSchedule, final String maintenanceWindowDuration,
             final String maintenanceWindowTimeZone) {
 
-        return makeAssignment(DeploymentManagement.deploymentRequest(controllerId, dsID)
-                .setMaintenance(maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)
-                .setConfirmationRequired(true).build());
+        return makeAssignment(DeploymentRequest.builder(controllerId, dsID)
+                .maintenance(maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)
+                .confirmationRequired(true).build());
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset, final Target target) {

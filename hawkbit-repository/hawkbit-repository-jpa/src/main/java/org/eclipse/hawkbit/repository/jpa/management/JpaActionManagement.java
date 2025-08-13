@@ -57,7 +57,7 @@ public class JpaActionManagement {
         this.repositoryProperties = repositoryProperties;
     }
 
-    public int getWeightConsideringDefault(final Action action) {
+    protected int getWeightConsideringDefault(final Action action) {
         return action.getWeight().orElse(repositoryProperties.getActionWeightIfAbsent());
     }
 

@@ -198,7 +198,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         enforceMaxAssignmentsPerRequest(distinctAssignments.size());
 
         final List<DeploymentRequest> deploymentRequests = distinctAssignments.stream()
-                .map(entry -> DeploymentManagement.deploymentRequest(entry.getKey(), entry.getValue()).build()).toList();
+                .map(entry -> DeploymentRequest.builder(entry.getKey(), entry.getValue()).build()).toList();
 
         return assignDistributionSets(
                 auditorAware.getCurrentAuditor().orElse(tenantAware.getCurrentUsername()), deploymentRequests, null,

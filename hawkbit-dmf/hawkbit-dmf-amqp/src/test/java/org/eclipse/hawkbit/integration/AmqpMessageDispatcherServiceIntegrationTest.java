@@ -40,7 +40,6 @@ import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest.DmfMultiActionElement;
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.dmf.json.model.DmfTarget;
-import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
@@ -64,6 +63,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCre
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValueChangeNotAllowedException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
@@ -258,13 +258,13 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         final DistributionSet ds = testdataFactory.createDistributionSet();
         testdataFactory.addSoftwareModuleMetadata(ds);
 
-        final Long installActionId = makeAssignment(DeploymentManagement.deploymentRequest(controllerId, ds.getId())
-                .setActionType(ActionType.FORCED).build()).getAssignedEntity().get(0).getId();
+        final Long installActionId = makeAssignment(DeploymentRequest.builder(controllerId, ds.getId())
+                .actionType(ActionType.FORCED).build()).getAssignedEntity().get(0).getId();
         enableMultiAssignments();
-        final Long downloadActionId = makeAssignment(DeploymentManagement.deploymentRequest(controllerId, ds.getId())
-                .setActionType(ActionType.DOWNLOAD_ONLY).setWeight(weight1).build()).getAssignedEntity().get(0).getId();
+        final Long downloadActionId = makeAssignment(DeploymentRequest.builder(controllerId, ds.getId())
+                .actionType(ActionType.DOWNLOAD_ONLY).weight(weight1).build()).getAssignedEntity().get(0).getId();
         final Long cancelActionId = makeAssignment(
-                DeploymentManagement.deploymentRequest(controllerId, ds.getId()).setWeight(DEFAULT_TEST_WEIGHT).build())
+                DeploymentRequest.builder(controllerId, ds.getId()).weight(DEFAULT_TEST_WEIGHT).build())
                 .getAssignedEntity().get(0).getId();
         // make sure the latest message in the queue is the one triggered by the
         // cancellation

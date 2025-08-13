@@ -85,7 +85,7 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
      * @return the page with the found {@link TargetFilterQuery}s
      * @throws EntityNotFoundException if DS with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY + " and " + "hasAuthority('READ_" + SpPermission.DISTRIBUTION_SET + "')")
     Page<TargetFilterQuery> findByAutoAssignDSAndRsql(long setId, String rsql, @NotNull Pageable pageable);
 
     /**

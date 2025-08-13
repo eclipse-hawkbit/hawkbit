@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
-import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.jupiter.api.Test;
@@ -326,7 +325,7 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private static DeploymentRequest toDeploymentRequest(final String controllerId, final Long distributionSetId) {
-        return new DeploymentRequestBuilder(controllerId, distributionSetId).setConfirmationRequired(true).build();
+        return DeploymentRequest.builder(controllerId, distributionSetId).confirmationRequired(true).build();
     }
 
     private void verifyAutoConfirmationIsDisabled(final String controllerId) {
