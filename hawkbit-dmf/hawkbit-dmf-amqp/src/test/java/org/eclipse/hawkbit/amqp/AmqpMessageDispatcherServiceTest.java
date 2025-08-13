@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.artifact.ArtifactFilesystem;
@@ -64,6 +65,7 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -78,6 +80,9 @@ import org.springframework.test.context.TestPropertySource;
         "org.eclipse.hawkbit.events.remote-enabled=false",
         "spring.main.allow-bean-definition-overriding=true" })
 class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
+
+    @Autowired
+    protected RepositoryProperties repositoryProperties;
 
     private static final String TENANT = "DEFAULT";
     private static final Long TENANT_ID = 4711L;
@@ -115,7 +120,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
         amqpMessageDispatcherService = new AmqpMessageDispatcherService(rabbitTemplate, senderService,
                 artifactUrlHandlerMock, systemSecurityContext, systemManagement, targetManagement,
-                softwareModuleManagement, distributionSetManagement, deploymentManagement, tenantConfigurationManagement);
+                softwareModuleManagement, distributionSetManagement, deploymentManagement, tenantConfigurationManagement, repositoryProperties);
 
     }
 

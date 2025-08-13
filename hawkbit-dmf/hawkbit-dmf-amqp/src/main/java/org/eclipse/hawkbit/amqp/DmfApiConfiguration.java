@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
@@ -268,10 +269,10 @@ public class DmfApiConfiguration {
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
             final TargetManagement<? extends Target> targetManagement, final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement, final DeploymentManagement deploymentManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
+            final TenantConfigurationManagement tenantConfigurationManagement, final RepositoryProperties repositoryProperties) {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
                 systemSecurityContext, systemManagement, targetManagement, softwareModuleManagement, distributionSetManagement,
-                deploymentManagement, tenantConfigurationManagement);
+                deploymentManagement, tenantConfigurationManagement, repositoryProperties);
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {

@@ -32,7 +32,6 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.Getter;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
-import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
@@ -65,7 +64,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
-import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -74,7 +72,6 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
-import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -747,11 +744,11 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget();
         final List<DistributionSet> distributionSets = testdataFactory.createDistributionSets(2);
 
-        final DeploymentRequest targetToDS0 = DeploymentManagement
-                .deploymentRequest(target.getControllerId(), distributionSets.get(0).getId()).setWeight(78).build();
+        final DeploymentRequest targetToDS0 = DeploymentRequest
+                .builder(target.getControllerId(), distributionSets.get(0).getId()).weight(78).build();
 
-        final DeploymentRequest targetToDS1 = DeploymentManagement
-                .deploymentRequest(target.getControllerId(), distributionSets.get(1).getId()).setWeight(565).build();
+        final DeploymentRequest targetToDS1 = DeploymentRequest
+                .builder(target.getControllerId(), distributionSets.get(1).getId()).weight(565).build();
 
         final List<DeploymentRequest> deploymentRequests = List.of(targetToDS0, targetToDS1);
         Assertions.assertThatExceptionOfType(MultiAssignmentIsNotEnabledException.class)
@@ -835,8 +832,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
 
         assignDistributionSets(Collections
-                .singletonList(new DeploymentRequestBuilder(target.getControllerId(), distributionSet.getId())
-                        .setConfirmationRequired(confirmationRequired).build()));
+                .singletonList(DeploymentRequest.builder(target.getControllerId(), distributionSet.getId())
+                        .confirmationRequired(confirmationRequired).build()));
 
         assertThat(deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent()).hasSize(1)
                 .allSatisfy(action -> {
@@ -952,14 +949,14 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
         final List<DeploymentRequest> twoEqualAssignments = Collections.nCopies(2,
-                DeploymentManagement.deploymentRequest(targetId, dsId).build());
+                DeploymentRequest.builder(targetId, dsId).build());
 
         assertThat(getResultingActionCount(deploymentManagement.assignDistributionSets(twoEqualAssignments)))
                 .isEqualTo(1);
 
         enableMultiAssignments();
         final List<DeploymentRequest> twoEqualAssignmentsWithWeight = Collections.nCopies(2,
-                DeploymentManagement.deploymentRequest(targetId, dsId).setWeight(555).build());
+                DeploymentRequest.builder(targetId, dsId).weight(555).build());
 
         assertThat(getResultingActionCount(deploymentManagement.assignDistributionSets(twoEqualAssignmentsWithWeight)))
                 .isEqualTo(1);
@@ -987,7 +984,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         for (int i = 0; i < size; i++) {
             final Long dsId = testdataFactory.createDistributionSet().getId();
             deploymentRequests.add(
-                    DeploymentManagement.deploymentRequest(controllerId, dsId).setWeight(24).build());
+                    DeploymentRequest.builder(controllerId, dsId).weight(24).build());
         }
 
         enableMultiAssignments();
@@ -1004,8 +1001,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
-        final DeploymentRequest assignWithoutWeight = DeploymentManagement.deploymentRequest(targetId, dsId).build();
-        final DeploymentRequest assignWithWeight = DeploymentManagement.deploymentRequest(targetId, dsId).setWeight(567).build();
+        final DeploymentRequest assignWithoutWeight = DeploymentRequest.builder(targetId, dsId).build();
+        final DeploymentRequest assignWithWeight = DeploymentRequest.builder(targetId, dsId).weight(567).build();
 
         enableMultiAssignments();
         assertThat(deploymentManagement.assignDistributionSets(List.of(assignWithoutWeight, assignWithWeight))).isNotNull();
@@ -1019,7 +1016,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
-        final DeploymentRequest assignWithoutWeight = DeploymentManagement.deploymentRequest(targetId, dsId).setWeight(456).build();
+        final DeploymentRequest assignWithoutWeight = DeploymentRequest.builder(targetId, dsId).weight(456).build();
         assertThat(deploymentManagement.assignDistributionSets(Collections.singletonList(assignWithoutWeight))).isNotNull().size().isEqualTo(1);
     }
 
@@ -1040,14 +1037,10 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     void weightValidatedAndSaved() {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
-        final DeploymentRequest valideRequest1 = DeploymentManagement.deploymentRequest(targetId, dsId)
-                .setWeight(Action.WEIGHT_MAX).build();
-        final DeploymentRequest valideRequest2 = DeploymentManagement.deploymentRequest(targetId, dsId)
-                .setWeight(Action.WEIGHT_MIN).build();
-        final DeploymentRequest weightTooLow = DeploymentManagement.deploymentRequest(targetId, dsId)
-                .setWeight(Action.WEIGHT_MIN - 1).build();
-        final DeploymentRequest weightTooHigh = DeploymentManagement.deploymentRequest(targetId, dsId)
-                .setWeight(Action.WEIGHT_MAX + 1).build();
+        final DeploymentRequest valideRequest1 = DeploymentRequest.builder(targetId, dsId).weight(Action.WEIGHT_MAX).build();
+        final DeploymentRequest valideRequest2 = DeploymentRequest.builder(targetId, dsId).weight(Action.WEIGHT_MIN).build();
+        final DeploymentRequest weightTooLow = DeploymentRequest.builder(targetId, dsId).weight(Action.WEIGHT_MIN - 1).build();
+        final DeploymentRequest weightTooHigh = DeploymentRequest.builder(targetId, dsId).weight(Action.WEIGHT_MAX + 1).build();
         enableMultiAssignments();
         final List<DeploymentRequest> deploymentRequestsTooLow = Collections.singletonList(weightTooLow);
         Assertions.assertThatExceptionOfType(ConstraintViolationException.class)
@@ -1613,8 +1606,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
         for (int i = 0; i < quotaManagement.getMaxTargetDistributionSetAssignmentsPerManualAssignment(); i++) {
             final Target target = testdataFactory.createTarget("test-target-" + i, "test-target-" + i, targetType);
-            final DeploymentRequest deployment = DeploymentManagement
-                    .deploymentRequest(target.getControllerId(), ds.getId()).build();
+            final DeploymentRequest deployment = DeploymentRequest
+                    .builder(target.getControllerId(), ds.getId()).build();
             deploymentRequests.add(deployment);
         }
 
@@ -1637,8 +1630,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Target target1 = testdataFactory.createTarget("test-target1", "test-target1", targetType1);
         final Target target2 = testdataFactory.createTarget("test-target2", "test-target2", targetType2);
 
-        final DeploymentRequest deployment1 = DeploymentManagement.deploymentRequest(target1.getControllerId(), ds.getId()).build();
-        final DeploymentRequest deployment2 = DeploymentManagement.deploymentRequest(target2.getControllerId(), ds.getId()).build();
+        final DeploymentRequest deployment1 = DeploymentRequest.builder(target1.getControllerId(), ds.getId()).build();
+        final DeploymentRequest deployment2 = DeploymentRequest.builder(target2.getControllerId(), ds.getId()).build();
         final List<DeploymentRequest> deploymentRequests = Arrays.asList(deployment1, deployment2);
 
         deploymentManagement.assignDistributionSets(deploymentRequests);
@@ -1663,7 +1656,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final TargetType targetType = testdataFactory.createTargetType("target-type", Set.of(dsType));
         final Target target = testdataFactory.createTarget("test-target", "test-target", targetType);
 
-        final DeploymentRequest deploymentRequest = DeploymentManagement.deploymentRequest(target.getControllerId(), ds.getId()).build();
+        final DeploymentRequest deploymentRequest = DeploymentRequest.builder(target.getControllerId(), ds.getId()).build();
         final List<DeploymentRequest> deploymentRequests = List.of(deploymentRequest);
 
         assertThatExceptionOfType(IncompatibleTargetTypeException.class)
@@ -1679,8 +1672,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final TargetType emptyTargetType = testdataFactory.createTargetType("target-type", Set.of());
         final Target targetWithEmptyType = testdataFactory.createTarget("test-target", "test-target", emptyTargetType);
 
-        final DeploymentRequest deploymentRequestWithEmptyType = DeploymentManagement
-                .deploymentRequest(targetWithEmptyType.getControllerId(), ds.getId()).build();
+        final DeploymentRequest deploymentRequestWithEmptyType = DeploymentRequest
+                .builder(targetWithEmptyType.getControllerId(), ds.getId()).build();
         final List<DeploymentRequest> deploymentRequests = Collections.singletonList(deploymentRequestWithEmptyType);
         assertThatExceptionOfType(IncompatibleTargetTypeException.class)
                 .isThrownBy(() -> deploymentManagement.assignDistributionSets(deploymentRequests));
@@ -1695,8 +1688,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             final Collection<Target> targets, final int weight, final boolean confirmationRequired) {
         final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
         distributionSets.forEach(ds -> targets.forEach(target -> deploymentRequests
-                .add(DeploymentManagement.deploymentRequest(target.getControllerId(), ds.getId()).setWeight(weight)
-                        .setConfirmationRequired(confirmationRequired).build())));
+                .add(DeploymentRequest.builder(target.getControllerId(), ds.getId())
+                        .weight(weight).confirmationRequired(confirmationRequired).build())));
         return deploymentRequests;
     }
 

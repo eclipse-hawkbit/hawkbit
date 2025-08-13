@@ -34,7 +34,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
-import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -57,17 +56,6 @@ public interface DeploymentManagement extends PermissionSupport {
     @Override
     default String permissionGroup() {
         return SpPermission.TARGET;
-    }
-
-    /**
-     * build a {@link DeploymentRequest} for a target distribution set assignment
-     *
-     * @param controllerId ID of target
-     * @param distributionSetId ID of distribution set
-     * @return the builder
-     */
-    static DeploymentRequestBuilder deploymentRequest(final String controllerId, final long distributionSetId) {
-        return new DeploymentRequestBuilder(controllerId, distributionSetId);
     }
 
     /**
@@ -315,14 +303,6 @@ public interface DeploymentManagement extends PermissionSupport {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     List<Action> findActiveActionsWithHighestWeight(@NotEmpty String controllerId, int maxActionCount);
-
-    /**
-     * Get weight of an Action. Returns the default value if the weight is null according to the properties.
-     *
-     * @param action to extract the weight from
-     * @return weight of the action
-     */
-    int getWeightConsideringDefault(final Action action);
 
     /**
      * Force cancels given {@link Action} for given {@link Target}. Force canceling means that the action is marked as canceled on the SP server

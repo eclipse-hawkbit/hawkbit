@@ -44,6 +44,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.dmf.json.model.DmfTarget;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -102,6 +103,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final DeploymentManagement deploymentManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
+    private final RepositoryProperties repositoryProperties;
 
     @SuppressWarnings("java:S107")
     protected AmqpMessageDispatcherService(
@@ -112,7 +114,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final DeploymentManagement deploymentManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final RepositoryProperties repositoryProperties) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
@@ -123,6 +126,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         this.distributionSetManagement = distributionSetManagement;
         this.deploymentManagement = deploymentManagement;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
+        this.repositoryProperties = repositoryProperties;
     }
 
     public boolean isBatchAssignmentsEnabled() {
@@ -281,7 +285,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                                                 final Map<String, String> softwareModuleMetadata = getSoftwareModuleMetaData.apply(module);
                                                 return softwareModuleMetadata == null ? Collections.emptyMap() : softwareModuleMetadata;
                                             })));
-                            final int weight = deploymentManagement.getWeightConsideringDefault(action);
+                            final int weight = getWeightConsideringDefault(action);
                             return new DmfMultiActionRequest.DmfMultiActionElement(getEventTypeForAction(action), actionRequest, weight);
                         })
                         .toList());
@@ -290,6 +294,10 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 multiActionRequest,
                 createConnectorMessagePropertiesEvent(target.getTenant(), target.getControllerId(), EventTopic.MULTI_ACTION));
         amqpSenderService.sendMessage(message, targetAddress);
+    }
+
+    private int getWeightConsideringDefault(final Action action) {
+        return action.getWeight().orElse(repositoryProperties.getActionWeightIfAbsent());
     }
 
     /**

@@ -266,6 +266,7 @@ public interface RolloutManagement extends PermissionSupport {
      * @param rolloutId rollout id
      * @return <code>true</code> if rollout exists
      */
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     boolean exists(long rolloutId);
 
     /**
