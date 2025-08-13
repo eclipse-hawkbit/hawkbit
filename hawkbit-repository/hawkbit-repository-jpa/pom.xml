@@ -159,5 +159,10 @@
             <artifactId>hibernate-micrometer</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.github.classgraph</groupId>
+            <artifactId>classgraph</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

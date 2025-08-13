@@ -69,7 +69,7 @@ import org.springframework.validation.annotation.Validated;
  */
 // Spring AOP doesn't support bridge methods and the AspectJ advices as ExceptionMappingAspectHandler could not handle the
 // thrown exception (e.g. to convert AuthorizationDeniedException to InsufficientPermissionException).
-// That's why we explictly handle the insufficient permission exception with this @HandleAuthorizationDenied annotation.
+// That's why we explicitly handle the insufficient permission exception with this @HandleAuthorizationDenied annotation.
 @HandleAuthorizationDenied(handlerClass = JpaRepositoryConfiguration.ManagementExceptionThrowingMethodAuthorizationDeniedHandler.class)
 @Transactional(readOnly = true)
 @Validated

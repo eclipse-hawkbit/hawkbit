@@ -12,9 +12,11 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
@@ -55,8 +57,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
                 Collections.singletonList(invalidationTestData.getDistributionSet().getId()), ActionCancellationType.NONE);
-        final DistributionSetInvalidationCount distributionSetInvalidationCount = distributionSetInvalidationManagement
-                .countEntitiesForInvalidation(distributionSetInvalidation);
+        final DistributionSetInvalidationCount distributionSetInvalidationCount = countEntitiesForInvalidation(distributionSetInvalidation);
         assertDistributionSetInvalidationCount(distributionSetInvalidationCount, 1, 0, 0);
 
         distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation);
@@ -85,8 +86,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
                 Collections.singletonList(invalidationTestData.getDistributionSet().getId()), ActionCancellationType.NONE);
-        final DistributionSetInvalidationCount distributionSetInvalidationCount = distributionSetInvalidationManagement
-                .countEntitiesForInvalidation(distributionSetInvalidation);
+        final DistributionSetInvalidationCount distributionSetInvalidationCount = countEntitiesForInvalidation(distributionSetInvalidation);
         assertDistributionSetInvalidationCount(distributionSetInvalidationCount, 1, 0, 0);
 
         distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation);
@@ -118,8 +118,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
                 Collections.singletonList(invalidationTestData.getDistributionSet().getId()), ActionCancellationType.FORCE);
-        final DistributionSetInvalidationCount distributionSetInvalidationCount = distributionSetInvalidationManagement
-                .countEntitiesForInvalidation(distributionSetInvalidation);
+        final DistributionSetInvalidationCount distributionSetInvalidationCount = countEntitiesForInvalidation(distributionSetInvalidation);
         assertDistributionSetInvalidationCount(distributionSetInvalidationCount, 1, 5, 1);
 
         distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation);
@@ -142,8 +141,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
                 Collections.singletonList(invalidationTestData.getDistributionSet().getId()), ActionCancellationType.SOFT);
-        final DistributionSetInvalidationCount distributionSetInvalidationCount = distributionSetInvalidationManagement
-                .countEntitiesForInvalidation(distributionSetInvalidation);
+        final DistributionSetInvalidationCount distributionSetInvalidationCount = countEntitiesForInvalidation(distributionSetInvalidation);
         assertDistributionSetInvalidationCount(distributionSetInvalidationCount, 1, 5, 1);
 
         distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation);
@@ -278,6 +276,48 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         return actionRepository.findAll(ActionSpecifications.byTargetControllerId(target.getControllerId()));
     }
 
+    private DistributionSetInvalidationCount countEntitiesForInvalidation(
+            final DistributionSetInvalidation distributionSetInvalidation) {
+        return systemSecurityContext.runAsSystem(() -> {
+            final Collection<Long> setIds = distributionSetInvalidation.getDistributionSetIds();
+            final long rolloutsCount = distributionSetInvalidation.getActionCancellationType() != ActionCancellationType.NONE ? countRolloutsForInvalidation(setIds) : 0;
+            final long autoAssignmentsCount = countAutoAssignmentsForInvalidation(setIds);
+            final long actionsCount = countActionsForInvalidation(setIds, distributionSetInvalidation.getActionCancellationType());
+
+            return new DistributionSetInvalidationCount(rolloutsCount, autoAssignmentsCount, actionsCount);
+        });
+    }
+
+    private long countRolloutsForInvalidation(final Collection<Long> setIds) {
+        return setIds.stream().mapToLong(rolloutManagement::countByDistributionSetIdAndRolloutIsStoppable).sum();
+    }
+
+    private long countAutoAssignmentsForInvalidation(final Collection<Long> setIds) {
+        return setIds.stream().mapToLong(targetFilterQueryManagement::countByAutoAssignDistributionSetId).sum();
+    }
+
+    private long countActionsForInvalidation(final Collection<Long> setIds, final ActionCancellationType cancelationType) {
+        long affectedActionsByDSInvalidation = 0;
+        if (cancelationType == ActionCancellationType.FORCE) {
+            affectedActionsByDSInvalidation = countActionsForForcedInvalidation(setIds);
+        } else if (cancelationType == ActionCancellationType.SOFT) {
+            affectedActionsByDSInvalidation = countActionsForSoftInvalidation(setIds);
+        }
+        return affectedActionsByDSInvalidation;
+    }
+
+    private long countActionsForForcedInvalidation(final Collection<Long> setIds) {
+        return setIds.stream().mapToLong(actionRepository::countByDistributionSetIdAndActiveIsTrue).sum();
+    }
+
+    private long countActionsForSoftInvalidation(final Collection<Long> setIds) {
+        return setIds.stream()
+                .mapToLong(distributionSet -> actionRepository
+                        .countByDistributionSetIdAndActiveIsTrueAndStatusIsNot(distributionSet, Status.CANCELING))
+                .sum();
+    }
+
+    @Data
     private static class InvalidationTestData {
 
         private final DistributionSet distributionSet;
@@ -285,29 +325,14 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         private final TargetFilterQuery targetFilterQuery;
         private final Rollout rollout;
 
-        public InvalidationTestData(final DistributionSet distributionSet, final List<Target> targets,
+        public InvalidationTestData(
+                final DistributionSet distributionSet, final List<Target> targets,
                 final TargetFilterQuery targetFilterQuery, final Rollout rollout) {
             super();
             this.distributionSet = distributionSet;
             this.targets = targets;
             this.targetFilterQuery = targetFilterQuery;
             this.rollout = rollout;
-        }
-
-        public DistributionSet getDistributionSet() {
-            return distributionSet;
-        }
-
-        public List<Target> getTargets() {
-            return targets;
-        }
-
-        public TargetFilterQuery getTargetFilterQuery() {
-            return targetFilterQuery;
-        }
-
-        public Rollout getRollout() {
-            return rollout;
         }
     }
 }
