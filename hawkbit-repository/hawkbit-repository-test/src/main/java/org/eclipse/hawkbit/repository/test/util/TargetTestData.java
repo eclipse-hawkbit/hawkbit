@@ -12,8 +12,10 @@ package org.eclipse.hawkbit.repository.test.util;
 import java.security.SecureRandom;
 import java.util.Random;
 
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.Target;
 
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class TargetTestData {
 
     public static final String ATTRIBUTE_KEY_TOO_LONG;
@@ -27,10 +29,6 @@ public class TargetTestData {
         ATTRIBUTE_KEY_VALID = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_MAX_KEY_SIZE, rand);
         ATTRIBUTE_VALUE_TOO_LONG = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_MAX_VALUE_SIZE + 1, rand);
         ATTRIBUTE_VALUE_VALID = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_MAX_VALUE_SIZE, rand);
-    }
-
-    private TargetTestData() {
-        // nothing to do here
     }
 
     private static String generateRandomStringWithLength(final int length, final Random rand) {

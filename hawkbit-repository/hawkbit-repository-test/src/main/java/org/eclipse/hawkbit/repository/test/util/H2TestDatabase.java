@@ -12,8 +12,7 @@ package org.eclipse.hawkbit.repository.test.util;
 import org.junit.jupiter.api.extension.Extension;
 
 /**
- * An {@link Extension} for creating and dropping H2 schemas if
- * tests are set up with H2.
+ * An {@link Extension} for creating and dropping H2 schemas if tests are set up with H2.
  */
 public class H2TestDatabase extends AbstractSqlTestDatabase {
 

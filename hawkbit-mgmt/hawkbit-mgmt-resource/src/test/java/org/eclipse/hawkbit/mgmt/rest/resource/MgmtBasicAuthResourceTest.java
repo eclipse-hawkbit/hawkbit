@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
 import org.eclipse.hawkbit.repository.test.util.CleanupTestExecutionListener;
-import org.eclipse.hawkbit.repository.test.util.JUnitTestLoggerExtension;
+import org.eclipse.hawkbit.repository.test.util.TestLoggerExtension;
 import org.eclipse.hawkbit.repository.test.util.SharedSqlTestDatabaseExtension;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.RestConfiguration;
@@ -49,37 +49,35 @@ import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Test for {@link MgmtBasicAuthResource}.
+ * <p/>
+ * Feature: Component Tests - Management API<br/>
+ * Story: Basic auth Userinfo Resource
  */
 @ActiveProfiles({ "test" })
-@ExtendWith({ JUnitTestLoggerExtension.class, SharedSqlTestDatabaseExtension.class })
+@ExtendWith({ TestLoggerExtension.class, SharedSqlTestDatabaseExtension.class })
 @SpringBootTest
-// destroy the context after each test class because otherwise we get problem
-// when context is
-// refreshed we e.g. get two instances of CacheManager which leads to very
-// strange test failures.
+// destroy the context after each test class because otherwise we get problem when context is
+// refreshed we e.g. get two instances of CacheManager which leads to very strange test failures.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-// Cleaning repository will fire "delete" events. We won't count them to the
-// test execution. So, the order execution between EventVerifier and Cleanup is
-// important!
-@TestExecutionListeners(listeners = { EventVerifier.class, CleanupTestExecutionListener.class },
+// Cleaning repository will fire "delete" events. We won't count them to the test execution. So, the order execution between EventVerifier and
+// Cleanup is important!
+@TestExecutionListeners(
+        listeners = { EventVerifier.class, CleanupTestExecutionListener.class },
         mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
 @WebAppConfiguration
 @AutoConfigureMockMvc
-@ContextConfiguration(classes = { MgmtApiConfiguration.class, RestConfiguration.class,
-        JpaRepositoryConfiguration.class, TestConfiguration.class })
-/**
- * Feature: Component Tests - Management API<br/>
- * Story: Basic auth Userinfo Resource
- */
+@ContextConfiguration(
+        classes = { MgmtApiConfiguration.class, RestConfiguration.class, JpaRepositoryConfiguration.class, TestConfiguration.class })
 class MgmtBasicAuthResourceTest {
+
+    private static final String DEFAULT_TENANT = "DEFAULT";
+    private static final String TEST_USER = "testUser";
 
     @Autowired
     protected WebApplicationContext webApplicationContext;
     @Autowired
     MockMvc defaultMock;
-    private static final String DEFAULT_TENANT = "DEFAULT";
-    private static final String TEST_USER = "testUser";
 
     /**
      * Test of userinfo api with basic auth validation

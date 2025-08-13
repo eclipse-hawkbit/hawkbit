@@ -99,7 +99,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @Slf4j
 @ActiveProfiles({ "test" })
-@ExtendWith({ JUnitTestLoggerExtension.class, SharedSqlTestDatabaseExtension.class })
+@ExtendWith({ TestLoggerExtension.class, SharedSqlTestDatabaseExtension.class })
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ContextConfiguration(classes = { TestConfiguration.class })

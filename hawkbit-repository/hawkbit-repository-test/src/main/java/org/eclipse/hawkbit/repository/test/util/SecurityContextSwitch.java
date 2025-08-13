@@ -22,24 +22,43 @@ import java.util.function.Supplier;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAwareUser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("java:S6548") // java:S6548 - singleton holder ensures static access to spring resources in some places
 public class SecurityContextSwitch {
 
-    public static final String DEFAULT_TENANT = "DEFAULT";
+    private static final SecurityContextSwitch INSTANCE = new SecurityContextSwitch();
 
-    private static final WithUser PRIVILEDGED_USER =
-            createWithUser("bumlux", DEFAULT_TENANT, false, true, false, "ROLE_CONTROLLER", "ROLE_SYSTEM_CODE");
+    public static final String DEFAULT_TENANT = "DEFAULT";
+    private static final WithUser PRIVILEGED_USER = createWithUser(
+            "bumlux", DEFAULT_TENANT, false, true, false, "ROLE_CONTROLLER", "ROLE_SYSTEM_CODE");
+
+    private static SystemManagement systemManagement;
+
+    /**
+     * @return the singleton {@link SecurityContextSwitch} instance to be injected
+     */
+    public static SecurityContextSwitch getInstance() {
+        return INSTANCE;
+    }
+
+    @SuppressWarnings("java:S2696") // intentionally, we want, after registering as bean the instance to have injected system management
+    @Autowired // spring setter injection
+    public void setSystemManagement(final SystemManagement systemManagement) {
+        SecurityContextSwitch.systemManagement = systemManagement;
+    }
 
     public static <T> T callAsPrivileged(final Callable<T> callable) throws Exception {
         createTenant(DEFAULT_TENANT);
-        return callAs(PRIVILEDGED_USER, callable);
+        return callAs(PRIVILEGED_USER, callable);
     }
 
     public static <T> T callAs(final WithUser withUser, final Callable<T> callable) throws Exception {
@@ -96,9 +115,9 @@ public class SecurityContextSwitch {
 
     private static void createTenant(final String tenantId) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
-        setSecurityContext(PRIVILEDGED_USER);
+        setSecurityContext(PRIVILEGED_USER);
         try {
-            SystemManagementHolder.getInstance().getSystemManagement().createTenantMetadata(tenantId);
+            systemManagement.createTenantMetadata(tenantId);
         } finally {
             SecurityContextHolder.setContext(oldContext);
         }

@@ -20,8 +20,7 @@ import org.springframework.security.test.context.support.WithSecurityContext;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
 /**
- * Annotation to run test classes or test methods with a specific user with
- * specific permissions.
+ * Annotation to run test classes or test methods with a specific user with specific permissions.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })
