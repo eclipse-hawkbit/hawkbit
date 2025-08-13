@@ -17,13 +17,13 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Getter
 @Slf4j
-public class DatasourceContext {
+class DatasourceContext {
 
-    public static final String SPRING_DATASOURCE_URL_KEY = "spring.datasource.url";
-    public static final String SPRING_DATABASE_KEY = "spring.jpa.database";
-    public static final String SPRING_DATABASE_USERNAME_KEY = "spring.datasource.username";
-    public static final String SPRING_DATABASE_PASSWORD_KEY = "spring.datasource.password";
-    public static final String DATABASE_PREFIX_KEY = "spring.database.random.prefix";
+    static final String SPRING_DATASOURCE_URL_KEY = "spring.datasource.url";
+    static final String SPRING_DATABASE_KEY = "spring.jpa.database";
+    static final String SPRING_DATABASE_USERNAME_KEY = "spring.datasource.username";
+    static final String SPRING_DATABASE_PASSWORD_KEY = "spring.datasource.password";
+    static final String DATABASE_PREFIX_KEY = "spring.database.random.prefix";
 
     private static final String RANDOM_DB_PREFIX = System.getProperty(DATABASE_PREFIX_KEY, "HAWKBIT_TEST_");
 
@@ -33,17 +33,14 @@ public class DatasourceContext {
     private final String password;
     private final String randomSchemaName = RANDOM_DB_PREFIX + TestdataFactory.randomString(10);
 
-    public DatasourceContext(final String database, final String datasourceUrl, final String username, final String password) {
+    DatasourceContext(final String database, final String datasourceUrl, final String username, final String password) {
         this.database = database;
         this.datasourceUrl = datasourceUrl;
         this.username = username;
         this.password = password;
     }
 
-    /**
-     * Constructor
-     */
-    public DatasourceContext() {
+    DatasourceContext() {
         database = System.getProperty(SPRING_DATABASE_KEY, System.getProperty(upperCaseVariant(SPRING_DATABASE_KEY)));
         datasourceUrl = System.getProperty(SPRING_DATASOURCE_URL_KEY, System.getProperty(upperCaseVariant(SPRING_DATASOURCE_URL_KEY)));
         username = System.getProperty(SPRING_DATABASE_USERNAME_KEY, System.getProperty(upperCaseVariant(SPRING_DATABASE_USERNAME_KEY)));

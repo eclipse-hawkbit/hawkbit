@@ -9,17 +9,21 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import lombok.EqualsAndHashCode;
+import lombok.Setter;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.model.Rollout;
 
 /**
- * Provides an approval strategy that can be manipulated by setting the {link
- * {@link #approvalNeeded}} flag used for testing.
+ * Provides an approval strategy that can be manipulated by setting the  {@link #approvalNeeded}} flag used for testing.
  */
+@Setter
+@EqualsAndHashCode
+@ToString
 public class RolloutTestApprovalStrategy implements RolloutApprovalStrategy {
 
     private boolean approvalNeeded = false;
-
     private String approvalDecidedBy;
 
     @Override
@@ -28,20 +32,12 @@ public class RolloutTestApprovalStrategy implements RolloutApprovalStrategy {
     }
 
     @Override
-    public void onApprovalRequired(Rollout rollout) {
-        // do nothing, as no action is needed when testing
-    }
-
-    @Override
     public String getApprovalUser(Rollout rollout) {
         return approvalDecidedBy;
     }
 
-    public void setApprovalNeeded(boolean approvalNeeded) {
-        this.approvalNeeded = approvalNeeded;
-    }
-
-    public void setApproveDecidedBy(final String user) {
-        this.approvalDecidedBy = user;
+    @Override
+    public void onApprovalRequired(Rollout rollout) {
+        // do nothing, as no action is needed when testing
     }
 }

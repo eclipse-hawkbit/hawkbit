@@ -15,7 +15,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
 
 @Slf4j
-public class JUnitTestLoggerExtension implements BeforeTestExecutionCallback, TestWatcher {
+public class TestLoggerExtension implements BeforeTestExecutionCallback, TestWatcher {
 
     @Override
     public void testSuccessful(final ExtensionContext context) {

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 @Slf4j
 public class SharedSqlTestDatabaseExtension implements BeforeAllCallback {
 
-    protected static final AtomicReference<DatasourceContext> CONTEXT = new AtomicReference<>();
+    static final AtomicReference<DatasourceContext> CONTEXT = new AtomicReference<>();
 
     @Override
     public void beforeAll(final ExtensionContext extensionContext) {

@@ -106,7 +106,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         enableMultiAssignments();
         approvalStrategy.setApprovalNeeded(true);
         try {
-            approvalStrategy.setApproveDecidedBy("exampleUsername");
+            approvalStrategy.setApprovalDecidedBy("exampleUsername");
 
             testdataFactory.createTargets(4, "rollout", "description");
             final DistributionSet dsA = testdataFactory.createDistributionSet("");
@@ -198,7 +198,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     void validateIfApprovalFieldsArePresentAfterApproval() throws Exception {
         approvalStrategy.setApprovalNeeded(true);
-        approvalStrategy.setApproveDecidedBy("testUser");
+        approvalStrategy.setApprovalDecidedBy("testUser");
         final int amountTargets = 2;
         final String remark = "Some remark";
         testdataFactory.createTargets(amountTargets, "rollout");

@@ -31,7 +31,7 @@ import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
-import org.eclipse.hawkbit.repository.test.util.SystemManagementHolder;
+import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityContextSerializer;
@@ -127,13 +127,10 @@ public class TestConfiguration implements AsyncConfigurer {
         return new ArtifactFilesystemRepository(artifactFilesystemProperties);
     }
 
-    /**
-     * @return the {@link org.eclipse.hawkbit.repository.test.util.SystemManagementHolder} singleton bean which holds the current
-     *         {@link SystemManagement} service and make it accessible in beans which cannot access the service directly, e.g. JPA entities.
-     */
+    /** @return the {@link org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch} to be injected. */
     @Bean
-    SystemManagementHolder systemManagementHolder() {
-        return SystemManagementHolder.getInstance();
+    SecurityContextSwitch securityContextSwitch() {
+        return SecurityContextSwitch.getInstance();
     }
 
     @Bean

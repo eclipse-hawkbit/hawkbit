@@ -15,8 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.Extension;
 
 /**
- * An {@link Extension} for creating and dropping MySql schemas if
- * tests are set up with MySql.
+ * An {@link Extension} for creating and dropping PostgreSQL schemas if tests are set up with PostgreSQL.
  */
 @Slf4j
 public class PostgreSqlTestDatabase extends AbstractSqlTestDatabase {
