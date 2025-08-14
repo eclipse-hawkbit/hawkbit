@@ -20,6 +20,8 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -117,6 +119,8 @@ import org.springframework.test.context.TestPropertySource;
 public abstract class AbstractIntegrationTest {
 
     protected static final Pageable PAGE = PageRequest.of(0, 500, Sort.by(Direction.ASC, "id"));
+    protected static final Pageable UNPAGED = Pageable.unpaged();
+
     protected static final URI LOCALHOST = URI.create("http://127.0.0.1");
     protected static final int DEFAULT_TEST_WEIGHT = 500;
     protected static final Random RND = new Random();
@@ -515,5 +519,12 @@ public abstract class AbstractIntegrationTest {
 
     protected List<? extends Target> findByUpdateStatus(final TargetUpdateStatus status, final Pageable pageable) {
         return targetManagement.findAll(pageable).stream().filter(target -> status.equals(target.getUpdateStatus())).toList();
+    }
+
+    @SafeVarargs
+    protected static <T> Collection<T> concat(final Collection<T>... targets) {
+        final List<T> result = new ArrayList<>();
+        List.of(targets).forEach(result::addAll);
+        return result;
     }
 }

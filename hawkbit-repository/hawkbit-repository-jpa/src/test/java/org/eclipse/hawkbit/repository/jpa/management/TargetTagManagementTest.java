@@ -307,13 +307,6 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
                 .isThrownBy(() -> targetTagManagement.update(tagUpdateEmpty));
     }
 
-    @SafeVarargs
-    private <T> Collection<T> concat(final Collection<T>... targets) {
-        final List<T> result = new ArrayList<>();
-        Arrays.asList(targets).forEach(result::addAll);
-        return result;
-    }
-
     private List<JpaTargetTag> createTargetsWithTags() {
         final List<Target> targets = testdataFactory.createTargets(20);
         final Iterable<? extends TargetTag> tags = testdataFactory.createTargetTags(20, "");

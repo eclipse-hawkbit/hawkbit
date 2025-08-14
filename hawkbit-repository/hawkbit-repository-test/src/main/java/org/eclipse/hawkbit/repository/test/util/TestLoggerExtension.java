@@ -29,6 +29,6 @@ public class TestLoggerExtension implements BeforeTestExecutionCallback, TestWat
 
     @Override
     public void beforeTestExecution(final ExtensionContext context) {
-        log.info("Starting Test {}...", context.getTestMethod());
+        log.debug("Starting Test {}...", context.getTestMethod());
     }
 }
