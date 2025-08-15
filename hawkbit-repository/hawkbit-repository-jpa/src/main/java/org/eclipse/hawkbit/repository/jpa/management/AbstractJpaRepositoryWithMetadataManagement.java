@@ -121,14 +121,8 @@ abstract class AbstractJpaRepositoryWithMetadataManagement<T extends AbstractJpa
 
     @Override
     public Map<String, MV> getMetadata(final Long id) {
-        return jpaRepository
-                .findById(id)
-                .map(T::getMetadata)
-                .map(metadata -> metadata.entrySet().stream()
-                        .collect(Collectors.toMap(
-                                Map.Entry::getKey,
-                                e -> (MV) e.getValue())))
-                .orElseThrow(() -> new EntityNotFoundException(jpaRepository.getManagementClass(), id));
+        final T entity = jpaRepository.getById(id);
+        return entity.getMetadata().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
@@ -145,16 +139,6 @@ abstract class AbstractJpaRepositoryWithMetadataManagement<T extends AbstractJpa
     }
 
     protected abstract void assertMetadataQuota(final long requested);
-
-    private T getValid(final Long id) {
-        final T jpaEntity = jpaRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(jpaRepository.getManagementClass(), id));
-        if (!jpaEntity.isValid()) {
-            throw new InvalidDistributionSetException(jpaRepository.getManagementClass().getSimpleName() + " " + id + " is invalid");
-        }
-        return jpaEntity;
-    }
 
     @SuppressWarnings("unchecked")
     private boolean setMetadataValue(final String key, final MV newValue, final MVI existingValue, final Map<String, MVI> metadataValueMap) {

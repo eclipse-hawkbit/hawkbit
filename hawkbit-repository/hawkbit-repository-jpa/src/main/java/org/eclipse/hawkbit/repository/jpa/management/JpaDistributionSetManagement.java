@@ -105,28 +105,32 @@ public class JpaDistributionSetManagement
         this.repositoryProperties = repositoryProperties;
     }
 
-    @SuppressWarnings("java:S1066") // java:S1066 better readable without merging the if statements
     @Override
     public JpaDistributionSet update(final Update update) {
-        final JpaDistributionSet distributionSet = getValid0(update.getId());
-
-        // lock/unlock ONLY if locked flag is present!
+        final JpaDistributionSet updated = super.update(update);
         if (Boolean.TRUE.equals(update.getLocked())) {
-            if (!distributionSet.isLocked()) {
-                lockSoftwareModules(distributionSet);
-                distributionSet.setLocked(true);
-            }
-        } else if (Boolean.FALSE.equals(update.getLocked())) {
-            if (distributionSet.isLocked()) {
-                distributionSet.setLocked(false);
+            lockSoftwareModules(updated);
+        }
+        return updated;
+    }
+
+    @Override
+    public Map<Long, JpaDistributionSet> update(final Collection<Update> updates) {
+        final Map<Long, JpaDistributionSet> updated = super.update(updates);
+        for (final Update update : updates) {
+            final JpaDistributionSet updatedSet = updated.get(update.getId());
+            if (Boolean.TRUE.equals(update.getLocked())) {
+                lockSoftwareModules(updatedSet);
             }
         }
+        return updated;
+    }
 
+    @Override
+    protected void checkUpdate(final Update update, final JpaDistributionSet distributionSet) {
         if (update.getRequiredMigrationStep() != null && !update.getRequiredMigrationStep().equals(distributionSet.isRequiredMigrationStep())) {
             assertDistributionSetIsNotAssignedToTargets(update.getId());
         }
-
-        return super.update(update, distributionSet);
     }
 
     @Override
@@ -152,11 +156,6 @@ public class JpaDistributionSetManagement
     @Override
     public Optional<JpaDistributionSet> getWithDetails(final long id) {
         return jpaRepository.findOne(jpaRepository.byIdSpec(id), JpaDistributionSet_.GRAPH_DISTRIBUTION_SET_DETAIL);
-    }
-
-    @Override
-    public JpaDistributionSet getOrElseThrowException(final long id) {
-        return getById(id);
     }
 
     // implicitly lock a distribution set if not already locked and implicit lock is enabled and not to skip
@@ -256,7 +255,7 @@ public class JpaDistributionSetManagement
         final JpaDistributionSet set = getValid0(id);
         assertDistributionSetIsNotAssignedToTargets(id);
 
-        final JpaSoftwareModule module = findSoftwareModuleAndThrowExceptionIfNotFound(moduleId);
+        final JpaSoftwareModule module = softwareModuleRepository.getById(moduleId);
         set.removeModule(module);
 
         return jpaRepository.save(set);
@@ -364,7 +363,7 @@ public class JpaDistributionSetManagement
     }
 
     private JpaDistributionSet getValid0(final long id) {
-        final JpaDistributionSet distributionSet = getById(id);
+        final JpaDistributionSet distributionSet = jpaRepository.getById(id);
         if (!distributionSet.isValid()) {
             throw new InvalidDistributionSetException(
                     "Distribution set of type " + distributionSet.getType().getKey() + " is invalid: " + distributionSet.getId());
@@ -375,8 +374,7 @@ public class JpaDistributionSetManagement
     private List<JpaDistributionSet> updateTag(
             final Collection<Long> dsIds, final long dsTagId,
             final BiFunction<DistributionSetTag, JpaDistributionSet, JpaDistributionSet> updater) {
-        final DistributionSetTag tag = distributionSetTagManagement.get(dsTagId)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, dsTagId));
+        final DistributionSetTag tag = distributionSetTagManagement.get(dsTagId);
         final List<JpaDistributionSet> allDs = dsIds.size() == 1 ?
                 jpaRepository.findById(dsIds.iterator().next())
                         .map(List::of)
@@ -393,11 +391,6 @@ public class JpaDistributionSetManagement
             // No reason to save the tag
             entityManager.detach(tag);
         }
-    }
-
-    private JpaSoftwareModule findSoftwareModuleAndThrowExceptionIfNotFound(final Long softwareModuleId) {
-        return softwareModuleRepository.findById(softwareModuleId)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
     }
 
     private void assertSoftwareModuleQuota(final Long id, final int requested) {
@@ -422,17 +415,11 @@ public class JpaDistributionSetManagement
         });
     }
 
-    private JpaDistributionSet getById(final long id) {
-        return jpaRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, id));
-    }
-
     private JpaDistributionSet toJpaDistributionSet(final DistributionSet distributionSet) {
         if (distributionSet instanceof JpaDistributionSet jpaDistributionSet) {
             return jpaDistributionSet;
         } else {
-            return getById(distributionSet.getId());
+            return jpaRepository.getById(distributionSet.getId());
         }
     }
 

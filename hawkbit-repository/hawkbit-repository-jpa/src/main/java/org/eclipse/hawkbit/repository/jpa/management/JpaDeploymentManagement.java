@@ -222,7 +222,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private Action cancelAction0(final long actionId) {
         log.debug("cancelAction({})", actionId);
 
-        final JpaAction action = actionRepository.findById(actionId).orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+        final JpaAction action = actionRepository.getById(actionId);
 
         if (action.isCancelingOrCanceled()) {
             throw new CancelActionNotAllowedException("Actions in canceling or canceled state cannot be canceled");
@@ -378,7 +378,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private Action forceQuitAction0(final long actionId) {
-        final JpaAction action = actionRepository.findById(actionId).orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+        final JpaAction action = actionRepository.getById(actionId);
 
         if (!action.isCancelingOrCanceled()) {
             throw new ForceQuitActionNotAllowedException(action.getId() + " is not canceled yet and cannot be force quit");
@@ -406,7 +406,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Retryable(retryFor = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action forceTargetAction(final long actionId) {
-        final JpaAction action = actionRepository.findById(actionId).map(this::assertTargetUpdateAllowed)
+        final JpaAction action = actionRepository.findById(actionId)
+                .map(this::assertTargetUpdateAllowed)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         if (!action.isForcedOrTimeForced()) {
@@ -996,10 +997,5 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         }).isEmpty()) {
             throw new EntityNotFoundException(Action.class, actionId);
         }
-    }
-
-    private Page<JpaAction> findActiveActionsForRollout(long rolloutId, Pageable pageable) {
-        return actionRepository
-                .findAll(ActionSpecifications.byRolloutIdAndActive(rolloutId), pageable);
     }
 }

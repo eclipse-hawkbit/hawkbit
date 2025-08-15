@@ -345,7 +345,7 @@ public final class MgmtTargetMapper {
                 .description(targetRest.getDescription()).securityToken(targetRest.getSecurityToken())
                 .address(targetRest.getAddress())
                 .targetType(Optional.ofNullable(targetRest.getTargetType())
-                        .map(targetTypeId -> targetTypeManagement.get(targetTypeId)
+                        .map(targetTypeId -> targetTypeManagement.find(targetTypeId)
                                 .orElseThrow(() -> new EntityNotFoundException(TargetType.class, targetTypeId)))
                         .map(TargetType.class::cast)
                         .orElse(null))

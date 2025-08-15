@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.repository.RolloutManagement.Update;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
@@ -44,15 +43,15 @@ class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void getPermissionsCheck() {
-        assertPermissions(() -> rolloutManagement.get(1L), List.of(SpPermission.READ_ROLLOUT));
+    void findPermissionsCheck() {
+        assertPermissions(() -> rolloutManagement.find(1L), List.of(SpPermission.READ_ROLLOUT));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void getByNamePermissionsCheck() {
+    void findByNamePermissionsCheck() {
         assertPermissions(() -> rolloutManagement.getByName("name"), List.of(SpPermission.READ_ROLLOUT));
     }
 
@@ -60,7 +59,7 @@ class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void getWithDetailedStatusPermissionsCheck() {
+    void findWithDetailedStatusPermissionsCheck() {
         assertPermissions(() -> rolloutManagement.getWithDetailedStatus(1L), List.of(SpPermission.READ_ROLLOUT));
     }
 

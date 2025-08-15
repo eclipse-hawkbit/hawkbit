@@ -393,7 +393,7 @@ public class TestdataFactory {
     public DistributionSet createDistributionSet(final String prefix, final String version, final Collection<DistributionSetTag> tags) {
         final DistributionSet set = createDistributionSet(prefix, version, false);
         tags.forEach(tag -> distributionSetManagement.assignTag(List.of(set.getId()), tag.getId()));
-        return distributionSetManagement.get(set.getId()).orElseThrow();
+        return distributionSetManagement.find(set.getId()).orElseThrow();
     }
 
     /**
@@ -1053,7 +1053,7 @@ public class TestdataFactory {
         // Run here, because Scheduler is disabled during tests
         rolloutHandleAll();
 
-        return rolloutManagement.get(rollout.getId()).orElseThrow();
+        return rolloutManagement.find(rollout.getId()).orElseThrow();
     }
 
     /**
@@ -1226,7 +1226,7 @@ public class TestdataFactory {
         final DistributionSet distributionSet = createDistributionSet();
         distributionSetInvalidationManagement.invalidateDistributionSet(
                 new DistributionSetInvalidation(List.of(distributionSet.getId()), ActionCancellationType.NONE));
-        return distributionSetManagement.get(distributionSet.getId()).orElseThrow();
+        return distributionSetManagement.find(distributionSet.getId()).orElseThrow();
     }
 
     /**
@@ -1298,6 +1298,6 @@ public class TestdataFactory {
     }
 
     private Rollout reloadRollout(final Rollout rollout) {
-        return rolloutManagement.get(rollout.getId()).orElseThrow(NoSuchElementException::new);
+        return rolloutManagement.find(rollout.getId()).orElseThrow(NoSuchElementException::new);
     }
 }

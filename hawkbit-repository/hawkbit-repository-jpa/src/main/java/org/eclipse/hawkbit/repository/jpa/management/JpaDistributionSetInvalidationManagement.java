@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
-import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
@@ -22,13 +21,10 @@ import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.StopRolloutException;
-import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
-import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidationCount;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -115,7 +111,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     }
 
     private void invalidateDistributionSet(final long setId, final ActionCancellationType cancelationType) {
-        final DistributionSet distributionSet = distributionSetManagement.getOrElseThrowException(setId);
+        final DistributionSet distributionSet = distributionSetManagement.get(setId);
         if (!distributionSet.isComplete()) {
             throw new IncompleteDistributionSetException(
                     "Distribution set of type " + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());

@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.artifact;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -20,16 +21,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
+import org.eclipse.hawkbit.repository.artifact.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.artifact.model.AbstractDbArtifact;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-@Slf4j
 /**
  * Feature: Unit Tests - Artifact File System Repository<br/>
  * Story: Test storing artifact binaries in the file-system
  */
+@Slf4j
 class ArtifactFilesystemRepositoryTest {
 
     private static final String TENANT = "test_tenant";
@@ -77,7 +79,7 @@ class ArtifactFilesystemRepositoryTest {
         final byte[] fileContent = randomBytes();
         final AbstractDbArtifact artifact = storeRandomArtifact(fileContent);
 
-        assertThat(artifactFilesystemRepository.getArtifactBySha1(TENANT, artifact.getHashes().getSha1())).isNotNull();
+        assertThat(artifactFilesystemRepository.getBySha1(TENANT, artifact.getHashes().getSha1())).isNotNull();
     }
 
     /**
@@ -88,7 +90,9 @@ class ArtifactFilesystemRepositoryTest {
         final AbstractDbArtifact artifact = storeRandomArtifact(randomBytes());
         artifactFilesystemRepository.deleteBySha1(TENANT, artifact.getHashes().getSha1());
 
-        assertThat(artifactFilesystemRepository.getArtifactBySha1(TENANT, artifact.getHashes().getSha1())).isNull();
+        final String sha1Hash = artifact.getHashes().getSha1();
+        assertThatExceptionOfType(ArtifactBinaryNotFoundException.class)
+                .isThrownBy(() -> artifactFilesystemRepository.getBySha1(TENANT, sha1Hash));
     }
 
     /**
@@ -99,7 +103,9 @@ class ArtifactFilesystemRepositoryTest {
         final AbstractDbArtifact artifact = storeRandomArtifact(randomBytes());
         artifactFilesystemRepository.deleteByTenant(TENANT);
 
-        assertThat(artifactFilesystemRepository.getArtifactBySha1(TENANT, artifact.getHashes().getSha1())).isNull();
+        final String sha1Hash = artifact.getHashes().getSha1();
+        assertThatExceptionOfType(ArtifactBinaryNotFoundException.class)
+                .isThrownBy(() -> artifactFilesystemRepository.getBySha1(TENANT, sha1Hash));
     }
 
     /**

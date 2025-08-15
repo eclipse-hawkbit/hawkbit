@@ -23,24 +23,24 @@ public abstract class AbstractRepositoryManagementSecurityTest<T extends BaseEnt
     /**
      * @return the repository management to test with
      */
-    protected abstract RepositoryManagement<T, C, U> getRepositoryManagement();
+    protected abstract RepositoryManagement<T, C, U> findRepositoryManagement();
 
     /**
      * @return the object to create
      */
-    protected abstract C getCreateObject();
+    protected abstract C findCreateObject();
 
     /**
      * @return the object to update
      */
-    protected abstract U getUpdateObject();
+    protected abstract U findUpdateObject();
 
     /**
      * Tests RepositoryManagement PreAuthorized method with correct and insufficient permissions.
      */
     @Test
     void createCollectionPermissionCheck() {
-        assertPermissions(() -> getRepositoryManagement().create(List.of(getCreateObject())), List.of(SpPermission.CREATE_REPOSITORY, SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> findRepositoryManagement().create(List.of(findCreateObject())), List.of(SpPermission.CREATE_REPOSITORY, SpPermission.READ_REPOSITORY));
     }
 
     /**
@@ -48,7 +48,7 @@ public abstract class AbstractRepositoryManagementSecurityTest<T extends BaseEnt
      */
     @Test
     void createPermissionCheck() {
-        assertPermissions(() -> getRepositoryManagement().create(getCreateObject()), List.of(SpPermission.CREATE_REPOSITORY, SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> findRepositoryManagement().create(findCreateObject()), List.of(SpPermission.CREATE_REPOSITORY, SpPermission.READ_REPOSITORY));
     }
 
     /**
@@ -56,7 +56,7 @@ public abstract class AbstractRepositoryManagementSecurityTest<T extends BaseEnt
      */
     @Test
     void updatePermissionCheck() {
-        assertPermissions(() -> getRepositoryManagement().update(getUpdateObject()), List.of(SpPermission.UPDATE_REPOSITORY));
+        assertPermissions(() -> findRepositoryManagement().update(findUpdateObject()), List.of(SpPermission.UPDATE_REPOSITORY));
     }
 
     /**
@@ -65,7 +65,7 @@ public abstract class AbstractRepositoryManagementSecurityTest<T extends BaseEnt
     @Test
     void deletePermissionCheck() {
         assertPermissions(() -> {
-            getRepositoryManagement().delete(1L);
+            findRepositoryManagement().delete(1L);
             return null;
             }, List.of(SpPermission.DELETE_REPOSITORY));
     }
@@ -75,7 +75,7 @@ public abstract class AbstractRepositoryManagementSecurityTest<T extends BaseEnt
      */
     @Test
      void countPermissionCheck() {
-        assertPermissions(() -> getRepositoryManagement().count(), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> findRepositoryManagement().count(), List.of(SpPermission.READ_REPOSITORY));
     }
     
 
@@ -85,7 +85,7 @@ public abstract class AbstractRepositoryManagementSecurityTest<T extends BaseEnt
     @Test
      void deleteCollectionRepositoryManagement() {
         assertPermissions(() -> {
-            getRepositoryManagement().delete(List.of(1L));
+            findRepositoryManagement().delete(List.of(1L));
             return null;
         }, List.of(SpPermission.DELETE_REPOSITORY));
     }
@@ -94,16 +94,16 @@ public abstract class AbstractRepositoryManagementSecurityTest<T extends BaseEnt
      * Tests RepositoryManagement PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-     void getPermissionCheck() {
-        assertPermissions(() -> getRepositoryManagement().get(1L), List.of(SpPermission.READ_REPOSITORY));
+     void findPermissionCheck() {
+        assertPermissions(() -> findRepositoryManagement().find(1L), List.of(SpPermission.READ_REPOSITORY));
     }
 
     /**
      * Tests RepositoryManagement PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-     void getCollectionPermissionCheck() {
-        assertPermissions(() -> getRepositoryManagement().get(List.of(1L)), List.of(SpPermission.READ_REPOSITORY));
+     void findCollectionPermissionCheck() {
+        assertPermissions(() -> findRepositoryManagement().get(List.of(1L)), List.of(SpPermission.READ_REPOSITORY));
     }
 
     /**
@@ -111,7 +111,7 @@ public abstract class AbstractRepositoryManagementSecurityTest<T extends BaseEnt
      */
     @Test
      void existsCollectionPermissionCheck() {
-        assertPermissions(() -> getRepositoryManagement().exists(1L), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> findRepositoryManagement().exists(1L), List.of(SpPermission.READ_REPOSITORY));
     }
 
     /**
@@ -119,7 +119,7 @@ public abstract class AbstractRepositoryManagementSecurityTest<T extends BaseEnt
      */
     @Test
      void findAllPermissionCheck() {
-        assertPermissions(() -> getRepositoryManagement().findAll(Pageable.ofSize(1)), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> findRepositoryManagement().findAll(Pageable.ofSize(1)), List.of(SpPermission.READ_REPOSITORY));
     }
 
     /**
@@ -127,6 +127,6 @@ public abstract class AbstractRepositoryManagementSecurityTest<T extends BaseEnt
      */
     @Test
      void findByRsqlPermissionCheck() {
-        assertPermissions(() -> getRepositoryManagement().findByRsql("(name==*)", Pageable.ofSize(1)), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> findRepositoryManagement().findByRsql("(name==*)", Pageable.ofSize(1)), List.of(SpPermission.READ_REPOSITORY));
     }
 }

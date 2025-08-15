@@ -223,7 +223,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             }
             case DOWNLOADED: {
                 handleDownloadedActionStatus(action).ifPresent(controllerId ->
-                        requestControllerAttributes(getByControllerId(controllerId)
+                        requestControllerAttributes(findByControllerId(controllerId)
                                 .map(JpaTarget.class::cast)
                                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId))));
                 break;
@@ -239,7 +239,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action addCancelActionStatus(final ActionStatusCreate create) {
-        final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
+        final JpaAction action = actionRepository.getById(create.getActionId());
         if (!action.isCancelingOrCanceled()) {
             throw new CancelActionNotAllowedException("The action is not in canceling state.");
         }
@@ -284,7 +284,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public ActionStatus addInformationalActionStatus(final ActionStatusCreate create) {
-        final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
+        final JpaAction action = actionRepository.getById(create.getActionId());
         assertActionStatusQuota(create, action);
 
         final JpaActionStatus actionStatus = buildJpaActionStatus(create);
@@ -476,13 +476,13 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    public Optional<Target> getByControllerId(final String controllerId) {
-        return targetRepository.findByControllerId(controllerId).map(Target.class::cast);
+    public Optional<Target> find(final long targetId) {
+        return targetRepository.findById(targetId).map(Target.class::cast);
     }
 
     @Override
-    public Optional<Target> get(final long targetId) {
-        return targetRepository.findById(targetId).map(Target.class::cast);
+    public Optional<Target> findByControllerId(final String controllerId) {
+        return targetRepository.findByControllerId(controllerId).map(Target.class::cast);
     }
 
     @Override
@@ -538,10 +538,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         targetRepository.getAccessController().ifPresent(
                 accessController -> accessController.assertOperationAllowed(
                         AccessController.Operation.UPDATE,
-                        actionRepository
-                                .findById(actionId)
-                                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId))
-                                .getTarget()));
+                        actionRepository.getById(actionId).getTarget()));
         actionRepository.updateExternalRef(actionId, externalRef);
     }
 
@@ -579,13 +576,14 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     public boolean updateOfflineAssignedVersion(@NotEmpty final String controllerId, final String distributionName, final String version) {
         List<DistributionSetAssignmentResult> distributionSetAssignmentResults =
                 systemSecurityContext.runAsSystem(() ->
-                        distributionSetManagement.findByNameAndVersion(distributionName, version).map(
-                                        distributionSet -> deploymentManagement.offlineAssignedDistributionSets(
-                                                controllerId, List.of(Map.entry(controllerId, distributionSet.getId()))))
+                        distributionSetManagement.findByNameAndVersion(distributionName, version)
+                                .map(distributionSet -> deploymentManagement.offlineAssignedDistributionSets(
+                                        controllerId, List.of(Map.entry(controllerId, distributionSet.getId()))))
                                 .orElseThrow(() ->
                                         new EntityNotFoundException(DistributionSet.class, Map.entry(distributionName, version))));
 
-        return distributionSetAssignmentResults.stream().findFirst()
+        return distributionSetAssignmentResults.stream()
+                .findFirst()
                 .map(result -> result.getAlreadyAssigned() == 0)
                 .orElseThrow();
     }
@@ -901,7 +899,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
      *         {@link Status#RETRIEVED}
      */
     private Action handleRegisterRetrieved(final Long actionId, final String message) {
-        final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
+        final JpaAction action = actionRepository.getById(actionId);
         // do a manual query with CriteriaBuilder to avoid unnecessary field queries and an extra
         // count query made by spring-data when using pageable requests, we don't need an extra count
         // query, we just want to check if the last action status is a retrieved or not.

@@ -154,7 +154,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                         targetManagement.unassignType(targetId);
                         return null;
                     } else {
-                        return targetTypeManagement.get(targetRest.getTargetType())
+                        return targetTypeManagement.find(targetRest.getTargetType())
                                 .orElseThrow(() -> new EntityNotFoundException(TargetType.class, targetRest.getTargetType()));
                     }
                 })

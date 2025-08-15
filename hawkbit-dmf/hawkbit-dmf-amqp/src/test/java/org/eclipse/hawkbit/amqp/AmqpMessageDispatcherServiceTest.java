@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.eclipse.hawkbit.repository.RepositoryProperties;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.artifact.ArtifactFilesystem;
 import org.eclipse.hawkbit.repository.artifact.model.AbstractDbArtifact;
@@ -184,8 +183,8 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
             receivedList.add(new ArtifactFilesystem(new File("./test"), artifact.getSha1Hash(),
                     new DbArtifactHash(artifact.getSha1Hash(), null, null), artifact.getSize(), null));
         }
-        module = softwareModuleManagement.get(module.getId()).get();
-        dsA = distributionSetManagement.get(dsA.getId()).get();
+        module = softwareModuleManagement.find(module.getId()).get();
+        dsA = distributionSetManagement.find(dsA.getId()).get();
 
         final Action action = createAction(dsA);
 

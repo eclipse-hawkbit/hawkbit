@@ -132,7 +132,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<MgmtDistributionSet> getDistributionSet(final Long distributionSetId) {
-        final DistributionSet foundDs = distributionSetManagement.getOrElseThrowException(distributionSetId);
+        final DistributionSet foundDs = distributionSetManagement.get(distributionSetId);
 
         final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(foundDs);
         MgmtDistributionSetMapper.addLinks(foundDs, response);
@@ -211,7 +211,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             final Long distributionSetId, final String rsqlParam,
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
         // check if distribution set exists otherwise throw exception immediately
-        distributionSetManagement.getOrElseThrowException(distributionSetId);
+        distributionSetManagement.get(distributionSetId);
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
         final Page<Target> targetsInstalledDS;
         if (rsqlParam != null) {

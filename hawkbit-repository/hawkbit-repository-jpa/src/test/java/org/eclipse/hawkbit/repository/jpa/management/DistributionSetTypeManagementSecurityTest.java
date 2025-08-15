@@ -27,17 +27,17 @@ class DistributionSetTypeManagementSecurityTest
         extends AbstractRepositoryManagementSecurityTest<DistributionSetType, DistributionSetTypeManagement.Create, DistributionSetTypeManagement.Update> {
 
     @Override
-    protected RepositoryManagement getRepositoryManagement() {
+    protected RepositoryManagement findRepositoryManagement() {
         return distributionSetTypeManagement;
     }
 
     @Override
-    protected DistributionSetTypeManagement.Create getCreateObject() {
+    protected DistributionSetTypeManagement.Create findCreateObject() {
         return DistributionSetTypeManagement.Create.builder().key(String.format("key-%d", new Random().nextInt())).name(String.format("name-%d", new Random().nextInt())).build();
     }
 
     @Override
-    protected DistributionSetTypeManagement.Update getUpdateObject() {
+    protected DistributionSetTypeManagement.Update findUpdateObject() {
         return DistributionSetTypeManagement.Update.builder().id(1L).description("description").build();
     }
 

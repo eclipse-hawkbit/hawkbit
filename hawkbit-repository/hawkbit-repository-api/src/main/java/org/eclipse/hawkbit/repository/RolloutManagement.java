@@ -235,18 +235,16 @@ public interface RolloutManagement extends PermissionSupport {
      * Retrieves a specific rollout by its ID.
      *
      * @param rolloutId the ID of the rollout to retrieve
-     * @return the founded rollout or {@code null} if rollout with given ID does
-     *         not exists
+     * @return the found rollout or empty if rollout with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<Rollout> get(long rolloutId);
+    Optional<Rollout> find(long rolloutId);
 
     /**
      * Retrieves a specific rollout by its name.
      *
      * @param rolloutName the name of the rollout to retrieve
-     * @return the founded rollout or {@code null} if rollout with given name
-     *         does not exists
+     * @return the found rollout or empty if rollout with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Optional<Rollout> getByName(@NotEmpty String rolloutName);

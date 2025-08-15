@@ -227,7 +227,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(targetTagManagement.get(original.getId())).isNotPresent();
+        assertThat(targetTagManagement.find(original.getId())).isNotPresent();
     }
 
     /**

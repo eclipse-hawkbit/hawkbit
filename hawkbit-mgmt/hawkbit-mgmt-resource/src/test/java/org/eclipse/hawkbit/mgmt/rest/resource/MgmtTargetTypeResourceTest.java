@@ -349,7 +349,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        testType = targetTypeManagement.get(testType.getId()).get();
+        testType = targetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo(TEST_USER);
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
         assertThat(testType.getDistributionSetTypes()).containsExactly(standardDsType);
@@ -405,7 +405,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        testType = targetTypeManagement.get(testType.getId()).get();
+        testType = targetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo(TEST_USER);
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
         assertThat(testType.getDistributionSetTypes()).isEmpty();
@@ -425,7 +425,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        testType = targetTypeManagement.get(testType.getId()).get();
+        testType = targetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo(TEST_USER);
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
         assertThat(testType.getDistributionSetTypes()).isEmpty();

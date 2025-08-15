@@ -195,10 +195,10 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
      * Tests ControllerManagement#getByControllerId() method
      */
     @Test
-    void getByControllerIdPermissionsCheck() {
-        assertPermissions(() -> controllerManagement.getByControllerId("controllerId"),
+    void findByControllerIdPermissionsCheck() {
+        assertPermissions(() -> controllerManagement.findByControllerId("controllerId"),
                 List.of(SpRole.CONTROLLER_ROLE));
-        assertPermissions(() -> controllerManagement.getByControllerId("controllerId"),
+        assertPermissions(() -> controllerManagement.findByControllerId("controllerId"),
                 List.of(SpRole.SYSTEM_ROLE));
     }
 
@@ -207,8 +207,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void getPermissionsCheck() {
-        assertPermissions(() -> controllerManagement.get(1L), List.of(SpRole.CONTROLLER_ROLE));
-        assertPermissions(() -> controllerManagement.get(1L), List.of(SpRole.SYSTEM_ROLE));
+        assertPermissions(() -> controllerManagement.find(1L), List.of(SpRole.CONTROLLER_ROLE));
+        assertPermissions(() -> controllerManagement.find(1L), List.of(SpRole.SYSTEM_ROLE));
     }
 
     /**

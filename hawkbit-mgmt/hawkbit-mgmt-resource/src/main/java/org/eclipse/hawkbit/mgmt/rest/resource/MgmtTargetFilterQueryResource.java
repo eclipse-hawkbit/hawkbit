@@ -172,7 +172,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     private TargetFilterQuery findFilterWithExceptionIfNotFound(final Long filterId) {
-        return filterManagement.get(filterId)
+        return filterManagement.find(filterId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, filterId));
     }
 }

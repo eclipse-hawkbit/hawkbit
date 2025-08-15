@@ -27,17 +27,17 @@ class SoftwareModuleTypeManagementSecurityTest
         extends AbstractRepositoryManagementSecurityTest<SoftwareModuleType, SoftwareModuleTypeManagement.Create, SoftwareModuleTypeManagement.Update> {
 
     @Override
-    protected RepositoryManagement getRepositoryManagement() {
+    protected RepositoryManagement findRepositoryManagement() {
         return softwareModuleTypeManagement;
     }
 
     @Override
-    protected SoftwareModuleTypeManagement.Create getCreateObject() {
+    protected SoftwareModuleTypeManagement.Create findCreateObject() {
         return SoftwareModuleTypeManagement.Create.builder().key(String.format("key-%d", new Random().nextInt())).name(String.format("name-%d", new Random().nextInt())).build();
     }
 
     @Override
-    protected SoftwareModuleTypeManagement.Update getUpdateObject() {
+    protected SoftwareModuleTypeManagement.Update findUpdateObject() {
         return SoftwareModuleTypeManagement.Update.builder().id(1L).description("description").build();
     }
 

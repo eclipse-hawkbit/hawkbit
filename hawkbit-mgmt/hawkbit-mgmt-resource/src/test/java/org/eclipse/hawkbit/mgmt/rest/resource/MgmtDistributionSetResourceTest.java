@@ -50,7 +50,6 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
-import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -1067,7 +1066,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .andExpect(jsonPath("$.locked", equalTo(false)))
                 .andExpect(jsonPath("$.deleted", equalTo(false)));
 
-        final DistributionSet setupdated = distributionSetManagement.get(set.getId()).get();
+        final DistributionSet setupdated = distributionSetManagement.find(set.getId()).get();
 
         assertThat(setupdated.isRequiredMigrationStep()).isTrue();
         assertThat(setupdated.getVersion()).isEqualTo("anotherVersion");
@@ -1079,8 +1078,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
      * Ensures that DS property update on requiredMigrationStep fails if DS is assigned to a target.
      */
     @Test
-    void updateRequiredMigrationStepFailsIfDistributionSetisInUse() throws Exception {
-
+    void updateRequiredMigrationStepFailsIfDistributionSetIsInUse() throws Exception {
         // prepare test data
         assertThat(distributionSetManagement.findAll(PAGE)).isEmpty();
 
@@ -1095,7 +1093,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
 
-        final DistributionSet setupdated = distributionSetManagement.get(set.getId()).get();
+        final DistributionSet setupdated = distributionSetManagement.find(set.getId()).get();
 
         assertThat(setupdated.isRequiredMigrationStep()).isFalse();
         assertThat(setupdated.getVersion()).isEqualTo(set.getVersion());
@@ -1702,16 +1700,16 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                         .content(jsonObject.toString()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        assertThat(targetFilterQueryManagement.get(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
+        assertThat(targetFilterQueryManagement.find(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
                 .isNull();
-        assertThat(rolloutManagement.get(rollout.getId()).get().getStatus()).isIn(RolloutStatus.STOPPING,
+        assertThat(rolloutManagement.find(rollout.getId()).get().getStatus()).isIn(RolloutStatus.STOPPING,
                 RolloutStatus.STOPPED);
         //then enforce executor to stop the rollout and check
         rolloutHandler.handleAll();
-        assertThat(rolloutManagement.get(rollout.getId()).get().getStatus()).isIn(RolloutStatus.STOPPED);
+        assertThat(rolloutManagement.find(rollout.getId()).get().getStatus()).isIn(RolloutStatus.STOPPED);
 
         for (final Target target : targets) {
-            assertThat(targetManagement.get(target.getId()).get().getUpdateStatus())
+            assertThat(targetManagement.find(target.getId()).get().getUpdateStatus())
                     .isEqualTo(TargetUpdateStatus.PENDING);
             assertThat(deploymentManagement.findActionsByTarget(target.getControllerId(), PageRequest.of(0, 100))
                     .getNumberOfElements()).isEqualTo(1);
@@ -1737,17 +1735,17 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                         .content(jsonObject.toString()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        assertThat(targetFilterQueryManagement.get(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
+        assertThat(targetFilterQueryManagement.find(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
                 .isNull();
-        assertThat(rolloutManagement.get(rollout.getId()).get().getStatus()).isIn(RolloutStatus.DELETING,
+        assertThat(rolloutManagement.find(rollout.getId()).get().getStatus()).isIn(RolloutStatus.DELETING,
                 RolloutStatus.DELETED);
         //then enforce executor to stop the rollout and check
         rolloutHandler.handleAll();
         // assert rollout is deleted
-        assertThat(rolloutManagement.get(rollout.getId())).isEmpty();
+        assertThat(rolloutManagement.find(rollout.getId())).isEmpty();
 
         for (final Target target : targets) {
-            assertThat(targetManagement.get(target.getId()).get().getUpdateStatus())
+            assertThat(targetManagement.find(target.getId()).get().getUpdateStatus())
                     .isEqualTo(TargetUpdateStatus.IN_SYNC);
             assertThat(deploymentManagement.findActionsByTarget(target.getControllerId(), PageRequest.of(0, 100))
                     .getNumberOfElements()).isEqualTo(1);
@@ -1771,10 +1769,10 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                         .content(jsonObject.toString()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        assertThat(rolloutManagement.get(rollout.getId()).get().getStatus()).isIn(RolloutStatus.RUNNING);
+        assertThat(rolloutManagement.find(rollout.getId()).get().getStatus()).isIn(RolloutStatus.RUNNING);
 
         for (final Target target : targets) {
-            assertThat(targetManagement.get(target.getId()).get().getUpdateStatus())
+            assertThat(targetManagement.find(target.getId()).get().getUpdateStatus())
                     .isEqualTo(TargetUpdateStatus.PENDING);
             assertThat(deploymentManagement.findActionsByTarget(target.getControllerId(), PageRequest.of(0, 100))
                     .getNumberOfElements()).isEqualTo(1);
@@ -1803,7 +1801,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.locked", equalTo(true)));
 
-        final DistributionSet updatedSet = distributionSetManagement.get(set.getId()).get();
+        final DistributionSet updatedSet = distributionSetManagement.find(set.getId()).get();
         assertThat(updatedSet.isLocked()).isTrue();
     }
 
@@ -1818,7 +1816,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         assertThat(distributionSetManagement.count()).isEqualTo(1);
         distributionSetManagement.lock(set);
-        assertThat(distributionSetManagement.get(set.getId())
+        assertThat(distributionSetManagement.find(set.getId())
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, set.getId())).isLocked())
                 .as("Distribution set should be locked")
                 .isTrue();
@@ -1831,7 +1829,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.locked", equalTo(false)));
 
-        final DistributionSet updatedSet = distributionSetManagement.get(set.getId()).get();
+        final DistributionSet updatedSet = distributionSetManagement.find(set.getId()).get();
         assertThat(updatedSet.isLocked()).isFalse();
     }
 

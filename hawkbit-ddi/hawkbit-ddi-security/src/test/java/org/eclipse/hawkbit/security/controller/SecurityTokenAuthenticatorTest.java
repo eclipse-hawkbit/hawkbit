@@ -78,7 +78,7 @@ class SecurityTokenAuthenticatorTest {
         final Target target = Mockito.mock(Target.class);
         when(target.getControllerId()).thenReturn(CONTROLLER_ID);
         when(target.getSecurityToken()).thenReturn(SECURITY_TOKEN);
-        when(controllerManagementMock.getByControllerId(CONTROLLER_ID)).thenReturn(Optional.of(target));
+        when(controllerManagementMock.findByControllerId(CONTROLLER_ID)).thenReturn(Optional.of(target));
 
         assertThat(authenticator.authenticate(securityToken))
                 .isNotNull()

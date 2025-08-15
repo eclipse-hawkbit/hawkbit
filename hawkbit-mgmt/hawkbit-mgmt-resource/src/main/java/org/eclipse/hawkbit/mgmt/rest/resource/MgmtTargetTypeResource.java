@@ -122,7 +122,7 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
     }
 
     private TargetType findTargetTypeWithExceptionIfNotFound(final Long targetTypeId) {
-        return targetTypeManagement.get(targetTypeId)
+        return targetTypeManagement.find(targetTypeId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetType.class, targetTypeId));
     }
 }

@@ -56,7 +56,7 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 0) })
     void nonExistingEntityAccessReturnsNotPresent() {
-        assertThat(distributionSetTypeManagement.get(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(distributionSetTypeManagement.find(NOT_EXIST_IDL)).isNotPresent();
         assertThat(distributionSetTypeManagement.findByKey(NOT_EXIST_ID)).isNotPresent();
         assertThat(distributionSetTypeManagement.findByName(NOT_EXIST_ID)).isNotPresent();
     }
@@ -165,8 +165,8 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
         final Long dsType2Id = dsType2.getId();
         distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType2Id,
                 moduleTypeIds.subList(0, quota));
-        assertThat(distributionSetTypeManagement.get(dsType2Id)).isNotEmpty();
-        assertThat(distributionSetTypeManagement.get(dsType2Id).get().getMandatoryModuleTypes()).hasSize(quota);
+        assertThat(distributionSetTypeManagement.find(dsType2Id)).isNotEmpty();
+        assertThat(distributionSetTypeManagement.find(dsType2Id).get().getMandatoryModuleTypes()).hasSize(quota);
         // assign one more to trigger the quota exceeded error
         final List<Long> softwareModuleTypeIds = Collections.singletonList(moduleTypeIds.get(quota));
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
@@ -177,8 +177,8 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
                 .create(DistributionSetTypeManagement.Create.builder().key("dst3").name("dst3").build());
         final Long dsType3Id = dsType3.getId();
         distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType3Id, moduleTypeIds.subList(0, quota));
-        assertThat(distributionSetTypeManagement.get(dsType3Id)).isNotEmpty();
-        assertThat(distributionSetTypeManagement.get(dsType3Id).get().getOptionalModuleTypes()).hasSize(quota);
+        assertThat(distributionSetTypeManagement.find(dsType3Id)).isNotEmpty();
+        assertThat(distributionSetTypeManagement.find(dsType3Id).get().getOptionalModuleTypes()).hasSize(quota);
         // assign one more to trigger the quota exceeded error
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType3Id, softwareModuleTypeIds));

@@ -160,7 +160,7 @@ class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRestApi {
     }
 
     private DistributionSetTag findDistributionTagById(final Long distributionsetTagId) {
-        return distributionSetTagManagement.get(distributionsetTagId)
+        return distributionSetTagManagement.find(distributionsetTagId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, distributionsetTagId));
     }
 }

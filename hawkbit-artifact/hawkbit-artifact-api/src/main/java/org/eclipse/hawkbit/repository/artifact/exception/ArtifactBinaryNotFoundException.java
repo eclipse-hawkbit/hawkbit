@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.exception;
+package org.eclipse.hawkbit.repository.artifact.exception;
 
 import java.io.Serial;
 
@@ -18,39 +18,30 @@ import org.eclipse.hawkbit.exception.SpServerError;
 
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public final class ArtifactUploadFailedException extends AbstractServerRtException {
+public final class ArtifactBinaryNotFoundException extends AbstractServerRtException {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     /**
      * Creates a new FileUploadFailedException with
-     * {@link SpServerError#SP_ARTIFACT_UPLOAD_FAILED} error.
+     * {@link SpServerError#SP_ARTIFACT_LOAD_FAILED} error.
      */
-    public ArtifactUploadFailedException() {
-        super(SpServerError.SP_ARTIFACT_UPLOAD_FAILED);
+    public ArtifactBinaryNotFoundException() {
+        super(SpServerError.SP_ARTIFACT_LOAD_FAILED);
     }
 
     /**
      * @param cause for the exception
      */
-    public ArtifactUploadFailedException(final Throwable cause) {
-        super(SpServerError.SP_ARTIFACT_UPLOAD_FAILED, cause);
+    public ArtifactBinaryNotFoundException(final Throwable cause) {
+        super(SpServerError.SP_ARTIFACT_LOAD_FAILED, cause);
     }
 
     /**
      * @param message of the error
      */
-    public ArtifactUploadFailedException(final String message) {
-        super(message, SpServerError.SP_ARTIFACT_UPLOAD_FAILED);
+    public ArtifactBinaryNotFoundException(final String message) {
+        super(message, SpServerError.SP_ARTIFACT_LOAD_FAILED);
     }
-
-    /**
-     * @param message for the error
-     * @param cause of the error
-     */
-    public ArtifactUploadFailedException(final String message, final Throwable cause) {
-        super(message, SpServerError.SP_ARTIFACT_UPLOAD_FAILED, cause);
-    }
-
 }

@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDist
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.Create;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -308,7 +307,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
         final List<Target> targetsA = createTargetsAndAutoAssignDistSet(targetDsAIdPref, 5, distributionSet, ActionType.FORCED);
         implicitLock(distributionSet);
-        final DistributionSet distributionSetLocked = distributionSetManagement.get(distributionSet.getId()).orElseThrow();
+        final DistributionSet distributionSetLocked = distributionSetManagement.find(distributionSet.getId()).orElseThrow();
         final List<Target> targetsB = createTargetsAndAutoAssignDistSet(targetDsBIdPref, 10, distributionSetLocked, ActionType.SOFT);
         final List<Target> targetsC = createTargetsAndAutoAssignDistSet(targetDsCIdPref, 10, distributionSetLocked, ActionType.DOWNLOAD_ONLY);
 

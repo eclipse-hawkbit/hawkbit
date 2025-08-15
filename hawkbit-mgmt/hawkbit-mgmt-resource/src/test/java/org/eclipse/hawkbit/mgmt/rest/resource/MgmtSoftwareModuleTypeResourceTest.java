@@ -349,7 +349,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                 .andExpect(jsonPath("$.lastModifiedAt", equalTo(testType.getLastModifiedAt())))
                 .andExpect(jsonPath("$.deleted", equalTo(false)));
 
-        testType = softwareModuleTypeManagement.get(testType.getId()).get();
+        testType = softwareModuleTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedAt()).isEqualTo(testType.getLastModifiedAt());
         assertThat(testType.isDeleted()).isFalse();
     }

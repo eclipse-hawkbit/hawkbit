@@ -268,7 +268,7 @@ public interface ControllerManagement {
      * @see Target#getControllerId()
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + " or " + SpringEvalExpressions.IS_SYSTEM_CODE)
-    Optional<Target> getByControllerId(@NotEmpty String controllerId);
+    Optional<Target> findByControllerId(@NotEmpty String controllerId);
 
     /**
      * Finds {@link Target} based on given ID returns found Target without details, i.e.
@@ -280,7 +280,7 @@ public interface ControllerManagement {
      * @see Target#getId()
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER + " or " + SpringEvalExpressions.IS_SYSTEM_CODE)
-    Optional<Target> get(long targetId);
+    Optional<Target> find(long targetId);
 
     /**
      * Retrieves the specified number of messages from action history of the given {@link Action} based on messageCount. Regardless of the

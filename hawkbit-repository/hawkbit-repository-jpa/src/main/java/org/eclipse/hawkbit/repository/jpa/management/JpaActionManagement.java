@@ -21,7 +21,6 @@ import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -80,7 +79,7 @@ public class JpaActionManagement {
 
     protected Action addActionStatus(final ActionStatusCreate create) {
         final Long actionId = create.getActionId();
-        final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
+        final JpaAction action = actionRepository.getById(actionId);
 
         if (isUpdatingActionStatusAllowed(action, create)) {
             return handleAddUpdateActionStatus(create, action);
@@ -90,10 +89,6 @@ public class JpaActionManagement {
                 "Update of actionStatus {} for action {} not possible since action not active anymore and not allowed as an action terminating.",
                 create.getStatus(), action.getId());
         return action;
-    }
-
-    protected JpaAction getActionAndThrowExceptionIfNotFound(final Long actionId) {
-        return actionRepository.findById(actionId).orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
     }
 
     protected void onActionStatusUpdate(final JpaActionStatus newActionStatus, final JpaAction action) {

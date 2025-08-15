@@ -322,7 +322,7 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void getPermissionsCheck() {
-        assertPermissions(() -> targetManagement.get(1L), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> targetManagement.find(1L), List.of(SpPermission.READ_TARGET));
     }
 
     /**

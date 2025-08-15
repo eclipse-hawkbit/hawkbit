@@ -44,7 +44,7 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class) })
     void nonExistingEntityAccessReturnsNotPresent() {
 
-        assertThat(softwareModuleTypeManagement.get(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(softwareModuleTypeManagement.find(NOT_EXIST_IDL)).isNotPresent();
         assertThat(softwareModuleTypeManagement.findByKey(NOT_EXIST_ID)).isNotPresent();
         assertThat(softwareModuleTypeManagement.findByName(NOT_EXIST_ID)).isNotPresent();
     }

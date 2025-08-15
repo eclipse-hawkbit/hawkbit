@@ -56,6 +56,12 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
         return repository.save(entity);
     }
 
+    // override because the default implementation is not protected by ACM proxy
+    @Override
+    public T getById(final Long id) {
+        return findOne(byIdSpec(id)).orElseThrow(() -> new EntityNotFoundException(getManagementClass(), id));
+    }
+
     @Override
     @NonNull
     public Optional<T> findById(@NonNull final Long id) {

@@ -107,7 +107,7 @@ class TargetFilterQueryManagementSecurityTest extends AbstractJpaIntegrationTest
      */
     @Test
     void getTargetFilterQueryByIdPermissionsCheck() {
-        assertPermissions(() -> targetFilterQueryManagement.get(1L), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> targetFilterQueryManagement.find(1L), List.of(SpPermission.READ_TARGET));
     }
 
     /**

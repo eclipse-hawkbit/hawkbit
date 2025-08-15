@@ -60,9 +60,9 @@ class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
             assertThat(targetTypeManagement.count()).isEqualTo(1);
 
             // verify targetTypeManagement#get by id
-            assertThat(targetTypeManagement.get(permittedTargetType.getId())).isPresent();
+            assertThat(targetTypeManagement.find(permittedTargetType.getId())).isPresent();
             final Long hiddenTargetTypeId = hiddenTargetType.getId();
-            assertThat(targetTypeManagement.get(hiddenTargetTypeId)).isEmpty();
+            assertThat(targetTypeManagement.find(hiddenTargetTypeId)).isEmpty();
 
             // verify targetTypeManagement#getByName
             assertThat(targetTypeManagement.getByName(permittedTargetType.getName())).isPresent();

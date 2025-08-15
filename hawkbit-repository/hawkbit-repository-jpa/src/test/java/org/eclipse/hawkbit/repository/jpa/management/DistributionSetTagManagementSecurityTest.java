@@ -28,17 +28,17 @@ class DistributionSetTagManagementSecurityTest
         extends AbstractRepositoryManagementSecurityTest<DistributionSetTag, DistributionSetTagManagement.Create, DistributionSetTagManagement.Update> {
 
     @Override
-    protected RepositoryManagement getRepositoryManagement() {
+    protected RepositoryManagement findRepositoryManagement() {
         return distributionSetTagManagement;
     }
 
     @Override
-    protected DistributionSetTagManagement.Create getCreateObject() {
+    protected DistributionSetTagManagement.Create findCreateObject() {
         return DistributionSetTagManagement.Create.builder().name(String.format("tag-%d", new Random().nextInt())).build();
     }
 
     @Override
-    protected DistributionSetTagManagement.Update getUpdateObject() {
+    protected DistributionSetTagManagement.Update findUpdateObject() {
         return DistributionSetTagManagement.Update.builder().id(1L).name("tag").build();
     }
 }

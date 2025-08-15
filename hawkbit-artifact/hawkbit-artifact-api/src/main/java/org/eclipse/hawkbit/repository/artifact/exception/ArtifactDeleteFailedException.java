@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.exception;
+package org.eclipse.hawkbit.repository.artifact.exception;
 
 import java.io.Serial;
 
@@ -16,32 +16,35 @@ import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
+/**
+ * Thrown if artifact deletion failed.
+ */
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public final class ArtifactBinaryNotFoundException extends AbstractServerRtException {
+public final class ArtifactDeleteFailedException extends AbstractServerRtException {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     /**
      * Creates a new FileUploadFailedException with
-     * {@link SpServerError#SP_ARTIFACT_LOAD_FAILED} error.
+     * {@link SpServerError#SP_ARTIFACT_DELETE_FAILED} error.
      */
-    public ArtifactBinaryNotFoundException() {
-        super(SpServerError.SP_ARTIFACT_LOAD_FAILED);
+    public ArtifactDeleteFailedException() {
+        super(SpServerError.SP_ARTIFACT_DELETE_FAILED);
     }
 
     /**
      * @param cause for the exception
      */
-    public ArtifactBinaryNotFoundException(final Throwable cause) {
-        super(SpServerError.SP_ARTIFACT_LOAD_FAILED, cause);
+    public ArtifactDeleteFailedException(final Throwable cause) {
+        super(SpServerError.SP_ARTIFACT_DELETE_FAILED, cause);
     }
 
     /**
      * @param message of the error
      */
-    public ArtifactBinaryNotFoundException(final String message) {
-        super(message, SpServerError.SP_ARTIFACT_LOAD_FAILED);
+    public ArtifactDeleteFailedException(final String message) {
+        super(message, SpServerError.SP_ARTIFACT_DELETE_FAILED);
     }
 }

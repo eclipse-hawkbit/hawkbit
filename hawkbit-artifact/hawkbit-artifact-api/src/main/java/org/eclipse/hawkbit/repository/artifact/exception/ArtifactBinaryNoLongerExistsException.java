@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.exception;
+package org.eclipse.hawkbit.repository.artifact.exception;
 
 import java.io.Serial;
 
@@ -15,11 +15,9 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
- * Exception indicating that an artifact's binary does not exist anymore. This
- * might be caused due to the soft deletion of a {@link SoftwareModule}.
+ * Exception indicating that an artifact's binary does not exist anymore. This might be caused due to the soft deletion of a software module.
  */
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

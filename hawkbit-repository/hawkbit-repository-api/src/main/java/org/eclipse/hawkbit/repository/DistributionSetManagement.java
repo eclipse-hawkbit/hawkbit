@@ -37,7 +37,6 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
@@ -46,7 +45,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Statistic;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -62,23 +60,13 @@ public interface DistributionSetManagement<T extends DistributionSet>
 
     /**
      * Find {@link DistributionSet} based on given ID including (lazy loaded) details, e.g. {@link DistributionSet#getModules()}. <br/>
-     * For performance reasons it is recommended to use {@link #get(long)} if the details are not required.
+     * For performance reasons it is recommended to use {@link #find(long)} if the details are not required.
      *
      * @param id to look for.
      * @return {@link DistributionSet}
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
     Optional<T> getWithDetails(long id);
-
-    /**
-     * Find distribution set by id and throw an exception if it is (soft) deleted.
-     *
-     * @param id id of {@link DistributionSet}
-     * @return the found valid {@link DistributionSet}
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     */
-    @PreAuthorize(HAS_READ_REPOSITORY)
-    T getOrElseThrowException(long id);
 
     @PreAuthorize(HAS_READ_REPOSITORY)
     boolean shouldLockImplicitly(final DistributionSet distributionSet);

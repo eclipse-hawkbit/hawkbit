@@ -26,17 +26,17 @@ class DistributionSetManagementSecurityTest
         extends AbstractRepositoryManagementSecurityTest<DistributionSet, DistributionSetManagement.Create, DistributionSetManagement.Update> {
 
     @Override
-    protected DistributionSetManagement getRepositoryManagement() {
+    protected DistributionSetManagement findRepositoryManagement() {
         return distributionSetManagement;
     }
 
     @Override
-    protected DistributionSetManagement.Create getCreateObject() {
+    protected DistributionSetManagement.Create findCreateObject() {
         return DistributionSetManagement.Create.builder().name("name").version("1.0.0").type(defaultDsType()).build();
     }
 
     @Override
-    protected DistributionSetManagement.Update getUpdateObject() {
+    protected DistributionSetManagement.Update findUpdateObject() {
         return DistributionSetManagement.Update.builder().id(0L).name("a new name")
                 .description("a new description").version("a new version").requiredMigrationStep(true).build();
     }
@@ -157,8 +157,8 @@ class DistributionSetManagementSecurityTest
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
     @Test
-    void getOrElseThrowExceptionPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.getOrElseThrowException(1L), List.of(SpPermission.READ_REPOSITORY));
+    void getPermissionsCheck() {
+        assertPermissions(() -> distributionSetManagement.get(1L), List.of(SpPermission.READ_REPOSITORY));
     }
 
     /**

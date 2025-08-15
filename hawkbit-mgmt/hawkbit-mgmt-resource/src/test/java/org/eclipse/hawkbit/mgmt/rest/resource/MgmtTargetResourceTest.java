@@ -2576,7 +2576,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final long unknownTargetTypeId = 999;
         final String errorMsg = String.format("TargetType with given identifier {%s} does not exist.", unknownTargetTypeId);
 
-        final Optional<? extends TargetType> targetType = targetTypeManagement.get(unknownTargetTypeId);
+        final Optional<? extends TargetType> targetType = targetTypeManagement.find(unknownTargetTypeId);
         assertThat(targetType).isNotPresent();
 
         final String controllerId = "targetcontroller";

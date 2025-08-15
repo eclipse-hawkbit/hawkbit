@@ -180,12 +180,12 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     }
 
     private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final Long distributionSetTypeId) {
-        return distributionSetTypeManagement.get(distributionSetTypeId)
+        return distributionSetTypeManagement.find(distributionSetTypeId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, distributionSetTypeId));
     }
 
     private SoftwareModuleType findSoftwareModuleTypeWithExceptionIfNotFound(final Long softwareModuleTypeId) {
-        return softwareModuleTypeManagement.get(softwareModuleTypeId)
+        return softwareModuleTypeManagement.find(softwareModuleTypeId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, softwareModuleTypeId));
     }
 }

@@ -144,7 +144,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         mvc.perform(delete(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId()))
                 .andExpect(status().isOk());
 
-        assertThat(targetFilterQueryManagement.get(filterQuery.getId())).isNotPresent();
+        assertThat(targetFilterQueryManagement.find(filterQuery.getId())).isNotPresent();
     }
 
     /**
@@ -192,7 +192,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .andExpect(jsonPath(JSON_PATH_NAME, equalTo(filterName)))
                 .andExpect(jsonPath(JSON_PATH_CONFIRMATION_REQUIRED).doesNotExist());
 
-        final TargetFilterQuery tfqCheck = targetFilterQueryManagement.get(tfq.getId()).get();
+        final TargetFilterQuery tfqCheck = targetFilterQueryManagement.find(tfq.getId()).get();
         assertThat(tfqCheck.getQuery()).isEqualTo(filterQuery2);
         assertThat(tfqCheck.getName()).isEqualTo(filterName);
     }
@@ -219,7 +219,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .andExpect(jsonPath(JSON_PATH_NAME, equalTo(filterName2)))
                 .andExpect(jsonPath(JSON_PATH_CONFIRMATION_REQUIRED).doesNotExist());
 
-        final TargetFilterQuery tfqCheck = targetFilterQueryManagement.get(tfq.getId()).get();
+        final TargetFilterQuery tfqCheck = targetFilterQueryManagement.find(tfq.getId()).get();
         assertThat(tfqCheck.getQuery()).isEqualTo(filterQuery);
         assertThat(tfqCheck.getName()).isEqualTo(filterName2);
     }
@@ -493,7 +493,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .andExpect(status().isOk());
         implicitLock(set);
 
-        final TargetFilterQuery updatedFilterQuery = targetFilterQueryManagement.get(filterQuery.getId()).get();
+        final TargetFilterQuery updatedFilterQuery = targetFilterQueryManagement.find(filterQuery.getId()).get();
 
         assertThat(updatedFilterQuery.getAutoAssignDistributionSet()).isEqualTo(set);
         assertThat(updatedFilterQuery.getAutoAssignActionType()).isEqualTo(ActionType.FORCED);
@@ -603,7 +603,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         targetFilterQueryManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(tfq.getId()).ds(set.getId()));
         implicitLock(set);
 
-        final TargetFilterQuery updatedFilterQuery = targetFilterQueryManagement.get(tfq.getId()).orElseThrow();
+        final TargetFilterQuery updatedFilterQuery = targetFilterQueryManagement.find(tfq.getId()).orElseThrow();
 
         assertThat(updatedFilterQuery.getAutoAssignDistributionSet()).isEqualTo(set);
         assertThat(updatedFilterQuery.getAutoAssignActionType()).isEqualTo(ActionType.FORCED);
@@ -615,7 +615,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         mvc.perform(delete(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isNoContent());
 
-        final TargetFilterQuery filterQueryWithDeletedDs = targetFilterQueryManagement.get(tfq.getId()).get();
+        final TargetFilterQuery filterQueryWithDeletedDs = targetFilterQueryManagement.find(tfq.getId()).get();
 
         assertThat(filterQueryWithDeletedDs.getAutoAssignDistributionSet()).isNull();
         assertThat(filterQueryWithDeletedDs.getAutoAssignActionType()).isNull();
@@ -676,7 +676,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         // do not provide something about the confirmation
         verifyAutoAssignmentByActionType(tfq, set, null, null);
 
-        assertThat(targetFilterQueryManagement.get(tfq.getId())).hasValueSatisfying(filter ->
+        assertThat(targetFilterQueryManagement.find(tfq.getId())).hasValueSatisfying(filter ->
                 assertThat(filter.isConfirmationRequired()).isEqualTo(confirmationFlowActive));
     }
 
@@ -720,7 +720,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .andExpect(status().isOk());
         implicitLock(set);
 
-        final TargetFilterQuery updatedFilterQuery = targetFilterQueryManagement.get(tfq.getId()).get();
+        final TargetFilterQuery updatedFilterQuery = targetFilterQueryManagement.find(tfq.getId()).get();
         final MgmtActionType expectedActionType = actionType != null ? actionType : MgmtActionType.FORCED;
 
         assertThat(updatedFilterQuery.getAutoAssignDistributionSet()).isEqualTo(set);

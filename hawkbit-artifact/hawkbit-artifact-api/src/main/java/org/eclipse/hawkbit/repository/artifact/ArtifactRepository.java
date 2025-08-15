@@ -42,6 +42,26 @@ public interface ArtifactRepository {
             String contentType, DbArtifactHash hash);
 
     /**
+     * Retrieves a {@link AbstractDbArtifact} from the store by its SHA1 hash. Throws {@link org.eclipse.hawkbit.repository.artifact.exception.ArtifactBinaryNotFoundException} if not found.
+     *
+     * @param tenant the tenant to store the artifact
+     * @param sha1Hash the sha1-hash of the file to lookup.
+     * @return The artifact file object or {@code null} if no file exists.
+     * @throws UnsupportedOperationException if implementation does not support the operation
+     */
+    AbstractDbArtifact getBySha1(@NotEmpty String tenant, @NotEmpty String sha1Hash);
+
+
+    /**
+     * Checks if an artifact exists for a given tenant by its sha1 hash
+     *
+     * @param tenant the tenant
+     * @param sha1Hash the sha1-hash of the file to lookup.
+     * @return the boolean whether the artifact exists or not
+     */
+    boolean existsBySha1(@NotEmpty String tenant, @NotEmpty String sha1Hash);
+
+    /**
      * Deletes an artifact by its SHA1 hash.
      *
      * @param tenant the tenant to store the artifact
@@ -51,28 +71,9 @@ public interface ArtifactRepository {
     void deleteBySha1(@NotEmpty String tenant, @NotEmpty String sha1Hash);
 
     /**
-     * Retrieves a {@link AbstractDbArtifact} from the store by its SHA1 hash.
-     *
-     * @param tenant the tenant to store the artifact
-     * @param sha1Hash the sha1-hash of the file to lookup.
-     * @return The artifact file object or {@code null} if no file exists.
-     * @throws UnsupportedOperationException if implementation does not support the operation
-     */
-    AbstractDbArtifact getArtifactBySha1(@NotEmpty String tenant, @NotEmpty String sha1Hash);
-
-    /**
      * Deletes all artifacts of given tenant.
      *
      * @param tenant to erase
      */
     void deleteByTenant(@NotEmpty String tenant);
-
-    /**
-     * Checks if an artifact exists for a given tenant by its sha1 hash
-     *
-     * @param tenant the tenant
-     * @param sha1Hash the sha1-hash of the file to lookup.
-     * @return the boolean whether the artifact exists or not
-     */
-    boolean existsByTenantAndSha1(@NotEmpty String tenant, @NotEmpty String sha1Hash);
 }

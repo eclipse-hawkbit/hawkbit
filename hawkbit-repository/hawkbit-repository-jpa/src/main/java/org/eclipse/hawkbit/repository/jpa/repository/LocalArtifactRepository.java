@@ -56,14 +56,6 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifac
     long countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(@Param("sha1") String sha1, @Param("tenant") String tenant);
 
     /**
-     * Searches for a {@link Artifact} based on given gridFsFileName.
-     *
-     * @param sha1Hash to search
-     * @return {@link Artifact} the first in the result list
-     */
-    Optional<Artifact> findFirstBySha1Hash(String sha1Hash);
-
-    /**
      * Searches for a {@link Artifact} based user provided filename at upload.
      *
      * @param filename to search
