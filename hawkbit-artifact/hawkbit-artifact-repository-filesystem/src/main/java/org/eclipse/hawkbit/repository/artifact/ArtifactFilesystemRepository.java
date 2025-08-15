@@ -14,8 +14,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.hawkbit.repository.artifact.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.artifact.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
 import org.springframework.validation.annotation.Validated;
@@ -52,10 +54,10 @@ public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
     }
 
     @Override
-    public ArtifactFilesystem getArtifactBySha1(final String tenant, final String sha1) {
+    public AbstractDbArtifact getBySha1(final String tenant, final String sha1) {
         final File file = getFile(tenant, sha1);
         if (!file.exists()) {
-            return null;
+            throw new ArtifactBinaryNotFoundException(sha1);
         }
 
         return new ArtifactFilesystem(file, sha1, new DbArtifactHash(sha1, null, null), file.length(), null);
@@ -67,7 +69,7 @@ public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
     }
 
     @Override
-    public boolean existsByTenantAndSha1(final String tenant, final String sha1) {
+    public boolean existsBySha1(final String tenant, final String sha1) {
         return getFile(tenant, sha1).exists();
     }
 

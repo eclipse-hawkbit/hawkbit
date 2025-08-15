@@ -60,8 +60,8 @@ public class SecurityTokenAuthenticator extends Authenticator.AbstractAuthentica
         final String presentedToken = authHeader.substring(OFFSET_TARGET_TOKEN);
 
         return systemSecurityContext.runAsSystemAsTenant(() -> controllerSecurityToken.getTargetId() != null
-                                ? controllerManagement.get(controllerSecurityToken.getTargetId())
-                                : controllerManagement.getByControllerId(controllerSecurityToken.getControllerId()),
+                                ? controllerManagement.find(controllerSecurityToken.getTargetId())
+                                : controllerManagement.findByControllerId(controllerSecurityToken.getControllerId()),
                         controllerSecurityToken.getTenant())
                 // validate if the presented token is the same as the one set for the target
                 .filter(target -> presentedToken.equals(

@@ -108,7 +108,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     void nonExistingEntityAccessReturnsNotPresent() {
         final Target target = testdataFactory.createTarget();
         assertThat(targetManagement.getByControllerId(NOT_EXIST_ID)).isNotPresent();
-        assertThat(targetManagement.get(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(targetManagement.find(NOT_EXIST_IDL)).isNotPresent();
         assertThat(targetManagement.getMetadata(target.getControllerId()).get(NOT_EXIST_ID)).isNull();
     }
 
@@ -252,14 +252,14 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(assignedTargets).as("Assigned targets are wrong").hasSize(4);
         assignedTargets.forEach(target -> assertThat(getTargetTags(target.getControllerId())).hasSize(1));
 
-        final TargetTag findTargetTag = targetTagManagement.get(targetTag.getId()).orElseThrow(IllegalStateException::new);
+        final TargetTag findTargetTag = targetTagManagement.find(targetTag.getId()).orElseThrow(IllegalStateException::new);
         assertThat(assignedTargets).as("Assigned targets are wrong")
                 .hasSize(targetManagement.findByTag(targetTag.getId(), PAGE).getNumberOfElements());
 
         final Target unAssignTarget = targetManagement.unassignTag(List.of("targetId123"), findTargetTag.getId()).get(0);
         assertThat(unAssignTarget.getControllerId()).as("Controller id is wrong").isEqualTo("targetId123");
         assertThat(getTargetTags(unAssignTarget.getControllerId())).as("Tag size is wrong").isEmpty();
-        targetTagManagement.get(targetTag.getId()).orElseThrow(NoSuchElementException::new);
+        targetTagManagement.find(targetTag.getId()).orElseThrow(NoSuchElementException::new);
         assertThat(targetManagement.findByTag(targetTag.getId(), PAGE)).as("Assigned targets are wrong").hasSize(3);
         assertThat(targetManagement.findByRsqlAndTag("controllerId==targetId123", targetTag.getId(), PAGE))
                 .as("Assigned targets are wrong").isEmpty();
@@ -812,13 +812,13 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         // create target meta data entry
         insertMetadata(knownKey, knownValue, target);
 
-        final Target changedLockRevisionTarget = targetManagement.get(target.getId()).orElseThrow(NoSuchElementException::new);
+        final Target changedLockRevisionTarget = targetManagement.find(target.getId()).orElseThrow(NoSuchElementException::new);
         assertThat(changedLockRevisionTarget.getOptLockRevision()).isEqualTo(2);
 
         // update the target metadata
         targetManagement.createMetadata(target.getControllerId(), knownKey, knownUpdateValue);
         // we are updating the target meta-data so also modifying the target so opt lock revision must be three
-        final Target changedLockRevisionTarget2 = targetManagement.get(target.getId()).orElseThrow(NoSuchElementException::new);
+        final Target changedLockRevisionTarget2 = targetManagement.find(target.getId()).orElseThrow(NoSuchElementException::new);
         assertThat(changedLockRevisionTarget2.getOptLockRevision()).isEqualTo(3);
         assertThat(changedLockRevisionTarget2.getLastModifiedAt()).isPositive();
 

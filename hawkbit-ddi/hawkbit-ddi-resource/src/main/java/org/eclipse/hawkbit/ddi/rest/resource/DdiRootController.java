@@ -53,7 +53,6 @@ import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
 import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
-import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidConfirmationFeedbackException;
@@ -180,9 +179,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         } else {
             // Artifact presence is ensured in 'checkModule'
             final Artifact artifact = module.getArtifactByFilename(fileName).orElseThrow(NoSuchElementException::new);
-            final DbArtifact file = artifactManagement
-                    .loadArtifactBinary(artifact.getSha1Hash(), module.getId(), module.isEncrypted())
-                    .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
+            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash(), module.getId(), module.isEncrypted());
 
             final String ifMatch = RequestResponseContextHolder.getHttpServletRequest().getHeader(HttpHeaders.IF_MATCH);
             if (ifMatch != null && !HttpUtil.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
@@ -694,7 +691,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     private Target findTarget(final String controllerId) {
-        return controllerManagement.getByControllerId(controllerId)
+        return controllerManagement.findByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
     }
 

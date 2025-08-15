@@ -601,7 +601,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
                 .containsEntry("type", EVENT.toString())
                 .containsEntry("topic", DOWNLOAD.toString());
 
-        final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
+        final Optional<Target> target = controllerManagement.findByControllerId(controllerId);
         assertThat(target).isPresent();
 
         // verify the DS was assigned to the Target
@@ -631,7 +631,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         assertSoftwareModules(softwareModules, request.getSoftwareModules());
 
         final List<String> tokens = controllerIds.stream().map(controllerId -> {
-            final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
+            final Optional<Target> target = controllerManagement.findByControllerId(controllerId);
             assertThat(target).isPresent();
             return target.get().getSecurityToken();
         }).toList();

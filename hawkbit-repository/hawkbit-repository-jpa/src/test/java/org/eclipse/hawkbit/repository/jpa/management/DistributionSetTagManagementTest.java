@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Stream;
 
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
@@ -51,7 +50,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void nonExistingEntityAccessReturnsNotPresent() {
-        assertThat(distributionSetTagManagement.get(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(distributionSetTagManagement.find(NOT_EXIST_IDL)).isNotPresent();
     }
 
     /**
@@ -91,18 +90,18 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
         assignTag(dsBs, tagB);
         assignTag(dsCs, tagC);
 
-        assignTag(dsABs, distributionSetTagManagement.get(tagA.getId()).orElseThrow());
-        assignTag(dsABs, distributionSetTagManagement.get(tagB.getId()).orElseThrow());
+        assignTag(dsABs, distributionSetTagManagement.find(tagA.getId()).orElseThrow());
+        assignTag(dsABs, distributionSetTagManagement.find(tagB.getId()).orElseThrow());
 
-        assignTag(dsACs, distributionSetTagManagement.get(tagA.getId()).orElseThrow());
-        assignTag(dsACs, distributionSetTagManagement.get(tagC.getId()).orElseThrow());
+        assignTag(dsACs, distributionSetTagManagement.find(tagA.getId()).orElseThrow());
+        assignTag(dsACs, distributionSetTagManagement.find(tagC.getId()).orElseThrow());
 
-        assignTag(dsBCs, distributionSetTagManagement.get(tagB.getId()).orElseThrow());
-        assignTag(dsBCs, distributionSetTagManagement.get(tagC.getId()).orElseThrow());
+        assignTag(dsBCs, distributionSetTagManagement.find(tagB.getId()).orElseThrow());
+        assignTag(dsBCs, distributionSetTagManagement.find(tagC.getId()).orElseThrow());
 
-        assignTag(dsABCs, distributionSetTagManagement.get(tagA.getId()).orElseThrow());
-        assignTag(dsABCs, distributionSetTagManagement.get(tagB.getId()).orElseThrow());
-        assignTag(dsABCs, distributionSetTagManagement.get(tagC.getId()).orElseThrow());
+        assignTag(dsABCs, distributionSetTagManagement.find(tagA.getId()).orElseThrow());
+        assignTag(dsABCs, distributionSetTagManagement.find(tagB.getId()).orElseThrow());
+        assignTag(dsABCs, distributionSetTagManagement.find(tagC.getId()).orElseThrow());
 
         // search for not deleted
         final DistributionSetFilter.DistributionSetFilterBuilder distributionSetFilterBuilder = getDistributionSetFilterBuilder()
@@ -215,9 +214,9 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(distributionSetTagRepository.findById(tag.getId()).orElseThrow().getDescription()).as("wrong tag found")
                 .isEqualTo("kai2");
-        assertThat(distributionSetTagManagement.get(tag.getId()).orElseThrow().getColour()).as("wrong tag found")
+        assertThat(distributionSetTagManagement.find(tag.getId()).orElseThrow().getColour()).as("wrong tag found")
                 .isEqualTo("colour");
-        assertThat(distributionSetTagManagement.get(tag.getId()).orElseThrow().getColour()).as("wrong tag found")
+        assertThat(distributionSetTagManagement.find(tag.getId()).orElseThrow().getColour()).as("wrong tag found")
                 .isEqualTo("colour");
     }
 

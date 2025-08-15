@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.rollout.condition;
 
 import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -55,7 +56,8 @@ public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator<Roll
                 and this one tries to pause the rollout too but throws an exception
                 and rollbacks rollout processing transaction
             */
-            final Rollout refreshedRollout = rolloutManagement.get(rollout.getId()).orElseThrow();
+            final Rollout refreshedRollout = rolloutManagement.find(rollout.getId())
+                    .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rollout.getId()));
             if (Rollout.RolloutStatus.PAUSED != refreshedRollout.getStatus()) {
                 // if only the latest state is != paused then pause
                 rolloutManagement.pauseRollout(rollout.getId());

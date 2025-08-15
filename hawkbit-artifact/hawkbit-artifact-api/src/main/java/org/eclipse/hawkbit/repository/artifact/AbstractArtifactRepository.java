@@ -67,8 +67,9 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
             checkHashes(providedHashes, sha1Hash16, md5Hash16, sha256Hash16);
 
             // Check if file with same sha1 hash exists and if so return it
-            if (existsByTenantAndSha1(tenant, sha1Hash16)) {
-                return addMissingHashes(getArtifactBySha1(tenant, sha1Hash16), sha1Hash16, md5Hash16, sha256Hash16);
+            if (existsBySha1(tenant, sha1Hash16)) {
+                // TODO - shall check if the file is really the same as bytes or just sha1 hash is the same
+                return addMissingHashes(getBySha1(tenant, sha1Hash16), sha1Hash16, md5Hash16, sha256Hash16);
             }
 
             return store(sanitizeTenant(tenant), new DbArtifactHash(sha1Hash16, md5Hash16, sha256Hash16), contentType, tempFile);

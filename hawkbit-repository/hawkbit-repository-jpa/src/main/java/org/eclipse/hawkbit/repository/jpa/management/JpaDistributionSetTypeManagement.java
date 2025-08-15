@@ -71,8 +71,7 @@ public class JpaDistributionSetTypeManagement
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
     public void delete(final long id) {
-        final JpaDistributionSetType toDelete = jpaRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, id));
+        final JpaDistributionSetType toDelete = jpaRepository.getById(id);
 
         unassignDsTypeFromTargetTypes(id);
 
@@ -118,7 +117,7 @@ public class JpaDistributionSetTypeManagement
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
     public JpaDistributionSetType unassignSoftwareModuleType(final long id, final long softwareModuleTypeId) {
-        final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(id);
+        final JpaDistributionSetType type = jpaRepository.getById(id);
         checkDistributionSetTypeNotAssigned(id);
         type.removeModuleType(softwareModuleTypeRepository.getById(softwareModuleTypeId));
         return jpaRepository.save(type);
@@ -132,7 +131,7 @@ public class JpaDistributionSetTypeManagement
                     SoftwareModuleType.class, softwareModulesTypeIds, foundModules.stream().map(SoftwareModuleType::getId).toList());
         }
 
-        final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
+        final JpaDistributionSetType type = jpaRepository.getById(dsTypeId);
 
         checkDistributionSetTypeNotAssigned(dsTypeId);
         assertSoftwareModuleTypeQuota(dsTypeId, softwareModulesTypeIds.size());
@@ -162,10 +161,6 @@ public class JpaDistributionSetTypeManagement
             targetType.removeDistributionSetType(typeId);
             targetTypeRepository.save(targetType);
         });
-    }
-
-    private JpaDistributionSetType findDistributionSetTypeAndThrowExceptionIfNotFound(final Long id) {
-        return jpaRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, id));
     }
 
     private void checkDistributionSetTypeNotAssigned(final Long id) {

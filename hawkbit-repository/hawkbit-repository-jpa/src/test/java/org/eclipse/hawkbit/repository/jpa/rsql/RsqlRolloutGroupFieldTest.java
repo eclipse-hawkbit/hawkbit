@@ -40,7 +40,7 @@ class RsqlRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
-        rollout = rolloutManagement.get(rollout.getId()).get();
+        rollout = rolloutManagement.find(rollout.getId()).get();
 
         this.rolloutGroupId = rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getContent().get(0).getId();
     }
@@ -102,7 +102,7 @@ class RsqlRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
             final String targetFilterQuery) {
         return rolloutManagement.create(
                 Create.builder()
-                        .distributionSet(distributionSetManagement.get(distributionSetId).get()).name(name).targetFilterQuery(targetFilterQuery)
+                        .distributionSet(distributionSetManagement.find(distributionSetId).get()).name(name).targetFilterQuery(targetFilterQuery)
                         .build(),
                 amountGroups, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());

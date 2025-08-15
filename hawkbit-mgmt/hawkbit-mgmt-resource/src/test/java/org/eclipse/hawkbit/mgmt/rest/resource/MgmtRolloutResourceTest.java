@@ -1946,7 +1946,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     private void awaitRunningState(final Long rolloutId) {
         awaitRollout().until(() -> SecurityContextSwitch
-                .callAsPrivileged(() -> rolloutManagement.get(rolloutId).orElseThrow(NoSuchElementException::new))
+                .callAsPrivileged(() -> rolloutManagement.find(rolloutId).orElseThrow(NoSuchElementException::new))
                 .getStatus().equals(RolloutStatus.RUNNING));
     }
 
@@ -1966,7 +1966,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     private void assertStatusIs(final Rollout rollout, final RolloutStatus expected) {
-        final Optional<Rollout> updatedRollout = rolloutManagement.get(rollout.getId());
+        final Optional<Rollout> updatedRollout = rolloutManagement.find(rollout.getId());
         assertThat(updatedRollout).get().extracting(Rollout::getStatus).isEqualTo(expected);
     }
 
@@ -2039,7 +2039,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         // Run here, because Scheduler is disabled during tests
         rolloutHandler.handleAll();
 
-        return rolloutManagement.get(rollout.getId()).orElseThrow(NoSuchElementException::new);
+        return rolloutManagement.find(rollout.getId()).orElseThrow(NoSuchElementException::new);
     }
 
     private void triggerNextGroupAndExpect(final Rollout rollout, final ResultMatcher expect) throws Exception {

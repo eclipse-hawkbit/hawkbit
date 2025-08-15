@@ -46,7 +46,7 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @ExpectEvents({ @Expect(type = TargetTypeCreatedEvent.class) })
     void nonExistingEntityAccessReturnsNotPresent() {
-        assertThat(targetTypeManagement.get(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(targetTypeManagement.find(NOT_EXIST_IDL)).isNotPresent();
         assertThat(targetTypeManagement.getByName(NOT_EXIST_ID)).isNotPresent();
     }
 

@@ -108,7 +108,7 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action confirmAction(final long actionId, final Integer code, final Collection<String> deviceMessages) {
         log.trace("Action with id {} confirm request is triggered.", actionId);
-        final Action action = getActionAndThrowExceptionIfNotFound(actionId);
+        final Action action = actionRepository.getById(actionId);
         assertActionCanAcceptFeedback(action);
         final List<String> messages = new ArrayList<>();
         if (deviceMessages != null) {
@@ -124,7 +124,7 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action denyAction(final long actionId, final Integer code, final Collection<String> deviceMessages) {
         log.trace("Action with id {} deny request is triggered.", actionId);
-        final Action action = getActionAndThrowExceptionIfNotFound(actionId);
+        final Action action = actionRepository.getById(actionId);
         assertActionCanAcceptFeedback(action);
         final List<String> messages = new ArrayList<>();
         if (deviceMessages != null) {

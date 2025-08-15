@@ -1192,7 +1192,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     }
 
     private void verifyAssignedDsAndInstalledDs(final Long assignedDsId, final Long installedDsId) {
-        final Optional<Target> target = controllerManagement.getByControllerId(DMF_REGISTER_TEST_CONTROLLER_ID);
+        final Optional<Target> target = controllerManagement.findByControllerId(DMF_REGISTER_TEST_CONTROLLER_ID);
         assertThat(target).isPresent();
 
         // verify the DS was assigned to the Target

@@ -102,21 +102,6 @@ public class JpaSoftwareModuleManagement
     }
 
     @Override
-    public JpaSoftwareModule update(final Update update) {
-        final JpaSoftwareModule module = jpaRepository.findById(update.getId())
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, update.getId()));
-
-        // lock/unlock ONLY if locked flag is present!
-        if (Boolean.TRUE.equals(update.getLocked())) {
-            module.lock();
-        } else if (Boolean.FALSE.equals(update.getLocked())) {
-            module.unlock();
-        }
-
-        return super.update(update, module);
-    }
-
-    @Override
     protected List<JpaSoftwareModule> softDelete(final Collection<JpaSoftwareModule> toDelete) {
         return toDelete.stream()
                 .filter(swModule -> {
@@ -213,14 +198,8 @@ public class JpaSoftwareModuleManagement
         if (softwareModule instanceof JpaSoftwareModule jpaSoftwareModule) {
             return jpaSoftwareModule;
         } else {
-            return getById(softwareModule.getId());
+            return jpaRepository.getById(softwareModule.getId());
         }
-    }
-
-    private JpaSoftwareModule getById(final long id) {
-        return jpaRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
     }
 
     private void deleteGridFsArtifacts(final JpaSoftwareModule swModule) {

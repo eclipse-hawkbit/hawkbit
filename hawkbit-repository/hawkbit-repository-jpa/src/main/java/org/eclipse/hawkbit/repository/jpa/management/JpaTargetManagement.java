@@ -113,8 +113,7 @@ public class JpaTargetManagement
     public boolean isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(
             final String controllerId, final long distributionSetId, final String targetFilterQuery) {
         RsqlUtility.getInstance().validateRsqlFor(targetFilterQuery, TargetFields.class, JpaTarget.class);
-        final DistributionSet ds = distributionSetManagement.get(distributionSetId)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, distributionSetId));
+        final DistributionSet ds = distributionSetManagement.get(distributionSetId);
         final Long distSetTypeId = ds.getType().getId();
         final List<Specification<JpaTarget>> specList = List.of(
                 RsqlUtility.getInstance().buildRsqlSpecification(targetFilterQuery, TargetFields.class),
@@ -130,7 +129,7 @@ public class JpaTargetManagement
     @Override
     public Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(
             final long distributionSetId, final String rsql, final Pageable pageable) {
-        final DistributionSet jpaDistributionSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
+        final DistributionSet jpaDistributionSet = distributionSetManagement.get(distributionSetId);
         final Long distSetTypeId = jpaDistributionSet.getType().getId();
 
         return jpaRepository
@@ -205,7 +204,7 @@ public class JpaTargetManagement
 
     @Override
     public Page<Target> findByAssignedDistributionSet(final long distributionSetId, final Pageable pageable) {
-        final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
+        final DistributionSet validDistSet = distributionSetManagement.get(distributionSetId);
 
         return JpaManagementHelper.findAllWithCountBySpec(
                 jpaRepository,
@@ -214,7 +213,7 @@ public class JpaTargetManagement
 
     @Override
     public Page<Target> findByAssignedDistributionSetAndRsql(final long distributionSetId, final String rsql, final Pageable pageable) {
-        final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
+        final DistributionSet validDistSet = distributionSetManagement.get(distributionSetId);
 
         final List<Specification<JpaTarget>> specList = List.of(
                 RsqlUtility.getInstance().buildRsqlSpecification(rsql, TargetFields.class),
@@ -225,7 +224,7 @@ public class JpaTargetManagement
 
     @Override
     public Page<Target> findByInstalledDistributionSet(final long distributionSetId, final Pageable pageReq) {
-        final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
+        final DistributionSet validDistSet = distributionSetManagement.get(distributionSetId);
 
         return JpaManagementHelper.findAllWithCountBySpec(
                 jpaRepository, List.of(TargetSpecifications.hasInstalledDistributionSet(validDistSet.getId())), pageReq);
@@ -233,7 +232,7 @@ public class JpaTargetManagement
 
     @Override
     public Page<Target> findByInstalledDistributionSetAndRsql(final long distributionSetId, final String rsql, final Pageable pageable) {
-        final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
+        final DistributionSet validDistSet = distributionSetManagement.get(distributionSetId);
 
         final List<Specification<JpaTarget>> specList = List.of(
                 RsqlUtility.getInstance().buildRsqlSpecification(rsql, TargetFields.class),
@@ -275,7 +274,7 @@ public class JpaTargetManagement
 
     @Override
     public long countByRsqlAndNonDsAndCompatibleAndUpdatable(final long distributionSetId, final String rsql) {
-        final DistributionSet jpaDistributionSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
+        final DistributionSet jpaDistributionSet = distributionSetManagement.get(distributionSetId);
         final Long distSetTypeId = jpaDistributionSet.getType().getId();
 
         return jpaRepository.count(
@@ -314,7 +313,7 @@ public class JpaTargetManagement
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteByControllerId(final String controllerId) {
-        jpaRepository.delete(getByControllerIdAndThrowIfNotFound(controllerId));
+        jpaRepository.delete(jpaRepository.getByControllerId(controllerId));
     }
 
     @Override
@@ -386,12 +385,12 @@ public class JpaTargetManagement
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target assignType(final String controllerId, final Long targetTypeId) {
-        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
+        final JpaTarget target = jpaRepository.getByControllerId(controllerId);
 
         jpaRepository.getAccessController().ifPresent(acm ->
                 acm.assertOperationAllowed(AccessController.Operation.UPDATE, target));
 
-        final JpaTargetType targetType = getTargetTypeByIdAndThrowIfNotFound(targetTypeId);
+        final JpaTargetType targetType = targetTypeRepository.getById(targetTypeId);
         target.setTargetType(targetType);
         return jpaRepository.save(target);
     }
@@ -401,7 +400,7 @@ public class JpaTargetManagement
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target unassignType(final String controllerId) {
-        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
+        final JpaTarget target = jpaRepository.getByControllerId(controllerId);
         target.setTargetType(null);
         return jpaRepository.save(target);
     }
@@ -460,7 +459,7 @@ public class JpaTargetManagement
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void createMetadata(final String controllerId, final String key, final String value) {
-        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
+        final JpaTarget target = jpaRepository.getByControllerId(controllerId);
 
         // get the modifiable metadata map
         final Map<String, String> metadata = target.getMetadata();
@@ -477,7 +476,7 @@ public class JpaTargetManagement
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void createMetadata(final String controllerId, final Map<String, String> md) {
-        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
+        final JpaTarget target = jpaRepository.getByControllerId(controllerId);
 
         // get the modifiable metadata map
         final Map<String, String> metadata = target.getMetadata();
@@ -507,7 +506,7 @@ public class JpaTargetManagement
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteMetadata(final String controllerId, final String key) {
-        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
+        final JpaTarget target = jpaRepository.getByControllerId(controllerId);
 
         // get the modifiable metadata map
         final Map<String, String> metadata = target.getMetadata();
@@ -519,7 +518,7 @@ public class JpaTargetManagement
     }
 
     private Map<String, String> getMap(final String controllerId, final MapAttribute<JpaTarget, String, String> mapAttribute) {
-        getByControllerIdAndThrowIfNotFound(controllerId);
+        jpaRepository.getByControllerId(controllerId);
 
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
@@ -544,14 +543,6 @@ public class JpaTargetManagement
         return controllerIds.stream().filter(id -> !foundTargetMap.containsKey(id)).toList();
     }
 
-    private JpaTarget getByControllerIdAndThrowIfNotFound(final String controllerId) {
-        return jpaRepository.getByControllerId(controllerId);
-    }
-
-    private JpaTargetType getTargetTypeByIdAndThrowIfNotFound(final long id) {
-        return targetTypeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(TargetType.class, id));
-    }
-
     private void assertMetadataQuota(final Long targetId, final int requested) {
         final int limit = quotaManagement.getMaxMetaDataEntriesPerTarget();
         QuotaHelper.assertAssignmentQuota(targetId, requested, limit, "Metadata", Target.class.getSimpleName(), null);
@@ -560,8 +551,7 @@ public class JpaTargetManagement
     private List<Target> updateTag(
             final Collection<String> controllerIds, final long targetTagId, final Consumer<Collection<String>> notFoundHandler,
             final BiFunction<JpaTargetTag, JpaTarget, Target> updater) {
-        final JpaTargetTag tag = targetTagRepository.findById(targetTagId)
-                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
+        final JpaTargetTag tag = targetTagRepository.getById(targetTagId);
         final List<JpaTarget> targets = controllerIds.size() == 1 ?
                 jpaRepository.findByControllerId(controllerIds.iterator().next())
                         .map(List::of)

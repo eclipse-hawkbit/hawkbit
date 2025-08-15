@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.validation.ConstraintViolationException;
@@ -26,7 +27,6 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldExc
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -59,22 +59,42 @@ public interface RepositoryManagement<T extends BaseEntity, C, U extends Identif
     List<T> create(@NotNull @Valid Collection<C> create);
 
     /**
+     * Retrieve {@link BaseEntity} and throws exception if not found.
+     *
+     * @param id to search for
+     * @return {@link BaseEntity} in the repository with given {@link BaseEntity#getId()}
+     * @throws EntityNotFoundException if no entity with given ID exists
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    T get(long id);
+
+    /**
      * Retrieve {@link BaseEntity}
      *
      * @param id to search for
      * @return {@link BaseEntity} in the repository with given {@link BaseEntity#getId()}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<T> get(long id);
+    Optional<T> find(long id);
 
     /**
-     * Retrieves all {@link BaseEntity}s without details.
+     * Retrieves {@link BaseEntity}s by id and throws exception if any of the requested entities are not found.
+     *
+     * @param ids the ids to for
+     * @return the found {@link BaseEntity}s
+     * @throws EntityNotFoundException if at least one of the given ids does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    List<T> get(@NotEmpty Collection<Long> ids);
+
+    /**
+     * Retrieves {@link BaseEntity}s by id and skips not found.
      *
      * @param ids the ids to for
      * @return the found {@link BaseEntity}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    List<T> get(@NotEmpty Collection<Long> ids);
+    List<T> find(@NotEmpty Collection<Long> ids);
 
     /**
      * Retrieves {@link Page} of all {@link BaseEntity} of given type.
@@ -133,6 +153,18 @@ public interface RepositoryManagement<T extends BaseEntity, C, U extends Identif
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     T update(@NotNull @Valid U update);
+
+    /**
+     * Updates existing {@link BaseEntity}s.
+     *
+     * @param update bean with properties of the object to update
+     * @return updated entity map -> key is the ID of the entity, value is the updated entity
+     * @throws EntityReadOnlyException if the {@link BaseEntity} cannot be updated (e.g. is already in use)
+     * @throws EntityNotFoundException in case the {@link BaseEntity} does not exist and cannot be updated
+     * @throws ConstraintViolationException if fields are not filled as specified. Check {@link BaseEntity} for field constraints.
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    Map<Long, T> update(@NotNull @Valid Collection<U> update);
 
     /**
      * Deletes or marks as delete in case the {@link BaseEntity} is in use.

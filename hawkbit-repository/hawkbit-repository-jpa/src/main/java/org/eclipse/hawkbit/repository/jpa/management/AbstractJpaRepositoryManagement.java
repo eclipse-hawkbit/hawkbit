@@ -15,12 +15,16 @@ import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_M
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,11 +35,13 @@ import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.criteria.Root;
 import jakarta.validation.constraints.NotNull;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
@@ -48,7 +54,6 @@ import org.eclipse.hawkbit.utils.ObjectCopyUtil;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -73,6 +78,7 @@ import org.springframework.validation.annotation.Validated;
 @HandleAuthorizationDenied(handlerClass = JpaRepositoryConfiguration.ManagementExceptionThrowingMethodAuthorizationDeniedHandler.class)
 @Transactional(readOnly = true)
 @Validated
+@Slf4j
 abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, C, U extends Identifiable<Long>, R extends BaseEntityRepository<T>, A extends Enum<A> & RsqlQueryField>
         implements RepositoryManagement<T, C, U> {
 
@@ -81,6 +87,7 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
     protected final R jpaRepository;
     protected final EntityManager entityManager;
     private final Supplier<T> jpaEntityCreator;
+    private final Function<T, Boolean> isValid;
 
     protected AbstractJpaRepositoryManagement(final R jpaRepository, final EntityManager entityManager) {
         this.jpaRepository = jpaRepository;
@@ -100,6 +107,25 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
                 throw new IllegalStateException("Must NEVER happen!", e);
             }
         };
+        Method isValidMethod = null;
+        try {
+            isValidMethod = jpaRepository.getDomainClass().getMethod("isValid");
+        } catch (final NoSuchMethodException e) {
+            // if there is no isValid method, then it is always valid
+        }
+        final Method isValidMethodF = isValidMethod;
+        isValid = jpaEntity -> {
+            if (isValidMethodF == null) {
+                return true; // if there is no isValid method, then it is always valid
+            } else {
+                try {
+                    return (Boolean) isValidMethodF.invoke(jpaEntity);
+                } catch (final IllegalAccessException | InvocationTargetException e) {
+                    log.error(e.getMessage(), e);
+                    return false; // if it fails, then it is not valid
+                }
+            }
+        };
     }
 
     @Override
@@ -117,13 +143,23 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
     }
 
     @Override
-    public Optional<T> get(final long id) {
+    public T get(final long id) {
+        return jpaRepository.getById(id);
+    }
+
+    @Override
+    public Optional<T> find(final long id) {
         return jpaRepository.findById(id);
     }
 
     @Override
     public List<T> get(final Collection<Long> ids) {
-        return findAllById(ids);
+        return findAllById(ids, true);
+    }
+
+    @Override
+    public List<T> find(final Collection<Long> ids) {
+        return findAllById(ids, false);
     }
 
     @Override
@@ -157,19 +193,51 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
     @SuppressWarnings("java:S1066") // javaS1066 - better readable that way
     public T update(final U update) {
-        final T entity = jpaRepository
-                .findById(update.getId())
-                .orElseThrow(() -> new EntityNotFoundException(managementClass(), update.getId()));
-        return update(update, entity);
-    }
-
-    protected T update(final Identifiable<Long> update, final T entity) {
+        final T entity = getValid(update.getId());
+        checkUpdate(update, entity);
         // update getId has no setter in target JPA entity but shall have getter and the value shall be the same
         // otherwise the Utils will throw an exception that there is no counterpart setter for getId
         if (ObjectCopyUtil.copy(update, entity, false, this::attach)) {
             return jpaRepository.save(entity);
         } else { // otherwise it is not changed, so return the same entity
             return entity;
+        }
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
+    @SuppressWarnings("java:S1066") // javaS1066 - better readable that way
+    public Map<Long, T> update(final Collection<U> update) {
+        final Map<Long, T> toUpdate = findAllById(update.stream().map(Identifiable::getId).toList(), true)
+                .stream()
+                .filter(entity -> {
+                    if (Boolean.FALSE.equals(isValid.apply(entity))) {
+                        throw new InvalidDistributionSetException(
+                                jpaRepository.getManagementClass().getSimpleName() + " " + entity.getId() + " is invalid");
+                    }
+                    return true;
+                })
+                .collect(Collectors.toMap(Identifiable::getId, Function.identity()));
+        final List<T> toSave = new ArrayList<>(toUpdate.values());
+        for (final U u : update) {
+            final T entity = toUpdate.get(u.getId());
+            checkUpdate(u, entity);
+            // update getId has no setter in target JPA entity but shall have getter and the value shall be the same
+            // otherwise the Utils will throw an exception that there is no counterpart setter for getId
+            if (ObjectCopyUtil.copy(u, entity, false, this::attach)) {
+                toSave.add(entity);
+            }
+        }
+        if (toSave.isEmpty()) {
+            return toUpdate;
+        } else {
+            final List<T> savedEntities = jpaRepository.saveAll(toSave);
+            final Map<Long, T> result = new HashMap<>(toUpdate);
+            for (final T savedEntity : savedEntities) {
+                result.put(savedEntity.getId(), savedEntity);
+            }
+            return result;
         }
     }
 
@@ -194,10 +262,20 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
                 .orElseGet(() -> List.of(RsqlUtility.getInstance().buildRsqlSpecification(rsql, fieldsClass())));
     }
 
+    protected void checkUpdate(final U update, final T distributionSet) {}
+
     // return which are for soft deletion
     @SuppressWarnings("java:S1172") // java:S1172 - it is intended to be used by subclasses
     protected Collection<T> softDelete(final Collection<T> toDelete) {
         return Collections.emptyList();
+    }
+
+    protected T getValid(final Long id) {
+        final T jpaEntity = jpaRepository.getById(id);
+        if (Boolean.FALSE.equals(isValid.apply(jpaEntity))) {
+            throw new InvalidDistributionSetException(jpaRepository.getManagementClass().getSimpleName() + " " + id + " is invalid");
+        }
+        return jpaEntity;
     }
 
     protected void delete0(final Collection<Long> ids) {
@@ -205,7 +283,7 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
             return;
         }
 
-        final List<T> toDelete = findAllById(ids); // throws EntityNotFoundException if any of these does not exist
+        final List<T> toDelete = findAllById(ids, true); // throws EntityNotFoundException if any of these does not exist
         jpaRepository.getAccessController().ifPresent(ac -> {
             for (final T entity : toDelete) {
                 ac.assertOperationAllowed(AccessController.Operation.DELETE, entity);
@@ -240,9 +318,9 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
         }
     }
 
-    private List<T> findAllById(final Collection<Long> ids) {
+    private List<T> findAllById(final Collection<Long> ids, final boolean throwIfNotFound) {
         final List<T> foundDs = jpaRepository.findAllById(ids);
-        if (foundDs.size() != ids.size()) {
+        if (throwIfNotFound && foundDs.size() != ids.size()) {
             throw new EntityNotFoundException(managementClass(), ids, foundDs.stream().map(T::getId).toList());
         }
         return foundDs;

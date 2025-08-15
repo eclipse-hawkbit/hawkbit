@@ -16,7 +16,6 @@ import java.util.concurrent.locks.Lock;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.RolloutExecutor;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -108,7 +107,7 @@ public class JpaRolloutHandler implements RolloutHandler {
         final long startNano = System.nanoTime();
 
         DeploymentHelper.runInNewTransaction(txManager, handlerId + "-" + rolloutId, status -> {
-            rolloutManagement.get(rolloutId).ifPresentOrElse(
+            rolloutManagement.find(rolloutId).ifPresentOrElse(
                     rolloutExecutor::execute,
                     () -> log.error("Could not retrieve rollout with id {}. Will not continue with execution.", rolloutId));
             return 0L;

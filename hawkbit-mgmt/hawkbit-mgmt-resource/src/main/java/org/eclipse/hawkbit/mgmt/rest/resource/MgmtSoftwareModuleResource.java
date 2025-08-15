@@ -278,7 +278,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     private SoftwareModule findSoftwareModuleWithExceptionIfNotFound(final Long softwareModuleId, final Long artifactId) {
-        final SoftwareModule module = softwareModuleManagement.get(softwareModuleId)
+        final SoftwareModule module = softwareModuleManagement.find(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
         if (artifactId != null && module.getArtifact(artifactId).isEmpty()) {

@@ -88,8 +88,8 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
                     .stream().map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
 
             // verify targetManagement#get
-            assertThat(targetManagement.get(permittedTarget.getId())).isPresent();
-            assertThat(targetManagement.get(hiddenTarget.getId())).isEmpty();
+            assertThat(targetManagement.find(permittedTarget.getId())).isPresent();
+            assertThat(targetManagement.find(hiddenTarget.getId())).isEmpty();
 
             // verify targetManagement#get
             final List<Long> withHidden = List.of(permittedTarget.getId(), hiddenTarget.getId());

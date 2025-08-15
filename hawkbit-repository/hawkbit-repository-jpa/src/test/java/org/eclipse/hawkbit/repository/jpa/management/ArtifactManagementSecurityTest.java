@@ -26,15 +26,6 @@ import org.junit.jupiter.api.Test;
 class ArtifactManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     /**
-     * Tests ArtifactManagement#count() method
-     */
-    @Test
-    @WithUser(principal = "user", authorities = { SpPermission.READ_REPOSITORY })
-    void countPermissionCheck() {
-        assertPermissions(() -> artifactManagement.count(), List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    /**
      * Tests ArtifactManagement#create() method
      */
     @Test
@@ -55,60 +46,6 @@ class ArtifactManagementSecurityTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Tests ArtifactManagement#get() method
-     */
-    @Test
-    void getPermissionCheck() {
-        assertPermissions(() -> artifactManagement.get(1L), List.of(SpPermission.READ_REPOSITORY));
-        assertPermissions(() -> artifactManagement.get(1L), List.of(SpRole.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
-    }
-
-    /**
-     * Tests ArtifactManagement#getByFilenameAndSoftwareModule() method
-     */
-    @Test
-    void getByFilenameAndSoftwareModulePermissionCheck() {
-        assertPermissions(() -> artifactManagement.getByFilenameAndSoftwareModule("filename", 1L),
-                List.of(SpPermission.READ_REPOSITORY), List.of(SpPermission.CREATE_REPOSITORY));
-        assertPermissions(() -> artifactManagement.getByFilenameAndSoftwareModule("filename", 1L),
-                List.of(SpRole.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
-    }
-
-    /**
-     * Tests ArtifactManagement#findFirstBySHA1() method
-     */
-    @Test
-    void findFirstBySHA1PermissionCheck() {
-        assertPermissions(() -> artifactManagement.findFirstBySHA1("sha1"), List.of(SpPermission.READ_REPOSITORY));
-        assertPermissions(() -> artifactManagement.findFirstBySHA1("sha1"), List.of(SpRole.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
-    }
-
-    /**
-     * Tests ArtifactManagement#getByFilename() method
-     */
-    @Test
-    void getByFilenamePermissionCheck() {
-        assertPermissions(() -> artifactManagement.getByFilename("filename"), List.of(SpPermission.READ_REPOSITORY));
-        assertPermissions(() -> artifactManagement.getByFilename("filename"), List.of(SpRole.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
-    }
-
-    /**
-     * Tests ArtifactManagement#findBySoftwareModule() method
-     */
-    @Test
-    void findBySoftwareModulePermissionCheck() {
-        assertPermissions(() -> artifactManagement.findBySoftwareModule(1L, PAGE), List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    /**
-     * Tests ArtifactManagement#countBySoftwareModule() method
-     */
-    @Test
-    void countBySoftwareModulePermissionCheck() {
-        assertPermissions(() -> artifactManagement.countBySoftwareModule(1L), List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    /**
      * Tests ArtifactManagement#loadArtifactBinary() method
      */
     @Test
@@ -116,5 +53,4 @@ class ArtifactManagementSecurityTest extends AbstractJpaIntegrationTest {
         assertPermissions(() -> artifactManagement.loadArtifactBinary("sha1", 1L, false), List.of(SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT), List.of(SpPermission.CREATE_REPOSITORY));
         assertPermissions(() -> artifactManagement.loadArtifactBinary("sha1", 1L, false), List.of(SpRole.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
     }
-
 }

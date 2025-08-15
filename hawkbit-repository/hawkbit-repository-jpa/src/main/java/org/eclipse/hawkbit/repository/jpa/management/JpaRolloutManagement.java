@@ -305,7 +305,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public Optional<Rollout> get(final long rolloutId) {
+    public Optional<Rollout> find(final long rolloutId) {
         return rolloutRepository.findById(rolloutId).map(Rollout.class::cast);
     }
 
@@ -316,7 +316,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public Optional<Rollout> getWithDetailedStatus(final long rolloutId) {
-        final Optional<Rollout> rollout = get(rolloutId);
+        final Optional<Rollout> rollout = find(rolloutId);
         if (rollout.isEmpty()) {
             return rollout;
         }
@@ -344,7 +344,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void pauseRollout(final long rolloutId) {
-        final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
+        final JpaRollout rollout = rolloutRepository.getById(rolloutId);
         if (RolloutStatus.RUNNING != rollout.getStatus()) {
             throw new RolloutIllegalStateException("Rollout can only be paused in state running but current state is " +
                     rollout.getStatus().name().toLowerCase());
@@ -361,7 +361,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void resumeRollout(final long rolloutId) {
-        final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
+        final JpaRollout rollout = rolloutRepository.getById(rolloutId);
         if (RolloutStatus.PAUSED != rollout.getStatus()) {
             throw new RolloutIllegalStateException("Rollout can only be resumed in state paused but current state is " +
                     rollout.getStatus().name().toLowerCase());
@@ -388,7 +388,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     private Rollout approveOrDeny0(final long rolloutId, final Rollout.ApprovalDecision decision, final String remark) {
         log.debug("approveOrDeny rollout called for rollout {} with decision {}", rolloutId, decision);
-        final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
+        final JpaRollout rollout = rolloutRepository.getById(rolloutId);
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.WAITING_FOR_APPROVAL);
         switch (decision) {
             case APPROVED: {
@@ -417,7 +417,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     public Rollout start(final long rolloutId) {
         log.debug("startRollout called for rollout {}", rolloutId);
 
-        final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
+        final JpaRollout rollout = rolloutRepository.getById(rolloutId);
         RolloutHelper.checkIfRolloutCanStarted(rollout, rollout);
         rollout.setStatus(RolloutStatus.STARTING);
         rollout.setLastCheck(0);
@@ -429,7 +429,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout update(final Update update) {
-        final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(update.getId());
+        final JpaRollout rollout = rolloutRepository.getById(update.getId());
         checkIfDeleted(update.getId(), rollout.getStatus());
 
         ObjectCopyUtil.copy(update, rollout, false, UnaryOperator.identity());
@@ -441,8 +441,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout stop(long rolloutId) {
-        final JpaRollout jpaRollout = rolloutRepository.findById(rolloutId)
-                .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
+        final JpaRollout jpaRollout = rolloutRepository.getById(rolloutId);
 
         if (!ROLLOUT_STATUS_STOPPABLE.contains(jpaRollout.getStatus())) {
             log.debug("Failed to stop rollout {} because it is in {} status.", rolloutId, jpaRollout.getStatus());
@@ -459,9 +458,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long rolloutId) {
-        final JpaRollout jpaRollout = rolloutRepository.findById(rolloutId)
-                .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
-        this.delete0(jpaRollout);
+        this.delete0(rolloutRepository.getById(rolloutId));
     }
 
     @Override
@@ -490,7 +487,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void triggerNextGroup(final long rolloutId) {
-        final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
+        final JpaRollout rollout = rolloutRepository.getById(rolloutId);
         if (RolloutStatus.RUNNING != rollout.getStatus()) {
             throw new RolloutIllegalStateException("Rollout is not in running state");
         }
@@ -889,11 +886,6 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         group.setErrorAction(errorAction);
         group.setErrorActionExp(errorActionExp);
-    }
-
-    private JpaRollout getRolloutOrThrowExceptionIfNotFound(final Long rolloutId) {
-        return rolloutRepository.findById(rolloutId)
-                .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
     }
 
     private @NotNull Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRollout(final List<Long> rollouts) {

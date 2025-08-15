@@ -193,6 +193,6 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     private TargetTag findTargetTagById(final Long targetTagId) {
-        return tagManagement.get(targetTagId).orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
+        return tagManagement.find(targetTagId).orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
     }
 }

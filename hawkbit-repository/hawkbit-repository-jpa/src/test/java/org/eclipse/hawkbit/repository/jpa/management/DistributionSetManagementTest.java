@@ -91,7 +91,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
     void nonExistingEntityAccessReturnsNotPresent() {
         final DistributionSet set = testdataFactory.createDistributionSet();
-        assertThat(distributionSetManagement.get(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(distributionSetManagement.find(NOT_EXIST_IDL)).isNotPresent();
         assertThat(distributionSetManagement.getWithDetails(NOT_EXIST_IDL)).isNotPresent();
         assertThat(distributionSetManagement.findByNameAndVersion(NOT_EXIST_ID, NOT_EXIST_ID)).isNotPresent();
         assertThat(distributionSetManagement.getMetadata(set.getId()).get(NOT_EXIST_ID)).isNull();
@@ -149,7 +149,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 "DistributionSet");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.createMetadata(NOT_EXIST_IDL, "xxx", "xxx"), "DistributionSet");
-        verifyThrownExceptionBy(() -> distributionSetManagement.getOrElseThrowException(NOT_EXIST_IDL), "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.get(NOT_EXIST_IDL), "DistributionSet");
         verifyThrownExceptionBy(() -> distributionSetManagement.getValidAndComplete(NOT_EXIST_IDL), "DistributionSet");
     }
 
@@ -292,7 +292,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .as("ds has wrong tag size")
                 .hasSize(1));
 
-        final DistributionSetTag findDistributionSetTag = getOrThrow(distributionSetTagManagement.get(tag.getId()));
+        final DistributionSetTag findDistributionSetTag = getOrThrow(distributionSetTagManagement.find(tag.getId()));
 
         assertThat(assignedDS)
                 .as("assigned ds has wrong size")
@@ -302,7 +302,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .unassignTag(List.of(assignDS.get(0)), findDistributionSetTag.getId()).get(0);
         assertThat(unAssignDS.getId()).as("unassigned ds is wrong").isEqualTo(assignDS.get(0));
         assertThat(unAssignDS.getTags()).as("unassigned ds has wrong tag size").isEmpty();
-        assertThat(distributionSetTagManagement.get(tag.getId())).isPresent();
+        assertThat(distributionSetTagManagement.find(tag.getId())).isPresent();
         assertThat(distributionSetManagement.findByTag(tag.getId(), PAGE).getNumberOfElements())
                 .as("ds tag ds has wrong ds size").isEqualTo(3);
 
@@ -508,7 +508,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // create an DS meta data entry
         insertMetadata(knownKey, knownValue, ds);
 
-        final DistributionSet changedLockRevisionDS = getOrThrow(distributionSetManagement.get(ds.getId()));
+        final DistributionSet changedLockRevisionDS = getOrThrow(distributionSetManagement.find(ds.getId()));
         assertThat(changedLockRevisionDS.getOptLockRevision()).isEqualTo(2);
 
         waitNextMillis();
@@ -516,7 +516,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         distributionSetManagement.createMetadata(ds.getId(), knownKey, knownUpdateValue);
         // we are updating the sw metadata so also modifying the base software
         // module so opt lock revision must be three
-        final DistributionSet reloadedDS = getOrThrow(distributionSetManagement.get(ds.getId()));
+        final DistributionSet reloadedDS = getOrThrow(distributionSetManagement.find(ds.getId()));
         assertThat(reloadedDS.getOptLockRevision()).isEqualTo(3);
         assertThat(reloadedDS.getLastModifiedAt()).isPositive();
 
@@ -562,7 +562,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         assignDistributionSet(dsDeleted, testdataFactory.createTargets(5));
         distributionSetManagement.delete(dsDeleted.getId());
-        dsDeleted = getOrThrow(distributionSetManagement.get(dsDeleted.getId()));
+        dsDeleted = getOrThrow(distributionSetManagement.find(dsDeleted.getId()));
 
         dsGroup1 = assignTag(dsGroup1, dsTagA);
         dsTagA = getOrThrow(distributionSetTagRepository.findById(dsTagA.getId()));
@@ -600,9 +600,9 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void lockDistributionSet() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
-        assertThat(distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked).orElse(true)).isFalse();
+        assertThat(distributionSetManagement.find(distributionSet.getId()).map(DistributionSet::isLocked).orElse(true)).isFalse();
         distributionSetManagement.lock(distributionSet);
-        assertThat(distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false)).isTrue();
+        assertThat(distributionSetManagement.find(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false)).isTrue();
         // assert software modules are locked
         assertThat(distributionSet.getModules().size()).isNotZero();
         distributionSetManagement.getWithDetails(distributionSet.getId()).map(DistributionSet::getModules).orElseThrow()
@@ -616,10 +616,10 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     void deleteUnassignedLockedDistributionSet() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
         distributionSetManagement.lock(distributionSet);
-        assertThat(distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false)).isTrue();
+        assertThat(distributionSetManagement.find(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false)).isTrue();
 
         distributionSetManagement.delete(distributionSet.getId());
-        assertThat(distributionSetManagement.get(distributionSet.getId())).isEmpty();
+        assertThat(distributionSetManagement.find(distributionSet.getId())).isEmpty();
     }
 
     /**
@@ -629,13 +629,13 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     void deleteAssignedLockedDistributionSet() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
         distributionSetManagement.lock(distributionSet);
-        assertThat(distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false)).isTrue();
+        assertThat(distributionSetManagement.find(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false)).isTrue();
 
         final Target target = testdataFactory.createTarget();
         assignDistributionSet(distributionSet.getId(), target.getControllerId());
 
         distributionSetManagement.delete(distributionSet.getId());
-        assertThat(distributionSetManagement.getOrElseThrowException(distributionSet.getId()).isDeleted()).isTrue();
+        assertThat(distributionSetManagement.get(distributionSet.getId()).isDeleted()).isTrue();
     }
 
     /**
@@ -645,9 +645,9 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     void unlockDistributionSet() {
         DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
         distributionSet = distributionSetManagement.lock(distributionSet);
-        assertThat(distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false)).isTrue();
+        assertThat(distributionSetManagement.find(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false)).isTrue();
         distributionSet = distributionSetManagement.unlock(distributionSet);
-        assertThat(distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked).orElse(true)).isFalse();
+        assertThat(distributionSetManagement.find(distributionSet.getId()).map(DistributionSet::isLocked).orElse(true)).isFalse();
         // assert software modules are not unlocked
         assertThat(distributionSet.getModules().size()).isNotZero();
         distributionSetManagement.getWithDetails(distributionSet.getId()).map(DistributionSet::getModules).orElseThrow()
@@ -664,7 +664,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(softwareModuleCount).isNotZero();
         distributionSetManagement.lock(distributionSet);
         final Long distributionSetId = distributionSet.getId();
-        assertThat(distributionSetManagement.get(distributionSetId).map(DistributionSet::isLocked).orElse(false)).isTrue();
+        assertThat(distributionSetManagement.find(distributionSetId).map(DistributionSet::isLocked).orElse(false)).isTrue();
 
         // try add
         final List<Long> moduleIds = List.of(testdataFactory.createSoftwareModule("sm-1").getId());
@@ -709,7 +709,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         skipTags.forEach(skipTag -> {
             DistributionSet distributionSetWithSkipTag = testdataFactory.createDistributionSet("ds-skip-" + skipTag.getName());
             distributionSetManagement.assignTag(List.of(distributionSetWithSkipTag.getId()), skipTag.getId());
-            distributionSetWithSkipTag = distributionSetManagement.get(distributionSetWithSkipTag.getId()).orElseThrow();
+            distributionSetWithSkipTag = distributionSetManagement.find(distributionSetWithSkipTag.getId()).orElseThrow();
             // assert that implicit lock isn't applicable for skip tags
             assertThat(distributionSetManagement.shouldLockImplicitly(distributionSetWithSkipTag)).isFalse();
         });
@@ -725,7 +725,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .as("Locking an incomplete distribution set should throw an exception")
                 .isThrownBy(() -> distributionSetManagement.lock(incompleteDistributionSet));
         assertThat(
-                distributionSetManagement.get(incompleteDistributionSet.getId()).map(DistributionSet::isLocked).orElse(true))
+                distributionSetManagement.find(incompleteDistributionSet.getId()).map(DistributionSet::isLocked).orElse(true))
                 .isFalse();
     }
 
@@ -909,12 +909,12 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds2.getId())).hasSize(1);
         assertThat(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds3.getId())).isEmpty();
 
-        Optional<Rollout> rollout = rolloutManagement.get(rollout1.getId());
+        Optional<Rollout> rollout = rolloutManagement.find(rollout1.getId());
         rollout.ifPresent(value -> assertThat(Rollout.RolloutStatus.valueOf(
                 String.valueOf(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds1.getId()).get(0).getName()))).isEqualTo(
                 value.getStatus()));
 
-        rollout = rolloutManagement.get(rollout2.getId());
+        rollout = rolloutManagement.find(rollout2.getId());
         rollout.ifPresent(value -> assertThat(Rollout.RolloutStatus.valueOf(
                 String.valueOf(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds2.getId()).get(0).getName()))).isEqualTo(
                 value.getStatus()));

@@ -261,7 +261,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(distributionSetTagManagement.get(original.getId())).isNotPresent();
+        assertThat(distributionSetTagManagement.find(original.getId())).isNotPresent();
     }
 
     /**

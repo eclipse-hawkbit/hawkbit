@@ -181,7 +181,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        testType = distributionSetTypeManagement.get(testType.getId()).get();
+        testType = distributionSetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
         assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
         assertThat(testType.getOptionalModuleTypes()).isEmpty();
@@ -207,7 +207,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        testType = distributionSetTypeManagement.get(testType.getId()).get();
+        testType = distributionSetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
         assertThat(testType.getOptionalModuleTypes()).containsExactly(osType);
         assertThat(testType.getMandatoryModuleTypes()).isEmpty();
@@ -366,7 +366,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        testType = distributionSetTypeManagement.get(testType.getId()).get();
+        testType = distributionSetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
         assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
         assertThat(testType.getMandatoryModuleTypes()).isEmpty();
@@ -385,7 +385,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        testType = distributionSetTypeManagement.get(testType.getId()).get();
+        testType = distributionSetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
         assertThat(testType.getOptionalModuleTypes()).isEmpty();
         assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);

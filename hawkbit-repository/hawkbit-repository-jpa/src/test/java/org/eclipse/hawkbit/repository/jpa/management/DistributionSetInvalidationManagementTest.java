@@ -63,7 +63,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation);
         rolloutHandler.handleAll();
 
-        assertThat(targetFilterQueryManagement.get(invalidationTestData.getTargetFilterQuery().getId()).get()
+        assertThat(targetFilterQueryManagement.find(invalidationTestData.getTargetFilterQuery().getId()).get()
                 .getAutoAssignDistributionSet()).isNull();
         assertThat(rolloutRepository.findById(invalidationTestData.getRollout().getId()).get().getStatus())
                 .isNotIn(RolloutStatus.STOPPING, RolloutStatus.FINISHED);
@@ -92,7 +92,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation);
         rolloutHandler.handleAll();
 
-        assertThat(targetFilterQueryManagement.get(invalidationTestData.getTargetFilterQuery().getId()).get()
+        assertThat(targetFilterQueryManagement.find(invalidationTestData.getTargetFilterQuery().getId()).get()
                 .getAutoAssignDistributionSet()).isNull();
         assertThat(rolloutRepository.findById(invalidationTestData.getRollout().getId()).get().getStatus())
                 .isEqualTo(RolloutStatus.READY);
@@ -124,7 +124,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation);
         rolloutHandler.handleAll();
 
-        assertThat(targetFilterQueryManagement.get(invalidationTestData.getTargetFilterQuery().getId()).get()
+        assertThat(targetFilterQueryManagement.find(invalidationTestData.getTargetFilterQuery().getId()).get()
                 .getAutoAssignDistributionSet()).isNull();
         // rollout should be deleted when force invalidation
         assertThat(rolloutRepository.findById(invalidationTestData.getRollout().getId())).isEmpty();
@@ -146,7 +146,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
 
         distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation);
 
-        assertThat(targetFilterQueryManagement.get(invalidationTestData.getTargetFilterQuery().getId()).get()
+        assertThat(targetFilterQueryManagement.find(invalidationTestData.getTargetFilterQuery().getId()).get()
                 .getAutoAssignDistributionSet()).isNull();
         assertThat(rolloutRepository.findById(invalidationTestData.getRollout().getId()).get().getStatus())
                 .isIn(RolloutStatus.STOPPING, RolloutStatus.FINISHED);

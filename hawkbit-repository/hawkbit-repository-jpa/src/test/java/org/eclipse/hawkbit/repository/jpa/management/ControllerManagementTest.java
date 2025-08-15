@@ -332,8 +332,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule module = testdataFactory.createSoftwareModuleOs();
 
         assertThat(controllerManagement.findActionWithDetails(NOT_EXIST_IDL)).isNotPresent();
-        assertThat(controllerManagement.getByControllerId(NOT_EXIST_ID)).isNotPresent();
-        assertThat(controllerManagement.get(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(controllerManagement.findByControllerId(NOT_EXIST_ID)).isNotPresent();
+        assertThat(controllerManagement.find(NOT_EXIST_IDL)).isNotPresent();
         assertThat(controllerManagement.getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(),
                 module.getId())).isNotPresent();
 
@@ -1952,14 +1952,14 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertAssignedDistributionSetId(final String controllerId, final Long dsId) {
-        final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
+        final Optional<Target> target = controllerManagement.findByControllerId(controllerId);
         assertThat(target).isPresent();
         final DistributionSet assignedDistributionSet = ((JpaTarget) target.get()).getAssignedDistributionSet();
         assertThat(assignedDistributionSet.getId()).isEqualTo(dsId);
     }
 
     private void assertInstalledDistributionSetId(final String controllerId, final Long dsId) {
-        final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
+        final Optional<Target> target = controllerManagement.findByControllerId(controllerId);
         assertThat(target).isPresent();
         final DistributionSet installedDistributionSet = ((JpaTarget) target.get()).getInstalledDistributionSet();
         if (dsId == null) {

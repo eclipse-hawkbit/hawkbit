@@ -1341,12 +1341,12 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         distributionSetManagement.delete(dsA.getId());
 
-        assertThat(distributionSetManagement.get(dsA.getId())).isNotPresent();
+        assertThat(distributionSetManagement.find(dsA.getId())).isNotPresent();
 
         // // verify that the ds is not physically deleted
         for (final DistributionSet ds : deploymentResult.getDistributionSets()) {
             distributionSetManagement.delete(ds.getId());
-            final DistributionSet foundDS = distributionSetManagement.get(ds.getId()).get();
+            final DistributionSet foundDS = distributionSetManagement.find(ds.getId()).get();
             assertThat(foundDS).as("founded should not be null").isNotNull();
             assertThat(foundDS.isDeleted()).as("found ds should be deleted").isTrue();
         }
@@ -1780,7 +1780,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private Slice<Action> findActionsByDistributionSet(final Pageable pageable, final long distributionSetId) {
-        distributionSetManagement.get(distributionSetId).orElseThrow(() ->
+        distributionSetManagement.find(distributionSetId).orElseThrow(() ->
                 new EntityNotFoundException(DistributionSet.class, distributionSetId));
         return actionRepository
                 .findAll(byDistributionSetId(distributionSetId), pageable)

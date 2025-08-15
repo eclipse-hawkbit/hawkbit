@@ -27,7 +27,6 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
@@ -132,7 +131,7 @@ class JpaTargetFilterQueryManagement
 
     @Override
     public Page<TargetFilterQuery> findByAutoAssignDSAndRsql(final long setId, final String rsql, final Pageable pageable) {
-        final DistributionSet distributionSet = distributionSetManagement.getOrElseThrowException(setId);
+        final DistributionSet distributionSet = distributionSetManagement.get(setId);
 
         final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>(2);
         specList.add(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet));
@@ -152,7 +151,7 @@ class JpaTargetFilterQueryManagement
     @Override
     @Transactional
     public TargetFilterQuery updateAutoAssignDS(final AutoAssignDistributionSetUpdate update) {
-        final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(update.targetFilterId());
+        final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(update.targetFilterId());
         if (update.dsId() == null) {
             targetFilterQuery.setAccessControlContext(null);
             targetFilterQuery.setAutoAssignDistributionSet(null);
@@ -201,12 +200,7 @@ class JpaTargetFilterQueryManagement
     }
 
     private boolean isConfirmationFlowEnabled() {
-        return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
-                .isConfirmationFlowEnabled();
-    }
-
-    private JpaTargetFilterQuery findTargetFilterQueryOrThrowExceptionIfNotFound(final Long queryId) {
-        return jpaRepository.findById(queryId).orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, queryId));
+        return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).isConfirmationFlowEnabled();
     }
 
     private void assertMaxTargetsQuota(final String query, final String filterName, final long dsId) {
@@ -245,7 +239,7 @@ class JpaTargetFilterQueryManagement
     }
 
     private void validate(final Update update) {
-        final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(update.getId());
+        final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(update.getId());
         Optional.ofNullable(update.getQuery()).ifPresent(query -> {
             // validate the RSQL query syntax
             RsqlUtility.getInstance().validateRsqlFor(query, TargetFields.class, JpaTarget.class);

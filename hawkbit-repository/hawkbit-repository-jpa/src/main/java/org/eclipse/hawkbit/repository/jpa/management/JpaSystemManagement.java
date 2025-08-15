@@ -267,15 +267,13 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TenantMetaData updateTenantMetadata(final long defaultDsType) {
         final JpaTenantMetaData data = (JpaTenantMetaData) getTenantMetadataWithoutDetails();
-        data.setDefaultDsType(distributionSetTypeRepository.findById(defaultDsType)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, defaultDsType)));
+        data.setDefaultDsType(distributionSetTypeRepository.getById(defaultDsType));
         return tenantMetaDataRepository.save(data);
     }
 
     @Override
     public TenantMetaData getTenantMetadata(final long tenantId) {
-        return tenantMetaDataRepository.findById(tenantId)
-                .orElseThrow(() -> new EntityNotFoundException(TenantMetaData.class, tenantId));
+        return tenantMetaDataRepository.findById(tenantId).orElseThrow(() -> new EntityNotFoundException(TenantMetaData.class, tenantId));
     }
 
     private static boolean isPostgreSql(final JpaProperties properties) {

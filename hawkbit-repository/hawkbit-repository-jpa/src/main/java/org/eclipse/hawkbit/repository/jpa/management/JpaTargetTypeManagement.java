@@ -99,7 +99,7 @@ public class JpaTargetTypeManagement
                     dsTypes.stream().map(DistributionSetType::getId).toList());
         }
 
-        final JpaTargetType type = getByIdAndThrowIfNotFound(id);
+        final JpaTargetType type = jpaRepository.getById(id);
         assertDistributionSetTypeQuota(id, distributionSetTypeIds.size(), typeId -> type.getDistributionSetTypes().size());
         dsTypes.forEach(type::addCompatibleDistributionSetType);
 
@@ -111,25 +111,14 @@ public class JpaTargetTypeManagement
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetType unassignDistributionSetType(final long id, final long distributionSetTypeId) {
-        final JpaTargetType type = getByIdAndThrowIfNotFound(id);
-        assertDistributionSetTypeExists(distributionSetTypeId);
+        final JpaTargetType type = jpaRepository.getById(id);
+        if (!distributionSetTypeRepository.existsById(distributionSetTypeId)) {
+            throw new EntityNotFoundException(DistributionSetType.class, distributionSetTypeId);
+        }
 
         type.removeDistributionSetType(distributionSetTypeId);
 
         return jpaRepository.save(type);
-    }
-
-    @SuppressWarnings("java:S2201") // the idea is just to check for distribution set type existence
-    private void assertDistributionSetTypeExists(final Long typeId) {
-        distributionSetTypeRepository
-                .findById(typeId)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, typeId));
-    }
-
-    private JpaTargetType getByIdAndThrowIfNotFound(final Long id) {
-        return jpaRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(TargetType.class, id));
     }
 
     /**

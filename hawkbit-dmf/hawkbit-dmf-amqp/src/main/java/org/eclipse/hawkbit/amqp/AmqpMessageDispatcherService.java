@@ -413,7 +413,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private void sendUpdateMessageToTargets(
             final Long dsId, final Map<String, ActionProperties> actionsPropsByTargetId, final List<Target> targets) {
-        distributionSetManagement.get(dsId).ifPresent(ds -> {
+        distributionSetManagement.find(dsId).ifPresent(ds -> {
             final Map<SoftwareModule, Map<String, String>> softwareModules = getSoftwareModulesWithMetadata(ds);
             sendUpdateMessageToTargets(actionsPropsByTargetId, targets, softwareModules);
         });

@@ -13,7 +13,6 @@ import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement.Create;
 import org.eclipse.hawkbit.repository.TargetTypeManagement.Update;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -101,7 +100,7 @@ class TargetTypeManagementSecurityTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void getPermissionsCheck() {
-        assertPermissions(() -> targetTypeManagement.get(1L), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> targetTypeManagement.find(1L), List.of(SpPermission.READ_TARGET));
     }
 
     /**

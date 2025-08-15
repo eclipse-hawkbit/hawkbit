@@ -26,6 +26,7 @@ import jakarta.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.artifact.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -67,7 +68,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
     void nonExistingEntityAccessReturnsNotPresent() {
         final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
-        assertThat(softwareModuleManagement.get(1234L)).isNotPresent();
+        assertThat(softwareModuleManagement.find(1234L)).isNotPresent();
         final Long moduleId = module.getId();
         assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> softwareModuleManagement.getMetadata(moduleId, NOT_EXIST_ID));
     }
@@ -223,10 +224,10 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // [VERIFY EXPECTED RESULT]:
         // verify: SoftwareModule is deleted
         assertThat(softwareModuleRepository.findAll()).isEmpty();
-        assertThat(softwareModuleManagement.get(unassignedModule.getId())).isNotPresent();
+        assertThat(softwareModuleManagement.find(unassignedModule.getId())).isNotPresent();
 
         // verify: binary data of artifact is deleted
-        assertArtifactNull(artifact1, artifact2);
+        assertArtifactDoesntExist(artifact1, artifact2);
 
         // verify: metadata of artifact is deleted
         assertThat(artifactRepository.findById(artifact1.getId())).isNotPresent();
@@ -249,7 +250,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         // [VERIFY EXPECTED RESULT]:
         // verify: assignedModule is marked as deleted
-        assignedModule = softwareModuleManagement.get(assignedModule.getId()).get();
+        assignedModule = softwareModuleManagement.find(assignedModule.getId()).get();
         assertTrue(assignedModule.isDeleted(), "The module should be flagged as deleted");
         assertThat(softwareModuleManagement.findAll(PAGE)).isEmpty();
         assertThat(softwareModuleManagement.findByRsql("name==*", PAGE)).isEmpty();
@@ -260,7 +261,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final Iterator<Artifact> artifactsIt = assignedModule.getArtifacts().iterator();
         final Artifact artifact1 = artifactsIt.next();
         final Artifact artifact2 = artifactsIt.next();
-        assertArtifactNull(artifact1, artifact2);
+        assertArtifactDoesntExist(artifact1, artifact2);
 
         // verify: artifact meta data is still available
         assertThat(artifactRepository.findById(artifact1.getId())).isNotNull();
@@ -293,7 +294,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         // [VERIFY EXPECTED RESULT]:
         // verify: assignedModule is marked as deleted
-        assignedModule = softwareModuleManagement.get(assignedModule.getId()).get();
+        assignedModule = softwareModuleManagement.find(assignedModule.getId()).get();
         assertTrue(assignedModule.isDeleted(), "The found module should be flagged deleted");
         assertThat(softwareModuleManagement.findAll(PAGE)).isEmpty();
         assertThat(softwareModuleRepository.findAll()).hasSize(1);
@@ -302,7 +303,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final Iterator<Artifact> artifactsIt = assignedModule.getArtifacts().iterator();
         final Artifact artifact1 = artifactsIt.next();
         final Artifact artifact2 = artifactsIt.next();
-        assertArtifactNull(artifact1, artifact2);
+        assertArtifactDoesntExist(artifact1, artifact2);
 
         // verify: artifact meta data is still available
         assertThat(artifactRepository.findById(artifact1.getId())).isNotNull();
@@ -325,7 +326,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // [STEP2]: Create newArtifactX and add it to SoftwareModuleX
         artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(source), moduleX.getId(), "artifactx",
                 false, artifactSize));
-        moduleX = softwareModuleManagement.get(moduleX.getId()).get();
+        moduleX = softwareModuleManagement.find(moduleX.getId()).get();
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
         // [STEP3]: Create SoftwareModuleY and add the same ArtifactX
@@ -334,7 +335,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // [STEP4]: Assign the same ArtifactX to SoftwareModuleY
         artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(source), moduleY.getId(), "artifactx",
                 false, artifactSize));
-        moduleY = softwareModuleManagement.get(moduleY.getId()).get();
+        moduleY = softwareModuleManagement.find(moduleY.getId()).get();
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
         // [STEP5]: Delete SoftwareModuleX
@@ -343,8 +344,8 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // [VERIFY EXPECTED RESULT]:
         // verify: SoftwareModuleX is deleted, and ModuelY still exists
         assertThat(softwareModuleRepository.findAll()).hasSize(1);
-        assertThat(softwareModuleManagement.get(moduleX.getId())).isNotPresent();
-        assertThat(softwareModuleManagement.get(moduleY.getId())).isPresent();
+        assertThat(softwareModuleManagement.find(moduleX.getId())).isNotPresent();
+        assertThat(softwareModuleManagement.find(moduleY.getId())).isPresent();
 
         // verify: binary data of artifact is not deleted
         assertArtifactNotNull(artifactY);
@@ -370,9 +371,8 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // [STEP1]: Create SoftwareModuleX and add a new ArtifactX
         SoftwareModule moduleX = createSoftwareModuleWithArtifacts(osType, "modulex", "v1.0", 0);
 
-        artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(source), moduleX.getId(), "artifactx",
-                false, artifactSize));
-        moduleX = softwareModuleManagement.get(moduleX.getId()).get();
+        artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false, artifactSize));
+        moduleX = softwareModuleManagement.find(moduleX.getId()).get();
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
         // [STEP2]: Create SoftwareModuleY and add the same ArtifactX
@@ -380,7 +380,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(source), moduleY.getId(), "artifactx",
                 false, artifactSize));
-        moduleY = softwareModuleManagement.get(moduleY.getId()).get();
+        moduleY = softwareModuleManagement.find(moduleY.getId()).get();
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
         // [STEP3]: Assign SoftwareModuleX to DistributionSetX and to target
@@ -400,8 +400,8 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         softwareModuleManagement.delete(moduleY.getId());
 
         // [VERIFY EXPECTED RESULT]:
-        moduleX = softwareModuleManagement.get(moduleX.getId()).get();
-        moduleY = softwareModuleManagement.get(moduleY.getId()).get();
+        moduleX = softwareModuleManagement.find(moduleX.getId()).get();
+        moduleY = softwareModuleManagement.find(moduleY.getId()).get();
 
         // verify: SoftwareModuleX and SoftwareModule are marked as deleted
         assertThat(moduleX).isNotNull();
@@ -412,7 +412,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(softwareModuleRepository.findAll()).hasSize(2);
 
         // verify: binary data of artifact is deleted
-        assertArtifactNull(artifactX, artifactY);
+        assertArtifactDoesntExist(artifactX, artifactY);
 
         // verify: meta data of artifactX and artifactY is not deleted
         assertThat(artifactRepository.findById(artifactY.getId())).isNotNull();
@@ -475,7 +475,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
                         knownKey1, new MetadataValueCreate(knownValue1, true),
                         knownKey2, new MetadataValueCreate(knownValue2)));
 
-        final SoftwareModule changedLockRevisionModule = softwareModuleManagement.get(softwareModule.getId()).get();
+        final SoftwareModule changedLockRevisionModule = softwareModuleManagement.find(softwareModule.getId()).get();
         assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2);
 
         assertThat(softwareModuleManagement.getMetadata(softwareModule.getId(), knownKey1)).satisfies(metadata -> {
@@ -560,7 +560,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         // base software module should have now the opt lock revision one
         // because we are modifying the base software module
-        SoftwareModule changedLockRevisionModule = softwareModuleManagement.get(ah.getId()).get();
+        SoftwareModule changedLockRevisionModule = softwareModuleManagement.find(ah.getId()).get();
         assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2);
 
         // update the software module metadata
@@ -569,7 +569,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         // we are updating the sw metadata so also modifying the base software
         // module so opt lock revision must be two
-        changedLockRevisionModule = softwareModuleManagement.get(ah.getId()).get();
+        changedLockRevisionModule = softwareModuleManagement.find(ah.getId()).get();
         assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(3);
 
         // verify updated meta data contains the updated value
@@ -638,9 +638,9 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void lockSoftwareModule() {
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModule("sm-1");
-        assertThat(softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(true)).isFalse();
+        assertThat(softwareModuleManagement.find(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(true)).isFalse();
         softwareModuleManagement.lock(softwareModule);
-        assertThat(softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(false)).isTrue();
+        assertThat(softwareModuleManagement.find(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(false)).isTrue();
     }
 
     /**
@@ -650,9 +650,9 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     void unlockSoftwareModule() {
         SoftwareModule softwareModule = testdataFactory.createSoftwareModule("sm-1");
         softwareModule = softwareModuleManagement.lock(softwareModule);
-        assertThat(softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(false)).isTrue();
+        assertThat(softwareModuleManagement.find(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(false)).isTrue();
         softwareModule = softwareModuleManagement.unlock(softwareModule);
-        assertThat(softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(true)).isFalse();
+        assertThat(softwareModuleManagement.find(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(true)).isFalse();
     }
 
     /**
@@ -664,10 +664,10 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final Long softwareModuleId = softwareModule.getId();
         artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(new byte[] { 1 }), softwareModuleId, "artifact1", false, 1));
         // update software module reference since it is modified, old reference is stale
-        final int artifactCount = (softwareModule = softwareModuleManagement.get(softwareModuleId).orElseThrow()).getArtifacts().size();
+        final int artifactCount = (softwareModule = softwareModuleManagement.find(softwareModuleId).orElseThrow()).getArtifacts().size();
         assertThat(artifactCount).isNotZero();
         softwareModuleManagement.lock(softwareModule);
-        assertThat(softwareModuleManagement.get(softwareModuleId).map(SoftwareModule::isLocked).orElse(false)).isTrue();
+        assertThat(softwareModuleManagement.find(softwareModuleId).map(SoftwareModule::isLocked).orElse(false)).isTrue();
 
         // try add
         final ArtifactUpload artifactUpload = new ArtifactUpload(new ByteArrayInputStream(new byte[] { 2 }), softwareModuleId, "artifact2",
@@ -675,21 +675,18 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(LockedException.class)
                 .as("Attempt to modify a locked SM artifacts should throw an exception")
                 .isThrownBy(() -> artifactManagement.create(artifactUpload));
-        assertThat(softwareModuleManagement.get(softwareModuleId).get().getArtifacts())
+        assertThat(softwareModuleManagement.find(softwareModuleId).get().getArtifacts())
                 .as("Artifacts shall not be added to a locked SM.")
                 .hasSize(artifactCount);
 
         // try remove
-        final long artifactId = softwareModuleManagement.get(softwareModuleId).get().getArtifacts().stream().findFirst().get().getId();
+        final long artifactId = softwareModuleManagement.find(softwareModuleId).get().getArtifacts().stream().findFirst().get().getId();
         assertThatExceptionOfType(LockedException.class)
                 .as("Attempt to modify a locked SM artifacts should throw an exception")
                 .isThrownBy(() -> artifactManagement.delete(artifactId));
-        assertThat(softwareModuleManagement.get(softwareModuleId).get().getArtifacts())
+        assertThat(softwareModuleManagement.find(softwareModuleId).get().getArtifacts())
                 .as("Artifact shall not be removed from a locked SM.")
                 .hasSize(artifactCount);
-        assertThat(artifactManagement.get(artifactId))
-                .as("Artifact shall not be removed if belongs to a locked SM.")
-                .isPresent();
     }
 
     /**
@@ -705,7 +702,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         softwareModuleManagement.delete(modules.get(0).getId());
 
         distributionSetManagement.lock(distributionSet);
-        assertThat(distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false)).isTrue();
+        assertThat(distributionSetManagement.find(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false)).isTrue();
 
         // try to delete SM of a locked DS
         final Long moduleId = modules.get(1).getId();
@@ -749,7 +746,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         }
 
         // Verify correct Creation of SoftwareModule and corresponding artifacts
-        softwareModule = softwareModuleManagement.get(softwareModule.getId()).get();
+        softwareModule = softwareModuleManagement.find(softwareModule.getId()).get();
         assertThat(softwareModuleRepository.findAll()).hasSize((int) countSoftwareModule + 1);
 
         final List<Artifact> artifacts = softwareModule.getArtifacts();
@@ -767,15 +764,17 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(artifactRepository.findAll()).hasSize(results.length);
         for (final Artifact result : results) {
             assertThat(result.getId()).isNotNull();
-            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash()))
+            assertThat(binaryArtifactRepository.getBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash()))
                     .isNotNull();
         }
     }
 
-    private void assertArtifactNull(final Artifact... results) {
+    private void assertArtifactDoesntExist(final Artifact... results) {
         for (final Artifact result : results) {
-            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash()))
-                    .isNull();
+            final String currentTenant = tenantAware.getCurrentTenant();
+            final String sha1Hash = result.getSha1Hash();
+            assertThatExceptionOfType(ArtifactBinaryNotFoundException.class)
+                    .isThrownBy(() -> binaryArtifactRepository.getBySha1(currentTenant, sha1Hash));
         }
     }
 }

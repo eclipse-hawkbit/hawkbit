@@ -279,7 +279,7 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
     protected void registerSameTargetAndAssertBasedOnVersion(final String controllerId, final String name,
             final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus,
             final Map<String, String> attributes) {
-        final int version = controllerManagement.getByControllerId(controllerId).get().getOptLockRevision();
+        final int version = controllerManagement.findByControllerId(controllerId).get().getOptLockRevision();
         registerAndAssertTargetWithExistingTenant(controllerId, name, existingTargetsAfterCreation,
                 expectedTargetStatus, CREATED_BY, attributes, () -> findTargetBasedOnNewVersion(controllerId, version));
     }
@@ -364,7 +364,7 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
     }
 
     protected void assertUpdateAttributes(final String controllerId, final Map<String, String> attributes) {
-        waitUntilIsPresent(() -> controllerManagement.getByControllerId(controllerId));
+        waitUntilIsPresent(() -> controllerManagement.findByControllerId(controllerId));
         await().untilAsserted(() -> {
             try {
                 final Map<String, String> controllerAttributes = SecurityContextSwitch.callAsPrivileged(
@@ -443,7 +443,7 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
     }
 
     private Optional<Target> findTargetBasedOnNewVersion(final String controllerId, final int version) {
-        final Optional<Target> target2 = controllerManagement.getByControllerId(controllerId);
+        final Optional<Target> target2 = controllerManagement.findByControllerId(controllerId);
         if (version < target2.get().getOptLockRevision()) {
             return target2;
         }

@@ -289,7 +289,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void nonExistingEntityAccessReturnsNotPresent() {
-        assertThat(rolloutManagement.get(NOT_EXIST_IDL)).isNotPresent();
+        assertThat(rolloutManagement.find(NOT_EXIST_IDL)).isNotPresent();
         assertThat(rolloutManagement.getByName(NOT_EXIST_ID)).isNotPresent();
         assertThat(rolloutManagement.getWithDetailedStatus(NOT_EXIST_IDL)).isNotPresent();
     }
@@ -570,7 +570,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
             rolloutHandler.handleAll();
             // finish running actions, 2 actions should be finished
             assertThat(changeStatusForAllRunningActions(createdRollout, Status.FINISHED)).isEqualTo(2);
-            assertThat(getRollout(createdRollout.getId()).getStatus()).isEqualTo(RolloutStatus.RUNNING);
+            assertThat(findRollout(createdRollout.getId()).getStatus()).isEqualTo(RolloutStatus.RUNNING);
 
         }
         // check rollout to see that all actions and all groups are finished and
@@ -857,7 +857,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
      * Verify that target actions of a rollout get cancelled when another rollout with same targets gets started.
      */
     @Test
-    void targetsOfRolloutGetDistributionSetAssignmentByOtherRollout() {
+    void targetsOfRolloutFindDistributionSetAssignmentByOtherRollout() {
 
         final int amountTargetsForRollout = 15;
         final int amountOtherTargets = 5;
@@ -1187,7 +1187,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
      * Verify that the percent count is acting like aspected when targets move to the status finished or error.
      */
     @Test
-    void getFinishedPercentForRunningGroup() {
+    void findFinishedPercentForRunningGroup() {
 
         final int amountTargetsForRollout = 10;
         final int amountGroups = 2;
@@ -1363,7 +1363,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // Run here, because scheduler is disabled during tests
         rolloutHandler.handleAll();
 
-        myRollout = getRollout(myRolloutId);
+        myRollout = findRollout(myRolloutId);
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.RUNNING);
         final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 1L);
@@ -1389,7 +1389,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.READY);
 
         rolloutHandler.handleAll();
-        myRollout = getRollout(myRollout.getId());
+        myRollout = findRollout(myRollout.getId());
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.READY);
 
         rolloutManagement.start(myRollout.getId());
@@ -1568,7 +1568,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutHandler.handleAll();
 
         // rollout should not have been started
-        myRollout = getRollout(myRolloutId);
+        myRollout = findRollout(myRolloutId);
         assertThat(myRollout.getName()).isEqualTo("newName");
         assertThat(myRollout.getDescription()).isEqualTo("newDesc");
     }
@@ -1604,7 +1604,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutGroups.add(generateRolloutGroup(2, percentTargetsInGroup3, null));
 
         Rollout myRollout = rolloutManagement.create(rolloutcreate, rolloutGroups, conditions);
-        myRollout = getRollout(myRollout.getId());
+        myRollout = findRollout(myRollout.getId());
 
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.CREATING);
         for (final RolloutGroup group : rolloutGroupManagement.findByRollout(myRollout.getId(), PAGE).getContent()) {
@@ -1616,7 +1616,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         rolloutHandler.handleAll();
 
-        myRollout = getRollout(myRollout.getId());
+        myRollout = findRollout(myRollout.getId());
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.READY);
         assertThat(myRollout.getTotalTargets()).isEqualTo(amountTargetsInGroup2and3 + amountTargetsInGroup1);
 
@@ -1658,7 +1658,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         final Long rolloutId = rolloutManagement.create(rolloutcreate, rolloutGroups, conditions).getId();
 
-        assertThat(getRollout(rolloutId)).satisfies(rollout -> {
+        assertThat(findRollout(rolloutId)).satisfies(rollout -> {
             assertThat(rollout.getStatus()).isEqualTo(RolloutStatus.CREATING);
             for (final RolloutGroup group : rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getContent()) {
                 assertThat(group.getStatus()).isEqualTo(RolloutGroupStatus.CREATING);
@@ -1668,7 +1668,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // first handle iteration will put rollout in ready state
         rolloutHandler.handleAll();
 
-        assertThat(getRollout(rolloutId)).satisfies(rollout -> {
+        assertThat(findRollout(rolloutId)).satisfies(rollout -> {
             assertThat(rollout.getStatus()).isEqualTo(RolloutStatus.READY);
             assertThat(rollout.getTotalTargets()).isEqualTo(amountTargetsInGroup1 + amountTargetsInGroup2);
         });
@@ -1796,7 +1796,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .build();
 
         Rollout myRollout = rolloutManagement.create(rolloutToCreate, amountGroups, false, conditions);
-        myRollout = getRollout(myRollout.getId());
+        myRollout = findRollout(myRollout.getId());
 
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.CREATING);
 
@@ -2215,10 +2215,10 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     void testRolloutStatusConvert() {
         final long id = testdataFactory.createAndStartRollout(1, 0, 1, "100", "80").getId();
         for (final RolloutStatus status : RolloutStatus.values()) {
-            final JpaRollout rollout = ((JpaRollout) rolloutManagement.get(id).orElseThrow());
+            final JpaRollout rollout = ((JpaRollout) rolloutManagement.find(id).orElseThrow());
             rollout.setStatus(status);
             rolloutRepository.save(rollout);
-            assertThat(rolloutManagement.get(id).orElseThrow().getStatus()).isEqualTo(status);
+            assertThat(rolloutManagement.find(id).orElseThrow().getStatus()).isEqualTo(status);
         }
     }
 
@@ -2229,10 +2229,10 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     void testActionTypeConvert() {
         final long id = testdataFactory.createAndStartRollout(1, 0, 1, "100", "80").getId();
         for (final ActionType actionType : ActionType.values()) {
-            final JpaRollout rollout = ((JpaRollout) rolloutManagement.get(id).orElseThrow());
+            final JpaRollout rollout = ((JpaRollout) rolloutManagement.find(id).orElseThrow());
             rollout.setActionType(actionType);
             rolloutRepository.save(rollout);
-            assertThat(rolloutManagement.get(id).orElseThrow().getActionType()).isEqualTo(actionType);
+            assertThat(rolloutManagement.find(id).orElseThrow().getActionType()).isEqualTo(actionType);
         }
     }
 
@@ -2355,11 +2355,11 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private Rollout reloadRollout(final Rollout r) {
-        return getRollout(r.getId());
+        return findRollout(r.getId());
     }
 
-    private Rollout getRollout(final Long myRolloutId) {
-        return rolloutManagement.get(myRolloutId).orElseThrow(NoSuchElementException::new);
+    private Rollout findRollout(final Long myRolloutId) {
+        return rolloutManagement.find(myRolloutId).orElseThrow(NoSuchElementException::new);
     }
 
     private void assertRolloutGroup(final long rolloutGroupId, final RolloutGroupStatus status,
