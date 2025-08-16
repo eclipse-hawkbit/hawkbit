@@ -129,6 +129,7 @@ public class HawkbitClient {
     private final BiFunction<Tenant, Controller, RequestInterceptor> requestInterceptorFn;
 
     private final HttpRequestRetryStrategy httpRequestRetryStrategy;
+    private final int BUFFER_SIZE = 8096;
 
     public HawkbitClient(
             final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract) {
@@ -291,6 +292,7 @@ public class HawkbitClient {
 
         conn.setDoOutput(true);
         conn.setDoInput(true);
+        conn.setChunkedStreamingMode(BUFFER_SIZE);
 
         try (final OutputStream out = new BufferedOutputStream(conn.getOutputStream())) {
             for (int i = 0; i < args.length; i++) {
@@ -371,7 +373,7 @@ public class HawkbitClient {
                     "Content-Disposition: form-data; name=\"" + name + "\"; filename=\"" + multipartFile.getName() + "\"\r\n" +
                     "Content-Type: " + multipartFile.getContentType() + "\r\n\r\n"
             ).getBytes(StandardCharsets.UTF_8));
-            final byte[] buff = new byte[8096];
+            final byte[] buff = new byte[BUFFER_SIZE];
             for (int read; (read = in.read(buff)) != -1; ) {
                 out.write(buff, 0, read);
             }
