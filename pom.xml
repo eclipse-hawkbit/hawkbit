@@ -47,7 +47,9 @@
         <!-- java.version is used to build the hawkbit in general, however, some artifacts which could be used
         as libraries in other projects might be compiled with a different, lower, java version. -->
         <java.client.version>17</java.client.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Spring javadoc override -->
+        <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
 
         <!-- must be the same as the parent version -->
         <spring.boot.version>3.5.5</spring.boot.version>
@@ -637,9 +639,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <configuration>
-                            <charset>UTF-8</charset>
-                        </configuration>
                         <executions>
                             <execution>
                                 <id>javadoc-jar</id>
