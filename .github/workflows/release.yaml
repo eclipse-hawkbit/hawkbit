@@ -117,7 +117,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Run build javadoc, verify (test)
-        run: mvn verify javadoc:jar -PgenerateTestReport -Drevision=${{ inputs.revision }} --batch-mode
+        run: mvn verify javadoc:jar -DdetectOfflineLinks=false -PgenerateTestReport -Drevision=${{ inputs.revision }} --batch-mode
 
       - name: "Deploy ${{ inputs.revision }}"
         run: mvn deploy -DskipTests -Ppublish -Drevision=${{ inputs.revision }} -DskipPublishing=${{ inputs.dry_run }} --batch-mode

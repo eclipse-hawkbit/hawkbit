@@ -62,4 +62,4 @@ jobs:
         run: mvn license:check -PcheckLicense --batch-mode
 
       - name: Run tests & javadoc
-        run: mvn clean verify javadoc:javadoc -PgenerateTestReport ${{ inputs.maven_properties }} --batch-mode
+        run: mvn clean verify javadoc:javadoc -DdetectOfflineLinks=false -PgenerateTestReport ${{ inputs.maven_properties }} --batch-mode
