@@ -90,16 +90,17 @@ import org.springframework.web.multipart.MultipartFile;
 public class HawkbitClient {
 
     private static final String AUTHORIZATION = "Authorization";
+    // @formatter:off
     public static final BiFunction<Tenant, Controller, RequestInterceptor> DEFAULT_REQUEST_INTERCEPTOR_FN =
             (tenant, controller) -> controller == null
                     ? template ->
-                            template.header(
-                                    AUTHORIZATION,
-                                    "Basic " + Base64.getEncoder().encodeToString(
-                                            (Objects.requireNonNull(tenant.getUsername(), "User is null!") +
-                                                    ":" +
-                                                    Objects.requireNonNull(tenant.getPassword(), "Password is not available!"))
-                                            .getBytes(StandardCharsets.ISO_8859_1)))
+                        template.header(
+                                AUTHORIZATION,
+                                "Basic " + Base64.getEncoder().encodeToString(
+                                        (Objects.requireNonNull(tenant.getUsername(), "User is null!") +
+                                                ":" +
+                                                Objects.requireNonNull(tenant.getPassword(), "Password is not available!"))
+                                        .getBytes(StandardCharsets.ISO_8859_1)))
                     : template -> {
                         if (!ObjectUtils.isEmpty(tenant.getGatewayToken())) {
                             template.header(AUTHORIZATION, "GatewayToken " + tenant.getGatewayToken());
@@ -107,6 +108,7 @@ public class HawkbitClient {
                             template.header(AUTHORIZATION, "TargetToken " + controller.getSecurityToken());
                         } // else do not send authentication, no auth or certificate based
                     };
+    // @formatter:on
     private static final ErrorDecoder DEFAULT_ERROR_DECODER_0 = new ErrorDecoder.Default();
     public static final ErrorDecoder DEFAULT_ERROR_DECODER = (methodKey, response) -> {
         final Exception e = DEFAULT_ERROR_DECODER_0.decode(methodKey, response);
