@@ -471,6 +471,7 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <configuration>
                         <doclint>syntax</doclint>
+                        <charset>UTF-8</charset>
                     </configuration>
                 </plugin>
 
