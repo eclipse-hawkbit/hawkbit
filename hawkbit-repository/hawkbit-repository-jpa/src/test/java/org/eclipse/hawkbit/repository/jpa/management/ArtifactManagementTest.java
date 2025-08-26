@@ -133,10 +133,8 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             final DbArtifact dbArtifact = artifactManagement.loadArtifactBinary(
                     HashGeneratorUtils.generateSHA1(randomBytes), sm.getId(), sm.isEncrypted());
             final DbArtifactHash hash = dbArtifact.getHashes();
+            // md5 and sha256 are kept in local artifact db and should not be provided by "load", test only sha1
             assertThat(hash.getSha1()).isEqualTo(HashGeneratorUtils.generateSHA1(randomBytes));
-            // md5 and sha256 are kept in local artifact db and should not be provided by "load"
-//            assertThat(hash.getMd5()).isEqualTo(HashGeneratorUtils.generateMD5(randomBytes));
-//            assertThat(hash.getSha256()).isEqualTo(HashGeneratorUtils.generateSHA256(randomBytes));
 
             assertThat(artifactRepository.findAll()).hasSize(4);
             assertThat(softwareModuleRepository.findAll()).hasSize(3);

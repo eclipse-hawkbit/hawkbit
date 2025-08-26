@@ -16,7 +16,7 @@ updates:
       interval: "daily"
   # Enable version updates for github actions
   - package-ecosystem: "github-actions"
-    directory: "/.3rd-party"
+    directory: "/"
     # Check daily
     schedule:
       interval: "daily"

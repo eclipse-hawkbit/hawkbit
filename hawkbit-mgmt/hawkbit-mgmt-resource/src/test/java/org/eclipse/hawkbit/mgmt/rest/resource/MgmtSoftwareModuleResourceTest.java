@@ -1539,10 +1539,6 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         // hashes
         final DbArtifactHash hash = artifact.getHashes();
         assertThat(hash.getSha1()).as("Wrong sha1 hash").isEqualTo(HashGeneratorUtils.generateSHA1(random));
-        // sha1 hashes are not used via loaded artifact
-//        assertThat(hash.getMd5()).as("Wrong md5 hash").isEqualTo(HashGeneratorUtils.generateMD5(random));
-//        assertThat(hash.getSha256()).as("Wrong sha256 hash").isEqualTo(HashGeneratorUtils.generateSHA256(random));
-
         // metadata
         assertThat(softwareModuleManagement.find(sm.getId()).orElseThrow().getArtifacts().get(0).getFilename())
                 .as("wrong metadata of the filename").isEqualTo("origFilename");

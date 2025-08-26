@@ -83,10 +83,6 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     protected static final String NOT_EXIST_ID = "12345678990";
     protected static final long NOT_EXIST_IDL = Long.parseLong(NOT_EXIST_ID);
 
-    private static final List<String> REPOSITORY_AND_TARGET_PERMISSIONS = List.of(SpPermission.READ_REPOSITORY, SpPermission.CREATE_REPOSITORY,
-            SpPermission.UPDATE_REPOSITORY, SpPermission.DELETE_REPOSITORY, SpPermission.READ_TARGET, SpPermission.CREATE_TARGET,
-            SpPermission.UPDATE_TARGET, SpPermission.DELETE_TARGET);
-
     @Autowired
     protected TargetRepository targetRepository;
     @Autowired
