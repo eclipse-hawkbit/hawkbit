@@ -246,14 +246,14 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
                 UPDATE_DISTRIBUTION_SET + "/id==" + permitted.getId(),
                 // read / update target needed to update target filter query
                 READ_TARGET, UPDATE_TARGET), () -> {
-//            assertThat(targetFilterQueryManagement
-//                    .updateAutoAssignDS(new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(permitted.getId())
-//                            .actionType(Action.ActionType.FORCED).confirmationRequired(false))
-//                    .getAutoAssignDistributionSet().getId()).isEqualTo(permitted.getId());
-//            targetFilterQueryManagement
-//                    .updateAutoAssignDS(new AutoAssignDistributionSetUpdate(targetFilterQuery.getId())
-//                            .ds(readOnly.getId()).actionType(Action.ActionType.FORCED).confirmationRequired(false))
-//                    .getAutoAssignDistributionSet().getId();
+            assertThat(targetFilterQueryManagement
+                    .updateAutoAssignDS(new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(permitted.getId())
+                            .actionType(Action.ActionType.FORCED).confirmationRequired(false))
+                    .getAutoAssignDistributionSet().getId()).isEqualTo(permitted.getId());
+            targetFilterQueryManagement
+                    .updateAutoAssignDS(new AutoAssignDistributionSetUpdate(targetFilterQuery.getId())
+                            .ds(readOnly.getId()).actionType(Action.ActionType.FORCED).confirmationRequired(false))
+                    .getAutoAssignDistributionSet().getId();
             final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate =
                     new AutoAssignDistributionSetUpdate(targetFilterQuery.getId())
                             .ds(hidden.getId()).actionType(Action.ActionType.FORCED).confirmationRequired(false);
