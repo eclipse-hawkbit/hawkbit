@@ -14,32 +14,24 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import jakarta.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement.Create;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement.Update;
 import org.eclipse.hawkbit.repository.artifact.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
-import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.LockedException;
-import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.RandomGeneratedInputStream;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -48,162 +40,34 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule.MetadataValue;
 import org.eclipse.hawkbit.repository.model.SoftwareModule.MetadataValueCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
-import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 
 /**
  * Feature: Component Tests - Repository<br/>
  * Story: Software Module Management
  */
-class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
+class SoftwareModuleManagementTest
+        extends AbstractRepositoryManagementWithMetadataTest<SoftwareModule, Create, Update, MetadataValue, MetadataValueCreate> {
 
-    /**
-     * Verifies that management get access reacts as specified on calls for non existing entities by means
-     * of Optional not present.
-     */
-    @Test
-    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
-    void nonExistingEntityAccessReturnsNotPresent() {
-        final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
-        assertThat(softwareModuleManagement.find(1234L)).isNotPresent();
-        final Long moduleId = module.getId();
-        assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> softwareModuleManagement.getMetadata(moduleId, NOT_EXIST_ID));
+    @SuppressWarnings("unchecked")
+    @Override
+    protected <O> O forType(final Class<O> type) {
+        if (type == MetadataValueCreate.class) {
+            return (O) new MetadataValueCreate(forType(String.class), forType(Boolean.class));
+        }
+        return super.forType(type);
     }
 
-    /**
-     * Verifies that management queries react as specfied on calls for non existing entities
-     * by means of throwing EntityNotFoundException.
-     */
-    @Test
-    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
-    void entityQueriesReferringToNotExistingEntitiesThrowsException() {
-        testdataFactory.createSoftwareModuleApp();
+    @Override
+    protected Object builderParameterValue(final Method builderSetter) {
+        // encrypted true is not supported
+        if (builderSetter.getDeclaringClass() == Create.CreateBuilder.class && "encrypted".equals(builderSetter.getName())) {
+            return Boolean.FALSE;
+        }
 
-        final SoftwareModuleManagement.Create noType = SoftwareModuleManagement.Create.builder().name("xxx").type(null).build();
-        final List<SoftwareModuleManagement.Create> noTypeList = List.of(noType);
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> softwareModuleManagement.create(noTypeList));
-        assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(() -> softwareModuleManagement.create(noType));
-
-        verifyThrownExceptionBy(
-                () -> softwareModuleManagement.createMetadata(
-                        NOT_EXIST_IDL, "xxx", new MetadataValueCreate("xxx")), "SoftwareModule");
-        verifyThrownExceptionBy(
-                () -> softwareModuleManagement.createMetadata(
-                        NOT_EXIST_IDL, Map.of("xxx", new MetadataValueCreate("xxx"))), "SoftwareModule");
-
-        verifyThrownExceptionBy(() -> softwareModuleManagement.delete(NOT_EXIST_IDL), "SoftwareModule");
-        verifyThrownExceptionBy(() -> softwareModuleManagement.delete(Collections.singletonList(NOT_EXIST_IDL)), "SoftwareModule");
-        verifyThrownExceptionBy(() -> softwareModuleManagement.deleteMetadata(NOT_EXIST_IDL, "xxx"), "SoftwareModule");
-
-        verifyThrownExceptionBy(
-                () -> softwareModuleManagement.createMetadata(NOT_EXIST_IDL, "xxx", new MetadataValueCreate("xxx")), "SoftwareModule");
-
-        verifyThrownExceptionBy(() -> softwareModuleManagement.findByAssignedTo(NOT_EXIST_IDL, PAGE), "DistributionSet");
-        verifyThrownExceptionBy(() -> softwareModuleManagement.getMetadata(NOT_EXIST_IDL, NOT_EXIST_ID), "SoftwareModule");
-        verifyThrownExceptionBy(() -> softwareModuleManagement.getMetadata(NOT_EXIST_IDL), "SoftwareModule");
-        verifyThrownExceptionBy(() -> softwareModuleManagement.update(SoftwareModuleManagement.Update.builder().id(NOT_EXIST_IDL).build()),
-                "SoftwareModule");
-    }
-
-    /**
-     * Calling update without changing fields results in no recorded change in the repository including unchanged audit fields.
-     */
-    @Test
-    void updateNothingResultsInUnchangedRepository() {
-        final SoftwareModule ah = testdataFactory.createSoftwareModuleOs();
-
-        final SoftwareModule updated = softwareModuleManagement
-                .update(SoftwareModuleManagement.Update.builder().id(ah.getId()).build());
-
-        assertThat(updated.getOptLockRevision())
-                .as("Expected version number of updated entity to be equal to created version")
-                .isEqualTo(ah.getOptLockRevision());
-    }
-
-    /**
-     * Calling update for changed fields results in change in the repository.
-     */
-    @Test
-    void updateSoftwareModuleFieldsToNewValue() {
-        final SoftwareModule ah = testdataFactory.createSoftwareModuleOs();
-
-        final SoftwareModule updated = softwareModuleManagement
-                .update(SoftwareModuleManagement.Update.builder().id(ah.getId()).description("changed").vendor("changed").build());
-
-        assertThat(updated.getOptLockRevision())
-                .as("Expected version number of updated entitity is")
-                .isEqualTo(ah.getOptLockRevision() + 1);
-        assertThat(updated.getDescription()).as("Updated description is").isEqualTo("changed");
-        assertThat(updated.getVendor()).as("Updated vendor is").isEqualTo("changed");
-    }
-
-    /**
-     * Create Software Module call fails when called for existing entity.
-     */
-    @Test
-    void createModuleCallFailsForExistingModule() {
-        testdataFactory.createSoftwareModuleOs();
-        assertThatExceptionOfType(EntityAlreadyExistsException.class)
-                .as("Should not have worked as module already exists.")
-                .isThrownBy(() -> testdataFactory.createSoftwareModuleOs());
-    }
-
-    /**
-     * searched for software modules based on the various filter options, e.g. name,desc,type, version.
-     */
-    @Test
-    void findSoftwareModuleByFilters() {
-        softwareModuleManagement
-                .create(SoftwareModuleManagement.Create.builder().type(appType).name("agent-hub").version("1.0.1").build());
-        final SoftwareModule jvm = softwareModuleManagement
-                .create(SoftwareModuleManagement.Create.builder().type(runtimeType).name("oracle-jre").version("1.7.2").build());
-        final SoftwareModule os = softwareModuleManagement
-                .create(SoftwareModuleManagement.Create.builder().type(osType).name("poky").version("3.0.2").build());
-
-        final SoftwareModule ah2 = softwareModuleManagement
-                .create(SoftwareModuleManagement.Create.builder().type(appType).name("agent-hub").version("1.0.2").build());
-        JpaDistributionSet ds = (JpaDistributionSet) distributionSetManagement
-                .create(DistributionSetManagement.Create.builder()
-                        .type(standardDsType)
-                        .name("ds-1").version("1.0.1")
-                        .modules(Set.of(os, jvm, ah2))
-                        .build());
-
-        final JpaTarget target = (JpaTarget) testdataFactory.createTarget();
-        ds = (JpaDistributionSet) assignSet(target, ds).getDistributionSet();
-        implicitLock(os);
-        implicitLock(jvm);
-
-        distributionSetManagement.unlock(ds); // otherwise delete will be rejected as a part of a locked DS
-        softwareModuleManagement.delete(ah2.getId());
-    }
-
-    /**
-     * Searches for software modules based on a list of IDs.
-     */
-    @Test
-    void findSoftwareModulesById() {
-        final List<Long> modules = List.of(testdataFactory.createSoftwareModuleOs().getId(), testdataFactory.createSoftwareModuleApp().getId());
-        assertThat(softwareModuleManagement.get(modules)).hasSize(2);
-    }
-
-    /**
-     * Counts all software modules in the repsitory that are not marked as deleted.
-     */
-    @Test
-    void countSoftwareModulesAll() {
-        // found in test
-        testdataFactory.createSoftwareModuleOs("one");
-        testdataFactory.createSoftwareModuleOs("two");
-        final SoftwareModule deleted = testdataFactory.createSoftwareModuleOs("deleted");
-        // ignored
-        softwareModuleManagement.delete(deleted.getId());
-
-        assertThat(softwareModuleManagement.count()).as("Expected to find the following number of modules:").isEqualTo(2);
+        return super.builderParameterValue(builderSetter);
     }
 
     /**
@@ -211,7 +75,6 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void hardDeleteOfNotAssignedArtifact() {
-
         // [STEP1]: Create SoftwareModuleX with Artifacts
         final SoftwareModule unassignedModule = createSoftwareModuleWithArtifacts(osType, "moduleX", "3.0.2", 2);
         final Iterator<Artifact> artifactsIt = unassignedModule.getArtifacts().iterator();
@@ -273,7 +136,6 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void softDeleteOfHistoricalAssignedArtifact() {
-
         // Init target
         final Target target = testdataFactory.createTarget();
 
@@ -311,11 +173,10 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Delete an software module with an artifact, which is also used by another software module.
+     * Delete a software module with an artifact, which is also used by another software module.
      */
     @Test
     void deleteSoftwareModulesWithSharedArtifact() {
-
         // Init artifact binary data, target and DistributionSets
         final int artifactSize = 1024;
         final byte[] source = randomBytes(artifactSize);
@@ -355,11 +216,10 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         // verify: meta data of artifactY is not deleted
         assertThat(artifactRepository.findById(artifactY.getId())).isPresent();
-
     }
 
     /**
-     * Delete two assigned softwaremodules which share an artifact.
+     * Delete two assigned software modules which share an artifact.
      */
     @Test
     void deleteMultipleSoftwareModulesWhichShareAnArtifact() {
@@ -419,10 +279,10 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Verifies that all undeleted software modules are found in the repository.
+     * Verifies that all soft deleted software modules are found in the repository.
      */
     @Test
-    void countSoftwareModuleTypesAll() {
+    void countSoftwareModules() {
         testdataFactory.createSoftwareModuleOs();
 
         // one soft deleted
@@ -454,187 +314,6 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
                 .as("Found this number of modules").hasSize(2);
     }
 
-    /**
-     * Checks that metadata for a software module can be created.
-     */
-    @Test
-    void createSoftwareModuleMetadata() {
-        final String knownKey1 = "myKnownKey1";
-        final String knownValue1 = "myKnownValue1";
-
-        final String knownKey2 = "myKnownKey2";
-        final String knownValue2 = "myKnownValue2";
-
-        final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleApp();
-
-        assertThat(softwareModule.getOptLockRevision()).isEqualTo(1);
-
-        softwareModuleManagement.createMetadata(
-                softwareModule.getId(),
-                Map.of(
-                        knownKey1, new MetadataValueCreate(knownValue1, true),
-                        knownKey2, new MetadataValueCreate(knownValue2)));
-
-        final SoftwareModule changedLockRevisionModule = softwareModuleManagement.find(softwareModule.getId()).get();
-        assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2);
-
-        assertThat(softwareModuleManagement.getMetadata(softwareModule.getId(), knownKey1)).satisfies(metadata -> {
-            assertThat(metadata.getValue()).isEqualTo(knownValue1);
-            assertThat(metadata.isTargetVisible()).isTrue();
-        });
-
-        assertThat(softwareModuleManagement.getMetadata(softwareModule.getId(), knownKey2)).satisfies(metadata -> {
-            assertThat(metadata.getValue()).isEqualTo(knownValue2);
-            assertThat(metadata.isTargetVisible()).isFalse();
-        });
-    }
-
-    /**
-     * Verifies the enforcement of the metadata quota per software module.
-     */
-    @Test
-    void createSoftwareModuleMetadataUntilQuotaIsExceeded() {
-        // add meta-data one by one
-        final SoftwareModule module = testdataFactory.createSoftwareModuleApp("m1");
-        final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerSoftwareModule();
-        for (int i = 0; i < maxMetaData; ++i) {
-            softwareModuleManagement.createMetadata(module.getId(), "k" + i, new MetadataValueCreate("v" + i));
-        }
-
-        // quota exceeded
-        final Long moduleId = module.getId();
-        final MetadataValueCreate metadata = new MetadataValueCreate("v" + maxMetaData);
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> softwareModuleManagement.createMetadata(moduleId, "k" + maxMetaData, metadata));
-
-        // add multiple meta data entries at once
-        final SoftwareModule module2 = testdataFactory.createSoftwareModuleApp("m2");
-        final Long moduleId2 = module2.getId();
-        final Map<String, MetadataValueCreate> create = new HashMap<>();
-        for (int i = 0; i < maxMetaData + 1; ++i) {
-            create.put("k" + i, new MetadataValueCreate("v" + i));
-        }
-        // quota exceeded
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> softwareModuleManagement.createMetadata(moduleId2, create));
-
-        // add some meta data entries
-        final SoftwareModule module3 = testdataFactory.createSoftwareModuleApp("m3");
-        final int firstHalf = Math.round((maxMetaData) / 2.f);
-        for (int i = 0; i < firstHalf; ++i) {
-            softwareModuleManagement.createMetadata(module3.getId(), "k" + i, new MetadataValueCreate("v" + i));
-        }
-        // add too many data entries
-        final Long moduleId3 = module3.getId();
-        final int secondHalf = maxMetaData - firstHalf;
-        final Map<String, MetadataValueCreate> create2 = new HashMap<>();
-        for (int i = 0; i < secondHalf + 1; ++i) {
-            create2.put("kk" + i, new MetadataValueCreate("vv" + i));
-        }
-        // quota exceeded
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> softwareModuleManagement.createMetadata(moduleId3, create2));
-
-    }
-
-    /**
-     * Checks that metadata for a software module can be updated.
-     */
-    @Test
-    @WithUser(allSpPermissions = true)
-    void updateSoftwareModuleMetadata() {
-        final String knownKey = "myKnownKey";
-        final String knownValue = "myKnownValue";
-        final String knownUpdateValue = "myNewUpdatedValue";
-
-        // create a base software module
-        final SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
-        // initial opt lock revision must be 1
-        assertThat(ah.getOptLockRevision()).isEqualTo(1);
-
-        // create an software module meta data entry
-        softwareModuleManagement.createMetadata(ah.getId(), knownKey, new MetadataValueCreate(knownValue));
-        final MetadataValue softwareModuleMetadata = softwareModuleManagement.getMetadata(ah.getId(), knownKey);
-        assertThat(softwareModuleMetadata.isTargetVisible()).isFalse();
-        assertThat(softwareModuleMetadata.getValue()).isEqualTo(knownValue);
-
-        // base software module should have now the opt lock revision one
-        // because we are modifying the base software module
-        SoftwareModule changedLockRevisionModule = softwareModuleManagement.find(ah.getId()).get();
-        assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2);
-
-        // update the software module metadata
-        softwareModuleManagement.createMetadata(ah.getId(), knownKey, new MetadataValueCreate(knownUpdateValue, true));
-        final MetadataValue updated = softwareModuleManagement.getMetadata(ah.getId(), knownKey);
-
-        // we are updating the sw metadata so also modifying the base software
-        // module so opt lock revision must be two
-        changedLockRevisionModule = softwareModuleManagement.find(ah.getId()).get();
-        assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(3);
-
-        // verify updated meta data contains the updated value
-        assertThat(updated).isNotNull();
-        assertThat(updated.getValue()).isEqualTo(knownUpdateValue);
-        assertThat(updated.isTargetVisible()).isTrue();
-    }
-
-    /**
-     * Verifies that existing metadata can be deleted.
-     */
-    @Test
-    void deleteSoftwareModuleMetadata() {
-        final String knownKey1 = "myKnownKey1";
-        final String knownValue1 = "myKnownValue1";
-
-        final SoftwareModule swModule = testdataFactory.createSoftwareModuleApp();
-
-        softwareModuleManagement.createMetadata(swModule.getId(), knownKey1, new MetadataValueCreate(knownValue1));
-
-        assertThat(softwareModuleManagement.getMetadata(swModule.getId()).entrySet())
-                .as("Contains the created metadata element").allSatisfy(metadata -> {
-                    assertThat(metadata.getKey()).isEqualTo(knownKey1);
-                    assertThat(metadata.getValue().getValue()).isEqualTo(knownValue1);
-                });
-
-        softwareModuleManagement.deleteMetadata(swModule.getId(), knownKey1);
-        assertThat(softwareModuleManagement.getMetadata(swModule.getId())).as("Metadata elements are").isEmpty();
-    }
-
-    /**
-     * Queries and loads the metadata related to a given software module.
-     */
-    @Test
-    void findAllSoftwareModuleMetadataBySwId() {
-        final SoftwareModule sw1 = testdataFactory.createSoftwareModuleApp();
-        final int metadataCountSw1 = 8;
-
-        final SoftwareModule sw2 = testdataFactory.createSoftwareModuleOs();
-        final int metadataCountSw2 = 10;
-
-        for (int index = 0; index < metadataCountSw1; index++) {
-            softwareModuleManagement.createMetadata(sw1.getId(), "key" + index, new MetadataValueCreate("value" + index, true));
-        }
-
-        for (int index = 0; index < metadataCountSw2; index++) {
-            softwareModuleManagement.createMetadata(sw2.getId(), "key" + index, new MetadataValueCreate("value" + index, false));
-        }
-
-        final Map<String, MetadataValue> metadataSw1 = softwareModuleManagement.getMetadata(sw1.getId());
-        final Map<String, MetadataValue> metadataSw2 = softwareModuleManagement.getMetadata(sw2.getId());
-        assertThat(metadataSw1).hasSize(metadataCountSw1);
-        assertThat(metadataSw2).hasSize(metadataCountSw2);
-
-        final Map<String, String> metadataSw1V = softwareModuleManagement
-                .findMetaDataBySoftwareModuleIdsAndTargetVisible(List.of(sw1.getId())).get(sw1.getId());
-        final Map<String, String> metadataSw2V = softwareModuleManagement
-                .findMetaDataBySoftwareModuleIdsAndTargetVisible(List.of(sw2.getId())).get(sw2.getId());
-        assertThat(metadataSw1V).hasSize(metadataCountSw1);
-        assertThat(metadataSw2V).isNull();
-    }
-
-    /**
-     * Locks a SM.
-     */
     @Test
     void lockSoftwareModule() {
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModule("sm-1");
@@ -643,9 +322,6 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(softwareModuleManagement.find(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(false)).isTrue();
     }
 
-    /**
-     * Unlocks a SM.
-     */
     @Test
     void unlockSoftwareModule() {
         SoftwareModule softwareModule = testdataFactory.createSoftwareModule("sm-1");
@@ -711,32 +387,40 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
                 .isThrownBy(() -> softwareModuleManagement.delete(moduleId));
     }
 
-    private Action assignSet(final JpaTarget target, final JpaDistributionSet ds) {
-        assignDistributionSet(ds.getId(), target.getControllerId());
-        implicitLock(ds);
-        assertThat(targetManagement.getByControllerId(target.getControllerId()).orElseThrow().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.PENDING);
-        final Optional<DistributionSet> assignedDistributionSet = deploymentManagement
-                .getAssignedDistributionSet(target.getControllerId());
-        assertThat(assignedDistributionSet).contains(ds);
-        final Action action = actionRepository
-                .findAll(
-                        (root, query, cb) ->
-                                cb.and(
-                                        cb.equal(root.get(JpaAction_.target).get(JpaTarget_.id), target.getId()),
-                                        cb.equal(root.get(JpaAction_.distributionSet).get(JpaDistributionSet_.id), ds.getId())),
-                        PAGE).getContent().get(0);
-        assertThat(action).isNotNull();
-        return action;
+    @Test
+    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
+    void failIfReferNotExistingEntity() {
+        testdataFactory.createSoftwareModuleApp();
+
+        final Create noType = Create.builder().name("xxx").type(null).build();
+        final List<Create> noTypeList = List.of(noType);
+        assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(() -> softwareModuleManagement.create(noTypeList));
+        assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(() -> softwareModuleManagement.create(noType));
+
+        verifyThrownExceptionBy(
+                () -> softwareModuleManagement.createMetadata(NOT_EXIST_IDL, "xxx", new MetadataValueCreate("xxx")), "SoftwareModule");
+        verifyThrownExceptionBy(
+                () -> softwareModuleManagement.createMetadata(NOT_EXIST_IDL, Map.of("xxx", new MetadataValueCreate("xxx"))), "SoftwareModule");
+
+        verifyThrownExceptionBy(() -> softwareModuleManagement.delete(NOT_EXIST_IDL), "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareModuleManagement.delete(Collections.singletonList(NOT_EXIST_IDL)), "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareModuleManagement.deleteMetadata(NOT_EXIST_IDL, "xxx"), "SoftwareModule");
+
+        verifyThrownExceptionBy(
+                () -> softwareModuleManagement.createMetadata(NOT_EXIST_IDL, "xxx", new MetadataValueCreate("xxx")), "SoftwareModule");
+
+        verifyThrownExceptionBy(() -> softwareModuleManagement.findByAssignedTo(NOT_EXIST_IDL, PAGE), "DistributionSet");
+        verifyThrownExceptionBy(() -> softwareModuleManagement.getMetadata(NOT_EXIST_IDL, NOT_EXIST_ID), "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareModuleManagement.getMetadata(NOT_EXIST_IDL), "SoftwareModule");
+        verifyThrownExceptionBy(() -> softwareModuleManagement.update(Update.builder().id(NOT_EXIST_IDL).build()), "SoftwareModule");
     }
 
-    private SoftwareModule createSoftwareModuleWithArtifacts(final SoftwareModuleType type, final String name,
-            final String version, final int numberArtifacts) {
-
+    private SoftwareModule createSoftwareModuleWithArtifacts(
+            final SoftwareModuleType type, final String name, final String version, final int numberArtifacts) {
         final long countSoftwareModule = softwareModuleRepository.count();
 
         // create SoftwareModule
-        SoftwareModule softwareModule = softwareModuleManagement.create(SoftwareModuleManagement.Create.builder()
+        SoftwareModule softwareModule = softwareModuleManagement.create(Create.builder()
                 .type(type).name(name).version(version).description("description of artifact " + name).build());
 
         final int artifactSize = 5 * 1024;
@@ -764,8 +448,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(artifactRepository.findAll()).hasSize(results.length);
         for (final Artifact result : results) {
             assertThat(result.getId()).isNotNull();
-            assertThat(binaryArtifactRepository.getBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash()))
-                    .isNotNull();
+            assertThat(binaryArtifactRepository.getBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash())).isNotNull();
         }
     }
 

@@ -119,22 +119,9 @@ public class JpaSoftwareModule
     @ManyToMany(mappedBy = "modules", targetEntity = JpaDistributionSet.class, fetch = FetchType.LAZY)
     private List<DistributionSet> assignedTo;
 
-    /**
-     * Parameterized constructor.
-     */
     public JpaSoftwareModule(final SoftwareModuleType type, final String name, final String version) {
-        this(type, name, version, null, null, false);
-    }
-
-    /**
-     * Parameterized constructor.
-     */
-    public JpaSoftwareModule(final SoftwareModuleType type, final String name, final String version,
-            final String description, final String vendor, final boolean encrypted) {
-        super(name, version, description);
-        this.vendor = vendor;
+        super(name, version, null);
         this.type = (JpaSoftwareModuleType) type;
-        this.encrypted = encrypted;
     }
 
     @Override

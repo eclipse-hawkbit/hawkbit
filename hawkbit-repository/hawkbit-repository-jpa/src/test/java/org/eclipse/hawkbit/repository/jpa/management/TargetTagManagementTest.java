@@ -14,11 +14,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import jakarta.validation.ConstraintViolationException;
 
@@ -26,12 +24,9 @@ import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement.Create;
 import org.eclipse.hawkbit.repository.TargetTagManagement.Update;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -47,15 +42,44 @@ import org.springframework.data.domain.Pageable;
  * Feature: Component Tests - Repository<br/>
  * Story: Target Tag Management
  */
-class TargetTagManagementTest extends AbstractJpaIntegrationTest {
+class TargetTagManagementTest extends AbstractRepositoryManagementTest<TargetTag, Create, Update> {
 
-    private static final Random RND = new Random();
-
-    /**
-     * Verifies that tagging of set containing missing DS throws meaningful and correct exception.
-     */
     @Test
-    void failOnMissingDs() {
+    void assignAndUnassignTargetTags() {
+        final List<Target> groupA = testdataFactory.createTargets(20);
+        final List<Target> groupB = testdataFactory.createTargets(20, "groupb", "groupb");
+
+        final TargetTag tag = targetTagManagement.create(Create.builder().name("tag1").description("tagdesc1").build());
+
+        // toggle A only -> A is now assigned
+        List<Target> result = assignTag(groupA, tag);
+        assertThat(result)
+                .containsAll(targetManagement.getByControllerId(groupA.stream().map(Target::getControllerId).toList()))
+                .size().isEqualTo(20);
+        assertThat(targetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent().stream().map(Target::getControllerId).sorted()
+                .toList())
+                .isEqualTo(groupA.stream().map(Target::getControllerId).sorted().toList());
+
+        // toggle A+B -> A is still assigned and B is assigned as well
+        final Collection<Target> groupAB = concat(groupA, groupB);
+        result = assignTag(groupAB, tag);
+        assertThat(result)
+                .containsAll(targetManagement.getByControllerId(groupAB.stream().map(Target::getControllerId).toList()))
+                .size().isEqualTo(40);
+        assertThat(targetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent().stream().map(Target::getControllerId).sorted()
+                .toList())
+                .isEqualTo(groupAB.stream().map(Target::getControllerId).sorted().toList());
+
+        // toggle A+B -> both unassigned
+        result = unassignTag(groupAB, tag);
+        assertThat(result)
+                .containsAll(targetManagement.getByControllerId(groupAB.stream().map(Target::getControllerId).toList()))
+                .size().isEqualTo(40);
+        assertThat(targetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent()).isEmpty();
+    }
+
+    @Test
+    void failToAssignOnMissingTargetTag() {
         final Collection<String> group = testdataFactory.createTargets(5).stream()
                 .map(Target::getControllerId)
                 .toList();
@@ -84,35 +108,18 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
                 });
     }
 
-    /**
-     * Verifies that management get access reacts as specfied on calls for non existing entities by means
-     * of Optional not present.
-     */
-    @Test
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
-    void nonExistingEntityAccessReturnsNotPresent() {
-        assertThat(targetTagManagement.find(NOT_EXIST_IDL)).isNotPresent();
-    }
-
-    /**
-     * Verifies that management queries react as specfied on calls for non existing entities
-     * by means of throwing EntityNotFoundException.
-     */
     @Test
     @ExpectEvents({
             @Expect(type = DistributionSetTagUpdatedEvent.class),
             @Expect(type = TargetTagUpdatedEvent.class) })
-    void entityQueriesReferringToNotExistingEntitiesThrowsException() {
+    void failIfReferNotExistingEntity() {
         verifyThrownExceptionBy(() -> targetTagManagement.delete(NOT_EXIST_IDL), "TargetTag");
         verifyThrownExceptionBy(() -> targetTagManagement.update(Update.builder().id(NOT_EXIST_IDL).build()), "TargetTag");
         verifyThrownExceptionBy(() -> getTargetTags(NOT_EXIST_ID), "Target");
     }
 
-    /**
-     * Verify that a tag with with invalid properties cannot be created or updated
-     */
     @Test
-    void createAndUpdateTagWithInvalidFields() {
+    void failToCreateAndUpdateTagWithInvalidFields() {
         final TargetTag tag = targetTagManagement.create(Create.builder().name("tag1").description("tagdesc1").build());
         createAndUpdateTagWithInvalidDescription(tag);
         createAndUpdateTagWithInvalidColour(tag);
@@ -120,126 +127,10 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Verifies assign/unassign.
-     */
-    @Test
-    void assignAndUnassignTargetTags() {
-        final List<Target> groupA = testdataFactory.createTargets(20);
-        final List<Target> groupB = testdataFactory.createTargets(20, "groupb", "groupb");
-
-        final TargetTag tag = targetTagManagement.create(Create.builder().name("tag1").description("tagdesc1").build());
-
-        // toggle A only -> A is now assigned
-        List<Target> result = assignTag(groupA, tag);
-        assertThat(result)
-                .containsAll(
-                        targetManagement.getByControllerId(groupA.stream().map(Target::getControllerId).toList()))
-                .size().isEqualTo(20);
-        assertThat(targetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent().stream().map(Target::getControllerId).sorted()
-                .toList())
-                .isEqualTo(groupA.stream().map(Target::getControllerId).sorted().toList());
-
-        // toggle A+B -> A is still assigned and B is assigned as well
-        final Collection<Target> groupAB = concat(groupA, groupB);
-        result = assignTag(groupAB, tag);
-        assertThat(result)
-                .containsAll(
-                        targetManagement.getByControllerId(groupAB.stream().map(Target::getControllerId).toList()))
-                .size().isEqualTo(40);
-        assertThat(targetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent().stream().map(Target::getControllerId).sorted()
-                .toList())
-                .isEqualTo(groupAB.stream().map(Target::getControllerId).sorted().toList());
-
-        // toggle A+B -> both unassigned
-        result = unassignTag(groupAB, tag);
-        assertThat(result)
-                .containsAll(targetManagement.getByControllerId(groupAB.stream().map(Target::getControllerId).toList()))
-                .size().isEqualTo(40);
-        assertThat(targetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent()).isEmpty();
-    }
-
-    /**
-     * Ensures that all tags are retrieved through repository.
-     */
-    @Test
-    void findAllTargetTags() {
-        final List<JpaTargetTag> tags = createTargetsWithTags();
-
-        assertThat(targetTagRepository.findAll()).isEqualTo(targetTagRepository.findAll()).isEqualTo(tags)
-                .as("Wrong tag size").hasSize(20);
-    }
-
-    /**
-     * Ensures that a created tag is persisted in the repository as defined.
-     */
-    @Test
-    void createTargetTag() {
-        final Tag tag = targetTagManagement.create(Create.builder().name("k1").description("k2").colour("colour").build());
-        assertThat(targetTagManagement.find(tag.getId()).orElseThrow().getColour()).as("wrong tag found").isEqualTo("colour");
-    }
-
-    /**
-     * Ensures that a deleted tag is removed from the repository as defined.
-     */
-    @Test
-    void deleteTargetTags() {
-        // create test data
-        final Iterable<JpaTargetTag> tags = createTargetsWithTags();
-        final TargetTag toDelete = tags.iterator().next();
-
-        for (final Target target : targetRepository.findAll()) {
-            assertThat(getTargetTags(target.getControllerId())).contains(toDelete);
-        }
-
-        // delete
-        targetTagManagement.delete(toDelete.getId());
-
-        // check
-        for (final Target target : targetRepository.findAll()) {
-            assertThat(getTargetTags(target.getControllerId()))
-                    .doesNotContain(toDelete);
-        }
-        assertThat(targetTagRepository.findById(toDelete.getId())).as("No tag should be found").isNotPresent();
-        assertThat(targetTagRepository.findAll()).as("Wrong target tag size").hasSize(19);
-    }
-
-    /**
-     * Tests the name update of a target tag.
-     */
-    @Test
-    void updateTargetTag() {
-        final List<JpaTargetTag> tags = createTargetsWithTags();
-
-        // change data
-        final TargetTag savedAssigned = tags.iterator().next();
-
-        // persist
-        targetTagManagement.update(Update.builder().id(savedAssigned.getId()).name("test123").build());
-
-        // check data
-        assertThat(targetTagRepository.findAll()).as("Wrong target tag size").hasSize(tags.size());
-        assertThat(targetTagRepository.findById(savedAssigned.getId()).orElseThrow().getName()).as("wrong target tag is saved")
-                .isEqualTo("test123");
-        assertThat(targetTagRepository.findById(savedAssigned.getId()).orElseThrow().getOptLockRevision())
-                .as("wrong target tag is saved")
-                .isEqualTo(2);
-    }
-
-    /**
-     * Ensures that a tag cannot be created if one exists already with that name (expects EntityAlreadyExistsException).
-     */
-    @Test
-    void failedDuplicateTargetTagNameException() {
-        final Create tagCreate = Create.builder().name("A").build();
-        targetTagManagement.create(tagCreate);
-        assertThatExceptionOfType(EntityAlreadyExistsException.class).isThrownBy(() -> targetTagManagement.create(tagCreate));
-    }
-
-    /**
      * Ensures that a tag cannot be updated to a name that already exists on another tag (expects EntityAlreadyExistsException).
      */
     @Test
-    void failedDuplicateTargetTagNameExceptionAfterUpdate() {
+    void failToDuplicateTargetTagNameOnUpdate() {
         targetTagManagement.create(Create.builder().name("A").build());
         final TargetTag tag = targetTagManagement.create(Create.builder().name("B").build());
 
@@ -305,14 +196,5 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("tag with too short name should not be updated")
                 .isThrownBy(() -> targetTagManagement.update(tagUpdateEmpty));
-    }
-
-    private List<JpaTargetTag> createTargetsWithTags() {
-        final List<Target> targets = testdataFactory.createTargets(20);
-        final Iterable<? extends TargetTag> tags = testdataFactory.createTargetTags(20, "");
-
-        tags.forEach(tag -> assignTag(targets, tag));
-
-        return targetTagRepository.findAll();
     }
 }

@@ -18,9 +18,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,14 +34,19 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
+import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
@@ -53,6 +56,7 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.utils.ObjectCopyUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.ResolvableType;
 import org.springframework.util.ObjectUtils;
 
 @Slf4j
@@ -60,34 +64,24 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
         extends AbstractJpaIntegrationTest {
 
     protected RepositoryManagement<T, C, U> repositoryManagement;
+
+    @Getter(AccessLevel.PROTECTED)
     private Class<T> entityType; // T
     private Class<C> createType; // C
     private Class<U> updateType; // U
     private Function<Class<?>, ?> entityFactory;
 
-    private final Map<Class<?>, AtomicInteger> expectedEvents = new ConcurrentHashMap<>();
-
-    private void incrementEvents(final Class<?> entityType, final EventType eventType) {
-        incrementEvents(entityType, eventType, 1);
-    }
-
-    private void incrementEvents(final Class<?> entityType, final EventType eventType, final int count) {
-        expectedEvents.computeIfAbsent(eventType.getEventType(entityType), k -> new AtomicInteger(0)).addAndGet(count);
-    }
-
     @BeforeEach
     void setup() {
         synchronized (AbstractRepositoryManagementTest.class) {
-            if (repositoryManagement != null) {
-                return; // already initialized
+            if (repositoryManagement == null) {
+                final RepoMan<T, C, U> repoMan = resolveRepositoryManagement();
+                repositoryManagement = repoMan.repo;
+                entityType = repoMan.entityType();
+                createType = repoMan.createType();
+                updateType = repoMan.updateType();
+                entityFactory = repoMan.entityFactory;
             }
-
-            final RepoMan<T, C, U> repoMan = resolveRepositoryManagement();
-            repositoryManagement = repoMan.repo;
-            entityType = repoMan.entityType;
-            createType = repoMan.createType;
-            updateType = repoMan.updateType;
-            entityFactory = repoMan.entityFactory;
         }
 
         expectedEvents.clear();
@@ -97,42 +91,45 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
                 .toArray(new Expect[0]));
     }
 
+    // also test get/find(Long)
     @ExpectEvents
     @Test
     void create() {
         final T instance = instance();
-        final T get = repositoryManagement.get(instance.getId());
-        assertEquals(get, instance);
+        assertEquals(repositoryManagement.get(instance.getId()), instance);
+        assertThat(repositoryManagement.find(instance.getId()))
+                .isPresent()
+                .hasValueSatisfying(get -> assertEquals(get, instance));
     }
 
+    // also test get/find(Collection<Long>)
     @ExpectEvents
     @Test
     void creates() {
         final List<T> instances = instances();
-        final List<T> get = repositoryManagement.get(instances.stream().map(Identifiable::getId).toList());
-        assertEquals(get, instances);
+        final List<Long> instanceIds = instances.stream().map(Identifiable::getId).toList();
+        assertEquals(repositoryManagement.get(instanceIds), instances);
+        assertThat(repositoryManagement.find(instanceIds)).hasSize(instances.size());
     }
 
     @Test
-    void rudNotExisting() {
-        assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> repositoryManagement.get(NOT_EXIST_IDL));
-        assertThat(repositoryManagement.find(-1L)).isEmpty();
-        final U notExistUpdate = forBuildableTypeRe(updateType, NOT_EXIST_IDL);
-        assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> repositoryManagement.update(notExistUpdate));
-        assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> repositoryManagement.delete(NOT_EXIST_IDL));
-    }
-
-    @Test
-    void findAll() {
+    void findCountAll() {
+        // some entities as distribution set types has pre-initialized entities
+        final int alreadyExisting = repositoryManagement.findAll(UNPAGED).getContent().size();
         final int count = 5;
-        instances(count); // create 'count' instances
-        assertThat(repositoryManagement.findAll(UNPAGED).getContent()).as("Wrong size of all entities").hasSize(count);
+        final List<T> instances = instances(count); // create 'count' instances
+        assertThat(repositoryManagement.findAll(UNPAGED).getContent()).as("Wrong size of all entities").hasSize(count + alreadyExisting);
+        assertThat(repositoryManagement.count()).as("Wrong size of all entities").isEqualTo(count + alreadyExisting);
+
+        repositoryManagement.delete(instances.get(0).getId());
+        assertThat(repositoryManagement.findAll(UNPAGED).getContent()).as("Wrong size of all entities").hasSize(count + alreadyExisting - 1);
+        assertThat(repositoryManagement.count()).as("Wrong size of all entities").isEqualTo(count + alreadyExisting - 1);
     }
 
     @ExpectEvents
     @Test
     void update() {
-        final var instance = instance();
+        final T instance = instance();
 
         final U update = forBuildableTypeRe(updateType, instance.getId());
         incrementEvents(entityType, EventType.UPDATED);
@@ -143,6 +140,41 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
         final T get = repositoryManagement.get(instance.getId());
         assertEquals(get, update);
         assertEquals(get, ObjectCopyUtil.copy(update, instance, false, UnaryOperator.identity()));
+    }
+
+    /**
+     * Calling update without changing fields results in no recorded change in the repository including unchanged audit fields.
+     */
+    @SneakyThrows
+    @Test
+    void updateNothingDontChangeRepository() {
+        final T instance = instance();
+
+        final U emptyUpdate = forBuildableType(updateType, instance.getId(), (name, type) -> {
+            try {
+                try {
+                    final Method getter = entityType.getMethod("get" + Character.toUpperCase(name.charAt(0)) + name.substring(1));
+                    if (getter.getReturnType() == type) {
+                        return getter.invoke(instance);
+                    }
+                } catch (final NoSuchMethodException e) {
+                    if (type == boolean.class || type == Boolean.class) {
+                        final Method getter = entityType.getMethod("is" + Character.toUpperCase(name.charAt(0)) + name.substring(1));
+                        if (getter.getReturnType() == boolean.class || getter.getReturnType() == Boolean.class) {
+                            return getter.invoke(instance);
+                        }
+                    }
+                }
+            } catch (final NoSuchMethodException | IllegalAccessException | InvocationTargetException e2) {
+                log.debug("Could not invoke getter for {} in {}", name, instance, e2);
+            }
+            return null;
+        });
+
+        final T updated = repositoryManagement.update(emptyUpdate);
+        assertThat(updated.getOptLockRevision())
+                .as("Expected version number of updated entity to be equal to created version")
+                .isEqualTo(instance.getOptLockRevision());
     }
 
     @ExpectEvents
@@ -170,6 +202,23 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
             assertThat(repositoryManagement.find(instanceId)).isEmpty();
             assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> repositoryManagement.get(instanceId));
         }
+    }
+
+    @Test
+    void failToReadUpdateDeleteNotExisting() {
+        assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> repositoryManagement.get(NOT_EXIST_IDL));
+        assertThat(repositoryManagement.find(-1L)).isEmpty();
+        final U notExistUpdate = forBuildableTypeRe(updateType, NOT_EXIST_IDL);
+        assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> repositoryManagement.update(notExistUpdate));
+        assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> repositoryManagement.delete(NOT_EXIST_IDL));
+    }
+
+    @Test
+    void failToDuplicate() {
+        final C create = forType(createType);
+        incrementEvents(entityType, EventType.CREATED);
+        repositoryManagement.create(create);
+        assertThatExceptionOfType(EntityAlreadyExistsException.class).isThrownBy(() -> repositoryManagement.create(create));
     }
 
     protected T instance() {
@@ -205,7 +254,39 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
         return instances;
     }
 
-    private final AtomicLong counter = new AtomicLong();
+    // asserts that all expected's fields (getters) are equal to the actual's fields
+    // does a deep compare for fields which are not primitive or String
+    protected void assertEquals(final Object actual, final Object expected) {
+        final Deque<String> stack = new ArrayDeque<>();
+        try {
+            assertEquals(actual, expected, stack);
+        } catch (final AssertionError e) {
+            throw new AssertionError(
+                    String.format(
+                            "Comparison failed at path: %s%n\tActual: %s,%n\tExpected: %s",
+                            String.join("->", stack), actual, expected),
+                    e);
+        }
+    }
+
+    private final Map<Class<?>, AtomicInteger> expectedEvents = new ConcurrentHashMap<>();
+
+    protected void incrementEvents(final Class<?> entityType, final EventType eventType) {
+        incrementEvents(entityType, eventType, 1);
+    }
+
+    protected void incrementEvents(final Class<?> entityType, final EventType eventType, final int count) {
+        expectedEvents.computeIfAbsent(eventType.getEventType(entityType), k -> new AtomicInteger(0)).addAndGet(count);
+    }
+
+    protected static Type[] genericTypes(final Class<?> clazz, final Class<?> targetSuperClass) {
+        return findGenericSuperType(ResolvableType.forType(clazz), targetSuperClass)
+                .map(ResolvableType::resolveGenerics)
+                .orElseThrow(() ->
+                        new IllegalStateException("No generic type found for " + targetSuperClass.getName() + " in " + clazz.getName()));
+    }
+
+    protected final AtomicLong counter = new AtomicLong();
 
     @SuppressWarnings("unchecked")
     protected <O> O forType(final Class<O> type) {
@@ -225,8 +306,12 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
             final Set<?> set = new HashSet<>();
 //            set.add(forType(createType));
             return (O) set;
+        } else if (type.isEnum()) {
+            final O[] constants = type.getEnumConstants();
+            return constants[(int) (counter.incrementAndGet() % constants.length)];
         } else {
-            if ("org.eclipse.hawkbit.repository.model".equals(type.getPackageName()) && type != createType) {
+            // entity classes for created events are root level classes
+            if ("org.eclipse.hawkbit.repository.model".equals(type.getPackageName()) && BaseEntity.class.isAssignableFrom(type)) {
                 try {
                     incrementEvents(type, EventType.CREATED);
                     return (O) entityFactory.apply(type);
@@ -262,6 +347,10 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
         }
     }
 
+    protected Object builderParameterValue(final Method builderSetter) {
+        return forType(builderSetter.getParameterTypes()[0]);
+    }
+
     private <O> O forBuildableTypeRe(final Class<O> type, final Long id) {
         try {
             return forBuildableType(type, id);
@@ -271,10 +360,15 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
         }
     }
 
-    @SuppressWarnings("unchecked")
     private <O> O forBuildableType(final Class<O> type, final Long id)
             throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        final Object builder = type.getDeclaredMethod("builder").invoke(null);
+        return forBuildableType(type, id, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <O> O forBuildableType(final Class<O> type, final Long id, final BiFunction<String, Class<?>, Object> propertyValueSupplier)
+            throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        final Object builder = type.getMethod("builder").invoke(null);
         Arrays.stream(builder.getClass().getMethods())
                 .filter(method -> method.getParameterCount() == 1)
                 .filter(method -> method.getDeclaringClass() != Object.class)
@@ -283,7 +377,14 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
                         if (id != null && "id".equals(method.getName()) && method.getParameterTypes()[0] == Long.class) {
                             method.invoke(builder, id);
                         } else {
-                            method.invoke(builder, forType(method.getParameterTypes()[0]));
+                            if (propertyValueSupplier == null) {
+                                method.invoke(builder, builderParameterValue(method));
+                            } else {
+                                final Object propertyValue = propertyValueSupplier.apply(method.getName(), method.getParameterTypes()[0]);
+                                if (propertyValue != null) {
+                                    method.invoke(builder, propertyValue);
+                                }
+                            }
                         }
                     } catch (final IllegalAccessException ex) {
                         throw new RuntimeException(ex);
@@ -298,7 +399,7 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private RepoMan<T, C, U> resolveRepositoryManagement() {
-        final Type[] typeArgs = genericTypes(getClass(), AbstractRepositoryManagementTest.class);
+        final Type[] abstractTestTypeArgs = genericTypes(getClass(), AbstractRepositoryManagementTest.class);
         final List<Field> fields = fields(getClass(), new ArrayList<>()).stream()
                 .peek(field -> field.setAccessible(true))
                 .filter(field -> RepositoryManagement.class.isAssignableFrom(field.getType()))
@@ -318,7 +419,9 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
         });
         return new RepoMan<T, C, U>(
                 fields.stream()
-                        .filter(field -> Arrays.equals(genericTypes(field.getType(), RepositoryManagement.class), typeArgs))
+                        .peek(field -> System.out.println("Found RepositoryManagement field: " + field.getName() + "-> " + Arrays.toString(
+                                genericTypes(field.getType(), RepositoryManagement.class))))
+                        .filter(field -> Arrays.equals(genericTypes(field.getType(), RepositoryManagement.class), abstractTestTypeArgs))
                         .map(field -> {
                             field.setAccessible(true);
                             try {
@@ -329,10 +432,11 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
                         })
                         .map(RepositoryManagement.class::cast)
                         .findAny()
-                        .orElseThrow(),
-                (Class<T>) typeArgs[0],
-                (Class<C>) typeArgs[1],
-                (Class<U>) typeArgs[2],
+                        .orElseThrow(() -> new IllegalStateException(
+                                "No field matching the generic types found: " + Arrays.toString(abstractTestTypeArgs))),
+                (Class<T>) abstractTestTypeArgs[0],
+                (Class<C>) abstractTestTypeArgs[1],
+                (Class<U>) abstractTestTypeArgs[2],
                 entityClass -> {
                     final Supplier<?> entitySupplier = entityCreators.get(entityClass);
                     if (entitySupplier == null) {
@@ -351,55 +455,19 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
         return fields;
     }
 
-    private Type[] genericTypes(final Class<?> clazz, final Class<?> targetSuperClass) {
-        return findGenericSuperType(clazz, targetSuperClass)
-                .map(ParameterizedType::getActualTypeArguments)
-                .map(fieldGenericTypes -> {
-                    for (int i = 0; i < fieldGenericTypes.length; i++) {
-                        if (fieldGenericTypes[i] instanceof TypeVariable<?> typeVar) {
-                            try {
-                                fieldGenericTypes[i] = Class.forName(typeVar.getBounds()[0].getTypeName());
-                            } catch (final ClassNotFoundException e) {
-                                throw new IllegalStateException(e);
-                            }
-                        }
-                    }
-                    return fieldGenericTypes;
-                })
-                .orElseThrow(() ->
-                        new IllegalStateException("No generic type found for " + targetSuperClass.getName() + " in " + clazz.getName()));
-    }
-
-    private Optional<ParameterizedType> findGenericSuperType(final Class<?> clazz, final Class<?> targetSuperClass) {
-        final Type superType = clazz.getGenericSuperclass();
-        if (superType instanceof ParameterizedType parameterizedType && parameterizedType.getRawType() == targetSuperClass) {
-            return Optional.of(parameterizedType);
+    private static Optional<ResolvableType> findGenericSuperType(final ResolvableType resolvableType, final Class<?> targetSuperClass) {
+        if (resolvableType.getRawClass() == targetSuperClass) {
+            return Optional.of(resolvableType);
         }
-        final Optional<ParameterizedType> inInterfaces = Arrays.stream(clazz.getGenericInterfaces())
-                .filter(superInterface -> superInterface instanceof ParameterizedType parameterizedType &&
-                        parameterizedType.getRawType() == targetSuperClass)
-                .map(ParameterizedType.class::cast).findAny();
+        final Optional<ResolvableType> inInterfaces = Arrays.stream(resolvableType.getInterfaces())
+                .filter(superInterface -> superInterface.getRawClass() == targetSuperClass)
+                .findAny();
         if (inInterfaces.isPresent()) {
             return inInterfaces;
-        } else if (clazz.getSuperclass() != null) {
-            return findGenericSuperType(clazz.getSuperclass(), targetSuperClass);
+        } else if (resolvableType.getSuperType() != ResolvableType.NONE) {
+            return findGenericSuperType(resolvableType.getSuperType(), targetSuperClass);
         } else {
             return Optional.empty();
-        }
-    }
-
-    // asserts that all expected's fields (getters) are equal to the actual's fields
-    // does a deep compare for fields which are not primitive or String
-    private void assertEquals(final Object actual, final Object expected) {
-        final Deque<String> stack = new ArrayDeque<>();
-        try {
-            assertEquals(actual, expected, stack);
-        } catch (final AssertionError e) {
-            throw new AssertionError(
-                    String.format(
-                            "Comparison failed at path: %s%n\tActual: %s,%n\tExpected: %s",
-                            String.join("->", stack), actual, expected),
-                    e);
         }
     }
 
@@ -409,6 +477,9 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
         }
         if (expected == null || actual == null) {
             throw new AssertionError("One of the expected and actual is null the other is not");
+        }
+        if (expected.equals(actual)) {
+            return; // equal
         }
         final Class<?> expectedClass = expected.getClass();
         final Class<?> actualClass = actual.getClass();
@@ -421,7 +492,7 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
                     return;
                 }
             } else if (!(Collection.class.isAssignableFrom(actualClass))) {
-                throw new AssertionError("Expected " + expected + " but got " + actual);
+                throw new AssertionError("Expected:\n\t" + expected + "but got:\n\t" + actual);
             }
         }
         if (expected instanceof Collection<?> expectedCollection) {
@@ -548,14 +619,7 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
         return actualGetter;
     }
 
-    private record RepoMan<T extends BaseEntity, C, U extends Identifiable<Long>>(
-            RepositoryManagement<T, C, U> repo,
-            Class<T> entityType,
-            Class<C> createType,
-            Class<U> updateType,
-            Function<Class<?>, ?> entityFactory) {}
-
-    private enum EventType {
+    protected enum EventType {
 
         CREATED("CreatedEvent"),
         UPDATED("UpdatedEvent"),
@@ -588,4 +652,11 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
 
         private record EventTypeKey(Class<?> entityClass, EventType eventType) {}
     }
+
+    private record RepoMan<T extends BaseEntity, C, U extends Identifiable<Long>>(
+            RepositoryManagement<T, C, U> repo,
+            Class<T> entityType,
+            Class<C> createType,
+            Class<U> updateType,
+            Function<Class<?>, ?> entityFactory) {}
 }

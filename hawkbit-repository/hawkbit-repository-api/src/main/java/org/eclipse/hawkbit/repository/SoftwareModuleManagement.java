@@ -90,6 +90,7 @@ public interface SoftwareModuleManagement<T extends SoftwareModule>
     @ToString(callSuper = true)
     final class Create extends UpdateCreate {
 
+        private SoftwareModuleType type;
         private boolean encrypted;
     }
 
@@ -123,6 +124,5 @@ public interface SoftwareModuleManagement<T extends SoftwareModule>
         @ValidString
         @Size(max = SoftwareModule.VENDOR_MAX_SIZE)
         private String vendor;
-        private SoftwareModuleType type;
     }
 }

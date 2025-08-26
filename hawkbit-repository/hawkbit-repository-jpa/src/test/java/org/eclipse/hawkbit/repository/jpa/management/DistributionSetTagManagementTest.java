@@ -26,8 +26,6 @@ import org.eclipse.hawkbit.repository.DistributionSetTagManagement.Update;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.jpa.DistributionSetFilter;
-import org.eclipse.hawkbit.repository.jpa.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.junit.jupiter.api.Test;
 
@@ -67,14 +65,10 @@ class DistributionSetTagManagementTest extends AbstractRepositoryManagementTest<
         assignTags(dsABCs, tagA, tagB, tagC);
 
         // search for not deleted
-        final DistributionSetFilterBuilder distributionSetFilterBuilder = DistributionSetFilter.builder().isComplete(true);
-        verifyExpectedFilteredDistributionSets(
-                distributionSetFilterBuilder.tagNames(List.of(tagA.getName())), Stream.of(dsAs, dsABs, dsACs, dsABCs));
-        verifyExpectedFilteredDistributionSets(
-                distributionSetFilterBuilder.tagNames(List.of(tagB.getName())), Stream.of(dsBs, dsABs, dsBCs, dsABCs));
-        verifyExpectedFilteredDistributionSets(
-                distributionSetFilterBuilder.tagNames(List.of(tagC.getName())), Stream.of(dsCs, dsACs, dsBCs, dsABCs));
-        verifyExpectedFilteredDistributionSets(distributionSetFilterBuilder.tagNames(List.of(tagX.getName())), Stream.empty());
+        assertTaggedWithATagAreAsExpected(tagA, dsAs, dsABs, dsACs, dsABCs);
+        assertTaggedWithATagAreAsExpected(tagB, dsBs, dsABs, dsBCs, dsABCs);
+        assertTaggedWithATagAreAsExpected(tagC, dsCs, dsACs, dsBCs, dsABCs);
+        assertTaggedWithATagAreAsExpected(tagX);
 
         assertThat(distributionSetTagRepository.findAll()).hasSize(5);
         distributionSetTagManagement.delete(tagY.getId());
@@ -84,12 +78,9 @@ class DistributionSetTagManagementTest extends AbstractRepositoryManagementTest<
         distributionSetTagManagement.delete(tagB.getId());
         assertThat(distributionSetTagRepository.findAll()).hasSize(2);
 
-        verifyExpectedFilteredDistributionSets(
-                distributionSetFilterBuilder.tagNames(List.of(tagA.getName())), Stream.of(dsAs, dsABs, dsACs, dsABCs));
-        verifyExpectedFilteredDistributionSets(
-                distributionSetFilterBuilder.tagNames(List.of(tagB.getName())), Stream.empty());
-        verifyExpectedFilteredDistributionSets(
-                distributionSetFilterBuilder.tagNames(List.of(tagC.getName())), Stream.of(dsCs, dsACs, dsBCs, dsABCs));
+        assertTaggedWithATagAreAsExpected(tagA, dsAs, dsABs, dsACs, dsABCs);
+        assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> assertTaggedWithATagAreAsExpected(tagB));
+        assertTaggedWithATagAreAsExpected(tagC, dsCs, dsACs, dsBCs, dsABCs);
     }
 
     /**
@@ -181,13 +172,14 @@ class DistributionSetTagManagementTest extends AbstractRepositoryManagementTest<
                 .isThrownBy(() -> distributionSetTagManagement.update(tagUpdate));
     }
 
-    private void verifyExpectedFilteredDistributionSets(
-            final DistributionSetFilterBuilder distributionSetFilterBuilder,
-            final Stream<Collection<DistributionSet>> expectedFilteredDistributionSets) {
-        final Collection<Long> retrievedFilteredDsIds = findDsByDistributionSetFilter(distributionSetFilterBuilder.build(), PAGE).stream()
-                .map(DistributionSet::getId).toList();
-        final Collection<Long> expectedFilteredDsIds = expectedFilteredDistributionSets.flatMap(Collection::stream)
-                .map(DistributionSet::getId).toList();
+    @SafeVarargs
+    private void assertTaggedWithATagAreAsExpected(final DistributionSetTag tag, final Collection<DistributionSet>... expectedDistributionSets) {
+        final Collection<Long> retrievedFilteredDsIds = distributionSetManagement.findByTag(tag.getId(), UNPAGED).getContent().stream()
+                .map(DistributionSet::getId)
+                .toList();
+        final Collection<Long> expectedFilteredDsIds = Stream.of(expectedDistributionSets).flatMap(Collection::stream)
+                .map(DistributionSet::getId)
+                .toList();
         assertThat(retrievedFilteredDsIds).hasSameElementsAs(expectedFilteredDsIds);
     }
 }

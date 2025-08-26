@@ -234,43 +234,4 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     private JpaRollout refresh(final Rollout rollout) {
         return rolloutRepository.findById(rollout.getId()).get();
     }
-
-    protected Slice<JpaDistributionSet> findDsByDistributionSetFilter(final DistributionSetFilter distributionSetFilter, final Pageable pageable) {
-        final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(distributionSetFilter);
-        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, specList, pageable);
-    }
-
-    private static List<Specification<JpaDistributionSet>> buildDistributionSetSpecifications(
-            final DistributionSetFilter distributionSetFilter) {
-        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>(10);
-
-        if (distributionSetFilter.getIsComplete() != null) {
-            specList.add(DistributionSetSpecification.isCompleted(distributionSetFilter.getIsComplete()));
-        }
-        if (distributionSetFilter.getIsDeleted() != null) {
-            specList.add(DistributionSetSpecification.isDeleted(distributionSetFilter.getIsDeleted()));
-        }
-        if (distributionSetFilter.getIsValid() != null) {
-            specList.add(DistributionSetSpecification.isValid(distributionSetFilter.getIsValid()));
-        }
-        if (distributionSetFilter.getTypeId() != null) {
-            specList.add(DistributionSetSpecification.byType(distributionSetFilter.getTypeId()));
-        }
-        if (!ObjectUtils.isEmpty(distributionSetFilter.getSearchText())) {
-            final String[] dsFilterNameAndVersionEntries = JpaManagementHelper
-                    .getFilterNameAndVersionEntries(distributionSetFilter.getSearchText().trim());
-            specList.add(DistributionSetSpecification.likeNameAndVersion(dsFilterNameAndVersionEntries[0], dsFilterNameAndVersionEntries[1]));
-        }
-        if (hasTagsFilterActive(distributionSetFilter)) {
-            specList.add(DistributionSetSpecification.hasTags(
-                    distributionSetFilter.getTagNames(), distributionSetFilter.getSelectDSWithNoTag()));
-        }
-        return specList;
-    }
-
-    private static boolean hasTagsFilterActive(final DistributionSetFilter distributionSetFilter) {
-        final boolean isNoTagActive = Boolean.TRUE.equals(distributionSetFilter.getSelectDSWithNoTag());
-        final boolean isAtLeastOneTagActive = !CollectionUtils.isEmpty(distributionSetFilter.getTagNames());
-        return isNoTagActive || isAtLeastOneTagActive;
-    }
 }

@@ -22,7 +22,8 @@ import java.util.Set;
 import jakarta.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement.Create;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement.Update;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeCreatedEvent;
@@ -30,7 +31,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdated
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
-import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -47,67 +47,9 @@ import org.junit.jupiter.api.Test;
  * Feature: Component Tests - Repository<br/>
  * Story: DistributionSet Management
  */
-class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
+class DistributionSetTypeManagementTest extends AbstractRepositoryManagementTest<DistributionSetType, Create, Update> {
 
-    /**
-     * Verifies that management get access react as specified on calls for non existing entities by means
-     * of Optional not present.
-     */
-    @Test
-    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 0) })
-    void nonExistingEntityAccessReturnsNotPresent() {
-        assertThat(distributionSetTypeManagement.find(NOT_EXIST_IDL)).isNotPresent();
-        assertThat(distributionSetTypeManagement.findByKey(NOT_EXIST_ID)).isNotPresent();
-        assertThat(distributionSetTypeManagement.findByName(NOT_EXIST_ID)).isNotPresent();
-    }
-
-    /**
-     * Verifies that management queries react as specified on calls for non existing entities
-     *  by means of throwing EntityNotFoundException.
-     */
-    @Test
-    @ExpectEvents({
-            @Expect(type = DistributionSetCreatedEvent.class, count = 0),
-            @Expect(type = DistributionSetTypeCreatedEvent.class, count = 1) })
-    void entityQueriesReferringToNotExistingEntitiesThrowsException() {
-
-        final List<Long> softwareModuleTypes = Collections.singletonList(osType.getId());
-
-        verifyThrownExceptionBy(() -> distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(NOT_EXIST_IDL,
-                softwareModuleTypes), "DistributionSetType");
-        final List<Long> notExistingSwModuleTypeIds = Collections.singletonList(NOT_EXIST_IDL);
-        verifyThrownExceptionBy(() -> distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(
-                        testdataFactory.findOrCreateDistributionSetType("xxx", "xxx").getId(), notExistingSwModuleTypeIds),
-                "SoftwareModuleType");
-
-        verifyThrownExceptionBy(() -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(NOT_EXIST_IDL,
-                softwareModuleTypes), "DistributionSetType");
-        verifyThrownExceptionBy(() -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(
-                        testdataFactory.findOrCreateDistributionSetType("xxx", "xxx").getId(), notExistingSwModuleTypeIds),
-                "SoftwareModuleType");
-
-        verifyThrownExceptionBy(() -> distributionSetTypeManagement.delete(NOT_EXIST_IDL), "DistributionSetType");
-
-        verifyThrownExceptionBy(
-                () -> distributionSetTypeManagement.update(DistributionSetTypeManagement.Update.builder().id(NOT_EXIST_IDL).build()),
-                        "DistributionSetType");
-    }
-
-    /**
-     * Verify that a DistributionSet with invalid properties cannot be created or updated
-     */
-    @Test
-    @ExpectEvents({
-            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = DistributionSetUpdatedEvent.class, count = 0) })
-    void createAndUpdateDistributionSetWithInvalidFields() {
-        final DistributionSet set = testdataFactory.createDistributionSet();
-
-        createAndUpdateDistributionSetWithInvalidDescription(set);
-        createAndUpdateDistributionSetWithInvalidName(set);
-        createAndUpdateDistributionSetWithInvalidVersion(set);
-    }
+    public static final String USED_BY_DS_TYPE_KEY = "updatableType";
 
     /**
      * Tests the successful module update of unused distribution set type which is in fact allowed.
@@ -115,150 +57,50 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
     @Test
     void updateUnassignedDistributionSetTypeModules() {
         final DistributionSetType updatableType = distributionSetTypeManagement
-                .create(DistributionSetTypeManagement.Create.builder().key("updatableType").name("to be deleted").build());
-        assertThat(distributionSetTypeManagement.findByKey("updatableType").get().getMandatoryModuleTypes()).isEmpty();
+                .create(Create.builder().key(USED_BY_DS_TYPE_KEY).name("to be deleted").build());
+        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getMandatoryModuleTypes()).isEmpty();
 
         // add OS
-        distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(),
-                Set.of(osType.getId()));
-        assertThat(distributionSetTypeManagement.findByKey("updatableType").get().getMandatoryModuleTypes())
+        distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(), Set.of(osType.getId()));
+        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getMandatoryModuleTypes())
                 .containsOnly(osType);
 
         // add JVM
-        distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(),
-                Set.of(runtimeType.getId()));
-        assertThat(distributionSetTypeManagement.findByKey("updatableType").get().getMandatoryModuleTypes())
+        distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(), Set.of(runtimeType.getId()));
+        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getMandatoryModuleTypes())
                 .containsOnly(osType, runtimeType);
 
         // remove OS
         distributionSetTypeManagement.unassignSoftwareModuleType(updatableType.getId(), osType.getId());
-        assertThat(distributionSetTypeManagement.findByKey("updatableType").get().getMandatoryModuleTypes())
-                .containsOnly(runtimeType);
+        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getMandatoryModuleTypes()).containsOnly(runtimeType);
     }
 
     /**
-     * Verifies that the quota for software module types per distribution set type is enforced as expected.
+     * Tests the successful update of used distribution set type properties that are allowed.
      */
     @Test
-    void quotaMaxSoftwareModuleTypes() {
-        final int quota = quotaManagement.getMaxSoftwareModuleTypesPerDistributionSetType();
-        // create software module types
-        final List<Long> moduleTypeIds = new ArrayList<>();
-        for (int i = 0; i < quota + 1; ++i) {
-            final SoftwareModuleTypeManagement.Create smCreate = SoftwareModuleTypeManagement.Create.builder().name("smType_" + i)
-                    .description("smType_" + i).maxAssignments(1).colour("blue").key("smType_" + i).build();
-            moduleTypeIds.add(softwareModuleTypeManagement.create(smCreate).getId());
-        }
-
-        // assign all types at once
-        final DistributionSetType dsType1 = distributionSetTypeManagement
-                .create(DistributionSetTypeManagement.Create.builder().key("dst1").name("dst1").build());
-        final Long dsType1Id = dsType1.getId();
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType1Id, moduleTypeIds));
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(
-                () -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType1Id, moduleTypeIds));
-
-        // assign as many mandatory modules as possible
-        final DistributionSetType dsType2 = distributionSetTypeManagement
-                .create(DistributionSetTypeManagement.Create.builder().key("dst2").name("dst2").build());
-        final Long dsType2Id = dsType2.getId();
-        distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType2Id,
-                moduleTypeIds.subList(0, quota));
-        assertThat(distributionSetTypeManagement.find(dsType2Id)).isNotEmpty();
-        assertThat(distributionSetTypeManagement.find(dsType2Id).get().getMandatoryModuleTypes()).hasSize(quota);
-        // assign one more to trigger the quota exceeded error
-        final List<Long> softwareModuleTypeIds = Collections.singletonList(moduleTypeIds.get(quota));
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType2Id, softwareModuleTypeIds));
-
-        // assign as many optional modules as possible
-        final DistributionSetType dsType3 = distributionSetTypeManagement
-                .create(DistributionSetTypeManagement.Create.builder().key("dst3").name("dst3").build());
-        final Long dsType3Id = dsType3.getId();
-        distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType3Id, moduleTypeIds.subList(0, quota));
-        assertThat(distributionSetTypeManagement.find(dsType3Id)).isNotEmpty();
-        assertThat(distributionSetTypeManagement.find(dsType3Id).get().getOptionalModuleTypes()).hasSize(quota);
-        // assign one more to trigger the quota exceeded error
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType3Id, softwareModuleTypeIds));
-
+    void updateAssignedDistributionSetTypeProperties() {
+        final DistributionSetType dsType = createDistributionSetTypeUsedByDs();
+        distributionSetTypeManagement.update(Update.builder().id(dsType.getId()).description("a new description").build());
+        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getDescription()).isEqualTo("a new description");
+        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getColour()).isEqualTo("test123");
     }
 
     /**
-     * Tests the successfull update of used distribution set type meta data which is in fact allowed.
+     * Tests the successful deletion of used (soft delete) distribution set types.
      */
     @Test
-    void updateAssignedDistributionSetTypeMetaData() {
-        final DistributionSetType nonUpdatableType = createDistributionSetTypeUsedByDs();
-
-        distributionSetTypeManagement.update(
-                DistributionSetTypeManagement.Update.builder().id(nonUpdatableType.getId()).description("a new description").build());
-
-        assertThat(distributionSetTypeManagement.findByKey("updatableType").orElseThrow().getDescription()).isEqualTo("a new description");
-        assertThat(distributionSetTypeManagement.findByKey("updatableType").orElseThrow().getColour()).isEqualTo("test123");
-    }
-
-    /**
-     * Tests the unsuccessful update of used distribution set type (module addition).
-     */
-    @Test
-    void addModuleToAssignedDistributionSetTypeFails() {
-        final Long nonUpdatableTypeId = createDistributionSetTypeUsedByDs().getId();
-        final Set<Long> osTypeId = Set.of(osType.getId());
-        assertThatThrownBy(() -> distributionSetTypeManagement
-                .assignMandatorySoftwareModuleTypes(nonUpdatableTypeId, osTypeId))
-                .isInstanceOf(EntityReadOnlyException.class);
-    }
-
-    /**
-     * Tests the unsuccessful update of used distribution set type (module removal).
-     */
-    @Test
-    void removeModuleToAssignedDistributionSetTypeFails() {
-        DistributionSetType nonUpdatableType = distributionSetTypeManagement
-                .create(DistributionSetTypeManagement.Create.builder().key("updatableType").name("to be deleted").build());
-        assertThat(distributionSetTypeManagement.findByKey("updatableType").get().getMandatoryModuleTypes()).isEmpty();
-
-        final Long osTypeId = osType.getId();
-        nonUpdatableType = distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(nonUpdatableType.getId(), Set.of(osTypeId));
-        distributionSetManagement.create(
-                DistributionSetManagement.Create.builder().type(nonUpdatableType).name("newtypesoft").version("1").build());
-
-        final Long typeId = nonUpdatableType.getId();
-        assertThatThrownBy(() -> distributionSetTypeManagement.unassignSoftwareModuleType(typeId, osTypeId))
-                .isInstanceOf(EntityReadOnlyException.class);
-    }
-
-    /**
-     * Tests the successfull deletion of unused (hard delete) distribution set types.
-     */
-    @Test
-    void deleteUnassignedDistributionSetType() {
-        final JpaDistributionSetType hardDelete = (JpaDistributionSetType) distributionSetTypeManagement
-                .create(DistributionSetTypeManagement.Create.builder().key("delete").name("to be deleted").build());
-
-        assertThat(distributionSetTypeRepository.findAll()).contains(hardDelete);
-        distributionSetTypeManagement.delete(hardDelete.getId());
-
-        assertThat(distributionSetTypeRepository.findAll()).doesNotContain(hardDelete);
-    }
-
-    /**
-     * Tests the successfull deletion of used (soft delete) distribution set types.
-     */
-    @Test
-    void deleteAssignedDistributionSetType() {
+    void softDeleteAssignedDistributionSetType() {
         final int existing = (int) distributionSetTypeManagement.count();
         final JpaDistributionSetType toBeDeleted = (JpaDistributionSetType) distributionSetTypeManagement
-                .create(DistributionSetTypeManagement.Create.builder().key("softdeleted").name("to be deleted").build());
+                .create(Create.builder().key("softDeleted").name("to be deleted").build());
 
         assertThat(distributionSetTypeRepository.findAll()).contains(toBeDeleted);
         distributionSetManagement.create(
-                DistributionSetManagement.Create.builder().type(toBeDeleted).name("softdeleted").version("1").build());
+                DistributionSetManagement.Create.builder().type(toBeDeleted).name("softDeleted").version("1").build());
 
         distributionSetTypeManagement.delete(toBeDeleted.getId());
-        final Optional<? extends DistributionSetType> softDeleted = distributionSetTypeManagement.findByKey("softdeleted");
+        final Optional<? extends DistributionSetType> softDeleted = distributionSetTypeManagement.findByKey("softDeleted");
         assertThat(softDeleted).isPresent();
         assertThat(softDeleted.get().isDeleted()).isTrue();
         assertThat(distributionSetTypeManagement.findAll(PAGE)).hasSize(existing);
@@ -270,16 +112,137 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
      * Verifies that when no SoftwareModules are assigned to a Distribution then the DistributionSet is not complete.
      */
     @Test
-    void shouldFailWhenDistributionSetHasNoSoftwareModulesAssigned() {
+    void incompleteIfDistributionSetHasNoSoftwareModulesAssigned() {
         final JpaDistributionSetType jpaDistributionSetType = (JpaDistributionSetType) distributionSetTypeManagement
-                .create(DistributionSetTypeManagement.Create.builder().key("newType").name("new Type").build());
-
-        final List<SoftwareModule> softwareModules = new ArrayList<>();
-
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet("DistributionOne", "3.1.2",
-                jpaDistributionSetType, softwareModules);
-
+                .create(Create.builder().key("newType").name("new Type").build());
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet(
+                "DistributionOne", "3.1.2", jpaDistributionSetType, new ArrayList<>());
         assertThat(jpaDistributionSetType.checkComplete(distributionSet)).isFalse();
+    }
+
+    /**
+     * Verifies that the quota for software module types per distribution set type is enforced as expected.
+     */
+    @Test
+    void failIfQuotaExceeded() {
+        final int quota = quotaManagement.getMaxSoftwareModuleTypesPerDistributionSetType();
+        // create software module types
+        final List<Long> moduleTypeIds = new ArrayList<>();
+        for (int i = 0; i < quota + 1; ++i) {
+            final SoftwareModuleTypeManagement.Create smCreate = SoftwareModuleTypeManagement.Create.builder().name("smType_" + i)
+                    .description("smType_" + i).maxAssignments(1).colour("blue").key("smType_" + i).build();
+            moduleTypeIds.add(softwareModuleTypeManagement.create(smCreate).getId());
+        }
+
+        // assign all types at once
+        final DistributionSetType dsType1 = distributionSetTypeManagement
+                .create(Create.builder().key("dst1").name("dst1").build());
+        final Long dsType1Id = dsType1.getId();
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+                .isThrownBy(() -> distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType1Id, moduleTypeIds));
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(
+                () -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType1Id, moduleTypeIds));
+
+        // assign as many mandatory modules as possible
+        final DistributionSetType dsType2 = distributionSetTypeManagement
+                .create(Create.builder().key("dst2").name("dst2").build());
+        final Long dsType2Id = dsType2.getId();
+        distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType2Id,
+                moduleTypeIds.subList(0, quota));
+        assertThat(distributionSetTypeManagement.find(dsType2Id)).isNotEmpty();
+        assertThat(distributionSetTypeManagement.find(dsType2Id).get().getMandatoryModuleTypes()).hasSize(quota);
+        // assign one more to trigger the quota exceeded error
+        final List<Long> softwareModuleTypeIds = Collections.singletonList(moduleTypeIds.get(quota));
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+                .isThrownBy(() -> distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType2Id, softwareModuleTypeIds));
+
+        // assign as many optional modules as possible
+        final DistributionSetType dsType3 = distributionSetTypeManagement.create(Create.builder().key("dst3").name("dst3").build());
+        final Long dsType3Id = dsType3.getId();
+        distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType3Id, moduleTypeIds.subList(0, quota));
+        assertThat(distributionSetTypeManagement.find(dsType3Id)).isNotEmpty();
+        assertThat(distributionSetTypeManagement.find(dsType3Id).get().getOptionalModuleTypes()).hasSize(quota);
+        // assign one more to trigger the quota exceeded error
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+                .isThrownBy(() -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType3Id, softwareModuleTypeIds));
+    }
+
+    @Test
+    @ExpectEvents({
+            @Expect(type = DistributionSetCreatedEvent.class, count = 0),
+            @Expect(type = DistributionSetTypeCreatedEvent.class, count = 1) })
+    void failIfReferNotExistingEntity() {
+        final List<Long> softwareModuleTypes = Collections.singletonList(osType.getId());
+
+        verifyThrownExceptionBy(
+                () -> distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(NOT_EXIST_IDL, softwareModuleTypes),
+                "DistributionSetType");
+        final List<Long> notExistingSwModuleTypeIds = Collections.singletonList(NOT_EXIST_IDL);
+        verifyThrownExceptionBy(
+                () -> distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(
+                        testdataFactory.findOrCreateDistributionSetType("xxx", "xxx").getId(), notExistingSwModuleTypeIds),
+                "SoftwareModuleType");
+
+        verifyThrownExceptionBy(
+                () -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(NOT_EXIST_IDL, softwareModuleTypes),
+                "DistributionSetType");
+        verifyThrownExceptionBy(
+                () -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(
+                        testdataFactory.findOrCreateDistributionSetType("xxx", "xxx").getId(), notExistingSwModuleTypeIds),
+                "SoftwareModuleType");
+
+        verifyThrownExceptionBy(() -> distributionSetTypeManagement.delete(NOT_EXIST_IDL), "DistributionSetType");
+
+        verifyThrownExceptionBy(
+                () -> distributionSetTypeManagement.update(Update.builder().id(NOT_EXIST_IDL).build()),
+                "DistributionSetType");
+    }
+
+    /**
+     * Verify that a DistributionSet with invalid properties cannot be created or updated
+     */
+    @Test
+    @ExpectEvents({
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 0) })
+    void failToCreateAndUpdateDistributionSetWithInvalidFields() {
+        final DistributionSet set = testdataFactory.createDistributionSet();
+
+        createAndUpdateDistributionSetWithInvalidDescription(set);
+        createAndUpdateDistributionSetWithInvalidName(set);
+        createAndUpdateDistributionSetWithInvalidVersion(set);
+    }
+
+    /**
+     * Tests the unsuccessful update of used distribution set type (module addition).
+     */
+    @Test
+    void failAddModuleIfAssignedDistributionSetType() {
+        final Long nonUpdatableTypeId = createDistributionSetTypeUsedByDs().getId();
+        final Set<Long> osTypeId = Set.of(osType.getId());
+        assertThatThrownBy(() -> distributionSetTypeManagement
+                .assignMandatorySoftwareModuleTypes(nonUpdatableTypeId, osTypeId))
+                .isInstanceOf(EntityReadOnlyException.class);
+    }
+
+    /**
+     * Tests the unsuccessful update of used distribution set type (module removal).
+     */
+    @Test
+    void failToRemoveModuleIfAssignedDistributionSetType() {
+        DistributionSetType nonUpdatableType = distributionSetTypeManagement
+                .create(Create.builder().key(USED_BY_DS_TYPE_KEY).name("to be deleted").build());
+        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).get().getMandatoryModuleTypes()).isEmpty();
+
+        final Long osTypeId = osType.getId();
+        nonUpdatableType = distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(nonUpdatableType.getId(), Set.of(osTypeId));
+        distributionSetManagement.create(
+                DistributionSetManagement.Create.builder().type(nonUpdatableType).name("newtypesoft").version("1").build());
+
+        final Long typeId = nonUpdatableType.getId();
+        assertThatThrownBy(() -> distributionSetTypeManagement.unassignSoftwareModuleType(typeId, osTypeId))
+                .isInstanceOf(EntityReadOnlyException.class);
     }
 
     private void createAndUpdateDistributionSetWithInvalidDescription(final DistributionSet set) {
@@ -301,7 +264,8 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
                 .as("set with too long description should not be updated")
                 .isThrownBy(() -> distributionSetManagement.update(distributionSetUpdate));
 
-        final DistributionSetManagement.Update distributionSetUpdate2 = DistributionSetManagement.Update.builder().id(set.getId()).description(INVALID_TEXT_HTML).build();
+        final DistributionSetManagement.Update distributionSetUpdate2 = DistributionSetManagement.Update.builder().id(set.getId())
+                .description(INVALID_TEXT_HTML).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("set with invalid description should not be updated")
                 .isThrownBy(() -> distributionSetManagement.update(distributionSetUpdate2));
@@ -396,13 +360,13 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private DistributionSetType createDistributionSetTypeUsedByDs() {
-        final DistributionSetType nonUpdatableType = distributionSetTypeManagement.create(
-                DistributionSetTypeManagement.Create.builder().key("updatableType").name("to be deleted").colour("test123").build());
-        assertThat(distributionSetTypeManagement.findByKey("updatableType").orElseThrow().getMandatoryModuleTypes()).isEmpty();
+        final DistributionSetType dsType = distributionSetTypeManagement.create(
+                Create.builder().key(USED_BY_DS_TYPE_KEY).name("to be deleted").colour("test123").build());
+        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getMandatoryModuleTypes()).isEmpty();
         distributionSetManagement.create(DistributionSetManagement.Create.builder()
-                .type(nonUpdatableType)
-                .name("newtypesoft").version("1")
+                .type(dsType)
+                .name("newTypeSoft").version("1")
                 .build());
-        return nonUpdatableType;
+        return dsType;
     }
 }
