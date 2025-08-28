@@ -110,29 +110,14 @@ public class SimpleUIApp implements AppShellConfigurator {
     OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(final HawkbitMgmtClient hawkbitClient) {
         final OidcUserService delegate = new OidcUserService();
         return (userRequest) -> {
-            // fetch the previous oidc user to re-use the same granted authorities and avoid too many requests
-            // when the token refreshes (and potential looping, as the refresh will most certainly go through the oidc user service)
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            OidcUser existingUser = authentication != null && authentication.getPrincipal() instanceof OidcUser existing
-                    ? existing
-                    : null;
-
             OidcUser oidcUser = delegate.loadUser(userRequest);
             final List<SimpleGrantedAuthority> grantedAuthorities = new ArrayList<>();
-            if (existingUser == null) {
-                final OAuth2AuthenticationToken tempToken = new OAuth2AuthenticationToken(
-                        oidcUser,
-                        emptyList(),
-                        userRequest.getClientRegistration().getRegistrationId()
-                );
-                grantedAuthorities.addAll(getGrantedAuthorities(hawkbitClient, tempToken));
-            } else {
-                grantedAuthorities.addAll(existingUser.getAuthorities()
-                        .stream()
-                        .map(authority -> new SimpleGrantedAuthority(authority.getAuthority()))
-                        .toList()
-                );
-            }
+            final OAuth2AuthenticationToken tempToken = new OAuth2AuthenticationToken(
+                    oidcUser,
+                    emptyList(),
+                    userRequest.getClientRegistration().getRegistrationId()
+            );
+            grantedAuthorities.addAll(getGrantedAuthorities(hawkbitClient, tempToken));
             return new DefaultOidcUser(
                     grantedAuthorities,
                     oidcUser.getIdToken(),
