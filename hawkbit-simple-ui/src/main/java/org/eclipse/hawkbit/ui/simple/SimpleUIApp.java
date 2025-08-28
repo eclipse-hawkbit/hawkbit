@@ -60,8 +60,8 @@ public class SimpleUIApp implements AppShellConfigurator {
     private static final Function<OAuth2TokenManager, RequestInterceptor> AUTHORIZATION = oAuth2TokenManager -> requestTemplate -> {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof OAuth2AuthenticationToken authenticationToken) {
-            var token = oAuth2TokenManager.getToken(authenticationToken);
-            requestTemplate.header("Authorization", "Bearer " + token);
+            String bearerToken = oAuth2TokenManager.getToken(authenticationToken);
+            requestTemplate.header("Authorization", "Bearer " + bearerToken);
         } else {
             requestTemplate.header(
                     "Authorization", "Basic " + Base64.getEncoder().encodeToString(
@@ -116,7 +116,7 @@ public class SimpleUIApp implements AppShellConfigurator {
                     emptyList(),
                     userRequest.getClientRegistration().getRegistrationId()
             );
-            final List<SimpleGrantedAuthority> grantedAuthorities = new ArrayList<>(getGrantedAuthorities(hawkbitClient, tempToken));
+            final List<SimpleGrantedAuthority> grantedAuthorities = getGrantedAuthorities(hawkbitClient, tempToken);
             return new DefaultOidcUser(
                     grantedAuthorities,
                     oidcUser.getIdToken(),
