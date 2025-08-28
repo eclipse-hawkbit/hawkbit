@@ -24,27 +24,22 @@ public interface RolloutHandler {
 
     /**
      * Process rollout based on its current {@link Rollout#getStatus()}.
-     *
-     * For {@link Rollout.RolloutStatus#CREATING} that means creating the
-     * {@link RolloutGroup}s with {@link Target}s and when finished switch to
+     * <p/>
+     * For {@link Rollout.RolloutStatus#CREATING} that means creating the {@link RolloutGroup}s with {@link Target}s and when finished switch to
      * {@link Rollout.RolloutStatus#READY}.
-     *
-     * For {@link Rollout.RolloutStatus#READY} that means switching to
-     * {@link Rollout.RolloutStatus#STARTING} if the {@link Rollout#getStartAt()} is
-     * set and time of calling this method is beyond this point in time. This auto
+     * <p/>
+     * For {@link Rollout.RolloutStatus#READY} that means switching to {@link Rollout.RolloutStatus#STARTING} if the
+     * {@link Rollout#getStartAt()} is set and time of calling this method is beyond this point in time. This auto
      * start mechanism is optional. Call {@link RolloutManagement#start(long)} otherwise.
-     *
-     * For {@link Rollout.RolloutStatus#STARTING} that means starting the first
-     * {@link RolloutGroup}s in line and when finished switch to
+     * <p/>
+     * For {@link Rollout.RolloutStatus#STARTING} that means starting the first {@link RolloutGroup}s in line and when finished switch to
      * {@link Rollout.RolloutStatus#RUNNING}.
-     *
-     * For {@link Rollout.RolloutStatus#RUNNING} that means checking to activate
-     * further groups based on the defined thresholds. Switched to
+     * <p/>
+     * For {@link Rollout.RolloutStatus#RUNNING} that means checking to activate further groups based on the defined thresholds. Switched to
      * {@link Rollout.RolloutStatus#FINISHED} is all groups are finished.
-     *
-     * For {@link Rollout.RolloutStatus#DELETING} that means either soft delete in
-     * case rollout was already {@link Rollout.RolloutStatus#RUNNING} which results
-     * in status change {@link Rollout.RolloutStatus#DELETED} or hard delete from
+     * <p/>
+     * For {@link Rollout.RolloutStatus#DELETING} that means either soft delete in case rollout was already
+     * {@link Rollout.RolloutStatus#RUNNING} which results in status change {@link Rollout.RolloutStatus#DELETED} or hard delete from
      * the persistence otherwise.
      */
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)

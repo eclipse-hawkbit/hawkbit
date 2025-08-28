@@ -56,13 +56,12 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
      * Verifies the provided filter syntax.
      *
      * @param query to verify
-     * @return <code>true</code> if syntax is valid
      * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
      *         given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    boolean verifyTargetFilterQuerySyntax(@NotNull String query);
+    void verifyTargetFilterQuerySyntax(@NotNull String query);
 
     /**
      * Counts all target filters that have a given auto assign distribution set

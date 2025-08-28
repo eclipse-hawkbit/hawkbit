@@ -13,7 +13,6 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidationCount;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**

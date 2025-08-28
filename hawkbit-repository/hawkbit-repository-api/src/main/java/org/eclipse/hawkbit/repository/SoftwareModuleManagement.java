@@ -11,10 +11,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -25,8 +22,6 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
-import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
@@ -36,7 +31,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule.MetadataValue;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**

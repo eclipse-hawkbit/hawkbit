@@ -64,7 +64,6 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         testdataFactory.createRollout();
 
-        verifyThrownExceptionBy(() -> rolloutGroupManagement.countByRollout(NOT_EXIST_IDL), "Rollout");
         verifyThrownExceptionBy(() -> rolloutGroupManagement.countTargetsOfRolloutsGroup(NOT_EXIST_IDL), "RolloutGroup");
         verifyThrownExceptionBy(() -> rolloutGroupManagement.findByRolloutWithDetailedStatus(NOT_EXIST_IDL, PAGE), "Rollout");
         verifyThrownExceptionBy(() -> rolloutGroupManagement.findByRolloutAndRsql(NOT_EXIST_IDL, "name==*", PAGE), "Rollout");

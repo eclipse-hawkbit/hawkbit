@@ -59,8 +59,7 @@ public interface TenantConfigurationManagement extends PermissionSupport {
     <T extends Serializable> Map<String, TenantConfigurationValue<T>> addOrUpdateConfiguration(Map<String, T> configurations);
 
     /**
-     * Deletes a specific configuration for the current tenant. Does nothing in
-     * case there is no tenant specific configuration value.
+     * Deletes a specific configuration for the current tenant. Does nothing in case there is no tenant specific configuration value.
      *
      * @param configurationKey the configuration key to be deleted
      */
@@ -68,59 +67,46 @@ public interface TenantConfigurationManagement extends PermissionSupport {
     void deleteConfiguration(String configurationKey);
 
     /**
-     * Retrieves a configuration value from the e.g. tenant overwritten
-     * configuration values or in case the tenant does not a have a specific
+     * Retrieves a configuration value from the e.g. tenant overwritten configuration values or in case the tenant does not a have a specific
      * configuration the global default value hold in the {@link Environment}.
      *
      * @param configurationKeyName the key of the configuration
-     * @return the converted configuration value either from the tenant specific
-     *         configuration stored or from the fall back default values or
-     *         {@code null} in case key has not been configured and not default
-     *         value exists
+     * @return the converted configuration value either from the tenant specific configuration stored or from the fallback default values or
+     *         {@code null} in case key has not been configured and not default value exists
      * @throws TenantConfigurationValidatorException if the {@code propertyType} and the value in general does not
      *         match the expected type and format defined by the Key
-     * @throws ConversionFailedException if the property cannot be converted to the given
-     *         {@code propertyType}
+     * @throws ConversionFailedException if the property cannot be converted to the given {@code propertyType}
      */
     @PreAuthorize(value = SpringEvalExpressions.HAS_READ_REPOSITORY)
     <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(String configurationKeyName);
 
     /**
-     * Retrieves a configuration value from the e.g. tenant overwritten
-     * configuration values or in case the tenant does not a have a specific
+     * Retrieves a configuration value from the e.g. tenant overwritten configuration values or in case the tenant does not a have a specific
      * configuration the global default value hold in the {@link Environment}.
      *
      * @param <T> the type of the configuration value
      * @param configurationKeyName the key of the configuration
-     * @param propertyType the type of the configuration value, e.g. {@code String.class}
-     *         , {@code Integer.class}, etc
-     * @return the converted configuration value either from the tenant specific
-     *         configuration stored or from the fallback default values or
-     *         {@code null} in case key has not been configured and not default
-     *         value exists
+     * @param propertyType the type of the configuration value, e.g. {@code String.class}, {@code Integer.class}, etc
+     * @return the converted configuration value either from the tenant specific configuration stored or from the fallback default values or
+     *         {@code null} in case key has not been configured and not default value exists
      * @throws TenantConfigurationValidatorException if the {@code propertyType} and the value in general does not
      *         match the expected type and format defined by the Key
-     * @throws ConversionFailedException if the property cannot be converted to the given
-     *         {@code propertyType}
+     * @throws ConversionFailedException if the property cannot be converted to the given {@code propertyType}
      */
     @PreAuthorize(value = SpringEvalExpressions.HAS_READ_REPOSITORY)
     <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(String configurationKeyName,
             Class<T> propertyType);
 
     /**
-     * returns the global configuration property either defined in the property
-     * file or an default value otherwise.
+     * returns the global configuration property either defined in the property file or a default value otherwise.
      *
      * @param <T> the type of the configuration value
      * @param configurationKeyName the key of the configuration
-     * @param propertyType the type of the configuration value, e.g. {@code String.class}
-     *         , {@code Integer.class}, etc
+     * @param propertyType the type of the configuration value, e.g. {@code String.class}, {@code Integer.class}, etc
      * @return the global configured value
-     * @throws TenantConfigurationValidatorException if the {@code propertyType} and the value in the property
-     *         file or the default value does not match the expected type
-     *         and format defined by the Key
-     * @throws ConversionFailedException if the property cannot be converted to the given
-     *         {@code propertyType}
+     * @throws TenantConfigurationValidatorException if the {@code propertyType} and the value in the property file or the default value
+     *         does not match the expected type and format defined by the Key
+     * @throws ConversionFailedException if the property cannot be converted to the given {@code propertyType}
      */
     @PreAuthorize(value = SpringEvalExpressions.HAS_READ_REPOSITORY)
     <T> T getGlobalConfigurationValue(String configurationKeyName, Class<T> propertyType);

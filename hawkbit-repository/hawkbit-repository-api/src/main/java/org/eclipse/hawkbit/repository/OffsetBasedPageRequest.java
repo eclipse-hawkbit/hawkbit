@@ -18,11 +18,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 /**
- * An implementation of the {@link PageRequest} which is offset based by means
- * the offset is given and not the page number as in the original
- * {@link PageRequest} implementation where the offset is generated. Due that
- * the REST-API is working with {@code offset} and {@code limit} parameter we
- * need an offset based page request.
+ * An implementation of the {@link PageRequest} which is offset based by means the offset is given and not the page number as in the original
+ * {@link PageRequest} implementation where the offset is generated. Due to the REST-API is working with {@code offset} and {@code limit}
+ * parameter we need an offset based page request.
  */
 @Getter
 @EqualsAndHashCode(callSuper = true)

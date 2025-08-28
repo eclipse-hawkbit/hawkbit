@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -114,13 +115,12 @@ class JpaTargetFilterQueryManagement
     }
 
     @Override
-    public boolean verifyTargetFilterQuerySyntax(final String query) {
+    public void verifyTargetFilterQuerySyntax(final String query) {
         try {
             RsqlUtility.getInstance().validateRsqlFor(query, TargetFields.class, JpaTarget.class);
-            return true;
         } catch (final RSQLParserException | RSQLParameterUnsupportedFieldException e) {
             log.debug("The RSQL query '{}}' is invalid.", query, e);
-            return false;
+            throw new RSQLParameterSyntaxException("Cannot create a Rollout with an empty target query filter!");
         }
     }
 

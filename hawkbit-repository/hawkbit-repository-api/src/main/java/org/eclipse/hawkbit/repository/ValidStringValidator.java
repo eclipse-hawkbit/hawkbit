@@ -46,7 +46,7 @@ public class ValidStringValidator implements ConstraintValidator<ValidString, St
         try {
             return cleaner.isValid(stringToDocument(value));
         } catch (final Exception ex) {
-            log.error(String.format("There was an exception during bean field value (%s) validation", value), ex);
+            log.error("There was an exception during bean field value ({}) validation", value, ex);
             return false;
         }
     }

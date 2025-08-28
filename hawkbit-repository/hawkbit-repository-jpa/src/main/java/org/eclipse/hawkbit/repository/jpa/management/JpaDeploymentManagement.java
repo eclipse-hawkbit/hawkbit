@@ -316,16 +316,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         return actionStatusRepository.findByActionId(pageable, actionId);
     }
 
-    @Override
-    public long countActionStatusByAction(final long actionId) {
-        assertActionExistsAndAccessible(actionId);
-
-        return actionStatusRepository.countByActionId(actionId);
-    }
-
-    // action is already got and there are checked read permissions - do not check
-    // permissions
-    // and UI which is to be removed
+    // action is already got and there are checked read permissions - do not check permissions and UI which is to be removed
     @Override
     public Page<String> findMessagesByActionStatusId(final long actionStatusId, final Pageable pageable) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();

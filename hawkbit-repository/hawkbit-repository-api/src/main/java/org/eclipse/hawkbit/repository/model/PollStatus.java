@@ -25,7 +25,8 @@ public class PollStatus {
     private final LocalDateTime overdueDate;
     private final LocalDateTime currentDate;
 
-    public PollStatus(final LocalDateTime lastPollDate, final LocalDateTime nextPollDate,
+    public PollStatus(
+            final LocalDateTime lastPollDate, final LocalDateTime nextPollDate,
             final LocalDateTime overdueDate, final LocalDateTime currentDate) {
         this.lastPollDate = lastPollDate;
         this.nextPollDate = nextPollDate;
@@ -34,11 +35,9 @@ public class PollStatus {
     }
 
     /**
-     * calculates if the target poll time is overdue and the target has not been
-     * polled in the configured poll time interval.
+     * Calculates if the target poll time is overdue and the target has not been polled in the configured poll time interval.
      *
-     * @return {@code true} if the current time is after the poll time overdue
-     *         date otherwise {@code false}.
+     * @return {@code true} if the current time is after the poll time overdue date otherwise {@code false}.
      */
     public boolean isOverdue() {
         return currentDate.isAfter(overdueDate);
