@@ -111,13 +111,12 @@ public class SimpleUIApp implements AppShellConfigurator {
         final OidcUserService delegate = new OidcUserService();
         return (userRequest) -> {
             OidcUser oidcUser = delegate.loadUser(userRequest);
-            final List<SimpleGrantedAuthority> grantedAuthorities = new ArrayList<>();
             final OAuth2AuthenticationToken tempToken = new OAuth2AuthenticationToken(
                     oidcUser,
                     emptyList(),
                     userRequest.getClientRegistration().getRegistrationId()
             );
-            grantedAuthorities.addAll(getGrantedAuthorities(hawkbitClient, tempToken));
+            final List<SimpleGrantedAuthority> grantedAuthorities = new ArrayList<>(getGrantedAuthorities(hawkbitClient, tempToken));
             return new DefaultOidcUser(
                     grantedAuthorities,
                     oidcUser.getIdToken(),
