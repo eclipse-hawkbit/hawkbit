@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -116,13 +117,7 @@ public class Filter extends Div {
         final Map<Object, Object> normalized = new HashMap<>(keyToValues)
                 .entrySet()
                 .stream()
-                .map(e -> {
-                    if (e.getValue() instanceof Optional<?> opt) {
-                        e.setValue(opt.orElse(null));
-                    }
-                    return e;
-                })
-                .filter(e -> !ObjectUtils.isEmpty(e))
+                .filter(e -> !ObjectUtils.isEmpty(e.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         if (normalized.isEmpty()) {
             return null;
