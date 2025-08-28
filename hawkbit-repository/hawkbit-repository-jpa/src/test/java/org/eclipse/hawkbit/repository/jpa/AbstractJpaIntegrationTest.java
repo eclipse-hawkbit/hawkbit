@@ -20,7 +20,6 @@ import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -48,7 +47,6 @@ import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecific
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -167,9 +165,16 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
                 targets.stream().map(Target::getControllerId).toList(), tag.getId());
     }
 
-    protected List<? extends DistributionSet> assignTag(final Collection<? extends DistributionSet> sets,
-            final DistributionSetTag tag) {
+    protected List<? extends DistributionSet> assignTag(final Collection<? extends DistributionSet> sets, final DistributionSetTag tag) {
         return distributionSetManagement.assignTag(sets.stream().map(DistributionSet::getId).toList(), tag.getId());
+    }
+
+    protected List<? extends DistributionSet> assignTags(final Collection<? extends DistributionSet> sets, final DistributionSetTag... tags) {
+        List<? extends DistributionSet> result = null;
+        for (DistributionSetTag tag : tags) {
+            result = assignTag(sets, tag);
+        }
+        return result;
     }
 
     protected List<? extends DistributionSet> unassignTag(
@@ -181,8 +186,8 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
         targets.stream().map(Target::getControllerId).forEach(id -> targetManagement.assignType(id, type.getId()));
     }
 
-    protected void assertRollout(final Rollout rollout, final boolean dynamic, final Rollout.RolloutStatus status, final int groupCreated,
-            final long totalTargets) {
+    protected void assertRollout(
+            final Rollout rollout, final boolean dynamic, final Rollout.RolloutStatus status, final int groupCreated, final long totalTargets) {
         final Rollout refreshed = refresh(rollout);
         assertThat(refreshed.isDynamic()).as("Is dynamic").isEqualTo(dynamic);
         assertThat(refreshed.getStatus()).as("Status").isEqualTo(status);
@@ -228,44 +233,5 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     private JpaRollout refresh(final Rollout rollout) {
         return rolloutRepository.findById(rollout.getId()).get();
-    }
-
-    protected Slice<JpaDistributionSet> findDsByDistributionSetFilter(final DistributionSetFilter distributionSetFilter, final Pageable pageable) {
-        final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(distributionSetFilter);
-        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, specList, pageable);
-    }
-
-    private static List<Specification<JpaDistributionSet>> buildDistributionSetSpecifications(
-            final DistributionSetFilter distributionSetFilter) {
-        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>(10);
-
-        if (distributionSetFilter.getIsComplete() != null) {
-            specList.add(DistributionSetSpecification.isCompleted(distributionSetFilter.getIsComplete()));
-        }
-        if (distributionSetFilter.getIsDeleted() != null) {
-            specList.add(DistributionSetSpecification.isDeleted(distributionSetFilter.getIsDeleted()));
-        }
-        if (distributionSetFilter.getIsValid() != null) {
-            specList.add(DistributionSetSpecification.isValid(distributionSetFilter.getIsValid()));
-        }
-        if (distributionSetFilter.getTypeId() != null) {
-            specList.add(DistributionSetSpecification.byType(distributionSetFilter.getTypeId()));
-        }
-        if (!ObjectUtils.isEmpty(distributionSetFilter.getSearchText())) {
-            final String[] dsFilterNameAndVersionEntries = JpaManagementHelper
-                    .getFilterNameAndVersionEntries(distributionSetFilter.getSearchText().trim());
-            specList.add(DistributionSetSpecification.likeNameAndVersion(dsFilterNameAndVersionEntries[0], dsFilterNameAndVersionEntries[1]));
-        }
-        if (hasTagsFilterActive(distributionSetFilter)) {
-            specList.add(DistributionSetSpecification.hasTags(
-                    distributionSetFilter.getTagNames(), distributionSetFilter.getSelectDSWithNoTag()));
-        }
-        return specList;
-    }
-
-    private static boolean hasTagsFilterActive(final DistributionSetFilter distributionSetFilter) {
-        final boolean isNoTagActive = Boolean.TRUE.equals(distributionSetFilter.getSelectDSWithNoTag());
-        final boolean isAtLeastOneTagActive = !CollectionUtils.isEmpty(distributionSetFilter.getTagNames());
-        return isNoTagActive || isAtLeastOneTagActive;
     }
 }

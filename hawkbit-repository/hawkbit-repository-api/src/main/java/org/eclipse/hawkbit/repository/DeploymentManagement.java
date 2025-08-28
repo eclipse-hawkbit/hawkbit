@@ -243,16 +243,6 @@ public interface DeploymentManagement extends PermissionSupport {
     Page<ActionStatus> findActionStatusByAction(long actionId, @NotNull Pageable pageable);
 
     /**
-     * Counts all the {@link ActionStatus} entries of the given {@link Action}.
-     *
-     * @param actionId to be filtered on
-     * @return count of {@link ActionStatus} entries
-     * @throws EntityNotFoundException if action with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    long countActionStatusByAction(long actionId);
-
-    /**
      * Retrieves all messages for an {@link ActionStatus}.<p/>
      * No entity based access control applied.
      *

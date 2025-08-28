@@ -60,7 +60,6 @@ public interface TargetManagement<T extends Target>
     String HAS_READ_TARGET_AND_READ_ROLLOUT = HAS_READ_REPOSITORY + " and hasAuthority('READ_" + SpPermission.ROLLOUT + "')";
     String HAS_READ_TARGET_AND_READ_DISTRIBUTION_SET = HAS_READ_REPOSITORY + " and hasAuthority('READ_" + SpPermission.DISTRIBUTION_SET + "')";
 
-    String DETAILS_BASE = "base";
     String DETAILS_AUTO_CONFIRMATION_STATUS = "autoConfirmationStatus";
     String DETAILS_TAGS = "tags";
 
@@ -110,11 +109,6 @@ public interface TargetManagement<T extends Target>
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
     Target getWithDetails(@NotEmpty String controllerId, String detailsKey);
-
-    @PreAuthorize(HAS_READ_REPOSITORY)
-    default Target getWithDetails(@NotEmpty String controllerId) {
-        return getWithDetails(controllerId, DETAILS_BASE);
-    }
 
     @PreAuthorize(HAS_READ_REPOSITORY)
     default Target getWithAutoConfigurationStatus(@NotEmpty String controllerId) {

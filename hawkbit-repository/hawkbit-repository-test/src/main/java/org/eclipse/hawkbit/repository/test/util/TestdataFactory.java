@@ -430,16 +430,16 @@ public class TestdataFactory {
 
     /**
      * Creates {@link DistributionSet}s in repository including three {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
-     * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} followed by an iterative number and {@link DistributionSet#isRequiredMigrationStep()}
+     * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} followed by an iterative count and {@link DistributionSet#isRequiredMigrationStep()}
      * <code>false</code>.
      *
      * @param prefix for {@link SoftwareModule}s and {@link DistributionSet}s name, vendor and description.
-     * @param number of {@link DistributionSet}s to create
+     * @param count of {@link DistributionSet}s to create
      * @return {@link List} of {@link DistributionSet} entities
      */
-    public List<DistributionSet> createDistributionSets(final String prefix, final int number) {
+    public List<DistributionSet> createDistributionSets(final String prefix, final int count) {
         final List<DistributionSet> sets = new ArrayList<>();
-        for (int i = 0; i < number; i++) {
+        for (int i = 0; i < count; i++) {
             sets.add(createDistributionSet(prefix, DEFAULT_VERSION + "." + i, false));
         }
         return sets;

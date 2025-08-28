@@ -431,8 +431,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Action registerRetrieved(final long actionId, final String message) {
-        return handleRegisterRetrieved(actionId, message);
+    public void registerRetrieved(final long actionId, final String message) {
+        handleRegisterRetrieved(actionId, message);
     }
 
     @Override
@@ -895,10 +895,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
      *
      * @param actionId to the handle status for
      * @param message for the status
-     * @return the updated action in case the status has been changed to
-     *         {@link Status#RETRIEVED}
      */
-    private Action handleRegisterRetrieved(final Long actionId, final String message) {
+    private void handleRegisterRetrieved(final Long actionId, final String message) {
         final JpaAction action = actionRepository.getById(actionId);
         // do a manual query with CriteriaBuilder to avoid unnecessary field queries and an extra
         // count query made by spring-data when using pageable requests, we don't need an extra count
@@ -910,8 +908,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 .multiselect(actionStatusRoot.get(AbstractJpaBaseEntity_.id), actionStatusRoot.get(JpaActionStatus_.status))
                 .where(cb.equal(actionStatusRoot.get(JpaActionStatus_.action).get(AbstractJpaBaseEntity_.id), actionId))
                 .orderBy(cb.desc(actionStatusRoot.get(AbstractJpaBaseEntity_.id)));
-        final List<Object[]> resultList = entityManager.createQuery(query).setFirstResult(0).setMaxResults(1)
-                .getResultList();
+        final List<Object[]> resultList = entityManager.createQuery(query).setFirstResult(0).setMaxResults(1).getResultList();
 
         // if the latest status is not in retrieve state then we add a retrieved state again, we want
         // to document a deployment retrieved status and a cancel retrieved status, but multiple
@@ -919,8 +916,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         // case controller retrieves a action multiple times.
         if (resultList.isEmpty() || (Status.RETRIEVED != resultList.get(0)[1])) {
             // document that the status has been retrieved
-            actionStatusRepository
-                    .save(new JpaActionStatus(action, Status.RETRIEVED, System.currentTimeMillis(), message));
+            actionStatusRepository.save(new JpaActionStatus(action, Status.RETRIEVED, System.currentTimeMillis(), message));
 
             // don't change the action status itself in case the action is in
             // canceling state otherwise
@@ -928,10 +924,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             // cancel job anymore.
             if (!action.isCancelingOrCanceled()) {
                 action.setStatus(Status.RETRIEVED);
-                return actionRepository.save(action);
             }
         }
-        return action;
     }
 
     private void cancelAssignDistributionSetEvent(final Action action) {

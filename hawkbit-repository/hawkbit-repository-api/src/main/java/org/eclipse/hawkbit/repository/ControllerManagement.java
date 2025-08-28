@@ -239,11 +239,10 @@ public interface ControllerManagement {
      *
      * @param actionId to the handle status for
      * @param message for the status
-     * @return the update action in case the status has been changed to {@link Status#RETRIEVED}
      * @throws EntityNotFoundException if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Action registerRetrieved(long actionId, String message);
+    void registerRetrieved(long actionId, String message);
 
     /**
      * Updates attributes of the controller according to the given {@link UpdateMode}.
@@ -260,8 +259,7 @@ public interface ControllerManagement {
     Target updateControllerAttributes(@NotEmpty String controllerId, @NotNull Map<String, String> attributes, UpdateMode mode);
 
     /**
-     * Finds {@link Target} based on given controller ID returns found Target without details, i.e.
-     * NO {@link Target#getTags()} and {@link Target#getActions()} possible.
+     * Finds {@link Target} based on given controller ID returns found Target without details
      *
      * @param controllerId to look for.
      * @return {@link Target} or {@code null} if it does not exist
@@ -271,9 +269,7 @@ public interface ControllerManagement {
     Optional<Target> findByControllerId(@NotEmpty String controllerId);
 
     /**
-     * Finds {@link Target} based on given ID returns found Target without details, i.e.
-     * NO {@link Target#getTags()} and {@link Target#getActions()}
-     * possible.
+     * Finds {@link Target} based on given ID returns found Target without details
      *
      * @param targetId to look for.
      * @return {@link Target} or {@code null} if it does not exist

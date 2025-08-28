@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serial;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -119,7 +120,7 @@ public class JpaDistributionSet
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_metadata_ds"))
     @MapKeyColumn(name = "meta_key", length = DistributionSet.METADATA_MAX_KEY_SIZE)
     @Column(name = "meta_value", length = DistributionSet.METADATA_MAX_VALUE_SIZE)
-    private Map<String, String> metadata;
+    private Map<String, String> metadata = new HashMap<>();
 
     @Column(name = "complete")
     private boolean complete;

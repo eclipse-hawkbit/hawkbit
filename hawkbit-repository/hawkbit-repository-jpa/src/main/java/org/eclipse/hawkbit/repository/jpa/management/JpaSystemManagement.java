@@ -271,11 +271,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         return tenantMetaDataRepository.save(data);
     }
 
-    @Override
-    public TenantMetaData getTenantMetadata(final long tenantId) {
-        return tenantMetaDataRepository.findById(tenantId).orElseThrow(() -> new EntityNotFoundException(TenantMetaData.class, tenantId));
-    }
-
     private static boolean isPostgreSql(final JpaProperties properties) {
         return Database.POSTGRESQL == properties.getDatabase();
     }

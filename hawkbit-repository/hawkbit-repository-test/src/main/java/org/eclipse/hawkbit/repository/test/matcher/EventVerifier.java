@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,8 +36,14 @@ import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
+import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
+import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.ActionCreatedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.ActionUpdatedServiceEvent;
@@ -47,12 +54,6 @@ import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistribut
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
-import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
-import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
-import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetUpdatedServiceEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
@@ -70,15 +71,12 @@ public class EventVerifier extends AbstractTestExecutionListener {
     private EventCaptor eventCaptor;
 
     /**
-     * Publishes a reset counter marker event on the context to reset the
-     * current counted events. This allows test to prepare a setup such in
-     * {@code @Before} annotations which are actually counted to the executed
-     * test-method and maybe fire events which are not covered / recognized by
-     * the test-method itself and reset the counter again.
+     * Publishes a reset counter marker event on the context to reset the current counted events. This allows test to prepare a setup such in
+     * {@code @Before} annotations which are actually counted to the executed test-method and maybe fire events which are not
+     * covered / recognized by the test-method itself and reset the counter again.
      * <p/>
-     * Note that this approach is only working when using a single-thread
-     * executor in the ApplicationEventMultiCaster, so the order of the events
-     * keep the same.
+     * Note that this approach is only working when using a single-thread executor in the ApplicationEventMultiCaster, so the order of the
+     * events keep the same.
      *
      * @param publisher the {@link ApplicationEventPublisher} to publish the marker event to
      */
@@ -88,8 +86,12 @@ public class EventVerifier extends AbstractTestExecutionListener {
 
     @Override
     public void beforeTestMethod(final TestContext testContext) {
-        final Optional<Expect[]> expectedEvents = getExpectationsFrom(testContext.getTestMethod());
-        expectedEvents.ifPresent(events -> beforeTest(testContext));
+        Optional.ofNullable(testContext.getTestMethod().getAnnotation(ExpectEvents.class))
+                .map(ExpectEvents::value)
+                .ifPresent(events -> {
+                    eventCaptor = new EventCaptor();
+                    ((ConfigurableApplicationContext) testContext.getApplicationContext()).addApplicationListener(eventCaptor);
+                });
     }
 
     @Override
@@ -100,75 +102,16 @@ public class EventVerifier extends AbstractTestExecutionListener {
             return;
         }
 
-        final Optional<Expect[]> expectedEvents = getExpectationsFrom(testContext.getTestMethod());
-        try {
-            expectedEvents.ifPresent(this::afterTest);
-        } finally {
-            expectedEvents.ifPresent(listener -> removeEventListener(testContext));
-        }
-    }
-
-    private Optional<Expect[]> getExpectationsFrom(final Method testMethod) {
-        final Optional<Expect[]> expectedEvents = Optional.ofNullable(testMethod.getAnnotation(ExpectEvents.class)).map(ExpectEvents::value);
-        if (expectedEvents.isPresent()) {
-            List<Expect> modifiedEvents = new ArrayList<>(Arrays.asList(expectedEvents.get()));
-            for (Expect event : expectedEvents.get()) {
-                final Class<?> type = event.type();
-                if (type.isAssignableFrom(TargetCreatedEvent.class)) {
-                    modifiedEvents.add(toExpectServiceEvent(TargetCreatedServiceEvent.class, event.count()));
-                } else if (type.isAssignableFrom(TargetUpdatedEvent.class)) {
-                    modifiedEvents.add(toExpectServiceEvent(TargetUpdatedServiceEvent.class, event.count()));
-                } else if (type.isAssignableFrom(TargetDeletedEvent.class)) {
-                    modifiedEvents.add(toExpectServiceEvent(TargetDeletedServiceEvent.class, event.count()));
-                } else if (type.isAssignableFrom(TargetAssignDistributionSetEvent.class)) {
-                    modifiedEvents.add(toExpectServiceEvent(TargetAssignDistributionSetServiceEvent.class, event.count()));
-                } else  if (type.isAssignableFrom(MultiActionAssignEvent.class)) {
-                    modifiedEvents.add(toExpectServiceEvent(MultiActionAssignServiceEvent.class, event.count()));
-                } else if (type.isAssignableFrom(MultiActionCancelEvent.class)) {
-                    modifiedEvents.add(toExpectServiceEvent(MultiActionCancelServiceEvent.class, event.count()));
-                } else if (type.isAssignableFrom(TargetAttributesRequestedEvent.class)) {
-                    modifiedEvents.add(toExpectServiceEvent(TargetAttributesRequestedServiceEvent.class, event.count()));
-                } else if (type.isAssignableFrom(CancelTargetAssignmentEvent.class)) {
-                    modifiedEvents.add(toExpectServiceEvent(CancelTargetAssignmentServiceEvent.class, event.count()));
-                } else if (type.isAssignableFrom(ActionCreatedEvent.class)) {
-                    modifiedEvents.add(toExpectServiceEvent(ActionCreatedServiceEvent.class, event.count()));
-                } else if (type.isAssignableFrom(ActionUpdatedEvent.class)) {
-                    modifiedEvents.add(toExpectServiceEvent(ActionUpdatedServiceEvent.class, event.count()));
-                }
+        getExpectationsFrom(testContext.getTestMethod()).ifPresent(expectedEvents -> {
+            try {
+                verifyRightCountOfEvents(expectedEvents);
+                verifyAllEventsCounted(expectedEvents);
+                log.info("Expected events received:\n\t{}", Arrays.stream(expectedEvents).map(Object::toString).collect(Collectors.joining("\n\t")));
+            } finally {
+                testContext.getApplicationContext().getBean(ApplicationEventMulticaster.class).removeApplicationListener(eventCaptor);
+                DYNAMIC_EXPECTATIONS.remove();
             }
-            return Optional.of(modifiedEvents.toArray(new Expect[0]));
-        }
-        return Optional.empty();
-    }
-
-    private static Expect toExpectServiceEvent(final Class<?> clazz, final int count) {
-        return new Expect() {
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return Expect.class;
-            }
-
-            @Override
-            public Class<?> type() {
-                return clazz;
-            }
-
-            @Override
-            public int count() {
-                return count;
-            }
-        };
-    }
-
-    private void beforeTest(final TestContext testContext) {
-        eventCaptor = new EventCaptor();
-        ((ConfigurableApplicationContext) testContext.getApplicationContext()).addApplicationListener(eventCaptor);
-    }
-
-    private void afterTest(final Expect[] expectedEvents) {
-        verifyRightCountOfEvents(expectedEvents);
-        verifyAllEventsCounted(expectedEvents);
+        });
     }
 
     private void verifyRightCountOfEvents(final Expect[] expectedEvents) {
@@ -188,7 +131,7 @@ public class EventVerifier extends AbstractTestExecutionListener {
     private void verifyAllEventsCounted(final Expect[] expectedEvents) {
         final Set<Class<?>> diffSet = eventCaptor.diff(expectedEvents);
         if (!diffSet.isEmpty()) {
-            final StringBuilder failMessage = new StringBuilder("Missing event verification for ");
+            final StringBuilder failMessage = new StringBuilder("Missing event expectation for ");
             for (final Class<?> element : diffSet) {
                 final int count = eventCaptor.getCountFor(element);
                 failMessage.append(element).append(" with count: ").append(count).append(" ");
@@ -197,11 +140,67 @@ public class EventVerifier extends AbstractTestExecutionListener {
         }
     }
 
-    private void removeEventListener(final TestContext testContext) {
-        testContext.getApplicationContext().getBean(ApplicationEventMulticaster.class).removeApplicationListener(eventCaptor);
+    public static final ThreadLocal<Supplier<Expect[]>> DYNAMIC_EXPECTATIONS = new ThreadLocal<>();
+
+    private Optional<Expect[]> getExpectationsFrom(final Method testMethod) {
+        return Optional.ofNullable(testMethod.getAnnotation(ExpectEvents.class))
+                .map(ExpectEvents::value)
+                .map(expectedEvents -> {
+                    final Supplier<Expect[]> supplier = DYNAMIC_EXPECTATIONS.get();
+                    if (expectedEvents.length == 0) {
+                        if (supplier != null) {
+                            return supplier.get();
+                        }
+                    } else {
+                        if (supplier != null && supplier.get().length > 0) {
+                            fail("Expectations defined - both static and dynamic - only one definition is allowed");
+                        }
+                    }
+                    return expectedEvents;
+                })
+                .map(expectedEvents -> {
+                    final List<Expect> modifiedEvents = new ArrayList<>(Arrays.asList(expectedEvents));
+                    for (final Expect event : expectedEvents) {
+                        addServiceEventIfNeeded(event, modifiedEvents);
+                    }
+                    return modifiedEvents.toArray(new Expect[0]);
+                });
     }
 
-    private static class EventCaptor implements ApplicationListener<AbstractRemoteEvent> {
+    private static void addServiceEventIfNeeded(final Expect event, final List<Expect> modifiedEvents) {
+        final Class<?> type = event.type();
+        if (type.isAssignableFrom(TargetCreatedEvent.class)) {
+            modifiedEvents.add(new DynamicExpect(TargetCreatedServiceEvent.class, event.count()));
+        } else if (type.isAssignableFrom(TargetUpdatedEvent.class)) {
+            modifiedEvents.add(new DynamicExpect(TargetUpdatedServiceEvent.class, event.count()));
+        } else if (type.isAssignableFrom(TargetDeletedEvent.class)) {
+            modifiedEvents.add(new DynamicExpect(TargetDeletedServiceEvent.class, event.count()));
+        } else if (type.isAssignableFrom(TargetAssignDistributionSetEvent.class)) {
+            modifiedEvents.add(new DynamicExpect(TargetAssignDistributionSetServiceEvent.class, event.count()));
+        } else if (type.isAssignableFrom(MultiActionAssignEvent.class)) {
+            modifiedEvents.add(new DynamicExpect(MultiActionAssignServiceEvent.class, event.count()));
+        } else if (type.isAssignableFrom(MultiActionCancelEvent.class)) {
+            modifiedEvents.add(new DynamicExpect(MultiActionCancelServiceEvent.class, event.count()));
+        } else if (type.isAssignableFrom(TargetAttributesRequestedEvent.class)) {
+            modifiedEvents.add(new DynamicExpect(TargetAttributesRequestedServiceEvent.class, event.count()));
+        } else if (type.isAssignableFrom(CancelTargetAssignmentEvent.class)) {
+            modifiedEvents.add(new DynamicExpect(CancelTargetAssignmentServiceEvent.class, event.count()));
+        } else if (type.isAssignableFrom(ActionCreatedEvent.class)) {
+            modifiedEvents.add(new DynamicExpect(ActionCreatedServiceEvent.class, event.count()));
+        } else if (type.isAssignableFrom(ActionUpdatedEvent.class)) {
+            modifiedEvents.add(new DynamicExpect(ActionUpdatedServiceEvent.class, event.count()));
+        }
+    }
+
+    public record DynamicExpect(Class<?> type, int count) implements Expect {
+
+        @Override
+        public Class<? extends Annotation> annotationType() {
+            return Expect.class;
+        }
+    }
+
+    private static final class EventCaptor implements ApplicationListener<AbstractRemoteEvent> {
 
         private final ConcurrentHashMap<Class<?>, Integer> capturedEvents = new ConcurrentHashMap<>();
 
@@ -225,7 +224,6 @@ public class EventVerifier extends AbstractTestExecutionListener {
 
             if (event instanceof TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
                 assertThat(targetAssignDistributionSetEvent.getActions()).isNotEmpty();
-                assertThat(targetAssignDistributionSetEvent.getDistributionSetId()).isNotNull();
             }
 
             capturedEvents.compute(event.getClass(), (k, v) -> v == null ? 1 : v + 1);

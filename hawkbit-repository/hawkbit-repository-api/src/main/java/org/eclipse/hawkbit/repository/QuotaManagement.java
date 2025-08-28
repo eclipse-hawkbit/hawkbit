@@ -20,8 +20,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 public interface QuotaManagement {
 
     /**
-     * @return maximum number of {@link ActionStatus} entries that the
-     *         controller can report for an {@link Action}.
+     * @return maximum number of {@link ActionStatus} entries that the controller can report for an {@link Action}.
      */
     int getMaxStatusEntriesPerAction();
 
@@ -31,15 +30,12 @@ public interface QuotaManagement {
     int getMaxAttributeEntriesPerTarget();
 
     /**
-     * @return maximum number of allowed {@link RolloutGroup}s per
-     *         {@link Rollout}.
+     * @return maximum number of allowed {@link RolloutGroup}s per {@link Rollout}.
      */
     int getMaxRolloutGroupsPerRollout();
 
     /**
-     * @return maximum number of
-     *         {@link ControllerManagement#getActionHistoryMessages(Long, int)}
-     *         for an individual {@link ActionStatus}.
+     * @return maximum number of action (history) messages per actions status.
      */
     int getMaxMessagesPerActionStatus();
 
@@ -49,7 +45,7 @@ public interface QuotaManagement {
     int getMaxMetaDataEntriesPerSoftwareModule();
 
     /**
-     * @return maximum number of meta data entries per distribution set
+     * @return maximum number of metadata entries per distribution set
      */
     int getMaxMetaDataEntriesPerDistributionSet();
 
@@ -80,14 +76,12 @@ public interface QuotaManagement {
     int getMaxTargetsPerRolloutGroup();
 
     /**
-     * @return the maximum number of target distribution set assignments
-     *         resulting from a manual assignment
+     * @return the maximum number of target distribution set assignments resulting from a manual assignment
      */
     int getMaxTargetDistributionSetAssignmentsPerManualAssignment();
 
     /**
-     * @return the maximum number of targets for an automatic distribution set
-     *         assignment
+     * @return the maximum number of targets for an automatic distribution set assignment
      */
     int getMaxTargetsPerAutoAssignment();
 
@@ -110,5 +104,4 @@ public interface QuotaManagement {
      * @return the maximum number of distribution set types per target type
      */
     int getMaxDistributionSetTypesPerTargetType();
-
 }

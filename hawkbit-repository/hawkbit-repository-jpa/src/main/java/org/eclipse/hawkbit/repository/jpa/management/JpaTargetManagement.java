@@ -464,7 +464,7 @@ public class JpaTargetManagement
         // get the modifiable metadata map
         final Map<String, String> metadata = target.getMetadata();
         if (!metadata.containsKey(key)) {
-            throw new EntityNotFoundException("Target metadata", controllerId + ":" + key);
+            assertMetadataQuota(target.getId(), metadata.size() + 1);
         }
         metadata.put(key, value);
 

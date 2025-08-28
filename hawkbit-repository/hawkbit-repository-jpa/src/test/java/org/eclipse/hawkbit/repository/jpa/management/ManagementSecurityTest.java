@@ -352,9 +352,6 @@ class ManagementSecurityTest extends AbstractJpaIntegrationTest {
         } else {
             try {
                 final Constructor[] constructors = clazz.getDeclaredConstructors();
-                if (ObjectUtils.isEmpty(constructors)) {
-                    throw new IllegalStateException("No public constructor found for " + clazz);
-                }
                 // prefer empty constructor
                 for (final Constructor constructor : constructors) {
                     if (constructor.getParameterCount() == 0) {

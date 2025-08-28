@@ -96,15 +96,6 @@ public interface RolloutGroupManagement extends PermissionSupport {
     Page<RolloutGroup> findByRollout(long rolloutId, @NotNull Pageable pageable);
 
     /**
-     * Retrieves a page of {@link RolloutGroup}s filtered by a given {@link Rollout}.
-     *
-     * @param rolloutId the ID of the rollout to filter the {@link RolloutGroup}s
-     * @return a page of found {@link RolloutGroup}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    long countByRollout(long rolloutId);
-
-    /**
      * Get targets of specified rollout group.
      *
      * @param rolloutGroupId rollout group

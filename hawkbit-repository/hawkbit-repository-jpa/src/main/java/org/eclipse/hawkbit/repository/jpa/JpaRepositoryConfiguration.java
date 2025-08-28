@@ -156,7 +156,7 @@ public class JpaRepositoryConfiguration {
      * @return the {@link MethodValidationPostProcessor}
      */
     @Bean
-    public MethodValidationPostProcessor methodValidationPostProcessor() {
+    public static MethodValidationPostProcessor methodValidationPostProcessor() {
         final MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
         // ValidatorFactory shall NOT be closed because after closing the generated Validator
         // methods shall not be called - we need the validator in future
@@ -170,7 +170,7 @@ public class JpaRepositoryConfiguration {
     }
 
     @Bean
-    public BeanPostProcessor entityManagerBeanPostProcessor(
+    public static BeanPostProcessor entityManagerBeanPostProcessor(
             @Autowired(required = false) final AccessController<JpaArtifact> artifactAccessController,
             @Autowired(required = false) final AccessController<JpaSoftwareModuleType> softwareModuleTypeAccessController,
             @Autowired(required = false) final AccessController<JpaSoftwareModule> softwareModuleAccessController,

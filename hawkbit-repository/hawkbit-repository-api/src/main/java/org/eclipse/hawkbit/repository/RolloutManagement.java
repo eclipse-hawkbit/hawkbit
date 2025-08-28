@@ -86,25 +86,19 @@ public interface RolloutManagement extends PermissionSupport {
     long countByDistributionSetIdAndRolloutIsStoppable(long setId);
 
     /**
-     * Persists a new rollout entity. The filter within the
-     * {@link Rollout#getTargetFilterQuery()} is used to retrieve the targets which
-     * are effected by this rollout to create. The amount of groups will be defined
-     * as equally sized.
-     *
-     * The rollout is not started. Only the preparation of the rollout is done,
-     * creating and persisting all the necessary groups. The Rollout and the groups
-     * are persisted in {@link RolloutStatus#CREATING} and
-     * {@link RolloutGroupStatus#CREATING}.
-     *
-     * The RolloutScheduler will start to assign targets to the groups. Once all
-     * targets have been assigned to the groups, the rollout status is changed to
-     * {@link RolloutStatus#READY} so it can be started with .
+     * Persists a new rollout entity. The filter within the {@link Rollout#getTargetFilterQuery()} is used to retrieve the targets which
+     * are effected by this rollout to create. The amount of groups will be defined as equally sized.
+     * <p/>
+     * The rollout is not started. Only the preparation of the rollout is done, creating and persisting all the necessary groups. The Rollout
+     * and the groups are persisted in {@link RolloutStatus#CREATING} and {@link RolloutGroupStatus#CREATING}.
+     * <p/>
+     * The RolloutScheduler will start to assign targets to the groups. Once all targets have been assigned to the groups, the rollout status
+     * is changed to {@link RolloutStatus#READY} so it can be started with .
      *
      * @param create the rollout entity to create
      * @param amountGroup the amount of groups to split the rollout into
      * @param confirmationRequired if a confirmation is required by the device group(s) of the rollout
-     * @param conditions the rolloutgroup conditions and actions which should be applied
-     *         for each {@link RolloutGroup}
+     * @param conditions the rolloutgroup conditions and actions which should be applied for each {@link RolloutGroup}
      * @param dynamicRolloutGroupTemplate the template for dynamic rollout groups
      * @return the persisted rollout.
      * @throws EntityNotFoundException if given {@link DistributionSet} does not exist
@@ -118,61 +112,45 @@ public interface RolloutManagement extends PermissionSupport {
             @NotNull RolloutGroupConditions conditions, DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate);
 
     /**
-     * Persists a new rollout entity. The filter within the
-     * {@link Rollout#getTargetFilterQuery()} is used to retrieve the targets which
-     * are effected by this rollout to create. The amount of groups will be defined
-     * as equally sized.
-     *
-     * The rollout is not started. Only the preparation of the rollout is done,
-     * creating and persisting all the necessary groups. The Rollout and the groups
-     * are persisted in {@link RolloutStatus#CREATING} and
-     * {@link RolloutGroupStatus#CREATING}.
-     *
-     * The RolloutScheduler will start to assign targets to the groups. Once all
-     * targets have been assigned to the groups, the rollout status is changed to
-     * {@link RolloutStatus#READY} so it can be started with .
+     * Persists a new rollout entity. The filter within the {@link Rollout#getTargetFilterQuery()} is used to retrieve the targets which
+     * are effected by this rollout to create. The amount of groups will be defined as equally sized.
+     * <p/>
+     * The rollout is not started. Only the preparation of the rollout is done, creating and persisting all the necessary groups. The Rollout
+     * and the groups are persisted in {@link RolloutStatus#CREATING} and {@link RolloutGroupStatus#CREATING}.
+     * <p/>
+     * The RolloutScheduler will start to assign targets to the groups. Once all targets have been assigned to the groups, the rollout status is
+     * changed to {@link RolloutStatus#READY} so it can be started with .
      *
      * @param create the rollout entity to create
      * @param amountGroup the amount of groups to split the rollout into
      * @param confirmationRequired if a confirmation is required by the device group(s) of the rollout
-     * @param conditions the rolloutgroup conditions and actions which should be applied
-     *         for each {@link RolloutGroup}
+     * @param conditions the rolloutgroup conditions and actions which should be applied for each {@link RolloutGroup}
      * @return the persisted rollout.
      * @throws EntityNotFoundException if given {@link DistributionSet} does not exist
      * @throws ConstraintViolationException if rollout or group parameters are invalid.
-     * @throws AssignmentQuotaExceededException if the maximum number of allowed targets per rollout group is
-     *         exceeded.
+     * @throws AssignmentQuotaExceededException if the maximum number of allowed targets per rollout group is exceeded.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_CREATE_REPOSITORY)
-    Rollout create(@NotNull @Valid Create create, int amountGroup, boolean confirmationRequired,
-            @NotNull RolloutGroupConditions conditions);
+    Rollout create(@NotNull @Valid Create create, int amountGroup, boolean confirmationRequired, @NotNull RolloutGroupConditions conditions);
 
     /**
-     * Persists a new rollout entity. The filter within the
-     * {@link Rollout#getTargetFilterQuery()} is used to filter the targets which
-     * are affected by this rollout. The given groups will be used to create the
-     * groups.
-     *
-     * The rollout is not started. Only the preparation of the rollout is done,
-     * creating and persisting all the necessary groups. The Rollout and the groups
-     * are persisted in {@link RolloutStatus#CREATING} and
-     * {@link RolloutGroupStatus#CREATING}.
-     *
-     * The RolloutScheduler will start to assign targets to the groups. Once all
-     * targets have been assigned to the groups, the rollout status is changed to
-     * {@link RolloutStatus#READY} so it can be started with
-     * {@link #start(long)}.
+     * Persists a new rollout entity. The filter within the {@link Rollout#getTargetFilterQuery()} is used to filter the targets which
+     * are affected by this rollout. The given groups will be used to create the groups.
+     * <p/>
+     * The rollout is not started. Only the preparation of the rollout is done, creating and persisting all the necessary groups. The Rollout
+     * and the groups are persisted in {@link RolloutStatus#CREATING} and {@link RolloutGroupStatus#CREATING}.
+     * <p/>
+     * The RolloutScheduler will start to assign targets to the groups. Once all targets have been assigned to the groups, the rollout status is
+     * changed to {@link RolloutStatus#READY} so it can be started with {@link #start(long)}.
      *
      * @param rollout the rollout entity to create
      * @param groups optional definition of groups
-     * @param conditions the rollout group conditions and actions which should be applied
-     *         for each {@link RolloutGroup} if not defined by the RolloutGroup
-     *         itself
+     * @param conditions the rollout group conditions and actions which should be applied for each {@link RolloutGroup} if not defined by the
+     *         RolloutGroup itself
      * @return the persisted rollout.
      * @throws EntityNotFoundException if given {@link DistributionSet} does not exist
      * @throws ConstraintViolationException if rollout or group parameters are invalid
-     * @throws AssignmentQuotaExceededException if the maximum number of allowed targets per rollout group is
-     *         exceeded.
+     * @throws AssignmentQuotaExceededException if the maximum number of allowed targets per rollout group is exceeded.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_CREATE_REPOSITORY)
     Rollout create(@Valid @NotNull Create rollout, @NotNull @Valid List<GroupCreate> groups, RolloutGroupConditions conditions);
@@ -192,8 +170,7 @@ public interface RolloutManagement extends PermissionSupport {
      *
      * @param deleted flag if deleted rollouts should be included
      * @param pageable the page request to sort and limit the result
-     * @return a list of rollouts with details of targets count for different
-     *         statuses
+     * @return a list of rollouts with details of targets count for different statuses
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Page<Rollout> findAllWithDetailedStatus(boolean deleted, @NotNull Pageable pageable);
@@ -218,7 +195,7 @@ public interface RolloutManagement extends PermissionSupport {
      * @param rsql search text which matches name or description of rollout
      * @param deleted flag if deleted rollouts should be included
      * @param pageable the page request to sort and limit the result
-     * @return the founded rollout or {@code null} if rollout with given ID does not exists
+     * @return the founded rollout or {@code null} if rollout with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Page<Rollout> findByRsqlWithDetailedStatus(@NotEmpty String rsql, boolean deleted, @NotNull Pageable pageable);
@@ -356,6 +333,7 @@ public interface RolloutManagement extends PermissionSupport {
 
     /**
      * Stop a rollout
+     *
      * @param rolloutId of the rollout to be stopped
      * @return stopped rollout
      */

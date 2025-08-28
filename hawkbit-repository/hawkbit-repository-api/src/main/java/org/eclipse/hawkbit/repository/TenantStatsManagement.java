@@ -25,7 +25,8 @@ public interface TenantStatsManagement {
      *
      * @return collected statistics
      */
-    @PreAuthorize("hasAuthority('" + SpRole.TENANT_ADMIN + "')" + " or " +
+    @PreAuthorize(
+            "hasAuthority('" + SpRole.TENANT_ADMIN + "')" + " or " +
             SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN + " or " +
             SpringEvalExpressions.IS_SYSTEM_CODE)
     TenantUsage getStatsOfTenant();

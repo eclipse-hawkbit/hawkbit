@@ -115,7 +115,4 @@ public interface SystemManagement {
      */
     @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TENANT_CONFIGURATION + "')")
     TenantMetaData updateTenantMetadata(long defaultDsType);
-
-    @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
-    TenantMetaData getTenantMetadata(long tenantId);
 }

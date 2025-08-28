@@ -154,13 +154,6 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public long countByRollout(final long rolloutId) {
-        throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
-
-        return rolloutGroupRepository.countByRolloutId(rolloutId);
-    }
-
-    @Override
     public Page<Target> findTargetsOfRolloutGroup(final long rolloutGroupId, final Pageable page) {
         final JpaRolloutGroup rolloutGroup = rolloutGroupRepository.getById(rolloutGroupId);
 

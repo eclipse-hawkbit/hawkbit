@@ -88,11 +88,9 @@ public final class MaintenanceScheduleHelper {
         if (allNotEmpty(cronSchedule, duration, timezone)) {
             validateCronSchedule(cronSchedule);
             validateDuration(duration);
-            // check if there is a window currently active or available in
-            // future.
-            if (!getNextMaintenanceWindow(cronSchedule, duration, timezone).isPresent()) {
-                throw new InvalidMaintenanceScheduleException(
-                        "No valid maintenance window available after current time");
+            // check if there is a window currently active or available in the future.
+            if (getNextMaintenanceWindow(cronSchedule, duration, timezone).isEmpty()) {
+                throw new InvalidMaintenanceScheduleException("No valid maintenance window available after current time");
             }
         } else if (atLeastOneNotEmpty(cronSchedule, duration, timezone)) {
             throw new InvalidMaintenanceScheduleException("All of schedule, duration and timezone should either be null or non empty.");
