@@ -116,13 +116,14 @@ public class Filter extends Div {
         final Map<Object, Object> normalized = new HashMap<>(keyToValues)
                 .entrySet()
                 .stream()
-                .map(e -> {
+                .filter(e -> {
                     if (e.getValue() instanceof Optional<?> opt) {
-                        e.setValue(opt.orElse(null));
+                        return opt.isPresent();
+                    } else {
+                        return e.getValue() != null;
                     }
-                    return e;
                 })
-                .filter(e -> !ObjectUtils.isEmpty(e))
+                .filter(e -> !(e.getValue() instanceof Collection<?> coll && coll.isEmpty()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         if (normalized.isEmpty()) {
             return null;
