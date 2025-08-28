@@ -13,11 +13,11 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.eclipse.hawkbit.repository.exception.FileSizeQuotaExceededException;
-import org.eclipse.hawkbit.repository.exception.StorageQuotaExceededException;
+import org.eclipse.hawkbit.repository.artifact.exception.FileSizeQuotaExceededException;
+import org.eclipse.hawkbit.repository.artifact.exception.StorageQuotaExceededException;
 
 /**
- * A FilterInputStream that ensures file size and storage quotas are enforced. It check during read operations if the
+ * A FilterInputStream that ensures file size and storage quotas are enforced. It checks during read operations if the
  * quota will be exceeded and throws an QuotaExceededException if this happens.
  */
 public class FileSizeAndStorageQuotaCheckingInputStream extends FilterInputStream {

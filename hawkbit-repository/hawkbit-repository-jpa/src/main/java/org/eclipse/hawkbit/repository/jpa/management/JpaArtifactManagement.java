@@ -102,20 +102,19 @@ public class JpaArtifactManagement implements ArtifactManagement {
             throw new UnsupportedOperationException();
         }
 
-        final long moduleId = artifactUpload.getModuleId();
+        final long moduleId = artifactUpload.moduleId();
         QuotaHelper.assertAssignmentQuota(
                 moduleId, 1, quotaManagement.getMaxArtifactsPerSoftwareModule(),
                 Artifact.class, SoftwareModule.class,
                 // get all artifacts without user context
-                softwareModuleId -> localArtifactRepository
-                        .count(null, ArtifactSpecifications.bySoftwareModuleId(softwareModuleId)));
+                softwareModuleId -> localArtifactRepository.count(null, ArtifactSpecifications.bySoftwareModuleId(softwareModuleId)));
 
         final JpaSoftwareModule softwareModule = softwareModuleRepository.getById(moduleId);
 
-        final String filename = artifactUpload.getFilename();
+        final String filename = artifactUpload.filename();
         final Artifact existing = softwareModule.getArtifactByFilename(filename).orElse(null);
         if (existing != null) {
-            if (artifactUpload.isOverrideExisting()) {
+            if (artifactUpload.overrideExisting()) {
                 log.debug("overriding existing artifact with new filename {}", filename);
             } else {
                 throw new EntityAlreadyExistsException("File with that name already exists in the Software Module");
@@ -130,7 +129,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         try {
             return storeArtifactMetadata(softwareModule, filename, artifact, existing);
         } catch (final Exception e) {
-            artifactRepository.deleteBySha1(tenantAware.getCurrentTenant(), artifact.getHashes().getSha1());
+            artifactRepository.deleteBySha1(tenantAware.getCurrentTenant(), artifact.getHashes().sha1());
             throw e;
         }
     }
@@ -209,17 +208,12 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload, final boolean isSmEncrypted) {
-        final InputStream stream = artifactUpload.getInputStream();
+        final InputStream stream = artifactUpload.inputStream();
         try (final InputStream wrappedStream = wrapInQuotaStream(
-                isSmEncrypted
-                        ? wrapInEncryptionStream(artifactUpload.getModuleId(), stream)
-                        : stream)) {
+                isSmEncrypted ? wrapInEncryptionStream(artifactUpload.moduleId(), stream) : stream)) {
             return artifactRepository.store(
-                    tenantAware.getCurrentTenant(), wrappedStream, artifactUpload.getFilename(), artifactUpload.getContentType(),
-                    new DbArtifactHash(
-                            artifactUpload.getProvidedSha1Sum(),
-                            artifactUpload.getProvidedMd5Sum(),
-                            artifactUpload.getProvidedSha256Sum()));
+                    tenantAware.getCurrentTenant(), wrappedStream, artifactUpload.filename(), artifactUpload.contentType(),
+                    new DbArtifactHash(artifactUpload.providedSha1Sum(), artifactUpload.providedMd5Sum(), artifactUpload.providedSha256Sum()));
         } catch (final ArtifactStoreException | IOException e) {
             throw new ArtifactUploadFailedException(e);
         } catch (final HashNotMatchException e) {
@@ -243,8 +237,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         final long currentlyUsed = localArtifactRepository.sumOfNonDeletedArtifactSize().orElse(0L);
         final long maxArtifactSizeTotal = quotaManagement.getMaxArtifactStorage();
 
-        return new FileSizeAndStorageQuotaCheckingInputStream(in, maxArtifactSize,
-                maxArtifactSizeTotal - currentlyUsed);
+        return new FileSizeAndStorageQuotaCheckingInputStream(in, maxArtifactSize, maxArtifactSizeTotal - currentlyUsed);
     }
 
     private DbArtifact wrapInEncryptionAwareDbArtifact(final long softwareModuleId, final DbArtifact dbArtifact) {
@@ -262,13 +255,13 @@ public class JpaArtifactManagement implements ArtifactManagement {
             final Artifact existing) {
         final JpaArtifact artifact;
         if (existing == null) {
-            artifact = new JpaArtifact(result.getHashes().getSha1(), providedFilename, softwareModule);
+            artifact = new JpaArtifact(result.getHashes().sha1(), providedFilename, softwareModule);
         } else {
             artifact = (JpaArtifact) existing;
-            artifact.setSha1Hash(result.getHashes().getSha1());
+            artifact.setSha1Hash(result.getHashes().sha1());
         }
-        artifact.setMd5Hash(result.getHashes().getMd5());
-        artifact.setSha256Hash(result.getHashes().getSha256());
+        artifact.setMd5Hash(result.getHashes().md5());
+        artifact.setSha256Hash(result.getHashes().sha256());
         artifact.setFileSize(result.getSize());
 
         log.debug("storing new artifact into repository {}", artifact);

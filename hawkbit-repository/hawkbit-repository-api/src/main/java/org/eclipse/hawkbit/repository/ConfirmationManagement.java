@@ -82,7 +82,7 @@ public interface ConfirmationManagement extends PermissionSupport {
      * @return instance of {@link AutoConfirmationStatus} wrapped in an {@link Optional}. Present if active and empty if disabled.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY + " or " + SpringEvalExpressions.IS_CONTROLLER)
-    Optional<AutoConfirmationStatus> getStatus(@NotEmpty String controllerId);
+    Optional<AutoConfirmationStatus> findStatus(@NotEmpty String controllerId);
 
     /**
      * Find active actions in the {@link Action.Status#WAIT_FOR_CONFIRMATION} state for a specific target with a specified controllerId.

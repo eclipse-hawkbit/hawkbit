@@ -16,13 +16,11 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 
 /**
- * Software update operations in large scale IoT scenarios with hundred of
- * thousands of devices require special handling.
- *
- * That includes secure handling of large volumes of devices at rollout creation
- * time. Monitoring of the rollout progress. Emergency rollout shutdown in case
- * of problems on to many devices and reporting capabilities for a complete
- * understanding of the rollout progress at each point in time.
+ * Software update operations in large scale IoT scenarios with hundred of thousands of devices require special handling.
+ * <p/>
+ * That includes secure handling of large volumes of devices at rollout creation time. Monitoring of the rollout progress. Emergency rollout
+ * shutdown in case of problems on to many devices and reporting capabilities for a complete understanding of the rollout progress at each point
+ * in time.
  */
 public interface Rollout extends NamedEntity {
 
@@ -48,8 +46,7 @@ public interface Rollout extends NamedEntity {
     DistributionSet getDistributionSet();
 
     /**
-     * @return rsql query that identifies the targets that are part of this
-     *         rollout.
+     * @return rsql query that identifies the targets that are part of this rollout.
      */
     String getTargetFilterQuery();
 
@@ -64,15 +61,13 @@ public interface Rollout extends NamedEntity {
     ActionType getActionType();
 
     /**
-     * @return time in {@link TimeUnit#MILLISECONDS} after which
-     *         {@link #isForced()} switches to <code>true</code> in case of
+     * @return time in {@link TimeUnit#MILLISECONDS} after which 'is forced' switches to <code>true</code> in case of
      *         {@link ActionType#TIMEFORCED}.
      */
     long getForcedTime();
 
     /**
-     * @return Timestamp when the rollout should be started automatically. Can
-     *         be null.
+     * @return Timestamp when the rollout should be started automatically. Can be null.
      */
     Long getStartAt();
 
@@ -123,7 +118,7 @@ public interface Rollout extends NamedEntity {
     enum RolloutStatus {
 
         /**
-         * Rollouts is being created.
+         * Rollout is being created.
          */
         CREATING,
 
@@ -178,9 +173,8 @@ public interface Rollout extends NamedEntity {
         DELETING,
 
         /**
-         * Rollout has been deleted. This state is only set in case of a
-         * soft-deletion of the rollout which keeps references, in case of an
-         * hard-deletion of a rollout the rollout-entry itself is deleted.
+         * Rollout has been deleted. This state is only set in case of a soft-deletion of the rollout which keeps references, in case of
+         * a hard-deletion of a rollout the rollout-entry itself is deleted.
          */
         DELETED
     }
@@ -189,8 +183,9 @@ public interface Rollout extends NamedEntity {
      * Enum that holds all possible approval workflow decisions.
      */
     enum ApprovalDecision {
+
         /**
-         * Representing an granted approval for a rollout.
+         * Representing a granted approval for a rollout.
          */
         APPROVED,
         /**

@@ -13,7 +13,7 @@ import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.LocalArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
-import org.eclipse.hawkbit.repository.report.model.TenantUsage;
+import org.eclipse.hawkbit.repository.model.report.TenantUsage;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;

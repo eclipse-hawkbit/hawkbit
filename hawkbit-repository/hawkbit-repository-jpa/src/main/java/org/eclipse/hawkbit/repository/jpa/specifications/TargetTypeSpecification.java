@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
-import java.util.Collection;
-
 import jakarta.persistence.criteria.SetJoin;
 
 import lombok.AccessLevel;

@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 
 /**
  * Managed filter entity.
- *
+ * <p/>
  * Supported operators.
  * <ul>
  * <li>{@code Equal to : ==}</li>

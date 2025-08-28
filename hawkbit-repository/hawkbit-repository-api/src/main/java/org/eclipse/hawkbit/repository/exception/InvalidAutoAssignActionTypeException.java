@@ -29,9 +29,6 @@ public class InvalidAutoAssignActionTypeException extends AbstractServerRtExcept
 
     private static final SpServerError THIS_ERROR = SpServerError.SP_AUTO_ASSIGN_ACTION_TYPE_INVALID;
 
-    /**
-     * Default constructor.
-     */
     public InvalidAutoAssignActionTypeException() {
         super(THIS_ERROR);
     }

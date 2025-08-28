@@ -72,11 +72,11 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
     }
 
 
-    @Test
     /**
      * We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) are requested only once from the device.")
      */
     @SuppressWarnings("squid:S2925")
+    @Test
     void requestConfigDataIfEmpty() throws Exception {
         final Target savedTarget = testdataFactory.createTarget("4712");
 
@@ -90,10 +90,10 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
                         "http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/4712/configData")));
         Thread.sleep(1); // is required: otherwise processing the next line is
         // often too fast and // the following assert will fail
-        assertThat(targetManagement.getByControllerId("4712").orElseThrow(NoSuchElementException::new)
+        assertThat(targetManagement.getByControllerId("4712")
                 .getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(targetManagement.getByControllerId("4712").orElseThrow(NoSuchElementException::new)
+        assertThat(targetManagement.getByControllerId("4712")
                 .getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 
@@ -140,7 +140,7 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
     /**
      * We verify that the config data (i.e. device attributes like serial number, hardware revision etc.)
-     * upload quota is enforced to protect the server from malicious attempts.""")
+     * upload quota is enforced to protect the server from malicious attempts.
      */
     @Test
     void putTooMuchConfigData() throws Exception {

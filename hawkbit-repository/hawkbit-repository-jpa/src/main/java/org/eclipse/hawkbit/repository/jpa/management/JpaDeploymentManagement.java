@@ -464,13 +464,13 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    public Optional<DistributionSet> getAssignedDistributionSet(final String controllerId) {
+    public Optional<DistributionSet> findAssignedDistributionSet(final String controllerId) {
         return targetRepository.findWithDetailsByControllerId(controllerId, JpaTarget_.GRAPH_TARGET_ASSIGNED_DISTRIBUTION_SET)
                 .map(JpaTarget::getAssignedDistributionSet);
     }
 
     @Override
-    public Optional<DistributionSet> getInstalledDistributionSet(final String controllerId) {
+    public Optional<DistributionSet> findInstalledDistributionSet(final String controllerId) {
         return targetRepository.findWithDetailsByControllerId(controllerId, JpaTarget_.GRAPH_TARGET_INSTALLED_DISTRIBUTION_SET)
                 .map(JpaTarget::getInstalledDistributionSet);
     }

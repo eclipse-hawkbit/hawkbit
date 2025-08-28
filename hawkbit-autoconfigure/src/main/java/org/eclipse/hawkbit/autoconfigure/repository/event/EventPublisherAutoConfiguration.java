@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
- * Autoconfiguration for the events..
+ * Autoconfiguration for the events.
  */
 @Configuration
 @Import(EventPublisherConfiguration.class)

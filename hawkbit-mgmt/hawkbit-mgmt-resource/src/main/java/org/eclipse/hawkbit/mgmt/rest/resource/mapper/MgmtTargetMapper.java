@@ -331,9 +331,9 @@ public final class MgmtTargetMapper {
         if (pollStatus != null) {
             final MgmtPollStatus pollStatusRest = new MgmtPollStatus();
             pollStatusRest.setLastRequestAt(
-                    Date.from(pollStatus.getLastPollDate().atZone(ZoneId.systemDefault()).toInstant()).getTime());
+                    Date.from(pollStatus.lastPollDate().atZone(ZoneId.systemDefault()).toInstant()).getTime());
             pollStatusRest.setNextExpectedRequestAt(
-                    Date.from(pollStatus.getNextPollDate().atZone(ZoneId.systemDefault()).toInstant()).getTime());
+                    Date.from(pollStatus.nextPollDate().atZone(ZoneId.systemDefault()).toInstant()).getTime());
             pollStatusRest.setOverdue(pollStatus.isOverdue());
             targetRest.setPollStatus(pollStatusRest);
         }

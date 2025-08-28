@@ -267,9 +267,9 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     private void assertDistributionSetInvalidationCount(
             final DistributionSetInvalidationCount distributionSetInvalidationCount,
             final long expectedAutoAssignmentCount, final long expectedActionCount, final long expectedRolloutCount) {
-        assertThat(distributionSetInvalidationCount.getAutoAssignmentCount()).isEqualTo(expectedAutoAssignmentCount);
-        assertThat(distributionSetInvalidationCount.getActionCount()).isEqualTo(expectedActionCount);
-        assertThat(distributionSetInvalidationCount.getRolloutsCount()).isEqualTo(expectedRolloutCount);
+        assertThat(distributionSetInvalidationCount.autoAssignmentCount()).isEqualTo(expectedAutoAssignmentCount);
+        assertThat(distributionSetInvalidationCount.actionCount()).isEqualTo(expectedActionCount);
+        assertThat(distributionSetInvalidationCount.rolloutsCount()).isEqualTo(expectedRolloutCount);
     }
 
     private List<JpaAction> findActionsByTarget(@Param("target") Target target) { // order by id ?

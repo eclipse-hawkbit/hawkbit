@@ -146,7 +146,7 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     }
 
     @Override
-    public Optional<AutoConfirmationStatus> getStatus(final String controllerId) {
+    public Optional<AutoConfirmationStatus> findStatus(final String controllerId) {
         return Optional.of(targetRepository.getWithDetailsByControllerId(controllerId, JpaTarget_.GRAPH_TARGET_AUTO_CONFIRMATION_STATUS))
                 .map(JpaTarget::getAutoConfirmationStatus);
     }

@@ -40,6 +40,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdated
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
@@ -85,8 +86,9 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
     void nonExistingEntityAccessReturnsNotPresent() {
         final DistributionSet set = testdataFactory.createDistributionSet();
         assertThat(distributionSetManagement.find(NOT_EXIST_IDL)).isNotPresent();
-        assertThat(distributionSetManagement.getWithDetails(NOT_EXIST_IDL)).isNotPresent();
-        assertThat(distributionSetManagement.findByNameAndVersion(NOT_EXIST_ID, NOT_EXIST_ID)).isNotPresent();
+        assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> distributionSetManagement.getWithDetails(NOT_EXIST_IDL));
+        assertThatExceptionOfType(EntityNotFoundException.class)
+                .isThrownBy(() -> distributionSetManagement.findByNameAndVersion(NOT_EXIST_ID, NOT_EXIST_ID));
         assertThat(distributionSetManagement.getMetadata(set.getId()).get(NOT_EXIST_ID)).isNull();
     }
 
@@ -277,7 +279,7 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
 
         // assign target
         assignDistributionSet(ds.getId(), target.getControllerId());
-        ds = distributionSetManagement.getWithDetails(ds.getId()).orElseThrow();
+        ds = distributionSetManagement.getWithDetails(ds.getId());
 
         final Long dsId = ds.getId();
         // not allowed as it is assigned now
@@ -348,6 +350,7 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
         assertThatExceptionOfType(InvalidDistributionSetException.class)
                 .as("Invalid distributionSet should throw an exception").isThrownBy(() -> distributionSetManagement.update(update));
     }
+
     @Test
     void failToModifyMetadataForInvalidDistributionSet() {
         final String key = forType(String.class);
@@ -464,7 +467,7 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
         assertThat(distributionSetManagement.find(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false)).isTrue();
         // assert software modules are locked
         assertThat(distributionSet.getModules().size()).isNotZero();
-        distributionSetManagement.getWithDetails(distributionSet.getId()).map(DistributionSet::getModules).orElseThrow()
+        distributionSetManagement.getWithDetails(distributionSet.getId()).getModules()
                 .forEach(module -> assertThat(module.isLocked()).isTrue());
     }
 
@@ -509,7 +512,7 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
         assertThat(distributionSetManagement.find(distributionSet.getId()).map(DistributionSet::isLocked).orElse(true)).isFalse();
         // assert software modules are not unlocked
         assertThat(distributionSet.getModules().size()).isNotZero();
-        distributionSetManagement.getWithDetails(distributionSet.getId()).map(DistributionSet::getModules).orElseThrow()
+        distributionSetManagement.getWithDetails(distributionSet.getId()).getModules()
                 .forEach(module -> assertThat(module.isLocked()).isTrue());
     }
 
@@ -530,7 +533,7 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
         assertThatExceptionOfType(LockedException.class)
                 .as("Attempt to modify a locked DS software modules should throw an exception")
                 .isThrownBy(() -> distributionSetManagement.assignSoftwareModules(distributionSetId, moduleIds));
-        assertThat(distributionSetManagement.getWithDetails(distributionSetId).orElseThrow().getModules())
+        assertThat(distributionSetManagement.getWithDetails(distributionSetId).getModules())
                 .as("Software module shall not be added to a locked DS.")
                 .hasSize(softwareModuleCount);
 
@@ -539,7 +542,7 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
         assertThatExceptionOfType(LockedException.class)
                 .as("Attempt to modify a locked DS software modules should throw an exception")
                 .isThrownBy(() -> distributionSetManagement.unassignSoftwareModule(distributionSetId, firstModuleId));
-        assertThat(distributionSetManagement.getWithDetails(distributionSetId).orElseThrow().getModules())
+        assertThat(distributionSetManagement.getWithDetails(distributionSetId).getModules())
                 .as("Software module shall not be removed from a locked DS.")
                 .hasSize(softwareModuleCount);
     }
@@ -705,15 +708,15 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
         assertThat(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds2.getId())).hasSize(1);
         assertThat(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds3.getId())).isEmpty();
 
-        Optional<Rollout> rollout = rolloutManagement.find(rollout1.getId());
-        rollout.ifPresent(value -> assertThat(Rollout.RolloutStatus.valueOf(
+        Rollout rollout = rolloutManagement.get(rollout1.getId());
+        assertThat(Rollout.RolloutStatus.valueOf(
                 String.valueOf(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds1.getId()).get(0).getName()))).isEqualTo(
-                value.getStatus()));
+                rollout.getStatus());
 
-        rollout = rolloutManagement.find(rollout2.getId());
-        rollout.ifPresent(value -> assertThat(Rollout.RolloutStatus.valueOf(
+        rollout = rolloutManagement.get(rollout2.getId());
+        assertThat(Rollout.RolloutStatus.valueOf(
                 String.valueOf(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds2.getId()).get(0).getName()))).isEqualTo(
-                value.getStatus()));
+                rollout.getStatus());
     }
 
     /**

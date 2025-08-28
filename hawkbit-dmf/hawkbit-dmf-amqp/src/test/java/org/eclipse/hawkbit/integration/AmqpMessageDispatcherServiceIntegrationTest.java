@@ -787,9 +787,8 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
 
     private void waitUntilTargetHasStatus(final String controllerId, final TargetUpdateStatus status) {
         waitUntil(() -> {
-            final Optional<Target> findTargetByControllerID = targetManagement.getByControllerId(controllerId);
-            return findTargetByControllerID.isPresent()
-                    && status.equals(findTargetByControllerID.get().getUpdateStatus());
+            final Optional<Target> findTargetByControllerID = targetManagement.findByControllerId(controllerId);
+            return findTargetByControllerID.isPresent() && status.equals(findTargetByControllerID.get().getUpdateStatus());
         });
     }
 

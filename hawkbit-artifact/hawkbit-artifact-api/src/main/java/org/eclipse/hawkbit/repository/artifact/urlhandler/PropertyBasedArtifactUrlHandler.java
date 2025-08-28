@@ -1,11 +1,5 @@
 /**
- * Copyright (c) 2025 Contributors to the Eclipse Foundation
- *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * Copyright (c) 2025 Bosch Digital GmbH, Germany. All rights reserved.
  */
 package org.eclipse.hawkbit.repository.artifact.urlhandler;
 
@@ -27,14 +21,14 @@ import org.springframework.util.StringUtils;
 /**
  * Implementation for ArtifactUrlHandler for creating urls to download resource based on patterns configured by
  * {@link ArtifactUrlHandlerProperties}.
- *
+ * <p/>
  * This mechanism can be used to generate links to arbitrary file hosting infrastructure. However, the hawkBit update server
  * supports hosting files as well in the following {@link UrlProtocol#getRef()} patterns:
- *
- * Default:
+ * <p/>
+ * Default: </br>
  * {protocol}://{hostname}:{port}{contextPath}/{tenant}/controller/v1/{controllerId}
  * /softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}
- *
+ * <p/>
  * Default (MD5SUM files):
  * {protocol}://{hostname}:{port}{contextPath}/{tenant}/controller/v1/{controllerId}/
  * softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}.MD5SUM
@@ -177,26 +171,26 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         replaceMap.put(CONTEXT_PATH, contextPath);
 
         replaceMap.put(ARTIFACT_FILENAME_PLACEHOLDER,
-                URLEncoder.encode(placeholder.getSoftwareData().getFilename(), StandardCharsets.UTF_8));
+                URLEncoder.encode(placeholder.softwareData().filename(), StandardCharsets.UTF_8));
 
-        replaceMap.put(ARTIFACT_SHA1_PLACEHOLDER, placeholder.getSoftwareData().getSha1Hash());
+        replaceMap.put(ARTIFACT_SHA1_PLACEHOLDER, placeholder.softwareData().sha1Hash());
         replaceMap.put(PROTOCOL_PLACEHOLDER, protocol.getProtocol());
         replaceMap.put(PORT_PLACEHOLDER, getPort(protocol));
-        replaceMap.put(TENANT_PLACEHOLDER, placeholder.getTenant());
-        replaceMap.put(TENANT_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getTenantId()));
-        replaceMap.put(TENANT_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getTenantId()));
-        replaceMap.put(CONTROLLER_ID_PLACEHOLDER, placeholder.getControllerId());
-        replaceMap.put(TARGET_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getTargetId()));
-        if (placeholder.getTargetId() != null) {
-            replaceMap.put(TARGET_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getTargetId()));
+        replaceMap.put(TENANT_PLACEHOLDER, placeholder.tenant());
+        replaceMap.put(TENANT_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.tenantId()));
+        replaceMap.put(TENANT_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.tenantId()));
+        replaceMap.put(CONTROLLER_ID_PLACEHOLDER, placeholder.controllerId());
+        replaceMap.put(TARGET_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.targetId()));
+        if (placeholder.targetId() != null) {
+            replaceMap.put(TARGET_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.targetId()));
         }
         replaceMap.put(ARTIFACT_ID_BASE62_PLACEHOLDER,
-                Base62Util.fromBase10(placeholder.getSoftwareData().getArtifactId()));
-        replaceMap.put(ARTIFACT_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getSoftwareData().getArtifactId()));
+                Base62Util.fromBase10(placeholder.softwareData().artifactId()));
+        replaceMap.put(ARTIFACT_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.softwareData().artifactId()));
         replaceMap.put(SOFTWARE_MODULE_ID_BASE10_PLACEHOLDER,
-                String.valueOf(placeholder.getSoftwareData().getSoftwareModuleId()));
+                String.valueOf(placeholder.softwareData().softwareModuleId()));
         replaceMap.put(SOFTWARE_MODULE_ID_BASE62_PLACEHOLDER,
-                Base62Util.fromBase10(placeholder.getSoftwareData().getSoftwareModuleId()));
+                Base62Util.fromBase10(placeholder.softwareData().softwareModuleId()));
         return replaceMap;
     }
 

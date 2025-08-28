@@ -68,7 +68,7 @@ public final class FileStreamingUtil {
 
         ResponseEntity<InputStream> result;
 
-        final String etag = artifact.getHashes().getSha1();
+        final String etag = artifact.getHashes().sha1();
         final long length = artifact.getSize();
 
         resetResponseExceptHeaders(response);

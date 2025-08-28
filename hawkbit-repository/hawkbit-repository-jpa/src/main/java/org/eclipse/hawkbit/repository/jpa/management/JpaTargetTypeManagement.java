@@ -76,13 +76,8 @@ public class JpaTargetTypeManagement
     }
 
     @Override
-    public Optional<TargetType> getByKey(final String key) {
+    public Optional<TargetType> findByKey(final String key) {
         return jpaRepository.findOne(TargetTypeSpecification.hasKey(key)).map(TargetType.class::cast);
-    }
-
-    @Override
-    public Optional<TargetType> getByName(final String name) {
-        return jpaRepository.findOne(TargetTypeSpecification.hasName(name)).map(TargetType.class::cast);
     }
 
     @Override
@@ -91,11 +86,11 @@ public class JpaTargetTypeManagement
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetType assignCompatibleDistributionSetTypes(final long id,
             final Collection<Long> distributionSetTypeIds) {
-        final Collection<JpaDistributionSetType> dsTypes = distributionSetTypeRepository
-                .findAllById(distributionSetTypeIds);
+        final Collection<JpaDistributionSetType> dsTypes = distributionSetTypeRepository.findAllById(distributionSetTypeIds);
 
         if (dsTypes.size() < distributionSetTypeIds.size()) {
-            throw new EntityNotFoundException(DistributionSetType.class, distributionSetTypeIds,
+            throw new EntityNotFoundException(
+                    DistributionSetType.class, distributionSetTypeIds,
                     dsTypes.stream().map(DistributionSetType::getId).toList());
         }
 

@@ -109,8 +109,26 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public Optional<RolloutGroup> get(final long rolloutGroupId) {
-        return rolloutGroupRepository.findById(rolloutGroupId).map(RolloutGroup.class::cast);
+    public RolloutGroup get(final long rolloutGroupId) {
+        return rolloutGroupRepository.findById(rolloutGroupId).map(RolloutGroup.class::cast)
+                .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutGroupId));
+    }
+
+    @Override
+    public RolloutGroup getWithDetailedStatus(final long rolloutGroupId) {
+        final JpaRolloutGroup jpaRolloutGroup = (JpaRolloutGroup) rolloutGroupRepository.findById(rolloutGroupId).map(RolloutGroup.class::cast)
+                .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutGroupId));
+
+        List<TotalTargetCountActionStatus> rolloutStatusCountItems = rolloutStatusCache.getRolloutGroupStatus(rolloutGroupId);
+        if (CollectionUtils.isEmpty(rolloutStatusCountItems)) {
+            rolloutStatusCountItems = actionRepository.getStatusCountByRolloutGroupId(rolloutGroupId);
+            rolloutStatusCache.putRolloutGroupStatus(rolloutGroupId, rolloutStatusCountItems);
+        }
+
+        final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
+                rolloutStatusCountItems, (long) jpaRolloutGroup.getTotalTargets(), jpaRolloutGroup.getRollout().getActionType());
+        jpaRolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
+        return jpaRolloutGroup;
     }
 
     @Override
@@ -183,30 +201,6 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
                 });
 
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageable);
-    }
-
-    @Override
-    public Optional<RolloutGroup> getWithDetailedStatus(final long rolloutGroupId) {
-        final Optional<RolloutGroup> rolloutGroup = get(rolloutGroupId);
-        if (rolloutGroup.isEmpty()) {
-            return rolloutGroup;
-        }
-
-        final JpaRolloutGroup jpaRolloutGroup = (JpaRolloutGroup) rolloutGroup.get();
-
-        List<TotalTargetCountActionStatus> rolloutStatusCountItems = rolloutStatusCache
-                .getRolloutGroupStatus(rolloutGroupId);
-
-        if (CollectionUtils.isEmpty(rolloutStatusCountItems)) {
-            rolloutStatusCountItems = actionRepository.getStatusCountByRolloutGroupId(rolloutGroupId);
-            rolloutStatusCache.putRolloutGroupStatus(rolloutGroupId, rolloutStatusCountItems);
-        }
-
-        final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
-                rolloutStatusCountItems, (long) jpaRolloutGroup.getTotalTargets(), jpaRolloutGroup.getRollout().getActionType());
-        jpaRolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
-        return rolloutGroup;
-
     }
 
     @Override

@@ -200,9 +200,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     @EventListener(classes = CancelTargetAssignmentServiceEvent.class)
     protected void targetCancelAssignmentToDistributionSet(final CancelTargetAssignmentServiceEvent cancelTargetAssignmentServiceEvent) {
         final CancelTargetAssignmentEvent cancelEvent = cancelTargetAssignmentServiceEvent.getRemoteEvent();
-        final List<Target> eventTargets = partitionedParallelExecution(
-                cancelEvent.getActions().keySet(), targetManagement::getByControllerId);
-
+        final List<Target> eventTargets = partitionedParallelExecution(cancelEvent.getActions().keySet(), targetManagement::findByControllerId);
         eventTargets.forEach(target ->
                 cancelEvent.getActionPropertiesForController(target.getControllerId())
                         .map(ActionProperties::getId)
@@ -400,7 +398,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private List<Target> getTargetsWithoutPendingCancellations(final Set<String> controllerIds) {
         return partitionedParallelExecution(controllerIds, partition ->
-                targetManagement.getByControllerId(partition).stream()
+                targetManagement.findByControllerId(partition).stream()
                         .filter(target -> {
                             if (hasPendingCancellations(target.getId())) {
                                 log.debug("Target {} has pending cancellations. Will not send update message to it.",
@@ -450,7 +448,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                         ? Collections.emptyMap()
                         : softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(allSmIds);
 
-        targetManagement.getByControllerId(controllerIds).forEach(target ->
+        targetManagement.findByControllerId(controllerIds).forEach(target ->
                 sendMultiActionRequestToTarget(
                         target, controllerIdToActions.get(target.getControllerId()), module -> getSoftwareModuleMetadata.get(module.getId())));
     }
@@ -565,7 +563,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                                                 localArtifact.getSha1Hash())),
                                 ApiType.DMF)
                         .stream()
-                        .collect(Collectors.toMap(ArtifactUrl::getProtocol, ArtifactUrl::getRef))
+                        .collect(Collectors.toMap(ArtifactUrl::protocol, ArtifactUrl::ref))
         );
     }
 

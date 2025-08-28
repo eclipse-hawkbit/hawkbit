@@ -106,10 +106,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
     @Override
     public ResponseEntity<MgmtRolloutResponseBody> getRollout(final Long rolloutId) {
-        final Rollout findRolloutById = rolloutManagement.getWithDetailedStatus(rolloutId)
-                .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
-
-        return ResponseEntity.ok(MgmtRolloutMapper.toResponseRollout(findRolloutById, true));
+        return ResponseEntity.ok(MgmtRolloutMapper.toResponseRollout(rolloutManagement.getWithDetailedStatus(rolloutId), true));
     }
 
     @Override
@@ -238,8 +235,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     public ResponseEntity<MgmtRolloutGroupResponseBody> getRolloutGroup(final Long rolloutId, final Long groupId) {
         findRolloutOrThrowException(rolloutId);
 
-        final RolloutGroup rolloutGroup = rolloutGroupManagement.getWithDetailedStatus(groupId)
-                .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutId));
+        final RolloutGroup rolloutGroup = rolloutGroupManagement.getWithDetailedStatus(groupId);
         if (!Objects.equals(rolloutId, rolloutGroup.getRollout().getId())) {
             throw new EntityNotFoundException(RolloutGroup.class, groupId);
         }
@@ -273,8 +269,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
     @Override
     public ResponseEntity<MgmtRolloutResponseBody> retryRollout(final Long rolloutId) {
-        final Rollout rolloutForRetry = rolloutManagement.find(rolloutId)
-                .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
+        final Rollout rolloutForRetry = rolloutManagement.get(rolloutId);
         if (rolloutForRetry.isDeleted()) {
             throw new EntityNotFoundException(Rollout.class, rolloutId);
         }

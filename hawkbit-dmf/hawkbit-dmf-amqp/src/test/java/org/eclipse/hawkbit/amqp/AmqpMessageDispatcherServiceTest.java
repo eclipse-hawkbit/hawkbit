@@ -25,7 +25,7 @@ import java.util.UUID;
 
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetManagement.Create;
-import org.eclipse.hawkbit.repository.artifact.ArtifactFilesystem;
+import org.eclipse.hawkbit.repository.artifact.filesystem.ArtifactFilesystem;
 import org.eclipse.hawkbit.repository.artifact.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
 import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrl;
@@ -314,7 +314,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     private Message getCaptureAddressEvent(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
-        final Target target = targetManagement.getByControllerId(targetAssignDistributionSetEvent.getActions().keySet().iterator().next()).get();
+        final Target target = targetManagement.getByControllerId(targetAssignDistributionSetEvent.getActions().keySet().iterator().next());
         return createArgumentCapture(IpUtil.addressToUri(target.getAddress()));
     }
 

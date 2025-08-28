@@ -1,11 +1,5 @@
 /**
- * Copyright (c) 2021 Bosch.IO GmbH and others
- *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * Copyright (c) 2025 Bosch Digital GmbH, Germany. All rights reserved.
  */
 package org.eclipse.hawkbit.repository.artifact.exception;
 
@@ -28,29 +22,7 @@ public class ArtifactBinaryNoLongerExistsException extends AbstractServerRtExcep
 
     private static final SpServerError THIS_ERROR = SpServerError.SP_ARTIFACT_BINARY_DELETED;
 
-    /**
-     * Creates a new ArtifactBinaryGoneException error.
-     */
     public ArtifactBinaryNoLongerExistsException() {
         super(THIS_ERROR);
     }
-
-    /**
-     * Creates a new ArtifactBinaryGoneException error with cause.
-     *
-     * @param cause for the exception
-     */
-    public ArtifactBinaryNoLongerExistsException(final Throwable cause) {
-        super(THIS_ERROR, cause);
-    }
-
-    /**
-     * Creates a new ArtifactBinaryGoneException error with message.
-     *
-     * @param message of the error
-     */
-    public ArtifactBinaryNoLongerExistsException(final String message) {
-        super(message, THIS_ERROR);
-    }
-
 }

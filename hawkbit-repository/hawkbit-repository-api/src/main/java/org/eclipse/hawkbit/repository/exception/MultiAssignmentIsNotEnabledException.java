@@ -28,38 +28,7 @@ public class MultiAssignmentIsNotEnabledException extends AbstractServerRtExcept
 
     private static final SpServerError THIS_ERROR = SpServerError.SP_MULTIASSIGNMENT_NOT_ENABLED;
 
-    /**
-     * Default constructor.
-     */
     public MultiAssignmentIsNotEnabledException() {
         super(THIS_ERROR);
-    }
-
-    /**
-     * Parameterized constructor.
-     *
-     * @param cause of the exception
-     */
-    public MultiAssignmentIsNotEnabledException(final Throwable cause) {
-        super(THIS_ERROR, cause);
-    }
-
-    /**
-     * Parameterized constructor.
-     *
-     * @param message of the exception
-     * @param cause of the exception
-     */
-    public MultiAssignmentIsNotEnabledException(final String message, final Throwable cause) {
-        super(message, THIS_ERROR, cause);
-    }
-
-    /**
-     * Parameterized constructor.
-     *
-     * @param message of the exception
-     */
-    public MultiAssignmentIsNotEnabledException(final String message) {
-        super(message, THIS_ERROR);
     }
 }

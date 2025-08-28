@@ -7,43 +7,38 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.artifact;
+package org.eclipse.hawkbit.repository.artifact.filesystem;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.hawkbit.repository.artifact.AbstractArtifactRepository;
+import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
 import org.eclipse.hawkbit.repository.artifact.exception.ArtifactBinaryNotFoundException;
+import org.eclipse.hawkbit.repository.artifact.exception.ArtifactStoreException;
 import org.eclipse.hawkbit.repository.artifact.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Implementation of the {@link ArtifactRepository} to store artifacts on the
- * file-system. The files are stored by their SHA1 hash of the artifact binary.
- * Duplicate files with the same SHA1 hash will only be stored once.
- *
+ * Implementation of the {@link ArtifactRepository} to store artifacts on the file-system. The files are stored by their SHA1 hash of the
+ * artifact binary. Duplicate files with the same SHA1 hash will only be stored once.
+ * <p/>
  * All files are stored flat in one base directory configured in the
  * {@link ArtifactFilesystemProperties#getPath()}.
- *
- * Due to the limit of many file-systems of files within one directory, the files
- * are stored in different subdirectories based on the last four digits of the
- * SHA1-hash {@code (/basepath/[two digit sha1]/[two digit sha1])}.
+ * <p/>
+ * Due to the limit of many file-systems of files within one directory, the files are stored in different subdirectories based on the last four
+ * digits of the SHA1-hash {@code (/basepath/[two digit sha1]/[two digit sha1])}.
  */
 @Validated
 public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
 
     private final ArtifactFilesystemProperties artifactResourceProperties;
 
-    /**
-     * Constructor.
-     *
-     * @param artifactResourceProperties the properties which holds the necessary configuration for the file-system repository
-     */
     public ArtifactFilesystemRepository(final ArtifactFilesystemProperties artifactResourceProperties) {
         this.artifactResourceProperties = artifactResourceProperties;
     }
@@ -77,33 +72,31 @@ public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
     protected AbstractDbArtifact store(final String tenant, final DbArtifactHash base16Hashes, final String contentType, final String tempFile)
             throws IOException {
         final File file = new File(tempFile);
-        return renameFileToSHA1Naming(
-                tenant, file,
-                new ArtifactFilesystem(file, base16Hashes.getSha1(), base16Hashes, file.length(), contentType));
-    }
-
-    private ArtifactFilesystem renameFileToSHA1Naming(final String tenant, final File file,
-            final AbstractDbArtifact artifact) throws IOException {
-        final File fileSHA1Naming = getFile(tenant, artifact.getHashes().getSha1());
+        final File fileSHA1Naming = getFile(tenant, base16Hashes.sha1());
         if (fileSHA1Naming.exists()) {
             FileUtils.deleteQuietly(file);
         } else {
             Files.move(file.toPath(), fileSHA1Naming.toPath());
         }
 
-        return new ArtifactFilesystem(
-                fileSHA1Naming, artifact.getArtifactId(), artifact.getHashes(), artifact.getSize(), artifact.getContentType());
+        return new ArtifactFilesystem(fileSHA1Naming, base16Hashes.sha1(), base16Hashes, fileSHA1Naming.length(), contentType);
     }
 
     private File getFile(final String tenant, final String sha1) {
         // ensure that the sha1 is not a path traversal attack
         if (sha1.indexOf('/') >= 0 || sha1.indexOf('\\') >= 0) {
-            throw new IllegalArgumentException("Invalid sha1 hash: " + sha1);
+            throw new IllegalArgumentException("Invalid SHA-1 hash: " + sha1);
         }
 
-        final File aritfactDirectory = getSha1DirectoryPath(tenant, sha1).toFile();
-        aritfactDirectory.mkdirs();
-        return new File(aritfactDirectory, sha1);
+        final File artifactDirectory = getSha1DirectoryPath(tenant, sha1).toFile();
+        if (!artifactDirectory.isDirectory()) {
+            if (artifactDirectory.isFile()) {
+                throw new ArtifactStoreException(artifactDirectory + " is a file, but a directory is required.");
+            } else if (!artifactDirectory.mkdirs()) {
+                throw new ArtifactStoreException("Fail to create directories: " + artifactDirectory);
+            }
+        }
+        return new File(artifactDirectory, sha1);
     }
 
     private Path getSha1DirectoryPath(final String tenant, final String sha1) {

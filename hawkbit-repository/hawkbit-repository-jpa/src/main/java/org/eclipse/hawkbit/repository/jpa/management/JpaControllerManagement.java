@@ -55,7 +55,6 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
@@ -66,6 +65,7 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
+import org.eclipse.hawkbit.repository.exception.SoftwareModuleNotAssignedToTargetException;
 import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -83,8 +83,10 @@ import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
+import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -138,7 +140,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     // TODO - make it final
     private TargetRepository targetRepository;
-    private final TargetTypeManagement<? extends TargetType> targetTypeManagement;
+    private final TargetTypeRepository targetTypeRepository;
     private final DeploymentManagement deploymentManagement;
     private final ConfirmationManagement confirmationManagement;
     private final SoftwareModuleRepository softwareModuleRepository;
@@ -158,7 +160,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     protected JpaControllerManagement(
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
             final RepositoryProperties repositoryProperties,
-            final TargetRepository targetRepository, final TargetTypeManagement<? extends TargetType> targetTypeManagement,
+            final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository,
             final DeploymentManagement deploymentManagement, final ConfirmationManagement confirmationManagement,
             final SoftwareModuleRepository softwareModuleRepository,
             final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
@@ -171,7 +173,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
 
         this.targetRepository = targetRepository;
-        this.targetTypeManagement = targetTypeManagement;
+        this.targetTypeRepository = targetTypeRepository;
         this.deploymentManagement = deploymentManagement;
         this.confirmationManagement = confirmationManagement;
         this.softwareModuleRepository = softwareModuleRepository;
@@ -270,8 +272,9 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    public Optional<SoftwareModule> getSoftwareModule(final long id) {
-        return softwareModuleRepository.findById(id).map(SoftwareModule.class::cast);
+    public SoftwareModule getSoftwareModule(final long id) {
+        return softwareModuleRepository.findById(id).map(SoftwareModule.class::cast)
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
     }
 
     @Override
@@ -360,7 +363,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    public Optional<Action> getActionForDownloadByTargetAndSoftwareModule(final String controllerId, final long moduleId) {
+    public Action getActionForDownloadByTargetAndSoftwareModule(final String controllerId, final long moduleId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
         throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
 
@@ -376,7 +379,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                         .stream()
                         .anyMatch(module -> module.getId() == moduleId))
                 .map(Action.class::cast)
-                .findFirst();
+                .findFirst()
+                .orElseThrow(() -> new SoftwareModuleNotAssignedToTargetException(moduleId, controllerId));
     }
 
     @Override
@@ -543,11 +547,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    public Optional<Action> getActionByExternalRef(@NotEmpty final String externalRef) {
-        return actionRepository.findByExternalRef(externalRef);
-    }
-
-    @Override
     public void deleteExistingTarget(@NotEmpty final String controllerId) {
         final JpaTarget target = targetRepository.getByControllerId(controllerId);
         targetRepository.deleteById(target.getId());
@@ -555,7 +554,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    public Optional<Action> getInstalledActionByTarget(final Target target) {
+    public Optional<Action> findInstalledActionByTarget(final Target target) {
         final JpaTarget jpaTarget = (JpaTarget) target;
         return Optional.ofNullable(jpaTarget.getInstalledDistributionSet())
                 .flatMap(installedDistributionSet -> actionRepository.findFirstByTargetIdAndDistributionSetIdAndStatusOrderByIdDesc(
@@ -575,12 +574,9 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Override
     public boolean updateOfflineAssignedVersion(@NotEmpty final String controllerId, final String distributionName, final String version) {
         List<DistributionSetAssignmentResult> distributionSetAssignmentResults =
-                systemSecurityContext.runAsSystem(() ->
-                        distributionSetManagement.findByNameAndVersion(distributionName, version)
-                                .map(distributionSet -> deploymentManagement.offlineAssignedDistributionSets(
-                                        controllerId, List.of(Map.entry(controllerId, distributionSet.getId()))))
-                                .orElseThrow(() ->
-                                        new EntityNotFoundException(DistributionSet.class, Map.entry(distributionName, version))));
+                systemSecurityContext.runAsSystem(() -> deploymentManagement.offlineAssignedDistributionSets(
+                        controllerId,
+                        List.of(Map.entry(controllerId, distributionSetManagement.findByNameAndVersion(distributionName, version).getId()))));
 
         return distributionSetAssignmentResults.stream()
                 .findFirst()
@@ -588,8 +584,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 .orElseThrow();
     }
 
-    Optional<TargetType> getTargetType(String targetTypeName) {
-        return systemSecurityContext.runAsSystem(() -> targetTypeManagement.getByName(targetTypeName));
+    private Optional<TargetType> findTargetType(String targetTypeName) {
+        return targetTypeRepository.findOne(TargetTypeSpecification.hasName(targetTypeName)).map(TargetType.class::cast);
     }
 
     // for testing
@@ -668,7 +664,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         jpaTarget.setAddress(Optional.ofNullable(address).map(URI::toString).orElse(null));
 
         if (StringUtils.hasText(type)) {
-            var targetTypeOptional = getTargetType(type);
+            final Optional<TargetType> targetTypeOptional = findTargetType(type);
             if (targetTypeOptional.isPresent()) {
                 log.debug("Setting target type for thing ID \"{}\" to \"{}\".", controllerId, type);
                 jpaTarget.setTargetType(targetTypeOptional.get());
@@ -772,7 +768,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
             if (isTypeChanged(toUpdate.getTargetType(), type)) {
                 if (StringUtils.hasText(type)) {
-                    final Optional<TargetType> targetTypeOptional = getTargetType(type);
+                    final Optional<TargetType> targetTypeOptional = findTargetType(type);
                     if (targetTypeOptional.isPresent()) {
                         log.debug("Updating target type for thing ID \"{}\" to \"{}\".", toUpdate.getControllerId(), type);
                         toUpdate.setTargetType(targetTypeOptional.get());

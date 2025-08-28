@@ -64,7 +64,7 @@ class DdiConfirmationBaseTest {
     }
 
     /**
-     * Verify the correct deserialization of a model with a additional unknown property
+     * Verify the correct deserialization of a model with an additional unknown property
      */
     @Test
     void shouldDeserializeObjectWithUnknownProperty() throws IOException {

@@ -18,7 +18,7 @@ import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
 import org.junit.jupiter.api.Test;
 
-class FileNameFieldsTest {
+class RsqlQueryFieldsTest {
 
     /**
      * Verifies that fields classes are correctly implemented
@@ -35,9 +35,7 @@ class FileNameFieldsTest {
                     .map(clazz -> (Class<? extends RsqlQueryField>) clazz)
                     .toList();
             assertThat(matchingClasses).isNotEmpty();
-            matchingClasses.forEach(providerClass -> {
-                assertThat(providerClass.getEnumConstants()).isNotEmpty();
-            });
+            matchingClasses.forEach(providerClass -> assertThat(providerClass.getEnumConstants()).isNotEmpty());
         }
     }
 }

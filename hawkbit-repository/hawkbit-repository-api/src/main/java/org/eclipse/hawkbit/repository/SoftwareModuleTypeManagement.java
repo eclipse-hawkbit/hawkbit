@@ -45,13 +45,6 @@ public interface SoftwareModuleTypeManagement<T extends SoftwareModuleType>
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Optional<T> findByKey(@NotEmpty String key);
 
-    /**
-     * @param name to search for
-     * @return all {@link SoftwareModuleType}s in the repository with given {@link SoftwareModuleType#getName()}
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<T> findByName(@NotEmpty String name);
-
     @SuperBuilder
     @Getter
     @EqualsAndHashCode(callSuper = true)

@@ -19,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.springframework.amqp.rabbit.listener.FatalExceptionStrategy;
@@ -53,7 +52,7 @@ class RequeueExceptionStrategy implements FatalExceptionStrategy {
                 // is invalid content, repository exception
                 ConstraintViolationException.class, InvalidTargetAttributeException.class,
                 // is invalid content, message exception
-                InvalidTargetAddressException.class, MessageHandlingException.class
+                MessageHandlingException.class
         ));
         if (!ObjectUtils.isEmpty(fatalExceptionTypes)) {
             // add explicitly configured fatal exception types

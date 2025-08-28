@@ -52,8 +52,8 @@ import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
 import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.FileSizeQuotaExceededException;
-import org.eclipse.hawkbit.repository.exception.StorageQuotaExceededException;
+import org.eclipse.hawkbit.repository.artifact.exception.FileSizeQuotaExceededException;
+import org.eclipse.hawkbit.repository.artifact.exception.StorageQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -1538,7 +1538,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         // hashes
         final DbArtifactHash hash = artifact.getHashes();
-        assertThat(hash.getSha1()).as("Wrong sha1 hash").isEqualTo(HashGeneratorUtils.generateSHA1(random));
+        assertThat(hash.sha1()).as("Wrong sha1 hash").isEqualTo(HashGeneratorUtils.generateSHA1(random));
         // metadata
         assertThat(softwareModuleManagement.find(sm.getId()).orElseThrow().getArtifacts().get(0).getFilename())
                 .as("wrong metadata of the filename").isEqualTo("origFilename");

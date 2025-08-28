@@ -9,10 +9,12 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.service;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
 
 @Getter
+@EqualsAndHashCode(callSuper = true)
 public abstract class AbstractServiceRemoteEvent<T extends AbstractRemoteEvent> extends AbstractRemoteEvent {
 
     private final T remoteEvent;
@@ -21,5 +23,4 @@ public abstract class AbstractServiceRemoteEvent<T extends AbstractRemoteEvent> 
         super(remoteEvent == null ? "_empty_source_" : remoteEvent.getSource());
         this.remoteEvent = remoteEvent;
     }
-
 }

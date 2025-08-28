@@ -28,11 +28,6 @@ public class DdiConfig {
 
     private final DdiPolling polling;
 
-    /**
-     * Constructor.
-     *
-     * @param polling configuration of the polling for the target
-     */
     @JsonCreator
     public DdiConfig(@JsonProperty("polling") final DdiPolling polling) {
         this.polling = polling;

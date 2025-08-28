@@ -91,6 +91,18 @@ public interface TargetManagement<T extends Target>
     boolean isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(
             @NotNull String controllerId, long distributionSetId, @NotNull String targetFilterQuery);
 
+    @PreAuthorize(HAS_READ_REPOSITORY)
+    Target getByControllerId(@NotEmpty String controllerId);
+
+    /**
+     * Find a {@link Target} based a given ID.
+     *
+     * @param controllerId to look for.
+     * @return {@link Target}
+     */
+    @PreAuthorize(HAS_READ_REPOSITORY)
+    Optional<Target> findByControllerId(@NotEmpty String controllerId);
+
     /**
      * Find {@link Target}s based a given IDs.
      *
@@ -98,7 +110,7 @@ public interface TargetManagement<T extends Target>
      * @return List of found{@link Target}s
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
-    List<Target> getByControllerId(@NotEmpty Collection<String> controllerIDs);
+    List<Target> findByControllerId(@NotEmpty Collection<String> controllerIDs);
 
     /**
      * Gets a {@link Target} based a given controller id and includes the details specified by the details key.
@@ -190,84 +202,13 @@ public interface TargetManagement<T extends Target>
      * @param rsql the specification to filter the result set
      * @param pageable page parameter
      * @return the found {@link Target}s, never {@code null}
-     * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided
-     *         by the given {@code fieldNameProvider}
+     * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the given
+     *         {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
     @PreAuthorize(HAS_READ_TARGET_AND_READ_DISTRIBUTION_SET)
     Page<Target> findByAssignedDistributionSetAndRsql(long distributionSetId, @NotNull String rsql, @NotNull Pageable pageable);
-
-    /**
-     * Count all targets for given {@link TargetFilterQuery} and that are compatible
-     * with the passed {@link DistributionSetType}.
-     *
-     * @param rsql filter definition in RSQL syntax
-     * @param distributionSetIdTypeId ID of the {@link DistributionSetType} the targets need to be
-     *         compatible with
-     * @return the found number of{@link Target}s
-     */
-    @PreAuthorize(HAS_READ_REPOSITORY)
-    long countByRsqlAndCompatible(@NotEmpty String rsql, @NotNull Long distributionSetIdTypeId);
-
-    /**
-     * Count all targets with failed actions for specific Rollout and that are compatible with the passed {@link DistributionSetType} and
-     * created after given timestamp
-     *
-     * @param rolloutId rolloutId of the rollout to be retried.
-     * @param dsTypeId ID of the {@link DistributionSetType} the targets need to be compatible with
-     * @return the found number of{@link Target}s
-     */
-    @PreAuthorize(HAS_READ_REPOSITORY)
-    long countByFailedInRollout(@NotEmpty String rolloutId, @NotNull Long dsTypeId);
-
-    /**
-     * Counts all targets for all the given parameter {@link TargetFilterQuery} and that don't have the specified distribution set in their
-     * action history and are compatible with the passed {@link DistributionSetType}.
-     *
-     * @param distributionSetId id of the {@link DistributionSet}
-     * @param rsql filter definition in RSQL syntax
-     * @return the count of found {@link Target}s
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     */
-    @PreAuthorize(HAS_READ_TARGET_AND_READ_DISTRIBUTION_SET)
-    long countByRsqlAndNonDsAndCompatibleAndUpdatable(long distributionSetId, @NotNull String rsql);
-
-    /**
-     * Counts all targets for all the given parameter {@link TargetFilterQuery} and that are not assigned to one of the {@link RolloutGroup}s
-     * and are compatible with the passed {@link DistributionSetType}.
-     *
-     * @param rsql filter definition in RSQL syntax
-     * @param groups the list of {@link RolloutGroup}s
-     * @param distributionSetType type of the {@link DistributionSet} the targets must be compatible with
-     * @return count of the found {@link Target}s
-     */
-    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
-    long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-            @NotNull String rsql, @NotEmpty Collection<Long> groups, @NotNull DistributionSetType distributionSetType);
-
-    /**
-     * Counts all targets with failed actions for specific Rollout and that are not assigned to one of the {@link RolloutGroup}s and are
-     * compatible with the passed {@link DistributionSetType}.
-     *
-     * @param rolloutId rolloutId of the rollout to be retried.
-     * @param groups the list of {@link RolloutGroup}s
-     * @return count of the found {@link Target}s
-     */
-    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
-    long countByFailedRolloutAndNotInRolloutGroups(@NotNull String rolloutId, @NotEmpty Collection<Long> groups);
-
-    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
-    long countByActionsInRolloutGroup(final long rolloutGroupId);
-
-    /**
-     * Find a {@link Target} based a given ID.
-     *
-     * @param controllerId to look for.
-     * @return {@link Target}
-     */
-    @PreAuthorize(HAS_READ_REPOSITORY)
-    Optional<Target> getByControllerId(@NotEmpty String controllerId);
 
     /**
      * retrieves {@link Target}s by the installed {@link DistributionSet}.
@@ -322,6 +263,65 @@ public interface TargetManagement<T extends Target>
     @PreAuthorize(HAS_READ_REPOSITORY)
     Page<Target> findByRsqlAndTag(@NotNull String rsql, long tagId, @NotNull Pageable pageable);
 
+    /**
+     * Count all targets for given {@link TargetFilterQuery} and that are compatible with the passed {@link DistributionSetType}.
+     *
+     * @param rsql filter definition in RSQL syntax
+     * @param distributionSetIdTypeId ID of the {@link DistributionSetType} the targets need to be compatible with
+     * @return the found number of{@link Target}s
+     */
+    @PreAuthorize(HAS_READ_REPOSITORY)
+    long countByRsqlAndCompatible(@NotEmpty String rsql, @NotNull Long distributionSetIdTypeId);
+
+    /**
+     * Count all targets with failed actions for specific Rollout and that are compatible with the passed {@link DistributionSetType} and
+     * created after given timestamp
+     *
+     * @param rolloutId rolloutId of the rollout to be retried.
+     * @param dsTypeId ID of the {@link DistributionSetType} the targets need to be compatible with
+     * @return the found number of{@link Target}s
+     */
+    @PreAuthorize(HAS_READ_REPOSITORY)
+    long countByFailedInRollout(@NotEmpty String rolloutId, @NotNull Long dsTypeId);
+
+    /**
+     * Counts all targets for all the given parameter {@link TargetFilterQuery} and that don't have the specified distribution set in their
+     * action history and are compatible with the passed {@link DistributionSetType}.
+     *
+     * @param distributionSetId id of the {@link DistributionSet}
+     * @param rsql filter definition in RSQL syntax
+     * @return the count of found {@link Target}s
+     * @throws EntityNotFoundException if distribution set with given ID does not exist
+     */
+    @PreAuthorize(HAS_READ_TARGET_AND_READ_DISTRIBUTION_SET)
+    long countByRsqlAndNonDsAndCompatibleAndUpdatable(long distributionSetId, @NotNull String rsql);
+
+    /**
+     * Counts all targets for all the given parameter {@link TargetFilterQuery} and that are not assigned to one of the {@link RolloutGroup}s
+     * and are compatible with the passed {@link DistributionSetType}.
+     *
+     * @param rsql filter definition in RSQL syntax
+     * @param groups the list of {@link RolloutGroup}s
+     * @param distributionSetType type of the {@link DistributionSet} the targets must be compatible with
+     * @return count of the found {@link Target}s
+     */
+    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
+    long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
+            @NotNull String rsql, @NotEmpty Collection<Long> groups, @NotNull DistributionSetType distributionSetType);
+
+    /**
+     * Counts all targets with failed actions for specific Rollout and that are not assigned to one of the {@link RolloutGroup}s and are
+     * compatible with the passed {@link DistributionSetType}.
+     *
+     * @param rolloutId rolloutId of the rollout to be retried.
+     * @param groups the list of {@link RolloutGroup}s
+     * @return count of the found {@link Target}s
+     */
+    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
+    long countByFailedRolloutAndNotInRolloutGroups(@NotNull String rolloutId, @NotEmpty Collection<Long> groups);
+
+    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
+    long countByActionsInRolloutGroup(final long rolloutGroupId);
 
     /**
      * Deletes target with the given controller ID.

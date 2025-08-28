@@ -1,11 +1,5 @@
 /**
- * Copyright (c) 2025 Contributors to the Eclipse Foundation
- *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * Copyright (c) 2025 Bosch Digital GmbH, Germany. All rights reserved.
  */
 package org.eclipse.hawkbit.repository.artifact.urlhandler;
 
@@ -15,7 +9,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ApiType;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrl;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandlerProperties;
 import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandlerProperties.UrlProtocol;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.PropertyBasedArtifactUrlHandler;
+import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder;
 import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder.SoftwareData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

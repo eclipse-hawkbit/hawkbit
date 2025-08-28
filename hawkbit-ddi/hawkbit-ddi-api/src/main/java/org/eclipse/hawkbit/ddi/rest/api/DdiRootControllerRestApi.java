@@ -100,7 +100,7 @@ public interface DdiRootControllerRestApi {
             retrieve actions that need to be executed. Those are provided as a list of links to give more detailed
             information about the action. Links are only available for initial configuration, open actions, or the latest
             installed action, respectively. The resource supports Etag based modification checks in order to save traffic.
-                        
+            
             Note: deployments have to be confirmed in order to move on to the next action. Cancellations have to be
             confirmed or rejected.""")
     @ApiResponses(value = {
@@ -214,7 +214,7 @@ public interface DdiRootControllerRestApi {
      *         the eTag needs to be re-generated
      * @param actionHistoryMessageCount specifies the number of messages to be returned from action history. Regardless of the passed value,
      *         in order to restrict resource utilization by controllers, maximum number of
-     *         messages that are retrieved from database is limited by {@link RepositoryConstants#MAX_ACTION_HISTORY_MSG_COUNT}.
+     *         messages that are retrieved from database is limited by RepositoryConstants#MAX_ACTION_HISTORY_MSG_COUNT.
      *         actionHistoryMessageCount less than zero: retrieves the maximum allowed number of action status messages from history;
      *         actionHistoryMessageCount equal to zero: does not retrieve any message;
      *         actionHistoryMessageCount greater than zero: retrieves the specified number of messages, limited by maximum allowed number.
@@ -222,7 +222,7 @@ public interface DdiRootControllerRestApi {
      */
     @Operation(summary = "Resource for software module (Deployment Base)", description = """
             Core resource for deployment operations. Contains all information necessary in order to execute the operation.
-                        
+            
             Keep in mind that the provided download links for the artifacts are generated dynamically by the update server.
             Host, port and path and not guaranteed to be similar to the provided examples below but will be defined at
             runtime.
@@ -230,15 +230,14 @@ public interface DdiRootControllerRestApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = """
                     Successfully retrieved
-                                        
+                    
                     In case a device provides state information on the feedback channel and won’t store it locally,
                     a query for, e.q, the last 10 messages, could be used which will include the previously provided by the
-                    device,
-                    feedback.
-                                        
+                    device, feedback.
+                    
                     In addition to the straight forward approach to inform the device to download and install the software
                     in one transaction hawkBit supports the separation of download and installation into separate steps.
-                                        
+                    
                     This feature is called Maintenance Window where the device is informed to download the software first
                     and then when it enters a defined (maintenance) window the installation triggers follows as usual.
                     """),
@@ -373,7 +372,7 @@ public interface DdiRootControllerRestApi {
      */
     @Operation(summary = "Cancel an action", description = """
             The Hawkbit server might cancel an operation, e.g. an unfinished update has a successor. It is up to the
-            provisioning target to decide to accept the cancelation or reject it.""")
+            provisioning target to decide to accept the cancellation or reject it.""")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -450,7 +449,7 @@ public interface DdiRootControllerRestApi {
      * @param actionId of the {@link DdiDeploymentBase} that matches to installed action.
      * @param actionHistoryMessageCount specifies the number of messages to be returned from action
      *         history. Regardless of the passed value, in order to restrict resource utilization by controllers, maximum number of
-     *         messages that are retrieved from database is limited by {@link RepositoryConstants#MAX_ACTION_HISTORY_MSG_COUNT}.
+     *         messages that are retrieved from database is limited by RepositoryConstants#MAX_ACTION_HISTORY_MSG_COUNT.
      *         actionHistoryMessageCount less than zero: retrieves the maximum allowed number of action status messages from history;
      *         actionHistoryMessageCount equal to zero: does not retrieve any message;
      *         actionHistoryMessageCount greater than zero: retrieves the specified number of messages, limited by maximum allowed number.
@@ -461,7 +460,7 @@ public interface DdiRootControllerRestApi {
             the already finished action, for example in case a re-installation is necessary. The response will be of
             the same format as the deploymentBase operation, providing the previous action that has been finished
             successfully. As the action is already finished, no further feedback is expected.
-                        
+            
             Keep in mind that the provided download links for the artifacts are generated dynamically by the update server.
             Host, port and path are not guaranteed to be similar to the provided examples below but will be defined at
             runtime.
@@ -470,7 +469,7 @@ public interface DdiRootControllerRestApi {
             @ApiResponse(responseCode = "200", description = """
                     The response body includes the detailed operation for the already finished action in the same format as
                     for the deploymentBase operation.
-                                        
+                    
                     In this case the (optional) query for the last 10 messages, previously provided by the device, are included.
                     """),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -546,7 +545,7 @@ public interface DdiRootControllerRestApi {
      *         needs to be re-generated
      * @param actionHistoryMessageCount specifies the number of messages to be returned from action history. Regardless of the passed value,
      *         in order to restrict resource utilization by controllers, maximum number of messages that are retrieved from database is limited
-     *         by {@link RepositoryConstants#MAX_ACTION_HISTORY_MSG_COUNT}.
+     *         by RepositoryConstants#MAX_ACTION_HISTORY_MSG_COUNT.
      *         actionHistoryMessageCount less than zero: retrieves the maximum allowed number of action status messages from history;
      *         actionHistoryMessageCount equal to zero: does not retrieve any message;
      *         actionHistoryMessageCount greater than zero: retrieves the specified number of messages, limited by maximum allowed number.
@@ -556,7 +555,7 @@ public interface DdiRootControllerRestApi {
             Resource to receive information about a pending confirmation. The response will be of the same format as the
             deploymentBase operation. The controller should provide feedback about the confirmation first, before
             processing the deployment.
-                        
+            
             Keep in mind that the provided download links for the artifacts are generated dynamically by the update server.
             Host, port and path are not guaranteed to be similar to the provided examples below but will be defined at
             runtime.

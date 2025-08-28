@@ -67,7 +67,7 @@ public class DdiResult {
          */
         NONE("none");
 
-        private String name;
+        private final String name;
 
         FinalResult(final String name) {
             this.name = name;

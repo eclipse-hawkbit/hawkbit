@@ -121,6 +121,7 @@ public final class DataConversionHelper {
             result.add(WebMvcLinkBuilder
                     .linkTo(WebMvcLinkBuilder
                             .methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
+                            // doesn't really call the putConfigData with null, just create the link
                             .putConfigData(null, tenantAware.getCurrentTenant(), target.getControllerId()))
                     .withRel(DdiRestConstants.CONFIG_DATA_ACTION).expand());
         }
@@ -186,7 +187,7 @@ public final class DataConversionHelper {
                                         artifact.getSoftwareModule().getId(), artifact.getFilename(), artifact.getId(),
                                         artifact.getSha1Hash())),
                         ApiType.DDI, request.getURI())
-                .forEach(entry -> file.add(Link.of(entry.getRef()).withRel(entry.getRel()).expand()));
+                .forEach(entry -> file.add(Link.of(entry.ref()).withRel(entry.rel()).expand()));
 
         return file;
     }

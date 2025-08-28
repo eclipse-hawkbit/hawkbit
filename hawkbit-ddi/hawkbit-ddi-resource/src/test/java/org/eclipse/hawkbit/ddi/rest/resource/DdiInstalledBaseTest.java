@@ -109,7 +109,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         // update assigned version
         putInstalledBase(target.getControllerId(), getJsonInstalledBase(ds.getName(), ds.getVersion()), status().isCreated());
 
-        assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get().getId()).isEqualTo(ds.getId());
+        assertThat(deploymentManagement.findAssignedDistributionSet(target.getControllerId()).get().getId()).isEqualTo(ds.getId());
 
         // update assigned version while version already assigned
         putInstalledBase(target.getControllerId(), getJsonInstalledBase(ds.getName(), ds.getVersion()), status().isOk());
@@ -127,7 +127,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         // get installed base
         putInstalledBase(target.getControllerId(), getJsonInstalledBase(dsName, dsVersion), status().isNotFound());
 
-        assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).isEmpty()).isTrue();
+        assertThat(deploymentManagement.findAssignedDistributionSet(target.getControllerId()).isEmpty()).isTrue();
     }
 
     /**

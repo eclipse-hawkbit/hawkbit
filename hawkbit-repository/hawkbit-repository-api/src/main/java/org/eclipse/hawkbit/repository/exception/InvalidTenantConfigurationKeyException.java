@@ -29,6 +29,6 @@ public class InvalidTenantConfigurationKeyException extends AbstractServerRtExce
     private static final SpServerError THIS_ERROR = SpServerError.SP_CONFIGURATION_KEY_INVALID;
 
     public InvalidTenantConfigurationKeyException(final String message) {
-        super(message, THIS_ERROR);
+        super(THIS_ERROR, message);
     }
 }

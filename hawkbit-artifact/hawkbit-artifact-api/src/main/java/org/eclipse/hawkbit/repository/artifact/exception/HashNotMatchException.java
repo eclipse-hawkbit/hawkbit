@@ -1,11 +1,5 @@
 /**
- * Copyright (c) 2025 Contributors to the Eclipse Foundation
- *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * Copyright (c) 2025 Bosch Digital GmbH, Germany. All rights reserved.
  */
 package org.eclipse.hawkbit.repository.artifact.exception;
 
@@ -28,12 +22,6 @@ public class HashNotMatchException extends RuntimeException {
 
     private final String hashFunction;
 
-    /**
-     * Constructs a HashNotMatchException with message.
-     *
-     * @param message the message of the exception
-     * @param hashFunction the hash function which caused this exception
-     */
     public HashNotMatchException(final String message, final String hashFunction) {
         super(message);
         this.hashFunction = hashFunction;

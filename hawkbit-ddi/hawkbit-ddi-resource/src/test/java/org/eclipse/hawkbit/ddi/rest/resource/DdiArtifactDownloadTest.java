@@ -57,8 +57,8 @@ import org.springframework.test.web.servlet.MvcResult;
 @SpringBootTest(classes = { DownloadTestConfiguration.class })
 class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
-    private static volatile int downloadProgress = 0;
-    private static volatile long shippedBytes = 0;
+    private static int downloadProgress = 0;
+    private static long shippedBytes = 0;
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 
@@ -68,7 +68,7 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     }
 
     /**
-     * Tests non allowed requests on the artifact ressource, e.g. invalid URI, wrong if-match, wrong command.
+     * Tests not allowed requests on the artifact resource, e.g. invalid URI, wrong if-match, wrong command.
      */
     @Test
     void invalidRequestsOnArtifactResource() throws Exception {
@@ -163,8 +163,10 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     @Test
     @WithUser(principal = "4712", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     void downloadArtifactThroughFileName() throws Exception {
-        downloadProgress = 1;
-        shippedBytes = 0;
+        synchronized (DdiArtifactDownloadTest.class) {
+            downloadProgress = 1;
+            shippedBytes = 0;
+        }
         assertThat(softwareModuleManagement.findAll(PAGE)).isEmpty();
 
         // create target
@@ -201,8 +203,10 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 "The same file that was uploaded is expected when downloaded");
 
         // download complete
-        assertThat(downloadProgress).isEqualTo(10);
-        assertThat(shippedBytes).isEqualTo(artifactSize);
+        synchronized (DdiArtifactDownloadTest.class) {
+            assertThat(downloadProgress).isEqualTo(10);
+            assertThat(shippedBytes).isEqualTo(artifactSize);
+        }
     }
 
     /**
@@ -379,8 +383,10 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         @EventListener(classes = DownloadProgressEvent.class)
         void listen(final DownloadProgressEvent event) {
-            downloadProgress++;
-            shippedBytes += event.getShippedBytesSinceLast();
+            synchronized (DdiArtifactDownloadTest.class) {
+                downloadProgress++;
+                shippedBytes += event.getShippedBytesSinceLast();
+            }
         }
     }
 }

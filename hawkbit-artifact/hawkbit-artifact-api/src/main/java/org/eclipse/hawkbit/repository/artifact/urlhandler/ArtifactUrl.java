@@ -1,25 +1,12 @@
 /**
- * Copyright (c) 2025 Contributors to the Eclipse Foundation
- *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * Copyright (c) 2025 Bosch Digital GmbH, Germany. All rights reserved.
  */
 package org.eclipse.hawkbit.repository.artifact.urlhandler;
-
-import lombok.Data;
 
 /**
  * Container for a generated Artifact URL.
  */
-@Data
-public class ArtifactUrl {
-
-    private final String protocol;
-    private final String rel;
-    private final String ref;
+public record ArtifactUrl(String protocol, String rel, String ref) {
 
     /**
      * Constructor.
@@ -28,9 +15,6 @@ public class ArtifactUrl {
      * @param rel hypermedia value
      * @param ref hypermedia value
      */
-    public ArtifactUrl(final String protocol, final String rel, final String ref) {
-        this.protocol = protocol;
-        this.rel = rel;
-        this.ref = ref;
+    public ArtifactUrl {
     }
 }

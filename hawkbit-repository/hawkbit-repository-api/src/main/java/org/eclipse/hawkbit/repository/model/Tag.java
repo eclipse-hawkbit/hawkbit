@@ -23,5 +23,4 @@ public interface Tag extends NamedEntity {
      * @return colour code of the tag used in Management UI.
      */
     String getColour();
-
 }

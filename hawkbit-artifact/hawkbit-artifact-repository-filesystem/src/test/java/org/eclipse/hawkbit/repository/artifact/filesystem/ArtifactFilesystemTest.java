@@ -1,22 +1,17 @@
 /**
- * Copyright (c) 2025 Contributors to the Eclipse Foundation
- *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * Copyright (c) 2025 Bosch Digital GmbH, Germany. All rights reserved.
  */
-package org.eclipse.hawkbit.repository.artifact;
+package org.eclipse.hawkbit.repository.artifact.filesystem;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.hawkbit.repository.artifact.AbstractArtifactRepository;
+import org.eclipse.hawkbit.repository.artifact.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
 import org.junit.jupiter.api.Test;
 
@@ -35,9 +30,7 @@ class ArtifactFilesystemTest {
         final ArtifactFilesystem underTest = new ArtifactFilesystem(
                 file, "fileWhichTotalDoesNotExists",
                 new DbArtifactHash("1", "2", "3"), 0L, null);
-        assertThatThrownBy(underTest::getFileInputStream)
-                .isInstanceOf(ArtifactFileNotFoundException.class)
-                .hasCauseInstanceOf(FileNotFoundException.class);
+        assertThatThrownBy(underTest::getFileInputStream).isInstanceOf(ArtifactBinaryNotFoundException.class);
     }
 
     /**

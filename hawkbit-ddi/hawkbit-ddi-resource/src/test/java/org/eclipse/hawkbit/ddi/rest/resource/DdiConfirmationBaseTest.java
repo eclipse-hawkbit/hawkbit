@@ -113,13 +113,12 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$._links.confirmationBase.href", containsString(expectedConfirmationBaseLink)))
                 .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist());
 
-        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
-                .isGreaterThanOrEqualTo(current);
-        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
+        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).getLastTargetQuery()).isGreaterThanOrEqualTo(current);
+        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(actionStatusRepository.count()).isEqualTo(2);
 
-        final DistributionSet findDistributionSetByAction = findDsByAction(action.getId()).get();
+        final DistributionSet findDistributionSetByAction = findDsByAction(action.getId()).orElseThrow();
 
         getAndVerifyConfirmationBasePayload(
                 DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, artifact,
@@ -142,7 +141,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
         final Target target = testdataFactory.createTarget();
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("");
 
-        final Long softwareModuleId = distributionSet.getModules().stream().findAny().get().getId();
+        final Long softwareModuleId = distributionSet.getModules().stream().findAny().orElseThrow().getId();
         testdataFactory.createArtifacts(softwareModuleId);
 
         assignDistributionSet(distributionSet.getId(), target.getName());
@@ -359,7 +358,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(confirmationManagement.getStatus(controllerId)).hasValueSatisfying(status -> {
+        assertThat(confirmationManagement.findStatus(controllerId)).hasValueSatisfying(status -> {
             assertThat(status.getInitiator()).isEqualTo(initiator);
             assertThat(status.getRemark()).isEqualTo(remark);
             assertThat(status.getCreatedBy()).isEqualTo("bumlux");
@@ -379,7 +378,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(confirmationManagement.getStatus(controllerId)).isEmpty();
+        assertThat(confirmationManagement.findStatus(controllerId)).isEmpty();
     }
 
     /**

@@ -34,8 +34,7 @@ public class ArtifactUrlHandlerAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(ArtifactUrlHandler.class)
     PropertyBasedArtifactUrlHandler propertyBasedArtifactUrlHandler(
-            final ArtifactUrlHandlerProperties urlHandlerProperties,
-            @Value("${server.servlet.context-path:}") final String contextPath) {
+            final ArtifactUrlHandlerProperties urlHandlerProperties, @Value("${server.servlet.context-path:}") final String contextPath) {
         return new PropertyBasedArtifactUrlHandler(urlHandlerProperties, contextPath);
     }
 }

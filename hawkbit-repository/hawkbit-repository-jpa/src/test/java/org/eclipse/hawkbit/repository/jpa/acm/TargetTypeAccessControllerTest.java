@@ -64,10 +64,6 @@ class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
             final Long hiddenTargetTypeId = hiddenTargetType.getId();
             assertThat(targetTypeManagement.find(hiddenTargetTypeId)).isEmpty();
 
-            // verify targetTypeManagement#getByName
-            assertThat(targetTypeManagement.getByName(permittedTargetType.getName())).isPresent();
-            assertThat(targetTypeManagement.getByName(hiddenTargetType.getName())).isEmpty();
-
             // verify targetTypeManagement#get by ids
             final List<Long> allEntityIds = Arrays.asList(permittedTargetType.getId(), hiddenTargetTypeId);
             assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> targetTypeManagement.get(allEntityIds));

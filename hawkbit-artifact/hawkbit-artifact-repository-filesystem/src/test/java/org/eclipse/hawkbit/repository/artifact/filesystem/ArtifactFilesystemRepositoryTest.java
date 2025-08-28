@@ -1,13 +1,7 @@
 /**
- * Copyright (c) 2025 Contributors to the Eclipse Foundation
- *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * Copyright (c) 2025 Bosch Digital GmbH, Germany. All rights reserved.
  */
-package org.eclipse.hawkbit.repository.artifact;
+package org.eclipse.hawkbit.repository.artifact.filesystem;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -21,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
+import org.eclipse.hawkbit.repository.artifact.AbstractArtifactRepository;
 import org.eclipse.hawkbit.repository.artifact.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.artifact.model.AbstractDbArtifact;
 import org.junit.jupiter.api.AfterAll;
@@ -79,7 +74,7 @@ class ArtifactFilesystemRepositoryTest {
         final byte[] fileContent = randomBytes();
         final AbstractDbArtifact artifact = storeRandomArtifact(fileContent);
 
-        assertThat(artifactFilesystemRepository.getBySha1(TENANT, artifact.getHashes().getSha1())).isNotNull();
+        assertThat(artifactFilesystemRepository.getBySha1(TENANT, artifact.getHashes().sha1())).isNotNull();
     }
 
     /**
@@ -88,9 +83,9 @@ class ArtifactFilesystemRepositoryTest {
     @Test
     void deleteStoredArtifactBySHA1Hash() throws IOException {
         final AbstractDbArtifact artifact = storeRandomArtifact(randomBytes());
-        artifactFilesystemRepository.deleteBySha1(TENANT, artifact.getHashes().getSha1());
+        artifactFilesystemRepository.deleteBySha1(TENANT, artifact.getHashes().sha1());
 
-        final String sha1Hash = artifact.getHashes().getSha1();
+        final String sha1Hash = artifact.getHashes().sha1();
         assertThatExceptionOfType(ArtifactBinaryNotFoundException.class)
                 .isThrownBy(() -> artifactFilesystemRepository.getBySha1(TENANT, sha1Hash));
     }
@@ -103,7 +98,7 @@ class ArtifactFilesystemRepositoryTest {
         final AbstractDbArtifact artifact = storeRandomArtifact(randomBytes());
         artifactFilesystemRepository.deleteByTenant(TENANT);
 
-        final String sha1Hash = artifact.getHashes().getSha1();
+        final String sha1Hash = artifact.getHashes().sha1();
         assertThatExceptionOfType(ArtifactBinaryNotFoundException.class)
                 .isThrownBy(() -> artifactFilesystemRepository.getBySha1(TENANT, sha1Hash));
     }
@@ -121,7 +116,7 @@ class ArtifactFilesystemRepositoryTest {
 
         final AbstractDbArtifact artifact = storeRandomArtifact(randomBytes());
         try {
-            artifactFilesystemRepository.deleteBySha1("tenantWhichDoesNotExist", artifact.getHashes().getSha1());
+            artifactFilesystemRepository.deleteBySha1("tenantWhichDoesNotExist", artifact.getHashes().sha1());
         } catch (final Exception e) {
             Assertions.fail("did not expect an exception while deleting a file which does not exists");
         }

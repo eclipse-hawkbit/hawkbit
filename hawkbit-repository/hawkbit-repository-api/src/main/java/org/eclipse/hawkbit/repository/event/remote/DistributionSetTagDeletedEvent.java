@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 /**
- * Defines the the remote event of delete a {@link DistributionSetTag}.
+ * Defines the remote event of delete a {@link DistributionSetTag}.
  */
 @NoArgsConstructor // for serialization libs like jackson
 public class DistributionSetTagDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {

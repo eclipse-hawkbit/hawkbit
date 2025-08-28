@@ -154,8 +154,9 @@ public class JpaDistributionSetManagement
     }
 
     @Override
-    public Optional<JpaDistributionSet> getWithDetails(final long id) {
-        return jpaRepository.findOne(jpaRepository.byIdSpec(id), JpaDistributionSet_.GRAPH_DISTRIBUTION_SET_DETAIL);
+    public JpaDistributionSet getWithDetails(final long id) {
+        return jpaRepository.findOne(jpaRepository.byIdSpec(id), JpaDistributionSet_.GRAPH_DISTRIBUTION_SET_DETAIL)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, id));
     }
 
     // implicitly lock a distribution set if not already locked and implicit lock is enabled and not to skip
@@ -290,8 +291,9 @@ public class JpaDistributionSetManagement
     }
 
     @Override
-    public Optional<JpaDistributionSet> findByNameAndVersion(final String distributionName, final String version) {
-        return jpaRepository.findOne(DistributionSetSpecification.equalsNameAndVersionIgnoreCase(distributionName, version));
+    public JpaDistributionSet findByNameAndVersion(final String distributionName, final String version) {
+        return jpaRepository.findOne(DistributionSetSpecification.equalsNameAndVersionIgnoreCase(distributionName, version))
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, Map.entry(distributionName, version)));
     }
 
     @Override

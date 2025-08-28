@@ -108,7 +108,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<MgmtTarget> getTarget(final String targetId) {
-        final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
+        final Target findTarget = targetManagement.getByControllerId(targetId);
         // to single response include poll status
         final MgmtTarget response = MgmtTargetMapper.toResponse(findTarget, tenantConfigHelper, null);
         MgmtTargetMapper.addTargetLinks(response);
@@ -142,11 +142,10 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     @AuditLog(entity = "Target", type = AuditLog.Type.UPDATE, description = "Update Target")
     public ResponseEntity<MgmtTarget> updateTarget(final String targetId, final MgmtTargetRequestBody targetRest) {
-        if (targetRest.getRequestAttributes() != null && !Boolean.TRUE.equals(targetRest.getRequestAttributes())) {
+        if (targetRest.getRequestAttributes() != null && !targetRest.getRequestAttributes()) {
             return ResponseEntity.badRequest().build();
         }
-        final Target targetToUpdate = targetManagement.getByControllerId(targetId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, targetId));
+        final Target targetToUpdate = targetManagement.getByControllerId(targetId);
         final TargetType targetType = Optional.ofNullable(targetRest.getTargetType())
                 .map(targetTypeId -> {
                     if (targetTypeId == -1L) {
@@ -211,7 +210,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<PagedList<MgmtAction>> getActionHistory(
             final String targetId, final String rsqlParam,
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
-        findTargetWithExceptionIfNotFound(targetId);
+        targetManagement.getByControllerId(targetId);
 
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeActionSortParam(sortParam));
         final Slice<Action> activeActions;
@@ -331,7 +330,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<PagedList<MgmtActionStatus>> getActionStatusList(
             final String targetId, final Long actionId,
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
-        final Target target = findTargetWithExceptionIfNotFound(targetId);
+        final Target target = targetManagement.getByControllerId(targetId);
 
         final Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
@@ -350,7 +349,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(final String targetId) {
-        final MgmtDistributionSet distributionSetRest = deploymentManagement.getAssignedDistributionSet(targetId)
+        final MgmtDistributionSet distributionSetRest = deploymentManagement.findAssignedDistributionSet(targetId)
                 .map(ds -> {
                     final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(ds);
                     MgmtDistributionSetMapper.addLinks(ds, response);
@@ -375,7 +374,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             return ResponseEntity.ok(mgmtDistributionSetMapper
                     .toResponse(deploymentManagement.offlineAssignedDistributionSets(offlineAssignments)));
         }
-        findTargetWithExceptionIfNotFound(targetId);
+        targetManagement.getByControllerId(targetId);
 
         final List<DeploymentRequest> deploymentRequests = dsAssignments.stream().map(dsAssignment -> {
             final boolean isConfirmationRequired = dsAssignment.getConfirmationRequired() == null
@@ -392,19 +391,14 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<MgmtDistributionSet> getInstalledDistributionSet(final String targetId) {
-        final MgmtDistributionSet distributionSetRest = deploymentManagement.getInstalledDistributionSet(targetId)
+        return deploymentManagement.findInstalledDistributionSet(targetId)
                 .map(set -> {
                     final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(set);
                     MgmtDistributionSetMapper.addLinks(set, response);
-
                     return response;
-                }).orElse(null);
-
-        if (distributionSetRest == null) {
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(distributionSetRest);
+                })
+                .map(distributionSetRest -> ResponseEntity.ok(distributionSetRest))
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @Override
@@ -465,11 +459,6 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<Void> deactivateAutoConfirm(final String targetId) {
         confirmationManagement.deactivateAutoConfirmation(targetId);
         return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    private Target findTargetWithExceptionIfNotFound(final String targetId) {
-        return targetManagement.getByControllerId(targetId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, targetId));
     }
 
     private <T, R> R getNullIfEmpty(final T object, final Function<T, R> extractMethod) {

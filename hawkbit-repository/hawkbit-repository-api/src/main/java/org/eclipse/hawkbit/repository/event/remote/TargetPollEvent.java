@@ -39,6 +39,6 @@ public class TargetPollEvent extends RemoteTenantAwareEvent {
 
     public TargetPollEvent(final Target target) {
         this(target.getControllerId(), target.getTenant());
-        this.targetAddress = target.getAddress().toString();
+        this.targetAddress = target.getAddress();
     }
 }

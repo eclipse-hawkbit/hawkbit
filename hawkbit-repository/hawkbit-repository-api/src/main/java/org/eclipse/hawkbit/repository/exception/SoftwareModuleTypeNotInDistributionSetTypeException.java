@@ -28,15 +28,8 @@ public class SoftwareModuleTypeNotInDistributionSetTypeException extends EntityN
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor
-     *
-     * @param moduleTypeId that is not part of given {@link DistributionSetType}
-     * @param distributionSetTypeId of the {@link DistributionSetType} where given {@link SoftwareModuleType} is not part of
-     */
-    public SoftwareModuleTypeNotInDistributionSetTypeException(final Long moduleTypeId,
-            final Long distributionSetTypeId) {
-        super(SoftwareModuleType.class.getSimpleName() + " with id {" + moduleTypeId + "} is not part of "
-                + DistributionSetType.class.getSimpleName() + " with id {" + distributionSetTypeId + "}.");
+    public SoftwareModuleTypeNotInDistributionSetTypeException(final Long moduleTypeId, final Long distributionSetTypeId) {
+        super(SoftwareModuleType.class.getSimpleName() + " with id {" + moduleTypeId + "} is not part of " +
+                DistributionSetType.class.getSimpleName() + " with id {" + distributionSetTypeId + "}.");
     }
 }

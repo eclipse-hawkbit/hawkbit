@@ -14,35 +14,19 @@ import java.io.InputStream;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-import lombok.Data;
 import org.eclipse.hawkbit.repository.ValidString;
 
 /**
  * Use to create a new artifact.
  */
-@Data
-public class ArtifactUpload {
-
-    @NotNull
-    private final InputStream inputStream;
-
-    private final long moduleId;
-
-    @NotEmpty
-    @ValidString
-    private final String filename;
-
-    private final String providedMd5Sum;
-
-    private final String providedSha1Sum;
-
-    private final String providedSha256Sum;
-
-    private final boolean overrideExisting;
-
-    private final String contentType;
-
-    private final long filesize;
+public record ArtifactUpload(
+        @NotNull InputStream inputStream,
+        long moduleId,
+        @NotEmpty @ValidString String filename,
+        String providedMd5Sum, String providedSha1Sum, String providedSha256Sum,
+        boolean overrideExisting,
+        String contentType,
+        long filesize) {
 
     /**
      * Constructor
@@ -50,12 +34,11 @@ public class ArtifactUpload {
      * @param inputStream to read from for artifact binary
      * @param moduleId to assign the new artifact to
      * @param filename of the artifact
-     * @param overrideExisting to <code>true</code> if the artifact binary can be overridden
-     *         if it already exists
+     * @param overrideExisting to <code>true</code> if the artifact binary can be overridden if it already exists
      * @param filesize the size of the file in bytes.
      */
-    public ArtifactUpload(final InputStream inputStream, final long moduleId, final String filename,
-            final boolean overrideExisting, final long filesize) {
+    public ArtifactUpload(
+            final InputStream inputStream, final long moduleId, final String filename, final boolean overrideExisting, final long filesize) {
         this(inputStream, moduleId, filename, null, null, null, overrideExisting, null, filesize);
     }
 
@@ -72,7 +55,8 @@ public class ArtifactUpload {
      * @param filesize the size of the file in bytes.
      */
     @SuppressWarnings("java:S107")
-    public ArtifactUpload(final InputStream inputStream, final long moduleId, final String filename,
+    public ArtifactUpload(
+            final InputStream inputStream, final long moduleId, final String filename,
             final String providedMd5Sum, final String providedSha1Sum, final String providedSha256Sum,
             final boolean overrideExisting, final String contentType, final long filesize) {
         this.inputStream = inputStream;

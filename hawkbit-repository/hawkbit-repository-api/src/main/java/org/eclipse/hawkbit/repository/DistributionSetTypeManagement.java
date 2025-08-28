@@ -47,9 +47,6 @@ public interface DistributionSetTypeManagement<T extends DistributionSetType>
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Optional<T> findByKey(@NotEmpty String key);
 
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<T> findByName(@NotEmpty String name);
-
     /**
      * Assigns {@link DistributionSetType#getMandatoryModuleTypes()}.
      *

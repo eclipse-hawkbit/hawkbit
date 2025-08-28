@@ -21,8 +21,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 public interface ActionStatus extends TenantAwareBaseEntity {
 
     /**
-     * @return time in {@link TimeUnit#MILLISECONDS} when the status was
-     *         reported.
+     * @return time in {@link TimeUnit#MILLISECONDS} when the status was reported.
      */
     long getOccurredAt();
 
@@ -33,7 +32,7 @@ public interface ActionStatus extends TenantAwareBaseEntity {
 
     /**
      * @return the {@link Status} of this {@link ActionStatus}. Caused potentially a transition change of the {@link #getAction()} if
-     *         different from the previous {@link #getStatus()} call.
+     *         different from the previous getStatus call.
      */
     Status getStatus();
 

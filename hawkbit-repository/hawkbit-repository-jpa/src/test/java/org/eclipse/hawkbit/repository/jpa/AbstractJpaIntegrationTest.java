@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.repository.jpa;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -43,7 +42,6 @@ import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TenantMetaDataRepository;
-import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -61,15 +59,11 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 @Slf4j
 @ContextConfiguration(classes = { JpaRepositoryConfiguration.class, TestConfiguration.class })

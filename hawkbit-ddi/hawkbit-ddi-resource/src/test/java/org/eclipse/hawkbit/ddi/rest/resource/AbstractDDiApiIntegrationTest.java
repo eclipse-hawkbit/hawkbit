@@ -39,12 +39,8 @@ import org.eclipse.hawkbit.ddi.json.model.DdiConfirmationFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiProgress;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
-import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -171,7 +167,7 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
 
     protected ResultActions performGet(final String url, final MediaType mediaType, final ResultMatcher statusMatcher, final String... values)
             throws Exception {
-        return mvc.perform(MockMvcRequestBuilders.get(url, values).accept(mediaType)
+        return mvc.perform(MockMvcRequestBuilders.get(url, (Object[]) values).accept(mediaType)
                         .with(new RequestOnHawkbitDefaultPortPostProcessor()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(statusMatcher)
@@ -281,14 +277,12 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     }
 
     protected String getJsonClosedDeploymentActionFeedback() throws JsonProcessingException {
-        return getJsonActionFeedback(
-                DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.NONE, Collections.singletonList("closed"));
+        return getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.NONE, Collections.singletonList("closed"));
     }
 
     protected String getJsonActionFeedback(
             final DdiStatus.ExecutionStatus executionStatus, final DdiResult.FinalResult finalResult) throws JsonProcessingException {
-        return getJsonActionFeedback(
-                executionStatus, finalResult, Collections.singletonList(randomString(1000)));
+        return getJsonActionFeedback(executionStatus, finalResult, Collections.singletonList(randomString(1000)));
     }
 
     protected String getJsonActionFeedback(

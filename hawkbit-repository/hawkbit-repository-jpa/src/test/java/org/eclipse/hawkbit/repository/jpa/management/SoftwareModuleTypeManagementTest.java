@@ -35,7 +35,6 @@ class SoftwareModuleTypeManagementTest extends AbstractRepositoryManagementTest<
     @Test
     void failIfReferNotExistingEntity() {
         assertThat(softwareModuleTypeManagement.findByKey(NOT_EXIST_ID)).isNotPresent();
-        assertThat(softwareModuleTypeManagement.findByName(NOT_EXIST_ID)).isNotPresent();
         verifyThrownExceptionBy(() -> softwareModuleTypeManagement.delete(NOT_EXIST_IDL), "SoftwareModuleType");
         verifyThrownExceptionBy(() -> softwareModuleTypeManagement.update(Update.builder().id(NOT_EXIST_IDL).build()), "SoftwareModuleType");
     }
@@ -86,19 +85,6 @@ class SoftwareModuleTypeManagementTest extends AbstractRepositoryManagementTest<
                         (JpaSoftwareModuleType) runtimeType,
                         (JpaSoftwareModuleType) appType,
                         softwareModuleTypeRepository.findById(type.getId()).orElseThrow());
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    void findSoftwareModuleTypeByName() {
-        testdataFactory.createSoftwareModuleOs();
-        final SoftwareModuleType found = softwareModuleTypeManagement
-                .create(Create.builder().key("thetype").name("thename").build());
-        softwareModuleTypeManagement
-                .create(Create.builder().key("thetype2").name("anothername").build());
-
-        Assertions.assertThat(((SoftwareModuleTypeManagement<SoftwareModuleType>) softwareModuleTypeManagement).findByName("thename"))
-                .as("Type with given name").contains(found);
     }
 
     /**

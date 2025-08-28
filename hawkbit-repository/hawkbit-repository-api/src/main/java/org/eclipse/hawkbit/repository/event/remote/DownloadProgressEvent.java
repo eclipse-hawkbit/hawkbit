@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import java.io.Serial;
 
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -19,14 +20,15 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
  * TenantAwareEvent that contains an updated download progress for a given
  * ActionStatus that was written for a download request.
  */
+@NoArgsConstructor(force = true) // for serialization libs like jackson
+@Data
 @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor // for serialization libs like jackson
 public class DownloadProgressEvent extends RemoteTenantAwareEvent {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private long shippedBytesSinceLast;
+    private final long shippedBytesSinceLast;
 
     /**
      * Constructor.
@@ -38,9 +40,5 @@ public class DownloadProgressEvent extends RemoteTenantAwareEvent {
     public DownloadProgressEvent(final String tenant, final Long actionStatusId, final long shippedBytesSinceLast) {
         super(tenant, actionStatusId);
         this.shippedBytesSinceLast = shippedBytesSinceLast;
-    }
-
-    public long getShippedBytesSinceLast() {
-        return shippedBytesSinceLast;
     }
 }

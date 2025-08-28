@@ -26,27 +26,7 @@ public class InvalidMD5HashException extends AbstractServerRtException {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Creates a new FileUploadFailedException with
-     * {@link SpServerError#SP_ARTIFACT_UPLOAD_FAILED_MD5_MATCH} error.
-     */
-    public InvalidMD5HashException() {
-        super(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_MD5_MATCH);
-    }
-
-    /**
-     * @param message of the error
-     * @param cause for the exception
-     */
     public InvalidMD5HashException(final String message, final Throwable cause) {
-        super(message, SpServerError.SP_ARTIFACT_UPLOAD_FAILED_MD5_MATCH, cause);
+        super(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_MD5_MATCH, message, cause);
     }
-
-    /**
-     * @param message of the error
-     */
-    public InvalidMD5HashException(final String message) {
-        super(message, SpServerError.SP_ARTIFACT_UPLOAD_FAILED_MD5_MATCH);
-    }
-
 }

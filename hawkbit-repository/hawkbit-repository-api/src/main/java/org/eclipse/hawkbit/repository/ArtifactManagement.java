@@ -15,6 +15,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.repository.artifact.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -44,7 +45,7 @@ public interface ArtifactManagement extends PermissionSupport {
      * @return uploaded {@link Artifact}
      * @throws EntityNotFoundException if given software module does not exist
      * @throws EntityAlreadyExistsException if File with that name already exists in the Software Module
-     * @throws org.eclipse.hawkbit.repository.artifact.exception.ArtifactUploadFailedException if upload fails with internal server errors
+     * @throws ArtifactUploadFailedException if upload fails with internal server errors
      * @throws InvalidMD5HashException if check against provided MD5 checksum failed
      * @throws InvalidSHA1HashException if check against provided SHA1 checksum failed
      * @throws ConstraintViolationException if {@link ArtifactUpload} contains invalid values

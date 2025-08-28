@@ -950,7 +950,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
                 amqpMessageHandlerService.setControllerManagement(mockedControllerManagement);
                 createAndSendThingCreated(controllerId);
                 verifyOneDeadLetterMessage();
-                assertThat(targetManagement.getByControllerId(controllerId)).isEmpty();
+                assertThat(targetManagement.findByControllerId(controllerId)).isEmpty();
             }
         } finally {
             amqpMessageHandlerService.setControllerManagement(controllerManagement);

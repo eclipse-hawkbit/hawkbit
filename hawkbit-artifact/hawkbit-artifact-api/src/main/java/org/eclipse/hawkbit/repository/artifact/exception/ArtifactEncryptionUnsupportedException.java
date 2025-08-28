@@ -1,11 +1,5 @@
 /**
- * Copyright (c) 2025 Contributors to the Eclipse Foundation
- *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * Copyright (c) 2025 Bosch Digital GmbH, Germany. All rights reserved.
  */
 package org.eclipse.hawkbit.repository.artifact.exception;
 
@@ -22,17 +16,7 @@ public final class ArtifactEncryptionUnsupportedException extends AbstractServer
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor.
-     */
-    public ArtifactEncryptionUnsupportedException() {
-        super(SpServerError.SP_ARTIFACT_ENCRYPTION_NOT_SUPPORTED);
-    }
-
-    /**
-     * @param message of the error
-     */
     public ArtifactEncryptionUnsupportedException(final String message) {
-        super(message, SpServerError.SP_ARTIFACT_ENCRYPTION_NOT_SUPPORTED);
+        super(SpServerError.SP_ARTIFACT_ENCRYPTION_NOT_SUPPORTED, message);
     }
 }

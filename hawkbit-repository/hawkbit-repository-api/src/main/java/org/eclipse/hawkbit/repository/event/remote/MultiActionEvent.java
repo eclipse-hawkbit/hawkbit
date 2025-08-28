@@ -18,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.ToString;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -46,6 +47,7 @@ public abstract class MultiActionEvent extends RemoteTenantAwareEvent implements
     }
 
     @Override
+    @NonNull
     public Iterator<String> iterator() {
         return controllerIds.iterator();
     }

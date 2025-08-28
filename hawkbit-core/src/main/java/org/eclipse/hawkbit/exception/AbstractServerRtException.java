@@ -28,73 +28,28 @@ public abstract class AbstractServerRtException extends RuntimeException {
     private final SpServerError error;
     private final transient Map<String, Object> info;
 
-    /**
-     * Parameterized constructor.
-     *
-     * @param error detail
-     */
     protected AbstractServerRtException(final SpServerError error) {
-        super(error.getMessage());
-        this.error = error;
-        this.info = null;
+        this(error, error.getMessage());
     }
 
-    /**
-     * Parameterized constructor.
-     *
-     * @param message custom error message
-     * @param error detail
-     */
-    protected AbstractServerRtException(final String message, final SpServerError error) {
-        this(message, error, (Map<String, Object>) null);
+    protected AbstractServerRtException(final SpServerError error, final String message) {
+        this(error, message, (Map<String, Object>) null);
     }
 
-    /**
-     * Parameterized constructor.
-     *
-     * @param message custom error message
-     * @param error detail
-     */
-    protected AbstractServerRtException(final String message, final SpServerError error, final Map<String, Object> info) {
-        super(message);
-        this.error = error;
-        this.info = info;
+    protected AbstractServerRtException(final SpServerError error, final String message, final Map<String, Object> info) {
+        this(error, message, info, null);
     }
 
-    /**
-     * Parameterized constructor.
-     *
-     * @param message custom error message
-     * @param error detail
-     * @param cause of the exception
-     */
-    protected AbstractServerRtException(final String message, final SpServerError error, final Throwable cause) {
-        super(message, cause);
-        this.error = error;
-        this.info = null;
+    protected AbstractServerRtException(final SpServerError error, final String message, final Throwable cause) {
+        this(error, message, null, cause);
     }
 
-    /**
-     * Parameterized constructor.
-     *
-     * @param error detail
-     * @param cause of the exception
-     */
     protected AbstractServerRtException(final SpServerError error, final Throwable cause) {
-        super(error.getMessage(), cause);
-        this.error = error;
-        this.info = null;
+        this(error, error.getMessage(), null, cause);
     }
 
-    /**
-     * Parameterized constructor.
-     *
-     * @param message custom error message
-     * @param error detail
-     * @param cause of the exception
-     */
     protected AbstractServerRtException(
-            final String message, final SpServerError error, final Throwable cause, final Map<String, Object> info) {
+            final SpServerError error, final String message, final Map<String, Object> info, final Throwable cause) {
         super(message, cause);
         this.error = error;
         this.info = info;

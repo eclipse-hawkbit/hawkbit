@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.artifact;
+package org.eclipse.hawkbit.repository.artifact.filesystem;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

@@ -334,8 +334,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(controllerManagement.findActionWithDetails(NOT_EXIST_IDL)).isNotPresent();
         assertThat(controllerManagement.findByControllerId(NOT_EXIST_ID)).isNotPresent();
         assertThat(controllerManagement.find(NOT_EXIST_IDL)).isNotPresent();
-        assertThat(controllerManagement.getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(),
-                module.getId())).isNotPresent();
+        assertThatExceptionOfType(EntityNotFoundException.class)
+                .isThrownBy(() -> controllerManagement.getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module.getId()));
 
         assertThat(controllerManagement.findActiveActionWithHighestWeight(NOT_EXIST_ID)).isNotPresent();
 
@@ -1107,13 +1107,11 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                         ActionStatusCreate.builder().actionId(action.getId()).status(Action.Status.RUNNING).build()));
 
         // nothing changed as "feedback after close" is disabled
-        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.IN_SYNC);
+        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
         assertThat(actionRepository.findById(action.getId()))
                 .hasValueSatisfying(a -> assertThat(a.getStatus()).isEqualTo(Status.FINISHED));
         assertThat(actionStatusRepository.count()).isEqualTo(3);
-        assertThat(controllerManagement.findActionStatusByAction(action.getId(), PAGE).getNumberOfElements())
-                .isEqualTo(3);
+        assertThat(controllerManagement.findActionStatusByAction(action.getId(), PAGE).getNumberOfElements()).isEqualTo(3);
     }
 
     /**
@@ -1139,7 +1137,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                         ActionStatusCreate.builder().actionId(action.getId()).status(Action.Status.RUNNING).build()));
 
         // nothing changed as "feedback after close" is disabled
-        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).get().getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
+        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
         // however, additional action status has been stored
         assertThat(actionStatusRepository.findAll(PAGE).getNumberOfElements()).isEqualTo(4);
         assertThat(controllerManagement.findActionStatusByAction(action.getId(), PAGE).getNumberOfElements()).isEqualTo(4);
@@ -1166,11 +1164,12 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         });
 
         // verify that audit information has not changed
-        final Target targetVerify = targetManagement.getByControllerId(controllerId).get();
-        assertThat(targetVerify.getCreatedBy()).isEqualTo(target.getCreatedBy());
-        assertThat(targetVerify.getCreatedAt()).isEqualTo(target.getCreatedAt());
-        assertThat(targetVerify.getLastModifiedBy()).isEqualTo(target.getLastModifiedBy());
-        assertThat(targetVerify.getLastModifiedAt()).isEqualTo(target.getLastModifiedAt());
+        assertThat(targetManagement.getByControllerId(controllerId)).satisfies(targetVerify -> {
+            assertThat(targetVerify.getCreatedBy()).isEqualTo(target.getCreatedBy());
+            assertThat(targetVerify.getCreatedAt()).isEqualTo(target.getCreatedAt());
+            assertThat(targetVerify.getLastModifiedBy()).isEqualTo(target.getLastModifiedBy());
+            assertThat(targetVerify.getLastModifiedAt()).isEqualTo(target.getLastModifiedAt());
+        });
     }
 
     /**
@@ -1443,31 +1442,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Verify that getting a single action using externalRef works
-     */
-    @Test
-    void getActionUsingSingleExternalRef() {
-
-        final String knownControllerId = "controllerId";
-        final String knownExternalRef = "externalRefId";
-        final DistributionSet knownDistributionSet = testdataFactory.createDistributionSet();
-
-        // GIVEN
-        testdataFactory.createTarget(knownControllerId);
-        final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(knownDistributionSet.getId(),
-                knownControllerId);
-        final Long actionId = getFirstAssignedActionId(assignmentResult);
-        controllerManagement.updateActionExternalRef(actionId, knownExternalRef);
-
-        // WHEN
-        final Optional<Action> foundAction = controllerManagement.getActionByExternalRef(knownExternalRef);
-
-        // THEN
-        assertThat(foundAction).isPresent();
-        assertThat(foundAction.get().getId()).isEqualTo(actionId);
-    }
-
-    /**
      * Verify that assigning version form target works
      */
     @Test
@@ -1728,9 +1702,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long dsId = testdataFactory.createDistributionSet().getId();
         testdataFactory.createTarget();
         assignDistributionSet(dsId, DEFAULT_CONTROLLER_ID);
-        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.PENDING);
-
+        assertThat(targetManagement.getByControllerId(DEFAULT_CONTROLLER_ID).getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
         return deploymentManagement.findActiveActionsByTarget(DEFAULT_CONTROLLER_ID, PAGE).getContent().get(0).getId();
     }
 
@@ -1738,7 +1710,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet(dsName);
         final Long dsId = ds.getId();
         assignDistributionSet(dsId, defaultControllerId, DOWNLOAD_ONLY);
-        assertThat(targetManagement.getByControllerId(defaultControllerId).get().getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
+        assertThat(targetManagement.getByControllerId(defaultControllerId).getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
 
         final Long id = deploymentManagement.findActiveActionsByTarget(defaultControllerId, PAGE).getContent().get(0).getId();
         assertThat(id).isNotNull();
@@ -1747,11 +1719,9 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     private Long assignDs(final Long dsId, final String defaultControllerId, final Action.ActionType actionType) {
         assignDistributionSet(dsId, defaultControllerId, actionType);
-        assertThat(targetManagement.getByControllerId(defaultControllerId).get().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.PENDING);
+        assertThat(targetManagement.getByControllerId(defaultControllerId).getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
 
-        final Long id = deploymentManagement.findActiveActionsByTarget(defaultControllerId, PAGE).getContent().get(0)
-                .getId();
+        final Long id = deploymentManagement.findActiveActionsByTarget(defaultControllerId, PAGE).getContent().get(0).getId();
         assertThat(id).isNotNull();
         return id;
     }
@@ -1809,7 +1779,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             final Long actionId, final String controllerId,
             final TargetUpdateStatus expectedTargetUpdateStatus, final Action.Status expectedActionActionStatus,
             final Action.Status expectedActionStatus, final boolean actionActive) {
-        final TargetUpdateStatus targetStatus = targetManagement.getByControllerId(controllerId).get().getUpdateStatus();
+        final TargetUpdateStatus targetStatus = targetManagement.getByControllerId(controllerId).getUpdateStatus();
         assertThat(targetStatus).isEqualTo(expectedTargetUpdateStatus);
         final Action action = deploymentManagement.findAction(actionId).get();
         assertThat(action.getStatus()).isEqualTo(expectedActionActionStatus);

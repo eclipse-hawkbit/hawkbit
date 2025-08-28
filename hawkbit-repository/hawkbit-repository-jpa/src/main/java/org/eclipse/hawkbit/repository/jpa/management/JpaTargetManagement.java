@@ -127,6 +127,27 @@ public class JpaTargetManagement
     }
 
     @Override
+    public Target getByControllerId(final String controllerId) {
+        return jpaRepository.findByControllerId(controllerId).map(Target.class::cast)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+    }
+
+    @Override
+    public Optional<Target> findByControllerId(final String controllerId) {
+        return jpaRepository.findByControllerId(controllerId).map(Target.class::cast);
+    }
+
+    @Override
+    public List<Target> findByControllerId(final Collection<String> controllerIDs) {
+        return Collections.unmodifiableList(jpaRepository.findAll(TargetSpecifications.byControllerIdWithAssignedDsInJoin(controllerIDs)));
+    }
+
+    @Override
+    public Target getWithDetails(final String controllerId, final String detailsKey) {
+        return jpaRepository.getWithDetailsByControllerId(controllerId, "Target." + detailsKey);
+    }
+
+    @Override
     public Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(
             final long distributionSetId, final String rsql, final Pageable pageable) {
         final DistributionSet jpaDistributionSet = distributionSetManagement.get(distributionSetId);
@@ -141,21 +162,6 @@ public class JpaTargetManagement
                                 TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId))),
                         pageable)
                 .map(Target.class::cast);
-    }
-
-    @Override
-    public List<Target> getByControllerId(final Collection<String> controllerIDs) {
-        return Collections.unmodifiableList(jpaRepository.findAll(TargetSpecifications.byControllerIdWithAssignedDsInJoin(controllerIDs)));
-    }
-
-    @Override
-    public Optional<Target> getByControllerId(final String controllerId) {
-        return jpaRepository.findByControllerId(controllerId).map(Target.class::cast);
-    }
-
-    @Override
-    public Target getWithDetails(final String controllerId, final String detailsKey) {
-        return jpaRepository.getWithDetailsByControllerId(controllerId, "Target." + detailsKey);
     }
 
     @Override

@@ -69,7 +69,7 @@ class TotalTargetCountStatusTest {
     }
 
     /**
-     * DownloadOnly actions should be displayed as FINISHED when they have ActionStatus.DOWNLOADED
+     * DownloadOnly actions should be displayed as FINISHED when they have ActionStatus#DOWNLOADED
      */
     @Test
     void shouldCorrectlyMapActionStatusesInDownloadOnlyCase() {

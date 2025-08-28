@@ -40,8 +40,7 @@ public class CacheAutoConfiguration {
     @ConditionalOnMissingBean
     @Primary
     TenancyCacheManager cacheManager(
-            @Qualifier("directCacheManager") final CacheManager directCacheManager,
-            final TenantAware tenantAware) {
+            @Qualifier("directCacheManager") final CacheManager directCacheManager, final TenantAware tenantAware) {
         return new TenantAwareCacheManager(directCacheManager, tenantAware);
     }
 
@@ -63,9 +62,7 @@ public class CacheAutoConfiguration {
             final CaffeineCacheManager cacheManager = new CaffeineCacheManager();
 
             if (cacheProperties.getTtl() > 0) {
-                final Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder()
-                        .expireAfterWrite(cacheProperties.getTtl(), cacheProperties.getTtlUnit());
-                cacheManager.setCaffeine(cacheBuilder);
+                cacheManager.setCaffeine(Caffeine.newBuilder().expireAfterWrite(cacheProperties.getTtl(), cacheProperties.getTtlUnit()));
             }
 
             return cacheManager;

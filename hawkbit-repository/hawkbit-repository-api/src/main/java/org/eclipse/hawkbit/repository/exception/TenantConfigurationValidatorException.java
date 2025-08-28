@@ -28,12 +28,7 @@ public class TenantConfigurationValidatorException extends AbstractServerRtExcep
 
     private static final SpServerError THIS_ERROR = SpServerError.SP_CONFIGURATION_VALUE_INVALID;
 
-    /**
-     * Parameterized constructor.
-     *
-     * @param message of the exception
-     */
     public TenantConfigurationValidatorException(final String message) {
-        super(message, THIS_ERROR);
+        super(THIS_ERROR, message);
     }
 }

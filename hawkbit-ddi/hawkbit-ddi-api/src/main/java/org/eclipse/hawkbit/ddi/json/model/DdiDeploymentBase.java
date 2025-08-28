@@ -54,10 +54,10 @@ import org.springframework.hateoas.RepresentationModel;
                     "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/binary.tgz"
                   },
                   "download-http" : {
-                    "href" : "http://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/binary.tgz"
+                    "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/binary.tgz"
                   },
                   "md5sum-http" : {
-                    "href" : "http://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/binary.tgz.MD5SUM"
+                    "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/binary.tgz.MD5SUM"
                   },
                   "md5sum" : {
                     "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/binary.tgz.MD5SUM"
@@ -76,10 +76,10 @@ import org.springframework.hateoas.RepresentationModel;
                     "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/file.signature"
                   },
                   "download-http" : {
-                    "href" : "http://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/file.signature"
+                    "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/file.signature"
                   },
                   "md5sum-http" : {
-                    "href" : "http://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/file.signature.MD5SUM"
+                    "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/file.signature.MD5SUM"
                   },
                   "md5sum" : {
                     "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/23/filename/file.signature.MD5SUM"
@@ -103,10 +103,10 @@ import org.springframework.hateoas.RepresentationModel;
                     "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/binary.tgz"
                   },
                   "download-http" : {
-                    "href" : "http://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/binary.tgz"
+                    "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/binary.tgz"
                   },
                   "md5sum-http" : {
-                    "href" : "http://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/binary.tgz.MD5SUM"
+                    "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/binary.tgz.MD5SUM"
                   },
                   "md5sum" : {
                     "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/binary.tgz.MD5SUM"
@@ -125,10 +125,10 @@ import org.springframework.hateoas.RepresentationModel;
                     "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/file.signature"
                   },
                   "download-http" : {
-                    "href" : "http://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/file.signature"
+                    "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/file.signature"
                   },
                   "md5sum-http" : {
-                    "href" : "http://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/file.signature.MD5SUM"
+                    "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/file.signature.MD5SUM"
                   },
                   "md5sum" : {
                     "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/24/filename/file.signature.MD5SUM"
@@ -152,10 +152,10 @@ import org.springframework.hateoas.RepresentationModel;
                     "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/binary.tgz"
                   },
                   "download-http" : {
-                    "href" : "http://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/binary.tgz"
+                    "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/binary.tgz"
                   },
                   "md5sum-http" : {
-                    "href" : "http://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/binary.tgz.MD5SUM"
+                    "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/binary.tgz.MD5SUM"
                   },
                   "md5sum" : {
                     "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/binary.tgz.MD5SUM"
@@ -174,10 +174,10 @@ import org.springframework.hateoas.RepresentationModel;
                     "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/file.signature"
                   },
                   "download-http" : {
-                    "href" : "http://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/file.signature"
+                    "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/file.signature"
                   },
                   "md5sum-http" : {
-                    "href" : "http://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/file.signature.MD5SUM"
+                    "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/file.signature.MD5SUM"
                   },
                   "md5sum" : {
                     "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/22/filename/file.signature.MD5SUM"

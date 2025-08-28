@@ -10,12 +10,12 @@
 package org.eclipse.hawkbit.repository.exception;
 
 import java.io.Serial;
-import java.lang.annotation.Target;
 
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.Target;
 
 /**
  * the {@link SoftwareModuleNotAssignedToTargetException} is thrown when a {@link SoftwareModule} is requested as part of an {@link Action}
@@ -28,14 +28,8 @@ public class SoftwareModuleNotAssignedToTargetException extends EntityNotFoundEx
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor
-     *
-     * @param moduleId that is not assigned to given {@link Target}
-     * @param controllerId of the {@link Target} where given {@link SoftwareModule} is not part of
-     */
     public SoftwareModuleNotAssignedToTargetException(final Long moduleId, final String controllerId) {
-        super("No assignment found for " + SoftwareModule.class.getSimpleName() + " with id {" + moduleId + "} to "
-                + Target.class.getSimpleName() + " with id {" + controllerId + "}.");
+        super("No assignment found for " + SoftwareModule.class.getSimpleName() + " with id {" + moduleId + "} to " +
+                Target.class.getSimpleName() + " with id {" + controllerId + "}.");
     }
 }

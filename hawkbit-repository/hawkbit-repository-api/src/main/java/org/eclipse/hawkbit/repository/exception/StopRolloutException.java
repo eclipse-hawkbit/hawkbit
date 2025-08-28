@@ -27,31 +27,7 @@ public class StopRolloutException extends AbstractServerRtException {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Creates a new StopRolloutException with
-     * {@link SpServerError#SP_STOP_ROLLOUT_FAILED} error.
-     */
-    public StopRolloutException() {
-        super(SpServerError.SP_STOP_ROLLOUT_FAILED);
-    }
-
-    /**
-     * Creates a new StopRolloutException with
-     * {@link SpServerError#SP_STOP_ROLLOUT_FAILED} error.
-     *
-     * @param cause for the exception
-     */
-    public StopRolloutException(final Throwable cause) {
-        super(SpServerError.SP_STOP_ROLLOUT_FAILED, cause);
-    }
-
-    /**
-     * Creates a new StopRolloutException with
-     * {@link SpServerError#SP_STOP_ROLLOUT_FAILED} error.
-     *
-     * @param message of the error
-     */
     public StopRolloutException(final String message) {
-        super(message, SpServerError.SP_STOP_ROLLOUT_FAILED);
+        super(SpServerError.SP_STOP_ROLLOUT_FAILED, message);
     }
 }

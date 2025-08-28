@@ -233,15 +233,15 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
         assignDistributionSet(testDs2.getId(), "4711");
         implicitLock(testDs2);
 
-        Target target = targetManagement.getByControllerId("4711").orElseThrow(IllegalStateException::new);
+        final Target target = targetManagement.getByControllerId("4711");
         // read data
         assertThat(target.getLastTargetQuery()).as("Target query is not work").isGreaterThanOrEqualTo(current);
 
-        final DistributionSet assignedDs = deploymentManagement.getAssignedDistributionSet("4711")
+        final DistributionSet assignedDs = deploymentManagement.findAssignedDistributionSet("4711")
                 .orElseThrow(NoSuchElementException::new);
         assertThat(assignedDs).as("Assigned ds size is wrong").isEqualTo(testDs2);
 
-        final DistributionSet installedDs = deploymentManagement.getInstalledDistributionSet("4711")
+        final DistributionSet installedDs = deploymentManagement.findInstalledDistributionSet("4711")
                 .orElseThrow(NoSuchElementException::new);
         assertThat(installedDs).as("Installed ds is wrong").isEqualTo(testDs1);
     }
@@ -266,17 +266,13 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
         final List<? extends TargetTag> t2Tags = testdataFactory.createTargetTags(noT2Tags, "tag2");
         t2Tags.forEach(tag -> targetManagement.assignTag(Collections.singletonList(t2.getControllerId()), tag.getId()));
 
-        final Target t11 = targetManagement.getByControllerId(t1.getControllerId())
-                .orElseThrow(IllegalStateException::new);
-        assertThat(getTargetTags(t11.getControllerId())).as("Tag size is wrong")
-                .hasSize(noT1Tags).containsAll(t1Tags);
+        final Target t11 = targetManagement.getByControllerId(t1.getControllerId());
+        assertThat(getTargetTags(t11.getControllerId())).as("Tag size is wrong").hasSize(noT1Tags).containsAll(t1Tags);
         assertThat(getTargetTags(t11.getControllerId())).as("Tag size is wrong")
                 .hasSize(noT1Tags).doesNotContain(toArray(t2Tags, TargetTag.class));
 
-        final Target t21 = targetManagement.getByControllerId(t2.getControllerId())
-                .orElseThrow(IllegalStateException::new);
-        assertThat(getTargetTags(t21.getControllerId())).as("Tag size is wrong")
-                .hasSize(noT2Tags).containsAll(t2Tags);
+        final Target t21 = targetManagement.getByControllerId(t2.getControllerId());
+        assertThat(getTargetTags(t21.getControllerId())).as("Tag size is wrong").hasSize(noT2Tags).containsAll(t2Tags);
         assertThat(getTargetTags(t21.getControllerId())).as("Tag size is wrong")
                 .hasSize(noT2Tags).doesNotContain(toArray(t1Tags, TargetTag.class));
     }
@@ -445,8 +441,7 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
         controllerManagement.findOrRegisterTargetIfItDoesNotExist(knownTargetControllerId, new URI("http://127.0.0.1"));
 
         SecurityContextSwitch.getAs(SecurityContextSwitch.withUser("bumlux", "READ_TARGET"), () -> {
-            final Target findTargetByControllerID = targetManagement.getByControllerId(knownTargetControllerId)
-                    .orElseThrow(IllegalStateException::new);
+            final Target findTargetByControllerID = targetManagement.getByControllerId(knownTargetControllerId);
             assertThat(findTargetByControllerID).isNotNull();
             assertThat(findTargetByControllerID.getPollStatus()).isNotNull();
             return null;
@@ -485,8 +480,7 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
         assertThat(target.isRequestControllerAttributes()).isFalse();
 
         targetManagement.update(Update.builder().id(target.getId()).requestControllerAttributes(true).build());
-        final Target updated = targetManagement.getByControllerId(knownControllerId).orElseThrow();
-        assertThat(updated.isRequestControllerAttributes()).isTrue();
+        assertThat(targetManagement.getByControllerId(knownControllerId).isRequestControllerAttributes()).isTrue();
     }
 
     /**
@@ -1093,7 +1087,7 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
 
     private void checkTargetHasNotTags(final Iterable<Target> targets, final TargetTag... tags) {
         for (final Target tl : targets) {
-            targetManagement.getByControllerId(tl.getControllerId()).orElseThrow();
+            assertThat(targetManagement.getByControllerId(tl.getControllerId())).isNotNull();
             for (final Tag tag : tags) {
                 for (final Tag tt : getTargetTags(tl.getControllerId())) {
                     if (tag.getName().equals(tt.getName())) {

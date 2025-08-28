@@ -163,7 +163,7 @@ public final class MgmtSoftwareModuleMapper {
                         systemManagement.getTenantMetadata().getId(), null, null,
                         new URLPlaceholder.SoftwareData(artifact.getSoftwareModule().getId(), artifact.getFilename(),
                                 artifact.getId(), artifact.getSha1Hash())), ApiType.MGMT, null);
-        urls.forEach(entry -> response.add(Link.of(entry.getRef()).withRel(entry.getRel()).expand()));
+        urls.forEach(entry -> response.add(Link.of(entry.ref()).withRel(entry.rel()).expand()));
     }
 
     private SoftwareModuleManagement.Create fromRequest(

@@ -28,7 +28,7 @@ public final class FileStreamingFailedException extends AbstractServerRtExceptio
      * @param message of the error
      */
     public FileStreamingFailedException(final String message) {
-        super(message, SpServerError.SP_ARTIFACT_LOAD_FAILED);
+        super(SpServerError.SP_ARTIFACT_LOAD_FAILED, message);
     }
 
     /**
@@ -38,6 +38,6 @@ public final class FileStreamingFailedException extends AbstractServerRtExceptio
      * @param cause for the exception
      */
     public FileStreamingFailedException(final String message, final Throwable cause) {
-        super(message, SpServerError.SP_ARTIFACT_LOAD_FAILED, cause);
+        super(SpServerError.SP_ARTIFACT_LOAD_FAILED, message, cause);
     }
 }

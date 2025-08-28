@@ -39,8 +39,7 @@ public interface BaseEntity extends Serializable, Identifiable<Long> {
     String getLastModifiedBy();
 
     /**
-     * @return time in {@link TimeUnit#MILLISECONDS} when the {@link BaseEntity}
-     *         was last time changed.
+     * @return time in {@link TimeUnit#MILLISECONDS} when the {@link BaseEntity} was last time changed.
      */
     long getLastModifiedAt();
 

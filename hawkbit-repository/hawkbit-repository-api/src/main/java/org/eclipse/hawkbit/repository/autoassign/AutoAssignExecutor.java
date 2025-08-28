@@ -10,15 +10,13 @@
 package org.eclipse.hawkbit.repository.autoassign;
 
 /**
- * An interface declaration which contains the check for the auto assignment
- * logic.
+ * An interface declaration which contains the check for the auto assignment logic.
  */
 public interface AutoAssignExecutor {
 
     /**
-     * Checks all target filter queries with an auto assign distribution set and
-     * triggers the check and assignment to targets that don't have the design DS
-     * yet
+     * Checks all target filter queries with an auto assign distribution set and triggers the check and assignment to targets that don't have
+     * the design DS yet
      */
     void checkAllTargets();
 

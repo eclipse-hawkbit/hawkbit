@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.artifact;
+package org.eclipse.hawkbit.repository.artifact.filesystem;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -19,6 +19,7 @@ import java.util.Objects;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.EqualsAndHashCode;
+import org.eclipse.hawkbit.repository.artifact.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.artifact.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
 
@@ -46,7 +47,7 @@ public class ArtifactFilesystem extends AbstractDbArtifact {
         try {
             return new BufferedInputStream(new FileInputStream(file));
         } catch (final FileNotFoundException e) {
-            throw new ArtifactFileNotFoundException(e);
+            throw new ArtifactBinaryNotFoundException("Artifact file not found!");
         }
     }
 }

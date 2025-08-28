@@ -10,6 +10,6 @@
 package org.eclipse.hawkbit.repository.event.entity;
 
 /**
- * Marker interface to indicate event has updated an entity.
+ * Marker interface to indicate an event for an updated entity.
  */
 public interface EntityUpdatedEvent extends EntityIdEvent {}

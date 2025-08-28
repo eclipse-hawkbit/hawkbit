@@ -1,16 +1,11 @@
 /**
- * Copyright (c) 2025 Contributors to the Eclipse Foundation
- *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * Copyright (c) 2025 Bosch Digital GmbH, Germany. All rights reserved.
  */
 package org.eclipse.hawkbit.repository.artifact.urlhandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -47,8 +42,8 @@ class URLPlaceholderTest {
     void differentObjectShouldNotBeEqual() {
         final URLPlaceholder.SoftwareData softwareData2 = new URLPlaceholder.SoftwareData(2L, "file.txt", 123L, "someHash123");
         final URLPlaceholder placeholder2 = new URLPlaceholder("SuperCorp", 123L, "Super-2", 2L, softwareData2);
-        final URLPlaceholder placeholderWithOtherSoftwareData = new URLPlaceholder(placeholder.getTenant(),
-                placeholder.getTenantId(), placeholder.getControllerId(), placeholder.getTargetId(), softwareData2);
+        final URLPlaceholder placeholderWithOtherSoftwareData = new URLPlaceholder(placeholder.tenant(),
+                placeholder.tenantId(), placeholder.controllerId(), placeholder.targetId(), softwareData2);
         assertThat(placeholder.equals(placeholder2)).isFalse();
         assertThat(placeholder2.equals(placeholder)).isFalse();
         assertThat(softwareData.equals(softwareData2)).isFalse();
@@ -61,24 +56,10 @@ class URLPlaceholderTest {
      */
     @Test
     void differentObjectsWithSamePropertiesShouldBeEqual() {
-        final URLPlaceholder placeholderWithSameProperties = new URLPlaceholder(placeholder.getTenant(), placeholder.getTenantId(),
-                placeholder.getControllerId(), placeholder.getTargetId(), softwareData);
+        final URLPlaceholder placeholderWithSameProperties = new URLPlaceholder(placeholder.tenant(), placeholder.tenantId(),
+                placeholder.controllerId(), placeholder.targetId(), softwareData);
         assertThat(placeholder).isEqualTo(placeholderWithSameProperties);
         assertThat(placeholderWithSameProperties).isEqualTo(placeholder);
-    }
-
-    /**
-     * Should not equal null
-     */
-    @Test
-    // Exception squid:S5785 - JUnit assertTrue/assertFalse should be simplified to
-    // the corresponding dedicated assertion
-    // Need to test the equals method and need to bypass magic logic in utility
-    // classes
-    @SuppressWarnings({ "squid:S5838" })
-    void shouldNotEqualNull() {
-        assertThat(placeholder.equals(null)).isFalse();
-        assertThat(softwareData.equals(null)).isFalse();
     }
 
     /**
@@ -86,8 +67,8 @@ class URLPlaceholderTest {
      */
     @Test
     void hashCodeShouldNotChange() {
-        final URLPlaceholder placeholderWithSameProperties = new URLPlaceholder(placeholder.getTenant(), placeholder.getTenantId(),
-                placeholder.getControllerId(), placeholder.getTargetId(), softwareData);
+        final URLPlaceholder placeholderWithSameProperties = new URLPlaceholder(placeholder.tenant(), placeholder.tenantId(),
+                placeholder.controllerId(), placeholder.targetId(), softwareData);
         assertThat(placeholder).hasSameHashCodeAs(placeholder).hasSameHashCodeAs(placeholderWithSameProperties);
     }
 }

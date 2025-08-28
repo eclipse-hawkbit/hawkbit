@@ -28,39 +28,7 @@ public class TargetTypeInUseException extends AbstractServerRtException {
 
     private static final SpServerError THIS_ERROR = SpServerError.SP_TARGET_TYPE_IN_USE;
 
-    /**
-     * Default constructor.
-     */
-    public TargetTypeInUseException() {
-        super(THIS_ERROR);
-    }
-
-    /**
-     * Parameterized constructor.
-     *
-     * @param cause of the exception
-     */
-    public TargetTypeInUseException(final Throwable cause) {
-        super(THIS_ERROR, cause);
-    }
-
-    /**
-     * Parameterized constructor.
-     *
-     * @param message of the exception
-     * @param cause of the exception
-     */
-    public TargetTypeInUseException(final String message, final Throwable cause) {
-        super(message, THIS_ERROR, cause);
-    }
-
-    /**
-     * Parameterized constructor.
-     *
-     * @param message of the exception
-     */
     public TargetTypeInUseException(final String message) {
-        super(message, THIS_ERROR);
+        super(THIS_ERROR, message);
     }
 }
-

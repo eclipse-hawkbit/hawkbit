@@ -16,8 +16,7 @@ import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 
 /**
- * Defines the {@link RemoteEntityEvent} for creation of a new
- * {@link DistributionSetTag}.
+ * Defines the {@link RemoteEntityEvent} for creation of a new {@link DistributionSetTag}.
  */
 @NoArgsConstructor // for serialization libs like jackson
 public class DistributionSetTagCreatedEvent extends RemoteEntityEvent<DistributionSetTag> implements EntityCreatedEvent {

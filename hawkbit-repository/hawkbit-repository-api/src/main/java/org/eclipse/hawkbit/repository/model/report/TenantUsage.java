@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.report.model;
+package org.eclipse.hawkbit.repository.model.report;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,11 +28,6 @@ public class TenantUsage {
     private long overallArtifactVolumeInBytes;
     private Map<String, String> usageData;
 
-    /**
-     * Constructor.
-     *
-     * @param tenantName name of the tenant
-     */
     public TenantUsage(final String tenantName) {
         this.tenantName = tenantName;
     }
@@ -41,13 +36,6 @@ public class TenantUsage {
         return Collections.unmodifiableMap(getLazyUsageData());
     }
 
-    /**
-     * Add a key and value as usage data to the system usage stats.
-     *
-     * @param key the key to set
-     * @param value the value to set
-     * @return tenant stats element with new usage added
-     */
     public TenantUsage addUsageData(final String key, final String value) {
         getLazyUsageData().put(key, value);
         return this;

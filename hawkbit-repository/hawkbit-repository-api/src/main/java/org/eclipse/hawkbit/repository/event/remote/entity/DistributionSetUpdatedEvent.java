@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import java.io.Serial;
 
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
@@ -20,6 +21,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
  * Defines the remote event for updating a {@link DistributionSet}.
  */
 @NoArgsConstructor // for serialization libs like jackson
+@Data
 @EqualsAndHashCode(callSuper = true)
 public class DistributionSetUpdatedEvent extends RemoteEntityEvent<DistributionSet> implements EntityUpdatedEvent {
 
@@ -37,12 +39,5 @@ public class DistributionSetUpdatedEvent extends RemoteEntityEvent<DistributionS
     public DistributionSetUpdatedEvent(final DistributionSet distributionSet, final boolean complete) {
         super(distributionSet);
         this.complete = complete;
-    }
-
-    /**
-     * @return <code>true</code> if {@link DistributionSet} is after the update {@link DistributionSet#isComplete()}
-     */
-    public boolean isComplete() {
-        return complete;
     }
 }

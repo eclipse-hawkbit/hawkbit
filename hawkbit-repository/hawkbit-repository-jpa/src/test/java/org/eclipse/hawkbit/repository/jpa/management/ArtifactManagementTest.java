@@ -34,12 +34,12 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
-import org.eclipse.hawkbit.repository.exception.FileSizeQuotaExceededException;
+import org.eclipse.hawkbit.repository.artifact.exception.FileSizeQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA256HashException;
-import org.eclipse.hawkbit.repository.exception.StorageQuotaExceededException;
+import org.eclipse.hawkbit.repository.artifact.exception.StorageQuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.RandomGeneratedInputStream;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -134,7 +134,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
                     HashGeneratorUtils.generateSHA1(randomBytes), sm.getId(), sm.isEncrypted());
             final DbArtifactHash hash = dbArtifact.getHashes();
             // md5 and sha256 are kept in local artifact db and should not be provided by "load", test only sha1
-            assertThat(hash.getSha1()).isEqualTo(HashGeneratorUtils.generateSHA1(randomBytes));
+            assertThat(hash.sha1()).isEqualTo(HashGeneratorUtils.generateSHA1(randomBytes));
 
             assertThat(artifactRepository.findAll()).hasSize(4);
             assertThat(softwareModuleRepository.findAll()).hasSize(3);
@@ -163,7 +163,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
      * Verifies that the quota specifying the maximum number of artifacts per software module is enforced.
      */
     @Test
-    void createArtifactsUntilQuotaIsExceeded() throws IOException {
+    void failIfMaxArtifactsPerSoftwareModuleQuotaIsExceeded() throws IOException {
         // create a software module
         final long smId = softwareModuleRepository.save(new JpaSoftwareModule(osType, "sm1", "1.0")).getId();
 
@@ -186,11 +186,8 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         createArtifactForSoftwareModule("fileXYZ", smId, artifactSize);
     }
 
-    /**
-     * Verifies that the quota specifying the maximum artifact storage is enforced (across software modules).
-     */
     @Test
-    void createArtifactsUntilStorageQuotaIsExceeded() throws IOException {
+    void failIfMaxArtifactStorageQuotaIsExceeded() throws IOException {
         // create as many small artifacts as possible w/o violating the storage quota
         final long maxBytes = quotaManagement.getMaxArtifactStorage();
         final List<Long> artifactIds = new ArrayList<>();
@@ -434,7 +431,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
             final ArtifactUpload artifactUploadWithInvalidSha1 = new ArtifactUpload(
                     inputStream, sm.getId(), "test-file",
-                    artifactHashes.getMd5(), "sha1", artifactHashes.getSha256(), false, null, testData.length);
+                    artifactHashes.md5(), "sha1", artifactHashes.sha256(), false, null, testData.length);
             assertThatExceptionOfType(InvalidSHA1HashException.class)
                     .isThrownBy(() -> artifactManagement.create(artifactUploadWithInvalidSha1));
         }
@@ -442,7 +439,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
             final ArtifactUpload artifactUploadWithInvalidMd5 = new ArtifactUpload(
                     inputStream, sm.getId(), "test-file",
-                    "md5", artifactHashes.getSha1(), artifactHashes.getSha256(), false, null, testData.length);
+                    "md5", artifactHashes.sha1(), artifactHashes.sha256(), false, null, testData.length);
             assertThatExceptionOfType(InvalidMD5HashException.class)
                     .isThrownBy(() -> artifactManagement.create(artifactUploadWithInvalidMd5));
         }
@@ -450,7 +447,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
             final ArtifactUpload artifactUploadWithInvalidSha256 = new ArtifactUpload(
                     inputStream, sm.getId(), "test-file",
-                    artifactHashes.getMd5(), artifactHashes.getSha1(), "sha256", false, null, testData.length);
+                    artifactHashes.md5(), artifactHashes.sha1(), "sha256", false, null, testData.length);
             assertThatExceptionOfType(InvalidSHA256HashException.class)
                     .isThrownBy(() -> artifactManagement.create(artifactUploadWithInvalidSha256));
         }
@@ -469,14 +466,14 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
             final ArtifactUpload artifactUpload = new ArtifactUpload(
                     inputStream, sm.getId(), "test-file",
-                    artifactHashes.getMd5(), artifactHashes.getSha1(), artifactHashes.getSha256(), false, null, testData.length);
+                    artifactHashes.md5(), artifactHashes.sha1(), artifactHashes.sha256(), false, null, testData.length);
             final Artifact createdArtifact = artifactManagement.create(artifactUpload);
-            assertThat(createdArtifact.getSha1Hash()).isEqualTo(artifactHashes.getSha1());
-            assertThat(createdArtifact.getMd5Hash()).isEqualTo(artifactHashes.getMd5());
-            assertThat(createdArtifact.getSha256Hash()).isEqualTo(artifactHashes.getSha256());
+            assertThat(createdArtifact.getSha1Hash()).isEqualTo(artifactHashes.sha1());
+            assertThat(createdArtifact.getMd5Hash()).isEqualTo(artifactHashes.md5());
+            assertThat(createdArtifact.getSha256Hash()).isEqualTo(artifactHashes.sha256());
         }
 
-        final DbArtifact dbArtifact = artifactManagement.loadArtifactBinary(artifactHashes.getSha1(), sm.getId(), sm.isEncrypted());
+        final DbArtifact dbArtifact = artifactManagement.loadArtifactBinary(artifactHashes.sha1(), sm.getId(), sm.isEncrypted());
         assertThat(dbArtifact).isNotNull();
     }
 
@@ -494,20 +491,20 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
             final ArtifactUpload artifactUpload = new ArtifactUpload(
                     inputStream, smOs.getId(), "test-file",
-                    artifactHashes.getMd5(), artifactHashes.getSha1(), artifactHashes.getSha256(), false, null, testData.length);
+                    artifactHashes.md5(), artifactHashes.sha1(), artifactHashes.sha256(), false, null, testData.length);
             final Artifact artifact = artifactManagement.create(artifactUpload);
             assertThat(artifact).isNotNull();
         }
-        final DbArtifact dbArtifact = artifactManagement.loadArtifactBinary(artifactHashes.getSha1(), smOs.getId(), smOs.isEncrypted());
+        final DbArtifact dbArtifact = artifactManagement.loadArtifactBinary(artifactHashes.sha1(), smOs.getId(), smOs.isEncrypted());
         assertThat(dbArtifact).isNotNull();
 
         try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
             final ArtifactUpload existingArtifactUpload = new ArtifactUpload(
                     inputStream, smApp.getId(), "test-file", false, testData.length);
             final Artifact createdArtifact = artifactManagement.create(existingArtifactUpload);
-            assertThat(createdArtifact.getSha1Hash()).isEqualTo(artifactHashes.getSha1());
-            assertThat(createdArtifact.getMd5Hash()).isEqualTo(artifactHashes.getMd5());
-            assertThat(createdArtifact.getSha256Hash()).isEqualTo(artifactHashes.getSha256());
+            assertThat(createdArtifact.getSha1Hash()).isEqualTo(artifactHashes.sha1());
+            assertThat(createdArtifact.getMd5Hash()).isEqualTo(artifactHashes.md5());
+            assertThat(createdArtifact.getSha256Hash()).isEqualTo(artifactHashes.sha256());
         }
     }
 

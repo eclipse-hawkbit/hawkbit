@@ -18,8 +18,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.im.authentication.Hierarchy;
-import org.eclipse.hawkbit.repository.artifact.ArtifactFilesystemProperties;
-import org.eclipse.hawkbit.repository.artifact.ArtifactFilesystemRepository;
+import org.eclipse.hawkbit.repository.artifact.filesystem.ArtifactFilesystemProperties;
+import org.eclipse.hawkbit.repository.artifact.filesystem.ArtifactFilesystemRepository;
 import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
 import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandlerProperties;
 import org.eclipse.hawkbit.repository.artifact.urlhandler.PropertyBasedArtifactUrlHandler;

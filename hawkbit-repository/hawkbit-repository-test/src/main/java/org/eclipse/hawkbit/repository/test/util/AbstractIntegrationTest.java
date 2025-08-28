@@ -29,6 +29,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Random;
 
+import jakarta.validation.constraints.NotEmpty;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.awaitility.Awaitility;
@@ -519,6 +521,11 @@ public abstract class AbstractIntegrationTest {
 
     protected List<? extends Target> findByUpdateStatus(final TargetUpdateStatus status, final Pageable pageable) {
         return targetManagement.findAll(pageable).stream().filter(target -> status.equals(target.getUpdateStatus())).toList();
+    }
+
+    protected TargetType findTargetTypeByName(@NotEmpty String name) {
+        return targetTypeManagement.findByRsql("name==" + name, UNPAGED).stream().findAny()
+                .orElseThrow(() -> new EntityNotFoundException(TargetType.class, name));
     }
 
     @SafeVarargs

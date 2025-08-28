@@ -351,7 +351,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @throws EntityNotFoundException if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<DistributionSet> getAssignedDistributionSet(@NotEmpty String controllerId);
+    Optional<DistributionSet> findAssignedDistributionSet(@NotEmpty String controllerId);
 
     /**
      * Returns {@link DistributionSet} that is installed on given {@link Target}.
@@ -361,7 +361,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @throws EntityNotFoundException if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<DistributionSet> getInstalledDistributionSet(@NotEmpty String controllerId);
+    Optional<DistributionSet> findInstalledDistributionSet(@NotEmpty String controllerId);
 
     /**
      * Deletes actions which match one of the given action status and which have not been modified since the given (absolute) time-stamp.

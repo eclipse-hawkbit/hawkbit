@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.report.model;
+package org.eclipse.hawkbit.repository.model.report;
 
 import lombok.Data;
 
@@ -23,16 +23,8 @@ public class SystemUsageReport {
     private final long overallActions;
     private final long overallTenants;
 
-    /**
-     * Constructor.
-     *
-     * @param overallTargets of the system
-     * @param overallArtifacts of the system
-     * @param overallActions of the system
-     * @param overallArtifactVolumeInBytes of the system
-     * @param overallTenants of the system
-     */
-    public SystemUsageReport(final long overallTargets, final long overallArtifacts, final long overallActions,
+    public SystemUsageReport(
+            final long overallTargets, final long overallArtifacts, final long overallActions,
             final long overallArtifactVolumeInBytes, final long overallTenants) {
         this.overallTargets = overallTargets;
         this.overallArtifacts = overallArtifacts;

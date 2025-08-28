@@ -1,11 +1,5 @@
 /**
- * Copyright (c) 2025 Contributors to the Eclipse Foundation
- *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * Copyright (c) 2025 Bosch Digital GmbH, Germany. All rights reserved.
  */
 package org.eclipse.hawkbit.repository.artifact;
 
@@ -110,7 +104,7 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
     // java:S1066 - more readable with separate "if" statements
     // java:S4042 - delete reason is not needed
     @SuppressWarnings({ "java:S1066", "java:S4042" })
-    static File createTempFile(final boolean directory) {
+    public static File createTempFile(final boolean directory) {
         try {
             final File file = (directory
                     ? Files.createTempDirectory(TEMP_FILE_PREFIX)
@@ -144,16 +138,16 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
             return;
         }
 
-        if (areHashesNotMatching(providedHashes.getSha1(), sha1Hash16)) {
-            throw new HashNotMatchException("The given sha1 hash " + providedHashes.getSha1() +
+        if (areHashesNotMatching(providedHashes.sha1(), sha1Hash16)) {
+            throw new HashNotMatchException("The given sha1 hash " + providedHashes.sha1() +
                     " does not match the calculated sha1 hash " + sha1Hash16, HashNotMatchException.SHA1);
         }
-        if (areHashesNotMatching(providedHashes.getMd5(), md5Hash16)) {
-            throw new HashNotMatchException("The given md5 hash " + providedHashes.getMd5() +
+        if (areHashesNotMatching(providedHashes.md5(), md5Hash16)) {
+            throw new HashNotMatchException("The given md5 hash " + providedHashes.md5() +
                     " does not match the calculated md5 hash " + md5Hash16, HashNotMatchException.MD5);
         }
-        if (areHashesNotMatching(providedHashes.getSha256(), sha256Hash16)) {
-            throw new HashNotMatchException("The given sha256 hash " + providedHashes.getSha256() +
+        if (areHashesNotMatching(providedHashes.sha256(), sha256Hash16)) {
+            throw new HashNotMatchException("The given sha256 hash " + providedHashes.sha256() +
                     " does not match the calculated sha256 hash " + sha256Hash16, HashNotMatchException.SHA256);
         }
     }
@@ -169,9 +163,9 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
 
     private AbstractDbArtifact addMissingHashes(final AbstractDbArtifact existing,
             final String calculatedSha1, final String calculatedMd5, final String calculatedSha256) {
-        final String sha1 = checkEmpty(existing.getHashes().getSha1(), calculatedSha1);
-        final String md5 = checkEmpty(existing.getHashes().getMd5(), calculatedMd5);
-        final String sha256 = checkEmpty(existing.getHashes().getSha256(), calculatedSha256);
+        final String sha1 = checkEmpty(existing.getHashes().sha1(), calculatedSha1);
+        final String md5 = checkEmpty(existing.getHashes().md5(), calculatedMd5);
+        final String sha256 = checkEmpty(existing.getHashes().sha256(), calculatedSha256);
 
         existing.setHashes(new DbArtifactHash(sha1, md5, sha256));
         return existing;

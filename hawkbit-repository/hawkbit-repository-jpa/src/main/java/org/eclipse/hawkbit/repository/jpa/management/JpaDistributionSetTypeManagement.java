@@ -95,11 +95,6 @@ public class JpaDistributionSetTypeManagement
     }
 
     @Override
-    public Optional<JpaDistributionSetType> findByName(final String name) {
-        return jpaRepository.findOne(DistributionSetTypeSpecification.byName(name));
-    }
-
-    @Override
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
     public JpaDistributionSetType assignOptionalSoftwareModuleTypes(final long id, final Collection<Long> softwareModulesTypeIds) {

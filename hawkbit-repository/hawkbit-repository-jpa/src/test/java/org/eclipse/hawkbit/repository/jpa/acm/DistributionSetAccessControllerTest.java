@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.acm;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_DISTRIBUTION_SET;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_REPOSITORY;
@@ -79,8 +80,8 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
             assertThat(distributionSetManagement.find(hiddenId)).isEmpty();
 
             // verify distributionSetManagement#getWithDetails
-            assertThat(distributionSetManagement.getWithDetails(permittedActionId)).isPresent();
-            assertThat(distributionSetManagement.getWithDetails(hiddenId)).isEmpty();
+            assertThat(distributionSetManagement.getWithDetails(permittedActionId)).isNotNull();
+            assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> distributionSetManagement.getWithDetails(hiddenId));
 
             // verify distributionSetManagement#get
             final List<Long> allActionIds = Arrays.asList(permittedActionId, hiddenId);
@@ -88,8 +89,11 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
                     .as("Fail if request hidden.").isInstanceOf(EntityNotFoundException.class);
 
             // verify distributionSetManagement#getByNameAndVersion
-            assertThat(distributionSetManagement.findByNameAndVersion(permitted.getName(), permitted.getVersion())).isPresent();
-            assertThat(distributionSetManagement.findByNameAndVersion(hidden.getName(), hidden.getVersion())).isEmpty();
+            assertThat(distributionSetManagement.findByNameAndVersion(permitted.getName(), permitted.getVersion())).isNotNull();
+            final String hiddenName = hidden.getName();
+            final String hiddenVersion = hidden.getVersion();
+            assertThatExceptionOfType(EntityNotFoundException.class)
+                    .isThrownBy(() -> distributionSetManagement.findByNameAndVersion(hiddenName, hiddenVersion));
         });
     }
 

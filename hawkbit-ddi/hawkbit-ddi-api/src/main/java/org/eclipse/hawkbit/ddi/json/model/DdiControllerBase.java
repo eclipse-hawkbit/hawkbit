@@ -32,7 +32,7 @@ import org.springframework.hateoas.RepresentationModel;
         **_links**: Actions that the server has for the target
         * **deploymentBase** - Detailed deployment operation
         * **installedBase** - Detailed operation of last successfully finished action
-        * **configData** - Link which is provided whenever the provisioning target or device is supposed to push its configuration data (aka. "controller attributes") to the server. Only shown for the initial configuration, after a successful update action, or if requested explicitly (e.g. via the management UI)    
+        * **configData** - Link which is provided whenever the provisioning target or device is supposed to push its configuration data (aka. "controller attributes") to the server. Only shown for the initial configuration, after a successful update action, or if requested explicitly (e.g. via the management UI)
         """,
         example = """
                 {

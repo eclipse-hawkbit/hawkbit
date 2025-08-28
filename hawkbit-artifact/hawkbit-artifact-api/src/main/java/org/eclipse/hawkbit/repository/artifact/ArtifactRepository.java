@@ -1,11 +1,5 @@
 /**
- * Copyright (c) 2025 Contributors to the Eclipse Foundation
- *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * Copyright (c) 2025 Bosch Digital GmbH, Germany. All rights reserved.
  */
 package org.eclipse.hawkbit.repository.artifact;
 
@@ -14,6 +8,7 @@ import java.io.InputStream;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.repository.artifact.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.artifact.exception.ArtifactStoreException;
 import org.eclipse.hawkbit.repository.artifact.exception.HashNotMatchException;
 import org.eclipse.hawkbit.repository.artifact.model.AbstractDbArtifact;
@@ -42,7 +37,7 @@ public interface ArtifactRepository {
             String contentType, DbArtifactHash hash);
 
     /**
-     * Retrieves a {@link AbstractDbArtifact} from the store by its SHA1 hash. Throws {@link org.eclipse.hawkbit.repository.artifact.exception.ArtifactBinaryNotFoundException} if not found.
+     * Retrieves a {@link AbstractDbArtifact} from the store by its SHA1 hash. Throws {@link ArtifactBinaryNotFoundException} if not found.
      *
      * @param tenant the tenant to store the artifact
      * @param sha1Hash the sha1-hash of the file to lookup.
@@ -50,7 +45,6 @@ public interface ArtifactRepository {
      * @throws UnsupportedOperationException if implementation does not support the operation
      */
     AbstractDbArtifact getBySha1(@NotEmpty String tenant, @NotEmpty String sha1Hash);
-
 
     /**
      * Checks if an artifact exists for a given tenant by its sha1 hash

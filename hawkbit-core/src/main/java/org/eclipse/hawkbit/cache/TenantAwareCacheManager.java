@@ -11,10 +11,13 @@ package org.eclipse.hawkbit.cache;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 
+import lombok.NonNull;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.lang.Nullable;
 
 /**
  * A {@link CacheManager} delegator which wraps the {@link CacheManager#getCache(String)} and {@link CacheManager#getCacheNames()}
@@ -40,8 +43,9 @@ public class TenantAwareCacheManager implements TenancyCacheManager {
         this.tenantAware = tenantAware;
     }
 
+    @Nullable
     @Override
-    public Cache getCache(final String name) {
+    public Cache getCache(@NonNull final String name) {
         final String currentTenant = tenantAware.getCurrentTenant();
         if (isTenantInvalid(currentTenant)) {
             return null;
@@ -50,6 +54,7 @@ public class TenantAwareCacheManager implements TenancyCacheManager {
         return delegate.getCache(buildKey(currentTenant.toUpperCase(), name));
     }
 
+    @NonNull
     @Override
     public Collection<String> getCacheNames() {
         final String currentTenant = tenantAware.getCurrentTenant();
@@ -67,7 +72,8 @@ public class TenantAwareCacheManager implements TenancyCacheManager {
 
     @Override
     public void evictCaches(final String tenant) {
-        getCacheNames(tenant).forEach(cacheName -> delegate.getCache(buildKey(tenant, cacheName)).clear());
+        getCacheNames(tenant).forEach(
+                cacheName -> Optional.ofNullable(delegate.getCache(buildKey(tenant, cacheName))).ifPresent(Cache::clear));
     }
 
     /**

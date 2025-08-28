@@ -12,31 +12,14 @@ package org.eclipse.hawkbit.tenancy;
 import java.io.Serial;
 import java.io.Serializable;
 
-import lombok.Getter;
-import lombok.ToString;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 
 /**
  * An authentication details object {@link AbstractAuthenticationToken#getDetails()} which is stored in the
  * spring security authentication token details to transport the principal and tenant in the security context session.
  */
-@Getter
-@ToString
-public class TenantAwareAuthenticationDetails implements Serializable {
+public record TenantAwareAuthenticationDetails(String tenant, boolean controller) implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
-
-    private final String tenant;
-    private final boolean controller;
-
-    /**
-     * @param tenant the current tenant
-     * @param controller boolean flag to indicate if this authenticated token is a controller authentication. {@code true} in case of
-     *         authenticated controller otherwise {@code false}
-     */
-    public TenantAwareAuthenticationDetails(final String tenant, final boolean controller) {
-        this.tenant = tenant;
-        this.controller = controller;
-    }
 }

@@ -26,46 +26,19 @@ public class RSQLParameterUnsupportedFieldException extends AbstractServerRtExce
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Creates a new RSQLParameterUnsupportedFieldException with
-     * {@link SpServerError#SP_REST_RSQL_PARAM_INVALID_FIELD} error.
-     */
     public RSQLParameterUnsupportedFieldException() {
         super(SpServerError.SP_REST_RSQL_PARAM_INVALID_FIELD);
     }
 
-    /**
-     * Creates a new RSQLParameterUnsupportedFieldException with
-     * {@link SpServerError#SP_REST_RSQL_PARAM_INVALID_FIELD} error.
-     *
-     * @param message the message of the exception
-     */
     public RSQLParameterUnsupportedFieldException(final String message) {
-        super(message, SpServerError.SP_REST_RSQL_PARAM_INVALID_FIELD);
+        super(SpServerError.SP_REST_RSQL_PARAM_INVALID_FIELD, message);
     }
 
-    /**
-     * Creates a new RSQLParameterUnsupportedFieldException with
-     * {@link SpServerError#SP_REST_RSQL_PARAM_INVALID_FIELD} error.
-     *
-     * @param cause the cause (which is saved for later retrieval by the
-     *         getCause() method). (A null value is permitted, and indicates
-     *         that the cause is nonexistent or unknown.)
-     */
     public RSQLParameterUnsupportedFieldException(final Throwable cause) {
         super(SpServerError.SP_REST_RSQL_PARAM_INVALID_FIELD, cause);
     }
 
-    /**
-     * Creates a new RSQLParameterUnsupportedFieldException with
-     * {@link SpServerError#SP_REST_RSQL_PARAM_INVALID_FIELD} error.
-     *
-     * @param message the message of the exception
-     * @param cause the cause (which is saved for later retrieval by the
-     *         getCause() method). (A null value is permitted, and indicates
-     *         that the cause is nonexistent or unknown.)
-     */
     public RSQLParameterUnsupportedFieldException(final String message, final Throwable cause) {
-        super(message, SpServerError.SP_REST_RSQL_PARAM_INVALID_FIELD, cause);
+        super(SpServerError.SP_REST_RSQL_PARAM_INVALID_FIELD, message, cause);
     }
 }

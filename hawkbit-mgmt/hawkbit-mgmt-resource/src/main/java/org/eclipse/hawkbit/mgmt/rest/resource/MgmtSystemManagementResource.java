@@ -20,8 +20,8 @@ import org.eclipse.hawkbit.mgmt.json.model.systemmanagement.MgmtSystemStatistics
 import org.eclipse.hawkbit.mgmt.json.model.systemmanagement.MgmtSystemTenantServiceUsage;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSystemManagementRestApi;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.report.model.SystemUsageReportWithTenants;
-import org.eclipse.hawkbit.repository.report.model.TenantUsage;
+import org.eclipse.hawkbit.repository.model.report.SystemUsageReportWithTenants;
+import org.eclipse.hawkbit.repository.model.report.TenantUsage;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
