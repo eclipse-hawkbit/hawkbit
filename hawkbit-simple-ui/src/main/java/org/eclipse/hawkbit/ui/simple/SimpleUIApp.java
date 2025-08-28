@@ -58,8 +58,8 @@ public class SimpleUIApp implements AppShellConfigurator {
 
     private static final Function<OAuth2TokenManager, RequestInterceptor> AUTHORIZATION = oAuth2TokenManager -> requestTemplate -> {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (oAuth2TokenManager != null && authentication instanceof OAuth2AuthenticationToken oAuth2AuthenticationToken) {
-            String bearerToken = oAuth2TokenManager.getToken(oAuth2AuthenticationToken);
+        if (authentication instanceof OAuth2AuthenticationToken authenticationToken) {
+            String bearerToken = oAuth2TokenManager.getToken(authenticationToken);
             requestTemplate.header("Authorization", "Bearer " + bearerToken);
         } else {
             requestTemplate.header(
@@ -108,16 +108,14 @@ public class SimpleUIApp implements AppShellConfigurator {
     @Bean
     OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(final HawkbitMgmtClient hawkbitClient) {
         final OidcUserService delegate = new OidcUserService();
-        return userRequest -> {
+        return (userRequest) -> {
             OidcUser oidcUser = delegate.loadUser(userRequest);
-
             final OAuth2AuthenticationToken tempToken = new OAuth2AuthenticationToken(
                     oidcUser,
                     emptyList(),
                     userRequest.getClientRegistration().getRegistrationId()
             );
-            final List<SimpleGrantedAuthority> grantedAuthorities =
-                    getGrantedAuthorities(hawkbitClient, tempToken);
+            final List<SimpleGrantedAuthority> grantedAuthorities = getGrantedAuthorities(hawkbitClient, tempToken);
             return new DefaultOidcUser(
                     grantedAuthorities,
                     oidcUser.getIdToken(),
