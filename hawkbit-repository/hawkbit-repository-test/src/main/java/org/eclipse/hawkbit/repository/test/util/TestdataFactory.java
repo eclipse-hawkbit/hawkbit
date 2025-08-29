@@ -486,7 +486,7 @@ public class TestdataFactory {
      */
     public Artifact createArtifact(final String artifactData, final Long moduleId, final String filename) {
         final InputStream stubInputStream = IOUtils.toInputStream(artifactData, StandardCharsets.UTF_8);
-        return artifactManagement.create(new ArtifactUpload(stubInputStream, moduleId, filename, false, artifactData.length()));
+        return artifactManagement.create(new ArtifactUpload(stubInputStream, null, artifactData.length(), null, moduleId, filename, false));
     }
 
     /**
@@ -500,7 +500,7 @@ public class TestdataFactory {
      */
     public Artifact createArtifact(final byte[] artifactData, final Long moduleId, final String filename, final int fileSize) {
         return artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(artifactData), moduleId, filename, false, fileSize));
+                new ArtifactUpload(new ByteArrayInputStream(artifactData), null, fileSize, null, moduleId, filename, false));
     }
 
     /**

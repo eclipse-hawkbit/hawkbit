@@ -18,13 +18,13 @@ import java.util.regex.Pattern;
 
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.RepositoryProperties;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
+import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -265,9 +265,10 @@ public class DmfApiConfiguration {
     @ConditionalOnMissingBean(AmqpMessageDispatcherService.class)
     AmqpMessageDispatcherService amqpMessageDispatcherService(
             final RabbitTemplate rabbitTemplate,
-            final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
+            final AmqpMessageSenderService amqpSenderService, final ArtifactUrlResolver artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
-            final TargetManagement<? extends Target> targetManagement, final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
+            final TargetManagement<? extends Target> targetManagement,
+            final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement, final DeploymentManagement deploymentManagement,
             final TenantConfigurationManagement tenantConfigurationManagement, final RepositoryProperties repositoryProperties) {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,

@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 import jakarta.validation.constraints.NotNull;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
-import org.eclipse.hawkbit.cache.TenancyCacheManager;
-import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
+import org.eclipse.hawkbit.tenancy.cache.TenantCacheManager;
+import org.eclipse.hawkbit.tenancy.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutStoppedEvent;
@@ -41,7 +41,7 @@ public class RolloutStatusCache {
     private static final String CACHE_GR_NAME = "RolloutGroupStatus";
     private static final long DEFAULT_SIZE = 50_000;
 
-    private final TenancyCacheManager cacheManager;
+    private final TenantCacheManager cacheManager;
     private final TenantAware tenantAware;
 
     /**

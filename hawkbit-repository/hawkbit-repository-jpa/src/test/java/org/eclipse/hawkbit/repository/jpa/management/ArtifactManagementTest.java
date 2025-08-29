@@ -26,20 +26,20 @@ import java.util.concurrent.Callable;
 import jakarta.validation.ConstraintViolationException;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.hawkbit.im.authentication.SpRole;
-import org.eclipse.hawkbit.repository.artifact.exception.ArtifactBinaryNotFoundException;
-import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
-import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
+import org.eclipse.hawkbit.artifact.exception.ArtifactBinaryNotFoundException;
+import org.eclipse.hawkbit.artifact.exception.FileSizeQuotaExceededException;
+import org.eclipse.hawkbit.artifact.exception.StorageQuotaExceededException;
+import org.eclipse.hawkbit.artifact.model.ArtifactHashes;
+import org.eclipse.hawkbit.artifact.model.ArtifactStream;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
-import org.eclipse.hawkbit.repository.artifact.exception.FileSizeQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
-import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
-import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
-import org.eclipse.hawkbit.repository.exception.InvalidSHA256HashException;
-import org.eclipse.hawkbit.repository.artifact.exception.StorageQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.InvalidMd5HashException;
+import org.eclipse.hawkbit.repository.exception.InvalidSha1HashException;
+import org.eclipse.hawkbit.repository.exception.InvalidSha256HashException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.RandomGeneratedInputStream;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -48,7 +48,6 @@ import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
-import org.eclipse.hawkbit.repository.test.util.HashGeneratorUtils;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
@@ -72,13 +71,9 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         final long moduleId = module.getId();
         final boolean encrypted = module.isEncrypted();
         assertThatExceptionOfType(ArtifactBinaryNotFoundException.class)
-                .isThrownBy(() -> artifactManagement.loadArtifactBinary(NOT_EXIST_ID, moduleId, encrypted));
+                .isThrownBy(() -> artifactManagement.getArtifactStream(NOT_EXIST_ID, moduleId, encrypted));
     }
 
-    /**
-     * Verifies that management queries react as specfied on calls for non existing entities by means of
-     * throwing EntityNotFoundException.
-     */
     @Test
     @ExpectEvents()
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
@@ -87,12 +82,12 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(
                 () -> artifactManagement.create(new ArtifactUpload(
                         IOUtils.toInputStream(artifactData, "UTF-8"),
-                        NOT_EXIST_IDL, "xxx", null, null, null, false, null, artifactSize)), "SoftwareModule");
+                        null, artifactSize, null, NOT_EXIST_IDL, "xxx", false)), "SoftwareModule");
 
         verifyThrownExceptionBy(
                 () -> artifactManagement.create(new ArtifactUpload(
                         IOUtils.toInputStream(artifactData, "UTF-8"),
-                        NOT_EXIST_IDL, "xxx", null, null, null, false, null, artifactSize)), "SoftwareModule");
+                        null, artifactSize, null, NOT_EXIST_IDL, "xxx", false)), "SoftwareModule");
 
         verifyThrownExceptionBy(() -> artifactManagement.delete(NOT_EXIST_IDL), "Artifact");
     }
@@ -130,16 +125,10 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             assertThat(artifact1).isNotEqualTo(artifact2);
             assertThat(artifact1.getSha1Hash()).isEqualTo(artifact2.getSha1Hash());
 
-            final DbArtifact dbArtifact = artifactManagement.loadArtifactBinary(
-                    HashGeneratorUtils.generateSHA1(randomBytes), sm.getId(), sm.isEncrypted());
-            final DbArtifactHash hash = dbArtifact.getHashes();
-            // md5 and sha256 are kept in local artifact db and should not be provided by "load", test only sha1
-            assertThat(hash.sha1()).isEqualTo(HashGeneratorUtils.generateSHA1(randomBytes));
-
             assertThat(artifactRepository.findAll()).hasSize(4);
             assertThat(softwareModuleRepository.findAll()).hasSize(3);
 
-            assertThat(softwareModuleManagement.find(sm.getId()).get().getArtifacts()).hasSize(3);
+            assertThat(softwareModuleManagement.get(sm.getId()).getArtifacts()).hasSize(3);
         }
     }
 
@@ -154,9 +143,9 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         final long smID = softwareModuleRepository.save(new JpaSoftwareModule(osType, "smIllegalFilenameTest", "1.0")).getId();
         final ArtifactUpload artifactUpload = new ArtifactUpload(
-                IOUtils.toInputStream(artifactData, "UTF-8"), smID, illegalFilename, false, artifactSize);
+                IOUtils.toInputStream(artifactData, "UTF-8"), null, artifactSize, null, smID, illegalFilename, false);
         assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(() -> artifactManagement.create(artifactUpload));
-        assertThat(softwareModuleManagement.find(smID).get().getArtifacts()).isEmpty();
+        assertThat(softwareModuleManagement.get(smID).getArtifacts()).isEmpty();
     }
 
     /**
@@ -287,7 +276,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Test the deletion of an artifact metadata where the binary is still linked to another metadata element. 
+     * Test the deletion of an artifact metadata where the binary is still linked to another metadata element.
      * The expected result is that the metadata is deleted but the binary kept.
      */
     @Test
@@ -340,7 +329,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             final Artifact artifact2 = createArtifactForSoftwareModule("file2", sm2.getId(), artifactSize, inputStream2);
 
             assertEqualFileContents(
-                    artifactManagement.loadArtifactBinary(artifact2.getSha1Hash(), sm2.getId(), sm2.isEncrypted()), randomBytes);
+                    artifactManagement.getArtifactStream(artifact2.getSha1Hash(), sm2.getId(), sm2.isEncrypted()), randomBytes);
 
             assertThat(artifactRepository.findAll()).hasSize(2);
 
@@ -402,7 +391,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             final SoftwareModule smOs = testdataFactory.createSoftwareModuleOs();
             final Artifact artifact = createArtifactForSoftwareModule("file1", smOs.getId(), artifactSize, input);
             assertEqualFileContents(
-                    artifactManagement.loadArtifactBinary(artifact.getSha1Hash(), smOs.getId(), smOs.isEncrypted()), randomBytes);
+                    artifactManagement.getArtifactStream(artifact.getSha1Hash(), smOs.getId(), smOs.isEncrypted()), randomBytes);
         }
     }
 
@@ -412,10 +401,10 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @WithUser(allSpPermissions = true, removeFromAllPermission = {
             SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT, SpRole.CONTROLLER_ROLE, SpRole.CONTROLLER_ROLE_ANONYMOUS })
-    void loadArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
+    void getArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
         assertThatExceptionOfType(InsufficientPermissionException.class)
                 .as("Should not have worked with missing permission.")
-                .isThrownBy(() -> artifactManagement.loadArtifactBinary("123", 1, false));
+                .isThrownBy(() -> artifactManagement.getArtifactStream("123", 1, false));
     }
 
     /**
@@ -426,29 +415,29 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final byte[] testData = randomBytes(100);
-        final DbArtifactHash artifactHashes = calcHashes(testData);
+        final ArtifactHashes artifactHashes = calcHashes(testData);
 
         try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
             final ArtifactUpload artifactUploadWithInvalidSha1 = new ArtifactUpload(
-                    inputStream, sm.getId(), "test-file",
-                    artifactHashes.md5(), "sha1", artifactHashes.sha256(), false, null, testData.length);
-            assertThatExceptionOfType(InvalidSHA1HashException.class)
+                    inputStream, null, testData.length, new ArtifactHashes("sha1", artifactHashes.md5(), artifactHashes.sha256()),
+                    sm.getId(), "test-file", false);
+            assertThatExceptionOfType(InvalidSha1HashException.class)
                     .isThrownBy(() -> artifactManagement.create(artifactUploadWithInvalidSha1));
         }
 
         try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
             final ArtifactUpload artifactUploadWithInvalidMd5 = new ArtifactUpload(
-                    inputStream, sm.getId(), "test-file",
-                    "md5", artifactHashes.sha1(), artifactHashes.sha256(), false, null, testData.length);
-            assertThatExceptionOfType(InvalidMD5HashException.class)
+                    inputStream, null, testData.length, new ArtifactHashes(artifactHashes.sha1(), "md5", artifactHashes.sha256()),
+                    sm.getId(), "test-file", false);
+            assertThatExceptionOfType(InvalidMd5HashException.class)
                     .isThrownBy(() -> artifactManagement.create(artifactUploadWithInvalidMd5));
         }
 
         try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
             final ArtifactUpload artifactUploadWithInvalidSha256 = new ArtifactUpload(
-                    inputStream, sm.getId(), "test-file",
-                    artifactHashes.md5(), artifactHashes.sha1(), "sha256", false, null, testData.length);
-            assertThatExceptionOfType(InvalidSHA256HashException.class)
+                    inputStream, null, testData.length, new ArtifactHashes(artifactHashes.sha1(), artifactHashes.md5(), "sha256"),
+                    sm.getId(), "test-file", false);
+            assertThatExceptionOfType(InvalidSha256HashException.class)
                     .isThrownBy(() -> artifactManagement.create(artifactUploadWithInvalidSha256));
         }
     }
@@ -461,20 +450,20 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final byte[] testData = randomBytes(100);
-        final DbArtifactHash artifactHashes = calcHashes(testData);
+        final ArtifactHashes artifactHashes = calcHashes(testData);
 
         try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
             final ArtifactUpload artifactUpload = new ArtifactUpload(
-                    inputStream, sm.getId(), "test-file",
-                    artifactHashes.md5(), artifactHashes.sha1(), artifactHashes.sha256(), false, null, testData.length);
+                    inputStream, null, testData.length,
+                    new ArtifactHashes(artifactHashes.sha1(), artifactHashes.md5(), artifactHashes.sha256()),
+                    sm.getId(), "test-file", false);
             final Artifact createdArtifact = artifactManagement.create(artifactUpload);
             assertThat(createdArtifact.getSha1Hash()).isEqualTo(artifactHashes.sha1());
             assertThat(createdArtifact.getMd5Hash()).isEqualTo(artifactHashes.md5());
             assertThat(createdArtifact.getSha256Hash()).isEqualTo(artifactHashes.sha256());
         }
 
-        final DbArtifact dbArtifact = artifactManagement.loadArtifactBinary(artifactHashes.sha1(), sm.getId(), sm.isEncrypted());
-        assertThat(dbArtifact).isNotNull();
+        assertThat(artifactManagement.getArtifactStream(artifactHashes.sha1(), sm.getId(), sm.isEncrypted())).isNotNull();
     }
 
     /**
@@ -486,21 +475,22 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule smApp = testdataFactory.createSoftwareModuleApp();
 
         final byte[] testData = randomBytes(100);
-        final DbArtifactHash artifactHashes = calcHashes(testData);
+        final ArtifactHashes artifactHashes = calcHashes(testData);
 
         try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
             final ArtifactUpload artifactUpload = new ArtifactUpload(
-                    inputStream, smOs.getId(), "test-file",
-                    artifactHashes.md5(), artifactHashes.sha1(), artifactHashes.sha256(), false, null, testData.length);
+                    inputStream, null, testData.length,
+                    new ArtifactHashes(artifactHashes.sha1(), artifactHashes.md5(), artifactHashes.sha256()),
+                    smOs.getId(), "test-file", false);
             final Artifact artifact = artifactManagement.create(artifactUpload);
             assertThat(artifact).isNotNull();
         }
-        final DbArtifact dbArtifact = artifactManagement.loadArtifactBinary(artifactHashes.sha1(), smOs.getId(), smOs.isEncrypted());
-        assertThat(dbArtifact).isNotNull();
+
+        assertThat(artifactManagement.getArtifactStream(artifactHashes.sha1(), smOs.getId(), smOs.isEncrypted())).isNotNull();
 
         try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
             final ArtifactUpload existingArtifactUpload = new ArtifactUpload(
-                    inputStream, smApp.getId(), "test-file", false, testData.length);
+                    inputStream, null, testData.length, null, smApp.getId(), "test-file", false);
             final Artifact createdArtifact = artifactManagement.create(existingArtifactUpload);
             assertThat(createdArtifact.getSha1Hash()).isEqualTo(artifactHashes.sha1());
             assertThat(createdArtifact.getMd5Hash()).isEqualTo(artifactHashes.md5());
@@ -508,12 +498,12 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         }
     }
 
-    private DbArtifactHash calcHashes(final byte[] input) throws NoSuchAlgorithmException {
+    private ArtifactHashes calcHashes(final byte[] input) throws NoSuchAlgorithmException {
         final String sha1Hash = toBase16Hash("SHA1", input);
         final String md5Hash = toBase16Hash("MD5", input);
         final String sha256Hash = toBase16Hash("SHA-256", input);
 
-        return new DbArtifactHash(sha1Hash, md5Hash, sha256Hash);
+        return new ArtifactHashes(sha1Hash, md5Hash, sha256Hash);
     }
 
     private String toBase16Hash(final String algorithm, final byte[] input) throws NoSuchAlgorithmException {
@@ -531,7 +521,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     private Artifact createArtifactForSoftwareModule(
             final String filename, final long moduleId, final int artifactSize, final InputStream inputStream) {
-        return artifactManagement.create(new ArtifactUpload(inputStream, moduleId, filename, false, artifactSize));
+        return artifactManagement.create(new ArtifactUpload(inputStream, null, artifactSize, null, moduleId, filename, false));
     }
 
     private <T> T runAsTenant(final String tenant, final Callable<T> callable) throws Exception {
@@ -551,8 +541,8 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(runAsTenant(tenant, () -> artifactRepository.findAll())).hasSize(count);
     }
 
-    private void assertEqualFileContents(final DbArtifact artifact, final byte[] randomBytes) throws IOException {
-        try (final InputStream inputStream = artifact.getFileInputStream()) {
+    private void assertEqualFileContents(final ArtifactStream artifact, final byte[] randomBytes) throws IOException {
+        try (final InputStream inputStream = artifact) {
             assertTrue(
                     IOUtils.contentEquals(new ByteArrayInputStream(randomBytes), inputStream),
                     "The stored binary matches the given binary");

@@ -31,13 +31,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import com.jayway.jsonpath.JsonPath;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.hawkbit.artifact.exception.ArtifactBinaryNotFoundException;
+import org.eclipse.hawkbit.artifact.exception.FileSizeQuotaExceededException;
+import org.eclipse.hawkbit.artifact.exception.StorageQuotaExceededException;
+import org.eclipse.hawkbit.artifact.model.ArtifactStream;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
@@ -47,13 +50,9 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
 import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.artifact.exception.ArtifactBinaryNotFoundException;
-import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
-import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.artifact.exception.FileSizeQuotaExceededException;
-import org.eclipse.hawkbit.repository.artifact.exception.StorageQuotaExceededException;
+import org.eclipse.hawkbit.repository.jpa.repository.LocalArtifactRepository;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -93,6 +92,8 @@ import org.springframework.web.bind.annotation.RestController;
         "hawkbit.server.security.dos.maxArtifactSize=100000",
         "hawkbit.server.security.dos.maxArtifactStorage=500000" })
 class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTest {
+
+    private LocalArtifactRepository localArtifactRepository;
 
     @BeforeEach
     public void assertPreparationOfRepo() {
@@ -145,7 +146,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         final byte[] random = randomBytes(5);
 
-        artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, 0));
+        artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random), null, 0, null, sm.getId(), "file1", false));
 
         mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts", sm.getId())
                         .param("representation", MgmtRepresentationMode.FULL.toString())
@@ -515,8 +516,10 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("$.providedFilename", equalTo("customFilename")))
                 .andExpect(status().isCreated())
                 .andDo(result -> {
-                    final MgmtArtifact mgmtArtifact = OBJECT_MAPPER.readerFor(MgmtArtifact.class).readValue(result.getResponse().getContentAsString());
-                    assertThat(artifactManagement.loadArtifactBinary(mgmtArtifact.getHashes().getSha1(), sm.getId(), sm.isEncrypted())).isNotNull();
+                    final MgmtArtifact mgmtArtifact = OBJECT_MAPPER.readerFor(MgmtArtifact.class)
+                            .readValue(result.getResponse().getContentAsString());
+                    assertThat(artifactManagement.getArtifactStream(mgmtArtifact.getHashes().getSha1(), sm.getId(),
+                            sm.isEncrypted())).isNotNull();
                 });
     }
 
@@ -687,9 +690,9 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final byte[] random = randomBytes(artifactSize);
 
         final Artifact artifact = artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+                new ArtifactUpload(new ByteArrayInputStream(random), null, artifactSize, null, sm.getId(), "file1", false));
         final Artifact artifact2 = artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file2", false, artifactSize));
+                new ArtifactUpload(new ByteArrayInputStream(random), null, artifactSize, null, sm.getId(), "file2", false));
 
         downloadAndVerify(sm, random, artifact);
         downloadAndVerify(sm, random, artifact2);
@@ -707,7 +710,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final byte[] random = randomBytes(artifactSize);
 
         final Artifact artifact = artifactManagement
-                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), null, artifactSize, null, sm.getId(), "file1", false));
 
         // perform test
         mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId())
@@ -722,11 +725,9 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("$.hashes.sha256", equalTo(artifact.getSha256Hash())))
                 .andExpect(jsonPath("$.providedFilename", equalTo("file1")))
                 .andExpect(jsonPath("$._links.download.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/%s/artifacts/%s/download"
-                                .formatted(sm.getId(), artifact.getId()))))
+                        equalTo("http://localhost/rest/v1/softwaremodules/%s/artifacts/%s/download".formatted(sm.getId(), artifact.getId()))))
                 .andExpect(jsonPath("$._links.self.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/%s/artifacts/%s".formatted(sm.getId(),
-                                artifact.getId()))));
+                        equalTo("http://localhost/rest/v1/softwaremodules/%s/artifacts/%s".formatted(sm.getId(), artifact.getId()))));
     }
 
     /**
@@ -742,7 +743,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final byte[] random = randomBytes(artifactSize);
 
         final Artifact artifact = artifactManagement
-                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), null, artifactSize, null, sm.getId(), "file1", false));
 
         // perform test
         mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId())
@@ -806,9 +807,9 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final byte[] random = randomBytes(artifactSize);
 
         final Artifact artifact = artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+                new ArtifactUpload(new ByteArrayInputStream(random), null, artifactSize, null, sm.getId(), "file1", false));
         final Artifact artifact2 = artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file2", false, artifactSize));
+                new ArtifactUpload(new ByteArrayInputStream(random), null, artifactSize, null, sm.getId(), "file2", false));
 
         mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -844,9 +845,9 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final byte[] random = randomBytes(artifactSize);
 
         final Artifact artifact = artifactManagement
-                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), null, artifactSize, null, sm.getId(), "file1", false));
         final Artifact artifact2 = artifactManagement
-                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file2", false, artifactSize));
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), null, artifactSize, null, sm.getId(), "file2", false));
 
         mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId())
                         .param("representation", MgmtRepresentationMode.FULL.toString())
@@ -910,7 +911,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         // SM does not exist
         artifactManagement
-                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), null, artifactSize, null, sm.getId(), "file1", false));
         mvc.perform(get("/rest/v1/softwaremodules/1234567890/artifacts"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
@@ -954,10 +955,10 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final long moduleId = sm.getId();
         final byte[] random = randomBytes(artifactSize);
         final Artifact artifact = artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(random), moduleId, "file1", false, artifactSize));
+                new ArtifactUpload(new ByteArrayInputStream(random), null, artifactSize, null, moduleId, "file1", false));
         final byte[] random2 = randomBytes(artifactSize);
         artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(random2), moduleId, "file2", false, artifactSize));
+                new ArtifactUpload(new ByteArrayInputStream(random2), null, artifactSize, null, moduleId, "file2", false));
 
         // check repo before delete
         assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(1);
@@ -974,7 +975,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final boolean encrypted = sm.isEncrypted();
         final String sha1Hash = artifact.getSha1Hash();
         assertThatExceptionOfType(ArtifactBinaryNotFoundException.class)
-                .isThrownBy(() -> artifactManagement.loadArtifactBinary(sha1Hash, moduleId, encrypted));
+                .isThrownBy(() -> artifactManagement.getArtifactStream(sha1Hash, moduleId, encrypted));
         assertThat(softwareModuleManagement.find(moduleId).get().getArtifacts())
                 .as("After delete artifact should available for marked as deleted sm's").hasSize(1);
     }
@@ -1344,14 +1345,14 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final byte[] random = randomBytes(artifactSize);
 
         final Artifact artifact = artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+                new ArtifactUpload(new ByteArrayInputStream(random), null, artifactSize, null, sm.getId(), "file1", false));
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("Softwaremoudle size is wrong").hasSize(1);
 
         final Long smId = sm.getId();
         final String sha1Hash = artifact.getSha1Hash();
         final boolean encrypted = sm.isEncrypted();
-        assertThat(artifactManagement.loadArtifactBinary(sha1Hash, smId, encrypted)).isNotNull();
+        assertThat(artifactManagement.getArtifactStream(sha1Hash, smId, encrypted)).isNotNull();
 
         mvc.perform(delete("/rest/v1/softwaremodules/{smId}", sm.getId()))
                 .andDo(MockMvcResultPrinter.print())
@@ -1359,7 +1360,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("After delete no softwarmodule should be available").isEmpty();
         assertThatExceptionOfType(EntityNotFoundException.class) // sm doesn't exists
-                .isThrownBy(() -> artifactManagement.loadArtifactBinary(sha1Hash, smId, encrypted));
+                .isThrownBy(() -> artifactManagement.getArtifactStream(sha1Hash, smId, encrypted));
     }
 
     /**
@@ -1376,12 +1377,12 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final Long appTypeSmId = appTypeSm.getId();
 
         final Artifact artifact = artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(random), appTypeSmId, "file1", false, artifactSize));
+                new ArtifactUpload(new ByteArrayInputStream(random), null, artifactSize, null, appTypeSmId, "file1", false));
 
         assertThat(softwareModuleManagement.count()).isEqualTo(3);
         final String sha1Hash = artifact.getSha1Hash();
         final boolean encrypted = appTypeSm.isEncrypted();
-        assertThat(artifactManagement.loadArtifactBinary(sha1Hash, appTypeSmId, encrypted)).isNotNull();
+        assertThat(artifactManagement.getArtifactStream(sha1Hash, appTypeSmId, encrypted)).isNotNull();
 
         mvc.perform(get("/rest/v1/softwaremodules/{smId}", appTypeSmId))
                 .andDo(MockMvcResultPrinter.print())
@@ -1399,7 +1400,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         assertThat(softwareModuleManagement.count()).isEqualTo(2);
         assertThatExceptionOfType(ArtifactBinaryNotFoundException.class)
-                .isThrownBy(() -> artifactManagement.loadArtifactBinary(sha1Hash, appTypeSmId, encrypted));
+                .isThrownBy(() -> artifactManagement.getArtifactStream(sha1Hash, appTypeSmId, encrypted));
     }
 
     /**
@@ -1526,19 +1527,13 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     private void assertArtifact(final SoftwareModule sm, final byte[] random) throws IOException {
-        final DbArtifact artifact = artifactManagement
-                .loadArtifactBinary(
-                        softwareModuleManagement.find(
-                                sm.getId()).orElseThrow().getArtifacts().get(0).getSha1Hash(), sm.getId(), sm.isEncrypted());
         // binary
-        try (final InputStream fileInputStream = artifact.getFileInputStream()) {
-            assertTrue(IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream),
-                    "Wrong artifact content");
+        try (final ArtifactStream artifact = artifactManagement.getArtifactStream(
+                softwareModuleManagement.find(sm.getId()).orElseThrow().getArtifacts().get(0).getSha1Hash(), sm.getId(), sm.isEncrypted())) {
+            assertTrue(IOUtils.contentEquals(new ByteArrayInputStream(random), artifact), "Wrong artifact content");
+            // hashes
+            assertThat(artifact.getSha1Hash()).as("Wrong sha1 hash").isEqualTo(HashGeneratorUtils.generateSHA1(random));
         }
-
-        // hashes
-        final DbArtifactHash hash = artifact.getHashes();
-        assertThat(hash.sha1()).as("Wrong sha1 hash").isEqualTo(HashGeneratorUtils.generateSHA1(random));
         // metadata
         assertThat(softwareModuleManagement.find(sm.getId()).orElseThrow().getArtifacts().get(0).getFilename())
                 .as("wrong metadata of the filename").isEqualTo("origFilename");

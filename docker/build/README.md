@@ -28,9 +28,7 @@ Docker image could be build, for example, with (fixed version 0.4.1 is just an e
 ```shell
 docker build --build-arg HAWKBIT_APP=hawkbit-update-server --build-arg HAWKBIT_VERSION=0.4.1 -t hawkbit_update_server:0.4.1 . -f Dockerfile
 ```
-
 or just by:
-
 ```shell
 docker build --build-arg HAWKBIT_VERSION=0.4.1 -t hawkbit_update_server:0.4.1 .
 ```

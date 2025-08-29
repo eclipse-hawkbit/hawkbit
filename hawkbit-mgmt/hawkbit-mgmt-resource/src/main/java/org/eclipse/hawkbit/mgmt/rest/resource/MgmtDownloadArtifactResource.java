@@ -13,8 +13,8 @@ import java.io.InputStream;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import org.eclipse.hawkbit.repository.artifact.exception.ArtifactBinaryNoLongerExistsException;
-import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.exception.ArtifactBinaryNoLongerExistsException;
+import org.eclipse.hawkbit.artifact.model.ArtifactStream;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadArtifactRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
@@ -38,7 +38,8 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
     private final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement;
     private final ArtifactManagement artifactManagement;
 
-    public MgmtDownloadArtifactResource(final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement, final ArtifactManagement artifactManagement) {
+    public MgmtDownloadArtifactResource(final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
+            final ArtifactManagement artifactManagement) {
         this.softwareModuleManagement = softwareModuleManagement;
         this.artifactManagement = artifactManagement;
     }
@@ -60,7 +61,7 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
         final Artifact artifact = module.getArtifact(artifactId)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, artifactId));
 
-        final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash(), module.getId(), module.isEncrypted());
+        final ArtifactStream file = artifactManagement.getArtifactStream(artifact.getSha1Hash(), module.getId(), module.isEncrypted());
         final HttpServletRequest request = RequestResponseContextHolder.getHttpServletRequest();
         final String ifMatch = request.getHeader(HttpHeaders.IF_MATCH);
         if (ifMatch != null && !HttpUtil.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {

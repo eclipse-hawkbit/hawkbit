@@ -376,8 +376,8 @@ Example header and payload:
             "HTTPS":"https://download-from-url.com"
             },
         "hashes":{
-            "md5":"md5hash",
-            "sha1":"sha1hash"
+            "md5":"<md5 hash>",
+            "sha1":"<sha1 hash>"
             },
         "size":512
         }],
@@ -508,8 +508,8 @@ Example header and payload:
               "HTTPS":"https://download-from-url.com"
               },
           "hashes":{
-              "md5":"md5hash",
-              "sha1":"sha1hash"
+              "md5":"<md5 hash>",
+              "sha1":"<sha1 hash>"
               },
           "size":512
           }],
@@ -541,8 +541,8 @@ Example header and payload:
               "HTTPS":"https://download-from-url.com"
               },
           "hashes":{
-              "md5":"md5hash",
-              "sha1":"sha1hash"
+              "md5":"<md5 hash>",
+              "sha1":"<sha1 hash>" 
               },
           "size":512
           }],

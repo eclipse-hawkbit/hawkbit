@@ -168,14 +168,14 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, random.length));
+                new ArtifactUpload(new ByteArrayInputStream(random), null, random.length, null, sm.getId(), "file1", false));
     }
 
     private void createDeletedTestArtifact(final byte[] random) {
         final DistributionSet ds = testdataFactory.createDistributionSet("deleted garbage", true);
         ds.getModules().forEach(module -> {
             artifactManagement.create(
-                    new ArtifactUpload(new ByteArrayInputStream(random), module.getId(), "file1", false, random.length));
+                    new ArtifactUpload(new ByteArrayInputStream(random), null, random.length, null, module.getId(), "file1", false));
             softwareModuleManagement.delete(module.getId());
         });
     }

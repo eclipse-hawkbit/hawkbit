@@ -28,7 +28,6 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.eclipse.hawkbit.repository.artifact.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
@@ -76,13 +75,6 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
     @Column(name = "file_size", updatable = false)
     private long fileSize;
 
-    /**
-     * Constructs artifact.
-     *
-     * @param sha1Hash that is the link to the {@link AbstractDbArtifact} entity.
-     * @param filename that is used by {@link AbstractDbArtifact} store.
-     * @param softwareModule of this artifact
-     */
     public JpaArtifact(@NotEmpty final String sha1Hash, @NotNull final String filename, final SoftwareModule softwareModule) {
         this.sha1Hash = sha1Hash;
         this.filename = filename;

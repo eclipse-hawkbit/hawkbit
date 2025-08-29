@@ -38,13 +38,13 @@ import org.springframework.security.concurrent.DelegatingSecurityContextSchedule
  */
 @Slf4j
 @Configuration
-@EnableConfigurationProperties(AsyncConfigurerThreadPoolProperties.class)
+@EnableConfigurationProperties(ExecutorProperties.class)
 public class ExecutorAutoConfiguration {
 
-    private final AsyncConfigurerThreadPoolProperties asyncConfigurerProperties;
+    private final ExecutorProperties executorProperties;
 
-    public ExecutorAutoConfiguration(final AsyncConfigurerThreadPoolProperties asyncConfigurerProperties) {
-        this.asyncConfigurerProperties = asyncConfigurerProperties;
+    public ExecutorAutoConfiguration(final ExecutorProperties executorProperties) {
+        this.executorProperties = executorProperties;
     }
 
     /**
@@ -72,7 +72,7 @@ public class ExecutorAutoConfiguration {
     @ConditionalOnMissingBean
     public ScheduledExecutorService scheduledExecutorService() {
         return new DelegatingSecurityContextScheduledExecutorService(Executors.newScheduledThreadPool(
-                asyncConfigurerProperties.getSchedulerThreads(), threadFactory("central-scheduled-executor-pool-%d")));
+                executorProperties.getSchedulerThreads(), threadFactory("central-scheduled-executor-pool-%d")));
     }
 
     /**
@@ -97,9 +97,9 @@ public class ExecutorAutoConfiguration {
      * @return central ThreadPoolExecutor for general purpose multithreaded operations. Tries an orderly shutdown when destroyed.
      */
     private ThreadPoolExecutor threadPoolExecutor() {
-        final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(asyncConfigurerProperties.getQueueSize());
-        return new ThreadPoolExecutor(asyncConfigurerProperties.getCoreThreads(),
-                asyncConfigurerProperties.getMaxThreads(), asyncConfigurerProperties.getIdleTimeout(),
+        final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(executorProperties.getQueueSize());
+        return new ThreadPoolExecutor(executorProperties.getCoreThreads(),
+                executorProperties.getMaxThreads(), executorProperties.getIdleTimeout(),
                 TimeUnit.MILLISECONDS, blockingQueue,
                 threadFactory("central-executor-pool-%d"),
                 new PoolSizeExceededPolicy());

@@ -654,10 +654,12 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         Target savedTarget = testdataFactory.createTarget();
 
         // create two artifacts with identical SHA1 hash
-        final Artifact artifact = artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random),
-                findFirstModuleByType(ds, osType).orElseThrow().getId(), "file1", false, artifactSize));
-        final Artifact artifact2 = artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random),
-                findFirstModuleByType(ds2, osType).orElseThrow().getId(), "file1", false, artifactSize));
+        final Artifact artifact = artifactManagement.create(new ArtifactUpload(
+                new ByteArrayInputStream(random), null, artifactSize, null,
+                findFirstModuleByType(ds, osType).orElseThrow().getId(), "file1", false));
+        final Artifact artifact2 = artifactManagement.create(new ArtifactUpload(
+                new ByteArrayInputStream(random), null,  artifactSize, null,
+                findFirstModuleByType(ds2, osType).orElseThrow().getId(), "file1", false));
         assertThat(artifact.getSha1Hash()).isEqualTo(artifact2.getSha1Hash());
 
         assertThat(

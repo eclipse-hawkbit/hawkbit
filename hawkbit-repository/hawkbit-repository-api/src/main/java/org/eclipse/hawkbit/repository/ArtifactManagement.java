@@ -14,14 +14,15 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.artifact.exception.ArtifactUploadFailedException;
+import org.eclipse.hawkbit.artifact.model.ArtifactStream;
+import org.eclipse.hawkbit.artifact.model.StoredArtifactInfo;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.repository.artifact.exception.ArtifactUploadFailedException;
-import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
 import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
-import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
+import org.eclipse.hawkbit.repository.exception.InvalidMd5HashException;
+import org.eclipse.hawkbit.repository.exception.InvalidSha1HashException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -46,23 +47,23 @@ public interface ArtifactManagement extends PermissionSupport {
      * @throws EntityNotFoundException if given software module does not exist
      * @throws EntityAlreadyExistsException if File with that name already exists in the Software Module
      * @throws ArtifactUploadFailedException if upload fails with internal server errors
-     * @throws InvalidMD5HashException if check against provided MD5 checksum failed
-     * @throws InvalidSHA1HashException if check against provided SHA1 checksum failed
+     * @throws InvalidMd5HashException if check against provided MD5 checksum failed
+     * @throws InvalidSha1HashException if check against provided SHA1 checksum failed
      * @throws ConstraintViolationException if {@link ArtifactUpload} contains invalid values
      */
     @PreAuthorize(SpringEvalExpressions.HAS_CREATE_REPOSITORY)
     Artifact create(@NotNull @Valid ArtifactUpload artifactUpload);
 
     /**
-     * Loads {@link DbArtifact} from store for given {@link Artifact}.
+     * Loads {@link StoredArtifactInfo} from store for given {@link Artifact}.
      *
      * @param sha1Hash to search for
      * @param softwareModuleId software module id.
      * @param isEncrypted flag to indicate if artifact is encrypted.
-     * @return loaded {@link DbArtifact}
+     * @return loaded {@link StoredArtifactInfo}
      */
     @PreAuthorize("hasAuthority('" + SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT + "')" + " or " + SpringEvalExpressions.IS_CONTROLLER)
-    DbArtifact loadArtifactBinary(@NotEmpty String sha1Hash, long softwareModuleId, final boolean isEncrypted);
+    ArtifactStream getArtifactStream(@NotEmpty String sha1Hash, long softwareModuleId, final boolean isEncrypted);
 
     /**
      * Deletes {@link Artifact} based on given id.

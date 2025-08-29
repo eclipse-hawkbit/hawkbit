@@ -83,7 +83,8 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         final int artifactSize = 5 * 1024;
         final byte[] random = nextBytes(artifactSize);
         final Artifact artifact = artifactManagement.create(new ArtifactUpload(
-                new ByteArrayInputStream(random), findFirstModuleByType(ds, osType).orElseThrow().getId(), "file1", false, artifactSize));
+                new ByteArrayInputStream(random), null, artifactSize, null,
+                findFirstModuleByType(ds, osType).orElseThrow().getId(), "file1", false));
 
         assignDistributionSet(ds, targets);
 
@@ -179,8 +180,9 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         // create artifact
         final int artifactSize = (int) quotaManagement.getMaxArtifactSize();
         final byte[] random = nextBytes(artifactSize);
-        final Artifact artifact = artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random),
-                findFirstModuleByType(ds, osType).orElseThrow().getId(), "file1", false, artifactSize));
+        final Artifact artifact = artifactManagement.create(new ArtifactUpload(
+                new ByteArrayInputStream(random), null, artifactSize, null,
+                findFirstModuleByType(ds, osType).orElseThrow().getId(), "file1", false));
 
         // download fails as artifact is not yet assigned
         mvc.perform(get("/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
@@ -199,8 +201,7 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(header().string("Content-Disposition", "attachment;filename=" + artifact.getFilename()))
                 .andReturn();
 
-        assertArrayEquals(result.getResponse().getContentAsByteArray(), random,
-                "The same file that was uploaded is expected when downloaded");
+        assertArrayEquals(result.getResponse().getContentAsByteArray(), random, "The same file that was uploaded is expected when downloaded");
 
         // download complete
         synchronized (DdiArtifactDownloadTest.class) {
@@ -223,8 +224,9 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         // create artifact
         final int artifactSize = 5 * 1024;
         final byte[] random = nextBytes(artifactSize);
-        final Artifact artifact = artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(random), getOsModule(ds), "file1", false, artifactSize));
+        final Artifact artifact = artifactManagement.create(new ArtifactUpload(
+                new ByteArrayInputStream(random), null, artifactSize, null,
+                getOsModule(ds), "file1", false));
 
         assignDistributionSet(ds, target);
 
@@ -258,8 +260,9 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // create artifact
         final byte[] random = nextBytes(resultLength);
-        final Artifact artifact = artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(random), getOsModule(ds), "file1", false, resultLength));
+        final Artifact artifact = artifactManagement.create(new ArtifactUpload(
+                new ByteArrayInputStream(random), null, resultLength, null,
+                getOsModule(ds), "file1", false));
 
         assertThat(random).hasSize(resultLength);
 

@@ -20,6 +20,9 @@ import java.util.stream.Collectors;
 
 import jakarta.validation.ValidationException;
 
+import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrl;
+import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
+import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver.DownloadDescriptor;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifactHash;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
@@ -33,10 +36,6 @@ import org.eclipse.hawkbit.mgmt.rest.resource.MgmtSoftwareModuleResource;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ApiType;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrl;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -157,12 +156,12 @@ public final class MgmtSoftwareModuleMapper {
     }
 
     public static void addLinks(final Artifact artifact, final MgmtArtifact response,
-            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement) {
+            final ArtifactUrlResolver artifactUrlHandler, final SystemManagement systemManagement) {
         final List<ArtifactUrl> urls = artifactUrlHandler.getUrls(
-                new URLPlaceholder(systemManagement.getTenantMetadata().getTenant(),
-                        systemManagement.getTenantMetadata().getId(), null, null,
-                        new URLPlaceholder.SoftwareData(artifact.getSoftwareModule().getId(), artifact.getFilename(),
-                                artifact.getId(), artifact.getSha1Hash())), ApiType.MGMT, null);
+                new DownloadDescriptor(
+                        systemManagement.getTenantMetadata().getTenant(), null,
+                        artifact.getSoftwareModule().getId(), artifact.getFilename(), artifact.getSha1Hash()),
+                ArtifactUrlResolver.ApiType.MGMT, null);
         urls.forEach(entry -> response.add(Link.of(entry.ref()).withRel(entry.rel()).expand()));
     }
 

@@ -1,3 +1,3 @@
 # hawkBit Core
 
-Various internal interfaces and utility classes.
+Various internal / core interfaces and utility classes.
