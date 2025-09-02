@@ -128,9 +128,6 @@ public class EventPublisherConfiguration {
     @ConditionalOnClass({ Schema.class, ProtostuffIOUtil.class })
     protected static class EventProtostuffConfiguration {
 
-        /**
-         * @return the protostuff io message converter
-         */
         @Bean
         public MessageConverter eventProtostuffMessageConverter() {
             return new EventProtoStuffMessageConverter();

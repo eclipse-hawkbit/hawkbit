@@ -432,7 +432,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
         for (final Target target : targetsAll) {
             if (targetIds.contains(target.getId())) {
-                assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId())).as("assigned DS").contains(set);
+                assertThat(deploymentManagement.findAssignedDistributionSet(target.getControllerId())).as("assigned DS").contains(set);
             }
         }
     }
@@ -456,7 +456,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
         for (final Target target : targetsAll) {
             if (targetIds.contains(target.getId())) {
-                assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId())).isEmpty();
+                assertThat(deploymentManagement.findAssignedDistributionSet(target.getControllerId())).isEmpty();
             }
         }
     }

@@ -16,11 +16,9 @@ import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.Action;
 
 /**
- * Generic deployment event for the Multi-Assignments feature. The event extends
- * the {@link MultiActionEvent} and holds a list of controller IDs to identify
- * the targets which are affected by a deployment action and a list of
- * actionIds containing the identifiers of the affected actions
- * as payload. This event is only published in case of an cancellation.
+ * Generic deployment event for the Multi-Assignments feature. The event extends the {@link MultiActionEvent} and holds a list of controller IDs
+ * to identify the targets which are affected by a deployment action and a list of actionIds containing the identifiers of the affected actions
+ * as payload. This event is only published in case of a cancellation.
  */
 @NoArgsConstructor // for serialization libs like jackson
 public class MultiActionCancelEvent extends MultiActionEvent {

@@ -17,8 +17,7 @@ import java.util.Map;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 
 /**
- * An implementation of the {@link UserAuthoritiesResolver} that is based on
- * in-memory user permissions.
+ * An implementation of the {@link UserAuthoritiesResolver} that is based on in-memory user permissions.
  */
 public class InMemoryUserAuthoritiesResolver implements UserAuthoritiesResolver {
 

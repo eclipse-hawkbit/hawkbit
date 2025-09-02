@@ -45,7 +45,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(assignedSet, assignedtargets);
 
         // get final updated version of targets
-        assignedtargets = targetManagement.getByControllerId(assignedtargets.stream().map(Target::getControllerId).toList());
+        assignedtargets = targetManagement.findByControllerId(assignedtargets.stream().map(Target::getControllerId).toList());
 
         assertThat(targetManagement.findByAssignedDistributionSet(assignedSet.getId(), PAGE))
                 .as("Contains the assigned targets").containsAll(assignedtargets)
@@ -90,7 +90,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(assignedSet, installedtargets);
 
         // get final updated version of targets
-        installedtargets = targetManagement.getByControllerId(installedtargets.stream().map(Target::getControllerId).toList());
+        installedtargets = targetManagement.findByControllerId(installedtargets.stream().map(Target::getControllerId).toList());
 
         assertThat(targetManagement.findByInstalledDistributionSet(installedSet.getId(), PAGE))
                 .as("Contains the assigned targets").containsAll(installedtargets)

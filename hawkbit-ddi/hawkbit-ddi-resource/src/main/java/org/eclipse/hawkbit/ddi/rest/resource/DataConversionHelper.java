@@ -14,10 +14,8 @@ import java.util.Map;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ApiType;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder.SoftwareData;
+import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
+import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver.DownloadDescriptor;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifactHash;
 import org.eclipse.hawkbit.ddi.json.model.DdiAutoConfirmationState;
@@ -121,6 +119,7 @@ public final class DataConversionHelper {
             result.add(WebMvcLinkBuilder
                     .linkTo(WebMvcLinkBuilder
                             .methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
+                            // doesn't really call the putConfigData with null, just create the link
                             .putConfigData(null, tenantAware.getCurrentTenant(), target.getControllerId()))
                     .withRel(DdiRestConstants.CONFIG_DATA_ACTION).expand());
         }
@@ -130,7 +129,7 @@ public final class DataConversionHelper {
 
     static List<DdiChunk> createChunks(
             final Target target, final Action uAction,
-            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement,
+            final ArtifactUrlResolver artifactUrlHandler, final SystemManagement systemManagement,
             final HttpRequest request, final ControllerManagement controllerManagement) {
         final Map<Long, Map<String, String>> metadata = controllerManagement
                 .findTargetVisibleMetaDataBySoftwareModuleId(uAction.getDistributionSet().getModules().stream()
@@ -146,7 +145,7 @@ public final class DataConversionHelper {
     }
 
     static List<DdiArtifact> createArtifacts(final Target target, final SoftwareModule module,
-            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement,
+            final ArtifactUrlResolver artifactUrlHandler, final SystemManagement systemManagement,
             final HttpRequest request) {
 
         return new ResponseList<>(module.getArtifacts().stream()
@@ -171,7 +170,7 @@ public final class DataConversionHelper {
     }
 
     private static DdiArtifact createArtifact(
-            final Target target, final ArtifactUrlHandler artifactUrlHandler,
+            final Target target, final ArtifactUrlResolver artifactUrlHandler,
             final Artifact artifact, final SystemManagement systemManagement, final HttpRequest request) {
         final DdiArtifact file = new DdiArtifact(
                 artifact.getFilename(),
@@ -180,13 +179,11 @@ public final class DataConversionHelper {
 
         final TenantMetaData tenantMetadata = systemManagement.getTenantMetadataWithoutDetails();
         artifactUrlHandler
-                .getUrls(new URLPlaceholder(
-                                tenantMetadata.getTenant(), tenantMetadata.getId(), target.getControllerId(), target.getId(),
-                                new SoftwareData(
-                                        artifact.getSoftwareModule().getId(), artifact.getFilename(), artifact.getId(),
-                                        artifact.getSha1Hash())),
-                        ApiType.DDI, request.getURI())
-                .forEach(entry -> file.add(Link.of(entry.getRef()).withRel(entry.getRel()).expand()));
+                .getUrls(new DownloadDescriptor(
+                                tenantMetadata.getTenant(), target.getControllerId(),
+                                artifact.getSoftwareModule().getId(), artifact.getFilename(), artifact.getSha1Hash()),
+                        ArtifactUrlResolver.ApiType.DDI, request.getURI())
+                .forEach(entry -> file.add(Link.of(entry.ref()).withRel(entry.rel()).expand()));
 
         return file;
     }

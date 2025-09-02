@@ -9,18 +9,16 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import lombok.NoArgsConstructor;
+
 /**
  * Repository model constants.
  */
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public final class RepositoryModelConstants {
 
     /**
-     * indicating that target action has no force time which is only needed in
-     * case of {@link Action.ActionType#TIMEFORCED}.
+     * Indicating that target action has no force time which is only needed in case of {@link Action.ActionType#TIMEFORCED}.
      */
     public static final Long NO_FORCE_TIME = 0L;
-
-    private RepositoryModelConstants() {
-        // Utility class.
-    }
 }

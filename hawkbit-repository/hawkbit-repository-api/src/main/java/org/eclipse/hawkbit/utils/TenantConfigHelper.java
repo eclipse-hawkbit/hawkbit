@@ -28,7 +28,8 @@ public final class TenantConfigHelper {
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final SystemSecurityContext systemSecurityContext;
 
-    private TenantConfigHelper(final SystemSecurityContext systemSecurityContext,
+    private TenantConfigHelper(
+            final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         this.systemSecurityContext = systemSecurityContext;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
@@ -41,14 +42,14 @@ public final class TenantConfigHelper {
      * @param tenantConfigurationManagement to get the value from
      * @return is active
      */
-    public static TenantConfigHelper usingContext(final SystemSecurityContext systemSecurityContext,
+    public static TenantConfigHelper usingContext(
+            final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         return new TenantConfigHelper(systemSecurityContext, tenantConfigurationManagement);
     }
 
     public <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType) {
-        return systemSecurityContext
-                .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
+        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
     }
 
     /**

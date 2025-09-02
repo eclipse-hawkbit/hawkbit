@@ -9,12 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import org.eclipse.hawkbit.repository.artifact.model.AbstractDbArtifact;
-
 /**
- * Binaries for a {@link SoftwareModule} Note: the decision which artifacts have
- * to be downloaded are done on the device side. e.g. Full Package, Signatures,
- * binary deltas
+ * Binaries for a {@link SoftwareModule} Note: the decision which artifacts have to be downloaded are done on the device side. e.g.
+ * Full Package, Signatures, binary deltas
  */
 public interface Artifact extends TenantAwareBaseEntity {
 
@@ -34,8 +31,7 @@ public interface Artifact extends TenantAwareBaseEntity {
     String getMd5Hash();
 
     /**
-     * @return SHA-1 hash of the artifact in Base16 format that identifies the
-     *         {@link AbstractDbArtifact} in the system.
+     * @return SHA-1 hash of the artifact in Base16 format.
      */
     String getSha1Hash();
 

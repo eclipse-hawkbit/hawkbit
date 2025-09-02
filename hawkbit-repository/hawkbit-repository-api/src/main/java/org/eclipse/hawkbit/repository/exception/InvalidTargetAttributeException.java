@@ -26,9 +26,6 @@ public class InvalidTargetAttributeException extends AbstractServerRtException {
 
     private static final SpServerError THIS_ERROR = SpServerError.SP_TARGET_ATTRIBUTES_INVALID;
 
-    /**
-     * Default constructor.
-     */
     public InvalidTargetAttributeException() {
         super(THIS_ERROR);
     }

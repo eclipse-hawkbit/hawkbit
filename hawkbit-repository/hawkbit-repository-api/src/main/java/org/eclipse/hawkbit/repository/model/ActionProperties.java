@@ -14,10 +14,12 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Holds properties for {@link Action}
  */
+@NoArgsConstructor // for serialization libs like jackson
 @Data
 public class ActionProperties implements Serializable {
 
@@ -30,9 +32,6 @@ public class ActionProperties implements Serializable {
     private boolean maintenanceWindowAvailable;
 
     private Action.Status status;
-
-    public ActionProperties() {
-    }
 
     /**
      * Constructor

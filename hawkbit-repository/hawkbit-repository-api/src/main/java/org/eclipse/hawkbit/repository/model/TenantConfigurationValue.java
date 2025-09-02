@@ -32,5 +32,6 @@ public final class TenantConfigurationValue<T extends Serializable> implements S
     private String lastModifiedBy;
     private Long createdAt;
     private String createdBy;
+    @Builder.Default
     private boolean global = true;
 }

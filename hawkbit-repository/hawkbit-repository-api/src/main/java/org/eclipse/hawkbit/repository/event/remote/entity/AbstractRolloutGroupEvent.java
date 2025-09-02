@@ -10,13 +10,18 @@
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import java.io.Serial;
-import java.util.Objects;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 /**
  * Event which is published in case a {@linkplain RolloutGroup} is created or updated
  */
+@NoArgsConstructor(force = true)// for serialization libs like jackson
+@Data
+@EqualsAndHashCode(callSuper = true)
 public abstract class AbstractRolloutGroupEvent extends RemoteEntityEvent<RolloutGroup> {
 
     @Serial
@@ -24,39 +29,8 @@ public abstract class AbstractRolloutGroupEvent extends RemoteEntityEvent<Rollou
 
     private final Long rolloutId;
 
-    /**
-     * Default constructor for serialization libs like jackson.
-     */
-    protected AbstractRolloutGroupEvent() {
-        this.rolloutId = null;
-    }
-
     protected AbstractRolloutGroupEvent(final RolloutGroup rolloutGroup, final Long rolloutId) {
         super(rolloutGroup);
         this.rolloutId = rolloutId;
-    }
-
-    public Long getRolloutId() {
-        return rolloutId;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), rolloutId);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        if (!super.equals(o)) {
-            return false;
-        }
-        final AbstractRolloutGroupEvent that = (AbstractRolloutGroupEvent) o;
-        return Objects.equals(rolloutId, that.rolloutId);
     }
 }

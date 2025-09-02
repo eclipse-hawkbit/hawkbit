@@ -26,7 +26,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.model.ArtifactStream;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -46,7 +46,6 @@ public final class FileStreamingUtil {
      * Write response with target relation and publishes events concerning the
      * download progress based on given update action status.
      * </p>
-     *
      * <p>
      * The request supports RFC7233 range requests.
      * </p>
@@ -59,16 +58,16 @@ public final class FileStreamingUtil {
      * @param progressListener to write progress updates to
      * @return http response
      * @throws FileStreamingFailedException if streaming fails
-     * @see <a href="https://tools.ietf.org/html/rfc7233">https://tools.ietf.org
-     *         /html/rfc7233</a>
+     * @see <a href="https://tools.ietf.org/html/rfc7233">https://tools.ietf.org/html/rfc7233</a>
      */
-    public static ResponseEntity<InputStream> writeFileResponse(final DbArtifact artifact, final String filename,
+    public static ResponseEntity<InputStream> writeFileResponse(
+            final ArtifactStream artifact, final String filename,
             final long lastModified, final HttpServletResponse response, final HttpServletRequest request,
             final FileStreamingProgressListener progressListener) {
 
         ResponseEntity<InputStream> result;
 
-        final String etag = artifact.getHashes().getSha1();
+        final String etag = artifact.getSha1Hash();
         final long length = artifact.getSize();
 
         resetResponseExceptHeaders(response);
@@ -114,20 +113,21 @@ public final class FileStreamingUtil {
             }
         }
 
-        // full request - no range
-        if (ranges.isEmpty() || ranges.get(0).equals(full)) {
-            log.debug("filename ({}) results into a full request: ", filename);
-            result = handleFullFileRequest(artifact, filename, response, progressListener, full);
-        }
-        // standard range request
-        else if (ranges.size() == 1) {
-            log.debug("filename ({}) results into a standard range request: ", filename);
-            result = handleStandardRangeRequest(artifact, filename, response, progressListener, ranges);
-        }
-        // multipart range request
-        else {
-            log.debug("filename ({}) results into a multipart range request: ", filename);
-            result = handleMultipartRangeRequest(artifact, filename, response, progressListener, ranges);
+        try (final InputStream inputStream = artifact) {
+            // full request - no range
+            if (ranges.isEmpty() || ranges.get(0).equals(full)) {
+                log.debug("filename ({}) results into a full request: ", filename);
+                result = handleFullFileRequest(inputStream, filename, response, progressListener, full);
+            } else if (ranges.size() == 1) { // standard range request
+                log.debug("filename ({}) results into a standard range request: ", filename);
+                result = handleStandardRangeRequest(inputStream, filename, response, progressListener, ranges.get(0));
+            } else { // multipart range request
+                log.debug("filename ({}) results into a multipart range request: ", filename);
+                result = handleMultipartRangeRequest(inputStream, filename, response, progressListener, ranges);
+            }
+        } catch (final IOException e) {
+            log.error("streaming of file ({}) failed!", filename, e);
+            throw new FileStreamingFailedException(filename, e);
         }
 
         return result;
@@ -146,16 +146,15 @@ public final class FileStreamingUtil {
         storedHeaders.forEach(response::addHeader);
     }
 
-    private static ResponseEntity<InputStream> handleFullFileRequest(final DbArtifact artifact, final String filename,
-            final HttpServletResponse response, final FileStreamingProgressListener progressListener,
-            final ByteRange full) {
-        final ByteRange r = full;
-        response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes " + r.getStart() + "-" + r.getEnd() + "/" + r.getTotal());
-        response.setContentLengthLong(r.getLength());
+    private static ResponseEntity<InputStream> handleFullFileRequest(
+            final InputStream inputStream, final String filename, final HttpServletResponse response,
+            final FileStreamingProgressListener progressListener, final ByteRange full) {
+        response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes " + full.getStart() + "-" + full.getEnd() + "/" + full.getTotal());
+        response.setContentLengthLong(full.getLength());
 
-        try (final InputStream from = artifact.getFileInputStream()) {
+        try {
             final ServletOutputStream to = response.getOutputStream();
-            copyStreams(from, to, progressListener, r.getStart(), r.getLength(), filename);
+            copyStreams(inputStream, to, progressListener, full.getStart(), full.getLength(), filename);
         } catch (final IOException e) {
             throw new FileStreamingFailedException("fullfileRequest " + filename, e);
         }
@@ -214,28 +213,30 @@ public final class FileStreamingUtil {
         }
     }
 
-    private static ResponseEntity<InputStream> handleMultipartRangeRequest(final DbArtifact artifact,
-            final String filename, final HttpServletResponse response,
+    private static ResponseEntity<InputStream> handleMultipartRangeRequest(
+            final InputStream inputStream, final String filename, final HttpServletResponse response,
             final FileStreamingProgressListener progressListener, final List<ByteRange> ranges) {
-
+        ranges.sort((r1, r2) -> Long.compare(r1.getStart(), r2.getStart()));
         response.setContentType("multipart/byteranges; boundary=" + ByteRange.MULTIPART_BOUNDARY);
         response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 
         try {
             final ServletOutputStream to = response.getOutputStream();
 
-            for (final ByteRange r : ranges) {
-                try (final InputStream from = artifact.getFileInputStream()) {
-
-                    // Add multipart boundary and header fields for every range.
-                    to.println();
-                    to.println("--" + ByteRange.MULTIPART_BOUNDARY);
-                    to.println(HttpHeaders.CONTENT_RANGE + ": bytes " + r.getStart() + "-" + r.getEnd() + "/"
-                            + r.getTotal());
-
-                    // Copy single part range of multi part range.
-                    copyStreams(from, to, progressListener, r.getStart(), r.getLength(), filename);
+            long streamPos = 0;
+            for (final ByteRange range : ranges) {
+                if (streamPos > range.getStart()) {
+                    throw new FileStreamingFailedException("Ranges are overlapping or not in order");
                 }
+
+                // Add multipart boundary and header fields for every range.
+                to.println();
+                to.println("--" + ByteRange.MULTIPART_BOUNDARY);
+                to.println(HttpHeaders.CONTENT_RANGE + ": bytes " + range.getStart() + "-" + range.getEnd() + "/" + range.getTotal());
+
+                // Copy single part range of multipart range.
+                copyStreams(inputStream, to, progressListener, range.getStart() - streamPos, range.getLength(), filename);
+                streamPos = range.getStart() + range.getLength();
             }
 
             // End with final multipart boundary.
@@ -248,17 +249,16 @@ public final class FileStreamingUtil {
         return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).build();
     }
 
-    private static ResponseEntity<InputStream> handleStandardRangeRequest(final DbArtifact artifact,
-            final String filename, final HttpServletResponse response,
-            final FileStreamingProgressListener progressListener, final List<ByteRange> ranges) {
-        final ByteRange r = ranges.get(0);
-        response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes " + r.getStart() + "-" + r.getEnd() + "/" + r.getTotal());
-        response.setContentLengthLong(r.getLength());
+    private static ResponseEntity<InputStream> handleStandardRangeRequest(
+            final InputStream inputStream, final String filename, final HttpServletResponse response,
+            final FileStreamingProgressListener progressListener, final ByteRange range) {
+        response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes " + range.getStart() + "-" + range.getEnd() + "/" + range.getTotal());
+        response.setContentLengthLong(range.getLength());
         response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 
-        try (final InputStream from = artifact.getFileInputStream()) {
+        try {
             final ServletOutputStream to = response.getOutputStream();
-            copyStreams(from, to, progressListener, r.getStart(), r.getLength(), filename);
+            copyStreams(inputStream, to, progressListener, range.getStart(), range.getLength(), filename);
         } catch (final IOException e) {
             log.error("standardRangeRequest of file ({}) failed!", filename, e);
             throw new FileStreamingFailedException(filename);
@@ -267,10 +267,11 @@ public final class FileStreamingUtil {
         return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).build();
     }
 
-    private static long copyStreams(final InputStream from, final OutputStream to,
-            final FileStreamingProgressListener progressListener, final long start, final long length,
+    private static long copyStreams(
+            final InputStream from, final OutputStream to,
+            final FileStreamingProgressListener progressListener,
+            final long start, final long length,
             final String filename) throws IOException {
-
         final long startMillis = System.currentTimeMillis();
         log.trace("Start of copy-streams of file {} from {} to {}", filename, start, length);
 
@@ -287,7 +288,7 @@ public final class FileStreamingUtil {
         long shippedSinceLastEvent = 0;
 
         while (toContinue) {
-            final int r = from.read(buf);
+            final int r = from.read(buf, 0, Math.min(BUFFER_SIZE, toRead > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) toRead));
             if (r == -1) {
                 break;
             }
@@ -319,8 +320,8 @@ public final class FileStreamingUtil {
         final long totalTime = System.currentTimeMillis() - startMillis;
 
         if (total < length) {
-            throw new FileStreamingFailedException(filename + ": " + (length - total)
-                    + " bytes could not be written to client, total time on write: !" + totalTime + " ms");
+            throw new FileStreamingFailedException(
+                    filename + ": " + (length - total) + " bytes could not be written to client, total time on write: !" + totalTime + " ms");
         }
 
         log.trace("Finished copy-stream of file {} with length {} in {} ms", filename, length, totalTime);
@@ -417,6 +418,5 @@ public final class FileStreamingUtil {
         private long getTotal() {
             return total;
         }
-
     }
 }

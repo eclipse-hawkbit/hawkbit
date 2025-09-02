@@ -10,19 +10,22 @@
 package org.eclipse.hawkbit.repository.model;
 
 /**
- * Defines if and how actions should be canceled when :
- *      - invalidating a distribution set
- *      - stopping a rollout
- *      - deleting a rollout
+ * Defines if and how actions should be canceled when:
+ * <ul>
+ *     <li>invalidating a distribution set</li>
+ *     <li>stopping a rollout</li>
+ *     <li>deleting a rollout</li>
+ * </ul>
  */
 public enum ActionCancellationType {
+
     /**
-     * will perform a FORCE action cancellation - will put them in CANCELED state.
+     * Will perform a FORCE action cancellation - will put them in CANCELED state.
      */
     FORCE,
 
     /**
-     * will perform a SOFT action cancellation - will put them in CANCELING state.
+     * Will perform a SOFT action cancellation - will put them in CANCELING state.
      */
     SOFT,
 

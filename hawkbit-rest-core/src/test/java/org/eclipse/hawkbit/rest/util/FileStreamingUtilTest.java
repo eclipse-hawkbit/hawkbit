@@ -20,13 +20,13 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Supplier;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
-import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
+import org.eclipse.hawkbit.artifact.model.ArtifactStream;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -43,33 +43,8 @@ class FileStreamingUtilTest {
     private static final String CONTENT = "This is some very long string which is intended to test";
     private static final byte[] CONTENT_BYTES = CONTENT.getBytes(StandardCharsets.UTF_8);
 
-    private static final DbArtifact TEST_ARTIFACT = new DbArtifact() {
-
-        @Override
-        public String getArtifactId() {
-            return "1";
-        }
-
-        @Override
-        public DbArtifactHash getHashes() {
-            return new DbArtifactHash("sha1-111", "md5-123", "sha256-123");
-        }
-
-        @Override
-        public long getSize() {
-            return CONTENT_BYTES.length;
-        }
-
-        @Override
-        public String getContentType() {
-            return "text/plain";
-        }
-
-        @Override
-        public InputStream getFileInputStream() {
-            return new ByteArrayInputStream(CONTENT_BYTES);
-        }
-    };
+    private static final Supplier<ArtifactStream> TEST_ARTIFACT =
+            () -> new ArtifactStream(new ByteArrayInputStream(CONTENT_BYTES), CONTENT_BYTES.length, "sha1-111");
 
     @Test
     void shouldProcessRangeHeaderForMultipartRequests() throws IOException {
@@ -78,11 +53,11 @@ class FileStreamingUtilTest {
 
         Mockito.when(servletResponse.getOutputStream()).thenReturn(outputStream);
         final HttpServletRequest servletRequest = Mockito.mock(HttpServletRequest.class);
-        Mockito.when(servletRequest.getHeader("Range")).thenReturn("bytes=0-10,9-15,16-");
+        Mockito.when(servletRequest.getHeader("Range")).thenReturn("bytes=0-10,11-15,16-");
         long lastModified = System.currentTimeMillis();
 
-        final ResponseEntity<InputStream> responseEntity = FileStreamingUtil.writeFileResponse(TEST_ARTIFACT,
-                "test.file", lastModified, servletResponse, servletRequest, null);
+        final ResponseEntity<InputStream> responseEntity = FileStreamingUtil.writeFileResponse(
+                TEST_ARTIFACT.get(), "test.file", lastModified, servletResponse, servletRequest, null);
 
         assertThat(responseEntity).isNotNull();
         verify(servletResponse).setDateHeader(HttpHeaders.LAST_MODIFIED, lastModified);
@@ -92,7 +67,7 @@ class FileStreamingUtilTest {
         verify(outputStream).print(stringCaptor.capture());
         assertThat(stringCaptor.getValue()).contains("--THIS_STRING_SEPARATES_MULTIPART--");
         verify(outputStream, times(3)).write(any(), anyInt(), lenCaptor.capture());
-        assertThat(lenCaptor.getAllValues()).containsExactly(11, 7, 39); // Range lengths
+        assertThat(lenCaptor.getAllValues()).containsExactly(11, 5, 39); // Range lengths
     }
 
     @Test
@@ -105,8 +80,8 @@ class FileStreamingUtilTest {
         final HttpServletRequest servletRequest = Mockito.mock(HttpServletRequest.class);
         Mockito.when(servletRequest.getHeader("Range")).thenReturn("bytes=0-10***,9-15,16-");
 
-        final ResponseEntity<InputStream> responseEntity = FileStreamingUtil.writeFileResponse(TEST_ARTIFACT,
-                "test.file", lastModified, servletResponse, servletRequest, null);
+        final ResponseEntity<InputStream> responseEntity = FileStreamingUtil.writeFileResponse(
+                TEST_ARTIFACT.get(), "test.file", lastModified, servletResponse, servletRequest, null);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
         verify(outputStream, times(0)).print(anyString());

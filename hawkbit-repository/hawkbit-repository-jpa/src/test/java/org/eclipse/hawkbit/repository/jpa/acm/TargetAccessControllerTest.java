@@ -76,15 +76,18 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
                     .containsOnly(permittedTarget.getId());
 
             // verify targetManagement#getByControllerID
-            assertThat(targetManagement.getByControllerId(permittedTarget.getControllerId())).isPresent();
+            assertThat(targetManagement.getByControllerId(permittedTarget.getControllerId())).isNotNull();
             final String hiddenTargetControllerId = hiddenTarget.getControllerId();
             assertThatThrownBy(() -> targetManagement.getByControllerId(hiddenTargetControllerId))
+                    .as("Missing read permissions for hidden target.")
+                    .isInstanceOf(InsufficientPermissionException.class);
+            assertThatThrownBy(() -> targetManagement.findByControllerId(hiddenTargetControllerId))
                     .as("Missing read permissions for hidden target.")
                     .isInstanceOf(InsufficientPermissionException.class);
 
             // verify targetManagement#getByControllerId
             assertThat(targetManagement
-                    .getByControllerId(List.of(permittedTarget.getControllerId(), hiddenTargetControllerId))
+                    .findByControllerId(List.of(permittedTarget.getControllerId(), hiddenTargetControllerId))
                     .stream().map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
 
             // verify targetManagement#get

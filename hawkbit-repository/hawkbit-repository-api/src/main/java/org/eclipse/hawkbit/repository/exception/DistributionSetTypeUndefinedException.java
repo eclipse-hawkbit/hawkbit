@@ -28,25 +28,7 @@ public class DistributionSetTypeUndefinedException extends AbstractServerRtExcep
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Creates a new FileUploadFailedException with
-     * {@link SpServerError#SP_DS_TYPE_UNDEFINED} error.
-     */
     public DistributionSetTypeUndefinedException() {
         super(SpServerError.SP_DS_TYPE_UNDEFINED);
-    }
-
-    /**
-     * @param cause for the exception
-     */
-    public DistributionSetTypeUndefinedException(final Throwable cause) {
-        super(SpServerError.SP_DS_TYPE_UNDEFINED, cause);
-    }
-
-    /**
-     * @param message of the error
-     */
-    public DistributionSetTypeUndefinedException(final String message) {
-        super(message, SpServerError.SP_DS_TYPE_UNDEFINED);
     }
 }

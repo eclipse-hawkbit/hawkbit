@@ -10,6 +10,6 @@
 package org.eclipse.hawkbit.repository.event.entity;
 
 /**
- * Marker interface to indicate event has created a newly entity.
+ * Marker interface to indicate an event for a newly created entity.
  */
 public interface EntityCreatedEvent extends EntityIdEvent {}

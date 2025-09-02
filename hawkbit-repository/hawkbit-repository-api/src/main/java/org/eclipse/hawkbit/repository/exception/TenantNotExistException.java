@@ -29,38 +29,7 @@ public class TenantNotExistException extends AbstractServerRtException {
 
     private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_TENANT_NOT_EXISTS;
 
-    /**
-     * Default constructor.
-     */
-    public TenantNotExistException() {
-        super(THIS_ERROR);
-    }
-
-    /**
-     * Parameterized constructor.
-     *
-     * @param cause of the exception
-     */
-    public TenantNotExistException(final Throwable cause) {
-        super(THIS_ERROR, cause);
-    }
-
-    /**
-     * Parameterized constructor.
-     *
-     * @param message of the exception
-     * @param cause of the exception
-     */
-    public TenantNotExistException(final String message, final Throwable cause) {
-        super(message, THIS_ERROR, cause);
-    }
-
-    /**
-     * Parameterized constructor.
-     *
-     * @param message of the exception
-     */
     public TenantNotExistException(final String message) {
-        super(message, THIS_ERROR);
+        super(THIS_ERROR, message);
     }
 }

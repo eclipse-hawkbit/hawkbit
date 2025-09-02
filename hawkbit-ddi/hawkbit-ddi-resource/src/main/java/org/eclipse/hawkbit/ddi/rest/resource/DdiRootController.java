@@ -21,6 +21,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.artifact.model.ArtifactStream;
+import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
 import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionHistory;
@@ -50,13 +52,10 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
-import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidConfirmationFeedbackException;
-import org.eclipse.hawkbit.repository.exception.SoftwareModuleNotAssignedToTargetException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate.ActionStatusCreateBuilder;
@@ -99,7 +98,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private final ControllerManagement controllerManagement;
     private final ConfirmationManagement confirmationManagement;
     private final ArtifactManagement artifactManagement;
-    private final ArtifactUrlHandler artifactUrlHandler;
+    private final ArtifactUrlResolver artifactUrlHandler;
     private final SystemManagement systemManagement;
     private final ApplicationEventPublisher eventPublisher;
     private final HawkbitSecurityProperties securityProperties;
@@ -108,7 +107,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     @SuppressWarnings("java:S107")
     public DdiRootController(
             final ControllerManagement controllerManagement, final ConfirmationManagement confirmationManagement,
-            final ArtifactManagement artifactManagement, final ArtifactUrlHandler artifactUrlHandler,
+            final ArtifactManagement artifactManagement, final ArtifactUrlResolver artifactUrlHandler,
             final SystemManagement systemManagement,
             final ApplicationEventPublisher eventPublisher,
             final HawkbitSecurityProperties securityProperties, final TenantAware tenantAware) {
@@ -131,11 +130,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         final Target target = findTarget(controllerId);
 
-        final SoftwareModule softwareModule = controllerManagement.getSoftwareModule(softwareModuleId)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
-
+        final SoftwareModule softwareModule = controllerManagement.getSoftwareModule(softwareModuleId);
         return new ResponseEntity<>(
-                DataConversionHelper.createArtifacts(target, softwareModule, artifactUrlHandler, systemManagement,
+                DataConversionHelper.createArtifacts(
+                        target, softwareModule, artifactUrlHandler, systemManagement,
                         new ServletServerHttpRequest(RequestResponseContextHolder.getHttpServletRequest())),
                 HttpStatus.OK);
     }
@@ -147,7 +145,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(
                 controllerId, IpUtil.getClientIpFromRequest(RequestResponseContextHolder.getHttpServletRequest(), securityProperties));
         final Action activeAction = controllerManagement.findActiveActionWithHighestWeight(controllerId).orElse(null);
-        final Action installedAction = controllerManagement.getInstalledActionByTarget(target).orElse(null);
+        final Action installedAction = controllerManagement.findInstalledActionByTarget(target).orElse(null);
 
         checkAndCancelExpiredAction(activeAction);
 
@@ -170,16 +168,14 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final ResponseEntity<InputStream> result;
 
         final Target target = findTarget(controllerId);
-        final SoftwareModule module = controllerManagement.getSoftwareModule(softwareModuleId)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
-
+        final SoftwareModule module = controllerManagement.getSoftwareModule(softwareModuleId);
         if (checkModule(fileName, module)) {
             log.warn("Software module with id {} could not be found (1).", softwareModuleId);
             result = ResponseEntity.notFound().build();
         } else {
             // Artifact presence is ensured in 'checkModule'
             final Artifact artifact = module.getArtifactByFilename(fileName).orElseThrow(NoSuchElementException::new);
-            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash(), module.getId(), module.isEncrypted());
+            final ArtifactStream file = artifactManagement.getArtifactStream(artifact.getSha1Hash(), module.getId(), module.isEncrypted());
 
             final String ifMatch = RequestResponseContextHolder.getHttpServletRequest().getHeader(HttpHeaders.IF_MATCH);
             if (ifMatch != null && !HttpUtil.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
@@ -212,9 +208,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             final String fileName) {
         final Target target = findTarget(controllerId);
 
-        final SoftwareModule module = controllerManagement.getSoftwareModule(softwareModuleId)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
-
+        final SoftwareModule module = controllerManagement.getSoftwareModule(softwareModuleId);
         if (checkModule(fileName, module)) {
             log.warn("Software module with id {} could not be found (2).", softwareModuleId);
             return ResponseEntity.notFound().build();
@@ -596,9 +590,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     private ActionStatus logDownload(final HttpServletRequest request, final Target target, final Long module) {
-        final Action action = controllerManagement
-                .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module)
-                .orElseThrow(() -> new SoftwareModuleNotAssignedToTargetException(module, target.getControllerId()));
+        final Action action = controllerManagement.getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module);
         return controllerManagement.addInformationalActionStatus(
                 ActionStatusCreate.builder()
                         .actionId(action.getId())
@@ -750,16 +742,16 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     private Optional<DdiActionHistory> generateDdiActionHistory(final Action action, final Integer actionHistoryMessageCount) {
-        final List<String> actionHistoryMsgs = controllerManagement.getActionHistoryMessages(
+        final List<String> actionHistoryMessages = controllerManagement.getActionHistoryMessages(
                 action.getId(),
                 actionHistoryMessageCount == null ? Integer.parseInt(DdiRestConstants.NO_ACTION_HISTORY) : actionHistoryMessageCount);
-        return actionHistoryMsgs.isEmpty()
+        return actionHistoryMessages.isEmpty()
                 ? Optional.empty()
-                : Optional.of(new DdiActionHistory(action.getStatus().name(), actionHistoryMsgs));
+                : Optional.of(new DdiActionHistory(action.getStatus().name(), actionHistoryMessages));
     }
 
     private DdiAutoConfirmationState getAutoConfirmationState(final String controllerId) {
-        return confirmationManagement.getStatus(controllerId).map(status -> {
+        return confirmationManagement.findStatus(controllerId).map(status -> {
             final DdiAutoConfirmationState state = new DdiAutoConfirmationState(
                     true, status.getInitiator(), status.getRemark(), status.getActivatedAt());
             log.trace("Returning state auto-conf state active [initiator='{}' | activatedAt={}] for device {}",

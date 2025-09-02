@@ -22,11 +22,11 @@ import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
 
+import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
@@ -53,19 +53,17 @@ import org.springframework.util.ObjectUtils;
 
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "software-module-management" }, matchIfMissing = true)
-public class JpaSoftwareModuleManagement
-        extends AbstractJpaRepositoryWithMetadataManagement<JpaSoftwareModule, SoftwareModuleManagement.Create, SoftwareModuleManagement.Update, SoftwareModuleRepository, SoftwareModuleFields, MetadataValue, JpaSoftwareModule.JpaMetadataValue>
+public class JpaSoftwareModuleManagement extends
+        AbstractJpaRepositoryWithMetadataManagement<JpaSoftwareModule, SoftwareModuleManagement.Create, SoftwareModuleManagement.Update, SoftwareModuleRepository, SoftwareModuleFields, MetadataValue, JpaSoftwareModule.JpaMetadataValue>
         implements SoftwareModuleManagement<JpaSoftwareModule> {
 
     private final DistributionSetRepository distributionSetRepository;
     private final ArtifactManagement artifactManagement;
     private final QuotaManagement quotaManagement;
 
-    protected JpaSoftwareModuleManagement(
-            final SoftwareModuleRepository softwareModuleRepository,
-            final EntityManager entityManager,
-            final DistributionSetRepository distributionSetRepository,
-            final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement) {
+    protected JpaSoftwareModuleManagement(final SoftwareModuleRepository softwareModuleRepository, final EntityManager entityManager,
+            final DistributionSetRepository distributionSetRepository, final ArtifactManagement artifactManagement,
+            final QuotaManagement quotaManagement) {
         super(softwareModuleRepository, entityManager);
         this.distributionSetRepository = distributionSetRepository;
         this.artifactManagement = artifactManagement;
@@ -79,9 +77,7 @@ public class JpaSoftwareModuleManagement
         if (createdModules.stream().anyMatch(SoftwareModule::isEncrypted)) {
             // flush sm creation in order to get ids
             entityManager.flush();
-            createdModules.stream()
-                    .filter(SoftwareModule::isEncrypted)
-                    .map(SoftwareModule::getId)
+            createdModules.stream().filter(SoftwareModule::isEncrypted).map(SoftwareModule::getId)
                     .forEach(encryptedModuleId -> ArtifactEncryptionService.getInstance().addEncryptionSecrets(encryptedModuleId));
         }
 
@@ -103,48 +99,39 @@ public class JpaSoftwareModuleManagement
 
     @Override
     protected List<JpaSoftwareModule> softDelete(final Collection<JpaSoftwareModule> toDelete) {
-        return toDelete.stream()
-                .filter(swModule -> {
-                    final List<DistributionSet> assignedTo = swModule.getAssignedTo();
-                    if (assignedTo != null) {
-                        final List<DistributionSet> lockedDS = assignedTo.stream()
-                                .filter(DistributionSet::isLocked)
-                                .filter(ds -> !ds.isDeleted())
-                                .toList();
-                        if (!lockedDS.isEmpty()) {
-                            final StringBuilder sb = new StringBuilder("Part of ");
-                            if (lockedDS.size() == 1) {
-                                sb.append("a locked distribution set: ");
-                            } else {
-                                sb.append(lockedDS.size()).append(" locked distribution sets: ");
-                            }
-                            for (final DistributionSet ds : lockedDS) {
-                                sb.append(ds.getName()).append(":").append(ds.getVersion()).append(" (").append(ds.getId()).append("), ");
-                            }
-                            sb.delete(sb.length() - 2, sb.length());
-                            throw new LockedException(JpaSoftwareModule.class, swModule.getId(), "DELETE", sb.toString());
-                        }
+        return toDelete.stream().filter(swModule -> {
+            final List<DistributionSet> assignedTo = swModule.getAssignedTo();
+            if (assignedTo != null) {
+                final List<DistributionSet> lockedDS = assignedTo.stream().filter(DistributionSet::isLocked).filter(ds -> !ds.isDeleted())
+                        .toList();
+                if (!lockedDS.isEmpty()) {
+                    final StringBuilder sb = new StringBuilder("Part of ");
+                    if (lockedDS.size() == 1) {
+                        sb.append("a locked distribution set: ");
+                    } else {
+                        sb.append(lockedDS.size()).append(" locked distribution sets: ");
                     }
-                    final boolean isAssigned = !ObjectUtils.isEmpty(assignedTo);
-                    // schedule delete binary data of artifacts for every soft or not soft deleted module
-                    deleteGridFsArtifacts(swModule);
-                    return isAssigned;
-                })
-                .toList();
+                    for (final DistributionSet ds : lockedDS) {
+                        sb.append(ds.getName()).append(":").append(ds.getVersion()).append(" (").append(ds.getId()).append("), ");
+                    }
+                    sb.delete(sb.length() - 2, sb.length());
+                    throw new LockedException(JpaSoftwareModule.class, swModule.getId(), "DELETE", sb.toString());
+                }
+            }
+            final boolean isAssigned = !ObjectUtils.isEmpty(assignedTo);
+            // schedule delete binary data of artifacts for every soft or not soft deleted module
+            deleteGridFsArtifacts(swModule);
+            return isAssigned;
+        }).toList();
     }
 
     // called only with 'system code' access, so no need to check access control
     @Override
     public Map<Long, Map<String, String>> findMetaDataBySoftwareModuleIdsAndTargetVisible(final Collection<Long> ids) {
-        return jpaRepository.findVisibleMetadataByModuleIds(ids)
-                .stream()
-                .collect(Collectors.groupingBy(
-                        entry -> (Long) entry[0],
-                        Collectors.toMap(
-                                entry -> (String) entry[1],
-                                entry -> (String) entry[2],
-                                (existing, replacement) -> existing, // in case of duplicates, keep the first one
-                                HashMap::new)));
+        return jpaRepository.findVisibleMetadataByModuleIds(ids).stream().collect(Collectors.groupingBy(entry -> (Long) entry[0],
+                Collectors.toMap(entry -> (String) entry[1], entry -> (String) entry[2], (existing, replacement) -> existing,
+                        // in case of duplicates, keep the first one
+                        HashMap::new)));
     }
 
     @Override
@@ -177,10 +164,8 @@ public class JpaSoftwareModuleManagement
     public Page<JpaSoftwareModule> findByAssignedTo(final long distributionSetId, final Pageable pageable) {
         assertDistributionSetExists(distributionSetId);
 
-        return JpaManagementHelper.findAllWithCountBySpec(
-                jpaRepository,
-                Collections.singletonList(SoftwareModuleSpecification.byAssignedToDs(distributionSetId)),
-                pageable);
+        return JpaManagementHelper.findAllWithCountBySpec(jpaRepository,
+                Collections.singletonList(SoftwareModuleSpecification.byAssignedToDs(distributionSetId)), pageable);
     }
 
     /**
@@ -203,11 +188,11 @@ public class JpaSoftwareModuleManagement
     }
 
     private void deleteGridFsArtifacts(final JpaSoftwareModule swModule) {
-        jpaRepository.getAccessController().ifPresent(accessController ->
-                accessController.assertOperationAllowed(AccessController.Operation.DELETE, swModule));
+        jpaRepository.getAccessController()
+                .ifPresent(accessController -> accessController.assertOperationAllowed(AccessController.Operation.DELETE, swModule));
         final Set<String> sha1Hashes = swModule.getArtifacts().stream().map(Artifact::getSha1Hash).collect(Collectors.toSet());
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() ->
-                sha1Hashes.forEach(((JpaArtifactManagement) artifactManagement)::clearArtifactBinary));
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit()
+                .afterCommit(() -> sha1Hashes.forEach(((JpaArtifactManagement) artifactManagement)::clearArtifactBinary));
     }
 
     private void assertDistributionSetExists(final long distributionSetId) {

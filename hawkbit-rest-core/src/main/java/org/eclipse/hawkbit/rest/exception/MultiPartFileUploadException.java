@@ -23,6 +23,6 @@ public final class MultiPartFileUploadException extends AbstractServerRtExceptio
     private static final long serialVersionUID = 1L;
 
     public MultiPartFileUploadException(final Throwable cause) {
-        super(cause.getMessage(), SpServerError.SP_ARTIFACT_UPLOAD_FAILED, cause);
+        super(SpServerError.SP_ARTIFACT_UPLOAD_FAILED, cause.getMessage(), cause);
     }
 }

@@ -26,25 +26,15 @@ public final class IncompleteDistributionSetException extends AbstractServerRtEx
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Creates a new IncompleteDistributionSetException with
-     * {@link SpServerError#SP_DS_INCOMPLETE} error.
-     */
     public IncompleteDistributionSetException() {
         super(SpServerError.SP_DS_INCOMPLETE);
     }
 
-    /**
-     * @param cause for the exception
-     */
     public IncompleteDistributionSetException(final Throwable cause) {
         super(SpServerError.SP_DS_INCOMPLETE, cause);
     }
 
-    /**
-     * @param message of the error
-     */
     public IncompleteDistributionSetException(final String message) {
-        super(message, SpServerError.SP_DS_INCOMPLETE);
+        super(SpServerError.SP_DS_INCOMPLETE, message);
     }
 }

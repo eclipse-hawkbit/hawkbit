@@ -15,12 +15,12 @@ import java.util.function.Consumer;
 import jakarta.persistence.EntityManager;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.cache.TenancyCacheManager;
+import org.eclipse.hawkbit.artifact.ArtifactStorage;
+import org.eclipse.hawkbit.tenancy.cache.TenantCacheManager;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
-import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.CurrentTenantCacheKeyGenerator;
 import org.eclipse.hawkbit.repository.jpa.SystemManagementCacheKeyGenerator;
@@ -44,8 +44,8 @@ import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
-import org.eclipse.hawkbit.repository.report.model.SystemUsageReport;
-import org.eclipse.hawkbit.repository.report.model.SystemUsageReportWithTenants;
+import org.eclipse.hawkbit.repository.model.report.SystemUsageReport;
+import org.eclipse.hawkbit.repository.model.report.SystemUsageReportWithTenants;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,13 +98,13 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     private final SystemSecurityContext systemSecurityContext;
     private final TenantAware tenantAware;
     private final PlatformTransactionManager txManager;
-    private final TenancyCacheManager cacheManager;
+    private final TenantCacheManager cacheManager;
     private final RolloutStatusCache rolloutStatusCache;
     private final EntityManager entityManager;
     private final RepositoryProperties repositoryProperties;
 
     @Nullable
-    private ArtifactRepository artifactRepository;
+    private ArtifactStorage artifactRepository;
 
     @SuppressWarnings("squid:S00107")
     protected JpaSystemManagement(
@@ -116,7 +116,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
             final TenantConfigurationRepository tenantConfigurationRepository, final TenantMetaDataRepository tenantMetaDataRepository,
             final TenantStatsManagement systemStatsManagement, final SystemManagementCacheKeyGenerator currentTenantCacheKeyGenerator,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final PlatformTransactionManager txManager,
-            final TenancyCacheManager cacheManager, final RolloutStatusCache rolloutStatusCache,
+            final TenantCacheManager cacheManager, final RolloutStatusCache rolloutStatusCache,
             final EntityManager entityManager, final RepositoryProperties repositoryProperties,
             final JpaProperties properties) {
         this.targetRepository = targetRepository;
@@ -147,7 +147,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Autowired(required = false) // it's not required on dmf/ddi only instances
-    public void setArtifactRepository(ArtifactRepository artifactRepository) {
+    public void setArtifactRepository(ArtifactStorage artifactRepository) {
         this.artifactRepository = artifactRepository;
     }
 

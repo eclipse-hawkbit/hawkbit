@@ -305,21 +305,20 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
+    public Rollout get(final long rolloutId) {
+        return rolloutRepository.findById(rolloutId).map(Rollout.class::cast)
+                .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
+    }
+
+    @Override
     public Optional<Rollout> find(final long rolloutId) {
         return rolloutRepository.findById(rolloutId).map(Rollout.class::cast);
     }
 
     @Override
-    public Optional<Rollout> getByName(final String rolloutName) {
-        return rolloutRepository.findByName(rolloutName);
-    }
-
-    @Override
-    public Optional<Rollout> getWithDetailedStatus(final long rolloutId) {
-        final Optional<Rollout> rollout = find(rolloutId);
-        if (rollout.isEmpty()) {
-            return rollout;
-        }
+    public Rollout getWithDetailedStatus(final long rolloutId) {
+        final Rollout rollout = rolloutRepository.findById(rolloutId).map(Rollout.class::cast)
+                .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
 
         List<TotalTargetCountActionStatus> rolloutStatusCountItems = rolloutStatusCache.getRolloutStatus(rolloutId);
 
@@ -329,8 +328,8 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
 
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
-                rolloutStatusCountItems, rollout.get().getTotalTargets(), rollout.get().getActionType());
-        ((JpaRollout) rollout.get()).setTotalTargetCountStatus(totalTargetCountStatus);
+                rolloutStatusCountItems, rollout.getTotalTargets(), rollout.getActionType());
+        ((JpaRollout) rollout).setTotalTargetCountStatus(totalTargetCountStatus);
         return rollout;
     }
 
@@ -831,7 +830,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         if (quotaManagement.getMaxTargetsPerRolloutGroup() > 0) {
             validateTargetsInGroups(
                     srcGroups, rollout.getTargetFilterQuery(), rollout.getCreatedAt(),
-                    distributionSetType.getId()).getTargetsPerGroup().forEach(this::assertTargetsPerRolloutGroupQuota);
+                    distributionSetType.getId()).targetsPerGroup().forEach(this::assertTargetsPerRolloutGroupQuota);
         }
 
         // create and persist the groups (w/o filling them with targets)

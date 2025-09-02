@@ -65,7 +65,7 @@ public interface ControllerManagement {
      * @return {@link SoftwareModule} identified by ID
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<SoftwareModule> getSoftwareModule(long moduleId);
+    SoftwareModule getSoftwareModule(long moduleId);
 
     /**
      * Retrieves software module metadata where isTargetVisible.
@@ -115,8 +115,7 @@ public interface ControllerManagement {
     Optional<Action> findActiveActionWithHighestWeight(@NotEmpty String controllerId);
 
     /**
-     * Retrieves active {@link Action}s with highest weight that are assigned to
-     * a {@link Target}.
+     * Retrieves active {@link Action}s with the highest weight that are assigned to a {@link Target}.
      *
      * @param controllerId identifies the target to retrieve the action from
      * @param maxActionCount max size of returned list
@@ -182,7 +181,7 @@ public interface ControllerManagement {
      * @throws EntityNotFoundException if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Action> getActionForDownloadByTargetAndSoftwareModule(@NotEmpty String controllerId, long moduleId);
+    Action getActionForDownloadByTargetAndSoftwareModule(@NotEmpty String controllerId, long moduleId);
 
     /**
      * Returns configured polling interval at which the controller polls hawkBit server.
@@ -318,15 +317,6 @@ public interface ControllerManagement {
     void updateActionExternalRef(long actionId, @NotEmpty String externalRef);
 
     /**
-     * Retrieves an {@link Action} using {@link Action#getExternalRef()}
-     *
-     * @param externalRef of the action. See {@link Action#getExternalRef()}
-     * @return {@link Action} or {@code null} if it does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Action> getActionByExternalRef(@NotEmpty String externalRef);
-
-    /**
      * Delete a single target.
      *
      * @param controllerId of the target to delete
@@ -340,7 +330,7 @@ public interface ControllerManagement {
      * @param target the target the action is assigned to
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Action> getInstalledActionByTarget(@NotNull Target target);
+    Optional<Action> findInstalledActionByTarget(@NotNull Target target);
 
     /**
      * Activate auto confirmation for a given controllerId

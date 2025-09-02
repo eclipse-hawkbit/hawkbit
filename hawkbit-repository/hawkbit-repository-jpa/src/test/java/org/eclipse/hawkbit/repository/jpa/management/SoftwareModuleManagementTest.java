@@ -19,16 +19,14 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import jakarta.validation.ConstraintViolationException;
 
+import org.eclipse.hawkbit.artifact.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement.Create;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement.Update;
-import org.eclipse.hawkbit.repository.artifact.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.jpa.RandomGeneratedInputStream;
@@ -185,8 +183,9 @@ class SoftwareModuleManagementTest
         SoftwareModule moduleX = createSoftwareModuleWithArtifacts(osType, "modulex", "v1.0", 0);
 
         // [STEP2]: Create newArtifactX and add it to SoftwareModuleX
-        artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(source), moduleX.getId(), "artifactx",
-                false, artifactSize));
+        artifactManagement.create(new ArtifactUpload(
+                new ByteArrayInputStream(source), null, artifactSize, null,
+                moduleX.getId(), "artifactx", false));
         moduleX = softwareModuleManagement.find(moduleX.getId()).get();
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
@@ -194,8 +193,9 @@ class SoftwareModuleManagementTest
         SoftwareModule moduleY = createSoftwareModuleWithArtifacts(osType, "moduley", "v1.0", 0);
 
         // [STEP4]: Assign the same ArtifactX to SoftwareModuleY
-        artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(source), moduleY.getId(), "artifactx",
-                false, artifactSize));
+        artifactManagement.create(new ArtifactUpload(
+                new ByteArrayInputStream(source), null, artifactSize, null,
+                moduleY.getId(), "artifactx", false));
         moduleY = softwareModuleManagement.find(moduleY.getId()).get();
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
@@ -231,15 +231,18 @@ class SoftwareModuleManagementTest
         // [STEP1]: Create SoftwareModuleX and add a new ArtifactX
         SoftwareModule moduleX = createSoftwareModuleWithArtifacts(osType, "modulex", "v1.0", 0);
 
-        artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(source), moduleX.getId(), "artifactx", false, artifactSize));
+        artifactManagement.create(new ArtifactUpload(
+                new ByteArrayInputStream(source), null, artifactSize, null,
+                moduleX.getId(), "artifactx", false));
         moduleX = softwareModuleManagement.find(moduleX.getId()).get();
         final Artifact artifactX = moduleX.getArtifacts().iterator().next();
 
         // [STEP2]: Create SoftwareModuleY and add the same ArtifactX
         SoftwareModule moduleY = createSoftwareModuleWithArtifacts(osType, "moduley", "v1.0", 0);
 
-        artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(source), moduleY.getId(), "artifactx",
-                false, artifactSize));
+        artifactManagement.create(new ArtifactUpload(
+                new ByteArrayInputStream(source), null, artifactSize, null,
+                moduleY.getId(), "artifactx", false));
         moduleY = softwareModuleManagement.find(moduleY.getId()).get();
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
@@ -338,7 +341,8 @@ class SoftwareModuleManagementTest
     void lockSoftwareModuleApplied() {
         SoftwareModule softwareModule = testdataFactory.createSoftwareModule("sm-1");
         final Long softwareModuleId = softwareModule.getId();
-        artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(new byte[] { 1 }), softwareModuleId, "artifact1", false, 1));
+        artifactManagement.create(new ArtifactUpload(
+                new ByteArrayInputStream(new byte[] { 1 }), null, 1, null, softwareModuleId, "artifact1", false));
         // update software module reference since it is modified, old reference is stale
         final int artifactCount = (softwareModule = softwareModuleManagement.find(softwareModuleId).orElseThrow()).getArtifacts().size();
         assertThat(artifactCount).isNotZero();
@@ -346,8 +350,8 @@ class SoftwareModuleManagementTest
         assertThat(softwareModuleManagement.find(softwareModuleId).map(SoftwareModule::isLocked).orElse(false)).isTrue();
 
         // try add
-        final ArtifactUpload artifactUpload = new ArtifactUpload(new ByteArrayInputStream(new byte[] { 2 }), softwareModuleId, "artifact2",
-                false, 1);
+        final ArtifactUpload artifactUpload = new ArtifactUpload(
+                new ByteArrayInputStream(new byte[] { 2 }), null, 1, null, softwareModuleId, "artifact2", false);
         assertThatExceptionOfType(LockedException.class)
                 .as("Attempt to modify a locked SM artifacts should throw an exception")
                 .isThrownBy(() -> artifactManagement.create(artifactUpload));
@@ -425,8 +429,9 @@ class SoftwareModuleManagementTest
 
         final int artifactSize = 5 * 1024;
         for (int i = 0; i < numberArtifacts; i++) {
-            artifactManagement.create(new ArtifactUpload(new RandomGeneratedInputStream(artifactSize),
-                    softwareModule.getId(), "file" + (i + 1), false, artifactSize));
+            artifactManagement.create(new ArtifactUpload(
+                    new RandomGeneratedInputStream(artifactSize), null, artifactSize, null,
+                    softwareModule.getId(), "file" + (i + 1), false));
         }
 
         // Verify correct Creation of SoftwareModule and corresponding artifacts

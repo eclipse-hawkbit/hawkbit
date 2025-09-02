@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.event.entity;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 
 /**
- * Interface to indicate an entity event which contains at least an entity id.
+ * Marker interface to indicate an event which contains at least an entity id.
  */
 public interface EntityIdEvent extends TenantAwareEvent {
 
@@ -20,11 +20,6 @@ public interface EntityIdEvent extends TenantAwareEvent {
      * @return the class of the entity of this event.
      */
     String getEntityClass();
-
-    /**
-     * @return the class of entities interface
-     */
-    String getInterfaceClass();
 
     /**
      * @return the ID of the entity of this event.

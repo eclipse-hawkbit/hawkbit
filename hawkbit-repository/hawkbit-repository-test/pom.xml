@@ -48,7 +48,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-artifact-repository-filesystem</artifactId>
+            <artifactId>hawkbit-artifact-fs</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- Database -->

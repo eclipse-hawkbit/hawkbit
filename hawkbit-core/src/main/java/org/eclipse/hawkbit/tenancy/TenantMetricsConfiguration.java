@@ -19,6 +19,7 @@ import io.micrometer.core.instrument.Tag;
 import io.micrometer.observation.ObservationRegistry;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import org.eclipse.hawkbit.tenancy.TenantAware.TenantResolver;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
@@ -59,8 +60,9 @@ public class TenantMetricsConfiguration {
         public DefaultServerRequestObservationConvention serverRequestObservationConvention(final TenantResolver tenantResolver) {
             return new DefaultServerRequestObservationConvention() {
 
+                @NonNull
                 @Override
-                public KeyValues getLowCardinalityKeyValues(final ServerRequestObservationContext context) {
+                public KeyValues getLowCardinalityKeyValues(@NonNull final ServerRequestObservationContext context) {
                     // Make sure that KeyValues entries are already sorted by name for better performance
                     return KeyValues.of(exception(context), method(context), outcome(context), status(context), tenant(), uri(context));
                 }

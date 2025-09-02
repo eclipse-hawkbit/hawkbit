@@ -19,7 +19,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * After lifetime the data gets reloaded out of the database.
  */
 @Data
-@ConfigurationProperties("hawkbit.cache.global")
+@ConfigurationProperties("hawkbit.cache")
 public class CacheProperties {
 
     /**

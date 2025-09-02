@@ -54,7 +54,7 @@ class TargetTagManagementTest extends AbstractRepositoryManagementTest<TargetTag
         // toggle A only -> A is now assigned
         List<Target> result = assignTag(groupA, tag);
         assertThat(result)
-                .containsAll(targetManagement.getByControllerId(groupA.stream().map(Target::getControllerId).toList()))
+                .containsAll(targetManagement.findByControllerId(groupA.stream().map(Target::getControllerId).toList()))
                 .size().isEqualTo(20);
         assertThat(targetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent().stream().map(Target::getControllerId).sorted()
                 .toList())
@@ -64,7 +64,7 @@ class TargetTagManagementTest extends AbstractRepositoryManagementTest<TargetTag
         final Collection<Target> groupAB = concat(groupA, groupB);
         result = assignTag(groupAB, tag);
         assertThat(result)
-                .containsAll(targetManagement.getByControllerId(groupAB.stream().map(Target::getControllerId).toList()))
+                .containsAll(targetManagement.findByControllerId(groupAB.stream().map(Target::getControllerId).toList()))
                 .size().isEqualTo(40);
         assertThat(targetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent().stream().map(Target::getControllerId).sorted()
                 .toList())
@@ -73,7 +73,7 @@ class TargetTagManagementTest extends AbstractRepositoryManagementTest<TargetTag
         // toggle A+B -> both unassigned
         result = unassignTag(groupAB, tag);
         assertThat(result)
-                .containsAll(targetManagement.getByControllerId(groupAB.stream().map(Target::getControllerId).toList()))
+                .containsAll(targetManagement.findByControllerId(groupAB.stream().map(Target::getControllerId).toList()))
                 .size().isEqualTo(40);
         assertThat(targetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent()).isEmpty();
     }

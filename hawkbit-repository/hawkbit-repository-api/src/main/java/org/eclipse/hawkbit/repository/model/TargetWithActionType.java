@@ -34,49 +34,17 @@ public class TargetWithActionType {
     private final String maintenanceWindowTimeZone;
 
     /**
-     * Constructor that uses {@link ActionType#FORCED}
-     *
-     * @param controllerId ID if the controller
-     */
-    public TargetWithActionType(final String controllerId) {
-        this(controllerId, ActionType.FORCED, 0, null, false);
-    }
-
-    /**
-     * Constructor that leaves the maintenance info empty
+     * Constructor that also accepts maintenance schedule parameters and checks for validity of the specified maintenance schedule.
      *
      * @param controllerId for which the action is created.
      * @param actionType specified for the action.
-     * @param forceTime after that point in time the action is exposed as forced in case
-     *         the type is {@link ActionType#TIMEFORCED}
+     * @param forceTime after that point in time the action is exposed as forced in case the type is {@link ActionType#TIMEFORCED}
      * @param weight the priority of an {@link Action}
-     * @param confirmationRequired sets the confirmation required flag when starting the
-     *         {@link Action}
-     */
-    public TargetWithActionType(
-            final String controllerId, final ActionType actionType, final long forceTime,
-            final Integer weight, final boolean confirmationRequired) {
-        this(controllerId, actionType, forceTime, weight, null, null, null, confirmationRequired);
-    }
-
-    /**
-     * Constructor that also accepts maintenance schedule parameters and checks
-     * for validity of the specified maintenance schedule.
-     *
-     * @param controllerId for which the action is created.
-     * @param actionType specified for the action.
-     * @param forceTime after that point in time the action is exposed as forced in
-     *         case the type is {@link ActionType#TIMEFORCED}
-     * @param weight the priority of an {@link Action}
-     * @param maintenanceSchedule is the cron expression to be used for scheduling maintenance
-     *         windows. Expression has 6 mandatory fields and 1 last optional
-     *         field: "second minute hour dayofmonth month weekday year"
-     * @param maintenanceWindowDuration in HH:mm:ss format specifying the duration of a maintenance
-     *         window, for example 00:30:00 for 30 minutes
-     * @param maintenanceWindowTimeZone is the time zone specified as +/-hh:mm offset from UTC, for
-     *         example +02:00 for CET summer time and +00:00 for UTC. The
-     *         start time of a maintenance window calculated based on the
-     *         cron expression is relative to this time zone.
+     * @param maintenanceSchedule is the cron expression to be used for scheduling maintenance windows. Expression has 6 mandatory fields
+     *         and 1 last optional field: "second minute hour dayofmonth month weekday year"
+     * @param maintenanceWindowDuration in HH:mm:ss format specifying the duration of a maintenance window, for example 00:30:00 for 30 minutes
+     * @param maintenanceWindowTimeZone is the time zone specified as +/-hh:mm offset from UTC, for example +02:00 for CET summer time
+     *         and +00:00 for UTC. The start time of a maintenance window calculated based on the cron expression is relative to this time zone.
      * @throws InvalidMaintenanceScheduleException if the parameters do not define a valid maintenance schedule.
      */
     @SuppressWarnings("java:S107")
@@ -86,13 +54,13 @@ public class TargetWithActionType {
             final boolean confirmationRequired) {
         this.controllerId = controllerId;
         this.actionType = actionType != null ? actionType : ActionType.FORCED;
-        this.forceTime = actionType == ActionType.TIMEFORCED ?
-                forceTime : RepositoryModelConstants.NO_FORCE_TIME;
+        this.forceTime = actionType == ActionType.TIMEFORCED ? forceTime : RepositoryModelConstants.NO_FORCE_TIME;
         this.weight = weight;
-        this.confirmationRequired = confirmationRequired;
 
         this.maintenanceSchedule = maintenanceSchedule;
         this.maintenanceWindowDuration = maintenanceWindowDuration;
         this.maintenanceWindowTimeZone = maintenanceWindowTimeZone;
+
+        this.confirmationRequired = confirmationRequired;
     }
 }

@@ -26,44 +26,19 @@ public class RSQLParameterSyntaxException extends AbstractServerRtException {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Creates a new RSQLSyntaxException with
-     * {@link SpServerError#SP_REST_RSQL_SEARCH_PARAM_SYNTAX} error.
-     */
     public RSQLParameterSyntaxException() {
         super(SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX);
     }
 
-    /**
-     * Creates a new RSQLParameterSyntaxException with
-     * {@link SpServerError#SP_REST_RSQL_SEARCH_PARAM_SYNTAX} error.
-     *
-     * @param message the message of the exception
-     */
     public RSQLParameterSyntaxException(final String message) {
-        super(message, SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX);
+        super(SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX, message);
     }
 
-    /**
-     * Creates a new RSQLSyntaxException with
-     * {@link SpServerError#SP_REST_RSQL_SEARCH_PARAM_SYNTAX} error.
-     *
-     * @param cause the cause of this exception
-     */
     public RSQLParameterSyntaxException(final Throwable cause) {
         super(SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX, cause);
     }
 
-    /**
-     * Creates a new RSQLParameterSyntaxException with
-     * {@link SpServerError#SP_REST_RSQL_SEARCH_PARAM_SYNTAX} error.
-     *
-     * @param message the message of the exception
-     * @param cause the cause (which is saved for later retrieval by the
-     *         getCause() method). (A null value is permitted, and indicates
-     *         that the cause is nonexistent or unknown.)
-     */
     public RSQLParameterSyntaxException(final String message, final Throwable cause) {
-        super(message, SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX, cause);
+        super(SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX, message, cause);
     }
 }

@@ -55,7 +55,16 @@ public interface RolloutGroupManagement extends PermissionSupport {
      * @return the found {@link RolloutGroup} by its ID or {@code null} if it does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<RolloutGroup> get(long rolloutGroupId);
+    RolloutGroup get(long rolloutGroupId);
+
+    /**
+     * Get {@link RolloutGroup} by id.
+     *
+     * @param rolloutGroupId rollout group id
+     * @return rolloutGroup with details of targets count for different statuses
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    RolloutGroup getWithDetailedStatus(long rolloutGroupId);
 
     /**
      * Retrieves a page of {@link RolloutGroup}s filtered by a given {@link Rollout} and an RSQL filter.
@@ -119,15 +128,6 @@ public interface RolloutGroupManagement extends PermissionSupport {
      */
     @PreAuthorize(HAS_READ_ROLLOUT_AND_READ_TARGET)
     Page<Target> findTargetsOfRolloutGroupByRsql(long rolloutGroupId, @NotNull String rsql, @NotNull Pageable pageable);
-
-    /**
-     * Get {@link RolloutGroup} by id.
-     *
-     * @param rolloutGroupId rollout group id
-     * @return rolloutGroup with details of targets count for different statuses
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<RolloutGroup> getWithDetailedStatus(long rolloutGroupId);
 
     /**
      * Count targets of rollout group.

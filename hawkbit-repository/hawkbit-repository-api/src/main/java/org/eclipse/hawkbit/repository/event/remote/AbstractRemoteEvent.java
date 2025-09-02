@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.context.ApplicationEvent;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
@@ -25,6 +26,7 @@ public abstract class AbstractRemoteEvent extends ApplicationEvent {
 
     private final String id;
 
+    // for serialization libs like jackson
     protected AbstractRemoteEvent() {
         this("_empty_default_");
     }

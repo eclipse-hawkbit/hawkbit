@@ -27,18 +27,6 @@ public final class DistributionSetTypeSpecification {
 
     /**
      * {@link Specification} for retrieving {@link DistributionSetType} with
-     * given {@link DistributionSetType#getName()} including fetching the
-     * elements list.
-     *
-     * @param name to search
-     * @return the {@link DistributionSet} {@link Specification}
-     */
-    public static Specification<JpaDistributionSetType> byName(final String name) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(AbstractJpaNamedEntity_.name), name);
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link DistributionSetType} with
      * given {@link DistributionSetType#getKey()} including fetching the
      * elements list.
      *

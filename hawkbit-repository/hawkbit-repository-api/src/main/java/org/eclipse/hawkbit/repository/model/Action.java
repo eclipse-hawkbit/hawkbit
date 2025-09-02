@@ -88,9 +88,8 @@ public interface Action extends TenantAwareBaseEntity {
     Target getTarget();
 
     /**
-     * @return time in {@link TimeUnit#MILLISECONDS} after which
-     *         {@link #isForced()} switches to <code>true</code> in case of
-     *         {@link ActionType#TIMEFORCED}.
+     * @return time in {@link TimeUnit#MILLISECONDS} after which {@link #isForced()} switches to <code>true</code> in case
+     *         of {@link ActionType#TIMEFORCED}.
      */
     long getForcedTime();
 
@@ -140,22 +139,17 @@ public interface Action extends TenantAwareBaseEntity {
     String getInitiatedBy();
 
     /**
-     * @return the latest action status code. Performance optimization to not
-     *         query the action status table for the last action status code.
+     * @return the latest action status code. Performance optimization to not query the action status table for the last action status code.
      */
     Optional<Integer> getLastActionStatusCode();
 
     /**
-     * checks if the {@link #getForcedTime()} is hit by the given
-     * {@code hitTimeMillis}, by means if the given milliseconds are greater
+     * Checks if the {@link #getForcedTime()} is hit by the given {@code hitTimeMillis}, by means if the given milliseconds are greater
      * than the forcedTime.
      *
-     * @param hitTimeMillis the milliseconds, mostly the
-     *         {@link System#currentTimeMillis()}
-     * @return {@code true} if this {@link #getActionType()} is in
-     *         {@link ActionType#TIMEFORCED} and the given {@code hitTimeMillis}
-     *         is greater than the {@link #getForcedTime()} otherwise
-     *         {@code false}
+     * @param hitTimeMillis the milliseconds, mostly the {@link System#currentTimeMillis()}
+     * @return {@code true} if this {@link #getActionType()} is in {@link ActionType#TIMEFORCED} and the given {@code hitTimeMillis}
+     *         is greater than the {@link #getForcedTime()} otherwise {@code false}
      */
     default boolean isHitAutoForceTime(final long hitTimeMillis) {
         if (ActionType.TIMEFORCED == getActionType()) {
@@ -165,23 +159,17 @@ public interface Action extends TenantAwareBaseEntity {
     }
 
     /**
-     * Check if action type is either forced or time-forced <i>and</i> force-time is
-     * exceeded.
+     * Check if action type is either forced or time-forced <i>and</i> force-time is exceeded.
      *
-     * @return {@code true} if either the {@link #getActionType()} is
-     *         {@link ActionType#FORCED} or {@link ActionType#TIMEFORCED} but then
-     *         if the {@link #getForcedTime()} has been exceeded otherwise always
-     *         {@code false}
+     * @return {@code true} if either the {@link #getActionType()} is {@link ActionType#FORCED} or {@link ActionType#TIMEFORCED} but then
+     *         if the {@link #getForcedTime()} has been exceeded otherwise always {@code false}
      */
     default boolean isForcedOrTimeForced() {
-        switch (getActionType()) {
-            case FORCED:
-                return true;
-            case TIMEFORCED:
-                return isHitAutoForceTime(System.currentTimeMillis());
-            default:
-                return false;
-        }
+        return switch (getActionType()) {
+            case FORCED -> true;
+            case TIMEFORCED -> isHitAutoForceTime(System.currentTimeMillis());
+            default -> false;
+        };
     }
 
     /**
@@ -192,15 +180,14 @@ public interface Action extends TenantAwareBaseEntity {
     }
 
     /**
-     * @return true when action is downloadonly, false otherwise
+     * @return true when action is download-only, false otherwise
      */
     default boolean isDownloadOnly() {
         return ActionType.DOWNLOAD_ONLY == getActionType();
     }
 
     /**
-     * Returns the start time of next available maintenance window for the
-     * {@link Action} as {@link ZonedDateTime}. If a maintenance window is
+     * Returns the start time of next available maintenance window for the {@link Action} as {@link ZonedDateTime}. If a maintenance window is
      * already active, the start time of currently active window is returned.
      *
      * @return the start time as { @link Optional<ZonedDateTime>}.
@@ -208,32 +195,29 @@ public interface Action extends TenantAwareBaseEntity {
     Optional<ZonedDateTime> getMaintenanceWindowStartTime();
 
     /**
-     * The method checks whether the action has a maintenance schedule defined
-     * for it. A maintenance schedule defines a set of maintenance windows
-     * during which actual update can be performed. A valid schedule defines at
-     * least one maintenance window.
+     * The method checks whether the action has a maintenance schedule defined for it. A maintenance schedule defines a set of maintenance
+     * windows during which actual update can be performed. A valid schedule defines at least one maintenance window.
      *
      * @return true if action has a maintenance schedule, else false.
      */
     boolean hasMaintenanceSchedule();
 
     /**
-     * The method checks whether the maintenance schedule has already lapsed for
-     * the action, i.e. there are no more windows available for maintenance.
-     * Controller manager uses the method to check if the maintenance schedule
-     * has lapsed, and automatically cancels the action if it is lapsed.
+     * The method checks whether the maintenance schedule has already lapsed for the action, i.e. there are no more windows available for
+     * maintenance.
+     * Controller manager uses the method to check if the maintenance schedule has lapsed, and automatically cancels the action if it is lapsed.
      *
      * @return true if maintenance schedule has lapsed, else false.
      */
     boolean isMaintenanceScheduleLapsed();
 
     /**
-     * The method checks whether a maintenance window is available for the
-     * action to proceed. If it is available, a 'true' value is returned. The
-     * maintenance window is considered available: 1) If there is no maintenance
-     * schedule at all, in which case device can start update any time after
-     * download is finished; or 2) the current time is within a scheduled
-     * maintenance window start and end time.
+     * The method checks whether a maintenance window is available for the action to proceed. If it is available, a 'true' value is returned.
+     * The maintenance window is considered available:
+     * <ol>
+     *     <li>if there is no maintenance schedule at all, in which case device can start update any time after download is finished; or</li>
+     *     <li>the current time is within a scheduled maintenance window start and end time
+     * </ol>
      *
      * @return true if maintenance window is available, else false.
      */
@@ -248,12 +232,12 @@ public interface Action extends TenantAwareBaseEntity {
 
     /**
      * Action status as reported by the controller.
-     *
-     * Be aware that JPA is persisting the ordinal number of the enum by means
-     * the ordered number in the enum. So don't re-order the enums within the
-     * Status enum declaration!
+     * <p/>
+     * Be aware that JPA is persisting the ordinal number of the enum by means the ordered number in the enum. So don't re-order the enums
+     * within the Status enum declaration!
      */
     enum Status {
+
         /**
          * Action is finished successfully for this target.
          */
@@ -285,7 +269,7 @@ public interface Action extends TenantAwareBaseEntity {
         CANCELING,
 
         /**
-         * Action has been send to the target.
+         * Action has been sent to the target.
          */
         RETRIEVED,
 
@@ -295,8 +279,7 @@ public interface Action extends TenantAwareBaseEntity {
         DOWNLOAD,
 
         /**
-         * Action is in waiting state, e.g. the action is scheduled in a rollout
-         * but not yet activated.
+         * Action is in waiting state, e.g. the action is scheduled in a rollout but not yet activated.
          */
         SCHEDULED,
 
@@ -306,8 +289,7 @@ public interface Action extends TenantAwareBaseEntity {
         CANCEL_REJECTED,
 
         /**
-         * Action has been downloaded by the target and waiting for update to
-         * start.
+         * Action has been downloaded by the target and waiting for update to start.
          */
         DOWNLOADED,
 
@@ -321,8 +303,9 @@ public interface Action extends TenantAwareBaseEntity {
      * The action type for this action relation.
      */
     enum ActionType {
+
         /**
-         * Forced action execution. Target is advised to executed immediately.
+         * Forced action execution. Target is advised to be executed immediately.
          */
         FORCED,
 
@@ -332,9 +315,7 @@ public interface Action extends TenantAwareBaseEntity {
         SOFT,
 
         /**
-         * {@link #SOFT} action execution until
-         * {@link Action#isHitAutoForceTime(long)} is reached, {@link #FORCED}
-         * after that.
+         * {@link #SOFT} action execution until {@link Action#isHitAutoForceTime(long)} is reached, {@link #FORCED} after that.
          */
         TIMEFORCED,
 

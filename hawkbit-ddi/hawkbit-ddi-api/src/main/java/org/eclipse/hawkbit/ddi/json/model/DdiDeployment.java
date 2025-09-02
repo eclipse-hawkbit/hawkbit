@@ -100,7 +100,7 @@ public class DdiDeployment {
          */
         FORCED("forced");
 
-        private String name;
+        private final String name;
 
         HandlingType(final String name) {
             this.name = name;
@@ -128,7 +128,7 @@ public class DdiDeployment {
          */
         UNAVAILABLE("unavailable");
 
-        private String status;
+        private final String status;
 
         DdiMaintenanceWindowStatus(final String status) {
             this.status = status;

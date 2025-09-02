@@ -722,7 +722,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
         for (int index = 0; index < size; index++) {
             String name = "TestTypePOST" + index;
-            final TargetType created = targetTypeManagement.getByName(name).get();
+            final TargetType created = findTargetTypeByName(name);
 
             assertThat(JsonPath.compile("$[ ?(@.name=='" + name + "') ].id")
                     .read(mvcResult.getResponse().getContentAsString()).toString()).contains(String.valueOf(created.getId()));

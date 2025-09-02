@@ -44,8 +44,7 @@ public class TargetAssignDistributionSetEvent extends AbstractAssignmentEvent {
      */
     public TargetAssignDistributionSetEvent(
             final String tenant, final long distributionSetId, final List<Action> a, final boolean maintenanceWindowAvailable) {
-        super(tenant, distributionSetId,
-                a.stream().filter(action -> action.getDistributionSet().getId().longValue() == distributionSetId).toList());
+        super(tenant, distributionSetId, a.stream().filter(action -> action.getDistributionSet().getId() == distributionSetId).toList());
         this.distributionSetId = distributionSetId;
         this.maintenanceWindowAvailable = maintenanceWindowAvailable;
     }

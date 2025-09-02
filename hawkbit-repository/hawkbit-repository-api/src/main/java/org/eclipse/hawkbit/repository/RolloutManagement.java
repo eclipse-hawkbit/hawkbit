@@ -209,6 +209,15 @@ public interface RolloutManagement extends PermissionSupport {
     List<Long> findActiveRollouts();
 
     /**
+     * Retrieves a specific rollout by its ID. Throws exception if not found.
+     *
+     * @param rolloutId the ID of the rollout to retrieve
+     * @return the found rollout or empty if rollout with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    Rollout get(long rolloutId);
+
+    /**
      * Retrieves a specific rollout by its ID.
      *
      * @param rolloutId the ID of the rollout to retrieve
@@ -218,22 +227,13 @@ public interface RolloutManagement extends PermissionSupport {
     Optional<Rollout> find(long rolloutId);
 
     /**
-     * Retrieves a specific rollout by its name.
-     *
-     * @param rolloutName the name of the rollout to retrieve
-     * @return the found rollout or empty if rollout with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<Rollout> getByName(@NotEmpty String rolloutName);
-
-    /**
      * Get count of targets in different status in rollout.
      *
      * @param rolloutId rollout id
      * @return rollout details of targets count for different statuses
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<Rollout> getWithDetailedStatus(long rolloutId);
+    Rollout getWithDetailedStatus(long rolloutId);
 
     /**
      * Checks if rollout with given ID exists.

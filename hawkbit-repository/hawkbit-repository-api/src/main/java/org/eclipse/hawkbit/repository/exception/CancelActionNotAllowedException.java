@@ -27,25 +27,7 @@ public final class CancelActionNotAllowedException extends AbstractServerRtExcep
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Creates a new CancelActionNotAllowed with
-     * {@link SpServerError#SP_ACTION_NOT_CANCELABLE} error.
-     */
-    public CancelActionNotAllowedException() {
-        super(SpServerError.SP_ACTION_NOT_CANCELABLE);
-    }
-
-    /**
-     * @param cause for the exception
-     */
-    public CancelActionNotAllowedException(final Throwable cause) {
-        super(SpServerError.SP_ACTION_NOT_CANCELABLE, cause);
-    }
-
-    /**
-     * @param message of the error
-     */
     public CancelActionNotAllowedException(final String message) {
-        super(message, SpServerError.SP_ACTION_NOT_CANCELABLE);
+        super(SpServerError.SP_ACTION_NOT_CANCELABLE, message);
     }
 }

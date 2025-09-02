@@ -12,13 +12,12 @@ package org.eclipse.hawkbit.repository.model;
 import java.util.Set;
 
 /**
- * A {@link TargetType} is an abstract definition for
- * {@link Target}
+ * A {@link TargetType} is an abstract definition for {@link Target}
  */
 public interface TargetType extends Type {
 
     /**
-     * Target type doesn't support soft-delete so all target type instandces re not deleted.
+     * Target type doesn't support soft-delete so all target type instances are not deleted.
      *
      * @return <code>false</code>
      */
@@ -38,7 +37,6 @@ public interface TargetType extends Type {
      * Unassigns a {@link DistributionSetType} from {@link TargetType}
      *
      * @param dsTypeId that will be removed from {@link TargetType}
-     * @return the resulting target type
      */
     void removeDistributionSetType(final Long dsTypeId);
 }

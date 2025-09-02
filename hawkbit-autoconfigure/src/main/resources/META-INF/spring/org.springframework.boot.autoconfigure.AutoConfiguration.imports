@@ -1,8 +1,8 @@
-org.eclipse.hawkbit.autoconfigure.artifact.ArtifactUrlHandlerAutoConfiguration
+org.eclipse.hawkbit.autoconfigure.artifact.PropertyBasedArtifactUrlResolverAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.cache.CacheAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.repository.event.EventPublisherAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.repository.JpaRepositoryAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.scheduling.AsyncConfigurerAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.scheduling.ExecutorAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.security.SecurityAutoConfiguration
-org.eclipse.hawkbit.autoconfigure.security.InMemoryUserManagementAutoConfiguration
+org.eclipse.hawkbit.autoconfigure.security.StaticUserManagementAutoConfiguration

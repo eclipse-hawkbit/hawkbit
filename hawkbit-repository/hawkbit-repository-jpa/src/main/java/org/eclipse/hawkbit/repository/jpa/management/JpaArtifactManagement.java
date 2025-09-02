@@ -16,23 +16,22 @@ import java.util.Optional;
 import jakarta.persistence.EntityManager;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.artifact.ArtifactStorage;
+import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryptionService;
+import org.eclipse.hawkbit.artifact.exception.ArtifactBinaryNotFoundException;
+import org.eclipse.hawkbit.artifact.exception.ArtifactDeleteFailedException;
+import org.eclipse.hawkbit.artifact.exception.ArtifactStoreException;
+import org.eclipse.hawkbit.artifact.exception.ArtifactUploadFailedException;
+import org.eclipse.hawkbit.artifact.exception.HashNotMatchException;
+import org.eclipse.hawkbit.artifact.model.ArtifactHashes;
+import org.eclipse.hawkbit.artifact.model.ArtifactStream;
+import org.eclipse.hawkbit.artifact.model.StoredArtifactInfo;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
-import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
-import org.eclipse.hawkbit.repository.artifact.encryption.ArtifactEncryptionService;
-import org.eclipse.hawkbit.repository.artifact.exception.ArtifactBinaryNotFoundException;
-import org.eclipse.hawkbit.repository.artifact.exception.ArtifactDeleteFailedException;
-import org.eclipse.hawkbit.repository.artifact.exception.ArtifactStoreException;
-import org.eclipse.hawkbit.repository.artifact.exception.ArtifactUploadFailedException;
-import org.eclipse.hawkbit.repository.artifact.exception.HashNotMatchException;
-import org.eclipse.hawkbit.repository.artifact.model.AbstractDbArtifact;
-import org.eclipse.hawkbit.repository.artifact.model.DbArtifact;
-import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
-import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
-import org.eclipse.hawkbit.repository.exception.InvalidSHA256HashException;
-import org.eclipse.hawkbit.repository.jpa.EncryptionAwareDbArtifact;
+import org.eclipse.hawkbit.repository.exception.InvalidMd5HashException;
+import org.eclipse.hawkbit.repository.exception.InvalidSha1HashException;
+import org.eclipse.hawkbit.repository.exception.InvalidSha256HashException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -69,7 +68,7 @@ import org.springframework.validation.annotation.Validated;
 public class JpaArtifactManagement implements ArtifactManagement {
 
     private final LocalArtifactRepository localArtifactRepository;
-    private final ArtifactRepository artifactRepository;
+    private final ArtifactStorage artifactRepository;
     private final SoftwareModuleRepository softwareModuleRepository;
     private final EntityManager entityManager;
     private final PlatformTransactionManager txManager;
@@ -78,7 +77,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     protected JpaArtifactManagement(
             final LocalArtifactRepository localArtifactRepository,
-            final Optional<ArtifactRepository> artifactRepository,
+            final Optional<ArtifactStorage> artifactRepository,
             final SoftwareModuleRepository softwareModuleRepository,
             final EntityManager entityManager,
             final PlatformTransactionManager txManager,
@@ -102,42 +101,40 @@ public class JpaArtifactManagement implements ArtifactManagement {
             throw new UnsupportedOperationException();
         }
 
-        final long moduleId = artifactUpload.getModuleId();
+        final long moduleId = artifactUpload.moduleId();
         QuotaHelper.assertAssignmentQuota(
                 moduleId, 1, quotaManagement.getMaxArtifactsPerSoftwareModule(),
                 Artifact.class, SoftwareModule.class,
                 // get all artifacts without user context
-                softwareModuleId -> localArtifactRepository
-                        .count(null, ArtifactSpecifications.bySoftwareModuleId(softwareModuleId)));
+                softwareModuleId -> localArtifactRepository.count(null, ArtifactSpecifications.bySoftwareModuleId(softwareModuleId)));
 
         final JpaSoftwareModule softwareModule = softwareModuleRepository.getById(moduleId);
 
-        final String filename = artifactUpload.getFilename();
+        final String filename = artifactUpload.filename();
         final Artifact existing = softwareModule.getArtifactByFilename(filename).orElse(null);
         if (existing != null) {
-            if (artifactUpload.isOverrideExisting()) {
+            if (artifactUpload.overrideExisting()) {
                 log.debug("overriding existing artifact with new filename {}", filename);
             } else {
                 throw new EntityAlreadyExistsException("File with that name already exists in the Software Module");
             }
         }
 
-        // touch it to update the lock revision because we are modifying the
-        // DS indirectly, it will, also check UPDATE access
+        // touch it to update the lock revision because we are modifying the DS indirectly, it will, also check UPDATE access
         JpaManagementHelper.touch(entityManager, softwareModuleRepository, softwareModule);
 
-        final AbstractDbArtifact artifact = storeArtifact(artifactUpload, softwareModule.isEncrypted());
+        final StoredArtifactInfo artifact = storeArtifact(artifactUpload, softwareModule.isEncrypted());
         try {
-            return storeArtifactMetadata(softwareModule, filename, artifact, existing);
+            return storeArtifactMetadata(softwareModule, filename, artifact.getHashes(), artifact.getSize(), existing);
         } catch (final Exception e) {
-            artifactRepository.deleteBySha1(tenantAware.getCurrentTenant(), artifact.getHashes().getSha1());
+            artifactRepository.deleteBySha1(tenantAware.getCurrentTenant(), artifact.getHashes().sha1());
             throw e;
         }
     }
 
     @SuppressWarnings("java:S2201") // java:S2201 - the idea is to just check if the artifact exists
     @Override
-    public DbArtifact loadArtifactBinary(final String sha1Hash, final long softwareModuleId, final boolean isEncrypted) {
+    public ArtifactStream getArtifactStream(final String sha1Hash, final long softwareModuleId, final boolean isEncrypted) {
         if (artifactRepository == null) {
             throw new UnsupportedOperationException();
         }
@@ -146,8 +143,15 @@ public class JpaArtifactManagement implements ArtifactManagement {
         // check access to the software module and if artifact belongs to it
         for (final Artifact artifact : softwareModuleRepository.getById(softwareModuleId).getArtifacts()) {
             if (artifact.getSha1Hash().equals(sha1Hash)) {
-                final DbArtifact dbArtifact = artifactRepository.getBySha1(tenant, sha1Hash);
-                return isEncrypted ? wrapInEncryptionAwareDbArtifact(softwareModuleId, dbArtifact) : dbArtifact;
+                if (isEncrypted) {
+                    final ArtifactEncryptionService encryptionService = ArtifactEncryptionService.getInstance();
+                    return new ArtifactStream(
+                            encryptionService.decryptArtifact(softwareModuleId, artifactRepository.getBySha1(tenant, sha1Hash)),
+                            artifact.getSize() - encryptionService.encryptionSizeOverhead(),
+                            artifact.getSha1Hash());
+                } else {
+                    return new ArtifactStream(artifactRepository.getBySha1(tenant, sha1Hash), artifact.getSize(), artifact.getSha1Hash());
+                }
             }
         }
         throw new ArtifactBinaryNotFoundException(sha1Hash);
@@ -208,27 +212,23 @@ public class JpaArtifactManagement implements ArtifactManagement {
         });
     }
 
-    private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload, final boolean isSmEncrypted) {
-        final InputStream stream = artifactUpload.getInputStream();
+    private StoredArtifactInfo storeArtifact(final ArtifactUpload artifactUpload, final boolean isSmEncrypted) {
+        final InputStream stream = artifactUpload.inputStream();
         try (final InputStream wrappedStream = wrapInQuotaStream(
-                isSmEncrypted
-                        ? wrapInEncryptionStream(artifactUpload.getModuleId(), stream)
-                        : stream)) {
+                isSmEncrypted ? wrapInEncryptionStream(artifactUpload.moduleId(), stream) : stream)) {
             return artifactRepository.store(
-                    tenantAware.getCurrentTenant(), wrappedStream, artifactUpload.getFilename(), artifactUpload.getContentType(),
-                    new DbArtifactHash(
-                            artifactUpload.getProvidedSha1Sum(),
-                            artifactUpload.getProvidedMd5Sum(),
-                            artifactUpload.getProvidedSha256Sum()));
+                    tenantAware.getCurrentTenant(),
+                    wrappedStream, artifactUpload.filename(),
+                    artifactUpload.contentType(), artifactUpload.hash());
         } catch (final ArtifactStoreException | IOException e) {
             throw new ArtifactUploadFailedException(e);
         } catch (final HashNotMatchException e) {
             if (e.getHashFunction().equals(HashNotMatchException.SHA1)) {
-                throw new InvalidSHA1HashException(e.getMessage(), e);
+                throw new InvalidSha1HashException(e.getMessage(), e);
             } else if (e.getHashFunction().equals(HashNotMatchException.SHA256)) {
-                throw new InvalidSHA256HashException(e.getMessage(), e);
+                throw new InvalidSha256HashException(e.getMessage(), e);
             } else {
-                throw new InvalidMD5HashException(e.getMessage(), e);
+                throw new InvalidMd5HashException(e.getMessage(), e);
             }
         }
     }
@@ -243,33 +243,23 @@ public class JpaArtifactManagement implements ArtifactManagement {
         final long currentlyUsed = localArtifactRepository.sumOfNonDeletedArtifactSize().orElse(0L);
         final long maxArtifactSizeTotal = quotaManagement.getMaxArtifactStorage();
 
-        return new FileSizeAndStorageQuotaCheckingInputStream(in, maxArtifactSize,
-                maxArtifactSizeTotal - currentlyUsed);
-    }
-
-    private DbArtifact wrapInEncryptionAwareDbArtifact(final long softwareModuleId, final DbArtifact dbArtifact) {
-        if (dbArtifact == null) {
-            return null;
-        }
-        final ArtifactEncryptionService encryptionService = ArtifactEncryptionService.getInstance();
-        return new EncryptionAwareDbArtifact(dbArtifact,
-                stream -> encryptionService.decryptArtifact(softwareModuleId, stream),
-                encryptionService.encryptionSizeOverhead());
+        return new FileSizeAndStorageQuotaCheckingInputStream(in, maxArtifactSize, maxArtifactSizeTotal - currentlyUsed);
     }
 
     private Artifact storeArtifactMetadata(
-            final SoftwareModule softwareModule, final String providedFilename, final AbstractDbArtifact result,
+            final SoftwareModule softwareModule, final String providedFilename,
+            final ArtifactHashes hash, final long fileSize,
             final Artifact existing) {
         final JpaArtifact artifact;
         if (existing == null) {
-            artifact = new JpaArtifact(result.getHashes().getSha1(), providedFilename, softwareModule);
+            artifact = new JpaArtifact(hash.sha1(), providedFilename, softwareModule);
         } else {
             artifact = (JpaArtifact) existing;
-            artifact.setSha1Hash(result.getHashes().getSha1());
+            artifact.setSha1Hash(hash.sha1());
         }
-        artifact.setMd5Hash(result.getHashes().getMd5());
-        artifact.setSha256Hash(result.getHashes().getSha256());
-        artifact.setFileSize(result.getSize());
+        artifact.setMd5Hash(hash.md5());
+        artifact.setSha256Hash(hash.sha256());
+        artifact.setFileSize(fileSize);
 
         log.debug("storing new artifact into repository {}", artifact);
         return localArtifactRepository.save(AccessController.Operation.CREATE, artifact);

@@ -11,38 +11,13 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.util.List;
 
-import jakarta.validation.constraints.NotNull;
-
-import lombok.Data;
-
 /**
- * Represents information to validate the correct distribution of targets to
- * rollout groups.
+ * Represents information to validate the correct distribution of targets into rollout groups.
+ *
+ * @param totalTargets The total amount of targets in a {@link Rollout}
+ * @param targetsPerGroup A list containing the count of targets for each {@link RolloutGroup}
  */
-@Data
-public class RolloutGroupsValidation {
-
-    /**
-     * The total amount of targets in a {@link Rollout}
-     */
-    private final long totalTargets;
-
-    /**
-     * A list containing the count of targets for each {@link RolloutGroup}
-     */
-    private final List<Long> targetsPerGroup;
-
-    /**
-     * Instantiates a new validation result
-     *
-     * @param totalTargets The total amount of targets in a {@link Rollout}
-     * @param targetsPerGroup A list containing the count of targets for each
-     *         {@link RolloutGroup}
-     */
-    public RolloutGroupsValidation(final long totalTargets, @NotNull final List<Long> targetsPerGroup) {
-        this.totalTargets = totalTargets;
-        this.targetsPerGroup = targetsPerGroup;
-    }
+public record RolloutGroupsValidation(long totalTargets, List<Long> targetsPerGroup) {
 
     /**
      * @return the count of targets that are in groups

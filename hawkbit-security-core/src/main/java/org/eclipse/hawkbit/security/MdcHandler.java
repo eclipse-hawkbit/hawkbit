@@ -77,7 +77,7 @@ public class MdcHandler {
 
         final String tenant;
         if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails) {
-            tenant = tenantAwareAuthenticationDetails.getTenant();
+            tenant = tenantAwareAuthenticationDetails.tenant();
         } else {
             tenant = null;
         }

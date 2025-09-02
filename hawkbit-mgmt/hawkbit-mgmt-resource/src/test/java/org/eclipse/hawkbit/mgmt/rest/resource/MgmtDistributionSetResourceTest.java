@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
@@ -858,7 +859,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .version("anotherVersion").requiredMigrationStep(true).build());
 
         // load also lazy stuff
-        set = distributionSetManagement.getWithDetails(set.getId()).get();
+        set = distributionSetManagement.getWithDetails(set.getId());
 
         assertThat(distributionSetManagement.findAll(PAGE)).hasSize(1);
 
@@ -943,11 +944,11 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 testdataFactory.generateDistributionSet("three", "three", standardDsType, List.of(os, jvm, ah), true));
 
         final DistributionSet one = distributionSetManagement
-                .getWithDetails(distributionSetManagement.findByRsql("name==one", PAGE).getContent().get(0).getId()).orElseThrow();
+                .getWithDetails(distributionSetManagement.findByRsql("name==one", PAGE).getContent().get(0).getId());
         final DistributionSet two = distributionSetManagement
-                .getWithDetails(distributionSetManagement.findByRsql("name==two", PAGE).getContent().get(0).getId()).orElseThrow();
+                .getWithDetails(distributionSetManagement.findByRsql("name==two", PAGE).getContent().get(0).getId());
         final DistributionSet three = distributionSetManagement
-                .getWithDetails(distributionSetManagement.findByRsql("name==three", PAGE).getContent().get(0).getId()).orElseThrow();
+                .getWithDetails(distributionSetManagement.findByRsql("name==three", PAGE).getContent().get(0).getId());
 
         assertThat((Object) JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/distributionsets/" + one.getId());
@@ -1702,11 +1703,11 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
         assertThat(targetFilterQueryManagement.find(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
                 .isNull();
-        assertThat(rolloutManagement.find(rollout.getId()).get().getStatus()).isIn(RolloutStatus.STOPPING,
+        assertThat(rolloutManagement.get(rollout.getId()).getStatus()).isIn(RolloutStatus.STOPPING,
                 RolloutStatus.STOPPED);
         //then enforce executor to stop the rollout and check
         rolloutHandler.handleAll();
-        assertThat(rolloutManagement.find(rollout.getId()).get().getStatus()).isIn(RolloutStatus.STOPPED);
+        assertThat(rolloutManagement.get(rollout.getId()).getStatus()).isIn(RolloutStatus.STOPPED);
 
         for (final Target target : targets) {
             assertThat(targetManagement.find(target.getId()).get().getUpdateStatus())
@@ -1735,17 +1736,16 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                         .content(jsonObject.toString()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        assertThat(targetFilterQueryManagement.find(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
-                .isNull();
-        assertThat(rolloutManagement.find(rollout.getId()).get().getStatus()).isIn(RolloutStatus.DELETING,
-                RolloutStatus.DELETED);
+        assertThat(targetFilterQueryManagement.find(targetFilterQuery.getId()).get().getAutoAssignDistributionSet()).isNull();
+        final Long rolloutId = rollout.getId();
+        assertThat(rolloutManagement.get(rolloutId).getStatus()).isIn(RolloutStatus.DELETING, RolloutStatus.DELETED);
         //then enforce executor to stop the rollout and check
         rolloutHandler.handleAll();
         // assert rollout is deleted
-        assertThat(rolloutManagement.find(rollout.getId())).isEmpty();
+        assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> rolloutManagement.get(rolloutId));
 
         for (final Target target : targets) {
-            assertThat(targetManagement.find(target.getId()).get().getUpdateStatus())
+            assertThat(targetManagement.get(target.getId()).getUpdateStatus())
                     .isEqualTo(TargetUpdateStatus.IN_SYNC);
             assertThat(deploymentManagement.findActionsByTarget(target.getControllerId(), PageRequest.of(0, 100))
                     .getNumberOfElements()).isEqualTo(1);
@@ -1769,11 +1769,10 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                         .content(jsonObject.toString()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        assertThat(rolloutManagement.find(rollout.getId()).get().getStatus()).isIn(RolloutStatus.RUNNING);
+        assertThat(rolloutManagement.get(rollout.getId()).getStatus()).isIn(RolloutStatus.RUNNING);
 
         for (final Target target : targets) {
-            assertThat(targetManagement.find(target.getId()).get().getUpdateStatus())
-                    .isEqualTo(TargetUpdateStatus.PENDING);
+            assertThat(targetManagement.get(target.getId()).getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
             assertThat(deploymentManagement.findActionsByTarget(target.getControllerId(), PageRequest.of(0, 100))
                     .getNumberOfElements()).isEqualTo(1);
             assertThat(deploymentManagement.findActionsByTarget(target.getControllerId(), PageRequest.of(0, 100))

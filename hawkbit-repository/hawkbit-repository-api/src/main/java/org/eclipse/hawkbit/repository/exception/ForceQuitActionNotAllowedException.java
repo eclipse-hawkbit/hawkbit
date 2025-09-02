@@ -26,25 +26,7 @@ public final class ForceQuitActionNotAllowedException extends AbstractServerRtEx
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Creates a new CancelActionNotAllowed with
-     * {@link SpServerError#SP_ACTION_NOT_CANCELABLE} error.
-     */
-    public ForceQuitActionNotAllowedException() {
-        super(SpServerError.SP_ACTION_NOT_FORCE_QUITABLE);
-    }
-
-    /**
-     * @param cause for the exception
-     */
-    public ForceQuitActionNotAllowedException(final Throwable cause) {
-        super(SpServerError.SP_ACTION_NOT_FORCE_QUITABLE, cause);
-    }
-
-    /**
-     * @param message of the error
-     */
     public ForceQuitActionNotAllowedException(final String message) {
-        super(message, SpServerError.SP_ACTION_NOT_FORCE_QUITABLE);
+        super(SpServerError.SP_ACTION_NOT_FORCE_QUITABLE, message);
     }
 }

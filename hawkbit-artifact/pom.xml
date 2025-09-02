@@ -24,6 +24,6 @@
 
     <modules>
         <module>hawkbit-artifact-api</module>
-        <module>hawkbit-artifact-repository-filesystem</module>
+        <module>hawkbit-artifact-fs</module>
     </modules>
 </project>

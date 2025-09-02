@@ -66,7 +66,7 @@ public interface DistributionSetManagement<T extends DistributionSet>
      * @return {@link DistributionSet}
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
-    Optional<T> getWithDetails(long id);
+    T getWithDetails(long id);
 
     @PreAuthorize(HAS_READ_REPOSITORY)
     boolean shouldLockImplicitly(final DistributionSet distributionSet);
@@ -169,7 +169,7 @@ public interface DistributionSetManagement<T extends DistributionSet>
      * @return the page with the found {@link DistributionSet}
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
-    Optional<T> findByNameAndVersion(@NotEmpty String distributionName, @NotEmpty String version);
+    T findByNameAndVersion(@NotEmpty String distributionName, @NotEmpty String version);
 
     /**
      * Retrieves {@link DistributionSet}s by filtering on the given parameters.

@@ -60,7 +60,7 @@ class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
 
         final Target targetToBeCreated = testdataFactory.createTarget("targetToBeCreated");
 
-        final Target loadedTarget = targetManagement.getByControllerId(targetToBeCreated.getControllerId()).get();
+        final Target loadedTarget = targetManagement.getByControllerId(targetToBeCreated.getControllerId());
         assertThat(postLoadEntityListener.getEntity()).isNotNull();
         assertThat(postLoadEntityListener.getEntity()).isEqualTo(loadedTarget);
     }

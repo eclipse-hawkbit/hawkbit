@@ -10,8 +10,7 @@
 package org.eclipse.hawkbit.repository.model;
 
 /**
- * Unstructured tenant configuration elements. Can be used to store arbitrary
- * tenant configuration elements.
+ * Unstructured tenant configuration elements. Can be used to store arbitrary tenant configuration elements.
  */
 public interface TenantConfiguration extends TenantAwareBaseEntity {
 

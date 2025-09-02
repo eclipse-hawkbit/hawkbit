@@ -28,38 +28,7 @@ public class NoWeightProvidedInMultiAssignmentModeException extends AbstractServ
 
     private static final SpServerError THIS_ERROR = SpServerError.SP_NO_WEIGHT_PROVIDED_IN_MULTIASSIGNMENT_MODE;
 
-    /**
-     * Default constructor.
-     */
     public NoWeightProvidedInMultiAssignmentModeException() {
         super(THIS_ERROR);
-    }
-
-    /**
-     * Parameterized constructor.
-     *
-     * @param cause of the exception
-     */
-    public NoWeightProvidedInMultiAssignmentModeException(final Throwable cause) {
-        super(THIS_ERROR, cause);
-    }
-
-    /**
-     * Parameterized constructor.
-     *
-     * @param message of the exception
-     * @param cause of the exception
-     */
-    public NoWeightProvidedInMultiAssignmentModeException(final String message, final Throwable cause) {
-        super(message, THIS_ERROR, cause);
-    }
-
-    /**
-     * Parameterized constructor.
-     *
-     * @param message of the exception
-     */
-    public NoWeightProvidedInMultiAssignmentModeException(final String message) {
-        super(message, THIS_ERROR);
     }
 }

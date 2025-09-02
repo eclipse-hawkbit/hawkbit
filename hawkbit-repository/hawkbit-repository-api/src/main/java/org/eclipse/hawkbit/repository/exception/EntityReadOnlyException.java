@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- * the {@link EntityReadOnlyException} is thrown when a entity is in read only mode and a user tries to change it.
+ * the {@link EntityReadOnlyException} is thrown when an entity is in read only mode and a user tries to change it.
  */
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -28,38 +28,19 @@ public class EntityReadOnlyException extends AbstractServerRtException {
 
     private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_ENTITY_READ_ONLY;
 
-    /**
-     * Default constructor.
-     */
     public EntityReadOnlyException() {
         super(THIS_ERROR);
     }
 
-    /**
-     * Parameterized constructor.
-     *
-     * @param cause of the exception
-     */
     public EntityReadOnlyException(final Throwable cause) {
         super(THIS_ERROR, cause);
     }
 
-    /**
-     * Parameterized constructor.
-     *
-     * @param message of the exception
-     * @param cause of the exception
-     */
     public EntityReadOnlyException(final String message, final Throwable cause) {
-        super(message, THIS_ERROR, cause);
+        super(THIS_ERROR, message, cause);
     }
 
-    /**
-     * Parameterized constructor.
-     *
-     * @param message of the exception
-     */
     public EntityReadOnlyException(final String message) {
-        super(message, THIS_ERROR);
+        super(THIS_ERROR, message);
     }
 }

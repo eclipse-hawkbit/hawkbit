@@ -29,25 +29,7 @@ public class UnsupportedSoftwareModuleForThisDistributionSetException extends Ab
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Creates a new UnsupportedSoftwareModuleForThisDistributionSetException
-     * with {@link SpServerError#SP_DS_MODULE_UNSUPPORTED} error.
-     */
     public UnsupportedSoftwareModuleForThisDistributionSetException() {
         super(SpServerError.SP_DS_MODULE_UNSUPPORTED);
-    }
-
-    /**
-     * @param cause for the exception
-     */
-    public UnsupportedSoftwareModuleForThisDistributionSetException(final Throwable cause) {
-        super(SpServerError.SP_DS_MODULE_UNSUPPORTED, cause);
-    }
-
-    /**
-     * @param message of the error
-     */
-    public UnsupportedSoftwareModuleForThisDistributionSetException(final String message) {
-        super(message, SpServerError.SP_DS_MODULE_UNSUPPORTED);
     }
 }

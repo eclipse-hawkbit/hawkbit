@@ -57,8 +57,7 @@ public class DdiConfirmationBase extends RepresentationModel<DdiConfirmationBase
     private final DdiAutoConfirmationState autoConfirm;
 
     @JsonCreator
-    public DdiConfirmationBase(
-            @JsonProperty(value = "autoConfirm", required = true) final DdiAutoConfirmationState autoConfirm) {
+    public DdiConfirmationBase(@JsonProperty(value = "autoConfirm", required = true) final DdiAutoConfirmationState autoConfirm) {
         this.autoConfirm = autoConfirm;
     }
 }

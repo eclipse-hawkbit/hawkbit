@@ -51,14 +51,7 @@ public interface TargetTypeManagement<T extends TargetType>
      * @return {@link TargetType}
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
-    Optional<TargetType> getByKey(@NotEmpty String key);
-
-    /**
-     * @param name as {@link TargetType#getName()}
-     * @return {@link TargetType}
-     */
-    @PreAuthorize(HAS_READ_REPOSITORY)
-    Optional<TargetType> getByName(@NotEmpty String name);
+    Optional<TargetType> findByKey(@NotEmpty String key);
 
     /**
      * @param id Target type ID

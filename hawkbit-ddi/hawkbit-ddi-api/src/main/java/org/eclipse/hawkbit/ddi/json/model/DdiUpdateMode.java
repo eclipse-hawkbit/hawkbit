@@ -13,8 +13,7 @@ package org.eclipse.hawkbit.ddi.json.model;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * Enumerates the supported update modes. Each mode represents an attribute
- * update strategy.
+ * Enumerates the supported update modes. Each mode represents an attribute update strategy.
  *
  * @see DdiConfigData
  */

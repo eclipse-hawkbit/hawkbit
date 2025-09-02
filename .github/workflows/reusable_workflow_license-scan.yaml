@@ -50,7 +50,7 @@ jobs:
       - name: Check dependency licenses with dash tool (and open issues to Dash IP lab, doesn't fail)
         if: ${{ inputs.open_tickets }}
         run: |
-          mvn license-tool:license-check -Ddash.fail=false -PcheckLicense -Ddash.iplab.token=${GITLAB_API_TOKEN} --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test'
+          mvn license-tool:license-check -Ddash.fail=false -PcheckLicense -Ddash.iplab.token=${GITLAB_API_TOKEN}
           CHANGED_FILES_COUNT=$(git status --short | wc -l)
           CHANGED_FILES_COUNT=${CHANGED_FILES_COUNT//[[:space:]]/}
           echo "Number of changed files: ${CHANGED_FILES_COUNT}"

@@ -22,7 +22,6 @@ import java.util.Optional;
 import jakarta.validation.ValidationException;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
@@ -39,6 +38,8 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.artifact.model.ArtifactHashes;
+import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
@@ -65,7 +66,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     private final ArtifactManagement artifactManagement;
     private final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement;
     private final SoftwareModuleTypeManagement<? extends SoftwareModuleType> softwareModuleTypeManagement;
-    private final ArtifactUrlHandler artifactUrlHandler;
+    private final ArtifactUrlResolver artifactUrlHandler;
     private final MgmtSoftwareModuleMapper mgmtSoftwareModuleMapper;
     private final SystemManagement systemManagement;
 
@@ -73,7 +74,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             final ArtifactManagement artifactManagement,
             final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
             final SoftwareModuleTypeManagement<? extends SoftwareModuleType> softwareModuleTypeManagement,
-            final ArtifactUrlHandler artifactUrlHandler,
+            final ArtifactUrlResolver artifactUrlHandler,
             final MgmtSoftwareModuleMapper mgmtSoftwareModuleMapper,
             final SystemManagement systemManagement) {
         this.artifactManagement = artifactManagement;
@@ -98,14 +99,17 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         }
 
         try (final InputStream in = file.getInputStream()) {
-            final Artifact result = artifactManagement.create(new ArtifactUpload(in, softwareModuleId, fileName,
-                    md5Sum == null ? null : md5Sum.toLowerCase(), sha1Sum == null ? null : sha1Sum.toLowerCase(),
-                    sha256Sum == null ? null : sha256Sum.toLowerCase(), false, file.getContentType(), file.getSize()));
+            final Artifact result = artifactManagement.create(new ArtifactUpload(
+                    in, file.getContentType(), file.getSize(),
+                    new ArtifactHashes(
+                            sha1Sum == null ? null : sha1Sum.toLowerCase(),
+                            md5Sum == null ? null : md5Sum.toLowerCase(),
+                            sha256Sum == null ? null : sha256Sum.toLowerCase()),
+                    softwareModuleId, fileName, false));
 
-            final MgmtArtifact reponse = MgmtSoftwareModuleMapper.toResponse(result);
-            MgmtSoftwareModuleMapper.addLinks(result, reponse);
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(reponse);
+            final MgmtArtifact response = MgmtSoftwareModuleMapper.toResponse(result);
+            MgmtSoftwareModuleMapper.addLinks(result, response);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (final IOException e) {
             log.error("Failed to store artifact", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

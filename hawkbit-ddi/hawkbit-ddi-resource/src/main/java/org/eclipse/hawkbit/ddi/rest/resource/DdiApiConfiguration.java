@@ -17,8 +17,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Controller;
 
 /**
- * Enable {@link ComponentScan} in the resource package to setup all
- * {@link Controller} annotated classes and setup the REST-Resources for the
+ * Enable {@link ComponentScan} in the resource package to set up all {@link Controller} annotated classes and set up the REST-Resources for the
  * Direct Device Integration API.
  */
 @Configuration

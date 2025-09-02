@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.springframework.lang.Nullable;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -27,16 +28,10 @@ public class DdiActivateAutoConfirmation {
             "confirming future actions", example = "exampleRemark")
     private final String remark;
 
-    /**
-     * Constructor.
-     *
-     * @param initiator can be null
-     * @param remark can be null
-     */
     @JsonCreator
     public DdiActivateAutoConfirmation(
-            @JsonProperty(value = "initiator") final String initiator,
-            @JsonProperty(value = "remark") final String remark) {
+            @Nullable @JsonProperty(value = "initiator") final String initiator,
+            @Nullable @JsonProperty(value = "remark") final String remark) {
         this.initiator = initiator;
         this.remark = remark;
     }

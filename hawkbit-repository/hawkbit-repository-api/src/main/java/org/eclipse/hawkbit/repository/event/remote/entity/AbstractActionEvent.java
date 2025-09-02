@@ -13,6 +13,7 @@ import java.io.Serial;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.springframework.lang.Nullable;
@@ -20,6 +21,7 @@ import org.springframework.lang.Nullable;
 /**
  * Defines the remote event of creating a new {@link Action}.
  */
+@NoArgsConstructor(force = true) // for serialization libs like jackson
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString
@@ -31,15 +33,6 @@ public abstract class AbstractActionEvent extends RemoteEntityEvent<Action> {
     private final Long targetId;
     private final Long rolloutId;
     private final Long rolloutGroupId;
-
-    /**
-     * Default constructor for serialization libs like jackson.
-     */
-    protected AbstractActionEvent() {
-        this.targetId = null;
-        this.rolloutId = null;
-        this.rolloutGroupId = null;
-    }
 
     protected AbstractActionEvent(
             final Action action, @Nullable final Long targetId, @Nullable final Long rolloutId, @Nullable final Long rolloutGroupId) {

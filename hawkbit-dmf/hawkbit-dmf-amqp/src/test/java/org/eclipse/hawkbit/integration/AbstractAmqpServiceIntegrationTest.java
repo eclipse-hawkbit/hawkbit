@@ -188,7 +188,7 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
     protected void assertDmfDownloadAndUpdateRequest(
             final DmfDownloadAndUpdateRequest request, final Set<SoftwareModule> softwareModules, final String controllerId) {
         assertSoftwareModules(softwareModules, request.getSoftwareModules());
-        final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.getByControllerId(controllerId));
+        final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.findByControllerId(controllerId));
         assertThat(updatedTarget).isNotNull();
         assertThat(updatedTarget.getSecurityToken()).isEqualTo(request.getTargetSecurityToken());
     }
@@ -266,8 +266,9 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
     protected void registerAndAssertTargetWithExistingTenant(final String controllerId, final String name,
             final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus,
             final String createdBy, final Map<String, String> attributes) {
-        registerAndAssertTargetWithExistingTenant(controllerId, name, existingTargetsAfterCreation,
-                expectedTargetStatus, createdBy, attributes, () -> targetManagement.getByControllerId(controllerId));
+        registerAndAssertTargetWithExistingTenant(
+                controllerId, name, existingTargetsAfterCreation, expectedTargetStatus, createdBy, attributes,
+                () -> targetManagement.findByControllerId(controllerId));
     }
 
     protected void registerSameTargetAndAssertBasedOnVersion(final String controllerId,
@@ -413,7 +414,7 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
 
     protected void assertConfirmRequest(final DmfConfirmRequest request, final Set<SoftwareModule> softwareModules, final String controllerId) {
         assertSoftwareModules(softwareModules, request.getSoftwareModules());
-        final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.getByControllerId(controllerId));
+        final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.findByControllerId(controllerId));
         assertThat(updatedTarget).isNotNull();
         assertThat(updatedTarget.getSecurityToken()).isEqualTo(request.getTargetSecurityToken());
     }

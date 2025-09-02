@@ -32,7 +32,7 @@ import org.springframework.hateoas.RepresentationModel;
         * **download** - HTTPs Download resource for artifacts. The resource supports partial download as specified by RFC7233 (range requests). Keep in mind that the target needs to have the artifact assigned in order to be granted permission to download.
         * **md5sum** - HTTPs Download resource for MD5SUM file is an optional auto generated artifact that is especially useful for Linux based devices on order to check artifact consistency after download by using the md5sum command line tool. The MD5 and SHA1 are in addition available as metadata in the deployment command itself.
         * **download-http** - HTTP Download resource for artifacts. The resource supports partial download as specified by RFC7233 (range requests). Keep in mind that the target needs to have the artifact assigned in order to be granted permission to download. (note: anonymous download needs to be enabled on the service account for non-TLS access)
-        * **md5sum-http** - HTTP Download resource for MD5SUM file is an optional auto generated artifact that is especially useful for Linux based devices on order to check artifact consistency after download by using the md5sum command line tool. The MD5 and SHA1 are in addition available as metadata in the deployment command itself. (note: anonymous download needs to be enabled on the service account for non-TLS access)    
+        * **md5sum-http** - HTTP Download resource for MD5SUM file is an optional auto generated artifact that is especially useful for Linux based devices on order to check artifact consistency after download by using the md5sum command line tool. The MD5 and SHA1 are in addition available as metadata in the deployment command itself. (note: anonymous download needs to be enabled on the service account for non-TLS access)
         """, example = """
         {
           "filename" : "binaryFile",
@@ -47,10 +47,10 @@ import org.springframework.hateoas.RepresentationModel;
               "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/40/filename/binaryFile"
             },
             "download-http" : {
-              "href" : "http://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/40/filename/binaryFile"
+              "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/40/filename/binaryFile"
             },
             "md5sum-http" : {
-              "href" : "http://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/40/filename/binaryFile.MD5SUM"
+              "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/40/filename/binaryFile.MD5SUM"
             },
             "md5sum" : {
               "href" : "https://link-to-cdn.com/api/v1/TENANT_ID/download/controller/CONTROLLER_ID/softwaremodules/40/filename/binaryFile.MD5SUM"

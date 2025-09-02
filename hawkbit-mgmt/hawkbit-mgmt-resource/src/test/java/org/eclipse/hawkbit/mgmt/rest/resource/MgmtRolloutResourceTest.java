@@ -30,13 +30,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionFactory;
 import org.eclipse.hawkbit.exception.SpServerError;
+import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtRestModelMapper;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -74,6 +74,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
 /**
@@ -238,9 +239,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final List<Target> allTargets = new ArrayList<>(successTargets);
         allTargets.addAll(failedTargets);
 
-        postRollout("rolloutToBeRetried", 1, dsA.getId(), "id==retryRolloutTarget*", 10, Action.ActionType.FORCED);
+        final long rolloutToBeRetriedId = postRollout("rolloutToBeRetried", 1, dsA.getId(), "id==retryRolloutTarget*", 10,
+                Action.ActionType.FORCED);
 
-        Rollout rollout = rolloutManagement.getByName("rolloutToBeRetried").orElseThrow();
+        Rollout rollout = rolloutManagement.get(rolloutToBeRetriedId);
 
         // no scheduler so invoke here
         rolloutHandler.handleAll();
@@ -265,13 +267,18 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
             }
         }
 
-        //retry rollout
-        mvc.perform(post("/rest/v1/rollouts/{rolloutId}/retry", rollout.getId()))
+        // retry rollout
+        final MvcResult result = mvc.perform(post("/rest/v1/rollouts/{rolloutId}/retry", rollout.getId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().is(201));
+                .andExpect(status().is(201))
+                .andReturn();
+        final long rolloutRetryId = OBJECT_MAPPER
+                .readerFor(MgmtRolloutResponseBody.class)
+                .<MgmtRolloutResponseBody> readValue(result.getResponse().getContentAsString())
+                .getId();
 
         //search for _retried suffix
-        Rollout retriedRollout = rolloutManagement.getByName(rollout.getName() + "_retry").orElseThrow();
+        Rollout retriedRollout = rolloutManagement.get(rolloutRetryId);
         //assert 4 targets involved
         rolloutHandler.handleAll();
 
@@ -303,8 +310,9 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     void retryNotFinishedRolloutShouldNotBeAllowed() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         testdataFactory.createTargets("retryRolloutTarget-", 10);
-        postRollout("rolloutToBeRetried", 1, dsA.getId(), "id==retryRolloutTarget*", 10, Action.ActionType.FORCED);
-        Rollout rollout = rolloutManagement.getByName("rolloutToBeRetried").orElseThrow();
+        final long rolloutToBeRetried = postRollout("rolloutToBeRetried", 1, dsA.getId(), "id==retryRolloutTarget*", 10,
+                Action.ActionType.FORCED);
+        Rollout rollout = rolloutManagement.get(rolloutToBeRetried);
         // no scheduler so invoke here
         rolloutHandler.handleAll();
         rolloutManagement.start(rollout.getId());
@@ -1072,7 +1080,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSetLocked("");
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout1 = createRollout("rollout1", 4, dsA, "controllerId==rollout*",false);
+        final Rollout rollout1 = createRollout("rollout1", 4, dsA, "controllerId==rollout*", false);
         final Rollout rollout2 = createRollout("rollout2", 1, dsA, "controllerId==rollout*", false);
 
         rolloutManagement.start(rollout1.getId());
@@ -1946,7 +1954,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     private void awaitRunningState(final Long rolloutId) {
         awaitRollout().until(() -> SecurityContextSwitch
-                .callAsPrivileged(() -> rolloutManagement.find(rolloutId).orElseThrow(NoSuchElementException::new))
+                .callAsPrivileged(() -> rolloutManagement.get(rolloutId))
                 .getStatus().equals(RolloutStatus.RUNNING));
     }
 
@@ -1966,22 +1974,21 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     private void assertStatusIs(final Rollout rollout, final RolloutStatus expected) {
-        final Optional<Rollout> updatedRollout = rolloutManagement.find(rollout.getId());
-        assertThat(updatedRollout).get().extracting(Rollout::getStatus).isEqualTo(expected);
+        assertThat(rolloutManagement.get(rollout.getId()).getStatus()).isEqualTo(expected);
     }
 
-    private void postRollout(final String name, final int groupSize, final Long distributionSetId,
+    private long postRollout(final String name, final int groupSize, final Long distributionSetId,
             final String targetFilterQuery, final int targets, final Action.ActionType type) throws Exception {
-        postRollout(name, groupSize, distributionSetId, targetFilterQuery, targets, type, null, null);
+        return postRollout(name, groupSize, distributionSetId, targetFilterQuery, targets, type, null, null);
     }
 
-    private void postRollout(final String name, final int groupSize, final Long distributionSetId,
+    private long postRollout(final String name, final int groupSize, final Long distributionSetId,
             final String targetFilterQuery, final int targets, final Action.ActionType type, final Long startTime,
             final Long forceTime) throws Exception {
-        postRollout(name, groupSize, distributionSetId, targetFilterQuery, targets, type, startTime, forceTime, false, null, 0);
+        return postRollout(name, groupSize, distributionSetId, targetFilterQuery, targets, type, startTime, forceTime, false, null, 0);
     }
 
-    private void postRollout(final String name, final int groupSize, final Long distributionSetId,
+    private long postRollout(final String name, final int groupSize, final Long distributionSetId,
             final String targetFilterQuery, final int targets, final Action.ActionType type, final Long startTime,
             final Long forceTime, boolean isDynamic, String dynamicGroupSuffix, int dynamicGroupTargetsCount) throws Exception {
         final String actionType = MgmtRestModelMapper.convertActionType(type).getName();
@@ -1989,7 +1996,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 new RolloutGroupConditionBuilder().withDefaults().build(), null, actionType, null, startTime, forceTime,
                 null, isDynamic, dynamicGroupSuffix, dynamicGroupTargetsCount);
 
-        mvc.perform(post("/rest/v1/rollouts").content(rollout).contentType(MediaType.APPLICATION_JSON)
+        final MvcResult result = mvc.perform(post("/rest/v1/rollouts").content(rollout).contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
@@ -2004,10 +2011,8 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.lastModifiedBy", equalTo("bumlux")))
                 .andExpect(jsonPath("$.lastModifiedAt", not(equalTo(0))))
                 .andExpect(jsonPath("$.totalTargets", equalTo(targets)))
-                .andExpect(startTime != null ? jsonPath("$.startAt", equalTo(startTime.intValue()))
-                        : jsonPath("$.startAt").doesNotExist())
-                .andExpect(forceTime != null ? jsonPath("$.forcetime", equalTo(forceTime.intValue()))
-                        : jsonPath("$.forcetime", equalTo(0)))
+                .andExpect(startTime != null ? jsonPath("$.startAt", equalTo(startTime.intValue())) : jsonPath("$.startAt").doesNotExist())
+                .andExpect(forceTime != null ? jsonPath("$.forcetime", equalTo(forceTime.intValue())) : jsonPath("$.forcetime", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.running", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.notstarted", equalTo(targets)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.scheduled", equalTo(0)))
@@ -2019,8 +2024,12 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$._links.pause.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/pause"))))
                 .andExpect(jsonPath("$.dynamic", equalTo(isDynamic)))
                 .andExpect(jsonPath("$._links.resume.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/resume"))))
-                .andExpect(jsonPath(
-                        "$._links.groups.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))));
+                .andExpect(jsonPath("$._links.groups.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))))
+                .andReturn();
+        return OBJECT_MAPPER
+                .readerFor(MgmtRolloutResponseBody.class)
+                .<MgmtRolloutResponseBody> readValue(result.getResponse().getContentAsString())
+                .getId();
     }
 
     private Rollout createRollout(
@@ -2039,7 +2048,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         // Run here, because Scheduler is disabled during tests
         rolloutHandler.handleAll();
 
-        return rolloutManagement.find(rollout.getId()).orElseThrow(NoSuchElementException::new);
+        return rolloutManagement.get(rollout.getId());
     }
 
     private void triggerNextGroupAndExpect(final Rollout rollout, final ResultMatcher expect) throws Exception {

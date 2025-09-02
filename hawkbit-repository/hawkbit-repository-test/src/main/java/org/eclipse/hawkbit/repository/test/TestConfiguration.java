@@ -17,13 +17,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.eclipse.hawkbit.ContextAware;
+import org.eclipse.hawkbit.artifact.ArtifactStorage;
+import org.eclipse.hawkbit.artifact.fs.FileArtifactProperties;
+import org.eclipse.hawkbit.artifact.fs.FileArtifactStorage;
+import org.eclipse.hawkbit.artifact.urlresolver.PropertyBasedArtifactUrlResolver;
+import org.eclipse.hawkbit.artifact.urlresolver.PropertyBasedArtifactUrlResolverProperties;
+import org.eclipse.hawkbit.tenancy.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.im.authentication.Hierarchy;
-import org.eclipse.hawkbit.repository.artifact.ArtifactFilesystemProperties;
-import org.eclipse.hawkbit.repository.artifact.ArtifactFilesystemRepository;
-import org.eclipse.hawkbit.repository.artifact.ArtifactRepository;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandlerProperties;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.PropertyBasedArtifactUrlHandler;
-import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
@@ -71,7 +71,7 @@ import org.springframework.security.concurrent.DelegatingSecurityContextSchedule
  */
 @Configuration
 @EnableConfigurationProperties({
-        DdiSecurityProperties.class, ArtifactUrlHandlerProperties.class, ArtifactFilesystemProperties.class,
+        DdiSecurityProperties.class, PropertyBasedArtifactUrlResolverProperties.class, FileArtifactProperties.class,
         HawkbitSecurityProperties.class, ControllerPollProperties.class, TenantConfigurationProperties.class })
 @Profile("test")
 @EnableAutoConfiguration
@@ -123,8 +123,8 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    ArtifactRepository artifactRepository(final ArtifactFilesystemProperties artifactFilesystemProperties) {
-        return new ArtifactFilesystemRepository(artifactFilesystemProperties);
+    ArtifactStorage artifactRepository(final FileArtifactProperties artifactFilesystemProperties) {
+        return new FileArtifactStorage(artifactFilesystemProperties);
     }
 
     /** @return the {@link org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch} to be injected. */
@@ -134,8 +134,9 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    PropertyBasedArtifactUrlHandler testPropertyBasedArtifactUrlHandler(final ArtifactUrlHandlerProperties urlHandlerProperties) {
-        return new PropertyBasedArtifactUrlHandler(urlHandlerProperties, "");
+    PropertyBasedArtifactUrlResolver testPropertyBasedArtifactUrlHandler(
+            final PropertyBasedArtifactUrlResolverProperties urlHandlerProperties) {
+        return new PropertyBasedArtifactUrlResolver(urlHandlerProperties, "");
     }
 
     @Bean

@@ -15,7 +15,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,28 +22,27 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.eclipse.hawkbit.repository.RepositoryProperties;
-import org.eclipse.hawkbit.repository.TargetManagement.Create;
-import org.eclipse.hawkbit.repository.artifact.ArtifactFilesystem;
-import org.eclipse.hawkbit.repository.artifact.model.AbstractDbArtifact;
-import org.eclipse.hawkbit.repository.artifact.model.DbArtifactHash;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrl;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
+import org.eclipse.hawkbit.artifact.model.ArtifactHashes;
+import org.eclipse.hawkbit.artifact.model.StoredArtifactInfo;
+import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrl;
+import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistributionSetServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
-import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -105,7 +103,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
         senderService = Mockito.mock(DefaultAmqpMessageSenderService.class);
 
-        final ArtifactUrlHandler artifactUrlHandlerMock = Mockito.mock(ArtifactUrlHandler.class);
+        final ArtifactUrlResolver artifactUrlHandlerMock = Mockito.mock(ArtifactUrlResolver.class);
         when(artifactUrlHandlerMock.getUrls(any(), any()))
                 .thenReturn(Collections.singletonList(new ArtifactUrl("http", "download", "http://mockurl")));
 
@@ -178,24 +176,25 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     void testSendDownloadRequest() {
         DistributionSet dsA = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         SoftwareModule module = dsA.getModules().iterator().next();
-        final List<AbstractDbArtifact> receivedList = new ArrayList<>();
+        final List<StoredArtifactInfo> receivedList = new ArrayList<>();
         for (final Artifact artifact : testdataFactory.createArtifacts(module.getId())) {
-            receivedList.add(new ArtifactFilesystem(new File("./test"), artifact.getSha1Hash(),
-                    new DbArtifactHash(artifact.getSha1Hash(), null, null), artifact.getSize(), null));
+            receivedList.add(new StoredArtifactInfo(
+                    null, artifact.getSize(),
+                    new ArtifactHashes(artifact.getSha1Hash(), artifact.getMd5Hash(), artifact.getSha256Hash())));
         }
-        module = softwareModuleManagement.find(module.getId()).get();
-        dsA = distributionSetManagement.find(dsA.getId()).get();
+        module = softwareModuleManagement.get(module.getId());
+        dsA = distributionSetManagement.get(dsA.getId());
 
         final Action action = createAction(dsA);
 
         Mockito.when(rabbitTemplate.convertSendAndReceive(any())).thenReturn(receivedList);
 
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(action);
-        final TargetAssignDistributionSetServiceEvent targetAssignDistributionSetServiceEvent = new TargetAssignDistributionSetServiceEvent(targetAssignDistributionSetEvent);
+        final TargetAssignDistributionSetServiceEvent targetAssignDistributionSetServiceEvent = new TargetAssignDistributionSetServiceEvent(
+                targetAssignDistributionSetEvent);
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetServiceEvent);
         final Message sendMessage = getCaptureAddressEvent(targetAssignDistributionSetEvent);
-        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage,
-                action.getId());
+        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage, action.getId());
 
         assertThat(downloadAndUpdateRequest.getSoftwareModules())
                 .as("DownloadAndUpdateRequest event should contains 3 software modules")
@@ -231,7 +230,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     void sendUpdateAttributesRequest() {
         final String amqpUri = "amqp://anyhost";
         final TargetAttributesRequestedEvent targetAttributesRequestedEvent = new TargetAttributesRequestedEvent(
-                TENANT,1L, Target.class, CONTROLLER_ID, amqpUri);
+                TENANT, 1L, Target.class, CONTROLLER_ID, amqpUri);
         final TargetAttributesRequestedServiceEvent targetAttributesRequestedServiceEvent =
                 new TargetAttributesRequestedServiceEvent(targetAttributesRequestedEvent);
         amqpMessageDispatcherService.targetTriggerUpdateAttributes(targetAttributesRequestedServiceEvent);
@@ -314,7 +313,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     private Message getCaptureAddressEvent(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
-        final Target target = targetManagement.getByControllerId(targetAssignDistributionSetEvent.getActions().keySet().iterator().next()).get();
+        final Target target = targetManagement.getByControllerId(targetAssignDistributionSetEvent.getActions().keySet().iterator().next());
         return createArgumentCapture(IpUtil.addressToUri(target.getAddress()));
     }
 

@@ -29,38 +29,19 @@ public class EntityAlreadyExistsException extends AbstractServerRtException {
 
     private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_ENTITY_ALREADY_EXISTS;
 
-    /**
-     * Default constructor.
-     */
     public EntityAlreadyExistsException() {
         super(THIS_ERROR);
     }
 
-    /**
-     * Parameterized constructor.
-     *
-     * @param cause of the exception
-     */
     public EntityAlreadyExistsException(final Throwable cause) {
         super(THIS_ERROR, cause);
     }
 
-    /**
-     * Parameterized constructor.
-     *
-     * @param message of the exception
-     * @param cause of the exception
-     */
     public EntityAlreadyExistsException(final String message, final Throwable cause) {
-        super(message, THIS_ERROR, cause);
+        super(THIS_ERROR, message, cause);
     }
 
-    /**
-     * Parameterized constructor.
-     *
-     * @param message of the exception
-     */
     public EntityAlreadyExistsException(final String message) {
-        super(message, THIS_ERROR);
+        super(THIS_ERROR, message);
     }
 }

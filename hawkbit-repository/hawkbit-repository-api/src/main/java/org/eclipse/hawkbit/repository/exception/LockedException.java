@@ -29,17 +29,15 @@ public class LockedException extends AbstractServerRtException {
 
     private static final SpServerError THIS_ERROR = SpServerError.SP_LOCKED;
 
-    public LockedException(
-            final Class<? extends BaseEntity> type, final Object entityId, final String operation) {
-        super(type.getSimpleName() + " with given identifier {" + entityId + "} is locked and " + operation +
-                        " is forbidden!",
-                THIS_ERROR);
+    public LockedException(final Class<? extends BaseEntity> type, final Object entityId, final String operation) {
+        this(type, entityId, operation, null);
     }
 
     public LockedException(
             final Class<? extends BaseEntity> type, final Object entityId, final String operation, final String reason) {
-        super(type.getSimpleName() + " with given identifier {" + entityId + "} is locked and " + operation +
-                        " is forbidden! Reason: " + reason,
-                THIS_ERROR);
+        super(
+                THIS_ERROR, type.getSimpleName() + " with given identifier {" + entityId + "} is locked and " + operation + " is forbidden!" +
+                        (reason == null ? "" : " Reason: " + reason)
+        );
     }
 }

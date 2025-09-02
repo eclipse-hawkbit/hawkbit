@@ -48,11 +48,6 @@ public class JpaSoftwareModuleTypeManagement
     }
 
     @Override
-    public Optional<JpaSoftwareModuleType> findByName(final String name) {
-        return jpaRepository.findByName(name);
-    }
-
-    @Override
     protected Collection<JpaSoftwareModuleType> softDelete(final Collection<JpaSoftwareModuleType> toDelete) {
         return toDelete.stream().filter(smt ->
                 softwareModuleRepository.countByType(smt) > 0 || distributionSetTypeRepository.countByElementsSmType(smt) > 0).toList();

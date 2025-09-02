@@ -86,7 +86,7 @@ public interface TenantAware {
             if (context.getAuthentication() != null) {
                 final Object principal = context.getAuthentication().getPrincipal();
                 if (context.getAuthentication().getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails) {
-                    return tenantAwareAuthenticationDetails.getTenant();
+                    return tenantAwareAuthenticationDetails.tenant();
                 } else if (principal instanceof TenantAwareUser tenantAwareUser) {
                     return tenantAwareUser.getTenant();
                 }

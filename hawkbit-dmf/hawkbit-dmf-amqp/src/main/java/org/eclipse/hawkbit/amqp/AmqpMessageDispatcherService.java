@@ -29,6 +29,9 @@ import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrl;
+import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
+import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver.DownloadDescriptor;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -49,23 +52,18 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ApiType;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrl;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.ArtifactUrlHandler;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder;
-import org.eclipse.hawkbit.repository.artifact.urlhandler.URLPlaceholder.SoftwareData;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.MultiActionAssignServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.MultiActionCancelServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistributionSetServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
-import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
-import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -94,7 +92,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private static final int MAX_PROCESSING_SIZE = 1000;
 
-    private final ArtifactUrlHandler artifactUrlHandler;
+    private final ArtifactUrlResolver artifactUrlHandler;
     private final AmqpMessageSenderService amqpSenderService;
     private final SystemSecurityContext systemSecurityContext;
     private final SystemManagement systemManagement;
@@ -108,7 +106,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     @SuppressWarnings("java:S107")
     protected AmqpMessageDispatcherService(
             final RabbitTemplate rabbitTemplate,
-            final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
+            final AmqpMessageSenderService amqpSenderService, final ArtifactUrlResolver artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
             final TargetManagement<? extends Target> targetManagement,
             final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
@@ -138,7 +136,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     /**
      * Method to send a message to a RabbitMQ Exchange after the Distribution set has been assign to a Target.
      *
-     * @param targetAssignDistributionSetServiceEvent  event to be processed
+     * @param targetAssignDistributionSetServiceEvent event to be processed
      */
     @EventListener(classes = TargetAssignDistributionSetServiceEvent.class)
     protected void targetAssignDistributionSet(final TargetAssignDistributionSetServiceEvent targetAssignDistributionSetServiceEvent) {
@@ -200,9 +198,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     @EventListener(classes = CancelTargetAssignmentServiceEvent.class)
     protected void targetCancelAssignmentToDistributionSet(final CancelTargetAssignmentServiceEvent cancelTargetAssignmentServiceEvent) {
         final CancelTargetAssignmentEvent cancelEvent = cancelTargetAssignmentServiceEvent.getRemoteEvent();
-        final List<Target> eventTargets = partitionedParallelExecution(
-                cancelEvent.getActions().keySet(), targetManagement::getByControllerId);
-
+        final List<Target> eventTargets = partitionedParallelExecution(cancelEvent.getActions().keySet(), targetManagement::findByControllerId);
         eventTargets.forEach(target ->
                 cancelEvent.getActionPropertiesForController(target.getControllerId())
                         .map(ActionProperties::getId)
@@ -400,7 +396,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private List<Target> getTargetsWithoutPendingCancellations(final Set<String> controllerIds) {
         return partitionedParallelExecution(controllerIds, partition ->
-                targetManagement.getByControllerId(partition).stream()
+                targetManagement.findByControllerId(partition).stream()
                         .filter(target -> {
                             if (hasPendingCancellations(target.getId())) {
                                 log.debug("Target {} has pending cancellations. Will not send update message to it.",
@@ -450,7 +446,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                         ? Collections.emptyMap()
                         : softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(allSmIds);
 
-        targetManagement.getByControllerId(controllerIds).forEach(target ->
+        targetManagement.findByControllerId(controllerIds).forEach(target ->
                 sendMultiActionRequestToTarget(
                         target, controllerIdToActions.get(target.getControllerId()), module -> getSoftwareModuleMetadata.get(module.getId())));
     }
@@ -558,14 +554,12 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 localArtifact.getSize(),
                 localArtifact.getLastModifiedAt(),
                 artifactUrlHandler
-                        .getUrls(new URLPlaceholder(
-                                        tenantMetadata.getTenant(), tenantMetadata.getId(), target.getControllerId(), target.getId(),
-                                        new SoftwareData(
-                                                localArtifact.getSoftwareModule().getId(), localArtifact.getFilename(), localArtifact.getId(),
-                                                localArtifact.getSha1Hash())),
-                                ApiType.DMF)
+                        .getUrls(new DownloadDescriptor(
+                                        tenantMetadata.getTenant(), target.getControllerId(),
+                                        localArtifact.getSoftwareModule().getId(), localArtifact.getFilename(), localArtifact.getSha1Hash()),
+                                ArtifactUrlResolver.ApiType.DMF)
                         .stream()
-                        .collect(Collectors.toMap(ArtifactUrl::getProtocol, ArtifactUrl::getRef))
+                        .collect(Collectors.toMap(ArtifactUrl::protocol, ArtifactUrl::ref))
         );
     }
 

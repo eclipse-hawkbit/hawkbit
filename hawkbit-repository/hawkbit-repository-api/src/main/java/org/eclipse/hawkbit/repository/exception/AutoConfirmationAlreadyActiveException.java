@@ -29,30 +29,7 @@ public class AutoConfirmationAlreadyActiveException extends AbstractServerRtExce
 
     private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_AUTO_CONFIRMATION_ALREADY_ACTIVE;
 
-    /**
-     * Default constructor.
-     */
-    public AutoConfirmationAlreadyActiveException() {
-        super(THIS_ERROR);
-    }
-
-    /**
-     * Parameterized constructor.
-     *
-     * @param cause of the exception
-     */
-    public AutoConfirmationAlreadyActiveException(final Throwable cause) {
-        super(THIS_ERROR, cause);
-    }
-
-    /**
-     * Parameterized constructor for auto confirmation is already active for given
-     * controller ID
-     *
-     * @param controllerId of affected device
-     */
     public AutoConfirmationAlreadyActiveException(final String controllerId) {
-        super("Auto confirmation is already active for device " + controllerId, THIS_ERROR);
+        super(THIS_ERROR, "Auto confirmation is already active for device " + controllerId);
     }
-
 }

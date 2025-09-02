@@ -22,9 +22,8 @@ public interface AutoConfirmationStatus extends BaseEntity {
     Target getTarget();
 
     /**
-     * The user who initiated the auto confirmation. Will be set on auto
-     * confirmation activation and could be null. In this case the created_by can be
-     * considered as initiator.
+     * The user who initiated the auto confirmation. Will be set on auto confirmation activation and could be null. In this case the created_by
+     * can be considered as initiator.
      *
      * @return the user
      */
@@ -47,9 +46,7 @@ public interface AutoConfirmationStatus extends BaseEntity {
     /**
      * Construct the action message based on the current status.
      *
-     * @return the constructed message which can be used for the action status as a
-     *         message
+     * @return the constructed message which can be used for the action status as a message
      */
     String constructActionMessage();
-
 }

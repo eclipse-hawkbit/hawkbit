@@ -23,26 +23,15 @@ public class InvalidDistributionSetException extends AbstractServerRtException {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Creates a new InvalidDistributionSetException with
-     * {@link SpServerError#SP_DS_INVALID} error.
-     */
     public InvalidDistributionSetException() {
         super(SpServerError.SP_DS_INVALID);
     }
 
-    /**
-     * @param cause for the exception
-     */
     public InvalidDistributionSetException(final Throwable cause) {
         super(SpServerError.SP_DS_INVALID, cause);
     }
 
-    /**
-     * @param message of the error
-     */
     public InvalidDistributionSetException(final String message) {
-        super(message, SpServerError.SP_DS_INVALID);
+        super(SpServerError.SP_DS_INVALID, message);
     }
-
 }

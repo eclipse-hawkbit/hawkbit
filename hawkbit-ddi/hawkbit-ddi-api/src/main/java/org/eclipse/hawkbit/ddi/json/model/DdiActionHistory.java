@@ -47,9 +47,7 @@ public class DdiActionHistory {
      * @param messages is a list of messages retrieved from action history.
      */
     @JsonCreator
-    public DdiActionHistory(
-            @JsonProperty("status") final String status,
-            @JsonProperty("messages") final List<String> messages) {
+    public DdiActionHistory(@JsonProperty("status") final String status, @JsonProperty("messages") final List<String> messages) {
         this.status = status;
         this.messages = messages;
     }

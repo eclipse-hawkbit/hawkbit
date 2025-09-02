@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.IntStream;
@@ -240,7 +239,6 @@ public class TestdataFactory {
     public DistributionSet createDistributionSet() {
         return createDistributionSet(UUID.randomUUID().toString(), DEFAULT_VERSION, false);
     }
-
 
     public DistributionSet createDistributionSetLocked() {
         return distributionSetManagement.lock(createDistributionSet());
@@ -488,7 +486,7 @@ public class TestdataFactory {
      */
     public Artifact createArtifact(final String artifactData, final Long moduleId, final String filename) {
         final InputStream stubInputStream = IOUtils.toInputStream(artifactData, StandardCharsets.UTF_8);
-        return artifactManagement.create(new ArtifactUpload(stubInputStream, moduleId, filename, false, artifactData.length()));
+        return artifactManagement.create(new ArtifactUpload(stubInputStream, null, artifactData.length(), null, moduleId, filename, false));
     }
 
     /**
@@ -502,7 +500,7 @@ public class TestdataFactory {
      */
     public Artifact createArtifact(final byte[] artifactData, final Long moduleId, final String filename, final int fileSize) {
         return artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(artifactData), moduleId, filename, false, fileSize));
+                new ArtifactUpload(new ByteArrayInputStream(artifactData), null, fileSize, null, moduleId, filename, false));
     }
 
     /**
@@ -637,7 +635,7 @@ public class TestdataFactory {
                 SoftwareModuleManagement.Update.builder().id(module.getId()).description("Updated " + DEFAULT_DESCRIPTION).build()));
 
         // load also lazy stuff
-        return distributionSetManagement.getWithDetails(set.getId()).orElseThrow();
+        return distributionSetManagement.getWithDetails(set.getId());
     }
 
     /**
@@ -1053,7 +1051,7 @@ public class TestdataFactory {
         // Run here, because Scheduler is disabled during tests
         rolloutHandleAll();
 
-        return rolloutManagement.find(rollout.getId()).orElseThrow();
+        return rolloutManagement.get(rollout.getId());
     }
 
     /**
@@ -1178,7 +1176,9 @@ public class TestdataFactory {
      * @return persisted {@link TargetType}
      */
     public TargetType findOrCreateTargetType(final String targetTypeName) {
-        return targetTypeManagement.getByName(targetTypeName)
+        return targetTypeManagement.findByRsql("name==" + targetTypeName, Pageable.unpaged())
+                .stream().findAny()
+                .map(TargetType.class::cast)
                 .orElseGet(() -> targetTypeManagement.create(TargetTypeManagement.Create.builder()
                         .name(targetTypeName).description(targetTypeName + SPACE_AND_DESCRIPTION)
                         .key(targetTypeName + " key").colour(DEFAULT_COLOUR)
@@ -1298,6 +1298,6 @@ public class TestdataFactory {
     }
 
     private Rollout reloadRollout(final Rollout rollout) {
-        return rolloutManagement.find(rollout.getId()).orElseThrow(NoSuchElementException::new);
+        return rolloutManagement.get(rollout.getId());
     }
 }

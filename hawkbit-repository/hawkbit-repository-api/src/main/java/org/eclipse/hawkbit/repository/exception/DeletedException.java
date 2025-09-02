@@ -29,9 +29,7 @@ public class DeletedException extends AbstractServerRtException {
 
     private static final SpServerError THIS_ERROR = SpServerError.SP_DELETED;
 
-    public DeletedException(
-            final Class<? extends BaseEntity> type, final Object entityId) {
-        super(type.getSimpleName() + " with given identifier {" + entityId + "} is soft-deleted!",
-                THIS_ERROR);
+    public DeletedException(final Class<? extends BaseEntity> type, final Object entityId) {
+        super(THIS_ERROR, type.getSimpleName() + " with given identifier {" + entityId + "} is soft-deleted!");
     }
 }
