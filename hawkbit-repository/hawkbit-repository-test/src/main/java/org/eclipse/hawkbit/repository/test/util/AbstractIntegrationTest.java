@@ -196,7 +196,7 @@ public abstract class AbstractIntegrationTest {
 
     @BeforeAll
     public static void beforeClass() {
-        System.setProperty("org.eclipse.hawkbit.repository.file.path", ARTIFACT_DIRECTORY);
+        System.setProperty("org.eclipse.hawkbit.artifact.fs.path", ARTIFACT_DIRECTORY);
     }
 
     @AfterAll

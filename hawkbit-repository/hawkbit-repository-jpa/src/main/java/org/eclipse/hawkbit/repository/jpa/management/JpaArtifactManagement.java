@@ -215,7 +215,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     private StoredArtifactInfo storeArtifact(final ArtifactUpload artifactUpload, final boolean isSmEncrypted) {
         final InputStream stream = artifactUpload.inputStream();
         try (final InputStream wrappedStream = wrapInQuotaStream(
-                isSmEncrypted ? wrapInEncryptionStream(artifactUpload.moduleId(), stream) : stream)) {
+                isSmEncrypted ? ArtifactEncryptionService.getInstance().encryptArtifact(artifactUpload.moduleId(), stream) : stream)) {
             return artifactStorage.store(
                     tenantAware.getCurrentTenant(),
                     wrappedStream, artifactUpload.filename(),
@@ -231,10 +231,6 @@ public class JpaArtifactManagement implements ArtifactManagement {
                 throw new InvalidMd5HashException(e.getMessage(), e);
             }
         }
-    }
-
-    private InputStream wrapInEncryptionStream(final long smId, final InputStream stream) {
-        return ArtifactEncryptionService.getInstance().encryptArtifact(smId, stream);
     }
 
     private InputStream wrapInQuotaStream(final InputStream in) {

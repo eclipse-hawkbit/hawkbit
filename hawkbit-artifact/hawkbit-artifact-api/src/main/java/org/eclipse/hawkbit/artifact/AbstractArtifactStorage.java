@@ -54,10 +54,9 @@ public abstract class AbstractArtifactStorage implements ArtifactStorage {
             throw new ArtifactStoreException(e.getMessage(), e);
         }
 
-        String tempFile = null;
+        File tempFile = null;
         try (final DigestInputStream inputStream = wrapInDigestInputStream(content, mdSHA1, mdMD5, mdSHA256)) {
             tempFile = storeTempFile(inputStream);
-
             final HexFormat hexFormat = HexFormat.of().withLowerCase();
 
             final String sha1Hash = hexFormat.formatHex(mdSHA1.digest());
@@ -66,13 +65,14 @@ public abstract class AbstractArtifactStorage implements ArtifactStorage {
 
             checkHashes(providedHashes, sha1Hash, md5Hash, sha256Hash);
 
+            final long fileSize = tempFile.length(); // store could change the file
+            final ArtifactHashes hashes = new ArtifactHashes(sha1Hash, md5Hash, sha256Hash);
             // Check if file with same sha1 hash exists and if so return it
-            if (existsBySha1(tenant, sha1Hash)) {
-                // TODO - shall check if the file is really the same as bytes or just sha1 hash is the same
-                return new StoredArtifactInfo(contentType, tempFile.length(), new ArtifactHashes(sha1Hash, md5Hash, sha256Hash));
+            // TODO - if exists, shall we check if the file is really the same as bytes or just sha1 hash is the same
+            if (!existsBySha1(tenant, sha1Hash)) {
+                store(sanitizeTenant(tenant), hashes, contentType, tempFile);
             }
-
-            return store(sanitizeTenant(tenant), new ArtifactHashes(sha1Hash, md5Hash, sha256Hash), contentType, tempFile);
+            return new StoredArtifactInfo(contentType, fileSize, hashes);
         } catch (final IOException e) {
             throw new ArtifactStoreException(e.getMessage(), e);
         } finally {
@@ -86,26 +86,25 @@ public abstract class AbstractArtifactStorage implements ArtifactStorage {
         return tenant.trim().toUpperCase();
     }
 
-    protected void deleteTempFile(final String tempFile) {
-        final File file = new File(tempFile);
+    protected void deleteTempFile(final File tempFile) {
         try {
-            Files.deleteIfExists(file.toPath());
+            Files.deleteIfExists(tempFile.toPath());
         } catch (final IOException e) {
-            log.error("Could not delete temp file {} ({})", file, e.getMessage());
+            log.error("Could not delete temp file {} ({})", tempFile.getAbsolutePath(), e.getMessage());
         }
     }
 
-    protected String storeTempFile(final InputStream content) throws IOException {
+    protected File storeTempFile(final InputStream content) throws IOException {
         final File file = createTempFile(false);
         try (final OutputStream outputstream = new BufferedOutputStream(new FileOutputStream(file))) {
             content.transferTo(outputstream);
             outputstream.flush();
         }
-        return file.getPath();
+        return file;
     }
 
-    protected abstract StoredArtifactInfo store(
-            final String tenant, final ArtifactHashes base16Hashes, final String contentType, final String tempFile) throws IOException;
+    protected abstract void store(
+            final String tenant, final ArtifactHashes base16Hashes, final String contentType, final File tempFile) throws IOException;
 
     // java:S1066 - more readable with separate "if" statements
     // java:S4042 - delete reason is not needed
@@ -165,9 +164,5 @@ public abstract class AbstractArtifactStorage implements ArtifactStorage {
     private static DigestInputStream wrapInDigestInputStream(final InputStream input,
             final MessageDigest mdSHA1, final MessageDigest mdMD5, final MessageDigest mdSHA256) {
         return new DigestInputStream(new DigestInputStream(new DigestInputStream(input, mdSHA256), mdMD5), mdSHA1);
-    }
-
-    private String checkEmpty(final String value, final String fallback) {
-        return ObjectUtils.isEmpty(value) ? fallback : value;
     }
 }

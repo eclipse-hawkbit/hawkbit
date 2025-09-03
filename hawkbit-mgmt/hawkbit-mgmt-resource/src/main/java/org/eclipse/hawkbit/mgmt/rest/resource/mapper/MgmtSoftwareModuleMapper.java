@@ -165,8 +165,7 @@ public final class MgmtSoftwareModuleMapper {
         urls.forEach(entry -> response.add(Link.of(entry.ref()).withRel(entry.rel()).expand()));
     }
 
-    private SoftwareModuleManagement.Create fromRequest(
-            final MgmtSoftwareModuleRequestBodyPost smsRest) {
+    private SoftwareModuleManagement.Create fromRequest(final MgmtSoftwareModuleRequestBodyPost smsRest) {
         return SoftwareModuleManagement.Create.builder()
                 .type(getSoftwareModuleTypeFromKeyString(smsRest.getType()))
                 .name(smsRest.getName()).version(smsRest.getVersion()).description(smsRest.getDescription()).vendor(smsRest.getVendor())

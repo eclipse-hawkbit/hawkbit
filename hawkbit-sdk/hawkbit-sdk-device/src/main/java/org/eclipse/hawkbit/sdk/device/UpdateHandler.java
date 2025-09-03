@@ -239,13 +239,12 @@ public interface UpdateHandler {
                     link -> status.add(downloadUrl(link, artifact.getHashes(), artifact.getSize())),
                     // HTTP
                     () -> status.add(downloadUrl(
-                            artifact.getLink("download-http")
-                                    .orElseThrow(() -> new IllegalArgumentException("Nor https nor http found!")),
+                            artifact.getLink("download-http").orElseThrow(() -> new IllegalArgumentException("Nor https nor http found!")),
                             artifact.getHashes(), artifact.getSize()))
             );
         }
 
-        private UpdateStatus downloadUrl(final Link link,  final DdiArtifactHash hash, final long size) {
+        private UpdateStatus downloadUrl(final Link link, final DdiArtifactHash hash, final long size) {
             if (log.isDebugEnabled()) {
                 log.debug(LOG_PREFIX + "Downloading {}, expected hash {} and size {}",
                         ddiController.getTenantId(), ddiController.getControllerId(), link.getHref(), hash, size);
@@ -254,7 +253,8 @@ public interface UpdateHandler {
             try {
                 return readAndCheckDownloadUrl(link, hash, size);
             } catch (final NoSuchAlgorithmException | IOException e) {
-                log.error(LOG_PREFIX + "Failed to download {}", ddiController.getTenantId(), ddiController.getControllerId(), link.getHref(), e);
+                log.error(LOG_PREFIX + "Failed to download {}",
+                        ddiController.getTenantId(), ddiController.getControllerId(), link.getHref(), e);
                 return new UpdateStatus(
                         UpdateStatus.Status.FAILURE,
                         List.of("Failed to download " + link.getHref() + ": " + e.getMessage()));
@@ -301,6 +301,7 @@ public interface UpdateHandler {
         private interface Validator {
 
             void read(final byte[] buff, final int len);
+
             void validate();
         }
     }

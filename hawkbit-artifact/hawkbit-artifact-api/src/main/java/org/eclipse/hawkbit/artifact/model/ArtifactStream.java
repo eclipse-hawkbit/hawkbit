@@ -28,7 +28,7 @@ public class ArtifactStream extends InputStream {
     @Getter
     private final String sha1Hash;
 
-    public ArtifactStream(InputStream inputStream, long size, String sha1Hash) {
+    public ArtifactStream(final InputStream inputStream, final long size, final String sha1Hash) {
         this.inputStream = inputStream;
         this.size = size;
         this.sha1Hash = sha1Hash;

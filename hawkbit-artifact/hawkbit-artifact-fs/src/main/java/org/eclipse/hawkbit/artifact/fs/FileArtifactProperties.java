@@ -16,7 +16,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * Configuration properties for the file-system repository, e.g. the base-path to store the files.
  */
 @Data
-@ConfigurationProperties("org.eclipse.hawkbit.repository.file")
+@ConfigurationProperties("org.eclipse.hawkbit.artifact.fs")
 public class FileArtifactProperties {
 
     /**
