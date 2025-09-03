@@ -30,7 +30,7 @@ public class FileArtifactStorageConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public ArtifactStorage artifactRepository(final FileArtifactProperties artifactFilesystemProperties) {
+    public ArtifactStorage artifactStorage(final FileArtifactProperties artifactFilesystemProperties) {
         return new FileArtifactStorage(artifactFilesystemProperties);
     }
 }

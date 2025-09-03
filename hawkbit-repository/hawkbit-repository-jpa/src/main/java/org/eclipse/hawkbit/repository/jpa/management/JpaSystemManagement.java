@@ -104,7 +104,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     private final RepositoryProperties repositoryProperties;
 
     @Nullable
-    private ArtifactStorage artifactRepository;
+    private ArtifactStorage artifactStorage;
 
     @SuppressWarnings("squid:S00107")
     protected JpaSystemManagement(
@@ -147,8 +147,8 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Autowired(required = false) // it's not required on dmf/ddi only instances
-    public void setArtifactRepository(ArtifactStorage artifactRepository) {
-        this.artifactRepository = artifactRepository;
+    public void setArtifactStorage(final ArtifactStorage artifactStorage) {
+        this.artifactStorage = artifactStorage;
     }
 
     @Override
@@ -161,7 +161,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteTenant(final String t) {
-        if (artifactRepository == null) {
+        if (artifactStorage == null) {
             throw new IllegalStateException("Artifact repository is not available. Can't delete tenant.");
         }
 
@@ -180,7 +180,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
             distributionSetRepository.deleteByTenant(tenant);
             distributionSetTypeRepository.deleteByTenant(tenant);
             softwareModuleRepository.deleteByTenant(tenant);
-            artifactRepository.deleteByTenant(tenant);
+            artifactStorage.deleteByTenant(tenant);
             softwareModuleTypeRepository.deleteByTenant(tenant);
             return null;
         }));
