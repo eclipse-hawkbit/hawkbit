@@ -25,7 +25,6 @@ import org.eclipse.hawkbit.artifact.ArtifactStorage;
 import org.eclipse.hawkbit.artifact.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.artifact.exception.ArtifactStoreException;
 import org.eclipse.hawkbit.artifact.model.ArtifactHashes;
-import org.eclipse.hawkbit.artifact.model.StoredArtifactInfo;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -75,17 +74,14 @@ public class FileArtifactStorage extends AbstractArtifactStorage {
     }
 
     @Override
-    protected StoredArtifactInfo store(final String tenant, final ArtifactHashes base16Hashes, final String contentType, final String tempFile)
+    protected void store(final String tenant, final ArtifactHashes base16Hashes, final String contentType, final File tempFile)
             throws IOException {
-        final File file = new File(tempFile);
         final File fileSHA1Naming = getFile(tenant, base16Hashes.sha1());
         if (fileSHA1Naming.exists()) {
-            FileUtils.deleteQuietly(file);
+            FileUtils.deleteQuietly(tempFile);
         } else {
-            Files.move(file.toPath(), fileSHA1Naming.toPath());
+            Files.move(tempFile.toPath(), fileSHA1Naming.toPath());
         }
-
-        return new StoredArtifactInfo(contentType, fileSHA1Naming.length(), base16Hashes);
     }
 
     private File getFile(final String tenant, final String sha1) {

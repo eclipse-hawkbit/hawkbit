@@ -64,7 +64,6 @@ public final class FileStreamingUtil {
             final ArtifactStream artifact, final String filename,
             final long lastModified, final HttpServletResponse response, final HttpServletRequest request,
             final FileStreamingProgressListener progressListener) {
-
         ResponseEntity<InputStream> result;
 
         final String etag = artifact.getSha1Hash();
