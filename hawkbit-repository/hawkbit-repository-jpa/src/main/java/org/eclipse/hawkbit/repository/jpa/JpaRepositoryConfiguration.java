@@ -70,7 +70,7 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.LocalArtifactRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutTargetGroupRepository;
@@ -184,7 +184,7 @@ public class JpaRepositoryConfiguration {
             @Override
             public Object postProcessAfterInitialization(@NonNull final Object bean, @NonNull final String beanName)
                     throws BeansException {
-                if (bean instanceof LocalArtifactRepository repo) {
+                if (bean instanceof ArtifactRepository repo) {
                     return repo.withACM(artifactAccessController);
                 } else if (bean instanceof SoftwareModuleTypeRepository repo) {
                     return repo.withACM(softwareModuleTypeAccessController);

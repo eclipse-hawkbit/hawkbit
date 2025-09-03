@@ -38,7 +38,7 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
-import org.eclipse.hawkbit.repository.jpa.repository.LocalArtifactRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.ArtifactSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
@@ -67,8 +67,8 @@ import org.springframework.validation.annotation.Validated;
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "artifact-management" }, matchIfMissing = true)
 public class JpaArtifactManagement implements ArtifactManagement {
 
-    private final LocalArtifactRepository localArtifactRepository;
-    private final ArtifactStorage artifactRepository;
+    private final ArtifactRepository artifactRepository;
+    private final ArtifactStorage artifactStorage;
     private final SoftwareModuleRepository softwareModuleRepository;
     private final EntityManager entityManager;
     private final PlatformTransactionManager txManager;
@@ -76,15 +76,15 @@ public class JpaArtifactManagement implements ArtifactManagement {
     private final QuotaManagement quotaManagement;
 
     protected JpaArtifactManagement(
-            final LocalArtifactRepository localArtifactRepository,
-            final Optional<ArtifactStorage> artifactRepository,
+            final ArtifactRepository artifactRepository,
+            final Optional<ArtifactStorage> artifactStorage,
             final SoftwareModuleRepository softwareModuleRepository,
             final EntityManager entityManager,
             final PlatformTransactionManager txManager,
             final QuotaManagement quotaManagement,
             final TenantAware tenantAware) {
-        this.localArtifactRepository = localArtifactRepository;
-        this.artifactRepository = artifactRepository.orElse(null);
+        this.artifactRepository = artifactRepository;
+        this.artifactStorage = artifactStorage.orElse(null);
         this.softwareModuleRepository = softwareModuleRepository;
         this.entityManager = entityManager;
         this.txManager = txManager;
@@ -97,7 +97,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Artifact create(final ArtifactUpload artifactUpload) {
-        if (artifactRepository == null) {
+        if (artifactStorage == null) {
             throw new UnsupportedOperationException();
         }
 
@@ -106,7 +106,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
                 moduleId, 1, quotaManagement.getMaxArtifactsPerSoftwareModule(),
                 Artifact.class, SoftwareModule.class,
                 // get all artifacts without user context
-                softwareModuleId -> localArtifactRepository.count(null, ArtifactSpecifications.bySoftwareModuleId(softwareModuleId)));
+                softwareModuleId -> artifactRepository.count(null, ArtifactSpecifications.bySoftwareModuleId(softwareModuleId)));
 
         final JpaSoftwareModule softwareModule = softwareModuleRepository.getById(moduleId);
 
@@ -127,7 +127,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         try {
             return storeArtifactMetadata(softwareModule, filename, artifact.getHashes(), artifact.getSize(), existing);
         } catch (final Exception e) {
-            artifactRepository.deleteBySha1(tenantAware.getCurrentTenant(), artifact.getHashes().sha1());
+            artifactStorage.deleteBySha1(tenantAware.getCurrentTenant(), artifact.getHashes().sha1());
             throw e;
         }
     }
@@ -135,7 +135,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @SuppressWarnings("java:S2201") // java:S2201 - the idea is to just check if the artifact exists
     @Override
     public ArtifactStream getArtifactStream(final String sha1Hash, final long softwareModuleId, final boolean isEncrypted) {
-        if (artifactRepository == null) {
+        if (artifactStorage == null) {
             throw new UnsupportedOperationException();
         }
 
@@ -146,11 +146,11 @@ public class JpaArtifactManagement implements ArtifactManagement {
                 if (isEncrypted) {
                     final ArtifactEncryptionService encryptionService = ArtifactEncryptionService.getInstance();
                     return new ArtifactStream(
-                            encryptionService.decryptArtifact(softwareModuleId, artifactRepository.getBySha1(tenant, sha1Hash)),
+                            encryptionService.decryptArtifact(softwareModuleId, artifactStorage.getBySha1(tenant, sha1Hash)),
                             artifact.getSize() - encryptionService.encryptionSizeOverhead(),
                             artifact.getSha1Hash());
                 } else {
-                    return new ArtifactStream(artifactRepository.getBySha1(tenant, sha1Hash), artifact.getSize(), artifact.getSha1Hash());
+                    return new ArtifactStream(artifactStorage.getBySha1(tenant, sha1Hash), artifact.getSize(), artifact.getSha1Hash());
                 }
             }
         }
@@ -162,11 +162,11 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long id) {
-        if (artifactRepository == null) {
+        if (artifactStorage == null) {
             throw new UnsupportedOperationException();
         }
 
-        final JpaArtifact toDelete = localArtifactRepository.getById(id);
+        final JpaArtifact toDelete = artifactRepository.getById(id);
 
         final JpaSoftwareModule softwareModule = toDelete.getSoftwareModule();
         // clearArtifactBinary checks (unconditionally) software module UPDATE access
@@ -175,7 +175,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         softwareModule.removeArtifact(toDelete);
         softwareModuleRepository.save(softwareModule);
 
-        localArtifactRepository.deleteById(id);
+        artifactRepository.deleteById(id);
 
         final String sha1Hash = toDelete.getSha1Hash();
         AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() -> clearArtifactBinary(sha1Hash));
@@ -195,14 +195,14 @@ public class JpaArtifactManagement implements ArtifactManagement {
     void clearArtifactBinary(final String sha1Hash) {
         DeploymentHelper.runInNewTransaction(txManager, "clearArtifactBinary", status -> {
             // countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse will skip ACM checks and will return total count as it should be
-            if (localArtifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(sha1Hash,
+            if (artifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(sha1Hash,
                     tenantAware.getCurrentTenant()) <= 0) { // 1 artifact is the one being deleted!
                 // removes the real artifact ONLY AFTER the delete of artifact or software module
                 // in local history has passed successfully (caller has permission and no errors)
                 AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() -> {
                     try {
                         log.debug("deleting artifact from repository {}", sha1Hash);
-                        artifactRepository.deleteBySha1(tenantAware.getCurrentTenant(), sha1Hash);
+                        artifactStorage.deleteBySha1(tenantAware.getCurrentTenant(), sha1Hash);
                     } catch (final ArtifactStoreException e) {
                         throw new ArtifactDeleteFailedException(e);
                     }
@@ -216,7 +216,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         final InputStream stream = artifactUpload.inputStream();
         try (final InputStream wrappedStream = wrapInQuotaStream(
                 isSmEncrypted ? wrapInEncryptionStream(artifactUpload.moduleId(), stream) : stream)) {
-            return artifactRepository.store(
+            return artifactStorage.store(
                     tenantAware.getCurrentTenant(),
                     wrappedStream, artifactUpload.filename(),
                     artifactUpload.contentType(), artifactUpload.hash());
@@ -240,7 +240,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     private InputStream wrapInQuotaStream(final InputStream in) {
         final long maxArtifactSize = quotaManagement.getMaxArtifactSize();
 
-        final long currentlyUsed = localArtifactRepository.sumOfNonDeletedArtifactSize().orElse(0L);
+        final long currentlyUsed = artifactRepository.sumOfNonDeletedArtifactSize().orElse(0L);
         final long maxArtifactSizeTotal = quotaManagement.getMaxArtifactStorage();
 
         return new FileSizeAndStorageQuotaCheckingInputStream(in, maxArtifactSize, maxArtifactSizeTotal - currentlyUsed);
@@ -262,6 +262,6 @@ public class JpaArtifactManagement implements ArtifactManagement {
         artifact.setFileSize(fileSize);
 
         log.debug("storing new artifact into repository {}", artifact);
-        return localArtifactRepository.save(AccessController.Operation.CREATE, artifact);
+        return artifactRepository.save(AccessController.Operation.CREATE, artifact);
     }
 }

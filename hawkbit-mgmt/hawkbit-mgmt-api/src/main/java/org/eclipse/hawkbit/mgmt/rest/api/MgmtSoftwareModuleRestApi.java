@@ -142,7 +142,7 @@ public interface MgmtSoftwareModuleRestApi {
      * Handles the GET request of retrieving a single Artifact metadata request.
      *
      * @param softwareModuleId of the parent SoftwareModule
-     * @param artifactId of the related LocalArtifact
+     * @param artifactId of the related artifact
      * @return responseEntity with status ok if successful
      */
     @Operation(summary = "Return single Artifact metadata", description = "Handles the GET request of retrieving a single Artifact metadata request. Required Permission: READ_REPOSITORY")
