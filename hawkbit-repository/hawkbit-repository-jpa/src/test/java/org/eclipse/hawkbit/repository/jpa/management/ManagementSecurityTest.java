@@ -76,7 +76,7 @@ class ManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     @Override
     @BeforeEach
-    public void beforeAll() throws Exception {
+    public void beforeAll() {
         // override - shall not do anything
     }
 

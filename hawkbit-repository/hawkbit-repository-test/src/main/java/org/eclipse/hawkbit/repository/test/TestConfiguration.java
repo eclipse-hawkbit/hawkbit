@@ -123,7 +123,7 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    ArtifactStorage artifactRepository(final FileArtifactProperties artifactFilesystemProperties) {
+    ArtifactStorage artifactStorage(final FileArtifactProperties artifactFilesystemProperties) {
         return new FileArtifactStorage(artifactFilesystemProperties);
     }
 
