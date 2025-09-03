@@ -178,7 +178,7 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected SystemSecurityContext systemSecurityContext;
     @Autowired
-    protected ArtifactStorage binaryArtifactRepository;
+    protected ArtifactStorage artifactStorage;
     @Autowired
     protected QuotaManagement quotaManagement;
 

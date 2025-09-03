@@ -253,8 +253,8 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             assertThat(artifact1.getSha1Hash()).isNotEqualTo(artifact2.getSha1Hash());
 
             final String currentTenant = tenantAware.getCurrentTenant();
-            assertThat(binaryArtifactRepository.getBySha1(currentTenant, artifact1.getSha1Hash())).isNotNull();
-            assertThat(binaryArtifactRepository.getBySha1(currentTenant, artifact2.getSha1Hash())).isNotNull();
+            assertThat(artifactStorage.getBySha1(currentTenant, artifact1.getSha1Hash())).isNotNull();
+            assertThat(artifactStorage.getBySha1(currentTenant, artifact2.getSha1Hash())).isNotNull();
 
             artifactManagement.delete(artifact1.getId());
 
@@ -262,14 +262,14 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
             final String sha1Hash = artifact1.getSha1Hash();
             assertThatExceptionOfType(ArtifactBinaryNotFoundException.class)
-                    .isThrownBy(() -> binaryArtifactRepository.getBySha1(currentTenant, sha1Hash));
+                    .isThrownBy(() -> artifactStorage.getBySha1(currentTenant, sha1Hash));
 
-            assertThat(binaryArtifactRepository.getBySha1(currentTenant, artifact2.getSha1Hash())).isNotNull();
+            assertThat(artifactStorage.getBySha1(currentTenant, artifact2.getSha1Hash())).isNotNull();
 
             artifactManagement.delete(artifact2.getId());
             final String sha1Hash2 = artifact2.getSha1Hash();
             assertThatExceptionOfType(ArtifactBinaryNotFoundException.class)
-                    .isThrownBy(() -> binaryArtifactRepository.getBySha1(currentTenant, sha1Hash2));
+                    .isThrownBy(() -> artifactStorage.getBySha1(currentTenant, sha1Hash2));
 
             assertThat(artifactRepository.findAll()).isEmpty();
         }
@@ -297,17 +297,17 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             assertThat((artifact1).getSha1Hash()).isEqualTo(artifact2.getSha1Hash());
             assertThat(artifactRepository.findAll()).hasSize(2);
             final String currentTenant = tenantAware.getCurrentTenant();
-            assertThat(binaryArtifactRepository.getBySha1(currentTenant, artifact1.getSha1Hash())).isNotNull();
+            assertThat(artifactStorage.getBySha1(currentTenant, artifact1.getSha1Hash())).isNotNull();
 
             artifactManagement.delete(artifact1.getId());
             assertThat(artifactRepository.existsById(artifact1.getId())).isFalse();
             assertThat(artifactRepository.findAll()).hasSize(1);
-            assertThat(binaryArtifactRepository.getBySha1(currentTenant, artifact1.getSha1Hash())).isNotNull();
+            assertThat(artifactStorage.getBySha1(currentTenant, artifact1.getSha1Hash())).isNotNull();
 
             artifactManagement.delete(artifact2.getId());
             final String sha1Hash = artifact1.getSha1Hash();
             assertThatExceptionOfType(ArtifactBinaryNotFoundException.class)
-                    .isThrownBy(() -> binaryArtifactRepository.getBySha1(currentTenant, sha1Hash));
+                    .isThrownBy(() -> artifactStorage.getBySha1(currentTenant, sha1Hash));
             assertThat(artifactRepository.findAll()).isEmpty();
         }
     }

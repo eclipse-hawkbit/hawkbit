@@ -453,7 +453,7 @@ class SoftwareModuleManagementTest
         assertThat(artifactRepository.findAll()).hasSize(results.length);
         for (final Artifact result : results) {
             assertThat(result.getId()).isNotNull();
-            assertThat(binaryArtifactRepository.getBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash())).isNotNull();
+            assertThat(artifactStorage.getBySha1(tenantAware.getCurrentTenant(), result.getSha1Hash())).isNotNull();
         }
     }
 
@@ -462,7 +462,7 @@ class SoftwareModuleManagementTest
             final String currentTenant = tenantAware.getCurrentTenant();
             final String sha1Hash = result.getSha1Hash();
             assertThatExceptionOfType(ArtifactBinaryNotFoundException.class)
-                    .isThrownBy(() -> binaryArtifactRepository.getBySha1(currentTenant, sha1Hash));
+                    .isThrownBy(() -> artifactStorage.getBySha1(currentTenant, sha1Hash));
         }
     }
 }
