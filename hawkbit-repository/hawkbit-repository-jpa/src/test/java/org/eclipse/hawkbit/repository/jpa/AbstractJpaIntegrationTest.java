@@ -32,7 +32,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.LocalArtifactRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutTargetGroupRepository;
@@ -98,7 +98,7 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     @Autowired
     protected ActionStatusRepository actionStatusRepository;
     @Autowired
-    protected LocalArtifactRepository artifactRepository;
+    protected ArtifactRepository artifactRepository;
     @Autowired
     protected RolloutGroupRepository rolloutGroupRepository;
     @Autowired

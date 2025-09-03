@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link Artifact} repository.
  */
 @Transactional(readOnly = true)
-public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifact> {
+public interface ArtifactRepository extends BaseEntityRepository<JpaArtifact> {
 
     /**
      * Counts artifacts size where the related software module is not deleted/archived.

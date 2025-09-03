@@ -52,7 +52,6 @@ import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.jpa.repository.LocalArtifactRepository;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -92,8 +91,6 @@ import org.springframework.web.bind.annotation.RestController;
         "hawkbit.server.security.dos.maxArtifactSize=100000",
         "hawkbit.server.security.dos.maxArtifactStorage=500000" })
 class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTest {
-
-    private LocalArtifactRepository localArtifactRepository;
 
     @BeforeEach
     public void assertPreparationOfRepo() {

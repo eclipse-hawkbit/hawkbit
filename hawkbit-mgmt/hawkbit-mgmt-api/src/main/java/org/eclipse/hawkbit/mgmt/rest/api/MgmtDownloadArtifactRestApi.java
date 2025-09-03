@@ -36,7 +36,7 @@ public interface MgmtDownloadArtifactRestApi {
      * Handles the GET request for downloading an artifact.
      *
      * @param softwareModuleId of the parent SoftwareModule
-     * @param artifactId of the related LocalArtifact
+     * @param artifactId of the related repository Artifact
      * @return responseEntity with status ok if successful
      */
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}/download")

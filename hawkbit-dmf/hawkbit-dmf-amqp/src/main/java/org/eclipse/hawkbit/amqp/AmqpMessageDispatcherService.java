@@ -538,25 +538,25 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         return metadata.entrySet().stream().map(md -> new DmfMetadata(md.getKey(), md.getValue())).toList();
     }
 
-    private List<DmfArtifact> convertArtifacts(final Target target, final List<Artifact> localArtifacts) {
-        if (localArtifacts.isEmpty()) {
+    private List<DmfArtifact> convertArtifacts(final Target target, final List<Artifact> artifacts) {
+        if (artifacts.isEmpty()) {
             return Collections.emptyList();
         }
 
-        return localArtifacts.stream().map(localArtifact -> convertArtifact(target, localArtifact)).toList();
+        return artifacts.stream().map(artifact -> convertArtifact(target, artifact)).toList();
     }
 
-    private DmfArtifact convertArtifact(final Target target, final Artifact localArtifact) {
+    private DmfArtifact convertArtifact(final Target target, final Artifact artifact) {
         final TenantMetaData tenantMetadata = systemManagement.getTenantMetadataWithoutDetails();
         return new DmfArtifact(
-                localArtifact.getFilename(),
-                new DmfArtifactHash(localArtifact.getSha1Hash(), localArtifact.getMd5Hash()),
-                localArtifact.getSize(),
-                localArtifact.getLastModifiedAt(),
+                artifact.getFilename(),
+                new DmfArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash()),
+                artifact.getSize(),
+                artifact.getLastModifiedAt(),
                 artifactUrlHandler
                         .getUrls(new DownloadDescriptor(
                                         tenantMetadata.getTenant(), target.getControllerId(),
-                                        localArtifact.getSoftwareModule().getId(), localArtifact.getFilename(), localArtifact.getSha1Hash()),
+                                        artifact.getSoftwareModule().getId(), artifact.getFilename(), artifact.getSha1Hash()),
                                 ArtifactUrlResolver.ApiType.DMF)
                         .stream()
                         .collect(Collectors.toMap(ArtifactUrl::protocol, ArtifactUrl::ref))
