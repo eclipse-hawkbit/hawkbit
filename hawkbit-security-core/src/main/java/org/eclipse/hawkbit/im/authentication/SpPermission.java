@@ -140,7 +140,7 @@ public final class SpPermission {
             TENANT_CONFIGURATION + IMPLY_READ + TENANT_CONFIGURATION + "\n" +
             TENANT_CONFIGURATION + IMPLY_UPDATE + TENANT_CONFIGURATION + "\n" +
             TENANT_CONFIGURATION + IMPLY_DELETE + TENANT_CONFIGURATION + "\n" +
-            TENANT_CONFIGURATION + IMPLY_CREATE + READ_GATEWAY_SECURITY_TOKEN + "\n";
+            TENANT_CONFIGURATION + " > " + READ_GATEWAY_SECURITY_TOKEN + "\n";
 
     // @formatter:on
     private static final SingletonSupplier<List<String>> ALL_AUTHORITIES = SingletonSupplier.of(() -> {
