@@ -35,7 +35,7 @@ public interface SoftwareModuleTypeManagement<T extends SoftwareModuleType>
 
     @Override
     default String permissionGroup() {
-        return SpPermission.SOFTWARE_MODULE;
+        return SpPermission.SOFTWARE_MODULE_TYPE;
     }
 
     /**

@@ -66,8 +66,7 @@ public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
                     : new TenantAwareUser(username, password, credentials, user.getTenant()));
         });
 
-        if (securityProperties != null && securityProperties.getUser() != null &&
-                !securityProperties.getUser().isPasswordGenerated()) {
+        if (securityProperties != null && securityProperties.getUser() != null && !securityProperties.getUser().isPasswordGenerated()) {
             // explicitly setup system user - add is as a regular (non-tenant scoped) user
             userPrincipals.add(new User(
                     securityProperties.getUser().getName(),

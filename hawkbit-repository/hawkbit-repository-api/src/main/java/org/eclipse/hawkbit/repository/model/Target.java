@@ -61,7 +61,7 @@ public interface Target extends NamedEntity, Identifiable<Long> {
 
     /**
      * @return the securityToken if the current security context contains the necessary permission
-     *         {@link org.eclipse.hawkbit.im.authentication.SpPermission#READ_TARGET_SEC_TOKEN}
+     *         {@link org.eclipse.hawkbit.im.authentication.SpPermission#READ_TARGET_SECURITY_TOKEN}
      *         or the current context is executed as system code, otherwise {@code null}.
      */
     String getSecurityToken();

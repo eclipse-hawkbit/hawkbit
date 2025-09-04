@@ -15,9 +15,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Hierarchy {
 
+    // @formatter:off
     public static final String DEFAULT =
             SpPermission.TARGET_HIERARCHY +
             SpPermission.REPOSITORY_HIERARCHY +
+            SpPermission.SOFTWARE_MODULE_HIERARCHY +
+            SpPermission.DISTRIBUTION_SET_HIERARCHY +
             SpPermission.TENANT_CONFIGURATION_HIERARCHY +
             SpRole.DEFAULT_ROLE_HIERARCHY;
+    // @formatter:on
 }

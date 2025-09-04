@@ -216,7 +216,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @Override
     public String getSecurityToken() {
         final SystemSecurityContext systemSecurityContext = SystemSecurityContextHolder.getInstance().getSystemSecurityContext();
-        if (systemSecurityContext.isCurrentThreadSystemCode() || systemSecurityContext.hasPermission(SpPermission.READ_TARGET_SEC_TOKEN)) {
+        if (systemSecurityContext.isCurrentThreadSystemCode() || systemSecurityContext.hasPermission(SpPermission.READ_TARGET_SECURITY_TOKEN)) {
             return securityToken;
         }
         return null;

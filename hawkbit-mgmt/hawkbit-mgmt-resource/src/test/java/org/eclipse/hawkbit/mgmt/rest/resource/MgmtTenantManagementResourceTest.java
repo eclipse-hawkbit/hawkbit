@@ -314,7 +314,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
 
         // TODO - should be able to read with TENANT_CONFIGURATION but somehow here the role hierarchy doesn't play
         // checked in mgmt / update server runtime PreAuthorizeEnabledTest
-        callAs(withUser("tenant_admin", SpPermission.READ_TENANT_CONFIGURATION, SpPermission.READ_GATEWAY_SEC_TOKEN), () -> {
+        callAs(withUser("tenant_admin", SpPermission.READ_TENANT_CONFIGURATION, SpPermission.READ_GATEWAY_SECURITY_TOKEN), () -> {
                     mvc.perform(get(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs"))
                             .andDo(MockMvcResultPrinter.print())
                             .andDo(m -> System.out.println("-> 1: " + m.getResponse().getContentAsString()))

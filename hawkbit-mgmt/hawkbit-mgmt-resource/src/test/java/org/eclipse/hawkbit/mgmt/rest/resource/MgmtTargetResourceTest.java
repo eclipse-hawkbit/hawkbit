@@ -431,7 +431,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
      */
     @Test
     @WithUser(allSpPermissions = false, authorities = { SpPermission.READ_TARGET, SpPermission.CREATE_TARGET,
-            SpPermission.READ_TARGET_SEC_TOKEN })
+            SpPermission.READ_TARGET_SECURITY_TOKEN })
     void securityTokenIsInResponseWithCorrectPermission() throws Exception {
 
         final String knownControllerId = "knownControllerId";

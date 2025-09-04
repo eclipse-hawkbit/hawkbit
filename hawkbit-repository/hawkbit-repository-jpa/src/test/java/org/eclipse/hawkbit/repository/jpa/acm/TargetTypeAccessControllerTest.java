@@ -31,12 +31,14 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 /**
  * Feature: Component Tests - Access Control<br/>
  * Story: Test Target Type Access Controller
  */
 @ContextConfiguration(classes = { DefaultAccessControllerConfiguration.class })
+@TestPropertySource(properties = { "hawkbit.acm.access-controller.target-type.enabled=true" })
 class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
 
     /**
@@ -92,8 +94,8 @@ class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
         final TargetType readOnlyTargetType = targetTypeManagement.create(Create.builder().name("type2").build());
 
         runAs(withUser("user",
-                        READ_TARGET_TYPE + "/id==" + manageableTargetType.getId() + " or id==" + readOnlyTargetType.getId(),
-                        DELETE_TARGET_TYPE + "/id==" + manageableTargetType.getId()), () -> {
+                READ_TARGET_TYPE + "/id==" + manageableTargetType.getId() + " or id==" + readOnlyTargetType.getId(),
+                DELETE_TARGET_TYPE + "/id==" + manageableTargetType.getId()), () -> {
             // delete the manageableTargetType
             targetTypeManagement.delete(manageableTargetType.getId());
 
@@ -113,8 +115,8 @@ class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
         final TargetType readOnlyTargetType = targetTypeManagement.create(Create.builder().name("type2").build());
 
         runAs(withUser("user",
-                        READ_TARGET_TYPE + "/id==" + manageableTargetType.getId() + " or id==" + readOnlyTargetType.getId(),
-                        UPDATE_TARGET_TYPE + "/id==" + manageableTargetType.getId()), () -> {
+                READ_TARGET_TYPE + "/id==" + manageableTargetType.getId() + " or id==" + readOnlyTargetType.getId(),
+                UPDATE_TARGET_TYPE + "/id==" + manageableTargetType.getId()), () -> {
             // update the manageableTargetType
             targetTypeManagement.update(Update.builder().id(manageableTargetType.getId())
                     .name(manageableTargetType.getName() + "/new").description("newDesc").build());
