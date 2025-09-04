@@ -34,6 +34,8 @@ public final class SpRole {
 
     private static final String IMPLIES = " > ";
     private static final String LINE_BREAK = "\n";
+
+    // @formatter:off
     public static final String TARGET_ADMIN_HIERARCHY =
             TARGET_ADMIN + IMPLIES + SpPermission.READ_TARGET + LINE_BREAK +
             TARGET_ADMIN + IMPLIES + SpPermission.READ_TARGET_SECURITY_TOKEN + LINE_BREAK +
@@ -44,12 +46,6 @@ public final class SpRole {
             TARGET_ADMIN + IMPLIES + SpPermission.UPDATE_TARGET_TYPE + LINE_BREAK +
             TARGET_ADMIN + IMPLIES + SpPermission.CREATE_PREFIX + SpPermission.TARGET_TYPE + LINE_BREAK +
             TARGET_ADMIN + IMPLIES + SpPermission.DELETE_TARGET_TYPE + LINE_BREAK;
-    public static final String REPOSITORY_ADMIN_HIERARCHY =
-            REPOSITORY_ADMIN + IMPLIES + SpPermission.READ_REPOSITORY + LINE_BREAK +
-            REPOSITORY_ADMIN + IMPLIES + SpPermission.UPDATE_REPOSITORY + LINE_BREAK +
-            REPOSITORY_ADMIN + IMPLIES + SpPermission.CREATE_REPOSITORY + LINE_BREAK +
-            REPOSITORY_ADMIN + IMPLIES + SpPermission.DELETE_REPOSITORY + LINE_BREAK +
-            REPOSITORY_ADMIN + IMPLIES + SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT + LINE_BREAK;
     public static final String ROLLOUT_ADMIN_HIERARCHY =
             ROLLOUT_ADMIN + IMPLIES + SpPermission.READ_ROLLOUT + LINE_BREAK +
             ROLLOUT_ADMIN + IMPLIES + SpPermission.CREATE_ROLLOUT + LINE_BREAK +
@@ -65,6 +61,12 @@ public final class SpRole {
     public static final String SYSTEM_ROLE_HIERARCHY =
             SYSTEM_ROLE + IMPLIES + TENANT_ADMIN + LINE_BREAK +
             SYSTEM_ROLE + IMPLIES + SpPermission.SYSTEM_ADMIN + LINE_BREAK;
+    public static final String REPOSITORY_ADMIN_HIERARCHY =
+            REPOSITORY_ADMIN + IMPLIES + SpPermission.READ_REPOSITORY + LINE_BREAK +
+            REPOSITORY_ADMIN + IMPLIES + SpPermission.UPDATE_REPOSITORY + LINE_BREAK +
+            REPOSITORY_ADMIN + IMPLIES + SpPermission.CREATE_REPOSITORY + LINE_BREAK +
+            REPOSITORY_ADMIN + IMPLIES + SpPermission.DELETE_REPOSITORY + LINE_BREAK +
+            REPOSITORY_ADMIN + IMPLIES + SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT + LINE_BREAK;
 
     public static final String DEFAULT_ROLE_HIERARCHY =
             TARGET_ADMIN_HIERARCHY +
@@ -72,4 +74,5 @@ public final class SpRole {
             ROLLOUT_ADMIN_HIERARCHY +
             TENANT_ADMIN_HIERARCHY +
             SYSTEM_ROLE_HIERARCHY;
+    // @formatter:on
 }
