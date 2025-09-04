@@ -41,7 +41,7 @@ public interface DistributionSetTypeManagement<T extends DistributionSetType>
 
     @Override
     default String permissionGroup() {
-        return SpPermission.DISTRIBUTION_SET;
+        return SpPermission.DISTRIBUTION_SET_TYPE;
     }
 
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)

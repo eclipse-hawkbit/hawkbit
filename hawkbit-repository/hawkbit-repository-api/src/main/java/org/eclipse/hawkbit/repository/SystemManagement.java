@@ -46,19 +46,17 @@ public interface SystemManagement {
     Page<String> findTenants(@NotNull Pageable pageable);
 
     /**
-     * Runs consumer for each teant as
+     * Runs consumer for each tenant as
      * {@link TenantAware#runAsTenant(String, org.eclipse.hawkbit.tenancy.TenantAware.TenantRunner)}
-     * sliently (i.e. exceptions will be logged but operations will continue for
-     * further tenants).
+     * silently (i.e. exceptions will be logged but operations will continue for further tenants).
      *
-     * @param consumer to run as teanant
+     * @param consumer to run as tenant
      */
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     void forEachTenant(Consumer<String> consumer);
 
     /**
-     * Calculated system usage statistics, both overall for the entire system
-     * and per tenant;
+     * Calculated system usage statistics, both overall for the entire system and per tenant;
      *
      * @return SystemUsageReport of the current system
      */

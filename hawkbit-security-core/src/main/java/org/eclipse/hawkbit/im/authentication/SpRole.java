@@ -36,10 +36,14 @@ public final class SpRole {
     private static final String LINE_BREAK = "\n";
     public static final String TARGET_ADMIN_HIERARCHY =
             TARGET_ADMIN + IMPLIES + SpPermission.READ_TARGET + LINE_BREAK +
-            TARGET_ADMIN + IMPLIES + SpPermission.READ_TARGET_SEC_TOKEN + LINE_BREAK +
+            TARGET_ADMIN + IMPLIES + SpPermission.READ_TARGET_SECURITY_TOKEN + LINE_BREAK +
             TARGET_ADMIN + IMPLIES + SpPermission.UPDATE_TARGET + LINE_BREAK +
             TARGET_ADMIN + IMPLIES + SpPermission.CREATE_TARGET + LINE_BREAK +
-            TARGET_ADMIN + IMPLIES + SpPermission.DELETE_TARGET + LINE_BREAK;
+            TARGET_ADMIN + IMPLIES + SpPermission.DELETE_TARGET + LINE_BREAK +
+            TARGET_ADMIN + IMPLIES + SpPermission.READ_TARGET_TYPE + LINE_BREAK +
+            TARGET_ADMIN + IMPLIES + SpPermission.UPDATE_TARGET_TYPE + LINE_BREAK +
+            TARGET_ADMIN + IMPLIES + SpPermission.CREATE_PREFIX + SpPermission.TARGET_TYPE + LINE_BREAK +
+            TARGET_ADMIN + IMPLIES + SpPermission.DELETE_TARGET_TYPE + LINE_BREAK;
     public static final String REPOSITORY_ADMIN_HIERARCHY =
             REPOSITORY_ADMIN + IMPLIES + SpPermission.READ_REPOSITORY + LINE_BREAK +
             REPOSITORY_ADMIN + IMPLIES + SpPermission.UPDATE_REPOSITORY + LINE_BREAK +

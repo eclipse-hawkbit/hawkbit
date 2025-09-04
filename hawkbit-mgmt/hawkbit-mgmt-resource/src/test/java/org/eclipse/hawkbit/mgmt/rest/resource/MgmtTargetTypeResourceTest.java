@@ -71,7 +71,9 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     @WithUser(
             principal = "targetTypeTester", allSpPermissions = true,
-            removeFromAllPermission = { SpPermission.READ_TARGET, SpPermission.READ_TARGET_TYPE })
+            removeFromAllPermission = {
+                    SpPermission.CREATE_TARGET, SpPermission.READ_TARGET, SpPermission.UPDATE_TARGET, SpPermission.DELETE_TARGET,
+                    SpPermission.READ_TARGET_TYPE })
     void getTargetTypesWithoutPermission() throws Exception {
         mvc.perform(get(TARGETTYPES_ENDPOINT).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())

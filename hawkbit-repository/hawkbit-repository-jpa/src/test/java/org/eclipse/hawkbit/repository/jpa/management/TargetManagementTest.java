@@ -139,7 +139,7 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
 
         // retrieve security token only with READ_TARGET_SEC_TOKEN permission
         final String securityTokenWithReadPermission = SecurityContextSwitch.getAs(
-                SecurityContextSwitch.withUser("OnlyTargetReadPermission", SpPermission.READ_TARGET_SEC_TOKEN),
+                SecurityContextSwitch.withUser("OnlyTargetReadPermission", SpPermission.READ_TARGET_SECURITY_TOKEN),
                 createdTarget::getSecurityToken);
         // retrieve security token only with ROLE_TARGET_ADMIN permission
         final String securityTokenWithTargetAdminPermission = SecurityContextSwitch.getAs(

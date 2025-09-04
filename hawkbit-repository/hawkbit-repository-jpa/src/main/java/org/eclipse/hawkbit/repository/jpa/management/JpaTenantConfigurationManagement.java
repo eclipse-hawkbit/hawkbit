@@ -51,7 +51,6 @@ import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -249,9 +248,9 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         if (AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY.equalsIgnoreCase(configurationKeyName)) {
             final SystemSecurityContext systemSecurityContext = SystemSecurityContextHolder.getInstance().getSystemSecurityContext();
             if (!systemSecurityContext.isCurrentThreadSystemCode() &&
-                    !systemSecurityContext.hasPermission(SpPermission.READ_GATEWAY_SEC_TOKEN)) {
+                    !systemSecurityContext.hasPermission(SpPermission.READ_GATEWAY_SECURITY_TOKEN)) {
                 throw new InsufficientPermissionException(
-                        "Can't read gateway security token! " + SpPermission.READ_GATEWAY_SEC_TOKEN + " is required!");
+                        "Can't read gateway security token! " + SpPermission.READ_GATEWAY_SECURITY_TOKEN + " is required!");
             }
         }
     }
