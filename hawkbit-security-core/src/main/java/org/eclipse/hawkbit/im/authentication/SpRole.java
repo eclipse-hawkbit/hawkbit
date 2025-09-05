@@ -37,18 +37,18 @@ public final class SpRole {
 
     // @formatter:off
     public static final String TARGET_ADMIN_HIERARCHY =
+            TARGET_ADMIN + IMPLIES + SpPermission.CREATE_TARGET + LINE_BREAK +
             TARGET_ADMIN + IMPLIES + SpPermission.READ_TARGET + LINE_BREAK +
             TARGET_ADMIN + IMPLIES + SpPermission.READ_TARGET_SECURITY_TOKEN + LINE_BREAK +
             TARGET_ADMIN + IMPLIES + SpPermission.UPDATE_TARGET + LINE_BREAK +
-            TARGET_ADMIN + IMPLIES + SpPermission.CREATE_TARGET + LINE_BREAK +
             TARGET_ADMIN + IMPLIES + SpPermission.DELETE_TARGET + LINE_BREAK +
+            TARGET_ADMIN + IMPLIES + SpPermission.CREATE_PREFIX + SpPermission.TARGET_TYPE + LINE_BREAK +
             TARGET_ADMIN + IMPLIES + SpPermission.READ_TARGET_TYPE + LINE_BREAK +
             TARGET_ADMIN + IMPLIES + SpPermission.UPDATE_TARGET_TYPE + LINE_BREAK +
-            TARGET_ADMIN + IMPLIES + SpPermission.CREATE_PREFIX + SpPermission.TARGET_TYPE + LINE_BREAK +
             TARGET_ADMIN + IMPLIES + SpPermission.DELETE_TARGET_TYPE + LINE_BREAK;
     public static final String ROLLOUT_ADMIN_HIERARCHY =
-            ROLLOUT_ADMIN + IMPLIES + SpPermission.READ_ROLLOUT + LINE_BREAK +
             ROLLOUT_ADMIN + IMPLIES + SpPermission.CREATE_ROLLOUT + LINE_BREAK +
+            ROLLOUT_ADMIN + IMPLIES + SpPermission.READ_ROLLOUT + LINE_BREAK +
             ROLLOUT_ADMIN + IMPLIES + SpPermission.UPDATE_ROLLOUT + LINE_BREAK +
             ROLLOUT_ADMIN + IMPLIES + SpPermission.DELETE_ROLLOUT + LINE_BREAK +
             ROLLOUT_ADMIN + IMPLIES + SpPermission.HANDLE_ROLLOUT + LINE_BREAK +
@@ -56,8 +56,8 @@ public final class SpRole {
     public static final String TENANT_ADMIN_HIERARCHY =
             TENANT_ADMIN + IMPLIES + TARGET_ADMIN + LINE_BREAK +
             TENANT_ADMIN + IMPLIES + REPOSITORY_ADMIN + LINE_BREAK +
-            TENANT_ADMIN + IMPLIES + ROLLOUT_ADMIN + LINE_BREAK +
-            TENANT_ADMIN + IMPLIES + SpPermission.TENANT_CONFIGURATION + LINE_BREAK;
+            TENANT_ADMIN + IMPLIES + SpPermission.TENANT_CONFIGURATION + LINE_BREAK +
+            TENANT_ADMIN + IMPLIES + ROLLOUT_ADMIN + LINE_BREAK;
     public static final String SYSTEM_ROLE_HIERARCHY =
             SYSTEM_ROLE + IMPLIES + TENANT_ADMIN + LINE_BREAK +
             SYSTEM_ROLE + IMPLIES + SpPermission.SYSTEM_ADMIN + LINE_BREAK;
@@ -70,9 +70,9 @@ public final class SpRole {
 
     public static final String DEFAULT_ROLE_HIERARCHY =
             TARGET_ADMIN_HIERARCHY +
-            REPOSITORY_ADMIN_HIERARCHY +
             ROLLOUT_ADMIN_HIERARCHY +
             TENANT_ADMIN_HIERARCHY +
-            SYSTEM_ROLE_HIERARCHY;
+            SYSTEM_ROLE_HIERARCHY +
+            REPOSITORY_ADMIN_HIERARCHY;
     // @formatter:on
 }
