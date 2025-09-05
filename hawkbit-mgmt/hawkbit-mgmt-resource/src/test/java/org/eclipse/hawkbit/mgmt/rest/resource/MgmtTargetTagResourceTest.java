@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
@@ -57,7 +56,6 @@ import org.springframework.test.web.servlet.ResultActions;
 public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String TARGETTAGS_ROOT = "http://localhost" + MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/";
-    private static final Random RND = new Random();
 
     /**
      * Verifies that a paged result list of target tags reflects the content on the repository side.

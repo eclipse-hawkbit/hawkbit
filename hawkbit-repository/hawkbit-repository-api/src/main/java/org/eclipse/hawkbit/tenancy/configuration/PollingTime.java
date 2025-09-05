@@ -58,6 +58,7 @@ public class PollingTime {
     @Value
     public static class PollingInterval {
 
+        @SuppressWarnings("java:S1068") // used for random delay only, no need of secure random
         private static final Random RANDOM = new Random();
 
         public static final String POLLING_INTERVALE_REGEX = "\\s{0,5}(?<pollingInterval>\\d{2}:[0-5]\\d:[0-5]\\d)\\s{0,5}(~(?<deviationPercent>\\d{1,2})%)?\\s{0,5}";

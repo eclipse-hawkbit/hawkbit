@@ -80,7 +80,6 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
 
     protected static final int ARTIFACT_SIZE = 5 * 1024;
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final Random RND = new Random();
 
     /**
      * Convert JSON to a CBOR equivalent.

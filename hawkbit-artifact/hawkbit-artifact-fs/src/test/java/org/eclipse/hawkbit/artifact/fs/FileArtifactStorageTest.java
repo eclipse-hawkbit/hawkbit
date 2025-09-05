@@ -36,6 +36,8 @@ import org.junit.jupiter.api.Test;
 class FileArtifactStorageTest {
 
     private static final String TENANT = "test_tenant";
+    @SuppressWarnings("java:S1068") // used for tests only, no need of secure random
+    private static final Random RND = new Random();
 
     private static FileArtifactProperties artifactResourceProperties;
     private static FileArtifactStorage artifactFilesystemRepository;
@@ -130,7 +132,7 @@ class FileArtifactStorageTest {
 
     private static byte[] randomBytes() {
         final byte[] randomBytes = new byte[20];
-        new Random().nextBytes(randomBytes);
+        RND.nextBytes(randomBytes);
         return randomBytes;
     }
 

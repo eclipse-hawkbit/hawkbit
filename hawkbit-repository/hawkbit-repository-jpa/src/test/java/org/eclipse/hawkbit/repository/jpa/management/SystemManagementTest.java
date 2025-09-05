@@ -13,7 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
-import java.util.Random;
 
 import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -130,9 +129,8 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void createTestTenantsForSystemStatistics(final int tenants, final int artifactSize, final int targets, final int updates) {
-        final Random randomgen = new Random();
         final byte[] random = new byte[artifactSize];
-        randomgen.nextBytes(random);
+        RND.nextBytes(random);
 
         for (int i = 0; i < tenants; i++) {
             final String tenantname = "TENANT" + i;
