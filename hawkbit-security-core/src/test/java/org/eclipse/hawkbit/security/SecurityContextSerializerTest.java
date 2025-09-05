@@ -42,7 +42,7 @@ class SecurityContextSerializerTest {
         final String serialized = JSON_SERIALIZATION.serialize(securityContext);
         final SecurityContext deserialized = JSON_SERIALIZATION.deserialize(serialized);
         final Authentication authentication = deserialized.getAuthentication();
-        assertThat(authentication.getPrincipal()).hasToString("user");
+        assertThat(SpringSecurityAuditorAware.resolveAuditor(authentication)).hasToString("user");
         assertThat(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList()).isEqualTo(AUTHORITIES);
         assertThat(authentication.isAuthenticated()).isTrue();
         assertThat(authentication.getDetails()).isEqualTo(details);
@@ -76,7 +76,7 @@ class SecurityContextSerializerTest {
         assertThat(oldSerialized).isNotEqualTo(newSerialized);
         final Authentication deserializedOld = JSON_SERIALIZATION.deserialize(oldSerialized).getAuthentication();
         final Authentication deserializedNew = JSON_SERIALIZATION.deserialize(newSerialized).getAuthentication();
-        assertThat(deserializedOld.getPrincipal()).hasToString(deserializedNew.getPrincipal().toString());
+        assertThat(SpringSecurityAuditorAware.resolveAuditor(deserializedOld)).hasToString(SpringSecurityAuditorAware.resolveAuditor(deserializedNew));
         assertThat(deserializedOld.getAuthorities()).isEqualTo(deserializedNew.getAuthorities());
         assertThat(deserializedOld.isAuthenticated()).isEqualTo(deserializedNew.isAuthenticated());
     }

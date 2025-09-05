@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.security.SpringSecurityAuditorAware.AuditorAwarePrincipal;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -140,11 +141,11 @@ public interface SecurityContextSerializer {
             @Serial
             private static final long serialVersionUID = 1L;
 
-            private String principal;
-            private String[] authorities;
-            private boolean authenticated;
             private String tenant;
             private boolean controller;
+            private String auditor;
+            private String[] authorities;
+            private boolean authenticated;
 
             SecCtxInfo(final SecurityContext securityContext) {
                 final Authentication authentication = securityContext.getAuthentication();
@@ -158,7 +159,7 @@ public interface SecurityContextSerializer {
                 // keep the auditor, ofr audit purposes,
                 // sets principal to the resolved auditor and then deserialized authentication will return it as principal
                 // since the class is not known to auditor aware - it shall used default - principal as auditor
-                principal = SpringSecurityAuditorAware.resolveAuditor(authentication);
+                auditor = SpringSecurityAuditorAware.resolveAuditor(authentication);
                 authorities = authentication.getAuthorities().stream().map(Object::toString).toArray(String[]::new);
                 authenticated = authentication.isAuthenticated();
             }
@@ -166,6 +167,7 @@ public interface SecurityContextSerializer {
             private SecurityContext toSecurityContext() {
                 final SecurityContext ctx = SecurityContextHolder.createEmptyContext();
                 final Object details = tenant == null ? null : new TenantAwareAuthenticationDetails(tenant, controller);
+                final AuditorAwarePrincipal principal = () -> auditor;
                 final Collection<? extends GrantedAuthority> grantedAuthorities =
                         Stream.of(authorities).map(SimpleGrantedAuthority::new).toList();
                 ctx.setAuthentication(new Authentication() {
@@ -202,7 +204,7 @@ public interface SecurityContextSerializer {
 
                     @Override
                     public String getName() {
-                        return principal;
+                        return auditor;
                     }
                 });
                 return ctx;
