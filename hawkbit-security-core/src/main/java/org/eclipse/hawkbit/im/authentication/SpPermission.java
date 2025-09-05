@@ -109,6 +109,10 @@ public final class SpPermission {
             UPDATE_TARGET + IMPLY_READ + TARGET_TYPE + "\n" +
             DELETE_TARGET + IMPLY_READ + TARGET_TYPE + "\n";
     public static final String REPOSITORY_HIERARCHY =
+            CREATE_REPOSITORY + IMPLY_CREATE + TARGET_TYPE + "\n" +
+            READ_REPOSITORY + IMPLY_READ + TARGET_TYPE + "\n" +
+            UPDATE_REPOSITORY + IMPLY_UPDATE + TARGET_TYPE + "\n" +
+            DELETE_REPOSITORY + IMPLY_DELETE + TARGET_TYPE + "\n" +
             CREATE_REPOSITORY + IMPLY_CREATE + SOFTWARE_MODULE + "\n" +
             READ_REPOSITORY + IMPLY_READ + SOFTWARE_MODULE + "\n" +
             UPDATE_REPOSITORY + IMPLY_UPDATE + SOFTWARE_MODULE + "\n" +
