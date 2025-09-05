@@ -456,11 +456,12 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             updatedAction = confirmationManagement.denyAction(action.getId(), actionUpdateStatus.getCode(), messages);
         } else {
             final ActionStatusCreateBuilder actionStatus = ActionStatusCreate.builder()
-                    .actionId(action.getId()).status(status).messages(messages);
+                    .actionId(action.getId()).status(status);
             Optional.ofNullable(actionUpdateStatus.getCode()).ifPresent(code -> {
                 actionStatus.code(code);
-                actionStatus.messages(List.of("Device reported status code: " + code));
+                messages.add("Device reported status code: " + code);
             });
+            actionStatus.messages(messages);
             updatedAction = Status.CANCELED == status || Status.CANCEL_REJECTED == status
                     ? controllerManagement.addCancelActionStatus(actionStatus.build())
                     : controllerManagement.addUpdateActionStatus(actionStatus.build());
