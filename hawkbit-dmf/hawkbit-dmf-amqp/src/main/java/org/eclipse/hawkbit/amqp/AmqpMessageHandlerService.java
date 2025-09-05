@@ -14,6 +14,7 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 
 import java.io.Serializable;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -211,7 +212,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return StringUtils.hasLength(message.getMessageProperties().getCorrelationId());
     }
 
-    @SuppressWarnings("java:S2637" ) // java:S2637 - logAndThrowMessageError throws exception, i.e. doesn't return null
+    @SuppressWarnings("java:S2637") // java:S2637 - logAndThrowMessageError throws exception, i.e. doesn't return null
     private static @NotNull Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus, final Action action) {
         Status status = null;
         switch (actionUpdateStatus.getActionStatus()) {
@@ -455,12 +456,16 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         } else if (actionUpdateStatus.getActionStatus() == DmfActionStatus.DENIED) {
             updatedAction = confirmationManagement.denyAction(action.getId(), actionUpdateStatus.getCode(), messages);
         } else {
-            final ActionStatusCreateBuilder actionStatus = ActionStatusCreate.builder()
-                    .actionId(action.getId()).status(status).messages(messages);
-            Optional.ofNullable(actionUpdateStatus.getCode()).ifPresent(code -> {
-                actionStatus.code(code);
-                actionStatus.messages(List.of("Device reported status code: " + code));
-            });
+            final ActionStatusCreateBuilder actionStatus = ActionStatusCreate.builder().actionId(action.getId())
+                    .status(status);
+            Optional.ofNullable(actionUpdateStatus.getCode()).ifPresentOrElse(
+                    code -> {
+                        actionStatus.code(code);
+                        final List<String> withCodeReportedMessage = new ArrayList<>(messages);
+                        withCodeReportedMessage.add("Device reported status code: " + code);
+                        actionStatus.messages(withCodeReportedMessage);
+                    },
+                    () -> actionStatus.messages(messages));
             updatedAction = Status.CANCELED == status || Status.CANCEL_REJECTED == status
                     ? controllerManagement.addCancelActionStatus(actionStatus.build())
                     : controllerManagement.addUpdateActionStatus(actionStatus.build());

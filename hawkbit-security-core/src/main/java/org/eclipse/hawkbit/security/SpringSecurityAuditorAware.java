@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.security;
 
 import java.util.Optional;
 
+import lombok.NonNull;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
@@ -19,8 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 /**
- * Auditor class that allows BaseEntitys to insert current logged in user for
- * repository changes.
+ * Auditor class that allows BaseEntity-s to insert current logged in user for repository changes.
  */
 public class SpringSecurityAuditorAware implements AuditorAware<String> {
 
@@ -43,6 +43,7 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
         AUDITOR_OVERRIDE.remove();
     }
 
+    @NonNull
     @Override
     public Optional<String> getCurrentAuditor() {
         if (AUDITOR_OVERRIDE.get() != null) {
@@ -55,10 +56,10 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(getCurrentAuditor(authentication));
+        return Optional.ofNullable(resolveAuditor(authentication));
     }
 
-    protected String getCurrentAuditor(final Authentication authentication) {
+    public static String resolveAuditor(final Authentication authentication) {
         if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails && tenantAwareDetails.controller()) {
             return "CONTROLLER_PLUG_AND_PLAY";
         }

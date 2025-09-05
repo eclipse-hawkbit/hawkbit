@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
@@ -54,7 +53,6 @@ import org.springframework.test.web.servlet.ResultActions;
 class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String DISTRIBUTIONSETTAGS_ROOT = "http://localhost" + MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/";
-    private static final Random RND = new Random();
 
     /**
      * Verifies that a paged result list of DS tags reflects the content on the repository side.

@@ -10,22 +10,31 @@
 package org.eclipse.hawkbit.repository.jpa.acm;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.security.SecurityContextSerializer.JSON_SERIALIZATION;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
+import java.util.List;
+import java.util.concurrent.Callable;
+
+import lombok.SneakyThrows;
 import org.eclipse.hawkbit.ContextAware;
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.security.SecurityContextSerializer;
+import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -35,14 +44,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 class ContextAwareTest extends AbstractJpaIntegrationTest {
 
+    private static final List<String> AUTHORITIES = SpPermission.getAllAuthorities();
+
     @Autowired
     AutoAssignExecutor autoAssignExecutor;
 
     @Autowired
     ContextAware contextAware;
 
-    private static final SecurityContextSerializer SECURITY_CONTEXT_SERIALIZER =
-            SecurityContextSerializer.JAVA_SERIALIZATION;
+    @Autowired
+    AuditorAware<String> auditorAware;
 
     @BeforeEach
     @AfterEach
@@ -55,13 +66,12 @@ class ContextAwareTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void verifyAcmContextIsPersistedInCreatedRollout() {
-        final SecurityContext securityContext = SecurityContextHolder.getContext();
+        final SecurityContext securityContext = createContext(0);
         assertThat(securityContext).isNotNull();
 
-        final Rollout exampleRollout = testdataFactory.createRollout();
+        final Rollout exampleRollout = runInContext(securityContext, testdataFactory::createRollout);
         assertThat(exampleRollout.getAccessControlContext())
-                .hasValueSatisfying(ctx ->
-                        assertThat(SECURITY_CONTEXT_SERIALIZER.deserialize(ctx)).isEqualTo(securityContext));
+                .hasValueSatisfying(ctx -> assertEssentialEquals(JSON_SERIALIZATION.deserialize(ctx), securityContext));
     }
 
     /**
@@ -69,12 +79,11 @@ class ContextAwareTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void verifyContextIsReusedWhenHandlingRollout() {
-        final SecurityContext securityContext = SecurityContextHolder.getContext();
-        assertThat(securityContext).isNotNull();
+        final SecurityContext securityContext = createContext(1);
 
         // testdataFactory#createRollout will trigger a rollout handling
-        testdataFactory.createRollout();
-        verify(contextAware).runInContext(eq(SECURITY_CONTEXT_SERIALIZER.serialize(securityContext)), any(Runnable.class));
+        runInContext(securityContext, testdataFactory::createRollout);
+        verify(contextAware).runInContext(eq(JSON_SERIALIZATION.serialize(securityContext)), any(Runnable.class));
     }
 
     /**
@@ -82,13 +91,12 @@ class ContextAwareTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void verifyContextIsPersistedInActiveAutoAssignment() {
-        final SecurityContext securityContext = SecurityContextHolder.getContext();
-        assertThat(securityContext).isNotNull();
+        final SecurityContext securityContext = createContext(2);
 
-        final TargetFilterQuery targetFilterQuery = testdataFactory.createTargetFilterWithTargetsAndActiveAutoAssignment();
+        final TargetFilterQuery targetFilterQuery =
+                runInContext(securityContext, testdataFactory::createTargetFilterWithTargetsAndActiveAutoAssignment);
         assertThat(targetFilterQuery.getAccessControlContext())
-                .hasValueSatisfying(ctx ->
-                        assertThat(SECURITY_CONTEXT_SERIALIZER.deserialize(ctx)).isEqualTo(securityContext));
+                .hasValueSatisfying(ctx -> assertEssentialEquals(JSON_SERIALIZATION.deserialize(ctx), securityContext));
     }
 
     /**
@@ -96,12 +104,14 @@ class ContextAwareTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void verifyContextIsReusedWhenCheckingForAutoAssignmentAllTargets() {
-        final SecurityContext securityContext = SecurityContextHolder.getContext();
-        assertThat(securityContext).isNotNull();
+        final SecurityContext securityContext = createContext(3);
 
-        testdataFactory.createTargetFilterWithTargetsAndActiveAutoAssignment();
-        autoAssignExecutor.checkAllTargets();
-        verify(contextAware).runInContext(eq(SECURITY_CONTEXT_SERIALIZER.serialize(securityContext)), any(Runnable.class));
+        runInContext(securityContext, testdataFactory::createTargetFilterWithTargetsAndActiveAutoAssignment);
+        runInContext(securityContext, () -> {
+            autoAssignExecutor.checkAllTargets();
+            return null;
+        });
+        verify(contextAware).runInContext(eq(JSON_SERIALIZATION.serialize(securityContext)), any(Runnable.class));
     }
 
     /**
@@ -109,12 +119,52 @@ class ContextAwareTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void verifyContextIsReusedWhenCheckingForAutoAssignmentSingleTarget() {
-        final SecurityContext securityContext = SecurityContextHolder.getContext();
+        final SecurityContext securityContext = createContext(4);
+
+        runInContext(securityContext, testdataFactory::createTargetFilterWithTargetsAndActiveAutoAssignment);
+        runInContext(securityContext, () -> {
+            autoAssignExecutor.checkSingleTarget(targetManagement.findAll(Pageable.ofSize(1)).getContent().get(0).getControllerId());
+            return null;
+        });
+        verify(contextAware).runInContext(eq(JSON_SERIALIZATION.serialize(securityContext)), any(Runnable.class));
+    }
+
+    private static SecurityContext createContext(final int testId) {
+        final SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        final UsernamePasswordAuthenticationToken userPassAuthentication = new UsernamePasswordAuthenticationToken(
+                "user", null, AUTHORITIES.stream().map(SimpleGrantedAuthority::new).toList());
+        final TenantAwareAuthenticationDetails details = new TenantAwareAuthenticationDetails("my_tenant_" + testId, false);
+        userPassAuthentication.setDetails(details);
+        securityContext.setAuthentication(userPassAuthentication);
+
         assertThat(securityContext).isNotNull();
 
-        testdataFactory.createTargetFilterWithTargetsAndActiveAutoAssignment();
-        autoAssignExecutor
-                .checkSingleTarget(targetManagement.findAll(Pageable.ofSize(1)).getContent().get(0).getControllerId());
-        verify(contextAware).runInContext(eq(SECURITY_CONTEXT_SERIALIZER.serialize(securityContext)), any(Runnable.class));
+        return securityContext;
+    }
+
+    @SneakyThrows
+    private <T> T runInContext(final SecurityContext securityContext, final Callable<T> runnable) {
+        SecurityContextHolder.setContext(securityContext);
+        try {
+            return runnable.call();
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
+    }
+
+    private void assertEssentialEquals(final SecurityContext sc1, final SecurityContext sc2) {
+        assertThat(auditor(sc1)).hasToString(auditor(sc2));
+        assertThat(sc1.getAuthentication().getAuthorities()).isEqualTo(sc2.getAuthentication().getAuthorities());
+        assertThat(sc1.getAuthentication().isAuthenticated()).isEqualTo(sc2.getAuthentication().isAuthenticated());
+        assertThat(sc1.getAuthentication().getDetails()).isEqualTo(sc2.getAuthentication().getDetails());
+    }
+
+    private String auditor(final SecurityContext securityContext) {
+        SecurityContextHolder.setContext(securityContext);
+        try {
+            return auditorAware.getCurrentAuditor().orElseThrow();
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
     }
 }
