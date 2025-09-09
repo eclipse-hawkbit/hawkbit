@@ -1393,10 +1393,10 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         final WithUser userWithoutHandleRollout = SecurityContextSwitch.withUser(
                 "user_without_handle_rollout",
-                SpPermission.READ_REPOSITORY, SpPermission.READ_TARGET, SpPermission.CREATE_ROLLOUT);
+                SpPermission.READ_DISTRIBUTION_SET, SpPermission.READ_TARGET, SpPermission.CREATE_ROLLOUT);
         final WithUser userWithHandleRollout = SecurityContextSwitch.withUser(
                 "user_with_handle_rollout",
-                SpPermission.READ_REPOSITORY, SpPermission.READ_TARGET, SpPermission.CREATE_ROLLOUT, SpPermission.HANDLE_ROLLOUT);
+                SpPermission.READ_DISTRIBUTION_SET, SpPermission.READ_TARGET, SpPermission.CREATE_ROLLOUT, SpPermission.HANDLE_ROLLOUT);
         final WithUser userWithSystemRole = SecurityContextSwitch.withUser(
                 "user_with_system_role",
                 SpRole.SYSTEM_ROLE);

@@ -74,7 +74,7 @@ public interface SystemManagement {
     /**
      * @return {@link TenantMetaData} of {@link TenantAware#getCurrentTenant()}
      */
-    @PreAuthorize("hasAuthority('" + SpPermission.READ_REPOSITORY + "')" + " or "
+    @PreAuthorize("hasAuthority('" + SpPermission.READ_DISTRIBUTION_SET + "')" + " or "
             + "hasAuthority('READ_" + SpPermission.TARGET + "')" + " or "
             + "hasAuthority('READ_" + SpPermission.TENANT_CONFIGURATION + "')" + " or "
             + SpringEvalExpressions.IS_CONTROLLER)
@@ -83,7 +83,7 @@ public interface SystemManagement {
     /**
      * @return {@link TenantMetaData} of {@link TenantAware#getCurrentTenant()} without details ({@link TenantMetaData#getDefaultDsType()})
      */
-    @PreAuthorize("hasAuthority('" + SpPermission.READ_REPOSITORY + "')" + " or "
+    @PreAuthorize("hasAuthority('" + SpPermission.READ_DISTRIBUTION_SET + "')" + " or "
             + "hasAuthority('READ_" + SpPermission.TARGET + "')" + " or "
             + "hasAuthority('READ_" + SpPermission.TENANT_CONFIGURATION + "')" + " or "
             + SpringEvalExpressions.IS_CONTROLLER)

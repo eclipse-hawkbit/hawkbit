@@ -13,7 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_DISTRIBUTION_SET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_REPOSITORY;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TARGET;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_DISTRIBUTION_SET;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_TARGET;
@@ -61,7 +60,6 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
         final Action permittedAction = testdataFactory.performAssignment(permitted);
 
         runAs(withUser("user",
-                READ_REPOSITORY,
                         READ_DISTRIBUTION_SET + "/id==" + permitted.getId(),
                         READ_TARGET +"/controllerId==" + permittedAction.getTarget().getControllerId()), () -> {
             final Long permittedActionId = permitted.getId();
@@ -114,7 +112,6 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
         final SoftwareModule swModule = testdataFactory.createSoftwareModuleOs();
 
         runAs(withUser("user",
-                READ_REPOSITORY,
                 READ_DISTRIBUTION_SET + "/id==" + permitted.getId() + " or id==" + readOnly.getId(),
                 UPDATE_DISTRIBUTION_SET + "/id==" + permitted.getId()), () -> {
             // verify distributionSetManagement#assignSoftwareModules
@@ -177,7 +174,6 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
         distributionSetManagement.assignTag(Arrays.asList(permitted.getId(), readOnly.getId(), hidden.getId()), dsTagId);
 
         runAs(withUser("user",
-                READ_REPOSITORY,
                 READ_DISTRIBUTION_SET + "/id==" + permitted.getId() + " or id==" + readOnly.getId(),
                 UPDATE_DISTRIBUTION_SET + "/id==" + permitted.getId()), () -> {
             assertThat(distributionSetManagement.findByTag(dsTagId, Pageable.unpaged()).get().map(Identifiable::getId)
@@ -245,7 +241,6 @@ class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
                 .create(TargetFilterQueryManagement.Create.builder().name("test").query("id==*").build());
 
         runAs(withUser("user",
-                READ_REPOSITORY,
                 READ_DISTRIBUTION_SET + "/id==" + permitted.getId() + " or id==" + readOnly.getId(),
                 UPDATE_DISTRIBUTION_SET + "/id==" + permitted.getId(),
                 // read / update target needed to update target filter query
