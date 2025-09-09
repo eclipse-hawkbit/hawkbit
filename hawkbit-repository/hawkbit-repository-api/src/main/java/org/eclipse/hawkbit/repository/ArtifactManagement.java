@@ -62,7 +62,7 @@ public interface ArtifactManagement extends PermissionSupport {
      * @param isEncrypted flag to indicate if artifact is encrypted.
      * @return loaded {@link StoredArtifactInfo}
      */
-    @PreAuthorize("hasAuthority('" + SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT + "')" + " or " + SpringEvalExpressions.IS_CONTROLLER)
+    @PreAuthorize("hasAuthority('DOWNLOAD_REPOSITORY_ARTIFACT') or hasAuthority('" + SpPermission.SOFTWARE_MODULE_DOWNLOAD_ARTIFACT + "')" + " or " + SpringEvalExpressions.IS_CONTROLLER)
     ArtifactStream getArtifactStream(@NotEmpty String sha1Hash, long softwareModuleId, final boolean isEncrypted);
 
     /**

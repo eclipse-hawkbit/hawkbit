@@ -21,7 +21,6 @@ public class Hierarchy {
             SpPermission.SOFTWARE_MODULE_HIERARCHY +
             SpPermission.DISTRIBUTION_SET_HIERARCHY +
             SpPermission.TENANT_CONFIGURATION_HIERARCHY +
-            SpRole.DEFAULT_ROLE_HIERARCHY +
-            SpPermission.REPOSITORY_HIERARCHY;
+            SpRole.DEFAULT_ROLE_HIERARCHY;
     // @formatter:on
 }

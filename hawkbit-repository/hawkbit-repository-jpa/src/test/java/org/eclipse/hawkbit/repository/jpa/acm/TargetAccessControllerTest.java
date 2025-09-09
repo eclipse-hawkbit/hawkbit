@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.CREATE_ROLLOUT;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_REPOSITORY;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_DISTRIBUTION_SET;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_ROLLOUT;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TARGET;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_TARGET;
@@ -126,8 +126,7 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
 
         runAs(withUser("user",
                         READ_TARGET + "/controllerId==" + permittedTarget.getControllerId() + " or controllerId==" + readOnlyTargetControllerId,
-                        UPDATE_TARGET + "/controllerId==" + permittedTarget.getControllerId(),
-                        READ_REPOSITORY),
+                        UPDATE_TARGET + "/controllerId==" + permittedTarget.getControllerId()),
                 () -> {
                     // verify targetManagement#findByTag
                     assertThat(
@@ -194,9 +193,9 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
                 .getControllerId();
 
         runAs(withUser("user",
+                READ_DISTRIBUTION_SET,
                 READ_TARGET + "/controllerId==" + permittedTarget.getControllerId(),
-                UPDATE_TARGET + "/controllerId==" + permittedTarget.getControllerId(),
-                READ_REPOSITORY), () -> {
+                UPDATE_TARGET + "/controllerId==" + permittedTarget.getControllerId()), () -> {
             final Long dsId = ds.getId();
             assertThat(assignDistributionSet(dsId, permittedTarget.getControllerId()).getAssigned()).isEqualTo(1);
             // assigning of not allowed target behaves as not found
@@ -220,9 +219,9 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
                 .create(Create.builder().controllerId("device02").updateStatus(TargetUpdateStatus.REGISTERED).build());
 
         runAs(withUser("user",
+                READ_DISTRIBUTION_SET,
                 READ_TARGET + "/controllerId==" + manageableTarget.getControllerId() + " or controllerId==" + readOnlyTarget.getControllerId(),
-                UPDATE_TARGET + "/controllerId==" + manageableTarget.getControllerId(),
-                READ_REPOSITORY), () -> {
+                UPDATE_TARGET + "/controllerId==" + manageableTarget.getControllerId()), () -> {
             final Long firstDsId = firstDs.getId();
             // assignment is permitted for manageableTarget
             assertThat(assignDistributionSet(firstDsId, manageableTarget.getControllerId()).getAssigned()).isEqualTo(1);
@@ -253,10 +252,10 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
         final List<Target> hiddenTargets = testdataFactory.createTargets("hidden1", "hidden2", "hidden3", "hidden4", "hidden5");
 
         runAs(withUser("user",
+                READ_DISTRIBUTION_SET,
                 READ_TARGET + "/controllerId=in=(" + String.join(", ", List.of(updateTargetControllerIds)) + ")" +
                         " or controllerId=in=(" + String.join(", ", List.of(readTargetControllerIds)) + ")",
                 UPDATE_TARGET + "/controllerId=in=(" + String.join(", ", List.of(updateTargetControllerIds)) + ")",
-                READ_REPOSITORY,
                 CREATE_ROLLOUT, READ_ROLLOUT), () -> {
             final Rollout rollout = testdataFactory.createRolloutByVariables(
                     "testRollout", "description", updateTargets.size(), "id==*", ds, "50", "5");
@@ -299,7 +298,7 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
                 READ_TARGET + "/controllerId=in=(" + String.join(", ", List.of(updateTargetControllerIds)) + ")" +
                         " or controllerId=in=(" + String.join(", ", List.of(readTargetControllerIds)) + ")",
                 UPDATE_TARGET + "/controllerId=in=(" + String.join(", ", List.of(updateTargetControllerIds)) + ")",
-                READ_REPOSITORY + "/id==" + distributionSet.getId()), () -> {
+                READ_DISTRIBUTION_SET + "/id==" + distributionSet.getId()), () -> {
 
             targetFilterQueryManagement.updateAutoAssignDS(
                     new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(distributionSet.getId()));

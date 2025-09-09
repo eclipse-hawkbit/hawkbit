@@ -67,11 +67,14 @@ public final class SpPermission {
     public static final String READ_DISTRIBUTION_SET = READ_PREFIX + DISTRIBUTION_SET;
     public static final String UPDATE_DISTRIBUTION_SET = UPDATE_PREFIX + DISTRIBUTION_SET;
 
-    public static final String CREATE_REPOSITORY = "CREATE_REPOSITORY";
-    public static final String READ_REPOSITORY = "READ_REPOSITORY";
-    public static final String UPDATE_REPOSITORY = "UPDATE_REPOSITORY";
-    public static final String DELETE_REPOSITORY = "DELETE_REPOSITORY";
+    /**
+     * Deprecated since 0.10.0, use {@link #SOFTWARE_MODULE_DOWNLOAD_ARTIFACT} instead
+     *
+     * @deprecated since 0.10.0, use {@link #SOFTWARE_MODULE_DOWNLOAD_ARTIFACT} instead
+     */
+    @Deprecated(since = "0.10.0", forRemoval = true)
     public static final String DOWNLOAD_REPOSITORY_ARTIFACT = "DOWNLOAD_REPOSITORY_ARTIFACT";
+    public static final String SOFTWARE_MODULE_DOWNLOAD_ARTIFACT = SOFTWARE_MODULE + "_DOWNLOAD_ARTIFACT";
 
     /**
      * Permission to read the tenant settings.
@@ -124,27 +127,6 @@ public final class SpPermission {
             TENANT_CONFIGURATION + IMPLY_UPDATE + TENANT_CONFIGURATION + "\n" +
             TENANT_CONFIGURATION + IMPLY_DELETE + TENANT_CONFIGURATION + "\n" +
             TENANT_CONFIGURATION + " > " + READ_GATEWAY_SECURITY_TOKEN + "\n";
-    public static final String REPOSITORY_HIERARCHY =
-            CREATE_REPOSITORY + IMPLY_CREATE + TARGET_TYPE + "\n" +
-            READ_REPOSITORY + IMPLY_READ + TARGET_TYPE + "\n" +
-            UPDATE_REPOSITORY + IMPLY_UPDATE + TARGET_TYPE + "\n" +
-            DELETE_REPOSITORY + IMPLY_DELETE + TARGET_TYPE + "\n" +
-            CREATE_REPOSITORY + IMPLY_CREATE + SOFTWARE_MODULE + "\n" +
-            READ_REPOSITORY + IMPLY_READ + SOFTWARE_MODULE + "\n" +
-            UPDATE_REPOSITORY + IMPLY_UPDATE + SOFTWARE_MODULE + "\n" +
-            DELETE_REPOSITORY + IMPLY_DELETE + SOFTWARE_MODULE + "\n" +
-            CREATE_REPOSITORY + IMPLY_CREATE + SOFTWARE_MODULE_TYPE + "\n" +
-            READ_REPOSITORY + IMPLY_READ + SOFTWARE_MODULE_TYPE + "\n" +
-            UPDATE_REPOSITORY + IMPLY_UPDATE + SOFTWARE_MODULE_TYPE + "\n" +
-            DELETE_REPOSITORY + IMPLY_DELETE + SOFTWARE_MODULE_TYPE + "\n" +
-            CREATE_REPOSITORY + IMPLY_CREATE + DISTRIBUTION_SET + "\n" +
-            READ_REPOSITORY + IMPLY_READ + DISTRIBUTION_SET + "\n" +
-            UPDATE_REPOSITORY + IMPLY_UPDATE + DISTRIBUTION_SET + "\n" +
-            DELETE_REPOSITORY + IMPLY_DELETE + DISTRIBUTION_SET + "\n" +
-            CREATE_REPOSITORY + IMPLY_CREATE + DISTRIBUTION_SET_TYPE + "\n" +
-            READ_REPOSITORY + IMPLY_READ + DISTRIBUTION_SET_TYPE + "\n" +
-            UPDATE_REPOSITORY + IMPLY_UPDATE + DISTRIBUTION_SET_TYPE + "\n" +
-            DELETE_REPOSITORY + IMPLY_DELETE + DISTRIBUTION_SET_TYPE + "\n";
 
     // @formatter:on
     private static final SingletonSupplier<List<String>> ALL_AUTHORITIES = SingletonSupplier.of(() -> {
@@ -163,7 +145,7 @@ public final class SpPermission {
         // special
         allPermissions.add(READ_TARGET_SECURITY_TOKEN);
         allPermissions.add(READ_GATEWAY_SECURITY_TOKEN);
-        allPermissions.add(DOWNLOAD_REPOSITORY_ARTIFACT);
+        allPermissions.add(SOFTWARE_MODULE_DOWNLOAD_ARTIFACT);
         allPermissions.add(APPROVE_ROLLOUT);
         allPermissions.add(HANDLE_ROLLOUT);
 
@@ -175,6 +157,9 @@ public final class SpPermission {
 
         // system permission, (!) take care with
         allPermissions.add(SYSTEM_ADMIN);
+
+        // add deprecated permissions
+        allPermissions.add(DOWNLOAD_REPOSITORY_ARTIFACT);
 
         return Collections.unmodifiableList(allPermissions);
     });

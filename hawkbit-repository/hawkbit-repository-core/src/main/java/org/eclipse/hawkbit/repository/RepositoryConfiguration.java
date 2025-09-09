@@ -19,6 +19,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.hawkbit.im.authentication.Hierarchy;
 import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
@@ -38,6 +39,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.function.SingletonSupplier;
 
 /**
@@ -52,8 +54,16 @@ public class RepositoryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    static RoleHierarchy roleHierarchy() {
-        return RoleHierarchyImpl.fromHierarchy(Hierarchy.DEFAULT);
+    @SuppressWarnings("java:S3358") // java:S3358 better readable this way
+    RoleHierarchy roleHierarchy(
+            // if configured replaces the hierarchy completely
+            @Value("${org.eclipse.hawkbit.hierarchy:}") final String hierarchy,
+            // if the "hierarchy" property is empty, and this property is configured it is appended to the default hierarchy
+            @Value("${org.eclipse.hawkbit.hierarchy.ext:}") final String hierarchyExt) {
+        return RoleHierarchyImpl.fromHierarchy(
+                ObjectUtils.isEmpty(hierarchy)
+                        ? (ObjectUtils.isEmpty(hierarchyExt) ? Hierarchy.DEFAULT : Hierarchy.DEFAULT + hierarchyExt)
+                        : hierarchy);
     }
 
     @Bean

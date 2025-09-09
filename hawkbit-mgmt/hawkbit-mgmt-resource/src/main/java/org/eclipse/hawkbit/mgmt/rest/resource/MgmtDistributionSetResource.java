@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.validation.ValidationException;
@@ -88,7 +88,6 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     private final DeploymentManagement deployManagement;
     private final SystemManagement systemManagement;
     private final MgmtDistributionSetMapper mgmtDistributionSetMapper;
-    private final SystemSecurityContext systemSecurityContext;
     private final TenantConfigHelper tenantConfigHelper;
 
     @SuppressWarnings("java:S107")
@@ -112,7 +111,6 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
         this.mgmtDistributionSetMapper = mgmtDistributionSetMapper;
         this.systemManagement = systemManagement;
-        this.systemSecurityContext = systemSecurityContext;
     }
 
     @Override
@@ -144,23 +142,27 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<List<MgmtDistributionSet>> createDistributionSets(final List<MgmtDistributionSetRequestBodyPost> sets) {
         log.debug("creating {} distribution sets", sets.size());
         // set default Ds type if ds type is null
-        final String defaultDsKey = systemSecurityContext.runAsSystem(systemManagement.getTenantMetadata().getDefaultDsType()::getKey);
+        final String defaultDsKey = systemManagement.getTenantMetadata().getDefaultDsType().getKey();
         sets.stream().filter(ds -> ds.getType() == null).forEach(ds -> ds.setType(defaultDsKey));
 
-        //check if there is already deleted DS Type
-        for (final MgmtDistributionSetRequestBodyPost ds : sets) {
-            final Optional<? extends DistributionSetType> opt = distributionSetTypeManagement.findByKey(ds.getType());
-            opt.ifPresent(dsType -> {
-                if (dsType.isDeleted()) {
-                    final String text = "Cannot create Distribution Set from type with key {0}. Distribution Set Type already deleted!";
-                    final String message = MessageFormat.format(text, dsType.getKey());
-                    throw new ValidationException(message);
-                }
-            });
-        }
+        // check if target ds types exist and are not deleted, also caches them
+        final Map<String, DistributionSetType> dsTypeKeyToDsType = sets.stream()
+                .map(MgmtDistributionSetRequestBodyPost::getType)
+                .distinct()
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        dsTypeKey ->
+                                distributionSetTypeManagement.findByKey(dsTypeKey).map(dsType -> {
+                                    if (dsType.isDeleted()) {
+                                        throw new ValidationException(MessageFormat.format(
+                                                "Cannot create Distribution Set from type with key {0}. Distribution Set Type already deleted!",
+                                                dsTypeKey));
+                                    }
+                                    return dsType;
+                                }).orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class,  dsTypeKey))));
 
-        final Collection<? extends DistributionSet> createdDSets = distributionSetManagement
-                .create(mgmtDistributionSetMapper.fromRequest(sets));
+        final Collection<? extends DistributionSet> createdDSets =
+                distributionSetManagement.create(mgmtDistributionSetMapper.fromRequest(sets, defaultDsKey, dsTypeKeyToDsType));
 
         log.debug("{} distribution sets created, return status {}", sets.size(), HttpStatus.CREATED);
         return new ResponseEntity<>(MgmtDistributionSetMapper.toResponseDistributionSets(createdDSets), HttpStatus.CREATED);

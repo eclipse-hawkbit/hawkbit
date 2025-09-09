@@ -29,6 +29,16 @@ import org.springframework.http.HttpStatus;
 class PreAuthorizeEnabledTest extends AbstractSecurityTest {
 
     /**
+     * Tests whether request succeed if a role is granted for the user
+     */
+    @Test
+    @WithUser(authorities = { SpPermission.READ_DISTRIBUTION_SET }, autoCreateTenant = false)
+    void successIfHasRole() throws Exception {
+        mvc.perform(get("/rest/v1/distributionsets")).andExpect(result ->
+                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value()));
+    }
+
+    /**
      * Tests whether request fail if a role is forbidden for the user
      */
     @Test
@@ -39,22 +49,11 @@ class PreAuthorizeEnabledTest extends AbstractSecurityTest {
     }
 
     /**
-     * Tests whether request succeed if a role is granted for the user
-     */
-    @Test
-    @WithUser(authorities = { SpPermission.READ_REPOSITORY }, autoCreateTenant = false)
-    void successIfHasRole() throws Exception {
-        mvc.perform(get("/rest/v1/distributionsets")).andExpect(result ->
-                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value()));
-    }
-
-    /**
      * Tests whether request returns distribution set if a role with scope is granted for the user
      */
     @Test
     @WithUser(authorities = {
-            SpPermission.CREATE_REPOSITORY,
-            SpPermission.READ_REPOSITORY,
+            "CREATE_DISTRIBUTION_SET", "READ_DISTRIBUTION_SET_TYPE",
             SpPermission.READ_DISTRIBUTION_SET + "/name==DsOne" }, autoCreateTenant = false)
     void successIfHasRoleWithScope() throws Exception {
         createDsOne("successIfHasRoleWithScope");
@@ -69,8 +68,7 @@ class PreAuthorizeEnabledTest extends AbstractSecurityTest {
      */
     @Test
     @WithUser(authorities = {
-            SpPermission.CREATE_REPOSITORY,
-            SpPermission.READ_REPOSITORY,
+            "CREATE_DISTRIBUTION_SET", "READ_DISTRIBUTION_SET_TYPE",
             SpPermission.READ_DISTRIBUTION_SET + "/name==DsOne2" }, autoCreateTenant = false)
     void failIfHasNoForbiddingScope() throws Exception {
         createDsOne("failIfHasNoForbiddingScope");
@@ -99,8 +97,7 @@ class PreAuthorizeEnabledTest extends AbstractSecurityTest {
         mvc.perform(get("/rest/v1/system/configs")).andExpect(result -> {
             // returns default DS type because of READ_TARGET
             assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
-            assertThat(new ObjectMapper().reader().readValue(result.getResponse().getContentAsString(), HashMap.class))
-                    .hasSize(1);
+            assertThat(new ObjectMapper().reader().readValue(result.getResponse().getContentAsString(), HashMap.class)).hasSize(1);
         });
     }
 

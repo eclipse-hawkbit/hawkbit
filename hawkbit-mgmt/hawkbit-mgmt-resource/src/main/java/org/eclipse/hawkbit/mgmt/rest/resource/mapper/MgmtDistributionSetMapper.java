@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -63,8 +64,38 @@ public class MgmtDistributionSetMapper {
         this.systemManagement = systemManagement;
     }
 
-    public List<DistributionSetManagement.Create> fromRequest(final Collection<MgmtDistributionSetRequestBodyPost> sets) {
-        return sets.stream().map(this::fromRequest).toList();
+    public List<DistributionSetManagement.Create> fromRequest(
+            final Collection<MgmtDistributionSetRequestBodyPost> sets,
+            final String defaultDsKey, final Map<String, DistributionSetType> dsTypeKeyToDsType) {
+        return sets.stream().<DistributionSetManagement.Create>map(dsRest -> {
+            final Set<Long> modules = new HashSet<>();
+            if (dsRest.getOs() != null) {
+                modules.add(dsRest.getOs().getId());
+            }
+            if (dsRest.getApplication() != null) {
+                modules.add(dsRest.getApplication().getId());
+            }
+            if (dsRest.getRuntime() != null) {
+                modules.add(dsRest.getRuntime().getId());
+            }
+            if (dsRest.getModules() != null) {
+                dsRest.getModules().forEach(module -> modules.add(module.getId()));
+            }
+            // distribution set type, if null by the REST call shall be replaced with the default tenant DS  type
+            final String dsTypeKey = Objects.requireNonNull(dsRest.getType(), "Distribution set type must not be null");
+            final DistributionSetType dsType = dsTypeKeyToDsType.get(dsTypeKey);
+            if (dsType == null) {
+                // type should never null, cache is prefilled with all types
+                throw new EntityNotFoundException(DistributionSetType.class, defaultDsKey);
+            }
+            return DistributionSetManagement.Create.builder()
+                    .type(dsType)
+                    .name(dsRest.getName()).version(dsRest.getVersion())
+                    .description(dsRest.getDescription())
+                    .modules(findSoftwareModuleWithExceptionIfNotFound(modules))
+                    .requiredMigrationStep(dsRest.getRequiredMigrationStep())
+                    .build();
+        }).toList();
     }
 
     public static MgmtDistributionSet toResponse(final DistributionSet distributionSet) {
@@ -168,36 +199,6 @@ public class MgmtDistributionSetMapper {
         }
 
         return sets.stream().map(MgmtDistributionSetMapper::toResponse).toList();
-    }
-
-    private DistributionSetManagement.Create fromRequest(final MgmtDistributionSetRequestBodyPost dsRest) {
-        final Set<Long> modules = new HashSet<>();
-        if (dsRest.getOs() != null) {
-            modules.add(dsRest.getOs().getId());
-        }
-        if (dsRest.getApplication() != null) {
-            modules.add(dsRest.getApplication().getId());
-        }
-        if (dsRest.getRuntime() != null) {
-            modules.add(dsRest.getRuntime().getId());
-        }
-        if (dsRest.getModules() != null) {
-            dsRest.getModules().forEach(module -> modules.add(module.getId()));
-        }
-        return DistributionSetManagement.Create.builder()
-                .type(Optional.ofNullable(dsRest.getType())
-                        // if the type is supplied the type MUST exist
-                        .map(typeKey -> distributionSetTypeManagement
-                                .findByKey(typeKey)
-                                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, typeKey)))
-                        .map(DistributionSetType.class::cast)
-                        // if here, the type is not supplied, use the default type
-                        .orElseGet(() -> systemManagement.getTenantMetadata().getDefaultDsType()))
-                .name(dsRest.getName()).version(dsRest.getVersion())
-                .description(dsRest.getDescription())
-                .modules(findSoftwareModuleWithExceptionIfNotFound(modules))
-                .requiredMigrationStep(dsRest.getRequiredMigrationStep())
-                .build();
     }
 
     private Set<? extends SoftwareModule> findSoftwareModuleWithExceptionIfNotFound(final Set<Long> softwareModuleIds) {
