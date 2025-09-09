@@ -21,6 +21,8 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
@@ -28,6 +30,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware.AuditorAwarePrincipal;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
+import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -103,7 +106,7 @@ public interface SecurityContextSerializer {
 
         private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
         private static final boolean FALLBACK_TO_JAVA_SERIALIZATION =
-                !Boolean.getBoolean("hawkbit.security.contextSerializer.json.no-fallback-to-java");
+                !Boolean.getBoolean("org.hawkbit.security.contextSerializer.json.no-fallback-to-java");
 
         @Override
         public String serialize(final SecurityContext securityContext) {
@@ -143,8 +146,11 @@ public interface SecurityContextSerializer {
 
             private String tenant;
             private boolean controller;
+            // auditor / username (authentication principal name)
             private String auditor;
+            @JsonProperty(required = true)
             private String[] authorities;
+            @JsonProperty(defaultValue = "true")
             private boolean authenticated;
 
             SecCtxInfo(final SecurityContext securityContext) {
@@ -152,16 +158,22 @@ public interface SecurityContextSerializer {
                 if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails) {
                     tenant = tenantAwareDetails.tenant();
                     controller = tenantAwareDetails.controller();
-                } else {
-                    tenant = null;
-                    controller = false;
+                } else if (authentication.getPrincipal() instanceof TenantAwareUser tenantAwareUser) {
+                    tenant = tenantAwareUser.getTenant();
                 }
+
                 // keep the auditor, ofr audit purposes,
                 // sets principal to the resolved auditor and then deserialized authentication will return it as principal
                 // since the class is not known to auditor aware - it shall used default - principal as auditor
                 auditor = SpringSecurityAuditorAware.resolveAuditor(authentication);
                 authorities = authentication.getAuthorities().stream().map(Object::toString).toArray(String[]::new);
                 authenticated = authentication.isAuthenticated();
+            }
+
+            // allows setting for auditor also as username (so supported auditor/username in json)
+            @JsonSetter("username")
+            private void setUsername(final String username) {
+                this.auditor = username;
             }
 
             private SecurityContext toSecurityContext() {

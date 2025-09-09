@@ -81,6 +81,24 @@ class SecurityContextSerializerTest {
         assertThat(deserializedOld.isAuthenticated()).isEqualTo(deserializedNew.isAuthenticated());
     }
 
+    @Test
+    void testUsername() {
+        final SecurityContext securityContext = SecurityContextHolder.getContext();
+        final UsernamePasswordAuthenticationToken userPassAuthentication = new UsernamePasswordAuthenticationToken(
+                "user", null, AUTHORITIES.stream().map(SimpleGrantedAuthority::new).toList());
+        final TenantAwareAuthenticationDetails details = new TenantAwareAuthenticationDetails("my_tenant", false);
+        userPassAuthentication.setDetails(details);
+        securityContext.setAuthentication(userPassAuthentication);
+
+        final String serialized = JSON_SERIALIZATION.serialize(securityContext).replace("auditor", "username");
+        final SecurityContext deserialized = JSON_SERIALIZATION.deserialize(serialized);
+        final Authentication authentication = deserialized.getAuthentication();
+        assertThat(SpringSecurityAuditorAware.resolveAuditor(authentication)).hasToString("user");
+        assertThat(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList()).isEqualTo(AUTHORITIES);
+        assertThat(authentication.isAuthenticated()).isTrue();
+        assertThat(authentication.getDetails()).isEqualTo(details);
+    }
+
     private static String bigString(final int length) {
         final StringBuilder sb = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
