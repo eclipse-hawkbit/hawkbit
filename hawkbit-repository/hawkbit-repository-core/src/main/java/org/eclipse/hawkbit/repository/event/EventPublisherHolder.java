@@ -44,7 +44,7 @@ import org.springframework.context.ApplicationEventPublisher;
 @Slf4j
 public final class EventPublisherHolder {
 
-    @Value("${hawkbit.events.remote-enabled:true}")
+    @Value("${hawkbit.events.remote.enabled:true}")
     private boolean remoteEventsEnabled;
     @Value("${hawkbit.events.remote.destination:fanoutEventChannel}")
     private String fanoutEventChannel;
@@ -65,7 +65,7 @@ public final class EventPublisherHolder {
     @PostConstruct
     private void validateRemoteEventConfig() {
         if (remoteEventsEnabled && streamBridge == null) {
-            throw new IllegalStateException("'hawkbit.events.remote-enabled' is true but streamBridge is not configured. Check if 'spring-cloud-starter-stream-rabbit' dependency is included.");
+            throw new IllegalStateException("'hawkbit.events.remote.enabled' is true but streamBridge is not configured. Check if 'spring-cloud-starter-stream-rabbit' dependency is included.");
         }
     }
 
