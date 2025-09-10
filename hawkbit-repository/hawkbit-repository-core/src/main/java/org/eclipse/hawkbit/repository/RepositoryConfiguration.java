@@ -57,9 +57,9 @@ public class RepositoryConfiguration {
     @SuppressWarnings("java:S3358") // java:S3358 better readable this way
     RoleHierarchy roleHierarchy(
             // if configured replaces the hierarchy completely
-            @Value("${org.eclipse.hawkbit.hierarchy:}") final String hierarchy,
+            @Value("${hawkbit.hierarchy:}") final String hierarchy,
             // if the "hierarchy" property is empty, and this property is configured it is appended to the default hierarchy
-            @Value("${org.eclipse.hawkbit.hierarchy.ext:}") final String hierarchyExt) {
+            @Value("${hawkbit.hierarchy.ext:}") final String hierarchyExt) {
         return RoleHierarchyImpl.fromHierarchy(
                 ObjectUtils.isEmpty(hierarchy)
                         ? (ObjectUtils.isEmpty(hierarchyExt) ? Hierarchy.DEFAULT : Hierarchy.DEFAULT + hierarchyExt)

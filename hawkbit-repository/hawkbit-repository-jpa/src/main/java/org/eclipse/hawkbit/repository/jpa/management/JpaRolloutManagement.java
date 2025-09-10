@@ -120,7 +120,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             RolloutStatus.CREATING, RolloutStatus.READY, RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.STARTING, RolloutStatus.RUNNING,
             RolloutStatus.PAUSED, RolloutStatus.APPROVAL_DENIED);
 
-    @Value("${org.eclipse.hawkbit.repository.jpa.management.rollout.max.actions.per.transaction:5000}")
+    @Value("${hawkbit.repository.jpa.management.rollout.max.actions.per.transaction:5000}")
     private int MAX_ACTIONS;
 
     private final EntityManager entityManager;

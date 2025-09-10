@@ -38,7 +38,7 @@ import org.springframework.test.context.TestPropertySource;
 // Dirty context is necessary to create a new vhost and recreate all necessary beans after every test class.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @TestPropertySource(properties = {
-        "org.eclipse.hawkbit.events.remote-enabled=false",
+        "hawkbit.events.remote-enabled=false",
         "spring.main.allow-bean-definition-overriding=true" })
 @SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTest {

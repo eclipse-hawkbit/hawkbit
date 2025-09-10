@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.security.SpringSecurityAuditorAware.AuditorAwarePrinc
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -106,7 +107,7 @@ public interface SecurityContextSerializer {
 
         private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
         private static final boolean FALLBACK_TO_JAVA_SERIALIZATION =
-                !Boolean.getBoolean("org.hawkbit.security.contextSerializer.json.no-fallback-to-java");
+                !Boolean.getBoolean("hawkbit.security.contextSerializer.json.no-fallback-to-java");
 
         @Override
         public String serialize(final SecurityContext securityContext) {
@@ -137,6 +138,8 @@ public interface SecurityContextSerializer {
         }
 
         // simplified info for the security context keeping just the basic info needed for background execution of
+        // controller authentication is not supported - always is false
+        // only authenticated user is supported
         @NoArgsConstructor
         @Data
         private static class SecCtxInfo implements Serializable {
@@ -145,19 +148,21 @@ public interface SecurityContextSerializer {
             private static final long serialVersionUID = 1L;
 
             private String tenant;
-            private boolean controller;
             // auditor / username (authentication principal name)
-            private String auditor;
+            private String auditor = "n/a"; // default value "n/a" is used only on deserialization if field is missing
             @JsonProperty(required = true)
             private String[] authorities;
-            @JsonProperty(defaultValue = "true")
-            private boolean authenticated;
 
             SecCtxInfo(final SecurityContext securityContext) {
                 final Authentication authentication = securityContext.getAuthentication();
+                if (!authentication.isAuthenticated()) {
+                    throw new IllegalStateException("Only authenticated context could be serialized");
+                }
                 if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails) {
+                    if (tenantAwareDetails.controller()) {
+                        throw new IllegalStateException("Controller authentication context is not supported");
+                    }
                     tenant = tenantAwareDetails.tenant();
-                    controller = tenantAwareDetails.controller();
                 } else if (authentication.getPrincipal() instanceof TenantAwareUser tenantAwareUser) {
                     tenant = tenantAwareUser.getTenant();
                 }
@@ -167,10 +172,10 @@ public interface SecurityContextSerializer {
                 // since the class is not known to auditor aware - it shall used default - principal as auditor
                 auditor = SpringSecurityAuditorAware.resolveAuditor(authentication);
                 authorities = authentication.getAuthorities().stream().map(Object::toString).toArray(String[]::new);
-                authenticated = authentication.isAuthenticated();
             }
 
-            // allows setting for auditor also as username (so supported auditor/username in json)
+            // TODO - remove it in future
+            // auditor alias, allows setting for auditor also as username (so supported auditor/username in json)
             @JsonSetter("username")
             private void setUsername(final String username) {
                 this.auditor = username;
@@ -178,7 +183,7 @@ public interface SecurityContextSerializer {
 
             private SecurityContext toSecurityContext() {
                 final SecurityContext ctx = SecurityContextHolder.createEmptyContext();
-                final Object details = tenant == null ? null : new TenantAwareAuthenticationDetails(tenant, controller);
+                final Object details = tenant == null ? null : new TenantAwareAuthenticationDetails(tenant, false);
                 final AuditorAwarePrincipal principal = () -> auditor;
                 final Collection<? extends GrantedAuthority> grantedAuthorities =
                         Stream.of(authorities).map(SimpleGrantedAuthority::new).toList();
@@ -196,7 +201,7 @@ public interface SecurityContextSerializer {
 
                     @Override
                     public boolean isAuthenticated() {
-                        return authenticated;
+                        return true;
                     }
 
                     @Override
