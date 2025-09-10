@@ -74,7 +74,7 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles({ "test" })
 @SpringBootTest(classes = { JpaRepositoryConfiguration.class }, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @TestPropertySource(properties = {
-        "hawkbit.events.remote-enabled=false",
+        "hawkbit.events.remote.enabled=false",
         "spring.main.allow-bean-definition-overriding=true" })
 class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
