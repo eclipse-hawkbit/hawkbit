@@ -31,7 +31,7 @@ public class PropertyBasedArtifactUrlResolverAutoConfiguration {
     @ConditionalOnMissingBean(ArtifactUrlResolver.class)
     PropertyBasedArtifactUrlResolver propertyBasedArtifactUrlHandler(
             final PropertyBasedArtifactUrlResolverProperties urlHandlerProperties,
-            @Value("${server.servlet.context-path:}") final String contextPath) {
+            @Value("${hawkbit.server.servlet.context-path:}") final String contextPath) {
         return new PropertyBasedArtifactUrlResolver(urlHandlerProperties, contextPath);
     }
 }
