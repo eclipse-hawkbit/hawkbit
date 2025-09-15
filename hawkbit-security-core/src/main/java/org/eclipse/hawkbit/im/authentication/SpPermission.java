@@ -74,7 +74,7 @@ public final class SpPermission {
      */
     @Deprecated(since = "0.10.0", forRemoval = true)
     public static final String DOWNLOAD_REPOSITORY_ARTIFACT = "DOWNLOAD_REPOSITORY_ARTIFACT";
-    public static final String SOFTWARE_MODULE_DOWNLOAD_ARTIFACT = SOFTWARE_MODULE + "_DOWNLOAD_ARTIFACT";
+    public static final String SOFTWARE_MODULE_DOWNLOAD_ARTIFACT = SOFTWARE_MODULE + "_DOWNLOAD";
 
     /**
      * Permission to read the tenant settings.
