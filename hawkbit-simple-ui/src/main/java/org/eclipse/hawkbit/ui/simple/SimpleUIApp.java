@@ -17,6 +17,7 @@ import feign.RequestInterceptor;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.HawkbitServer;
 import org.eclipse.hawkbit.sdk.Tenant;
@@ -29,6 +30,7 @@ import org.springframework.cloud.openfeign.FeignClientsConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -41,6 +43,8 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,6 +54,7 @@ import java.util.function.Function;
 import static feign.Util.ISO_8859_1;
 import static java.util.Collections.emptyList;
 
+@Slf4j
 @Theme("hawkbit")
 @PWA(name = "hawkBit UI", shortName = "hawkBit UI")
 @SpringBootApplication
@@ -126,10 +131,15 @@ public class SimpleUIApp implements AppShellConfigurator {
 
     // accepts all user / pass, just delegating them to the feign client
     @Bean
-    AuthenticationManager authenticationManager(final HawkbitMgmtClient hawkbitClient) {
+    AuthenticationManager authenticationManager(final HawkbitMgmtClient hawkbitClient, final HawkbitServer server) {
         return authentication -> {
             final String username = authentication.getName();
             final String password = authentication.getCredentials().toString();
+
+            // make simple check in order not to be logged in as not real user.
+            if (!isAuthenticated(username, password, server.getMgmtUrl())) {
+                throw new BadCredentialsException("Incorrect username or password!");
+            }
 
             final List<SimpleGrantedAuthority> grantedAuthorities = getGrantedAuthorities(
                     hawkbitClient, new UsernamePasswordAuthenticationToken(username, password));
@@ -171,5 +181,22 @@ public class SimpleUIApp implements AppShellConfigurator {
             SecurityContextHolder.setContext(currentContext);
         }
         return roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role)).toList();
+    }
+
+    public static boolean isAuthenticated(String username, String password, String mgmtUrl) {
+        try {
+            final URL url = new URL(mgmtUrl + "/rest/v1/rollouts");
+            final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            final String auth = username + ":" + password;
+            final String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+            conn.setRequestProperty("Authorization", "Basic " + encodedAuth);
+
+            return conn.getResponseCode() != 401;
+        } catch (final Exception ex) {
+            log.error("Failed to authenticate user {} .Reason : ", username, ex);
+            return false;
+        }
     }
 }
