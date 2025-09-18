@@ -32,7 +32,6 @@ import org.eclipse.hawkbit.security.SpringSecurityAuditorAware.AuditorAwarePrinc
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -49,17 +48,8 @@ public interface SecurityContextSerializer {
     SecurityContextSerializer NOP = new Nop();
     /**
      * Serializer the uses JSON serialization.
-     * <p/>
-     * Note that on deserialization this serialization does (if configured) fallback to {@link #JAVA_SERIALIZATION}.
      */
     SecurityContextSerializer JSON_SERIALIZATION = new JsonSerialization();
-    /**
-     * Serializer the uses Java serialization of {@link java.io.Serializable} objects (legacy, not recommended).
-     * <p/>
-     * Note that serialized via java serialization context might become unreadable if incompatible
-     * changes are made to the object classes.
-     */
-    SecurityContextSerializer JAVA_SERIALIZATION = new JavaSerialization();
 
     /**
      * Return security context as string (could be just a reference)
@@ -82,10 +72,8 @@ public interface SecurityContextSerializer {
      * It returns <code>null</code> as serialized context and throws exception if
      * someone try to deserialize anything.
      */
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
     class Nop implements SecurityContextSerializer {
-
-        private Nop() {
-        }
 
         @Override
         public String serialize(final SecurityContext securityContext) {
@@ -106,8 +94,6 @@ public interface SecurityContextSerializer {
     class JsonSerialization implements SecurityContextSerializer {
 
         private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-        private static final boolean FALLBACK_TO_JAVA_SERIALIZATION =
-                !Boolean.getBoolean("hawkbit.security.contextSerializer.json.no-fallback-to-java");
 
         @Override
         public String serialize(final SecurityContext securityContext) {
@@ -124,13 +110,6 @@ public interface SecurityContextSerializer {
             Objects.requireNonNull(securityContextString);
             final String securityContextTrimmed = securityContextString.trim();
             try {
-                // java serialization starts with {@link ObjectStreamConstants#STREAM_MAGIC} (0xAC, 0xED) bytes
-                // while trimmed json object starts with '{'
-                if (FALLBACK_TO_JAVA_SERIALIZATION &&
-                        (securityContextTrimmed.isEmpty() || securityContextTrimmed.charAt(0) != '{')) {
-                    return JAVA_SERIALIZATION.deserialize(securityContextString);
-                }
-
                 return OBJECT_MAPPER.readerFor(SecCtxInfo.class).<SecCtxInfo> readValue(securityContextTrimmed).toSecurityContext();
             } catch (final JsonProcessingException e) {
                 throw new RuntimeException(e);

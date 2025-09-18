@@ -65,11 +65,12 @@ public class SecurityAutoConfiguration {
     }
 
     /**
-     * Creates a {@link ContextAware} (hence {@link TenantAware}) bean based on the given {@link UserAuthoritiesResolver} and
-     * {@link SecurityContextSerializer}.
+     * Creates a {@link ContextAware} (hence {@link TenantAware}) bean based on the given {@link UserAuthoritiesResolver},
+     * {@link SecurityContextSerializer} and {@link TenantResolver}.
      *
      * @param authoritiesResolver The user authorities/roles resolver
-     * @param securityContextSerializer The security context serializer.
+     * @param securityContextSerializer The security context serializer (optional, if not found the default {@link SecurityContextSerializer#NOP} is used).
+     * @param tenantResolver The tenant resolver (optional, if not found the default {@link DefaultTenantResolver} is used).
      * @return the {@link ContextAware} singleton bean.
      */
     @Bean

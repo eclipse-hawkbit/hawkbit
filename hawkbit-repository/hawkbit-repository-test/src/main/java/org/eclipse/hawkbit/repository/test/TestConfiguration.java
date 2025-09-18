@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
@@ -145,18 +146,14 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    SecurityContextSerializer securityContextSerializer() {
-        return SecurityContextSerializer.JSON_SERIALIZATION;
-    }
-
-    @Bean
     TenantResolver tenantResolver() {
         return new DefaultTenantResolver();
     }
 
     @Bean
     ContextAware contextAware(
-            final UserAuthoritiesResolver authoritiesResolver, final SecurityContextSerializer securityContextSerializer,
+            final UserAuthoritiesResolver authoritiesResolver,
+            @Autowired(required = false) final SecurityContextSerializer securityContextSerializer,
             final TenantResolver tenantResolver) {
         // allow spying the security context
         return org.mockito.Mockito.spy(new SecurityContextTenantAware(authoritiesResolver, securityContextSerializer, tenantResolver));

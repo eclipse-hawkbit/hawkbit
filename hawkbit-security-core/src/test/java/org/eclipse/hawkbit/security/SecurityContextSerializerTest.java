@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.security.SecurityContextSerializer.JAVA_SERIALIZATION;
 import static org.eclipse.hawkbit.security.SecurityContextSerializer.JSON_SERIALIZATION;
 
 import java.util.List;
@@ -61,24 +60,6 @@ class SecurityContextSerializerTest {
 
         final String serialized = JSON_SERIALIZATION.serialize(securityContext);
         assertThat(serialized).hasSizeLessThan(4096); // ensure that it is not too big
-    }
-
-    // test JSON serialization fallback to java serialization
-    @Test
-    void backwardCompatibilityOfJavaSerialization() {
-        final SecurityContext securityContext = SecurityContextHolder.getContext();
-        securityContext.setAuthentication(
-                new UsernamePasswordAuthenticationToken("user", null, AUTHORITIES.stream().map(SimpleGrantedAuthority::new).toList()));
-
-        final String newSerialized = JSON_SERIALIZATION.serialize(securityContext);
-        final String oldSerialized = JAVA_SERIALIZATION.serialize(securityContext);
-
-        assertThat(oldSerialized).isNotEqualTo(newSerialized);
-        final Authentication deserializedOld = JSON_SERIALIZATION.deserialize(oldSerialized).getAuthentication();
-        final Authentication deserializedNew = JSON_SERIALIZATION.deserialize(newSerialized).getAuthentication();
-        assertThat(SpringSecurityAuditorAware.resolveAuditor(deserializedOld)).hasToString(SpringSecurityAuditorAware.resolveAuditor(deserializedNew));
-        assertThat(deserializedOld.getAuthorities()).isEqualTo(deserializedNew.getAuthorities());
-        assertThat(deserializedOld.isAuthenticated()).isEqualTo(deserializedNew.isAuthenticated());
     }
 
     @Test
