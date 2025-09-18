@@ -68,7 +68,7 @@ class PreAuthorizeEnabledTest extends AbstractSecurityTest {
      */
     @Test
     @WithUser(authorities = {
-            "CREATE_DISTRIBUTION_SET", "READ_DISTRIBUTION_SET_TYPE",
+            "CREATE_DISTRIBUTION_SET",
             SpPermission.READ_DISTRIBUTION_SET + "/name==DsOne2" }, autoCreateTenant = false)
     void failIfHasNoForbiddingScope() throws Exception {
         createDsOne("failIfHasNoForbiddingScope");
