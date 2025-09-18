@@ -37,11 +37,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ContextConfiguration;
 
 /**
  * Feature: Component Tests - Context runner<br/>
  * Story: Test Context Runner
  */
+@ContextConfiguration(classes = { AcmTestConfiguration.class })
 class ContextAwareTest extends AbstractJpaIntegrationTest {
 
     private static final List<String> AUTHORITIES = SpPermission.getAllAuthorities();

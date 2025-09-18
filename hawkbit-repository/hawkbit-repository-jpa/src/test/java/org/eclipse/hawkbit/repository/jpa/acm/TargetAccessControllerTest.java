@@ -49,7 +49,7 @@ import org.springframework.test.context.ContextConfiguration;
  * Feature: Component Tests - Access Control<br/>
  * Story: Test Target Access Controller
  */
-@ContextConfiguration(classes = { DefaultAccessControllerConfiguration.class })
+@ContextConfiguration(classes = { DefaultAccessControllerConfiguration.class, AcmTestConfiguration.class })
 class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
 
     @Autowired

@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.security.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_TARGET_SECURITY_TOKEN_ENABLED;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -18,11 +19,9 @@ import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
-import org.eclipse.hawkbit.security.SecurityContextSerializer;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class SecurityTokenAuthenticatorTest {
 
-    private static final String CONTROLLER_ID = "controllerId_gwtoken";
+    private static final String CONTROLLER_ID = "controllerId_token";
     private static final String SECURITY_TOKEN = "test-sec-token";
     private static final String UNKNOWN_TOKEN = "unknown";
 
@@ -54,12 +53,10 @@ class SecurityTokenAuthenticatorTest {
     private ControllerManagement controllerManagementMock;
     @Mock
     private UserAuthoritiesResolver authoritiesResolver;
-    @Mock
-    private SecurityContextSerializer securityContextSerializer;
 
     @BeforeEach
     void before() {
-        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver, securityContextSerializer);
+        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver);
         authenticator = new SecurityTokenAuthenticator(
                 tenantConfigurationManagementMock, tenantAware,
                 new SystemSecurityContext(tenantAware), controllerManagementMock);
@@ -71,8 +68,7 @@ class SecurityTokenAuthenticatorTest {
     @Test
     void testWithSecToken() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(SECURITY_TOKEN);
-        when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))
+        when(tenantConfigurationManagementMock.getConfigurationValue(AUTHENTICATION_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))
                 .thenReturn(CONFIG_VALUE_ENABLED);
 
         final Target target = Mockito.mock(Target.class);
@@ -91,8 +87,7 @@ class SecurityTokenAuthenticatorTest {
     @Test
     void testWithBadSecToken() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(UNKNOWN_TOKEN);
-        when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))
+        when(tenantConfigurationManagementMock.getConfigurationValue(AUTHENTICATION_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))
                 .thenReturn(CONFIG_VALUE_ENABLED);
 
         assertThat(authenticator.authenticate(securityToken)).isNull();
@@ -112,8 +107,7 @@ class SecurityTokenAuthenticatorTest {
     @Test
     void testWithSecTokenButDisabled() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(SECURITY_TOKEN);
-        when(tenantConfigurationManagementMock.getConfigurationValue(
-                TenantConfigurationKey.AUTHENTICATION_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))
+        when(tenantConfigurationManagementMock.getConfigurationValue(AUTHENTICATION_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))
                 .thenReturn(CONFIG_VALUE_DISABLED);
 
         assertThat(authenticator.authenticate(securityToken)).isNull();
