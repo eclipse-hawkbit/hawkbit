@@ -24,6 +24,7 @@ import static org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison.Operator.NOT
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -41,8 +42,10 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.FieldValueConverter;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
+import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.ql.Node;
@@ -68,14 +71,14 @@ public class RsqlParser {
     public static final ComparisonOperator IS = new ComparisonOperator("=is=", "=eq=");
     public static final ComparisonOperator NOT = new ComparisonOperator("=not=", "=ne=");
 
-    private static final RSQLParser PARSER;
+    private static final RSQLParser RSQL_PARSER;
 
     static {
         final Set<ComparisonOperator> operators = new HashSet<>(RSQLOperators.defaultOperators());
         // == and != alternatives just treating "null" string as null not as a "null"
         operators.add(IS);
         operators.add(NOT);
-        PARSER = new RSQLParser(operators);
+        RSQL_PARSER = new RSQLParser(operators);
     }
 
     public static Node parse(final String rsql) {
@@ -88,7 +91,7 @@ public class RsqlParser {
 
     private static Node parse(final String rsql, final Function<String, Key> keyResolver) {
         try {
-            return PARSER
+            return RSQL_PARSER
                     .parse(rsql)
                     .accept(new RsqlVisitor(keyResolver));
         } catch (final RSQLParserException e) {
@@ -121,6 +124,12 @@ public class RsqlParser {
                 } else if (enumValue.getSubEntityAttributes().size() == 1) {
                     // single sub attribute - so, treat it as a default
                     attribute = enumValue.getJpaEntityFieldName() + SUB_ATTRIBUTE_SEPARATOR + enumValue.getSubEntityAttributes().get(0);
+                } else if (RsqlUtility.SM_DS_SEARCH_BY_TYPE_BACKWARD_COMPATIBILITY &&
+                        "type".equalsIgnoreCase(enumValue.getJpaEntityFieldName()) &&
+                        (Objects.equals(rsqlQueryFieldType, SoftwareModuleFields.class) ||
+                                Objects.equals(rsqlQueryFieldType, DistributionSetFields.class))) {
+                    // backward compatibility - type for SoftwareModuleTypeFields && DistributionSetFields means type.key
+                    attribute = enumValue.getJpaEntityFieldName() + SUB_ATTRIBUTE_SEPARATOR + "key";
                 } else {
                     throw new RSQLParameterUnsupportedFieldException(
                             String.format(
@@ -148,7 +157,9 @@ public class RsqlParser {
             }
         }
 
-        return new Key(attribute, RsqlVisitor.valueConverter(enumValue));
+        return new
+
+                Key(attribute, RsqlVisitor.valueConverter(enumValue));
     }
 
     private record Key(String path, UnaryOperator<Object> converter) {}

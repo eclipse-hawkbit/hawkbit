@@ -21,7 +21,10 @@ import lombok.Getter;
 public enum DistributionSetFields implements RsqlQueryField {
 
     ID("id"),
-    TYPE("type", "key", "name"),
+    TYPE("type",
+            DistributionSetTypeFields.ID.getJpaEntityFieldName(),
+            DistributionSetTypeFields.KEY.getJpaEntityFieldName(),
+            DistributionSetTypeFields.NAME.getJpaEntityFieldName()),
     NAME("name"),
     DESCRIPTION("description"),
     CREATEDAT("createdAt"),

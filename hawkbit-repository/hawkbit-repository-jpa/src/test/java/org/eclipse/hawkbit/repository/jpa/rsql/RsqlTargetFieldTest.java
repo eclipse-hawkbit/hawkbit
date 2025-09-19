@@ -400,6 +400,16 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
      * Test filter by target type key
      */
     @Test
+    void shouldFilterTargetsByTypeId() {
+        assertRSQLQuery("targettype." + TargetTypeFields.ID.name() + "==" + targetType1.getId(), 1);
+        assertRSQLQuery("targettype." + TargetTypeFields.ID.name() + "!=" + targetType2.getId(), 4);
+        assertRSQLQuery("targettype." + TargetTypeFields.ID.name() + "==-1", 0);
+    }
+
+    /**
+     * Test filter by target type key
+     */
+    @Test
     void shouldFilterTargetsByTypeKey() {
         assertRSQLQuery("targettype." + TargetTypeFields.KEY.name() + "==" + targetType1.getKey(), 1);
         assertRSQLQuery("targettype." + TargetTypeFields.KEY.name() + "==*1.key", 1);
@@ -424,7 +434,7 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
     @Test
     void shouldFilterTargetsByTypeIdAndDescription() {
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> assertRSQLQuery("targettype.ID==1", 0));
+                .isThrownBy(() -> assertRSQLQuery("targettype.IDD==1", 0));
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
                 .isThrownBy(() -> assertRSQLQuery("targettype.description==Description", 0));
     }
