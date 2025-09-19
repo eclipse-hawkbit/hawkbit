@@ -71,7 +71,8 @@ public class MainLayout extends AppLayout {
     protected void afterNavigation() {
         super.afterNavigation();
         viewTitle.setText(
-                Optional.ofNullable(getContent().getClass().getAnnotation(PageTitle.class))
+                Optional.ofNullable(getContent())
+                        .map(c -> c.getClass().getAnnotation(PageTitle.class))
                         .map(PageTitle::value)
                         .orElse(""));
         if (UI.getCurrent().getActiveViewLocation().getPath().isEmpty()) {
