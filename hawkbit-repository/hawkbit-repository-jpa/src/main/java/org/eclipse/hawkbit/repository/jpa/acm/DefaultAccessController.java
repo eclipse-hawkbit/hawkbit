@@ -64,12 +64,12 @@ public class DefaultAccessController<A extends Enum<A> & RsqlQueryField, T> impl
             return Optional.empty();
         }
 
-        return Optional.ofNullable(getScopes(operation)) // if get scopes returns null, no scopes return no spec - all entities are accessible
+        return Optional.ofNullable(getScopes(operation)) // if "get scopes" returns null, no scopes return no spec - all entities are accessible
                 .map(scopes -> // to RSQL
                         scopes.size() == 1
                                 ? scopes.get(0) // single scope
                                 : "(" + String.join(") or (", scopes) + ")") // join multiple scopes with 'or' - union
-                .map(scope -> RsqlUtility.getInstance().buildRsqlSpecification(scope, rsqlQueryFieldType));
+                .map(rsql -> RsqlUtility.getInstance().buildRsqlSpecification(rsql, rsqlQueryFieldType));
     }
 
     @Override
