@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository.jpa.acm;
 
 import java.lang.reflect.Proxy;
-import java.util.List;
 import java.util.Optional;
 
 import jakarta.persistence.criteria.From;
@@ -18,14 +17,11 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.metamodel.EntityType;
 
-import lombok.Getter;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
-import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
-import org.eclipse.hawkbit.repository.TagFields;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetTypeFields;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
@@ -114,47 +110,5 @@ public class DefaultAccessControllerConfiguration {
     @ConditionalOnProperty(name = "hawkbit.acm.access-controller.distribution-set-type.enabled", havingValue = "true")
     AccessController<JpaDistributionSetType> distributionSetTypeAccessController() {
         return new DefaultAccessController<>(DistributionSetTypeFields.class, SpPermission.DISTRIBUTION_SET_TYPE);
-    }
-
-    // contains the same fields as TargetFields, but with "target." prefix for JPA queries in order to be applied to JpaAction repository
-    @Getter
-    public enum ActionFieldsInternal implements RsqlQueryField {
-
-        ID("controllerId"),
-        NAME("name"),
-        DESCRIPTION("description"),
-        CREATEDAT("createdAt"),
-        CREATEDBY("createdBy"),
-        LASTMODIFIEDAT("lastModifiedAt"),
-        LASTMODIFIEDBY("lastModifiedBy"),
-        CONTROLLERID("controllerId"),
-        UPDATESTATUS("updateStatus"),
-        IPADDRESS("address"),
-        ATTRIBUTE("controllerAttributes"),
-        GROUP("group"),
-        ASSIGNEDDS("assignedDistributionSet",
-                DistributionSetFields.NAME.getJpaEntityFieldName(), DistributionSetFields.VERSION.getJpaEntityFieldName()),
-        INSTALLEDDS("installedDistributionSet",
-                DistributionSetFields.NAME.getJpaEntityFieldName(), DistributionSetFields.VERSION.getJpaEntityFieldName()),
-        TAG("tags", TagFields.NAME.getJpaEntityFieldName()),
-        LASTCONTROLLERREQUESTAT("lastTargetQuery"),
-        METADATA("metadata"),
-        TARGETTYPE("targetType",
-                TargetTypeFields.ID.getJpaEntityFieldName(),
-                TargetTypeFields.KEY.getJpaEntityFieldName(),
-                TargetTypeFields.NAME.getJpaEntityFieldName());
-
-        private final String jpaEntityFieldName;
-        private final List<String> subEntityAttributes;
-
-        ActionFieldsInternal(final String jpaEntityFieldName, final String... subEntityAttributes) {
-            this.jpaEntityFieldName = "target." + jpaEntityFieldName;
-            this.subEntityAttributes = List.of(subEntityAttributes);
-        }
-
-        @Override
-        public boolean isMap() {
-            return this == ATTRIBUTE || this == METADATA;
-        }
     }
 }

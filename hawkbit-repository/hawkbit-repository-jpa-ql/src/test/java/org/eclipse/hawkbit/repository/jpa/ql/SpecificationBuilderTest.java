@@ -467,6 +467,90 @@ class SpecificationBuilderTest {
         }
     }
 
+    @Test
+    void deapSearchSubSubSubSubAttribute() {
+        final SubSub subSubSubSub1 = subSubRepository.save(new SubSub().setStrValue("subx").setIntValue(0));
+        final SubSub subSubSubSub2 = subSubRepository.save(new SubSub().setStrValue("suby").setIntValue(1));
+        final SubSub subSub1 = subSubRepository.save(new SubSub().setStrValue("subx").setIntValue(0).setSubSub(subSubSubSub1));
+        final SubSub subSub2 = subSubRepository.save(new SubSub().setStrValue("suby").setIntValue(1).setSubSub(subSubSubSub2));
+        final Sub sub1 = subRepository.save(new Sub().setSubSub(subSub1));
+        final Sub sub2 = subRepository.save(new Sub().setSubSub(subSub2));
+        final Root root1 = rootRepository.save(new Root().setSubEntity(sub1));
+        final Root root2 = rootRepository.save(new Root().setSubEntity(sub1));
+        final Root root3 = rootRepository.save(new Root().setSubEntity(sub2));
+        final Root root4 = rootRepository.save(new Root().setSubEntity(sub2));
+        final Root root5 = rootRepository.save(new Root()); // no sub set
+
+        // by sub entity string
+        assertThat(filter("subEntity.subSub.subSub.strValue==subx")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
+        assertThat(filter("subEntity.subSub.subSub.strValue==nostr")).isEmpty();
+        // TODO / recheck - when missing entity shall it be included or not in != or =out=? - now it is
+        assertThat(filter("subEntity.subSub.subSub.strValue!=subx")).hasSize(3).containsExactlyInAnyOrder(root3, root4, root5);
+        assertThat(filter("subEntity.subSub.subSub.strValue!=nostr")).hasSize(5);
+        assertThat(filter("subEntity.subSub.subSub.strValue<suby")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
+        assertThat(filter("subEntity.subSub.subSub.strValue<=suby")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
+        assertThat(filter("subEntity.subSub.subSub.strValue>subx")).hasSize(2).containsExactlyInAnyOrder(root3, root4);
+        assertThat(filter("subEntity.subSub.subSub.strValue>=subx")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
+        assertThat(filter("subEntity.subSub.subSub.strValue=in=subx")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
+        assertThat(filter("subEntity.subSub.subSub.strValue=in=(subx, suby)")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
+        assertThat(filter("subEntity.subSub.subSub.strValue=in=(subZ, subT)")).isEmpty();
+        assertThat(filter("subEntity.subSub.subSub.strValue=out=subx")).hasSize(3).containsExactlyInAnyOrder(root3, root4, root5);
+        assertThat(filter("subEntity.subSub.subSub.strValue=out=(subx, suby)")).hasSize(1).containsExactlyInAnyOrder(root5);
+        // wildcard, like
+        assertThat(filter("subEntity.subSub.subSub.strValue==sub*")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
+        assertThat(filter("subEntity.subSub.subSub.strValue==*bx")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
+        assertThat(filter("subEntity.subSub.subSub.strValue!=sub*")).hasSize(1).containsExactlyInAnyOrder(root5);
+        assertThat(filter("subEntity.subSub.subSub.strValue!=*bx")).hasSize(3).containsExactlyInAnyOrder(root3, root4, root5);
+        assertThat(filter("subEntity.subSub.subSub.strValue==*")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
+        assertThat(filter("subEntity.subSub.subSub.strValue!=*")).hasSize(1).containsExactlyInAnyOrder(root5);
+
+        assertThat(filter("subEntity.subSub.subSub.strValue=is=null")).hasSize(1).containsExactlyInAnyOrder(root5);
+
+        assertThat(filter("subEntity.subSub.subSub.strValue==*bx and subEntity.subSub.strValue==suby")).isEmpty();
+        assertThat(filter("subEntity.subSub.subSub.strValue==*bx and subEntity.subSub.strValue!=subx")).isEmpty();
+        assertThat(filter("subEntity.subSub.subSub.strValue==*bx and subEntity.subSub.strValue==subx"))
+                .hasSize(2).containsExactlyInAnyOrder(root1, root2);
+        assertThat(filter("subEntity.subSub.subSub.strValue==*bx or subEntity.subSub.strValue==suby"))
+                .hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
+        assertThat(filter("subEntity.subSub.subSub.strValue==*bx or subEntity.subSub.strValue!=subx"))
+                .hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
+        assertThat(filter("subEntity.subSub.subSub.strValue==*bx or subEntity.subSub.strValue=is=null"))
+                .hasSize(3).containsExactlyInAnyOrder(root1, root2, root5);
+
+        // by sub entity int
+        assertThat(filter("subEntity.subSub.subSub.intValue==0")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
+        assertThat(filter("subEntity.subSub.subSub.intValue==2")).isEmpty();
+        assertThat(filter("subEntity.subSub.subSub.intValue!=0")).hasSize(3).containsExactlyInAnyOrder(root3, root4, root5);
+        assertThat(filter("subEntity.subSub.subSub.intValue!=2")).hasSize(5);
+        assertThat(filter("subEntity.subSub.subSub.intValue<1")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
+        assertThat(filter("subEntity.subSub.subSub.intValue<=1")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
+        assertThat(filter("subEntity.subSub.subSub.intValue>0")).hasSize(2).containsExactlyInAnyOrder(root3, root4);
+        assertThat(filter("subEntity.subSub.subSub.intValue>=0")).hasSize(4);
+        assertThat(filter("subEntity.subSub.subSub.intValue=in=0")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
+        assertThat(filter("subEntity.subSub.subSub.intValue=in=(0, 1)")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
+        assertThat(filter("subEntity.subSub.subSub.intValue=in=(2, 3)")).isEmpty();
+        assertThat(filter("subEntity.subSub.subSub.intValue=out=0")).hasSize(3).containsExactlyInAnyOrder(root3, root4, root5);
+        assertThat(filter("subEntity.subSub.subSub.intValue=out=(0, 1)")).hasSize(1).containsExactlyInAnyOrder(root5);
+
+        assertThat(filter("subEntity.subSub.subSub.intValue==0 and subEntity.subSub.intValue==1")).isEmpty();
+        assertThat(filter("subEntity.subSub.subSub.intValue==0 and subEntity.subSub.intValue!=1")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
+        assertThat(filter("subEntity.subSub.subSub.intValue==0 and subEntity.subSub.intValue==0")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
+        assertThat(filter("subEntity.subSub.subSub.intValue==0 or subEntity.subSub.intValue==1")).hasSize(4)
+                .containsExactlyInAnyOrder(root1, root2, root3, root4);
+        assertThat(filter("subEntity.subSub.subSub.intValue==0 or subEntity.subSub.subSub.intValue!=1"))
+                .hasSize(3).containsExactlyInAnyOrder(root1, root2, root5);
+
+        assertThat(filter("subEntity.subSub.subSub.strValue==subx and subEntity.subSub.intValue==1")).isEmpty();
+        assertThat(filter("subEntity.subSub.subSub.strValue==subx and subEntity.subSub.intValue!=1")).hasSize(2)
+                .containsExactlyInAnyOrder(root1, root2);
+        assertThat(filter("subEntity.subSub.subSub.strValue==subx and subEntity.subSub.intValue==0"))
+                .hasSize(2).containsExactlyInAnyOrder(root1, root2);
+        assertThat(filter("subEntity.subSub.subSub.strValue==subx or subEntity.subSub.intValue==1"))
+                .hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
+        assertThat(filter("subEntity.subSub.subSub.strValue==subx or subEntity.subSub.intValue!=1"))
+                .hasSize(3).containsExactlyInAnyOrder(root1, root2, root5);
+    }
+
     private List<Root> filter(final String rsql) {
         // reference / auto filter (using elements and reflection)
         final EntityMatcher matcher = EntityMatcher.forRsql(rsql);
