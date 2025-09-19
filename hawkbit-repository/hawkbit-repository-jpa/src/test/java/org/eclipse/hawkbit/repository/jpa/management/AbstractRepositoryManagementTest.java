@@ -303,9 +303,7 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
         } else if (type == String.class) {
             return (O) ("test-" + counter.incrementAndGet());
         } else if (type == Set.class) {
-            final Set<?> set = new HashSet<>();
-//            set.add(forType(createType));
-            return (O) set;
+            return (O) new HashSet<>();
         } else if (type.isEnum()) {
             final O[] constants = type.getEnumConstants();
             return constants[(int) (counter.incrementAndGet() % constants.length)];

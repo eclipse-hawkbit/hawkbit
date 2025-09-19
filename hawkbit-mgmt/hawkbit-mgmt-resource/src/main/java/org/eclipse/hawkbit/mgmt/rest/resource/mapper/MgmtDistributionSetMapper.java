@@ -51,17 +51,10 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class MgmtDistributionSetMapper {
 
-    private final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement;
     private final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement;
-    private final SystemManagement systemManagement;
 
-    MgmtDistributionSetMapper(
-            final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement,
-            final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
-            final SystemManagement systemManagement) {
-        this.distributionSetTypeManagement = distributionSetTypeManagement;
+    MgmtDistributionSetMapper(final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement) {
         this.softwareModuleManagement = softwareModuleManagement;
-        this.systemManagement = systemManagement;
     }
 
     public List<DistributionSetManagement.Create> fromRequest(
