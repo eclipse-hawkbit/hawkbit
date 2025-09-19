@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.simple.security;
 
 import com.vaadin.flow.spring.security.VaadinAwareSecurityContextHolderStrategyConfiguration;
 import com.vaadin.flow.spring.security.VaadinSecurityConfigurer;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ui.simple.view.LoginView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,14 +30,18 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 
 @EnableWebSecurity
 @Configuration
 @EnableConfigurationProperties(OidcClientProperties.class)
+@Slf4j
 @Import(VaadinAwareSecurityContextHolderStrategyConfiguration.class)
 public class SecurityConfiguration {
 
     private Customizer<OAuth2LoginConfigurer<HttpSecurity>> oAuth2LoginConfigurerCustomizer;
+    @Autowired
+    private UserDetailsSetter userDetailsSetter;
 
     @Autowired(required = false)
     public void setOAuth2LoginConfigurerCustomizer(
@@ -61,6 +66,7 @@ public class SecurityConfiguration {
         http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/images/*.png").permitAll());
         if (oAuth2LoginConfigurerCustomizer != null) {
             http.oauth2Login(oAuth2LoginConfigurerCustomizer);
+            http.addFilterAfter(userDetailsSetter, AuthorizationFilter.class);
         } else {
             http.formLogin(form -> form
                     .loginPage("/login")
