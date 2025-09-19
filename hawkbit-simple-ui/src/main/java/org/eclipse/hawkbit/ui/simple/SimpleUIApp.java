@@ -61,14 +61,15 @@ import static java.util.Collections.emptyList;
 @Import(FeignClientsConfiguration.class)
 public class SimpleUIApp implements AppShellConfigurator {
 
+    private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final Function<OAuth2TokenManager, RequestInterceptor> AUTHORIZATION = oAuth2TokenManager -> requestTemplate -> {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof OAuth2AuthenticationToken authenticationToken) {
             String bearerToken = oAuth2TokenManager.getToken(authenticationToken);
-            requestTemplate.header("Authorization", "Bearer " + bearerToken);
+            requestTemplate.header(AUTHORIZATION_HEADER, "Bearer " + bearerToken);
         } else {
             requestTemplate.header(
-                    "Authorization", "Basic " + Base64.getEncoder().encodeToString(
+                    AUTHORIZATION_HEADER, "Basic " + Base64.getEncoder().encodeToString(
                             (Objects.requireNonNull(authentication.getPrincipal(), "User is null!") + ":" + Objects.requireNonNull(
                                     authentication.getCredentials(), "Password is not available!")).getBytes(ISO_8859_1))
             );
@@ -113,7 +114,7 @@ public class SimpleUIApp implements AppShellConfigurator {
     @Bean
     OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(final HawkbitMgmtClient hawkbitClient) {
         final OidcUserService delegate = new OidcUserService();
-        return (userRequest) -> {
+        return userRequest -> {
             OidcUser oidcUser = delegate.loadUser(userRequest);
             final OAuth2AuthenticationToken tempToken = new OAuth2AuthenticationToken(
                     oidcUser,
@@ -121,11 +122,7 @@ public class SimpleUIApp implements AppShellConfigurator {
                     userRequest.getClientRegistration().getRegistrationId()
             );
             final List<SimpleGrantedAuthority> grantedAuthorities = getGrantedAuthorities(hawkbitClient, tempToken);
-            return new DefaultOidcUser(
-                    grantedAuthorities,
-                    oidcUser.getIdToken(),
-                    oidcUser.getUserInfo()
-            );
+            return new DefaultOidcUser(grantedAuthorities, oidcUser.getIdToken(), oidcUser.getUserInfo());
         };
     }
 
@@ -191,7 +188,7 @@ public class SimpleUIApp implements AppShellConfigurator {
 
             final String auth = username + ":" + password;
             final String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
-            conn.setRequestProperty("Authorization", "Basic " + encodedAuth);
+            conn.setRequestProperty(AUTHORIZATION_HEADER, "Basic " + encodedAuth);
 
             return conn.getResponseCode() != 401;
         } catch (final Exception ex) {
