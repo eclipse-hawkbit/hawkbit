@@ -241,22 +241,24 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 testdataFactory.createDistributionSet("ds1"), testdataFactory.createTargets(1, "t1")));
         assertThat(actionId1).isNotNull();
         final ActionStatusCreateBuilder status = ActionStatusCreate.builder().actionId(actionId1).status(Status.WARNING);
-        for (int i = 0; i < maxStatusEntries; ++i) {
+        for (int i = 0; i < maxStatusEntries; i++) {
             controllerManagement.addInformationalActionStatus(status.messages(List.of("Msg " + i)).occurredAt(System.currentTimeMillis()).build());
         }
+        final ActionStatusCreate actionStatusCreate = status.build();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> controllerManagement.addInformationalActionStatus(status.build()));
+                .isThrownBy(() -> controllerManagement.addInformationalActionStatus(actionStatusCreate));
 
         // test for update status (and mixed case)
         final Long actionId2 = getFirstAssignedActionId(assignDistributionSet(
                 testdataFactory.createDistributionSet("ds2"), testdataFactory.createTargets(1, "t2")));
         assertThat(actionId2).isNotEqualTo(actionId1);
         final ActionStatusCreateBuilder statusWarning = ActionStatusCreate.builder().actionId(actionId2).status(Status.WARNING);
-        for (int i = 0; i < maxStatusEntries; ++i) {
+        for (int i = 0; i < maxStatusEntries; i++) {
             controllerManagement.addUpdateActionStatus(statusWarning.messages(List.of("Msg " + i)).occurredAt(System.currentTimeMillis()).build());
         }
+        final ActionStatusCreate actionStatusCreateQE = statusWarning.build();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> controllerManagement.addInformationalActionStatus(statusWarning.build()));
+                .isThrownBy(() -> controllerManagement.addInformationalActionStatus(actionStatusCreateQE));
     }
 
     /**
@@ -334,12 +336,14 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(controllerManagement.findActionWithDetails(NOT_EXIST_IDL)).isNotPresent();
         assertThat(controllerManagement.findByControllerId(NOT_EXIST_ID)).isNotPresent();
         assertThat(controllerManagement.find(NOT_EXIST_IDL)).isNotPresent();
+        final String controllerId = target.getControllerId();
+        final Long moduleId = module.getId();
         assertThatExceptionOfType(EntityNotFoundException.class)
-                .isThrownBy(() -> controllerManagement.getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module.getId()));
+                .isThrownBy(() -> controllerManagement.getActionForDownloadByTargetAndSoftwareModule(controllerId, moduleId));
 
         assertThat(controllerManagement.findActiveActionWithHighestWeight(NOT_EXIST_ID)).isNotPresent();
 
-        assertThat(controllerManagement.hasTargetArtifactAssigned(target.getControllerId(), "XXX")).isFalse();
+        assertThat(controllerManagement.hasTargetArtifactAssigned(controllerId, "XXX")).isFalse();
         assertThat(controllerManagement.hasTargetArtifactAssigned(target.getId(), "XXX")).isFalse();
     }
 
