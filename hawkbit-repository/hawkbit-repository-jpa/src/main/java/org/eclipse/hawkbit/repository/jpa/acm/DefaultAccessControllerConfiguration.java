@@ -42,9 +42,8 @@ public class DefaultAccessControllerConfiguration {
         return new DefaultAccessController<>(TargetFields.class, SpPermission.TARGET);
     }
 
-    // after adding support for internal action field search support it add matchIfMissing = true
     @Bean
-    @ConditionalOnProperty(name = "hawkbit.acm.access-controller.action.enabled", havingValue = "true", matchIfMissing = false)
+    @ConditionalOnProperty(name = "hawkbit.acm.access-controller.action.enabled", havingValue = "true", matchIfMissing = true)
     AccessController<JpaAction> actionAccessController() {
         return new DefaultAccessController<>(ActionFieldsInternal.class, SpPermission.TARGET);
     }
