@@ -25,6 +25,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.oauth2.client.OAuth2LoginConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
@@ -42,6 +43,9 @@ public class SecurityConfiguration {
     private Customizer<OAuth2LoginConfigurer<HttpSecurity>> oAuth2LoginConfigurerCustomizer;
     @Autowired
     private UserDetailsSetter userDetailsSetter;
+
+    @Autowired
+    private InMemoryClientRegistrationRepository clientRegistrationRepository;
 
     @Autowired(required = false)
     public void setOAuth2LoginConfigurerCustomizer(
@@ -65,7 +69,6 @@ public class SecurityConfiguration {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/images/*.png").permitAll());
         if (oAuth2LoginConfigurerCustomizer != null) {
-            http.oauth2Login(oAuth2LoginConfigurerCustomizer);
             http.addFilterAfter(userDetailsSetter, AuthorizationFilter.class);
         } else {
             http.formLogin(form -> form
@@ -75,6 +78,12 @@ public class SecurityConfiguration {
         return http.with(VaadinSecurityConfigurer.vaadin(), configurer -> {
             if (oAuth2LoginConfigurerCustomizer == null) {
                 configurer.loginView(LoginView.class);
+            } else {
+                var defaultClientRegistration = clientRegistrationRepository.iterator().next();
+                configurer.oauth2LoginPage(
+                        "/oauth2/authorization/" + defaultClientRegistration.getRegistrationId(),
+                        "{baseUrl}/"
+                );
             }
         }).build();
     }
