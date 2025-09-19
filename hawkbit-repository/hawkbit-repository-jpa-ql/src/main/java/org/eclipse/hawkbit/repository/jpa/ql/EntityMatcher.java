@@ -60,7 +60,6 @@ public class EntityMatcher {
             final String[] split = comparison.getKey().split("\\.", 2);
             try {
                 final Method fieldGetter = getGetter(t.getClass(), split[0]);
-                fieldGetter.setAccessible(true);
                 final Object fieldValue = fieldGetter.invoke(t);
                 final Operator op = comparison.getOp();
                 if (Map.class.isAssignableFrom(getReturnType(fieldGetter))) {
@@ -110,7 +109,6 @@ public class EntityMatcher {
                             // nested field access
                             final String[] nestedSplit = split[1].split("\\.", 2);
                             final Method nestedFieldGetter = getGetter(getReturnType(fieldGetter), nestedSplit[0]);
-                            nestedFieldGetter.setAccessible(true);
                             final Method valueGetter = getGetter(getReturnType(nestedFieldGetter), nestedSplit[1]);
                             final Object nestedFieldValue = fieldValue == null ? null : nestedFieldGetter.invoke(fieldValue);
                             return compare(
@@ -119,7 +117,9 @@ public class EntityMatcher {
                                     map(comparison.getValue(), getReturnType(valueGetter)));
                         } else {
                             final Method valueGetter = getGetter(getReturnType(fieldGetter), split[1]);
-                            return compare(fieldValue == null ? null : valueGetter.invoke(fieldValue), op,
+                            return compare(
+                                    fieldValue == null ? null : valueGetter.invoke(fieldValue),
+                                    op,
                                     map(comparison.getValue(), getReturnType(valueGetter)));
                         }
                     }
@@ -145,8 +145,8 @@ public class EntityMatcher {
                 .map(Method::getName)
                 .map(getterName -> {
                     try {
-                        // gets method via Class.getMethod(String, Class<?>...) because in listing it might has no the
-                        // correct return type, but the type got from a declaring generic type
+                        // gets method via Class.getMethod(String, Class<?>...) because in listing it might have not
+                        // the correct return type, but the type got from a declaring generic type
                         final Method getter = t.getMethod(getterName);
                         getter.setAccessible(true);
                         return getter;
