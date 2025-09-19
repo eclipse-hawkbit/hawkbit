@@ -20,7 +20,10 @@ import lombok.Getter;
 public enum SoftwareModuleFields implements RsqlQueryField {
 
     ID("id"),
-    TYPE("type", "key"),
+    TYPE("type",
+            SoftwareModuleTypeFields.ID.getJpaEntityFieldName(),
+            SoftwareModuleTypeFields.KEY.getJpaEntityFieldName(),
+            SoftwareModuleTypeFields.NAME.getJpaEntityFieldName()),
     NAME("name"),
     DESCRIPTION("description"),
     VERSION("version"),

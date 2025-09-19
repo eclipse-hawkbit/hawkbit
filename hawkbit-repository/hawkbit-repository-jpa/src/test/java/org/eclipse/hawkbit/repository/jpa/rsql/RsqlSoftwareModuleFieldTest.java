@@ -135,11 +135,33 @@ class RsqlSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void testFilterByType() {
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + ".key==" + TestdataFactory.SM_TYPE_APP, 2);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + ".key!=" + TestdataFactory.SM_TYPE_APP, 4);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + ".key==noExist*", 0);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + ".key=in=(" + TestdataFactory.SM_TYPE_APP + ")", 2);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + ".key=out=(" + TestdataFactory.SM_TYPE_APP + ")", 4);
+    }
+
+    @Test
+    void testFilterByTypeBackwardCompatibility() {
+        assertThat(RsqlUtility.SM_DS_SEARCH_BY_TYPE_BACKWARD_COMPATIBILITY).isTrue();
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==" + TestdataFactory.SM_TYPE_APP, 2);
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "!=" + TestdataFactory.SM_TYPE_APP, 4);
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==noExist*", 0);
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "=in=(" + TestdataFactory.SM_TYPE_APP + ")", 2);
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "=out=(" + TestdataFactory.SM_TYPE_APP + ")", 4);
+    }
+
+    /**
+     * Test filter software module by type key
+     */
+    @Test
+    void testFilterByName() {
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + ".name==" + appType.getName(), 2);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + ".name!=" + appType.getName(), 4);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + ".name==noExist*", 0);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + ".name=in=(" + appType.getName() + ")", 2);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + ".name=out=(" + appType.getName() + ")", 4);
     }
 
     /**
