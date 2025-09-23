@@ -143,8 +143,7 @@ class RsqlSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    void testFilterByTypeBackwardCompatibility() {
-        assertThat(RsqlUtility.SM_DS_SEARCH_BY_TYPE_BACKWARD_COMPATIBILITY).isTrue();
+    void testFilterByTypeShortcut() {
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==" + TestdataFactory.SM_TYPE_APP, 2);
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "!=" + TestdataFactory.SM_TYPE_APP, 4);
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==noExist*", 0);

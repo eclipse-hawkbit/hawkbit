@@ -341,8 +341,8 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
                 subquery.select(subqueryRoot)
                         .where(cb.and(
                                 cb.equal(
-                                        root.get(queryPath.getEnumValue().identifierFieldName()),
-                                        subqueryRoot.get(queryPath.getEnumValue().identifierFieldName())),
+                                        root.get(queryPath.getEnumValue().getIdentifierFieldName()),
+                                        subqueryRoot.get(queryPath.getEnumValue().getIdentifierFieldName())),
                                 subQueryPredicateProvider.apply(
                                         getExpressionToCompare(queryPath.getEnumValue(), getFieldPath(subqueryRoot, queryPath)))))));
     }

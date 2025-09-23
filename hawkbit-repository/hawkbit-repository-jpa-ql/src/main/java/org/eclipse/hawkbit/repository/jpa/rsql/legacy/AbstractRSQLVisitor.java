@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -24,12 +23,9 @@ import cz.jirutka.rsql.parser.ast.ComparisonOperator;
 import cz.jirutka.rsql.parser.ast.RSQLOperators;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
-import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.ql.SpecificationBuilder;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -74,14 +70,9 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
             if (!enumValue.isMap()) {
                 // sub entity need minimum 1 dot
                 if (!enumValue.getSubEntityAttributes().isEmpty() && split.length < 2) {
-                    if (enumValue.getSubEntityAttributes().size() == 1) { // single sub attribute - so add is as a default
-                        split = new String[] { split[0], enumValue.getSubEntityAttributes().get(0) };
-                    } else if (RsqlUtility.SM_DS_SEARCH_BY_TYPE_BACKWARD_COMPATIBILITY &&
-                            "type".equals(node.getSelector()) &&
-                            (Objects.equals(rsqlQueryFieldType, SoftwareModuleFields.class) ||
-                                    Objects.equals(rsqlQueryFieldType, DistributionSetFields.class))) {
-                        // backward compatibility - type for DistributionSetFields means type.key
-                        split = new String[] { split[0], "key" };
+                    final String defaultSubEntityAttribute = enumValue.getDefaultSubEntityAttribute();
+                    if (defaultSubEntityAttribute != null) { // single sub attribute - so add is as a default
+                        split = new String[] { split[0], defaultSubEntityAttribute };
                     } else {
                         throw createRSQLParameterUnsupportedException(node, null);
                     }
