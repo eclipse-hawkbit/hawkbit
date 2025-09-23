@@ -47,6 +47,11 @@ public enum DistributionSetFields implements RsqlQueryField {
     }
 
     @Override
+    public String getDefaultSubEntityAttribute() {
+        return this == TYPE ? DistributionSetTypeFields.KEY.getJpaEntityFieldName() : RsqlQueryField.super.getDefaultSubEntityAttribute();
+    }
+
+    @Override
     public boolean isMap() {
         return this == METADATA;
     }

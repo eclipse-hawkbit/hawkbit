@@ -493,8 +493,8 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
         final Class<?> javaType = root.getJavaType();
         final Subquery<?> subquery = query.subquery(javaType);
         final Root subqueryRoot = subquery.from(javaType);
-        final Predicate equalPredicate = cb.equal(root.get(enumField.identifierFieldName()),
-                subqueryRoot.get(enumField.identifierFieldName()));
+        final Predicate equalPredicate = cb.equal(root.get(enumField.getIdentifierFieldName()),
+                subqueryRoot.get(enumField.getIdentifierFieldName()));
         final Path innerFieldPath = getInnerFieldPath(subqueryRoot, fieldNames, enumField.isMap());
         final Expression<String> expressionToCompare = getExpressionToCompare(innerFieldPath, enumField);
         final Predicate subQueryPredicate = subQueryPredicateProvider.apply(expressionToCompare);

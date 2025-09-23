@@ -20,7 +20,7 @@ package org.eclipse.hawkbit.repository;
 public interface FieldValueConverter<T extends Enum<T>> {
 
     /**
-     * Converts the given {@code value} into the representation to build ageneric query.
+     * Converts the given {@code value} into the representation to build a generic query.
      *
      * @param enumValue the enum value to build the value for
      * @param value the value in string representation

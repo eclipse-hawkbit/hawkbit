@@ -39,6 +39,14 @@ public enum TargetFields implements RsqlQueryField {
     TAG("tags", TagFields.NAME.getJpaEntityFieldName()),
     LASTCONTROLLERREQUESTAT("lastTargetQuery"),
     METADATA("metadata"),
+    TYPE("targetType",
+            TargetTypeFields.ID.getJpaEntityFieldName(),
+            TargetTypeFields.KEY.getJpaEntityFieldName(),
+            TargetTypeFields.NAME.getJpaEntityFieldName()),
+    // kept just for backward compatibility for backward compatibility
+    // could be removed only if in the systems there are no active auto assignments or rollouts (dynamic or starting) with that condition
+    // to be reconsidered if and when to be removed
+    @Deprecated(forRemoval = true, since = "0.10.0")
     TARGETTYPE("targetType",
             TargetTypeFields.ID.getJpaEntityFieldName(),
             TargetTypeFields.KEY.getJpaEntityFieldName(),
@@ -50,6 +58,11 @@ public enum TargetFields implements RsqlQueryField {
     TargetFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
         this.jpaEntityFieldName = jpaEntityFieldName;
         this.subEntityAttributes = List.of(subEntityAttributes);
+    }
+
+    @Override
+    public String getDefaultSubEntityAttribute() {
+        return this == TYPE ? TargetTypeFields.KEY.getJpaEntityFieldName() : RsqlQueryField.super.getDefaultSubEntityAttribute();
     }
 
     @Override

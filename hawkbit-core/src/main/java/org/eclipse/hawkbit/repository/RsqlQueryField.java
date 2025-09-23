@@ -40,11 +40,21 @@ public interface RsqlQueryField {
     }
 
     /**
+     * Return the default sub entity attribute if available. This allows to skip that sub-attribute and call with "shortcut" - the enum name
+     *
+     * @return the default sub-attribute or <code>null</code>> if no default is available
+     */
+    default String getDefaultSubEntityAttribute() {
+        final List<String> subAttributes = getSubEntityAttributes();
+        return subAttributes.size() == 1 ? subAttributes.get(0) : null;
+    }
+
+    /**
      * Returns the name of the field, that identifies the entity.
      *
      * @return the name of the identifier, by default 'id'
      */
-    default String identifierFieldName() {
+    default String getIdentifierFieldName() {
         return "id";
     }
 

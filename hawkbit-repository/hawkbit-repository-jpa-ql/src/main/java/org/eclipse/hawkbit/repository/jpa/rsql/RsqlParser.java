@@ -24,7 +24,6 @@ import static org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison.Operator.NOT
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -42,10 +41,8 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.FieldValueConverter;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
-import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.ql.Node;
@@ -58,7 +55,7 @@ import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison;
  *     <li>check for * and convert EQ/NEQ to LIKE/NOT_LIKE</li>
  *     <li>replace the rsql fields (enum values) with the JPA entity field names</li>
  *     <li>checks sub-attributes (if allowed)</li>
- *     <li>append the default sub-attributes if needed)</li>
+ *     <li>append the default sub-attributes if needed</li>
  *     <li>apply value conversion for implementing with FieldValueConverter</li>
  * </ul>
  */
@@ -121,20 +118,17 @@ public class RsqlParser {
                 // just enum name for a complex type (with sub-attributes), should have single (default!) sub-attribute
                 if (enumValue.isMap()) {
                     throw new RSQLParameterUnsupportedFieldException("No key specified for a map type " + enumValue);
-                } else if (enumValue.getSubEntityAttributes().size() == 1) {
-                    // single sub attribute - so, treat it as a default
-                    attribute = enumValue.getJpaEntityFieldName() + SUB_ATTRIBUTE_SEPARATOR + enumValue.getSubEntityAttributes().get(0);
-                } else if (RsqlUtility.SM_DS_SEARCH_BY_TYPE_BACKWARD_COMPATIBILITY &&
-                        "type".equalsIgnoreCase(enumValue.getJpaEntityFieldName()) &&
-                        (Objects.equals(rsqlQueryFieldType, SoftwareModuleFields.class) ||
-                                Objects.equals(rsqlQueryFieldType, DistributionSetFields.class))) {
-                    // backward compatibility - type for SoftwareModuleTypeFields && DistributionSetFields means type.key
-                    attribute = enumValue.getJpaEntityFieldName() + SUB_ATTRIBUTE_SEPARATOR + "key";
                 } else {
-                    throw new RSQLParameterUnsupportedFieldException(
-                            String.format(
-                                    "The given search parameter field {%s} requires one of the following sub-attributes %s",
-                                    key, enumValue.getSubEntityAttributes()));
+                    final String defaultSubEntityAttribute = enumValue.getDefaultSubEntityAttribute();
+                    if (defaultSubEntityAttribute != null) {
+                        // single sub attribute - so, treat it as a default
+                        attribute = enumValue.getJpaEntityFieldName() + SUB_ATTRIBUTE_SEPARATOR + defaultSubEntityAttribute;
+                    } else {
+                        throw new RSQLParameterUnsupportedFieldException(
+                                String.format(
+                                        "The given search parameter field {%s} requires one of the following sub-attributes %s",
+                                        key, enumValue.getSubEntityAttributes()));
+                    }
                 }
             }
         } else { // field name with sub-attribute

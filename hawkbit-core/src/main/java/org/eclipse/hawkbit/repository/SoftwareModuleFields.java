@@ -41,6 +41,12 @@ public enum SoftwareModuleFields implements RsqlQueryField {
         this.subEntityAttributes = List.of(subEntityAttributes);
     }
 
+
+    @Override
+    public String getDefaultSubEntityAttribute() {
+        return this == TYPE ? SoftwareModuleTypeFields.KEY.getJpaEntityFieldName() : RsqlQueryField.super.getDefaultSubEntityAttribute();
+    }
+
     @Override
     public boolean isMap() {
         return this == METADATA;

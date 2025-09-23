@@ -71,11 +71,6 @@ import org.springframework.orm.jpa.vendor.Database;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RsqlUtility {
 
-    // to be removed in future releases, use type.key instead of type for software module and distribution set RSQL queries
-    @Deprecated(forRemoval = true, since = "0.10.0")
-    public static final boolean SM_DS_SEARCH_BY_TYPE_BACKWARD_COMPATIBILITY =
-            "true".equalsIgnoreCase(System.getProperty("hawkbit.rsql.sm-ds-search-by-type.backward-compatibility", "true"));
-
     private static final RsqlUtility SINGLETON = new RsqlUtility();
 
     public enum RsqlToSpecBuilder {
