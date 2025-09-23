@@ -99,6 +99,12 @@ class SpecificationBuilderLegacyTest extends SpecificationBuilderTest {
     }
 
     @Override
+    @Test
+    void deapSearchSubSubSubSubAttribute() {
+        // legacy builders doesn't support deep search
+    }
+
+    @Override
     protected Specification<Root> getSpecification(final String rsql) {
         return builder.specification(rsql);
     }

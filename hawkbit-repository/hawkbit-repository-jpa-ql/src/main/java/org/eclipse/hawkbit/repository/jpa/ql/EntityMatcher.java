@@ -23,11 +23,12 @@ import static org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison.Operator.NOT
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 
 import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison.Operator;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParser;
@@ -55,13 +56,13 @@ public class EntityMatcher {
         return match(t, root);
     }
 
+    @SuppressWarnings({"java:S3776", "java:S3358", "java:S1125", "java:S6541"}) // better readable this way
     private static <T> boolean match(final T t, final Node node) {
         if (node instanceof Node.Comparison comparison) {
             final String[] split = comparison.getKey().split("\\.", 2);
             try {
-                final Method fieldGetter = getGetter(t.getClass(), split[0]);
-                fieldGetter.setAccessible(true);
-                final Object fieldValue = fieldGetter.invoke(t);
+                final Getter fieldGetter = getGetter(t.getClass(), split[0]);
+                final Object fieldValue = fieldGetter.get(t);
                 final Operator op = comparison.getOp();
                 if (Map.class.isAssignableFrom(getReturnType(fieldGetter))) {
                     if ((op == NE || op == NOT_IN || op == NOT_LIKE)
@@ -74,20 +75,20 @@ public class EntityMatcher {
                             op,
                             map(
                                     comparison.getValue(),
-                                    (Class<?>) ((ParameterizedType) fieldGetter.getGenericReturnType()).getActualTypeArguments()[1]));
+                                    (Class<?>) ((ParameterizedType) fieldGetter.type()).getActualTypeArguments()[1]));
                 } else if (Collection.class.isAssignableFrom(getReturnType(fieldGetter))) { // Set / List
                     final Object value;
-                    final BiFunction<Object, Operator, Boolean> compare;
+                    final BiPredicate<Object, Operator> compare;
                     if (split.length == 1) {
                         value = map(comparison.getValue(), getReturnType(fieldGetter));
                         compare = (e, operator) -> compare(e, operator, value);
                     } else {
-                        final Method valueGetter = getGetter(
-                                (Class<?>) ((ParameterizedType) fieldGetter.getGenericReturnType()).getActualTypeArguments()[0], split[1]);
+                        final Getter valueGetter = getGetter(
+                                (Class<?>) ((ParameterizedType) fieldGetter.type()).getActualTypeArguments()[0], split[1]);
                         value = map(comparison.getValue(), getReturnType(valueGetter));
                         compare = (e, operator) -> {
                             try {
-                                return compare(map(e == null ? null : valueGetter.invoke(e), getReturnType(valueGetter)), operator, value);
+                                return compare(map(e == null ? null : valueGetter.get(e), getReturnType(valueGetter)), operator, value);
                             } catch (final IllegalAccessException | InvocationTargetException ex) {
                                 throw new IllegalArgumentException(ex);
                             }
@@ -97,10 +98,10 @@ public class EntityMatcher {
                     return switch (op) {
                         case EQ, GT, GTE, LT, LTE, IN, LIKE -> set == null
                                 ? false
-                                : set.stream().anyMatch(e -> compare.apply(e, op));
+                                : set.stream().anyMatch(e -> compare.test(e, op));
                         case NE, NOT_IN, NOT_LIKE -> set == null
                                 ? true
-                                : set.stream().noneMatch(e -> compare.apply(e, op == NE ? EQ : op == NOT_IN ? IN : LIKE));
+                                : set.stream().noneMatch(e -> compare.test(e, op == NE ? EQ : op == NOT_IN ? IN : LIKE));
                     };
                 } else {
                     if (split.length == 1) {
@@ -109,17 +110,18 @@ public class EntityMatcher {
                         if (split[1].contains(".")) {
                             // nested field access
                             final String[] nestedSplit = split[1].split("\\.", 2);
-                            final Method nestedFieldGetter = getGetter(getReturnType(fieldGetter), nestedSplit[0]);
-                            nestedFieldGetter.setAccessible(true);
-                            final Method valueGetter = getGetter(getReturnType(nestedFieldGetter), nestedSplit[1]);
-                            final Object nestedFieldValue = fieldValue == null ? null : nestedFieldGetter.invoke(fieldValue);
+                            final Getter nestedFieldGetter = getGetter(getReturnType(fieldGetter), nestedSplit[0]);
+                            final Getter valueGetter = getGetter(getReturnType(nestedFieldGetter), nestedSplit[1]);
+                            final Object nestedFieldValue = fieldValue == null ? null : nestedFieldGetter.get(fieldValue);
                             return compare(
-                                    nestedFieldValue == null ? null : valueGetter.invoke(nestedFieldValue),
+                                    nestedFieldValue == null ? null : valueGetter.get(nestedFieldValue),
                                     op,
                                     map(comparison.getValue(), getReturnType(valueGetter)));
                         } else {
-                            final Method valueGetter = getGetter(getReturnType(fieldGetter), split[1]);
-                            return compare(fieldValue == null ? null : valueGetter.invoke(fieldValue), op,
+                            final Getter valueGetter = getGetter(getReturnType(fieldGetter), split[1]);
+                            return compare(
+                                    fieldValue == null ? null : valueGetter.get(fieldValue),
+                                    op,
                                     map(comparison.getValue(), getReturnType(valueGetter)));
                         }
                     }
@@ -137,7 +139,26 @@ public class EntityMatcher {
         }
     }
 
-    private static <T> Method getGetter(final Class<T> t, final String fieldName) throws NoSuchMethodException {
+    @SuppressWarnings("java:S3011") // java:S3011 uses reflection to private members antway
+    private static <T> Getter getGetter(final Class<T> t, final String fieldName) throws NoSuchMethodException {
+        final String[] parts = fieldName.split("\\.");
+        if (parts.length > 1) {
+            final Getter firstGetter = getGetter(t, parts[0]);
+            final Getter nextGetter = getGetter(t, fieldName.substring(parts[0].length() + 1));
+            return new Getter() {
+
+                @Override
+                public Object get(final Object obj) throws IllegalAccessException, InvocationTargetException {
+                    return nextGetter.get(firstGetter.get(obj));
+                }
+
+                @Override
+                public Type type() {
+                    return nextGetter.type();
+                }
+            };
+        }
+
         final String getterLowercase = "get" + fieldName.toLowerCase();
         return Arrays.stream(t.getMethods())
                 .filter(method -> getterLowercase.equals(method.getName().toLowerCase()))
@@ -145,22 +166,33 @@ public class EntityMatcher {
                 .map(Method::getName)
                 .map(getterName -> {
                     try {
-                        // gets method via Class.getMethod(String, Class<?>...) because in listing it might has no the
-                        // correct return type, but the type got from a declaring generic type
+                        // gets method via Class.getMethod(String, Class<?>...) because in listing it might have not
+                        // the correct return type, but the type got from a declaring generic type
                         final Method getter = t.getMethod(getterName);
                         getter.setAccessible(true);
-                        return getter;
+                        return new Getter() {
+
+                            @Override
+                            public Object get(final Object obj) throws IllegalAccessException, InvocationTargetException {
+                                return getter.invoke(obj);
+                            }
+
+                            @Override
+                            public Type type() {
+                                return getter.getGenericReturnType();
+                            }
+                        };
                     } catch (final NoSuchMethodException e) {
                         throw new IllegalStateException("Unexpected: No getter found for field: " + fieldName + " in class: " + t.getName(), e);
                     }
                 }).orElseThrow(() -> new NoSuchMethodException("No getter found for field: " + fieldName + " in class: " + t.getName()));
     }
 
-    private static Class<?> getReturnType(final Method valueGetter) {
-        return valueGetter.getReturnType();
+    private static Class<?> getReturnType(final Getter getter) {
+        return getter.type() instanceof Class<?> clazz ? clazz : (Class<?>) ((ParameterizedType) getter.type()).getRawType();
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "unchecked", "rawtypes", "java:S3776" }) // java:S3776 - better readable this way
     private static Object map(final Object value, final Class<?> type) {
         if (value instanceof Collection<?> collection) { // in / out
             return collection.stream().map(e -> map(e, type)).toList();
@@ -242,5 +274,12 @@ public class EntityMatcher {
         } else {
             throw new IllegalArgumentException("LIKE pattern must be String. Found: " + (pattern == null ? null : pattern.getClass()));
         }
+    }
+
+    private interface Getter {
+
+        Object get(Object obj) throws IllegalAccessException, InvocationTargetException;
+
+        Type type();
     }
 }
