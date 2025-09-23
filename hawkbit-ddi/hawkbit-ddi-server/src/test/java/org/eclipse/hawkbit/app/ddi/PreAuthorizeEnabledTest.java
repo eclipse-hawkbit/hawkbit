@@ -23,7 +23,7 @@ import org.springframework.test.context.TestPropertySource;
  * Feature: Integration Test - Security<br/>
  * Story: PreAuthorized enabled
  */
-@TestPropertySource(properties = { "spring.flyway.enabled=true" })
+@TestPropertySource(properties = { "spring.flyway.enabled=true", "hawkbit.acm.access-controller.enabled=false" })
 class PreAuthorizeEnabledTest extends AbstractSecurityTest {
 
     /**

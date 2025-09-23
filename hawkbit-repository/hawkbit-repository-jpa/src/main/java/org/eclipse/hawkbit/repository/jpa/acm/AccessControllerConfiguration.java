@@ -10,13 +10,17 @@
 package org.eclipse.hawkbit.repository.jpa.acm;
 
 import java.lang.reflect.Proxy;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.metamodel.EntityType;
 
+import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
@@ -33,14 +37,34 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
+import org.eclipse.hawkbit.security.SecurityContextSerializer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.util.function.SingletonSupplier;
 
 @Configuration
-@ConditionalOnProperty(name = "hawkbit.acm.access-controller.enabled", havingValue = "true", matchIfMissing = true)
-public class DefaultAccessControllerConfiguration {
+@ConditionalOnProperty(name = "hawkbit.acm.access-controller.enabled", havingValue = "true")
+public class AccessControllerConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    SecurityContextSerializer securityContextSerializer() {
+        return SecurityContextSerializer.JSON_SERIALIZATION;
+    }
 
     @Bean
     @ConditionalOnProperty(name = "hawkbit.acm.access-controller.target.enabled", havingValue = "true", matchIfMissing = true)
@@ -110,5 +134,87 @@ public class DefaultAccessControllerConfiguration {
     @ConditionalOnProperty(name = "hawkbit.acm.access-controller.distribution-set-type.enabled", havingValue = "true")
     AccessController<JpaDistributionSetType> distributionSetTypeAccessController() {
         return new DefaultAccessController<>(DistributionSetTypeFields.class, SpPermission.DISTRIBUTION_SET_TYPE);
+    }
+
+    @Bean
+    @Primary
+    MethodSecurityExpressionHandler methodSecurityExpressionHandler(
+            final RoleHierarchy roleHierarchy, final PermissionEvaluator permissionEvaluator,
+            final Optional<ApplicationContext> applicationContext) {
+        final DefaultMethodSecurityExpressionHandler methodSecurityExpressionHandler = new DefaultMethodSecurityExpressionHandler() {
+
+            @Override
+            public EvaluationContext createEvaluationContext(final Supplier<Authentication> authentication, final MethodInvocation mi) {
+                return super.createEvaluationContext(SingletonSupplier.of(() -> new RawAuthoritiesAuthentication(authentication.get())), mi);
+            }
+
+            @Override
+            protected MethodSecurityExpressionOperations createSecurityExpressionRoot(
+                    final Authentication authentication, final MethodInvocation mi) {
+                return super.createSecurityExpressionRoot(new RawAuthoritiesAuthentication(authentication), mi);
+            }
+        };
+        methodSecurityExpressionHandler.setRoleHierarchy(roleHierarchy);
+        methodSecurityExpressionHandler.setPermissionEvaluator(permissionEvaluator);
+        applicationContext.ifPresent(methodSecurityExpressionHandler::setApplicationContext);
+        return methodSecurityExpressionHandler;
+    }
+
+    private static class RawAuthoritiesAuthentication implements Authentication {
+
+        private final Authentication authentication;
+        private final transient SingletonSupplier<List<? extends GrantedAuthority>> rawAuthoritiesSupplier;
+
+        public RawAuthoritiesAuthentication(final Authentication authentication) {
+            this.authentication = authentication;
+            rawAuthoritiesSupplier = SingletonSupplier.of(
+                    () -> authentication.getAuthorities().stream()
+                            .map(GrantedAuthority::getAuthority)// get the authority
+                            .map(authority -> {
+                                // permissions are in the format UPDATE_TARGET(/<rsql query>).
+                                // here we remove the rsql query - not supported by expression evaluation
+                                // the rsql evaluation will be done later by the access controller
+                                final int index = authority.indexOf('/');
+                                return index < 0 ? authority : authority.substring(0, index);
+                            })
+                            .distinct() // remove duplicates if any
+                            .map(SimpleGrantedAuthority::new)
+                            .toList());
+        }
+
+        @Override
+        public Collection<? extends GrantedAuthority> getAuthorities() {
+            return rawAuthoritiesSupplier.get();
+        }
+
+        @Override
+        public Object getCredentials() {
+            return authentication.getCredentials();
+        }
+
+        @Override
+        public Object getDetails() {
+            return authentication.getDetails();
+        }
+
+        @Override
+        public Object getPrincipal() {
+            return authentication.getPrincipal();
+        }
+
+        @Override
+        public boolean isAuthenticated() {
+            return authentication.isAuthenticated();
+        }
+
+        @Override
+        public void setAuthenticated(final boolean isAuthenticated) throws IllegalArgumentException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String getName() {
+            return authentication.getName();
+        }
     }
 }

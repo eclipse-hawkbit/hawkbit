@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 /**
  * Note: Still all test gets READ_REPOSITORY since find methods are inherited with request for READ_REPOSITORY. However,
@@ -46,7 +47,8 @@ import org.springframework.test.context.ContextConfiguration;
  * Feature: Component Tests - Access Control<br/>
  * Story: Test Distribution Set Access Controller
  */
-@ContextConfiguration(classes = { DefaultAccessControllerConfiguration.class })
+@ContextConfiguration(classes = { AccessControllerConfiguration.class })
+@TestPropertySource(properties = "hawkbit.acm.access-controller.enabled=true")
 class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
 
     /**
