@@ -37,8 +37,8 @@ import org.springframework.test.context.TestPropertySource;
  * Feature: Component Tests - Access Control<br/>
  * Story: Test Target Type Access Controller
  */
-@ContextConfiguration(classes = { DefaultAccessControllerConfiguration.class })
-@TestPropertySource(properties = { "hawkbit.acm.access-controller.target-type.enabled=true" })
+@ContextConfiguration(classes = { AccessControllerConfiguration.class })
+@TestPropertySource(properties = { "hawkbit.acm.access-controller.target-type.enabled=true", "hawkbit.acm.access-controller.enabled=true" })
 class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
 
     /**

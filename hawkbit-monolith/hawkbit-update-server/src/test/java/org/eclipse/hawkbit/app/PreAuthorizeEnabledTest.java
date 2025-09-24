@@ -21,11 +21,13 @@ import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.TestPropertySource;
 
 /**
  * Feature: Integration Test - Security<br/>
  * Story: PreAuthorized enabled
  */
+@TestPropertySource(properties = "hawkbit.acm.access-controller.enabled=true")
 class PreAuthorizeEnabledTest extends AbstractSecurityTest {
 
     /**
