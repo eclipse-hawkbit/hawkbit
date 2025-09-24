@@ -88,7 +88,7 @@ to hawkBit permissions.
     - Artifacts
     - DS tags
 
-- DOWNLOAD_REPOSITORY_ARTIFACT
+- SOFTWARE_MODULE_DOWNLOAD
     - Permission to download artifacts of a software module (Note: READ_REPOSITORY allows only to read the metadata).
 
 - READ_TARGET_SECURITY_TOKEN
