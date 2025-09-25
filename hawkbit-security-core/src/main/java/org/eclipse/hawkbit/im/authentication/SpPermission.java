@@ -68,13 +68,13 @@ public final class SpPermission {
     public static final String UPDATE_DISTRIBUTION_SET = UPDATE_PREFIX + DISTRIBUTION_SET;
 
     /**
-     * Deprecated since 0.10.0, use {@link #SOFTWARE_MODULE_DOWNLOAD} instead
+     * Deprecated since 0.10.0, use {@link #READ_SOFTWARE_MODULE_DOWNLOAD} instead
      *
-     * @deprecated since 0.10.0, use {@link #SOFTWARE_MODULE_DOWNLOAD} instead
+     * @deprecated since 0.10.0, use {@link #READ_SOFTWARE_MODULE_DOWNLOAD} instead
      */
     @Deprecated(since = "0.10.0", forRemoval = true)
     public static final String DOWNLOAD_REPOSITORY_ARTIFACT = "DOWNLOAD_REPOSITORY_ARTIFACT";
-    public static final String SOFTWARE_MODULE_DOWNLOAD = SOFTWARE_MODULE + "_DOWNLOAD";
+    public static final String READ_SOFTWARE_MODULE_DOWNLOAD = READ_PREFIX + SOFTWARE_MODULE + "_DOWNLOAD";
 
     /**
      * Permission to read the tenant settings.
@@ -118,7 +118,7 @@ public final class SpPermission {
             READ_PREFIX + SOFTWARE_MODULE + IMPLY_READ + SOFTWARE_MODULE_TYPE + LINE_BREAK +
             UPDATE_PREFIX + SOFTWARE_MODULE + IMPLY_READ + SOFTWARE_MODULE_TYPE + LINE_BREAK +
             DELETE_PREFIX + SOFTWARE_MODULE + IMPLY_READ + SOFTWARE_MODULE_TYPE + LINE_BREAK +
-            DOWNLOAD_REPOSITORY_ARTIFACT + IMPLY + SOFTWARE_MODULE_DOWNLOAD + LINE_BREAK;
+            DOWNLOAD_REPOSITORY_ARTIFACT + IMPLY + READ_SOFTWARE_MODULE_DOWNLOAD + LINE_BREAK;
     public static final String DISTRIBUTION_SET_HIERARCHY =
             CREATE_PREFIX + DISTRIBUTION_SET + IMPLY_READ + DISTRIBUTION_SET_TYPE + LINE_BREAK +
             READ_PREFIX + DISTRIBUTION_SET + IMPLY_READ + DISTRIBUTION_SET_TYPE + LINE_BREAK +
@@ -148,7 +148,7 @@ public final class SpPermission {
         // special
         allPermissions.add(READ_TARGET_SECURITY_TOKEN);
         allPermissions.add(READ_GATEWAY_SECURITY_TOKEN);
-        allPermissions.add(SOFTWARE_MODULE_DOWNLOAD);
+        allPermissions.add(READ_SOFTWARE_MODULE_DOWNLOAD);
         allPermissions.add(APPROVE_ROLLOUT);
         allPermissions.add(HANDLE_ROLLOUT);
 
