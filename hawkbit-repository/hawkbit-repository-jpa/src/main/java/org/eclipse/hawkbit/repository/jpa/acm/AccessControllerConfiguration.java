@@ -107,7 +107,7 @@ public class AccessControllerConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "hawkbit.acm.access-controller.target-type.enabled", havingValue = "true")
+    @ConditionalOnProperty(name = "hawkbit.acm.access-controller.target-type.enabled", havingValue = "true", matchIfMissing = true)
     AccessController<JpaTargetType> targetTypeAccessController() {
         return new DefaultAccessController<>(TargetTypeFields.class, SpPermission.TARGET_TYPE);
     }
@@ -119,7 +119,7 @@ public class AccessControllerConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "hawkbit.acm.access-controller.software-module-type.enabled", havingValue = "true")
+    @ConditionalOnProperty(name = "hawkbit.acm.access-controller.software-module-type.enabled", havingValue = "true", matchIfMissing = true)
     AccessController<JpaSoftwareModuleType> softwareModuleTypeAccessController() {
         return new DefaultAccessController<>(SoftwareModuleTypeFields.class, SpPermission.SOFTWARE_MODULE_TYPE);
     }
@@ -131,7 +131,7 @@ public class AccessControllerConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "hawkbit.acm.access-controller.distribution-set-type.enabled", havingValue = "true")
+    @ConditionalOnProperty(name = "hawkbit.acm.access-controller.distribution-set-type.enabled", havingValue = "true", matchIfMissing = true)
     AccessController<JpaDistributionSetType> distributionSetTypeAccessController() {
         return new DefaultAccessController<>(DistributionSetTypeFields.class, SpPermission.DISTRIBUTION_SET_TYPE);
     }
