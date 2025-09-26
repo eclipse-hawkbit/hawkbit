@@ -15,7 +15,7 @@ import lombok.Getter;
  * Describing the fields of the SoftwareModuleType model which can be used in the REST API e.g. for sorting etc.
  */
 @Getter
-public enum SoftwareModuleTypeFields implements RsqlQueryField {
+public enum SoftwareModuleTypeFields implements QueryField {
 
     ID("id"),
     KEY("key"),

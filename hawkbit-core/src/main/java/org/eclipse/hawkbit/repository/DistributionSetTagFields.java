@@ -20,7 +20,7 @@ import lombok.Getter;
  * filtering over distribution set fields also.
  */
 @Getter
-public enum DistributionSetTagFields implements RsqlQueryField {
+public enum DistributionSetTagFields implements QueryField {
 
     ID(TagFields.ID.getJpaEntityFieldName()),
     NAME(TagFields.NAME.getJpaEntityFieldName()),

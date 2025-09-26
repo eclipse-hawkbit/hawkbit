@@ -43,7 +43,7 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.eclipse.hawkbit.repository.FieldValueConverter;
-import org.eclipse.hawkbit.repository.RsqlQueryField;
+import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -65,7 +65,7 @@ import org.springframework.util.ObjectUtils;
  */
 @Deprecated(forRemoval = true, since = "0.6.0")
 @Slf4j
-public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends AbstractRSQLVisitor<A>
+public class JpaQueryRsqlVisitor<A extends Enum<A> & QueryField, T> extends AbstractRSQLVisitor<A>
         implements RSQLVisitor<List<Predicate>, String> {
 
     public static final Character LIKE_WILDCARD = '*';

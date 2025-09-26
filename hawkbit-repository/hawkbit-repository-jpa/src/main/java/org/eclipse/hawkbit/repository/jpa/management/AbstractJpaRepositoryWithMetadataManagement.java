@@ -26,9 +26,8 @@ import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.MetadataSupport;
-import org.eclipse.hawkbit.repository.RsqlQueryField;
+import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.WithMetadata;
 import org.eclipse.hawkbit.repository.jpa.repository.BaseEntityRepository;
@@ -39,7 +38,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 
 @SuppressWarnings("java:S119") // java:S119 - better self explainable
-abstract class AbstractJpaRepositoryWithMetadataManagement<T extends AbstractJpaBaseEntity & WithMetadata<MV, MVI>, C, U extends Identifiable<Long>, R extends BaseEntityRepository<T>, A extends Enum<A> & RsqlQueryField, MV, MVI extends MV>
+abstract class AbstractJpaRepositoryWithMetadataManagement<T extends AbstractJpaBaseEntity & WithMetadata<MV, MVI>, C, U extends Identifiable<Long>, R extends BaseEntityRepository<T>, A extends Enum<A> & QueryField, MV, MVI extends MV>
         extends AbstractJpaRepositoryManagement<T, C, U, R, A> implements MetadataSupport<MV> {
 
     private final Supplier<MVI> metadataValueCreator;

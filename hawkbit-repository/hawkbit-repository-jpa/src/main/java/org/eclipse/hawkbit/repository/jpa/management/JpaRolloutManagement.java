@@ -66,7 +66,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRolloutGroupSuccessAction;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
+import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
@@ -285,7 +285,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     public Page<Rollout> findByRsql(final String rsql, final boolean deleted, final Pageable pageable) {
         final List<Specification<JpaRollout>> specList = List.of(
-                RsqlUtility.getInstance().buildRsqlSpecification(rsql, RolloutFields.class),
+                QLSupport.getInstance().buildSpec(rsql, RolloutFields.class),
                 RolloutSpecification.isDeleted(deleted, pageable.getSort()));
         return JpaManagementHelper.convertPage(rolloutRepository.findAll(JpaManagementHelper.combineWithAnd(specList), pageable), pageable);
     }
@@ -293,7 +293,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     public Page<Rollout> findByRsqlWithDetailedStatus(final String rsql, final boolean deleted, final Pageable pageable) {
         final List<Specification<JpaRollout>> specList = List.of(
-                RsqlUtility.getInstance().buildRsqlSpecification(rsql, RolloutFields.class),
+                QLSupport.getInstance().buildSpec(rsql, RolloutFields.class),
                 RolloutSpecification.isDeleted(deleted, pageable.getSort()));
         return appendStatusDetails(JpaManagementHelper.convertPage(
                 rolloutRepository.findAll(JpaManagementHelper.combineWithAnd(specList), JpaRollout_.GRAPH_ROLLOUT_DS, pageable), pageable));

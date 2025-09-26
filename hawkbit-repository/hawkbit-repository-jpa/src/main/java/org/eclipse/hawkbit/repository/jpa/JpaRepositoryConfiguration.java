@@ -67,6 +67,8 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
+import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.DefaultQueryParser;
+import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.QueryParser;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;
@@ -86,7 +88,7 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupEvaluati
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupSuccessCondition;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
+import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
 import org.eclipse.hawkbit.repository.jpa.utils.ExceptionMapper;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -513,14 +515,20 @@ public class JpaRepositoryConfiguration {
         return new RolloutScheduler(rolloutHandler, systemManagement, systemSecurityContext, threadPoolSize, meterRegistry);
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    QueryParser queryParser() {
+        return new DefaultQueryParser();
+    }
+
     /**
-     * Register the {@link RsqlUtility} bean to force Spring to inject values and auto-wired fields.
+     * Register the {@link QLSupport} bean to force Spring to inject values and auto-wired fields.
      *
-     * @return The {@link RsqlUtility} singleton.
+     * @return The {@link QLSupport} singleton.
      */
     @Bean
-    RsqlUtility rsqlUtility() {
-        return RsqlUtility.getInstance();
+    QLSupport rsqlUtility() {
+        return QLSupport.getInstance();
     }
 
     /**

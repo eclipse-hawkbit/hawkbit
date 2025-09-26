@@ -16,9 +16,9 @@ import java.util.Map;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * An RSQL query field interface extended by all the fields that could be used in RSQL queries.
+ * A query field interface extended by all the fields that could be used in queries.
  */
-public interface RsqlQueryField {
+public interface QueryField {
 
     /**
      * Separator for the sub attributes

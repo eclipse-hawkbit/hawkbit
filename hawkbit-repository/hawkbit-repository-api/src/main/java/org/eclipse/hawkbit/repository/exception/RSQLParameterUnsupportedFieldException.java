@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.exception.SpServerError;
  */
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class RSQLParameterUnsupportedFieldException extends AbstractServerRtException {
+public class RSQLParameterUnsupportedFieldException extends QueryException {
 
     @Serial
     private static final long serialVersionUID = 1L;

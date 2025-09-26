@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.rest.resource.exception.SortParameterSyntaxErrorException;
 import org.eclipse.hawkbit.mgmt.rest.resource.exception.SortParameterUnsupportedDirectionException;
 import org.eclipse.hawkbit.mgmt.rest.resource.exception.SortParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.RsqlQueryField;
+import org.eclipse.hawkbit.repository.QueryField;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 
@@ -44,15 +44,15 @@ public final class SortUtility {
      * sorting will be mapped into the {@link Direction} enum.
      *
      * @param enumType the class of the enum which the fields in the sort string should be related to.
-     * @param <T> the type of the enumeration which must be derived from {@link RsqlQueryField}
+     * @param <T> the type of the enumeration which must be derived from {@link QueryField}
      * @param sortString the string representation of the query parameters. Might be {@code null} or an empty string.
-     * @return a list which holds the {@link RsqlQueryField} and the specific {@link Direction} for them as a tuple. Never {@code null}.
+     * @return a list which holds the {@link QueryField} and the specific {@link Direction} for them as a tuple. Never {@code null}.
      *         In case of no sorting parameters an empty map will be returned.
      * @throws SortParameterSyntaxErrorException if the sorting query parameter is not well-formed
      * @throws SortParameterUnsupportedFieldException if a field name cannot be mapped to the enum type
      * @throws SortParameterUnsupportedDirectionException if the given direction is not "ASC" or "DESC"
      */
-    public static <T extends Enum<T> & RsqlQueryField> List<Order> parse(final Class<T> enumType, final String sortString)
+    public static <T extends Enum<T> & QueryField> List<Order> parse(final Class<T> enumType, final String sortString)
             throws SortParameterSyntaxErrorException {
         final List<Order> orders = new ArrayList<>();
         // scan the sort tuples e.g. field:direction

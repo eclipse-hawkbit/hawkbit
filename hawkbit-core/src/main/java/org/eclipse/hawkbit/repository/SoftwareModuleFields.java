@@ -17,7 +17,7 @@ import lombok.Getter;
  * Describing the fields of the SoftwareModule model which can be used in the REST API e.g. for sorting etc.
  */
 @Getter
-public enum SoftwareModuleFields implements RsqlQueryField {
+public enum SoftwareModuleFields implements QueryField {
 
     ID("id"),
     TYPE("type",
@@ -44,7 +44,7 @@ public enum SoftwareModuleFields implements RsqlQueryField {
 
     @Override
     public String getDefaultSubEntityAttribute() {
-        return this == TYPE ? SoftwareModuleTypeFields.KEY.getJpaEntityFieldName() : RsqlQueryField.super.getDefaultSubEntityAttribute();
+        return this == TYPE ? SoftwareModuleTypeFields.KEY.getJpaEntityFieldName() : QueryField.super.getDefaultSubEntityAttribute();
     }
 
     @Override

@@ -21,10 +21,10 @@ import java.util.regex.Pattern;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ContextAware;
-import org.eclipse.hawkbit.repository.RsqlQueryField;
+import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.ql.EntityMatcher;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
+import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,7 +32,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.ObjectUtils;
 
 @Slf4j
-public class DefaultAccessController<A extends Enum<A> & RsqlQueryField, T> implements AccessController<T> {
+public class DefaultAccessController<A extends Enum<A> & QueryField, T> implements AccessController<T> {
 
     private final Class<A> rsqlQueryFieldType;
     private final Map<Operation, List<String>> permissions = new EnumMap<>(Operation.class);
@@ -69,7 +69,7 @@ public class DefaultAccessController<A extends Enum<A> & RsqlQueryField, T> impl
                         scopes.size() == 1
                                 ? scopes.get(0) // single scope
                                 : "(" + String.join(") or (", scopes) + ")") // join multiple scopes with 'or' - union
-                .map(rsql -> RsqlUtility.getInstance().buildRsqlSpecification(rsql, rsqlQueryFieldType));
+                .map(rsql -> QLSupport.getInstance().buildSpec(rsql, rsqlQueryFieldType));
     }
 
     @Override

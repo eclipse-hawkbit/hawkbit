@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
-import org.eclipse.hawkbit.repository.RsqlQueryField;
+import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.Jpa;
@@ -49,7 +49,7 @@ import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.repository.BaseEntityRepository;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
+import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
 import org.eclipse.hawkbit.utils.ObjectCopyUtil;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -79,7 +79,7 @@ import org.springframework.validation.annotation.Validated;
 @Transactional(readOnly = true)
 @Validated
 @Slf4j
-abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, C, U extends Identifiable<Long>, R extends BaseEntityRepository<T>, A extends Enum<A> & RsqlQueryField>
+abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, C, U extends Identifiable<Long>, R extends BaseEntityRepository<T>, A extends Enum<A> & QueryField>
         implements RepositoryManagement<T, C, U> {
 
     public static final String DELETED = "deleted";
@@ -258,8 +258,8 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
     @NotNull
     private List<Specification<T>> rsqlSpec(final String rsql) {
         return isNotDeleted()
-                .map(isNotDeleted -> List.of(RsqlUtility.getInstance().<A, T> buildRsqlSpecification(rsql, fieldsClass()), isNotDeleted))
-                .orElseGet(() -> List.of(RsqlUtility.getInstance().buildRsqlSpecification(rsql, fieldsClass())));
+                .map(isNotDeleted -> List.of(QLSupport.getInstance().<A, T> buildSpec(rsql, fieldsClass()), isNotDeleted))
+                .orElseGet(() -> List.of(QLSupport.getInstance().buildSpec(rsql, fieldsClass())));
     }
 
     protected void checkUpdate(final U update, final T distributionSet) {}

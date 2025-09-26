@@ -63,14 +63,10 @@ public class SpecificationBuilder<T> {
 
     private static final char ESCAPE_CHAR = '\\';
 
-    private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final boolean ensureIgnoreCase;
     private final Database database;
 
-    public SpecificationBuilder(
-            final VirtualPropertyReplacer virtualPropertyReplacer,
-            final boolean ensureIgnoreCase, final Database database) {
-        this.virtualPropertyReplacer = virtualPropertyReplacer;
+    public SpecificationBuilder(final boolean ensureIgnoreCase, final Database database) {
         this.ensureIgnoreCase = ensureIgnoreCase;
         this.database = database;
     }
@@ -244,10 +240,6 @@ public class SpecificationBuilder<T> {
         private List<Object> getValues(final Comparison comparison, final Class<?> javaType) {
             final Object value = comparison.getValue();
             final List<Object> values = (value == null ? NULL_VALUE : (value instanceof List<?> list ? list : List.of(value))).stream()
-                    // if lookup is available, replace macros ...
-                    .map(element -> virtualPropertyReplacer != null && element instanceof String strElement
-                            ? virtualPropertyReplacer.replace(strElement)
-                            : element)
                     // converts value to the correct type
                     .map(element -> element instanceof String strElement
                             ? convertValueIfNecessary(strElement, javaType, comparison)

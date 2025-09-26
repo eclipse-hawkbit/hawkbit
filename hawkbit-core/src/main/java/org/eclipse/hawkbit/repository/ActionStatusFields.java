@@ -15,7 +15,7 @@ import lombok.Getter;
  * Sort and search fields for action status.
  */
 @Getter
-public enum ActionStatusFields implements RsqlQueryField {
+public enum ActionStatusFields implements QueryField {
 
     ID("id"),
     @Deprecated

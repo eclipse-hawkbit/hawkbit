@@ -9,17 +9,16 @@
  */
 package org.eclipse.hawkbit.repository.jpa.ql;
 
-import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility.RsqlToSpecBuilder.LEGACY_G1;
-import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility.RsqlToSpecBuilder.LEGACY_G2;
+import static org.eclipse.hawkbit.repository.jpa.ql.QLSupport.SpecBuilder.LEGACY_G1;
+import static org.eclipse.hawkbit.repository.jpa.ql.QLSupport.SpecBuilder.LEGACY_G2;
 
 import java.util.Arrays;
 import java.util.List;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.RsqlQueryField;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility.RsqlToSpecBuilder;
+import org.eclipse.hawkbit.repository.QueryField;
+import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.SpecBuilder;
 import org.eclipse.hawkbit.repository.jpa.rsql.legacy.SpecificationBuilderLegacy;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,13 +30,13 @@ class SpecificationBuilderLegacyTest extends SpecificationBuilderTest {
 
     private final SpecificationBuilderLegacy<RootField, Root> builder = new SpecificationBuilderLegacy<>(RootField.class, null, Database.H2);
 
-    private static void runWithRsqlToSpecBuilder(final Runnable runnable, final RsqlToSpecBuilder rsqlToSpecBuilder) {
-        final RsqlToSpecBuilder defaultBuilder = RsqlUtility.getInstance().getRsqlToSpecBuilder();
-        RsqlUtility.getInstance().setRsqlToSpecBuilder(rsqlToSpecBuilder);
+    private static void runWithRsqlToSpecBuilder(final Runnable runnable, final SpecBuilder rsqlToSpecBuilder) {
+        final SpecBuilder defaultBuilder = QLSupport.getInstance().getSpecBuilder();
+        QLSupport.getInstance().setSpecBuilder(rsqlToSpecBuilder);
         try {
             runnable.run();
         } finally {
-            RsqlUtility.getInstance().setRsqlToSpecBuilder(defaultBuilder);
+            QLSupport.getInstance().setSpecBuilder(defaultBuilder);
         }
     }
 
@@ -110,7 +109,7 @@ class SpecificationBuilderLegacyTest extends SpecificationBuilderTest {
     }
 
     @Getter
-    private enum RootField implements RsqlQueryField {
+    private enum RootField implements QueryField {
 
         INTVALUE("intValue"),
         STRVALUE("strValue"),

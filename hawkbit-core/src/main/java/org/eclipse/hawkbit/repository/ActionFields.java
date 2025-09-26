@@ -17,7 +17,7 @@ import lombok.Getter;
  * Sort and search fields for actions.
  */
 @Getter
-public enum ActionFields implements RsqlQueryField, FieldValueConverter<ActionFields> {
+public enum ActionFields implements QueryField, FieldValueConverter<ActionFields> {
 
     ID("id"),
     STATUS("active"),

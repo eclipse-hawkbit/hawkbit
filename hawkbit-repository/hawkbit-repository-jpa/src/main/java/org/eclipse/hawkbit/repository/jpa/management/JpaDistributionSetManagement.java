@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -47,7 +46,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
+import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -324,7 +323,7 @@ public class JpaDistributionSetManagement
         return JpaManagementHelper.findAllWithCountBySpec(
                 jpaRepository,
                 List.of(
-                        RsqlUtility.getInstance().buildRsqlSpecification(rsql, DistributionSetFields.class),
+                        QLSupport.getInstance().buildSpec(rsql, DistributionSetFields.class),
                         DistributionSetSpecification.hasTag(tagId), DistributionSetSpecification.isNotDeleted()),
                 pageable);
     }

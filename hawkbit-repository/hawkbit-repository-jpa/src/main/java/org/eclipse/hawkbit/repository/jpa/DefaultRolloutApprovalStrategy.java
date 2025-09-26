@@ -91,11 +91,9 @@ public class DefaultRolloutApprovalStrategy implements RolloutApprovalStrategy {
         // scheduler under SYSTEM user context, thus we get the
         // user based on the properties of initially created rollout entity
         if (RolloutStatus.CREATING == rollout.getStatus()) {
-            final String actor = rollout.getLastModifiedBy() != null ? rollout.getLastModifiedBy()
-                    : rollout.getCreatedBy();
+            final String actor = rollout.getLastModifiedBy() != null ? rollout.getLastModifiedBy() : rollout.getCreatedBy();
             if (!ObjectUtils.isEmpty(actor)) {
-                return systemSecurityContext.runAsSystem(
-                        () -> userAuthoritiesResolver.getUserAuthorities(rollout.getTenant(), actor));
+                return systemSecurityContext.runAsSystem(() -> userAuthoritiesResolver.getUserAuthorities(rollout.getTenant(), actor));
             }
         }
 

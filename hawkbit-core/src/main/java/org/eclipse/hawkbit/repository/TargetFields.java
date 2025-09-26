@@ -18,7 +18,7 @@ import lombok.Getter;
  * e.g. for sorting etc.
  */
 @Getter
-public enum TargetFields implements RsqlQueryField {
+public enum TargetFields implements QueryField {
 
     ID("controllerId"),
     NAME("name"),
@@ -62,7 +62,7 @@ public enum TargetFields implements RsqlQueryField {
 
     @Override
     public String getDefaultSubEntityAttribute() {
-        return this == TYPE ? TargetTypeFields.KEY.getJpaEntityFieldName() : RsqlQueryField.super.getDefaultSubEntityAttribute();
+        return this == TYPE ? TargetTypeFields.KEY.getJpaEntityFieldName() : QueryField.super.getDefaultSubEntityAttribute();
     }
 
     @Override

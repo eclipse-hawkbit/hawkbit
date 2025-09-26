@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.ql;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.UnaryOperator;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -36,6 +37,25 @@ public interface Node {
 
     default Logical or(final Node other) {
         return op(this, Logical.Operator.OR, other);
+    }
+
+    // utility method that maps this node with a mapper that could modify comparisons - e.g. change keys, values, operators, or whatever
+    // if there are no changes the same instance is returned
+    default Node map(final UnaryOperator<Comparison> mapper) {
+        if (this instanceof Comparison comparison) {
+            return mapper.apply(comparison);
+        } else {
+            final List<Node> mappedChildren = new ArrayList<>();
+            boolean modified = false;
+            for (final Node child : ((Logical) this).getChildren()) {
+                final Node mapped = child.map(mapper);
+                mappedChildren.add(mapped);
+                if (!mapped.equals(child)) {
+                    modified = true;
+                }
+            }
+            return modified ? new Logical(((Logical) this).getOp(), mappedChildren) : this;
+        }
     }
 
     static Logical op(final Node node1, final Logical.Operator op, final Node node2) {
@@ -121,7 +141,7 @@ public interface Node {
 
             private final String symbol;
 
-            Operator(String symbol) {
+            Operator(final String symbol) {
                 this.symbol = symbol;
             }
 

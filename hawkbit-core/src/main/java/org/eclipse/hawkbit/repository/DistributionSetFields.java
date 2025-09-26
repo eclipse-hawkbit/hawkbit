@@ -18,7 +18,7 @@ import lombok.Getter;
  * REST API e.g. for sorting etc.
  */
 @Getter
-public enum DistributionSetFields implements RsqlQueryField {
+public enum DistributionSetFields implements QueryField {
 
     ID("id"),
     TYPE("type",
@@ -48,7 +48,7 @@ public enum DistributionSetFields implements RsqlQueryField {
 
     @Override
     public String getDefaultSubEntityAttribute() {
-        return this == TYPE ? DistributionSetTypeFields.KEY.getJpaEntityFieldName() : RsqlQueryField.super.getDefaultSubEntityAttribute();
+        return this == TYPE ? DistributionSetTypeFields.KEY.getJpaEntityFieldName() : QueryField.super.getDefaultSubEntityAttribute();
     }
 
     @Override
