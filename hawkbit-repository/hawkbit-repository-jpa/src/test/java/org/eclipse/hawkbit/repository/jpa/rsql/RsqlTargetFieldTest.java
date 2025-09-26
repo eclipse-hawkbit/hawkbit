@@ -375,26 +375,26 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void rsqlValidTargetFields() {
-        QLSupport.getInstance().validateQuery(
+        QLSupport.getInstance().validate(
                 "ID == '0123' and NAME == abcd and DESCRIPTION == absd and CREATEDAT =lt= 0123 and LASTMODIFIEDAT =gt= 0123" +
                         " and CONTROLLERID == 0123 and UPDATESTATUS == PENDING and IPADDRESS == 0123 and LASTCONTROLLERREQUESTAT == 0123" +
                         " and tag == beta",
                 TargetFields.class, JpaTarget.class);
-        QLSupport.getInstance().validateQuery(
+        QLSupport.getInstance().validate(
                 "ASSIGNEDDS.name == abcd and ASSIGNEDDS.version == 0123 and INSTALLEDDS.name == abcd and INSTALLEDDS.version == 0123",
                 TargetFields.class, JpaTarget.class);
-        QLSupport.getInstance().validateQuery(
+        QLSupport.getInstance().validate(
                 "ATTRIBUTE.subkey1 == test and ATTRIBUTE.subkey2 == test and METADATA.metakey1 == abcd and METADATA.metavalue2 == asdfg",
                 TargetFields.class, JpaTarget.class);
-        QLSupport.getInstance().validateQuery(
+        QLSupport.getInstance().validate(
                 "CREATEDAT =lt= ${NOW_TS} and LASTMODIFIEDAT =ge= ${OVERDUE_TS}",
                 TargetFields.class, JpaTarget.class);
-        QLSupport.getInstance().validateQuery(
+        QLSupport.getInstance().validate(
                 "ATTRIBUTE.test.dot == test and ATTRIBUTE.subkey2 == test and METADATA.test.dot == abcd and METADATA.metavalue2 == asdfg",
                 TargetFields.class, JpaTarget.class);
 
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> QLSupport.getInstance().validateQuery("wrongfield == abcd", TargetFields.class, JpaTarget.class));
+                .isThrownBy(() -> QLSupport.getInstance().validate("wrongfield == abcd", TargetFields.class, JpaTarget.class));
     }
 
     /**
@@ -449,6 +449,6 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
 
     private void assertRSQLQueryThrowsException(final String rsql) {
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> QLSupport.getInstance().validateQuery(rsql, TargetFields.class, JpaTarget.class));
+                .isThrownBy(() -> QLSupport.getInstance().validate(rsql, TargetFields.class, JpaTarget.class));
     }
 }

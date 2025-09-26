@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.TenantConfigurationDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
@@ -39,7 +40,7 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
-import org.eclipse.hawkbit.repository.jpa.ql.EntityMatcher;
+import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
 import org.eclipse.hawkbit.repository.jpa.repository.TenantConfigurationRepository;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -204,7 +205,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
             if (!ObjectUtils.isEmpty(pollingTime.getOverrides()) && target instanceof JpaTarget jpaTarget) {
                 for (final PollingTime.Override override : pollingTime.getOverrides()) {
                     try {
-                        if (EntityMatcher.forRsql(override.qlStr()).match(jpaTarget)) {
+                        if (QLSupport.getInstance().entityMatcher(override.qlStr(), TargetFields.class).match(jpaTarget)) {
                             return pollStatus(lastTargetQuery, override.pollingInterval(), pollingOverdueTime);
                         }
                     } catch (final Exception e) {
@@ -271,8 +272,8 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
                 if (!ObjectUtils.isEmpty(pollingTime.getOverrides())) {
                     // validate that the QL strings are valid RSQL queries,
                     // nevertheless always when parse them we shall be prepared to catch exceptions if the parsers
-                    // has been changed in non backward compatible way
-                    pollingTime.getOverrides().forEach(override -> EntityMatcher.forRsql(override.qlStr()));
+                    // has been changed in not backward compatible way
+                    pollingTime.getOverrides().forEach(override -> QLSupport.getInstance().entityMatcher(override.qlStr(), TargetFields.class));
                 }
             }
 
@@ -291,8 +292,8 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         return jpaTenantConfigurations.stream().collect(Collectors.toMap(
                 JpaTenantConfiguration::getKey,
                 updatedTenantConfiguration -> {
-                    @SuppressWarnings("unchecked")
-                    final Class<T> clazzT = (Class<T>) configurations.get(updatedTenantConfiguration.getKey()).getClass();
+                    @SuppressWarnings("unchecked") final Class<T> clazzT = (Class<T>) configurations.get(updatedTenantConfiguration.getKey())
+                            .getClass();
                     return TenantConfigurationValue.<T> builder().global(false)
                             .createdBy(updatedTenantConfiguration.getCreatedBy())
                             .createdAt(updatedTenantConfiguration.getCreatedAt())
@@ -351,7 +352,9 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         if (MULTI_ASSIGNMENTS_ENABLED.equals(key) && Boolean.parseBoolean(valueChange.getValue())) {
             JpaTenantConfiguration batchConfig = tenantConfigurationRepository.findByKey(BATCH_ASSIGNMENTS_ENABLED);
             if (batchConfig != null && Boolean.parseBoolean(batchConfig.getValue())) {
-                log.debug("The Multi-Assignments '{}' feature cannot be enabled as it contradicts with the Batch-Assignments feature, which is already enabled .", key);
+                log.debug(
+                        "The Multi-Assignments '{}' feature cannot be enabled as it contradicts with the Batch-Assignments feature, which is already enabled .",
+                        key);
                 throw new TenantConfigurationValueChangeNotAllowedException();
             }
         }
@@ -361,7 +364,9 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         if (BATCH_ASSIGNMENTS_ENABLED.equals(key) && Boolean.parseBoolean(valueChange.getValue())) {
             JpaTenantConfiguration multiConfig = tenantConfigurationRepository.findByKey(MULTI_ASSIGNMENTS_ENABLED);
             if (multiConfig != null && Boolean.parseBoolean(multiConfig.getValue())) {
-                log.debug("The Batch-Assignments '{}' feature cannot be enabled as it contradicts with the Multi-Assignments feature, which is already enabled .", key);
+                log.debug(
+                        "The Batch-Assignments '{}' feature cannot be enabled as it contradicts with the Multi-Assignments feature, which is already enabled .",
+                        key);
                 throw new TenantConfigurationValueChangeNotAllowedException();
             }
         }

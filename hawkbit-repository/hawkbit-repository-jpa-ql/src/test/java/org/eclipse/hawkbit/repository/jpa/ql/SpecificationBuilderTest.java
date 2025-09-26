@@ -553,7 +553,7 @@ class SpecificationBuilderTest {
 
     private List<Root> filter(final String rsql) {
         // reference / auto filter (using elements and reflection)
-        final EntityMatcher matcher = EntityMatcher.forRsql(rsql);
+        final EntityMatcher matcher = EntityMatcher.of(RsqlParser.parse(rsql));
         final List<Root> refResult = StreamSupport.stream(rootRepository.findAll().spliterator(), false).filter(matcher::match).toList();
         final List<Root> result = rootRepository.findAll(getSpecification(rsql));
         // auto check with reference result
