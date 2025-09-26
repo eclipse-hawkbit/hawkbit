@@ -114,7 +114,7 @@ public class TargetActionsHistory extends Grid<TargetActionsHistory.ActionStatus
         }
 
         private boolean isActive() {
-            return action.getStatus().equals(MgmtAction.ACTION_PENDING);
+            return action.isActive();
         }
 
         private boolean isCancelingOrCanceled() {

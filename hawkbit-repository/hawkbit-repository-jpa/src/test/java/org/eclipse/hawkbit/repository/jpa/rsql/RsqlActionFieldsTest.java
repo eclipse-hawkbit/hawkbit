@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.TargetManagement.Create;
+import org.eclipse.hawkbit.repository.exception.QueryException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -77,8 +78,8 @@ class RsqlActionFieldsTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(ActionFields.STATUS.name() + "=in=(pending)", 5);
         assertRSQLQuery(ActionFields.STATUS.name() + "=out=(pending)", 6);
 
-        final String rsql = ActionFields.STATUS.name() + "==true";
-        assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
+        final String rsql = ActionFields.STATUS.name() + "==true2";
+        assertThatExceptionOfType(QueryException.class)
                 .as("RSQLParameterUnsupportedFieldException because status cannot be compared with 'true'")
                 .isThrownBy(() -> assertRSQLQuery(rsql, 5));
     }

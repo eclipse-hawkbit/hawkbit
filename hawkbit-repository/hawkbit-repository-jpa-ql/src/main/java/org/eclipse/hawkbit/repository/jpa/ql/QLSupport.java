@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.ql;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import jakarta.persistence.EntityManager;
@@ -21,6 +23,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.text.StrLookup;
+import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.exception.QueryException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
@@ -186,32 +189,45 @@ public class QLSupport {
 
         @Override
         public <T extends Enum<T> & QueryField> Node parse(final String query, final Class<T> queryFieldType) throws QueryException {
-            return RsqlParser.parse(query, queryFieldType);
-        }
-    }
-
-    public static class MappingQueryParser extends DefaultQueryParser {
-
-        @Override
-        public <T extends Enum<T> & QueryField> Node parse(final String query, final Class<T> queryFieldType) throws QueryException {
-            return RsqlParser.parse(query, queryFieldType).map(this::map);
+            return RsqlParser.parse(query, queryFieldType).map(comparison -> map(comparison, queryFieldType));
         }
 
-        protected Comparison map(final Comparison comparison) {
-            final String key = mapKey(comparison.getKey(), comparison).toString();
-            final Object value = mapValue(comparison.getValue(), comparison);
+        protected <T extends Enum<T> & QueryField> Comparison map(final Comparison comparison, final Class<T> queryFieldType) {
+            final String key = mapKey(comparison.getKey(), comparison, queryFieldType).toString();
+            final Object value = mapValue(comparison.getValue(), comparison, queryFieldType);
             return key.equals(comparison.getKey()) && Objects.equals(value, comparison.getValue())
                     ? comparison : Comparison.builder().key(key).op(comparison.getOp()).value(value).build();
         }
 
         // just extension points for subclasses
-        protected Object mapKey(final String key, final Comparison comparison) {
+        protected <T extends Enum<T> & QueryField>Object mapKey(final String key, final Comparison comparison, final Class<T> queryFieldType) {
             return key;
         }
 
         // just extension points for subclasses
-        protected Object mapValue(final Object value, final Comparison comparison) {
+        protected <T extends Enum<T> & QueryField> Object mapValue(final Object value, final Comparison comparison, final Class<T> queryFieldType) {
+            if (queryFieldType == (Class<?>)ActionFields.class && "active".equalsIgnoreCase(comparison.getKey())) {
+                if (value instanceof List) {
+                    return ((List<?>)value).stream().map(DefaultQueryParser::mapActionStatus).toList();
+                } else {
+                    return mapActionStatus(value);
+                }
+            }
             return value;
+        }
+
+        private static Object mapActionStatus(final Object value){
+            final String strValue = String.valueOf(value);
+            if ("true".equalsIgnoreCase(strValue) || "false".equalsIgnoreCase(strValue)) {
+                return value;
+            } else {
+                // handle custom action fields status
+                try {
+                    return ActionFields.convertStatusValue(strValue);
+                } catch (final IllegalArgumentException e) {
+                    throw new RSQLParameterUnsupportedFieldException(e.getMessage());
+                }
+            }
         }
     }
 }

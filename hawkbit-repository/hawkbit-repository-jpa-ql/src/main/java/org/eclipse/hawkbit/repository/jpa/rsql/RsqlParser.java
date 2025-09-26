@@ -28,8 +28,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-import jakarta.annotation.Nullable;
-
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.RSQLParserException;
 import cz.jirutka.rsql.parser.ast.AndNode;
@@ -41,7 +39,6 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.FieldValueConverter;
 import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
@@ -79,14 +76,14 @@ public class RsqlParser {
     }
 
     public static Node parse(final String rsql) {
-        return parse(rsql, (Function<String, Key>) null);
+        return parse(rsql, (UnaryOperator<String>) null);
     }
 
     public static <T extends Enum<T> & QueryField> Node parse(final String rsql, final Class<T> queryFieldType) {
         return parse(rsql, queryFieldType == null ? null : key -> resolveKey(key, queryFieldType));
     }
 
-    private static Node parse(final String rsql, final Function<String, Key> keyResolver) {
+    private static Node parse(final String rsql, final UnaryOperator<String> keyResolver) {
         try {
             return RSQL_PARSER
                     .parse(rsql)
@@ -97,7 +94,7 @@ public class RsqlParser {
     }
 
     @SuppressWarnings("java:S3776") // java:S3776 - group in single method for easier read of whole logic
-    private static <T extends Enum<T> & QueryField> Key resolveKey(final String key, final Class<T> rsqlQueryFieldType) {
+    private static <T extends Enum<T> & QueryField> String resolveKey(final String key, final Class<T> rsqlQueryFieldType) {
         final int firstSeparatorIndex = key.indexOf(SUB_ATTRIBUTE_SEPARATOR);
         final String enumName = (firstSeparatorIndex == -1 ? key : key.substring(0, firstSeparatorIndex)).toUpperCase();
         log.debug("Get field identifier by name {} of enum type {}", enumName, rsqlQueryFieldType);
@@ -151,17 +148,15 @@ public class RsqlParser {
             }
         }
 
-        return new Key(attribute, RsqlVisitor.valueConverter(enumValue));
+        return attribute;
     }
-
-    private record Key(String path, UnaryOperator<Object> converter) {}
 
     private static class RsqlVisitor implements RSQLVisitor<Node, String> {
 
-        private final Function<String, Key> keyResolver;
+        private final Function<String, String> keyResolver;
 
-        private RsqlVisitor(final Function<String, Key> keyResolver) {
-            this.keyResolver = keyResolver == null ? str -> new Key(str, UnaryOperator.identity()) : keyResolver;
+        private RsqlVisitor(final UnaryOperator<String> keyResolver) {
+            this.keyResolver = keyResolver == null ? UnaryOperator.identity() : keyResolver;
         }
 
         @Override
@@ -184,40 +179,39 @@ public class RsqlParser {
         @Override
         public Node visit(final ComparisonNode node, final String param) {
             final String nodeSelector = node.getSelector();
-            final Key key = keyResolver.apply(nodeSelector);
-            final String path = key.path();
-            final Object value = toValue(node, key);
+            final String key = keyResolver.apply(nodeSelector);
+            final Object value = toValue(node);
             final ComparisonOperator op = node.getOperator();
             if (op == IS || op == RSQLOperators.EQUAL) {
                 if ("".equals(value)) {
                     // keep special backward compatible behaviour tags == '' means "null / has not or ''
-                    return new Comparison(path, EQ, null, nodeSelector).or(new Comparison(path, EQ, "", nodeSelector));
+                    return new Comparison(key, EQ, null, nodeSelector).or(new Comparison(key, EQ, "", nodeSelector));
                 }
-                return new Comparison(path, isLike(value) ? LIKE : EQ, value, nodeSelector);
+                return new Comparison(key, isLike(value) ? LIKE : EQ, value, nodeSelector);
             } else if (op == NOT || op == RSQLOperators.NOT_EQUAL) {
                 if ("".equals(value)) {
                     // keep special backward compatible behaviour. != '' means "not null / has and not ''
-                    return new Comparison(path, LIKE, "*", nodeSelector).and(new Comparison(path, NE, "", nodeSelector));
+                    return new Comparison(key, LIKE, "*", nodeSelector).and(new Comparison(key, NE, "", nodeSelector));
                 }
-                return new Comparison(path, isLike(value) ? NOT_LIKE : NE, value, nodeSelector);
+                return new Comparison(key, isLike(value) ? NOT_LIKE : NE, value, nodeSelector);
             } else if (op == RSQLOperators.GREATER_THAN) {
-                return new Comparison(path, GT, value, nodeSelector);
+                return new Comparison(key, GT, value, nodeSelector);
             } else if (op == RSQLOperators.GREATER_THAN_OR_EQUAL) {
-                return new Comparison(path, GTE, value, nodeSelector);
+                return new Comparison(key, GTE, value, nodeSelector);
             } else if (op == RSQLOperators.LESS_THAN) {
-                return new Comparison(path, LT, value, nodeSelector);
+                return new Comparison(key, LT, value, nodeSelector);
             } else if (op == RSQLOperators.LESS_THAN_OR_EQUAL) {
-                return new Comparison(path, LTE, value, nodeSelector);
+                return new Comparison(key, LTE, value, nodeSelector);
             } else if (op == RSQLOperators.IN) {
-                return new Comparison(path, IN, value, nodeSelector);
+                return new Comparison(key, IN, value, nodeSelector);
             } else if (op == RSQLOperators.NOT_IN) {
-                return new Comparison(path, NOT_IN, value, nodeSelector);
+                return new Comparison(key, NOT_IN, value, nodeSelector);
             } else {
                 throw new IllegalArgumentException("Unsupported operator: " + node.getOperator());
             }
         }
 
-        private Object toValue(final ComparisonNode node, final Key key) {
+        private Object toValue(final ComparisonNode node) {
             final List<String> arguments = node.getArguments();
             final ComparisonOperator operator = node.getOperator();
             if (arguments.isEmpty()) {
@@ -228,32 +222,13 @@ public class RsqlParser {
                 return null;
             } else {
                 if (operator == RSQLOperators.IN || operator == RSQLOperators.NOT_IN) {
-                    return arguments.stream().map(key.converter()).toList();
+                    return arguments.stream().toList();
                 } else if (arguments.size() > 1) {
                     throw new IllegalArgumentException(
                             "Operator " + operator + " requires exactly one argument, but got: " + arguments.size());
                 } else {
-                    return key.converter().apply(arguments.get(0));
+                    return arguments.get(0);
                 }
-            }
-        }
-
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        private static <T extends Enum<T>> UnaryOperator<Object> valueConverter(@Nullable final T enumValue) {
-            if (enumValue instanceof FieldValueConverter fieldValueConverter) {
-                return value -> {
-                    if (value instanceof String strValue) {
-                        try {
-                            return fieldValueConverter.convertValue(enumValue, strValue);
-                        } catch (final Exception e) {
-                            throw new RSQLParameterUnsupportedFieldException(e.getMessage(), null);
-                        }
-                    } else {
-                        return value;
-                    }
-                };
-            } else {
-                return UnaryOperator.identity();
             }
         }
 
