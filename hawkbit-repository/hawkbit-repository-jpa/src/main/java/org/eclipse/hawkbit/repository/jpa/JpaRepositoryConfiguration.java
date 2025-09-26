@@ -67,7 +67,10 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
+import org.eclipse.hawkbit.repository.jpa.ql.Node;
+import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison;
 import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.DefaultQueryParser;
+import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.MappingQueryParser;
 import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.QueryParser;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
@@ -96,6 +99,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -517,8 +522,20 @@ public class JpaRepositoryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    QueryParser queryParser() {
-        return new DefaultQueryParser();
+    public VirtualPropertyResolver virtualPropertyReplacer() {
+        return new VirtualPropertyResolver();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    QueryParser queryParser(final Optional<VirtualPropertyResolver> virtualPropertyResolver) {
+        return virtualPropertyResolver.<QueryParser>map(resolver -> new MappingQueryParser() {
+
+            @Override
+            protected Object mapValue(final Object value, final Comparison comparison) {
+                return value instanceof String strValue ? resolver.replace(strValue) : value;
+            }
+        }).orElseGet(DefaultQueryParser::new);
     }
 
     /**

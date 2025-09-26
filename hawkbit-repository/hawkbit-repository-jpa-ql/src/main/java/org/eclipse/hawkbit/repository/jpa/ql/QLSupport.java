@@ -181,12 +181,13 @@ public class QLSupport {
 
     public static class DefaultQueryParser implements QueryParser {
 
-        private VirtualPropertyReplacer virtualPropertyReplacer;
-
-        @Autowired(required = false)
-        void setVirtualPropertyReplacer(final VirtualPropertyReplacer virtualPropertyReplacer) {
-            this.virtualPropertyReplacer = virtualPropertyReplacer;
+        @Override
+        public <T extends Enum<T> & QueryField> Node parse(final String query, final Class<T> queryFieldType) throws QueryException {
+            return RsqlParser.parse(query, queryFieldType);
         }
+    }
+
+    public static class MappingQueryParser extends DefaultQueryParser {
 
         @Override
         public <T extends Enum<T> & QueryField> Node parse(final String query, final Class<T> queryFieldType) throws QueryException {
@@ -205,8 +206,9 @@ public class QLSupport {
             return key;
         }
 
+        // just extension points for subclasses
         protected Object mapValue(final Object value, final Comparison comparison) {
-            return value instanceof String strValue ? virtualPropertyReplacer.replace(strValue) : value;
+            return value;
         }
     }
 }

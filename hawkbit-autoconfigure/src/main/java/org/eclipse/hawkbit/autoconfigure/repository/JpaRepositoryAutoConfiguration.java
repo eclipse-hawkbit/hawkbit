@@ -10,11 +10,7 @@
 package org.eclipse.hawkbit.autoconfigure.repository;
 
 import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -25,13 +21,4 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnClass({ JpaRepositoryConfiguration.class })
 @Import({ JpaRepositoryConfiguration.class })
 public class JpaRepositoryAutoConfiguration {
-
-    /**
-     * @return returns a VirtualPropertyReplacer
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public VirtualPropertyReplacer virtualPropertyReplacer() {
-        return new VirtualPropertyResolver();
-    }
 }

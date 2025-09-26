@@ -20,8 +20,8 @@ import lombok.Getter;
 public enum ActionFields implements QueryField, FieldValueConverter<ActionFields> {
 
     ID("id"),
-    STATUS("active"),
-    DETAILSTATUS("status"),
+    STATUS("active"), // true if status is "pending", false if "finished"
+    DETAILSTATUS("status"), // real status
     LASTSTATUSCODE("lastActionStatusCode"),
     CREATEDAT("createdAt"),
     CREATEDBY("createdBy"),
