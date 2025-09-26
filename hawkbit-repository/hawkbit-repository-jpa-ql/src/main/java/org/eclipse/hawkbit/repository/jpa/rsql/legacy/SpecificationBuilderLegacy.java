@@ -50,14 +50,14 @@ public class SpecificationBuilderLegacy<A extends Enum<A> & QueryField, T> {
 
     public Specification<T> specification(final String rsql) {
         return (root, query, cb) -> {
-            final QLSupport rsqlUtility = QLSupport.getInstance();
+            final QLSupport qlSupport = QLSupport.getInstance();
 
-            final Node rootNode = parseRsql(rsql, rsqlUtility);
+            final Node rootNode = parseRsql(rsql, qlSupport);
             query.distinct(true);
 
-            final boolean ensureIgnoreCase = !rsqlUtility.isCaseInsensitiveDB() && rsqlUtility.isIgnoreCase();
+            final boolean ensureIgnoreCase = !qlSupport.isCaseInsensitiveDB() && qlSupport.isIgnoreCase();
             final RSQLVisitor<List<Predicate>, String> jpqQueryRSQLVisitor =
-                    rsqlUtility.getSpecBuilder() == LEGACY_G1
+                    qlSupport.getSpecBuilder() == LEGACY_G1
                             ? new JpaQueryRsqlVisitor<>(root, cb, rsqlQueryFieldType, virtualPropertyReplacer, database, query, ensureIgnoreCase)
                             : new JpaQueryRsqlVisitorG2<>(rsqlQueryFieldType, root, query, cb, database, virtualPropertyReplacer, ensureIgnoreCase);
             final List<Predicate> accept = rootNode.accept(jpqQueryRSQLVisitor);

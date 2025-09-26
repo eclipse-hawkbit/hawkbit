@@ -31,7 +31,6 @@ import java.util.Objects;
 import java.util.function.BiPredicate;
 
 import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison.Operator;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParser;
 
 /**
  * Provides entity matcher that matches an entity object against a filter (a {@link Node} or an RSQL string).
@@ -44,12 +43,8 @@ public class EntityMatcher {
         this.root = root;
     }
 
-    public static EntityMatcher forNode(final Node root) {
+    public static EntityMatcher of(final Node root) {
         return new EntityMatcher(root);
-    }
-
-    public static EntityMatcher forRsql(final String rsql) {
-        return forNode(RsqlParser.parse(rsql));
     }
 
     public <T> boolean match(final T t) {

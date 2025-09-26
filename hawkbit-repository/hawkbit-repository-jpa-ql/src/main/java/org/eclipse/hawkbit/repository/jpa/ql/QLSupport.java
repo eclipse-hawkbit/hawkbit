@@ -149,14 +149,17 @@ public class QLSupport {
      *         given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
-    public <A extends Enum<A> & QueryField, T> Specification<T> buildSpec(
-            final String query, final Class<A> queryFieldType) {
+    public <A extends Enum<A> & QueryField, T> Specification<T> buildSpec(final String query, final Class<A> queryFieldType) {
         if (specBuilder == SpecBuilder.G3) {
             return new SpecificationBuilder<T>(!caseInsensitiveDB && ignoreCase, database)
                     .specification(parser.parse(caseInsensitiveDB || ignoreCase ? query.toLowerCase() : query, queryFieldType));
         } else {
             return new SpecificationBuilderLegacy<A, T>(queryFieldType, virtualPropertyReplacer, database).specification(query);
         }
+    }
+
+    public <A extends Enum<A> & QueryField> EntityMatcher entityMatcher(final String query, final Class<A> queryFieldType) {
+        return EntityMatcher.of(parser.parse(caseInsensitiveDB || ignoreCase ? query.toLowerCase() : query, queryFieldType));
     }
 
     /**
@@ -168,7 +171,7 @@ public class QLSupport {
      * @throws QueryException if query is invalid
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public <A extends Enum<A> & QueryField> void validateQuery(final String query, final Class<A> queryFieldType, final Class<?> jpaType) {
+    public <A extends Enum<A> & QueryField> void validate(final String query, final Class<A> queryFieldType, final Class<?> jpaType) {
         final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         final CriteriaQuery<?> criteriaQuery = criteriaBuilder.createQuery(jpaType);
         buildSpec(query, queryFieldType).toPredicate(criteriaQuery.from((Class) jpaType), criteriaQuery, criteriaBuilder);

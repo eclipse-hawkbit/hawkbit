@@ -111,7 +111,7 @@ public class JpaTargetManagement
     @Override
     public boolean isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(
             final String controllerId, final long distributionSetId, final String targetFilterQuery) {
-        QLSupport.getInstance().validateQuery(targetFilterQuery, TargetFields.class, JpaTarget.class);
+        QLSupport.getInstance().validate(targetFilterQuery, TargetFields.class, JpaTarget.class);
         final DistributionSet ds = distributionSetManagement.get(distributionSetId);
         final Long distSetTypeId = ds.getType().getId();
         final List<Specification<JpaTarget>> specList = List.of(

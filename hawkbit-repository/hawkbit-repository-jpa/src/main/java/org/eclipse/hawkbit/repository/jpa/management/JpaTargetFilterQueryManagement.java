@@ -117,7 +117,7 @@ class JpaTargetFilterQueryManagement
     @Override
     public void verifyTargetFilterQuerySyntax(final String query) {
         try {
-            QLSupport.getInstance().validateQuery(query, TargetFields.class, JpaTarget.class);
+            QLSupport.getInstance().validate(query, TargetFields.class, JpaTarget.class);
         } catch (final RSQLParserException | RSQLParameterUnsupportedFieldException e) {
             log.debug("The RSQL query '{}}' is invalid.", query, e);
             throw new RSQLParameterSyntaxException("Cannot create a Rollout with an empty target query filter!");
@@ -225,7 +225,7 @@ class JpaTargetFilterQueryManagement
         });
         Optional.ofNullable(create.getQuery()).ifPresent(query -> {
             // validate the RSQL query syntax
-            QLSupport.getInstance().validateQuery(query, TargetFields.class, JpaTarget.class);
+            QLSupport.getInstance().validate(query, TargetFields.class, JpaTarget.class);
 
             // enforce the 'max targets per auto assign' quota right here even if the result of the filter query can vary over time
             Optional.ofNullable(create.getAutoAssignDistributionSet()).ifPresent(dsId -> {
@@ -242,7 +242,7 @@ class JpaTargetFilterQueryManagement
         final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(update.getId());
         Optional.ofNullable(update.getQuery()).ifPresent(query -> {
             // validate the RSQL query syntax
-            QLSupport.getInstance().validateQuery(query, TargetFields.class, JpaTarget.class);
+            QLSupport.getInstance().validate(query, TargetFields.class, JpaTarget.class);
 
             Optional.ofNullable(targetFilterQuery.getAutoAssignDistributionSet()).ifPresent(autoAssignDs -> {
                 // enforce the 'max targets per auto assignment'-quota only if the query is going to change

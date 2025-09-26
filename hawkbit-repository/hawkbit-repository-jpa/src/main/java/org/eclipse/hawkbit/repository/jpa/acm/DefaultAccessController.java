@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
-import org.eclipse.hawkbit.repository.jpa.ql.EntityMatcher;
 import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -34,17 +33,17 @@ import org.springframework.util.ObjectUtils;
 @Slf4j
 public class DefaultAccessController<A extends Enum<A> & QueryField, T> implements AccessController<T> {
 
-    private final Class<A> rsqlQueryFieldType;
+    private final Class<A> queryFieldType;
     private final Map<Operation, List<String>> permissions = new EnumMap<>(Operation.class);
 
     private ContextAware contextAware;
 
-    public DefaultAccessController(final Class<A> rsqlQueryFieldType, final String... permissionTypes) {
+    public DefaultAccessController(final Class<A> queryFieldType, final String... permissionTypes) {
         if (ObjectUtils.isEmpty(permissionTypes)) {
             throw new IllegalArgumentException("Permission types must not be empty");
         }
 
-        this.rsqlQueryFieldType = rsqlQueryFieldType;
+        this.queryFieldType = queryFieldType;
         for (final Operation operation : Operation.values()) {
             for (final String permissionType : permissionTypes) {
                 permissions.computeIfAbsent(operation, k -> new ArrayList<>()).add(operation.name() + "_" + permissionType.toUpperCase());
@@ -69,7 +68,7 @@ public class DefaultAccessController<A extends Enum<A> & QueryField, T> implemen
                         scopes.size() == 1
                                 ? scopes.get(0) // single scope
                                 : "(" + String.join(") or (", scopes) + ")") // join multiple scopes with 'or' - union
-                .map(rsql -> QLSupport.getInstance().buildSpec(rsql, rsqlQueryFieldType));
+                .map(rsql -> QLSupport.getInstance().buildSpec(rsql, queryFieldType));
     }
 
     @Override
@@ -82,7 +81,7 @@ public class DefaultAccessController<A extends Enum<A> & QueryField, T> implemen
         final List<String> scopes = getScopes(operation);
         if (scopes != null) {
             for (final String scope : scopes) {
-                if (EntityMatcher.forRsql(scope).match(entity)) {
+                if (QLSupport.getInstance().entityMatcher(scope, queryFieldType).match(entity)) {
                     return; // at least one scope matches, operation is allowed
                 }
             }
@@ -110,7 +109,7 @@ public class DefaultAccessController<A extends Enum<A> & QueryField, T> implemen
             // * in case the entity permission(s) are implied - e.g. there is READ_REPOSITORY which implies READ_DISTRIBUTION_SET
             log.debug(
                     "[{}] No matching authority found for operation {} (expects {}), they shall have already been checked with @PreAuthorize)",
-                    rsqlQueryFieldType, operation, operationPermissions);
+                    queryFieldType, operation, operationPermissions);
             return null;
         } else if (scopes.contains(null)) {
             return null; // not scoped at all

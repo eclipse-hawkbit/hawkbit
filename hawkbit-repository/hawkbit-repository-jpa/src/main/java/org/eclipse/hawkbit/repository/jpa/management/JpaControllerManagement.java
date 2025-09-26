@@ -55,6 +55,7 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
@@ -78,7 +79,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
-import org.eclipse.hawkbit.repository.jpa.ql.EntityMatcher;
+import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
@@ -391,7 +392,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             if (!ObjectUtils.isEmpty(pollingTime.getOverrides()) && target instanceof JpaTarget jpaTarget) {
                 for (final PollingTime.Override override : pollingTime.getOverrides()) {
                     try {
-                        if (EntityMatcher.forRsql(override.qlStr()).match(jpaTarget)) {
+                        if (QLSupport.getInstance().entityMatcher(override.qlStr(), TargetFields.class).match(jpaTarget)) {
                             return override.pollingInterval().getFormattedIntervalWithDeviation(minPollingTime, maxPollingTime);
                         }
                     } catch (final Exception e) {
