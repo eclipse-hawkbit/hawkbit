@@ -33,7 +33,7 @@ import org.eclipse.hawkbit.repository.TimestampCalculator;
  *                            and pollingOverdueInterval are retrieved from tenant-specific system configuration.</li>
  * </ul>
  */
-public class VirtualPropertyResolver implements VirtualPropertyReplacer {
+public class VirtualPropertyResolver {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -42,7 +42,6 @@ public class VirtualPropertyResolver implements VirtualPropertyReplacer {
             StringLookupFactory.builder().get().functionStringLookup(VirtualPropertyResolver::lookup),
             StringSubstitutor.DEFAULT_PREFIX, StringSubstitutor.DEFAULT_SUFFIX, StringSubstitutor.DEFAULT_ESCAPE);
 
-    @Override
     public String replace(final String input) {
         return STRING_SUBSTITUTOR.replace(input);
     }

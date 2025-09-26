@@ -98,7 +98,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
@@ -521,7 +520,7 @@ public class JpaRepositoryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public VirtualPropertyResolver virtualPropertyReplacer() {
+    public VirtualPropertyResolver virtualPropertyResolver() {
         return new VirtualPropertyResolver();
     }
 

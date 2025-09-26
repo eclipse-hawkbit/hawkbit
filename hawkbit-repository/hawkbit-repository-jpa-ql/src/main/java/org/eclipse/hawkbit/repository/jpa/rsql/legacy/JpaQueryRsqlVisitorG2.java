@@ -45,7 +45,7 @@ import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.ql.SpecificationBuilder;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -73,7 +73,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & QueryField, T>
     private final CriteriaQuery<?> query;
     private final CriteriaBuilder cb;
     private final Database database;
-    private final VirtualPropertyReplacer virtualPropertyReplacer;
+    private final VirtualPropertyResolver virtualPropertyResolver;
     private final boolean ensureIgnoreCase;
 
     private final Map<String, Path<?>> attributeToPath = new HashMap<>();
@@ -82,12 +82,12 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & QueryField, T>
     public JpaQueryRsqlVisitorG2(
             final Class<A> enumType,
             final Root<T> root, final CriteriaQuery<?> query, final CriteriaBuilder cb,
-            final Database database, final VirtualPropertyReplacer virtualPropertyReplacer, final boolean ensureIgnoreCase) {
+            final Database database, final VirtualPropertyResolver virtualPropertyResolver, final boolean ensureIgnoreCase) {
         super(enumType);
         this.root = root;
         this.cb = cb;
         this.query = query;
-        this.virtualPropertyReplacer = virtualPropertyReplacer;
+        this.virtualPropertyResolver = virtualPropertyResolver;
         this.database = database;
         this.ensureIgnoreCase = ensureIgnoreCase;
     }
@@ -266,7 +266,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & QueryField, T>
     private List<Object> getValues(final ComparisonNode node, final AbstractRSQLVisitor<A>.QueryPath queryPath, final Path<?> fieldPath) {
         final List<Object> values = node.getArguments().stream()
                 // if lookup is available, replace macros ...
-                .map(value -> virtualPropertyReplacer == null ? value : virtualPropertyReplacer.replace(value))
+                .map(value -> virtualPropertyResolver == null ? value : virtualPropertyResolver.replace(value))
                 // converts value to the correct type
                 .map(value -> convertValueIfNecessary(node, queryPath.getEnumValue(), fieldPath, value))
                 .toList();

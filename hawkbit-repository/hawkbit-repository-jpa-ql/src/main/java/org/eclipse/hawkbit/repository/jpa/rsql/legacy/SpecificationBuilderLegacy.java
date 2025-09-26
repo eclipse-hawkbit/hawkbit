@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.jpa.ql.SpecificationBuilder;
 import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.util.CollectionUtils;
@@ -38,13 +38,13 @@ import org.springframework.util.CollectionUtils;
 public class SpecificationBuilderLegacy<A extends Enum<A> & QueryField, T> {
 
     private final Class<A> rsqlQueryFieldType;
-    private final VirtualPropertyReplacer virtualPropertyReplacer;
+    private final VirtualPropertyResolver virtualPropertyResolver;
     private final Database database;
 
     public SpecificationBuilderLegacy(
-            final Class<A> rsqlQueryFieldType, final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
+            final Class<A> rsqlQueryFieldType, final VirtualPropertyResolver virtualPropertyResolver, final Database database) {
         this.rsqlQueryFieldType = rsqlQueryFieldType;
-        this.virtualPropertyReplacer = virtualPropertyReplacer;
+        this.virtualPropertyResolver = virtualPropertyResolver;
         this.database = database;
     }
 
@@ -58,8 +58,8 @@ public class SpecificationBuilderLegacy<A extends Enum<A> & QueryField, T> {
             final boolean ensureIgnoreCase = !qlSupport.isCaseInsensitiveDB() && qlSupport.isIgnoreCase();
             final RSQLVisitor<List<Predicate>, String> jpqQueryRSQLVisitor =
                     qlSupport.getSpecBuilder() == LEGACY_G1
-                            ? new JpaQueryRsqlVisitor<>(root, cb, rsqlQueryFieldType, virtualPropertyReplacer, database, query, ensureIgnoreCase)
-                            : new JpaQueryRsqlVisitorG2<>(rsqlQueryFieldType, root, query, cb, database, virtualPropertyReplacer, ensureIgnoreCase);
+                            ? new JpaQueryRsqlVisitor<>(root, cb, rsqlQueryFieldType, virtualPropertyResolver, database, query, ensureIgnoreCase)
+                            : new JpaQueryRsqlVisitorG2<>(rsqlQueryFieldType, root, query, cb, database, virtualPropertyResolver, ensureIgnoreCase);
             final List<Predicate> accept = rootNode.accept(jpqQueryRSQLVisitor);
 
             if (CollectionUtils.isEmpty(accept)) {

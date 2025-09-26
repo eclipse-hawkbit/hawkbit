@@ -53,7 +53,6 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldExc
 import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison;
 import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison.Operator;
 import org.eclipse.hawkbit.repository.jpa.ql.Node.Logical;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.util.ObjectUtils;

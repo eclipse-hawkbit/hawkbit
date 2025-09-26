@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldExc
 import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParser;
 import org.eclipse.hawkbit.repository.jpa.rsql.legacy.SpecificationBuilderLegacy;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -75,6 +74,7 @@ import org.springframework.orm.jpa.vendor.Database;
 @Slf4j
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("java:S6548") // singleton holder ensures static access to spring resources in some places
 public class QLSupport {
 
     private static final QLSupport SINGLETON = new QLSupport();
@@ -110,9 +110,9 @@ public class QLSupport {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private QueryParser parser;
-    private VirtualPropertyReplacer virtualPropertyReplacer;
     private Database database;
     private EntityManager entityManager;
+    private VirtualPropertyResolver virtualPropertyResolver;
 
     /**
      * @return The holder singleton instance.
@@ -126,11 +126,6 @@ public class QLSupport {
         this.parser = parser;
     }
 
-    @Autowired(required = false)
-    void setVirtualPropertyReplacer(final VirtualPropertyReplacer virtualPropertyReplacer) {
-        this.virtualPropertyReplacer = virtualPropertyReplacer;
-    }
-
     @Autowired
     void setDatabase(final JpaProperties jpaProperties) {
         database = jpaProperties.getDatabase();
@@ -139,6 +134,11 @@ public class QLSupport {
     @Autowired
     void setEntityManager(final EntityManager entityManager) {
         this.entityManager = entityManager;
+    }
+
+    @Autowired(required = false)
+    void setVirtualPropertyResolver(final VirtualPropertyResolver virtualPropertyResolver) {
+        this.virtualPropertyResolver = virtualPropertyResolver;
     }
 
     /**
@@ -157,7 +157,7 @@ public class QLSupport {
             return new SpecificationBuilder<T>(!caseInsensitiveDB && ignoreCase, database)
                     .specification(parser.parse(caseInsensitiveDB || ignoreCase ? query.toLowerCase() : query, queryFieldType));
         } else {
-            return new SpecificationBuilderLegacy<A, T>(queryFieldType, virtualPropertyReplacer, database).specification(query);
+            return new SpecificationBuilderLegacy<A, T>(queryFieldType, virtualPropertyResolver, database).specification(query);
         }
     }
 
