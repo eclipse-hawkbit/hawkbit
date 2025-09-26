@@ -15,7 +15,10 @@ import java.io.Serializable;
  * Implementations map a placeholder to the associated value.
  * <p>
  * This is used in context of string replacement.
+ *
+ * @deprecated Since 0.10.0, used only in deprecated specification builders
  */
+@Deprecated(since = "0.10.0", forRemoval = true)
 @FunctionalInterface
 public interface VirtualPropertyReplacer extends Serializable {
 
