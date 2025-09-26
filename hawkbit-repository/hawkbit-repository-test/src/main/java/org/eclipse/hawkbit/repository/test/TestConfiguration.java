@@ -28,7 +28,6 @@ import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
@@ -187,11 +186,8 @@ public class TestConfiguration implements AsyncConfigurer {
         return new SpringSecurityAuditorAware();
     }
 
-    /**
-     * @return returns a VirtualPropertyReplacer
-     */
     @Bean
-    VirtualPropertyReplacer virtualPropertyReplacer() {
+    VirtualPropertyResolver virtualPropertyResolver() {
         return new VirtualPropertyResolver();
     }
 

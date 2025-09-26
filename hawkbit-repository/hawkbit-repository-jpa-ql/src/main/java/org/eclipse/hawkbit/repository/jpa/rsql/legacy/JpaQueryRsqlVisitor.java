@@ -46,7 +46,7 @@ import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.orm.jpa.vendor.Database;
@@ -80,7 +80,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & QueryField, T> extends Abst
     private final Database database;
     private final boolean ensureIgnoreCase;
     private final Root<T> root;
-    private final VirtualPropertyReplacer virtualPropertyReplacer;
+    private final VirtualPropertyResolver virtualPropertyResolver;
     private final SimpleTypeConverter simpleTypeConverter;
 
     private int level;
@@ -89,13 +89,13 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & QueryField, T> extends Abst
 
     public JpaQueryRsqlVisitor(
             final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
+            final VirtualPropertyResolver virtualPropertyResolver, final Database database,
             final CriteriaQuery<?> query, final boolean ensureIgnoreCase) {
         super(enumType);
         this.root = root;
         this.cb = cb;
         this.query = query;
-        this.virtualPropertyReplacer = virtualPropertyReplacer;
+        this.virtualPropertyResolver = virtualPropertyResolver;
         this.simpleTypeConverter = new SimpleTypeConverter();
         this.database = database;
         this.ensureIgnoreCase = ensureIgnoreCase;
@@ -328,8 +328,8 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & QueryField, T> extends Abst
 
         String value = values.get(0);
         // if lookup is available, replace macros ...
-        if (virtualPropertyReplacer != null) {
-            value = virtualPropertyReplacer.replace(value);
+        if (virtualPropertyResolver != null) {
+            value = virtualPropertyResolver.replace(value);
         }
 
         final Predicate mapPredicate = mapToMapPredicate(fieldPath, queryPath);
