@@ -9,8 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.ql;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import jakarta.persistence.EntityManager;
@@ -200,23 +200,38 @@ public class QLSupport {
         }
 
         // just extension points for subclasses
-        protected <T extends Enum<T> & QueryField>Object mapKey(final String key, final Comparison comparison, final Class<T> queryFieldType) {
+        protected <T extends Enum<T> & QueryField> Object mapKey(final String key, final Comparison comparison, final Class<T> queryFieldType) {
             return key;
         }
 
-        // just extension points for subclasses
-        protected <T extends Enum<T> & QueryField> Object mapValue(final Object value, final Comparison comparison, final Class<T> queryFieldType) {
-            if (queryFieldType == (Class<?>)ActionFields.class && "active".equalsIgnoreCase(comparison.getKey())) {
-                if (value instanceof List) {
-                    return ((List<?>)value).stream().map(DefaultQueryParser::mapActionStatus).toList();
-                } else {
-                    return mapActionStatus(value);
+        // internal, override only if you really want to replace whole lists
+        protected <T extends Enum<T> & QueryField> Object mapValue(
+                final Object value, final Comparison comparison, final Class<T> queryFieldType) {
+            if (value instanceof List<?> list) {
+                final List<Object> mappedList = new ArrayList<>();
+                boolean modified = false;
+                for (final Object e : list) {
+                    final Object mapped = mapSimpleValue(e, comparison, queryFieldType);
+                    if (!Objects.equals(mapped, value)) {
+                        modified = true;
+                    }
+                    mappedList.add(mapped);
                 }
+                return modified ? mappedList : list;
+            } else {
+                return mapSimpleValue(value, comparison, queryFieldType);
             }
-            return value;
         }
 
-        private static Object mapActionStatus(final Object value){
+        // just extension points for subclasses
+        protected <T extends Enum<T> & QueryField> Object mapSimpleValue(
+                final Object value, final Comparison comparison, final Class<T> queryFieldType) {
+            return queryFieldType == (Class<?>) ActionFields.class && "active".equalsIgnoreCase(comparison.getKey())
+                    ? mapActionStatus(value)
+                    : value;
+        }
+
+        private static Object mapActionStatus(final Object value) {
             final String strValue = String.valueOf(value);
             if ("true".equalsIgnoreCase(strValue) || "false".equalsIgnoreCase(strValue)) {
                 return value;
