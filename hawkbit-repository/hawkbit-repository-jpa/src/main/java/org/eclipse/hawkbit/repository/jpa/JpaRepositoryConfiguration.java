@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryptionSecretsStorage;
 import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
+import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConfiguration;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -67,10 +68,8 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
-import org.eclipse.hawkbit.repository.jpa.ql.Node;
 import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison;
 import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.DefaultQueryParser;
-import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.MappingQueryParser;
 import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.QueryParser;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
@@ -529,11 +528,12 @@ public class JpaRepositoryConfiguration {
     @Bean
     @ConditionalOnMissingBean
     QueryParser queryParser(final Optional<VirtualPropertyResolver> virtualPropertyResolver) {
-        return virtualPropertyResolver.<QueryParser>map(resolver -> new MappingQueryParser() {
+        return virtualPropertyResolver.<QueryParser>map(resolver -> new DefaultQueryParser() {
 
             @Override
-            protected Object mapValue(final Object value, final Comparison comparison) {
-                return value instanceof String strValue ? resolver.replace(strValue) : value;
+            protected <T extends Enum<T> & QueryField> Object mapValue(
+                    final Object value, final Comparison comparison, final Class<T> queryFieldType) {
+                return super.mapValue(value instanceof String strValue ? resolver.replace(strValue) : value, comparison, queryFieldType);
             }
         }).orElseGet(DefaultQueryParser::new);
     }

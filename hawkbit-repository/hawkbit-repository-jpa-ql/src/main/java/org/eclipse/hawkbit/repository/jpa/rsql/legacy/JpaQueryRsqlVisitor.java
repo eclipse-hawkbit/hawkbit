@@ -42,7 +42,7 @@ import cz.jirutka.rsql.parser.ast.OrNode;
 import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.eclipse.hawkbit.repository.FieldValueConverter;
+import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
@@ -301,8 +301,8 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & QueryField, T> extends Abst
         if (javaType != null && javaType.isEnum()) {
             return transformEnumValue(node, value, javaType);
         }
-        if (fieldName instanceof FieldValueConverter) {
-            return convertFieldConverterValue(fieldName, value);
+        if (fieldName == ActionFields.STATUS) {
+            return ActionFields.convertStatusValue(value);
         }
 
         if (Boolean.TYPE.equals(javaType)) {
@@ -320,15 +320,6 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & QueryField, T> extends Abst
                     "The value of the given search parameter field {" + node.getSelector()
                             + "} is not well formed. Only a boolean (true or false) value will be expected",
                     e);
-        }
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Object convertFieldConverterValue(final A fieldName, final String value) {
-        try {
-            return ((FieldValueConverter) fieldName).convertValue(fieldName, value);
-        } catch (final Exception e) {
-            throw new RSQLParameterSyntaxException(e.getMessage(), null);
         }
     }
 

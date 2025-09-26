@@ -239,12 +239,9 @@ public final class MgmtTargetMapper {
         action.getWeight().ifPresent(result::setWeight);
         result.setForceType(MgmtRestModelMapper.convertActionType(action.getActionType()));
 
-        if (action.isActive()) {
-            result.setStatus(MgmtAction.ACTION_PENDING);
-        } else {
-            result.setStatus(MgmtAction.ACTION_FINISHED);
-        }
+        result.setStatus(action.isActive() ? MgmtAction.ACTION_PENDING : MgmtAction.ACTION_FINISHED);
 
+        result.setActive(action.isActive());
         result.setDetailStatus(action.getStatus().toString().toLowerCase());
 
         action.getLastActionStatusCode().ifPresent(result::setLastStatusCode);

@@ -76,20 +76,28 @@ public class MgmtAction extends MgmtBaseEntity {
     public static final String ACTION_CANCEL = "cancel";
     /**
      * API definition for action completed.
+     *
+     * @deprecated since 0.10.0 will be removed together with status field
      */
+    @Deprecated(since = "0.10.0", forRemoval = true)
     public static final String ACTION_FINISHED = "finished";
     /**
      * API definition for action still active.
+     *
+     * @deprecated since 0.10.0 will be removed together with status field
      */
+    @Deprecated(since = "0.10.0", forRemoval = true)
     public static final String ACTION_PENDING = "pending";
 
     @Schema(description = "ID of the action", example = "7")
     private Long id;
     @Schema(description = "Type of action", example = "update")
     private String type;
-    @Schema(description = "Status of action", example = "finished")
+    @Deprecated(since = "0.10.0")
+    @Schema(description = "Status of action, use active", example = "finished", deprecated = true)
     private String status;
-
+    @Schema(description = "Status of action")
+    private boolean active;
     @Schema(description = "Detailed status of action", example = "finished")
     private String detailStatus;
     @Schema(example = "1691065903238")
