@@ -21,24 +21,21 @@ import org.eclipse.hawkbit.exception.SpServerError;
  */
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class RSQLParameterSyntaxException extends QueryException {
+public abstract class QueryException extends AbstractServerRtException {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    public RSQLParameterSyntaxException() {
-        super(SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX);
+    QueryException(final SpServerError error) {
+        super(error);
     }
 
-    public RSQLParameterSyntaxException(final String message) {
-        super(SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX, message);
+    QueryException(final SpServerError error, final String message) {
+        super(error, message);
     }
 
-    public RSQLParameterSyntaxException(final Throwable cause) {
-        super(SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX, cause);
+    QueryException(final SpServerError error, final Throwable cause) {
+        super(error, cause);
     }
 
-    public RSQLParameterSyntaxException(final String message, final Throwable cause) {
-        super(SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX, message, cause);
+    QueryException(final SpServerError error, final String message, final Throwable cause) {
+        super(error, message, cause);
     }
 }

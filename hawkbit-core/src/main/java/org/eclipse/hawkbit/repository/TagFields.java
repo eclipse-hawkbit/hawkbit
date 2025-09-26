@@ -15,7 +15,7 @@ import lombok.Getter;
  * Describing the fields of the Tag model which can be used in the REST API e.g. for sorting etc.
  */
 @Getter
-public enum TagFields implements RsqlQueryField {
+public enum TagFields implements QueryField {
 
     ID("id"),
     NAME("name"),

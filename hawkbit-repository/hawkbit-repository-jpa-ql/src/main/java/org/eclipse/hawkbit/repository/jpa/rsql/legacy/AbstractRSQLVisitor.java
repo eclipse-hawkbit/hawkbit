@@ -23,7 +23,7 @@ import cz.jirutka.rsql.parser.ast.ComparisonOperator;
 import cz.jirutka.rsql.parser.ast.RSQLOperators;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.RsqlQueryField;
+import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.ql.SpecificationBuilder;
 import org.springframework.util.ObjectUtils;
@@ -33,7 +33,7 @@ import org.springframework.util.ObjectUtils;
  */
 @Deprecated(forRemoval = true, since = "0.9.0")
 @Slf4j
-public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
+public abstract class AbstractRSQLVisitor<A extends Enum<A> & QueryField> {
 
     static final ComparisonOperator IS = new ComparisonOperator("=is=", "=eq=");
     static final ComparisonOperator NOT = new ComparisonOperator("=not=", "=ne=");
@@ -56,7 +56,7 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
 
     @SuppressWarnings("java:S1066") // java:S1066 - more readable with separate "if" statements
     protected QueryPath getQueryPath(final ComparisonNode node) {
-        final int firstSeparatorIndex = node.getSelector().indexOf(RsqlQueryField.SUB_ATTRIBUTE_SEPARATOR);
+        final int firstSeparatorIndex = node.getSelector().indexOf(QueryField.SUB_ATTRIBUTE_SEPARATOR);
         final String enumName = (firstSeparatorIndex == -1
                 ? node.getSelector()
                 : node.getSelector().substring(0, firstSeparatorIndex)).toUpperCase();
@@ -99,14 +99,14 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
 
     private String[] getSplit(final A enumValue, final String rsqlFieldName) {
         if (enumValue.isMap()) {
-            final String[] split = rsqlFieldName.split(RsqlQueryField.SUB_ATTRIBUTE_SPLIT_REGEX, 2);
+            final String[] split = rsqlFieldName.split(QueryField.SUB_ATTRIBUTE_SPLIT_REGEX, 2);
             if (split.length != 2 || ObjectUtils.isEmpty(split[1])) {
                 throw new RSQLParameterUnsupportedFieldException(
                         "The syntax of the given map search parameter field {" + rsqlFieldName + "} is wrong. Syntax is: <enum name>.<key name>");
             }
             return split;
         } else {
-            return rsqlFieldName.split(RsqlQueryField.SUB_ATTRIBUTE_SPLIT_REGEX);
+            return rsqlFieldName.split(QueryField.SUB_ATTRIBUTE_SPLIT_REGEX);
         }
     }
 
@@ -123,7 +123,7 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
         }
 
         for (final String attribute : subEntityAttributes) {
-            final String[] graph = attribute.split(RsqlQueryField.SUB_ATTRIBUTE_SPLIT_REGEX);
+            final String[] graph = attribute.split(QueryField.SUB_ATTRIBUTE_SPLIT_REGEX);
             for (final String subAttribute : graph) {
                 if (subAttribute.equalsIgnoreCase(propertyField)) {
                     return true;
@@ -158,7 +158,7 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
                 .filter(enumField -> enumField.getSubEntityAttributes().isEmpty()).map(enumField -> {
                     final String enumFieldName = enumField.name().toLowerCase();
                     if (enumField.isMap()) {
-                        return enumFieldName + RsqlQueryField.SUB_ATTRIBUTE_SEPARATOR + "keyName";
+                        return enumFieldName + QueryField.SUB_ATTRIBUTE_SEPARATOR + "keyName";
                     } else {
                         return enumFieldName;
                     }
@@ -167,7 +167,7 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
                 .filter(enumField -> !enumField.getSubEntityAttributes().isEmpty()).flatMap(enumField -> {
                     final List<String> subEntity = enumField
                             .getSubEntityAttributes().stream().map(fieldName -> enumField.name().toLowerCase()
-                                    + RsqlQueryField.SUB_ATTRIBUTE_SEPARATOR + fieldName)
+                                    + QueryField.SUB_ATTRIBUTE_SEPARATOR + fieldName)
                             .toList();
 
                     return subEntity.stream();

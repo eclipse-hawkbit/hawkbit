@@ -18,7 +18,7 @@ import lombok.Getter;
  * Describing the fields of the Target model which can be used in the REST API e.g. for sorting etc.
  */
 @Getter
-public enum TargetFilterQueryFields implements RsqlQueryField {
+public enum TargetFilterQueryFields implements QueryField {
 
     ID("id"),
     NAME("name"),

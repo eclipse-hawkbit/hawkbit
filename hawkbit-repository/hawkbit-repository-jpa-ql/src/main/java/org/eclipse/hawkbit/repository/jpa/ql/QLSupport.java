@@ -7,23 +7,26 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.rsql;
+package org.eclipse.hawkbit.repository.jpa.ql;
+
+import java.util.Objects;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 
-import cz.jirutka.rsql.parser.RSQLParserException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.text.StrLookup;
-import org.eclipse.hawkbit.repository.RsqlQueryField;
+import org.eclipse.hawkbit.repository.QueryField;
+import org.eclipse.hawkbit.repository.exception.QueryException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.jpa.ql.SpecificationBuilder;
+import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParser;
 import org.eclipse.hawkbit.repository.jpa.rsql.legacy.SpecificationBuilderLegacy;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
@@ -69,20 +72,20 @@ import org.springframework.orm.jpa.vendor.Database;
 @Slf4j
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class RsqlUtility {
+public class QLSupport {
 
-    private static final RsqlUtility SINGLETON = new RsqlUtility();
+    private static final QLSupport SINGLETON = new QLSupport();
 
-    public enum RsqlToSpecBuilder {
+    public enum SpecBuilder {
         LEGACY_G1, // legacy RSQL visitor
         LEGACY_G2, // G2 RSQL visitor
-        G3 // G3 RSQL visitor - still experimental / yet default
+        G3 // G3 specification builder - still experimental / yet default
     }
 
     /**
-     * If RSQL comparison operators shall ignore the case. If ignore case is <code>true</code> "x == ax" will match "x == aX"
+     * If QL comparison operators shall ignore the case. If ignore case is <code>true</code> "x == ax" will match "x == aX"
      */
-    @Value("${hawkbit.rsql.ignore-case:true}")
+    @Value("${hawkbit.ql.ignore-case:true}")
     private boolean ignoreCase;
     /**
      * Declares if the database is case-insensitive, by default assumes <code>false</code>. In case it is case-sensitive and,
@@ -100,8 +103,10 @@ public class RsqlUtility {
     @Setter // for tests only
     @Deprecated(forRemoval = true, since = "0.6.0")
     @Value("${hawkbit.rsql.rsql-to-spec-builder:G3}") //
-    private RsqlToSpecBuilder rsqlToSpecBuilder;
+    private SpecBuilder specBuilder;
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private QueryParser parser;
     private VirtualPropertyReplacer virtualPropertyReplacer;
     private Database database;
     private EntityManager entityManager;
@@ -109,8 +114,13 @@ public class RsqlUtility {
     /**
      * @return The holder singleton instance.
      */
-    public static RsqlUtility getInstance() {
+    public static QLSupport getInstance() {
         return SINGLETON;
+    }
+
+    @Autowired
+    void setQueryParser(final QueryParser parser) {
+        this.parser = parser;
     }
 
     @Autowired(required = false)
@@ -132,37 +142,71 @@ public class RsqlUtility {
      * Builds a JPA {@link Specification} which corresponds with the given RSQL query. The specification can be used to filter for JPA entities
      * with the given RSQL query.
      *
-     * @param rsql the rsql query to be parsed
-     * @param rsqlQueryFieldType the enum class type which implements the {@link RsqlQueryField}
+     * @param query the rsql query to be parsed
+     * @param queryFieldType the enum class type which implements the {@link QueryField}
      * @return a specification which can be used with JPA
      * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
      *         given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
-    public <A extends Enum<A> & RsqlQueryField, T> Specification<T> buildRsqlSpecification(
-            final String rsql, final Class<A> rsqlQueryFieldType) {
-        if (rsqlToSpecBuilder == RsqlToSpecBuilder.G3) {
-            return new SpecificationBuilder<T>(virtualPropertyReplacer, !caseInsensitiveDB && ignoreCase, database)
-                    .specification(RsqlParser.parse(caseInsensitiveDB || ignoreCase ? rsql.toLowerCase() : rsql, rsqlQueryFieldType));
+    public <A extends Enum<A> & QueryField, T> Specification<T> buildSpec(
+            final String query, final Class<A> queryFieldType) {
+        if (specBuilder == SpecBuilder.G3) {
+            return new SpecificationBuilder<T>(!caseInsensitiveDB && ignoreCase, database)
+                    .specification(parser.parse(caseInsensitiveDB || ignoreCase ? query.toLowerCase() : query, queryFieldType));
         } else {
-            return new SpecificationBuilderLegacy<A, T>(rsqlQueryFieldType, virtualPropertyReplacer, database).specification(rsql);
+            return new SpecificationBuilderLegacy<A, T>(queryFieldType, virtualPropertyReplacer, database).specification(query);
         }
     }
 
     /**
-     * Validates the RSQL string
+     * Validates the query string
      *
-     * @param rsql RSQL string to validate
-     * @param rsqlQueryFieldType the enum class type which implements the {@link RsqlQueryField}
+     * @param query query string to validate
+     * @param queryFieldType the enum class type which implements the {@link QueryField}
      * @param jpaType the JPA entity type to validate against
-     * @throws RSQLParserException if RSQL syntax is invalid
-     * @throws RSQLParameterUnsupportedFieldException if RSQL key is not allowed
+     * @throws QueryException if query is invalid
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public <A extends Enum<A> & RsqlQueryField> void validateRsqlFor(
-            final String rsql, final Class<A> rsqlQueryFieldType, final Class<?> jpaType) {
+    public <A extends Enum<A> & QueryField> void validateQuery(final String query, final Class<A> queryFieldType, final Class<?> jpaType) {
         final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         final CriteriaQuery<?> criteriaQuery = criteriaBuilder.createQuery(jpaType);
-        buildRsqlSpecification(rsql, rsqlQueryFieldType).toPredicate(criteriaQuery.from((Class) jpaType), criteriaQuery, criteriaBuilder);
+        buildSpec(query, queryFieldType).toPredicate(criteriaQuery.from((Class) jpaType), criteriaQuery, criteriaBuilder);
+    }
+
+    public interface QueryParser {
+
+        <T extends Enum<T> & QueryField> Node parse(final String query, final Class<T> queryFieldType) throws QueryException;
+    }
+
+    public static class DefaultQueryParser implements QueryParser {
+
+        private VirtualPropertyReplacer virtualPropertyReplacer;
+
+        @Autowired(required = false)
+        void setVirtualPropertyReplacer(final VirtualPropertyReplacer virtualPropertyReplacer) {
+            this.virtualPropertyReplacer = virtualPropertyReplacer;
+        }
+
+        @Override
+        public <T extends Enum<T> & QueryField> Node parse(final String query, final Class<T> queryFieldType) throws QueryException {
+            return RsqlParser.parse(query, queryFieldType).map(this::map);
+        }
+
+        protected Comparison map(final Comparison comparison) {
+            final String key = mapKey(comparison.getKey(), comparison).toString();
+            final Object value = mapValue(comparison.getValue(), comparison);
+            return key.equals(comparison.getKey()) && Objects.equals(value, comparison.getValue())
+                    ? comparison : Comparison.builder().key(key).op(comparison.getOp()).value(value).build();
+        }
+
+        // just extension points for subclasses
+        protected Object mapKey(final String key, final Comparison comparison) {
+            return key;
+        }
+
+        protected Object mapValue(final Object value, final Comparison comparison) {
+            return value instanceof String strValue ? virtualPropertyReplacer.replace(strValue) : value;
+        }
     }
 }

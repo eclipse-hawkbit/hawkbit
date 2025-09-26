@@ -18,7 +18,7 @@ import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
 import org.junit.jupiter.api.Test;
 
-class RsqlQueryFieldsTest {
+class QueryFieldsTest {
 
     /**
      * Verifies that fields classes are correctly implemented
@@ -28,11 +28,11 @@ class RsqlQueryFieldsTest {
     void repositoryManagementMethodsArePreAuthorizedAnnotated() {
         final String packageName = getClass().getPackage().getName();
         try (final ScanResult scanResult = new ClassGraph().acceptPackages(packageName).scan()) {
-            final List<? extends Class<? extends RsqlQueryField>> matchingClasses = scanResult.getAllClasses()
+            final List<? extends Class<? extends QueryField>> matchingClasses = scanResult.getAllClasses()
                     .stream()
-                    .filter(classInPackage -> classInPackage.implementsInterface(RsqlQueryField.class))
+                    .filter(classInPackage -> classInPackage.implementsInterface(QueryField.class))
                     .map(ClassInfo::loadClass)
-                    .map(clazz -> (Class<? extends RsqlQueryField>) clazz)
+                    .map(clazz -> (Class<? extends QueryField>) clazz)
                     .toList();
             assertThat(matchingClasses).isNotEmpty();
             matchingClasses.forEach(providerClass -> assertThat(providerClass.getEnumConstants()).isNotEmpty());

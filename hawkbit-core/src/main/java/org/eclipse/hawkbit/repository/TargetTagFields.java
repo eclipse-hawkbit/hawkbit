@@ -16,7 +16,7 @@ import lombok.Getter;
  * Additionally, here were added fields for Target in order filtering over target fields also.
  */
 @Getter
-public enum TargetTagFields implements RsqlQueryField {
+public enum TargetTagFields implements QueryField {
 
     ID(TagFields.ID.getJpaEntityFieldName()),
     NAME(TagFields.NAME.getJpaEntityFieldName()),

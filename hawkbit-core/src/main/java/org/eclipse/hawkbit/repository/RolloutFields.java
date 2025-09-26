@@ -17,7 +17,7 @@ import lombok.Getter;
  * Describing the fields of the Rollout model which can be used in the REST API e.g. for sorting etc.
  */
 @Getter
-public enum RolloutFields implements RsqlQueryField {
+public enum RolloutFields implements QueryField {
 
     ID("id"),
     NAME("name"),

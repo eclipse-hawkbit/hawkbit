@@ -16,7 +16,7 @@ import lombok.Getter;
  * the REST API e.g. for sorting etc.
  */
 @Getter
-public enum DistributionSetTypeFields implements RsqlQueryField {
+public enum DistributionSetTypeFields implements QueryField {
 
     ID("id"),
     KEY("key"),

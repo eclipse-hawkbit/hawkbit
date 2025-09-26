@@ -9,8 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
-import static org.eclipse.hawkbit.repository.RsqlQueryField.SUB_ATTRIBUTE_SEPARATOR;
-import static org.eclipse.hawkbit.repository.RsqlQueryField.SUB_ATTRIBUTE_SPLIT_REGEX;
+import static org.eclipse.hawkbit.repository.QueryField.SUB_ATTRIBUTE_SEPARATOR;
+import static org.eclipse.hawkbit.repository.QueryField.SUB_ATTRIBUTE_SPLIT_REGEX;
 import static org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison.Operator.EQ;
 import static org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison.Operator.GT;
 import static org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison.Operator.GTE;
@@ -42,7 +42,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.FieldValueConverter;
-import org.eclipse.hawkbit.repository.RsqlQueryField;
+import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.ql.Node;
@@ -82,8 +82,8 @@ public class RsqlParser {
         return parse(rsql, (Function<String, Key>) null);
     }
 
-    public static <T extends Enum<T> & RsqlQueryField> Node parse(final String rsql, final Class<T> rsqlQueryFieldType) {
-        return parse(rsql, rsqlQueryFieldType == null ? null : key -> resolveKey(key, rsqlQueryFieldType));
+    public static <T extends Enum<T> & QueryField> Node parse(final String rsql, final Class<T> queryFieldType) {
+        return parse(rsql, queryFieldType == null ? null : key -> resolveKey(key, queryFieldType));
     }
 
     private static Node parse(final String rsql, final Function<String, Key> keyResolver) {
@@ -97,7 +97,7 @@ public class RsqlParser {
     }
 
     @SuppressWarnings("java:S3776") // java:S3776 - group in single method for easier read of whole logic
-    private static <T extends Enum<T> & RsqlQueryField> Key resolveKey(final String key, final Class<T> rsqlQueryFieldType) {
+    private static <T extends Enum<T> & QueryField> Key resolveKey(final String key, final Class<T> rsqlQueryFieldType) {
         final int firstSeparatorIndex = key.indexOf(SUB_ATTRIBUTE_SEPARATOR);
         final String enumName = (firstSeparatorIndex == -1 ? key : key.substring(0, firstSeparatorIndex)).toUpperCase();
         log.debug("Get field identifier by name {} of enum type {}", enumName, rsqlQueryFieldType);
@@ -151,9 +151,7 @@ public class RsqlParser {
             }
         }
 
-        return new
-
-                Key(attribute, RsqlVisitor.valueConverter(enumValue));
+        return new Key(attribute, RsqlVisitor.valueConverter(enumValue));
     }
 
     private record Key(String path, UnaryOperator<Object> converter) {}

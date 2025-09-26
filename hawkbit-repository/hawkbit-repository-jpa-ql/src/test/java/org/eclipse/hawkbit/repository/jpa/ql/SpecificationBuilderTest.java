@@ -10,9 +10,9 @@
 package org.eclipse.hawkbit.repository.jpa.ql;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility.RsqlToSpecBuilder.G3;
-import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility.RsqlToSpecBuilder.LEGACY_G1;
-import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility.RsqlToSpecBuilder.LEGACY_G2;
+import static org.eclipse.hawkbit.repository.jpa.ql.QLSupport.SpecBuilder.G3;
+import static org.eclipse.hawkbit.repository.jpa.ql.QLSupport.SpecBuilder.LEGACY_G1;
+import static org.eclipse.hawkbit.repository.jpa.ql.QLSupport.SpecBuilder.LEGACY_G2;
 
 import java.util.List;
 import java.util.Map;
@@ -22,9 +22,9 @@ import java.util.stream.StreamSupport;
 import jakarta.persistence.EntityManager;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.SpecBuilder;
 import org.eclipse.hawkbit.repository.jpa.ql.utils.HawkbitQlToSql;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParser;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlUtility;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -51,7 +51,7 @@ class SpecificationBuilderTest {
     @Autowired
     private EntityManager entityManager;
 
-    private final SpecificationBuilder<Root> builder = new SpecificationBuilder<>(null, false, Database.H2);
+    private final SpecificationBuilder<Root> builder = new SpecificationBuilder<>(false, Database.H2);
 
     @Test
     void singularStringAttribute() {
@@ -573,8 +573,8 @@ class SpecificationBuilderTest {
         return builder.specification(RsqlParser.parse(rsql));
     }
 
-    private static RsqlUtility.RsqlToSpecBuilder getRsqlToSpecBuilder() {
-        return RsqlUtility.getInstance().getRsqlToSpecBuilder();
+    private static SpecBuilder getRsqlToSpecBuilder() {
+        return QLSupport.getInstance().getSpecBuilder();
     }
 
     @SpringBootConfiguration
