@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryption;
 import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryptionSecretsStorage;
 import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryptionService;
+import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
 import org.eclipse.hawkbit.repository.QueryField;
@@ -45,6 +46,7 @@ import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
@@ -69,12 +71,13 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExe
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison;
-import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.DefaultQueryParser;
+import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
+import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.NodeTransformer;
 import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.QueryParser;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutTargetGroupRepository;
@@ -90,7 +93,7 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupEvaluati
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupSuccessCondition;
-import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParser;
 import org.eclipse.hawkbit.repository.jpa.utils.ExceptionMapper;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -109,6 +112,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -525,16 +529,54 @@ public class JpaRepositoryConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    QueryParser queryParser(final Optional<VirtualPropertyResolver> virtualPropertyResolver) {
-        return virtualPropertyResolver.<QueryParser>map(resolver -> new DefaultQueryParser() {
+    @ConditionalOnBean(VirtualPropertyResolver.class)
+    public NodeTransformer virtualPropertyReplacerTransformer(final VirtualPropertyResolver resolver) {
+        return new NodeTransformer.Abstract() {
 
             @Override
-            protected <T extends Enum<T> & QueryField> Object mapValue(
+            protected <T extends Enum<T> & QueryField> Object transformValueElement(
                     final Object value, final Comparison comparison, final Class<T> queryFieldType) {
-                return super.mapValue(value instanceof String strValue ? resolver.replace(strValue) : value, comparison, queryFieldType);
+                return value instanceof String strValue ? resolver.replace(strValue) : value;
             }
-        }).orElseGet(DefaultQueryParser::new);
+        };
+    }
+
+    /**
+     * @deprecated since 0.10.0, will be removed in future releases. Use "active" for querying active status instead of "status".
+     */
+    @Deprecated(since = "0.10.0", forRemoval = true)
+    @Bean
+    public NodeTransformer actionStatusTransformer() {
+        return new NodeTransformer.Abstract() {
+
+            // just extension points for subclasses
+            protected <T extends Enum<T> & QueryField> Object transformValueElement(
+                    final Object value, final Comparison comparison, final Class<T> queryFieldType) {
+                return queryFieldType == (Class<?>) ActionFields.class && "active".equalsIgnoreCase(comparison.getKey())
+                        ? mapActionStatus(value)
+                        : value;
+            }
+
+            private static Object mapActionStatus(final Object value) {
+                final String strValue = String.valueOf(value);
+                if ("true".equalsIgnoreCase(strValue) || "false".equalsIgnoreCase(strValue)) {
+                    return value;
+                } else {
+                    // handle custom action fields status
+                    try {
+                        return ActionFields.convertStatusValue(strValue);
+                    } catch (final IllegalArgumentException e) {
+                        throw new RSQLParameterUnsupportedFieldException(e.getMessage());
+                    }
+                }
+            }
+        };
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    QueryParser queryParser() {
+        return RsqlParser::parse;
     }
 
     /**

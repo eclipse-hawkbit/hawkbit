@@ -39,16 +39,16 @@ public interface Node {
         return op(this, Logical.Operator.OR, other);
     }
 
-    // utility method that maps this node with a mapper that could modify comparisons - e.g. change keys, values, operators, or whatever
+    // utility method that maps this node with a transformer that could modify comparisons - e.g. change keys, values, operators, or whatever
     // if there are no changes the same instance is returned
-    default Node map(final UnaryOperator<Comparison> mapper) {
+    default Node transform(final UnaryOperator<Comparison> transformer) {
         if (this instanceof Comparison comparison) {
-            return mapper.apply(comparison);
+            return transformer.apply(comparison);
         } else {
             final List<Node> mappedChildren = new ArrayList<>();
             boolean modified = false;
             for (final Node child : ((Logical) this).getChildren()) {
-                final Node mapped = child.map(mapper);
+                final Node mapped = child.transform(transformer);
                 mappedChildren.add(mapped);
                 if (!mapped.equals(child)) {
                     modified = true;

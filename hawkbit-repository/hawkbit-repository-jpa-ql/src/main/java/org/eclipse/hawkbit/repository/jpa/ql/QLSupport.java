@@ -20,21 +20,24 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.text.StrLookup;
-import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.exception.QueryException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParser;
 import org.eclipse.hawkbit.repository.jpa.rsql.legacy.SpecificationBuilderLegacy;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 
@@ -75,7 +78,7 @@ import org.springframework.orm.jpa.vendor.Database;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @SuppressWarnings("java:S6548") // singleton holder ensures static access to spring resources in some places
-public class QLSupport {
+public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
 
     private static final QLSupport SINGLETON = new QLSupport();
 
@@ -110,6 +113,7 @@ public class QLSupport {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private QueryParser parser;
+    private List<NodeTransformer> nodeTransformers;
     private Database database;
     private EntityManager entityManager;
     private VirtualPropertyResolver virtualPropertyResolver;
@@ -124,6 +128,15 @@ public class QLSupport {
     @Autowired
     void setQueryParser(final QueryParser parser) {
         this.parser = parser;
+    }
+
+    @Override
+    public void onApplicationEvent(@NonNull final ContextRefreshedEvent event) {
+        nodeTransformers = event.getApplicationContext().getBeansOfType(NodeTransformer.class).values().stream().sorted((b1, b2) -> {
+            final Order o1 = b1.getClass().getAnnotation(Order.class);
+            final Order o2 = b2.getClass().getAnnotation(Order.class);
+            return Integer.compare(o1 != null ? o1.value() : Ordered.LOWEST_PRECEDENCE, o2 != null ? o2.value() : Ordered.LOWEST_PRECEDENCE);
+        }).toList();
     }
 
     @Autowired
@@ -155,7 +168,7 @@ public class QLSupport {
     public <A extends Enum<A> & QueryField, T> Specification<T> buildSpec(final String query, final Class<A> queryFieldType) {
         if (specBuilder == SpecBuilder.G3) {
             return new SpecificationBuilder<T>(!caseInsensitiveDB && ignoreCase, database)
-                    .specification(parser.parse(caseInsensitiveDB || ignoreCase ? query.toLowerCase() : query, queryFieldType));
+                    .specification(parseAndTransform(query, queryFieldType, caseInsensitiveDB || ignoreCase));
         } else {
             return new SpecificationBuilderLegacy<A, T>(queryFieldType, virtualPropertyResolver, database).specification(query);
         }
@@ -164,7 +177,7 @@ public class QLSupport {
     @SuppressWarnings({ "java:S1117" }) // it is again ignoreCase
     public <A extends Enum<A> & QueryField> EntityMatcher entityMatcher(final String query, final Class<A> queryFieldType) {
         final boolean ignoreCase = caseInsensitiveDB || this.ignoreCase; // sync with DB and case sensitivity requirements
-        return EntityMatcher.of(parser.parse(ignoreCase ? query.toLowerCase() : query, queryFieldType), ignoreCase);
+        return EntityMatcher.of(parseAndTransform(query, queryFieldType, ignoreCase), ignoreCase);
     }
 
     /**
@@ -182,68 +195,81 @@ public class QLSupport {
         buildSpec(query, queryFieldType).toPredicate(criteriaQuery.from((Class) jpaType), criteriaQuery, criteriaBuilder);
     }
 
+    private <A extends Enum<A> & QueryField> Node parseAndTransform(
+            final String query, final Class<A> queryFieldType, final boolean ignoreCase) {
+        Node node = parser.parse(ignoreCase ? query.toLowerCase() : query, queryFieldType);
+        for (final NodeTransformer transformer : nodeTransformers) {
+            node = transformer.transform(node, queryFieldType);
+        }
+        return node;
+    }
+
+    /**
+     * By registering a custom {@link QueryParser} (as a {@link org.springframework.context.annotation.Bean}) the entire parsing of the queries
+     * could be replaced / customized, e.g. the default query language (RSQL) could be replaced with a custom.
+     */
     public interface QueryParser {
 
         <T extends Enum<T> & QueryField> Node parse(final String query, final Class<T> queryFieldType) throws QueryException;
     }
 
-    public static class DefaultQueryParser implements QueryParser {
+    /**
+     * By registering a custom {@link NodeTransformer} (as a {@link org.springframework.context.annotation.Bean}) the nodes could be
+     * modified after parsing, e.g. to add implicit nodes or to modify values.
+     * <p/>
+     * By default, all transformers are with {@link Ordered#LOWEST_PRECEDENCE} order. So, if you need a specific order use the {@link Order}
+     * annotation of their class (not on the bean registering methods).
+     */
+    public interface NodeTransformer {
 
-        @Override
-        public <T extends Enum<T> & QueryField> Node parse(final String query, final Class<T> queryFieldType) throws QueryException {
-            return RsqlParser.parse(query, queryFieldType).map(comparison -> map(comparison, queryFieldType));
-        }
+        <T extends Enum<T> & QueryField> Node transform(Node node, final Class<T> queryFieldType);
 
-        protected <T extends Enum<T> & QueryField> Comparison map(final Comparison comparison, final Class<T> queryFieldType) {
-            final String key = mapKey(comparison.getKey(), comparison, queryFieldType).toString();
-            final Object value = mapValue(comparison.getValue(), comparison, queryFieldType);
-            return key.equals(comparison.getKey()) && Objects.equals(value, comparison.getValue())
-                    ? comparison : Comparison.builder().key(key).op(comparison.getOp()).value(value).build();
-        }
+        /**
+         * Base implementation that does no real transformation but allows extenders to easily modify keys and / or values by simply extending
+         * the extension points.
+         */
+        abstract class Abstract implements NodeTransformer {
 
-        // just extension points for subclasses
-        protected <T extends Enum<T> & QueryField> Object mapKey(final String key, final Comparison comparison, final Class<T> queryFieldType) {
-            return key;
-        }
-
-        // internal, override only if you really want to replace whole lists
-        protected <T extends Enum<T> & QueryField> Object mapValue(
-                final Object value, final Comparison comparison, final Class<T> queryFieldType) {
-            if (value instanceof List<?> list) {
-                final List<Object> mappedList = new ArrayList<>();
-                boolean modified = false;
-                for (final Object e : list) {
-                    final Object mapped = mapSimpleValue(e, comparison, queryFieldType);
-                    if (!Objects.equals(mapped, value)) {
-                        modified = true;
-                    }
-                    mappedList.add(mapped);
-                }
-                return modified ? mappedList : list;
-            } else {
-                return mapSimpleValue(value, comparison, queryFieldType);
+            public <T extends Enum<T> & QueryField> Node transform(final Node node, final Class<T> queryFieldType) {
+                return node.transform(comparison -> transform(comparison, queryFieldType));
             }
-        }
 
-        // just extension points for subclasses
-        protected <T extends Enum<T> & QueryField> Object mapSimpleValue(
-                final Object value, final Comparison comparison, final Class<T> queryFieldType) {
-            return queryFieldType == (Class<?>) ActionFields.class && "active".equalsIgnoreCase(comparison.getKey())
-                    ? mapActionStatus(value)
-                    : value;
-        }
+            protected <T extends Enum<T> & QueryField> Comparison transform(final Comparison comparison, final Class<T> queryFieldType) {
+                final String key = transformKey(comparison.getKey(), comparison, queryFieldType).toString();
+                final Object value = transformValue(comparison.getValue(), comparison, queryFieldType);
+                return key.equals(comparison.getKey()) && Objects.equals(value, comparison.getValue())
+                        ? comparison : Comparison.builder().key(key).op(comparison.getOp()).value(value).build();
+            }
 
-        private static Object mapActionStatus(final Object value) {
-            final String strValue = String.valueOf(value);
-            if ("true".equalsIgnoreCase(strValue) || "false".equalsIgnoreCase(strValue)) {
-                return value;
-            } else {
-                // handle custom action fields status
-                try {
-                    return ActionFields.convertStatusValue(strValue);
-                } catch (final IllegalArgumentException e) {
-                    throw new RSQLParameterUnsupportedFieldException(e.getMessage());
+            // just extension points for subclasses
+            protected <T extends Enum<T> & QueryField> Object transformKey(
+                    final String key, final Comparison comparison, final Class<T> queryFieldType) {
+                return key;
+            }
+
+            // internal, override only if you really want to replace whole lists
+            protected <T extends Enum<T> & QueryField> Object transformValue(
+                    final Object value, final Comparison comparison, final Class<T> queryFieldType) {
+                if (value instanceof List<?> list) {
+                    final List<Object> mappedList = new ArrayList<>();
+                    boolean modified = false;
+                    for (final Object e : list) {
+                        final Object mapped = transformValueElement(e, comparison, queryFieldType);
+                        if (!Objects.equals(mapped, value)) {
+                            modified = true;
+                        }
+                        mappedList.add(mapped);
+                    }
+                    return modified ? mappedList : list;
+                } else {
+                    return transformValueElement(value, comparison, queryFieldType);
                 }
+            }
+
+            // just extension points for subclasses
+            protected <T extends Enum<T> & QueryField> Object transformValueElement(
+                    final Object value, final Comparison comparison, final Class<T> queryFieldType) {
+                return value;
             }
         }
     }
