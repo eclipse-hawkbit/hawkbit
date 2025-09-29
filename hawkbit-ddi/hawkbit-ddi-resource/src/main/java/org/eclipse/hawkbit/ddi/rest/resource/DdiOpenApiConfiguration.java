@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(value = OpenApi.HAWKBIT_SERVER_OPENAPI_ENABLED, havingValue = "true", matchIfMissing = true)
 public class DdiOpenApiConfiguration {
 
-    private static final String DDI_TOKEN_SEC_SCHEME_NAME = "Token";
+    private static final String DDI_TOKEN_SEC_SCHEME_NAME = "Authorization";
 
     @Bean
     @ConditionalOnProperty(
