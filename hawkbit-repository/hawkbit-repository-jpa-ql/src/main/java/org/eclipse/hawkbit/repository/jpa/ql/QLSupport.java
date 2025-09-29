@@ -161,8 +161,10 @@ public class QLSupport {
         }
     }
 
+    @SuppressWarnings({ "java:S1117" }) // it is again ignoreCase
     public <A extends Enum<A> & QueryField> EntityMatcher entityMatcher(final String query, final Class<A> queryFieldType) {
-        return EntityMatcher.of(parser.parse(caseInsensitiveDB || ignoreCase ? query.toLowerCase() : query, queryFieldType));
+        final boolean ignoreCase = caseInsensitiveDB || this.ignoreCase; // sync with DB and case sensitivity requirements
+        return EntityMatcher.of(parser.parse(ignoreCase ? query.toLowerCase() : query, queryFieldType), ignoreCase);
     }
 
     /**

@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -59,6 +60,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
@@ -147,7 +149,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
      * Ensures that server returns a not found response in case of empty controller ID.
      */
     @Test
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void rootRsWithoutId() throws Exception {
         mvc.perform(get("/controller/v1/"))
                 .andDo(MockMvcResultPrinter.print())
@@ -218,12 +220,19 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Test
     @WithUser(principal = "knownpricipal")
     @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TargetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 1), // assign to group
+            @Expect(type = TargetPollEvent.class, count = 2),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1),
             @Expect(type = TenantConfigurationDeletedEvent.class, count = 1) })
     void pollWithModifiedWithOverridesGlobalPollingTime() throws Exception {
-        withPollingTime("00:02:00, controllerid == 4711 -> 00:01:00", () -> callAs(
+        SecurityContextSwitch.callAsPrivileged(() -> {
+            final Target target = testdataFactory.createTarget("not4711");
+            targetManagement.assignTargetsWithGroup("Europe", List.of(target.getControllerId()));
+            return null;
+        });
+
+        withPollingTime("00:02:00, controllerid == 4711 -> 00:01:00, group == 'Europe' -> 00:05:05", () -> callAs(
                 withUser("controller", CONTROLLER_ROLE_ANONYMOUS),
                 () -> {
                     mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), 4711))
@@ -231,6 +240,12 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                             .andExpect(status().isOk())
                             .andExpect(content().contentType(MediaTypes.HAL_JSON))
                             .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")));
+
+                    mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), "not4711"))
+                            .andDo(MockMvcResultPrinter.print())
+                            .andExpect(status().isOk())
+                            .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                            .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:05:05")));
                     return null;
                 }));
     }

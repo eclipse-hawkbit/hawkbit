@@ -38,13 +38,19 @@ import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison.Operator;
 public class EntityMatcher {
 
     private final Node root;
+    private final boolean ignoreCase;
 
-    private EntityMatcher(final Node root) {
+    private EntityMatcher(final Node root, final boolean ignoreCase) {
         this.root = root;
+        this.ignoreCase = ignoreCase;
     }
 
     public static EntityMatcher of(final Node root) {
-        return new EntityMatcher(root);
+        return of(root, false);
+    }
+
+    public static EntityMatcher of(final Node root, final boolean ignoreCase) {
+        return new EntityMatcher(root, ignoreCase);
     }
 
     public <T> boolean match(final T t) {
@@ -52,7 +58,7 @@ public class EntityMatcher {
     }
 
     @SuppressWarnings({"java:S3776", "java:S3358", "java:S1125", "java:S6541"}) // better readable this way
-    private static <T> boolean match(final T t, final Node node) {
+    private <T> boolean match(final T t, final Node node) {
         if (node instanceof Node.Comparison comparison) {
             final String[] split = comparison.getKey().split("\\.", 2);
             try {
@@ -65,7 +71,7 @@ public class EntityMatcher {
                         // TODO / recheck - when missing entity shall it be included or not in != or =out=? - now it's not
                         return false;
                     }
-                    return compare(
+                    return compareIgnoreCaseAware(
                             fieldValue == null ? null : ((Map<?, ?>) fieldValue).get(split[1]),
                             op,
                             map(
@@ -76,14 +82,14 @@ public class EntityMatcher {
                     final BiPredicate<Object, Operator> compare;
                     if (split.length == 1) {
                         value = map(comparison.getValue(), getReturnType(fieldGetter));
-                        compare = (e, operator) -> compare(e, operator, value);
+                        compare = (e, operator) -> compareIgnoreCaseAware(e, operator, value);
                     } else {
                         final Getter valueGetter = getGetter(
                                 (Class<?>) ((ParameterizedType) fieldGetter.type()).getActualTypeArguments()[0], split[1]);
                         value = map(comparison.getValue(), getReturnType(valueGetter));
                         compare = (e, operator) -> {
                             try {
-                                return compare(map(e == null ? null : valueGetter.get(e), getReturnType(valueGetter)), operator, value);
+                                return compareIgnoreCaseAware(map(e == null ? null : valueGetter.get(e), getReturnType(valueGetter)), operator, value);
                             } catch (final IllegalAccessException | InvocationTargetException ex) {
                                 throw new IllegalArgumentException(ex);
                             }
@@ -100,7 +106,7 @@ public class EntityMatcher {
                     };
                 } else {
                     if (split.length == 1) {
-                        return compare(fieldValue, op, map(comparison.getValue(), getReturnType(fieldGetter)));
+                        return compareIgnoreCaseAware(fieldValue, op, map(comparison.getValue(), getReturnType(fieldGetter)));
                     } else {
                         if (split[1].contains(".")) {
                             // nested field access
@@ -108,13 +114,13 @@ public class EntityMatcher {
                             final Getter nestedFieldGetter = getGetter(getReturnType(fieldGetter), nestedSplit[0]);
                             final Getter valueGetter = getGetter(getReturnType(nestedFieldGetter), nestedSplit[1]);
                             final Object nestedFieldValue = fieldValue == null ? null : nestedFieldGetter.get(fieldValue);
-                            return compare(
+                            return compareIgnoreCaseAware(
                                     nestedFieldValue == null ? null : valueGetter.get(nestedFieldValue),
                                     op,
                                     map(comparison.getValue(), getReturnType(valueGetter)));
                         } else {
                             final Getter valueGetter = getGetter(getReturnType(fieldGetter), split[1]);
-                            return compare(
+                            return compareIgnoreCaseAware(
                                     fieldValue == null ? null : valueGetter.get(fieldValue),
                                     op,
                                     map(comparison.getValue(), getReturnType(valueGetter)));
@@ -134,7 +140,24 @@ public class EntityMatcher {
         }
     }
 
-    @SuppressWarnings("java:S3011") // java:S3011 uses reflection to private members antway
+    private boolean compareIgnoreCaseAware(final Object entityValue, final Operator op, final Object comparisonValue) {
+        return compare(ignoreCase(entityValue), op, ignoreCase(comparisonValue));
+    }
+    private Object ignoreCase(final Object o) {
+        if (!ignoreCase || o == null) {
+            return o;
+        }
+        // if here - ignoreCase in true and we have non-null value
+        if (o instanceof String str) {
+            return str.toLowerCase();
+        } else if (o instanceof Collection<?> collection) {
+            return collection.stream().map(this::ignoreCase).toList();
+        } else {
+            return o;
+        }
+    }
+
+    @SuppressWarnings("java:S3011") // java:S3011 uses reflection to private members anyway
     private static <T> Getter getGetter(final Class<T> t, final String fieldName) throws NoSuchMethodException {
         final String[] parts = fieldName.split("\\.");
         if (parts.length > 1) {
@@ -216,22 +239,22 @@ public class EntityMatcher {
         }
     }
 
-    private static boolean compare(final Object o1, final Operator op, final Object o2) {
-        if ((o1 == null || o2 == null) && // null is not comparable!
+    private static boolean compare(final Object entityValue, final Operator op, final Object comparisonValue) {
+        if ((entityValue == null || comparisonValue == null) && // null is not comparable!
                 (op == GT || op == GTE || op == LT || op == LTE)) {
             return false;
         }
         return switch (op) {
-            case EQ -> Objects.equals(o1, o2);
-            case NE -> !Objects.equals(o1, o2);
-            case GT -> compare(o1, o2) > 0;
-            case GTE -> compare(o1, o2) >= 0;
-            case LT -> compare(o1, o2) < 0;
-            case LTE -> compare(o1, o2) <= 0;
-            case IN -> in(o1, o2);
-            case NOT_IN -> !in(o1, o2);
-            case LIKE -> like(o2, o1);
-            case NOT_LIKE -> !like(o2, o1);
+            case EQ -> Objects.equals(entityValue, comparisonValue);
+            case NE -> !Objects.equals(entityValue, comparisonValue);
+            case GT -> compare(entityValue, comparisonValue) > 0;
+            case GTE -> compare(entityValue, comparisonValue) >= 0;
+            case LT -> compare(entityValue, comparisonValue) < 0;
+            case LTE -> compare(entityValue, comparisonValue) <= 0;
+            case IN -> in(entityValue, comparisonValue);
+            case NOT_IN -> !in(entityValue, comparisonValue);
+            case LIKE -> like(comparisonValue, entityValue);
+            case NOT_LIKE -> !like(comparisonValue, entityValue);
         };
     }
 
