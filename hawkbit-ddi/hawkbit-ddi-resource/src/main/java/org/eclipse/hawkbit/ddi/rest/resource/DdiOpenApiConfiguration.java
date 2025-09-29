@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(value = OpenApi.HAWKBIT_SERVER_OPENAPI_ENABLED, havingValue = "true", matchIfMissing = true)
 public class DdiOpenApiConfiguration {
 
+    private static final String DDI_TOKEN_HEADER = "Authorization";
     private static final String DDI_TOKEN_SEC_SCHEME_NAME = "Token";
 
     @Bean
@@ -46,7 +47,7 @@ public class DdiOpenApiConfiguration {
                                                 .getComponents()
                                                 .addSecuritySchemes(DDI_TOKEN_SEC_SCHEME_NAME,
                                                         new SecurityScheme()
-                                                                .name(DDI_TOKEN_SEC_SCHEME_NAME)
+                                                                .name(DDI_TOKEN_HEADER)
                                                                 .description("Format: (Target|Gateway)Token &lt;token&gt;")
                                                                 .type(SecurityScheme.Type.APIKEY)
                                                                 .in(SecurityScheme.In.HEADER))))
