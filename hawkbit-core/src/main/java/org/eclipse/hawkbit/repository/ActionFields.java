@@ -49,6 +49,9 @@ public enum ActionFields implements QueryField {
         this.subEntityAttributes = List.of(subEntityAttributes);
     }
 
+    /**
+     * @deprecated since 0.10.0 - use {@link #ACTIVE} instead of {@link #STATUS}
+     */
     @Deprecated(since = "0.10.0", forRemoval = true) // remove together with STATUS (with active meaning)
     public static Object convertStatusValue(final String value) {
         final String trimmedValue = value.trim();

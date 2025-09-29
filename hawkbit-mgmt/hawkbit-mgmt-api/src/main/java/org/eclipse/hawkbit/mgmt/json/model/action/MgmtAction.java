@@ -94,6 +94,9 @@ public class MgmtAction extends MgmtBaseEntity {
     @Schema(description = "Type of action", example = "update")
     private String type;
     @Deprecated(since = "0.10.0")
+    /**
+     * @deprecated since 0.10.0 - use {@link #active} instead of {@link #status}
+     */
     @Schema(description = "Status of action, use active", example = "finished", deprecated = true)
     private String status;
     @Schema(description = "Status of action")
