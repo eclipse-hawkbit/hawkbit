@@ -9,11 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.rsql;
 
-import java.io.Serial;
+import java.time.Duration;
 
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.commons.text.lookup.StringLookupFactory;
-import org.eclipse.hawkbit.repository.TimestampCalculator;
+import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
+import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
+import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
+import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 
 /**
  * Adds macro capabilities to RSQL expressions that are used to filter for targets.
@@ -35,9 +39,6 @@ import org.eclipse.hawkbit.repository.TimestampCalculator;
  */
 public class VirtualPropertyResolver {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
-
     private static final StringSubstitutor STRING_SUBSTITUTOR = new StringSubstitutor(
             StringLookupFactory.builder().get().functionStringLookup(VirtualPropertyResolver::lookup),
             StringSubstitutor.DEFAULT_PREFIX, StringSubstitutor.DEFAULT_SUFFIX, StringSubstitutor.DEFAULT_ESCAPE);
@@ -50,9 +51,39 @@ public class VirtualPropertyResolver {
         if ("now_ts".equalsIgnoreCase(rhs)) {
             return String.valueOf(System.currentTimeMillis());
         } else if ("overdue_ts".equalsIgnoreCase(rhs)) {
-            return String.valueOf(TimestampCalculator.calculateOverdueTimestamp());
+            return String.valueOf(calculateOverdueTimestamp());
         } else {
             return null;
         }
+    }
+
+    /**
+     * Calculates the overdue timestamp (<em>overdue_ts</em>) based on the current timestamp and the intervals for polling and poll-overdue:
+     * <p/>
+     * <em>overdue_ts = now_ts - pollingInterval - pollingOverdueInterval</em>;<br>
+     * <em>pollingInterval</em> and <em>pollingOverdueInterval</em> are retrieved from tenant-specific system configuration.
+     * <p/>
+     * Note: this method checks against the default polling time interval. I.e. overrides are not considered.
+     *
+     * @return <em>overdue_ts</em> in milliseconds since Unix epoch as long value
+     */
+    public static long calculateOverdueTimestamp() {
+        return calculateOverdueTimestamp(
+                new PollingTime(getRawStringForKey(TenantConfigurationProperties.TenantConfigurationKey.POLLING_TIME)).getPollingInterval(),
+                DurationHelper.fromString(getRawStringForKey(TenantConfigurationProperties.TenantConfigurationKey.POLLING_OVERDUE_TIME)));
+    }
+
+    private static long calculateOverdueTimestamp(final PollingTime.PollingInterval pollingInterval, final Duration pollingOverdueTime) {
+        return System.currentTimeMillis()
+                - (pollingInterval.getDeviationPercent() == 0
+                ? pollingInterval.getInterval().toMillis()
+                : pollingInterval.getInterval().toMillis() * (100 + pollingInterval.getDeviationPercent()) / 100)
+                - pollingOverdueTime.toMillis();
+    }
+
+    private static String getRawStringForKey(final String key) {
+        return SystemSecurityContextHolder.getInstance().getSystemSecurityContext().runAsSystem(
+                () -> TenantConfigurationManagementHolder.getInstance().getTenantConfigurationManagement()
+                        .getConfigurationValue(key, String.class).getValue());
     }
 }

@@ -543,7 +543,7 @@ public class JpaRepositoryConfiguration {
      * @return The {@link QLSupport} singleton.
      */
     @Bean
-    QLSupport rsqlUtility() {
+    QLSupport qlSupport() {
         return QLSupport.getInstance();
     }
 
