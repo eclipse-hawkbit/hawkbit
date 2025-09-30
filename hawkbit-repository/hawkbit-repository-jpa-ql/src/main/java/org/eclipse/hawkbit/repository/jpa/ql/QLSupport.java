@@ -100,7 +100,7 @@ public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
      * If the database is declared as case-sensitive and ignoreCase is set to <code>false</code> the RSQL queries shall use strict
      * syntax - i.e. 'and' instead of 'AND' / 'aND'. Otherwise, the queries would be case-insensitive regarding operators.
      */
-    @Value("${hawkbit.rsql.case-insensitive-db:false}")
+    @Value("${hawkbit.ql.case-insensitive-db:false}")
     private boolean caseInsensitiveDB;
 
     /**
@@ -108,7 +108,7 @@ public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
      */
     @Setter // for tests only
     @Deprecated(forRemoval = true, since = "0.6.0")
-    @Value("${hawkbit.rsql.rsql-to-spec-builder:G3}") //
+    @Value("${hawkbit.ql.spec-builder:G3}") //
     private SpecBuilder specBuilder;
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -167,8 +167,8 @@ public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
      */
     public <A extends Enum<A> & QueryField, T> Specification<T> buildSpec(final String query, final Class<A> queryFieldType) {
         if (specBuilder == SpecBuilder.G3) {
-            return new SpecificationBuilder<T>(!caseInsensitiveDB && ignoreCase, database)
-                    .specification(parseAndTransform(query, queryFieldType, caseInsensitiveDB || ignoreCase));
+            return new SpecificationBuilder<T>(ignoreCase && !caseInsensitiveDB , database)
+                    .specification(parseAndTransform(query, queryFieldType, ignoreCase || caseInsensitiveDB));
         } else {
             return new SpecificationBuilderLegacy<A, T>(queryFieldType, virtualPropertyResolver, database).specification(query);
         }
@@ -176,7 +176,7 @@ public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
 
     @SuppressWarnings({ "java:S1117" }) // it is again ignoreCase
     public <A extends Enum<A> & QueryField> EntityMatcher entityMatcher(final String query, final Class<A> queryFieldType) {
-        final boolean ignoreCase = caseInsensitiveDB || this.ignoreCase; // sync with DB and case sensitivity requirements
+        final boolean ignoreCase = this.ignoreCase || caseInsensitiveDB; // sync with DB and case sensitivity requirements
         return EntityMatcher.of(parseAndTransform(query, queryFieldType, ignoreCase), ignoreCase);
     }
 
@@ -242,6 +242,7 @@ public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
             }
 
             // just extension points for subclasses
+            @SuppressWarnings("java:S1172") // comparison and queryFieldType might be useful for subclasses
             protected <T extends Enum<T> & QueryField> Object transformKey(
                     final String key, final Comparison comparison, final Class<T> queryFieldType) {
                 return key;
@@ -267,6 +268,7 @@ public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
             }
 
             // just extension points for subclasses
+            @SuppressWarnings("java:S1172") // comparison and queryFieldType might be useful for subclasses
             protected <T extends Enum<T> & QueryField> Object transformValueElement(
                     final Object value, final Comparison comparison, final Class<T> queryFieldType) {
                 return value;
