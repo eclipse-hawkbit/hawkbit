@@ -400,7 +400,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     @WithUser(allSpPermissions = true, removeFromAllPermission = {
-            SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT, SpPermission.READ_SOFTWARE_MODULE_DOWNLOAD,
+            SpPermission.READ_SOFTWARE_MODULE_DOWNLOAD,
             SpRole.CONTROLLER_ROLE, SpRole.CONTROLLER_ROLE_ANONYMOUS })
     void getArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
         assertThatExceptionOfType(InsufficientPermissionException.class)

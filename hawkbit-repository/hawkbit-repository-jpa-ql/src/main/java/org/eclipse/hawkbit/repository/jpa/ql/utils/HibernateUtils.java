@@ -50,7 +50,7 @@ public class HibernateUtils {
         try {
             method = QueryEngine.class.getMethod("getSqmTranslatorFactory");
         } catch (final NoSuchMethodException e) {
-            log.warn("Can't resolve getSqmTranslatorFactory method (Utils.toString won't work)", e);
+            log.warn("Can't resolve getSqmTranslatorFactory method (HibernateUtils.toString won't work)", e);
         }
         getSqmTranslatorFactory = method;
     }

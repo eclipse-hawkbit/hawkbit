@@ -67,13 +67,6 @@ public final class SpPermission {
     public static final String READ_DISTRIBUTION_SET = READ_PREFIX + DISTRIBUTION_SET;
     public static final String UPDATE_DISTRIBUTION_SET = UPDATE_PREFIX + DISTRIBUTION_SET;
 
-    /**
-     * Deprecated since 0.10.0, use {@link #READ_SOFTWARE_MODULE_DOWNLOAD} instead
-     *
-     * @deprecated since 0.10.0, use {@link #READ_SOFTWARE_MODULE_DOWNLOAD} instead
-     */
-    @Deprecated(since = "0.10.0", forRemoval = true)
-    public static final String DOWNLOAD_REPOSITORY_ARTIFACT = "DOWNLOAD_REPOSITORY_ARTIFACT";
     public static final String READ_SOFTWARE_MODULE_DOWNLOAD = READ_PREFIX + SOFTWARE_MODULE + "_DOWNLOAD";
 
     /**
@@ -117,8 +110,7 @@ public final class SpPermission {
             CREATE_PREFIX + SOFTWARE_MODULE + IMPLY_READ + SOFTWARE_MODULE_TYPE + LINE_BREAK +
             READ_PREFIX + SOFTWARE_MODULE + IMPLY_READ + SOFTWARE_MODULE_TYPE + LINE_BREAK +
             UPDATE_PREFIX + SOFTWARE_MODULE + IMPLY_READ + SOFTWARE_MODULE_TYPE + LINE_BREAK +
-            DELETE_PREFIX + SOFTWARE_MODULE + IMPLY_READ + SOFTWARE_MODULE_TYPE + LINE_BREAK +
-            DOWNLOAD_REPOSITORY_ARTIFACT + IMPLY + READ_SOFTWARE_MODULE_DOWNLOAD + LINE_BREAK;
+            DELETE_PREFIX + SOFTWARE_MODULE + IMPLY_READ + SOFTWARE_MODULE_TYPE + LINE_BREAK;
     public static final String DISTRIBUTION_SET_HIERARCHY =
             CREATE_PREFIX + DISTRIBUTION_SET + IMPLY_READ + DISTRIBUTION_SET_TYPE + LINE_BREAK +
             READ_PREFIX + DISTRIBUTION_SET + IMPLY_READ + DISTRIBUTION_SET_TYPE + LINE_BREAK +
@@ -160,9 +152,6 @@ public final class SpPermission {
 
         // system permission, (!) take care with
         allPermissions.add(SYSTEM_ADMIN);
-
-        // add deprecated permissions
-        allPermissions.add(DOWNLOAD_REPOSITORY_ARTIFACT);
 
         return Collections.unmodifiableList(allPermissions);
     });
