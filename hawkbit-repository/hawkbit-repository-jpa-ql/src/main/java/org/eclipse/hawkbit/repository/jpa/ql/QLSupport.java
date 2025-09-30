@@ -174,7 +174,7 @@ public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
         }
     }
 
-    @SuppressWarnings({ "java:S1117" }) // it is again ignoreCase
+    @SuppressWarnings("java:S1117") // it is again ignoreCase
     public <A extends Enum<A> & QueryField> EntityMatcher entityMatcher(final String query, final Class<A> queryFieldType) {
         final boolean ignoreCase = this.ignoreCase || caseInsensitiveDB; // sync with DB and case sensitivity requirements
         return EntityMatcher.of(parseAndTransform(query, queryFieldType, ignoreCase), ignoreCase);
