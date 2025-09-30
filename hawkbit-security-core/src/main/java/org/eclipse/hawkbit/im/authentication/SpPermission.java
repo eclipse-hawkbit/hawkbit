@@ -67,7 +67,7 @@ public final class SpPermission {
     public static final String READ_DISTRIBUTION_SET = READ_PREFIX + DISTRIBUTION_SET;
     public static final String UPDATE_DISTRIBUTION_SET = UPDATE_PREFIX + DISTRIBUTION_SET;
 
-    public static final String READ_SOFTWARE_MODULE_DOWNLOAD = READ_PREFIX + SOFTWARE_MODULE + "_DOWNLOAD";
+    public static final String READ_SOFTWARE_MODULE_ARTIFACT = READ_PREFIX + SOFTWARE_MODULE + "_ARTIFACT";
 
     /**
      * Permission to read the tenant settings.
@@ -140,7 +140,7 @@ public final class SpPermission {
         // special
         allPermissions.add(READ_TARGET_SECURITY_TOKEN);
         allPermissions.add(READ_GATEWAY_SECURITY_TOKEN);
-        allPermissions.add(READ_SOFTWARE_MODULE_DOWNLOAD);
+        allPermissions.add(READ_SOFTWARE_MODULE_ARTIFACT);
         allPermissions.add(APPROVE_ROLLOUT);
         allPermissions.add(HANDLE_ROLLOUT);
 
