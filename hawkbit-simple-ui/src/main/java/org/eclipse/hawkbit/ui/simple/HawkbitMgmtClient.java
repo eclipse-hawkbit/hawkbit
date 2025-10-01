@@ -48,7 +48,7 @@ public class HawkbitMgmtClient {
     private final MgmtTenantManagementRestApi tenantManagementRestApi;
     private final MgmtActionRestApi actionRestApi;
 
-    HawkbitMgmtClient(final Tenant tenant, final HawkbitClient hawkbitClient) {
+    public HawkbitMgmtClient(final Tenant tenant, final HawkbitClient hawkbitClient) {
         this.tenant = tenant;
         this.hawkbitClient = hawkbitClient;
 
@@ -66,23 +66,23 @@ public class HawkbitMgmtClient {
         actionRestApi = service(MgmtActionRestApi.class);
     }
 
-    boolean hasSoftwareModulesRead() {
+    public boolean hasSoftwareModulesRead() {
         return hasRead(() -> softwareModuleRestApi.getSoftwareModule(-1L));
     }
 
-    boolean hasRolloutRead() {
+    public boolean hasRolloutRead() {
         return hasRead(() -> rolloutRestApi.getRollout(-1L));
     }
 
-    boolean hasDistributionSetRead() {
+    public boolean hasDistributionSetRead() {
         return hasRead(() -> distributionSetRestApi.getDistributionSet(-1L));
     }
 
-    boolean hasTargetRead() {
+    public boolean hasTargetRead() {
         return hasRead(() -> targetRestApi.getTarget("_#ETE$ER"));
     }
 
-    boolean hasConfigRead() {
+    public boolean hasConfigRead() {
         return hasRead(() -> tenantManagementRestApi.getTenantConfigurationValue("_#ETE$ER"));
     }
 
