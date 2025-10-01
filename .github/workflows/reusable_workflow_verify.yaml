@@ -61,5 +61,12 @@ jobs:
       - name: Check file license headers
         run: mvn license:check -PcheckLicense --batch-mode
 
+      - name: Check code style
+        run:  |
+          # compare style to target branch
+          git remote add target ${{ github.event.pull_request.base.repo.clone_url }}
+          git fetch target
+          mvn spotless:check -DratchetFrom=${{ github.event.pull_request.base.sha }}
+
       - name: Run tests & javadoc
         run: mvn clean verify javadoc:javadoc -DdetectOfflineLinks=false -PgenerateTestReport ${{ inputs.maven_properties }} --batch-mode
