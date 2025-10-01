@@ -550,6 +550,7 @@ public class JpaRepositoryConfiguration {
         return new NodeTransformer.Abstract() {
 
             // just extension points for subclasses
+            @Override
             protected <T extends Enum<T> & QueryField> Object transformValueElement(
                     final Object value, final Comparison comparison, final Class<T> queryFieldType) {
                 return queryFieldType == (Class<?>) ActionFields.class && "active".equalsIgnoreCase(comparison.getKey())
