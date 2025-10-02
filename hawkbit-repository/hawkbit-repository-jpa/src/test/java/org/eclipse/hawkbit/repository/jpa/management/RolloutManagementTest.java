@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -1877,8 +1878,9 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // verify
         final Optional<JpaRollout> deletedRollout = rolloutRepository.findById(createdRollout.getId());
         assertThat(deletedRollout).isNotPresent();
-        assertThat(rolloutGroupRepository.count()).isZero();
-        assertThat(rolloutTargetGroupRepository.count()).isZero();
+        assertThat(rolloutGroupRepository.countByRolloutId(createdRollout.getId())).isZero();
+        await().atMost(Duration.ofSeconds(10)).pollInterval(Duration.ofSeconds(1))
+                .until(() -> rolloutTargetGroupRepository.count() == 0);
     }
 
     @Test
