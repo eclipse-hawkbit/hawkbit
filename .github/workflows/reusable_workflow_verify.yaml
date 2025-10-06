@@ -62,6 +62,7 @@ jobs:
         run: mvn license:check -PcheckLicense --batch-mode
 
       - name: Check code style
+        if: github.event_name == 'pull_request'
         run:  |
           # compare style to target branch
           git remote add target ${{ github.event.pull_request.base.repo.clone_url }}
