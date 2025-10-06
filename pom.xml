@@ -130,7 +130,6 @@
         <!-- Dash tool integration - END -->
 
         <skipPublishing>false</skipPublishing>
-        <ratchetFrom>origin/master</ratchetFrom>
     </properties>
 
     <developers>
@@ -380,7 +379,7 @@
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
                 <configuration>
-                    <ratchetFrom>${ratchetFrom}</ratchetFrom>
+                    <ratchetFrom>origin/master</ratchetFrom>
                     <java>
                         <eclipse>
                             <file>${maven.multiModuleProjectDirectory}/eclipse_codeformatter.xml</file>
