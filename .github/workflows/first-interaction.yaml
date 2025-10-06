@@ -17,6 +17,8 @@ jobs:
       - uses: actions/first-interaction@v3
         with:
           repo-token: ${{ secrets.PAT_SECRET }}
+          issue-message: |-
+            Thanks @${{ github.actor }} for submitting an issue to hawkBit!! Make yourself comfortable while I'm looking for a committer to assist you.
           pr-message: |-
             Thanks @${{ github.actor }} for taking the time to contribute to hawkBit! We really appreciate this. Make yourself comfortable while I'm looking for a committer to help you with your contribution.
             Please make sure you read the [contribution guide](https://github.com/eclipse-hawkbit/hawkbit/blob/master/CONTRIBUTING.md) and signed the Eclipse Contributor Agreement (ECA).
