@@ -61,7 +61,7 @@ import org.springframework.security.web.session.SessionManagementFilter;
  */
 @Slf4j
 @Configuration
-@EnableConfigurationProperties({HawkbitSecurityProperties.class, OidcProperties.class})
+@EnableConfigurationProperties({ HawkbitSecurityProperties.class, OidcProperties.class })
 @EnableWebSecurity
 public class MgmtSecurityConfiguration {
 
@@ -103,23 +103,20 @@ public class MgmtSecurityConfiguration {
     @Order(350)
     SecurityFilterChain filterChainREST(
             final HttpSecurity http,
-            @Autowired(required = false)
-            @Qualifier("hawkbitOAuth2ResourceServerCustomizer") final Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> oauth2ResourceServerCustomizer,
+            @Autowired(required = false) @Qualifier("hawkbitOAuth2ResourceServerCustomizer") final Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> oauth2ResourceServerCustomizer,
             // called just before build of the SecurityFilterChain.
             // could be used for instance to set authentication provider
             // Note: implementation of the customizer shall always take in account what is the already set by the hawkBit
-            @Autowired(required = false)
-            @Qualifier("hawkbitHttpSecurityCustomizer") final Customizer<HttpSecurity> httpSecurityCustomizer,
+            @Autowired(required = false) @Qualifier("hawkbitHttpSecurityCustomizer") final Customizer<HttpSecurity> httpSecurityCustomizer,
             final SystemManagement systemManagement,
             final SystemSecurityContext systemSecurityContext) throws Exception {
         http
                 .securityMatcher(MgmtRestConstants.BASE_REST_MAPPING + "/**", MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
-                .authorizeHttpRequests(amrmRegistry ->
-                        amrmRegistry
-                                .requestMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
-                                .hasAnyAuthority(SpPermission.SYSTEM_ADMIN)
-                                .anyRequest()
-                                .authenticated())
+                .authorizeHttpRequests(amrmRegistry -> amrmRegistry
+                        .requestMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
+                        .hasAnyAuthority(SpPermission.SYSTEM_ADMIN)
+                        .anyRequest()
+                        .authenticated())
                 .anonymous(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterAfter(
@@ -178,7 +175,7 @@ public class MgmtSecurityConfiguration {
                 final String tenant = tenantClaim == null ? "DEFAULT" : followPathInJwtClaims(jwt, tenantClaim, String.class);
                 final Collection<GrantedAuthority> authorities = Optional
                         .ofNullable(followPathInJwtClaims(jwt, rolesClaim, Collection.class))
-                        .map(resourceRoles -> ((Collection<String>)resourceRoles).stream()
+                        .map(resourceRoles -> ((Collection<String>) resourceRoles).stream()
                                 .distinct()
                                 .map(SimpleGrantedAuthority::new)
                                 .map(GrantedAuthority.class::cast)
@@ -211,7 +208,7 @@ public class MgmtSecurityConfiguration {
                 return null;
             }
 
-            return (T)current;
+            return (T) current;
         }
 
         @Getter
