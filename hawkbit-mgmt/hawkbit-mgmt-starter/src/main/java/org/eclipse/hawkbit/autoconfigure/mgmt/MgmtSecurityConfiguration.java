@@ -192,6 +192,9 @@ public class MgmtSecurityConfiguration {
         private static <T> T followPathInJwtClaims(final Jwt jwt, final String path, final Class<T> clazz) {
             final String[] chunks = path.split("\\.");
             Object current = jwt.getClaims();
+            if (current == null) {
+                return null;
+            }
             for (final String chunk : chunks) {
                 if (current instanceof Map<?, ?> map) {
                     current = map.get(chunk);
