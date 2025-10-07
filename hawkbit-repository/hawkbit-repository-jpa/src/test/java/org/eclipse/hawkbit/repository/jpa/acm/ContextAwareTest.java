@@ -16,7 +16,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import lombok.SneakyThrows;
@@ -26,11 +26,15 @@ import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.security.SecurityContextSerializer;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -43,10 +47,10 @@ import org.springframework.test.context.ContextConfiguration;
  * Feature: Component Tests - Context runner<br/>
  * Story: Test Context Runner
  */
-@ContextConfiguration(classes = { AcmTestConfiguration.class })
+@ContextConfiguration(classes = { ContextAwareTest.TestConfiguration.class })
 class ContextAwareTest extends AbstractJpaIntegrationTest {
 
-    private static final List<String> AUTHORITIES = SpPermission.getAllAuthorities();
+    private static final Set<String> AUTHORITIES = SpPermission.getAllAuthorities();
 
     @Autowired
     AutoAssignExecutor autoAssignExecutor;
@@ -167,6 +171,16 @@ class ContextAwareTest extends AbstractJpaIntegrationTest {
             return auditorAware.getCurrentAuditor().orElseThrow();
         } finally {
             SecurityContextHolder.clearContext();
+        }
+    }
+
+    @Configuration
+    static class TestConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean
+        SecurityContextSerializer securityContextSerializer() {
+            return SecurityContextSerializer.JSON_SERIALIZATION;
         }
     }
 }

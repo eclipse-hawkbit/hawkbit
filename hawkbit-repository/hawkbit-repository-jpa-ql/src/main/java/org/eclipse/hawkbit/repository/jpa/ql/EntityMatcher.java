@@ -31,6 +31,7 @@ import java.util.Objects;
 import java.util.function.BiPredicate;
 
 import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison.Operator;
+import org.springframework.core.ResolvableType;
 
 /**
  * Provides entity matcher that matches an entity object against a filter (a {@link Node} or an RSQL string).
@@ -57,7 +58,7 @@ public class EntityMatcher {
         return match(t, root);
     }
 
-    @SuppressWarnings({"java:S3776", "java:S3358", "java:S1125", "java:S6541"}) // better readable this way
+    @SuppressWarnings({ "java:S3776", "java:S3358", "java:S1125", "java:S6541" }) // better readable this way
     private <T> boolean match(final T t, final Node node) {
         if (node instanceof Node.Comparison comparison) {
             final String[] split = comparison.getKey().split("\\.", 2);
@@ -89,7 +90,8 @@ public class EntityMatcher {
                         value = map(comparison.getValue(), getReturnType(valueGetter));
                         compare = (e, operator) -> {
                             try {
-                                return compareIgnoreCaseAware(map(e == null ? null : valueGetter.get(e), getReturnType(valueGetter)), operator, value);
+                                return compareIgnoreCaseAware(
+                                        map(e == null ? null : valueGetter.get(e), getReturnType(valueGetter)), operator, value);
                             } catch (final IllegalAccessException | InvocationTargetException ex) {
                                 throw new IllegalArgumentException(ex);
                             }
@@ -143,6 +145,7 @@ public class EntityMatcher {
     private boolean compareIgnoreCaseAware(final Object entityValue, final Operator op, final Object comparisonValue) {
         return compare(ignoreCase(entityValue), op, ignoreCase(comparisonValue));
     }
+
     private Object ignoreCase(final Object o) {
         if (!ignoreCase || o == null) {
             return o;
@@ -157,7 +160,9 @@ public class EntityMatcher {
         }
     }
 
-    @SuppressWarnings("java:S3011") // java:S3011 uses reflection to private members anyway
+    // java:S3011 uses reflection to private members anyway
+    // java:S3358 - better readable this way
+    @SuppressWarnings({ "java:S3011", "java:S3358" })
     private static <T> Getter getGetter(final Class<T> t, final String fieldName) throws NoSuchMethodException {
         final String[] parts = fieldName.split("\\.");
         if (parts.length > 1) {
@@ -197,7 +202,12 @@ public class EntityMatcher {
 
                             @Override
                             public Type type() {
-                                return getter.getGenericReturnType();
+                                final Type type = getter.getGenericReturnType();
+                                return type instanceof Class<?>
+                                        ? type
+                                        : type instanceof ParameterizedType
+                                                ? type // Map or Collection generic type
+                                                : ResolvableType.forMethodReturnType(getter, t).resolve();
                             }
                         };
                     } catch (final NoSuchMethodException e) {

@@ -12,8 +12,9 @@ package org.eclipse.hawkbit.security;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.hawkbit.security.SecurityContextSerializer.JSON_SERIALIZATION;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
@@ -27,7 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 class SecurityContextSerializerTest {
 
-    private static final List<String> AUTHORITIES = SpPermission.getAllAuthorities();
+    private static final Set<String> AUTHORITIES = SpPermission.getAllAuthorities();
 
     @Test
     void testJsonSerialization() {
@@ -42,7 +43,7 @@ class SecurityContextSerializerTest {
         final SecurityContext deserialized = JSON_SERIALIZATION.deserialize(serialized);
         final Authentication authentication = deserialized.getAuthentication();
         assertThat(SpringSecurityAuditorAware.resolveAuditor(authentication)).hasToString("user");
-        assertThat(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList()).isEqualTo(AUTHORITIES);
+        assertThat(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet())).isEqualTo(AUTHORITIES);
         assertThat(authentication.isAuthenticated()).isTrue();
         assertThat(authentication.getDetails()).isEqualTo(details);
     }
@@ -75,7 +76,7 @@ class SecurityContextSerializerTest {
         final SecurityContext deserialized = JSON_SERIALIZATION.deserialize(serialized);
         final Authentication authentication = deserialized.getAuthentication();
         assertThat(SpringSecurityAuditorAware.resolveAuditor(authentication)).hasToString("user");
-        assertThat(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList()).isEqualTo(AUTHORITIES);
+        assertThat(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet())).isEqualTo(AUTHORITIES);
         assertThat(authentication.isAuthenticated()).isTrue();
         assertThat(authentication.getDetails()).isEqualTo(details);
     }

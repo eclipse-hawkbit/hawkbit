@@ -47,7 +47,6 @@ import org.springframework.test.context.TestPropertySource;
  * Feature: Component Tests - Access Control<br/>
  * Story: Test Distribution Set Access Controller
  */
-@ContextConfiguration(classes = { AccessControllerConfiguration.class })
 @TestPropertySource(properties = "hawkbit.acm.access-controller.enabled=true")
 class DistributionSetAccessControllerTest extends AbstractJpaIntegrationTest {
 

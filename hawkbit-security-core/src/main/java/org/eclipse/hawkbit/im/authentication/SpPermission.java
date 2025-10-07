@@ -9,9 +9,9 @@
  */
 package org.eclipse.hawkbit.im.authentication;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -124,8 +124,11 @@ public final class SpPermission {
             TENANT_CONFIGURATION + IMPLY + READ_GATEWAY_SECURITY_TOKEN + LINE_BREAK;
 
     // @formatter:on
-    private static final SingletonSupplier<List<String>> ALL_AUTHORITIES = SingletonSupplier.of(() -> {
-        final List<String> allPermissions = new ArrayList<>();
+    private static final SingletonSupplier<Set<String>> ALL_AUTHORITIES = SingletonSupplier.of(() -> getAuthorities(false));
+    private static final SingletonSupplier<Set<String>> ALL_TENANT_AUTHORITIES = SingletonSupplier.of(() -> getAuthorities(true));
+
+    private static Set<String> getAuthorities(final boolean tenant) {
+        final Set<String> allPermissions = new HashSet<>();
 
         // groups with access, canonical
         for (final String group : new String[] {
@@ -150,18 +153,19 @@ public final class SpPermission {
         }
         allPermissions.add(TENANT_CONFIGURATION);
 
-        // system permission, (!) take care with
-        allPermissions.add(SYSTEM_ADMIN);
+        if (!tenant) {
+            // system permission, (!) take care with
+            allPermissions.add(SYSTEM_ADMIN);
+        }
 
-        return Collections.unmodifiableList(allPermissions);
-    });
+        return Collections.unmodifiableSet(allPermissions);
+    }
 
-    /**
-     * Return all permission.
-     *
-     * @return all permissions
-     */
-    public static List<String> getAllAuthorities() {
+    public static Set<String> getAllAuthorities() {
         return ALL_AUTHORITIES.get();
+    }
+
+    public static Set<String> getAllTenantAuthorities() {
+        return ALL_TENANT_AUTHORITIES.get();
     }
 }

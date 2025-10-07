@@ -43,14 +43,12 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
 /**
  * Feature: Component Tests - Access Control<br/>
  * Story: Test Target Access Controller
  */
-@ContextConfiguration(classes = { AccessControllerConfiguration.class, AcmTestConfiguration.class })
 @TestPropertySource(properties = "hawkbit.acm.access-controller.enabled=true")
 class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
 
@@ -185,7 +183,7 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void verifyTargetAssignment() {
-        final DistributionSet ds  = testdataFactory.createDistributionSet("myDs");
+        final DistributionSet ds = testdataFactory.createDistributionSet("myDs");
         distributionSetManagement.lock(ds);
 
         final Target permittedTarget = targetManagement
