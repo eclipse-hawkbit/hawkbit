@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 
 import org.apache.commons.io.IOUtils;
@@ -98,6 +99,7 @@ public class TestdataFactory {
     public static final String INVISIBLE_SM_MD_VALUE = "invisibleMetdataValue";
 
     public static final RandomStringUtils RANDOM_STRING_UTILS = RandomStringUtils.secure();
+    public static final AtomicLong COUNTER = new AtomicLong();
 
     /**
      * default {@link Target#getControllerId()}.
@@ -359,10 +361,8 @@ public class TestdataFactory {
     /**
      * Creates {@link DistributionSet} in repository.
      *
-     * @param prefix for {@link SoftwareModule}s and {@link DistributionSet}s name,
-     *         vendor and description.
-     * @param version {@link DistributionSet#getVersion()} and
-     *         {@link SoftwareModule#getVersion()} extended by a random number.
+     * @param prefix for {@link SoftwareModule}s and {@link DistributionSet}s name, vendor and description.
+     * @param version {@link DistributionSet#getVersion()} and {@link SoftwareModule#getVersion()} extended by a random number.
      * @param isRequiredMigrationStep for {@link DistributionSet#isRequiredMigrationStep()}
      * @param modules for {@link DistributionSet#getModules()}
      * @return {@link DistributionSet} entity.
@@ -395,7 +395,7 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates {@link DistributionSet}s in repository including three {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
+     * Creates {@link DistributionSet}s in repository including three {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT},
      * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} followed by an iterative number and {@link DistributionSet#isRequiredMigrationStep()}
      * <code>false</code>.
      *
@@ -427,7 +427,7 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates {@link DistributionSet}s in repository including three {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
+     * Creates {@link DistributionSet}s in repository including three {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT},
      * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} followed by an iterative count and {@link DistributionSet#isRequiredMigrationStep()}
      * <code>false</code>.
      *
@@ -568,7 +568,7 @@ public class TestdataFactory {
         return softwareModuleManagement.create(
                 SoftwareModuleManagement.Create.builder()
                         .type(findOrCreateSoftwareModuleType(typeKey))
-                        .name(prefix + typeKey)
+                        .name(prefix + typeKey + "_" + COUNTER.incrementAndGet())
                         .version(prefix + DEFAULT_VERSION)
                         .description(randomDescriptionShort())
                         .vendor(DEFAULT_VENDOR)
@@ -617,7 +617,7 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates {@link DistributionSet}s in repository including three {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
+     * Creates {@link DistributionSet}s in repository including three {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT},
      * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} followed by an iterative number and {@link DistributionSet#isRequiredMigrationStep()}
      * <code>false</code>.
      * <p/>
@@ -640,7 +640,7 @@ public class TestdataFactory {
 
     /**
      * @return {@link DistributionSetType} with key {@link #DS_TYPE_DEFAULT} and {@link SoftwareModuleType}s {@link #SM_TYPE_OS},
-     *         {@link #SM_TYPE_RT} , {@link #SM_TYPE_APP}.
+     *             {@link #SM_TYPE_RT} , {@link #SM_TYPE_APP}.
      */
     public DistributionSetType findOrCreateDefaultTestDsType() {
         final List<SoftwareModuleType> swt = new ArrayList<>();

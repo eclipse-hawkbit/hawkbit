@@ -1,0 +1,36 @@
+name: Style Check
+
+on:
+  pull_request:
+    paths-ignore:
+      - '.3rd-party/**'
+      - 'site/**'
+      - '**.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  style_check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          repository: ${{ inputs.repository }}
+          ref: ${{ inputs.ref }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 21
+          cache: 'maven'
+
+      - name: Check code style
+        run:  |
+          # compare style to target branch
+          git remote add target ${{ github.event.pull_request.base.repo.clone_url }}
+          git fetch target
+          mvn spotless:check -DratchetFrom=${{ github.event.pull_request.base.sha }}

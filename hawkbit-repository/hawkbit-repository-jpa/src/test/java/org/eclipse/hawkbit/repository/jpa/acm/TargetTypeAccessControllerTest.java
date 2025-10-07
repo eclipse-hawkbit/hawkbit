@@ -30,14 +30,12 @@ import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
 /**
  * Feature: Component Tests - Access Control<br/>
  * Story: Test Target Type Access Controller
  */
-@ContextConfiguration(classes = { AccessControllerConfiguration.class })
 @TestPropertySource(properties = "hawkbit.acm.access-controller.enabled=true")
 class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
 

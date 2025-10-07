@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-@ContextConfiguration(classes = { AccessControllerConfiguration.class })
 @TestPropertySource(properties = "hawkbit.acm.access-controller.enabled=true")
 class ActionAccessControllerTest extends AbstractJpaIntegrationTest {
 
