@@ -192,11 +192,12 @@ public class MgmtSecurityConfiguration {
         private static <T> T followPathInJwtClaims(final Jwt jwt, final String path, final Class<T> clazz) {
             final String[] chunks = path.split("\\.");
             Object current = jwt.getClaims();
+            if (current == null){
+                return null;
+            }
             for (final String chunk : chunks) {
                 if (current instanceof Map<?, ?> map) {
                     current = map.get(chunk);
-                } else if (current == null) {
-                    return null;
                 } else {
                     log.warn("Unexpected claim type for path {} (chunk {})! Expected a Map but got {}", path, chunk, current.getClass());
                     return null;
