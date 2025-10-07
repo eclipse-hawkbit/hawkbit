@@ -50,8 +50,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface DeploymentManagement extends PermissionSupport {
 
-    String HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET =
-            SpringEvalExpressions.HAS_UPDATE_REPOSITORY + " and hasAuthority('READ_" + SpPermission.DISTRIBUTION_SET + "')";
+    String HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET = SpringEvalExpressions.HAS_UPDATE_REPOSITORY + " and hasAuthority('READ_" + SpPermission.DISTRIBUTION_SET + "')";
 
     @Override
     default String permissionGroup() {
@@ -64,12 +63,12 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param deploymentRequests information about all target-ds-assignments that shall be made
      * @return the list of assignment results
      * @throws IncompleteDistributionSetException if mandatory {@link SoftwareModuleType} are not assigned as
-     *         defined by the {@link DistributionSetType}.
+     *             defined by the {@link DistributionSetType}.
      * @throws EntityNotFoundException if either provided {@link DistributionSet} or {@link Target}s do not exist
      * @throws AssignmentQuotaExceededException if the maximum number of targets the distribution set can be
-     *         assigned to at once is exceeded
+     *             assigned to at once is exceeded
      * @throws MultiAssignmentIsNotEnabledException if the request results in multiple assignments to the same
-     *         target and multi-assignment is disabled
+     *             target and multi-assignment is disabled
      */
     @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
     List<DistributionSetAssignmentResult> assignDistributionSets(@Valid @NotEmpty List<DeploymentRequest> deploymentRequests);
@@ -82,12 +81,12 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param actionMessage an optional message for the action status
      * @return the list of assignment results
      * @throws IncompleteDistributionSetException if mandatory {@link SoftwareModuleType} are not assigned as
-     *         defined by the {@link DistributionSetType}.
+     *             defined by the {@link DistributionSetType}.
      * @throws EntityNotFoundException if either provided {@link DistributionSet} or {@link Target}s do not exist
      * @throws AssignmentQuotaExceededException if the maximum number of targets the distribution set can be
-     *         assigned to at once is exceeded
+     *             assigned to at once is exceeded
      * @throws MultiAssignmentIsNotEnabledException if the request results in multiple assignments to the same
-     *         target and multi-assignment is disabled
+     *             target and multi-assignment is disabled
      */
     @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
     List<DistributionSetAssignmentResult> assignDistributionSets(
@@ -109,11 +108,11 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param assignments target IDs with the respective distribution set ID which they are supposed to be assigned to
      * @return the assignment results
      * @throws IncompleteDistributionSetException if mandatory {@link SoftwareModuleType} are not assigned as
-     *         defined by the {@link DistributionSetType}.
+     *             defined by the {@link DistributionSetType}.
      * @throws EntityNotFoundException if either provided {@link DistributionSet} or {@link Target}s do not exist
      * @throws AssignmentQuotaExceededException if the maximum number of targets the distribution set can be assigned to at once is exceeded
      * @throws MultiAssignmentIsNotEnabledException if the request results in multiple assignments to the same
-     *         target and multi-assignment is disabled
+     *             target and multi-assignment is disabled
      */
     @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
     List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(String initiatedBy, Collection<Entry<String, Long>> assignments);
@@ -140,7 +139,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param controllerId the target associated to the actions to count
      * @return the count value of found actions associated to the target
      * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
-     *         given {@code fieldNameProvider}
+     *             given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      * @throws EntityNotFoundException if target with given ID does not exist
      */
@@ -148,8 +147,7 @@ public interface DeploymentManagement extends PermissionSupport {
     long countActionsByTarget(@NotNull String rsql, @NotEmpty String controllerId);
 
     /**
-     * Returns total count of all actions<p/>
-     * No access control applied.
+     * Returns total count of all actions
      *
      * @return the total amount of stored actions
      */
@@ -157,8 +155,7 @@ public interface DeploymentManagement extends PermissionSupport {
     long countActionsAll();
 
     /**
-     * Counts the actions which match the given query.<p/>
-     * No access control applied.
+     * Counts the actions which match the given query.
      *
      * @param rsql RSQL query.
      * @return the total number of actions matching the given RSQL query.
@@ -187,8 +184,6 @@ public interface DeploymentManagement extends PermissionSupport {
 
     /**
      * Retrieves all {@link Action}s from repository.
-     * <p/>
-     * No access control applied.
      *
      * @param pageable pagination parameter
      * @return a paged list of {@link Action}s
@@ -197,8 +192,7 @@ public interface DeploymentManagement extends PermissionSupport {
     Slice<Action> findActionsAll(@NotNull Pageable pageable);
 
     /**
-     * Retrieves all {@link Action} entities which match the given RSQL query.<p/>
-     * No access control applied.
+     * Retrieves all {@link Action} entities which match the given RSQL query.
      *
      * @param rsql RSQL query string
      * @param pageable the page request parameter for paging and sorting the result
@@ -215,7 +209,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param pageable the page request
      * @return a slice of actions assigned to the specific target and the specification
      * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
-     *         given {@code fieldNameProvider}
+     *             given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
@@ -244,7 +238,6 @@ public interface DeploymentManagement extends PermissionSupport {
 
     /**
      * Retrieves all messages for an {@link ActionStatus}.<p/>
-     * No entity based access control applied.
      *
      * @param actionStatusId the id of {@link ActionStatus} to retrieve the messages from
      * @param pageable the page request parameter for paging and sorting the result
@@ -272,17 +265,6 @@ public interface DeploymentManagement extends PermissionSupport {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Page<Action> findActiveActionsByTarget(@NotEmpty String controllerId, @NotNull Pageable pageable);
-
-    /**
-     * Retrieves all inactive {@link Action}s of a specific target.
-     *
-     * @param controllerId the target associated with the actions
-     * @param pageable the page request parameter for paging and sorting the result
-     * @return a list of actions associated with the given target
-     * @throws EntityNotFoundException if target with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Page<Action> findInActiveActionsByTarget(@NotEmpty String controllerId, @NotNull Pageable pageable);
 
     /**
      * Retrieves active {@link Action}s with highest weight that are assigned to a {@link Target}.
@@ -325,8 +307,7 @@ public interface DeploymentManagement extends PermissionSupport {
     void cancelInactiveScheduledActionsForTargets(List<Long> targetIds);
 
     /**
-     * Starts all scheduled actions of an RolloutGroup parent.<p/>
-     * No entity based access control applied.
+     * Starts all scheduled actions of an RolloutGroup parent.
      *
      * @param rolloutId the rollout the actions belong to
      * @param distributionSetId to assign
@@ -365,8 +346,7 @@ public interface DeploymentManagement extends PermissionSupport {
 
     /**
      * Deletes actions which match one of the given action status and which have not been modified since the given (absolute) time-stamp.
-     * Used for obsolete actions cleanup.<p/>
-     * No entity based access control applied.
+     * Used for obsolete actions cleanup.
      *
      * @param status Set of action status.
      * @param lastModified A time-stamp in milliseconds.

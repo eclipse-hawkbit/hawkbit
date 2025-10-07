@@ -29,6 +29,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import jakarta.annotation.Nonnull;
+import jakarta.persistence.PersistenceException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
@@ -378,19 +379,41 @@ public class SpecificationBuilder<T> {
             }
         }
 
+        @SuppressWarnings("java:S1872") // java:S1872 - sometimes class could be unavailable at runtime
         private Predicate like(final Path<String> fieldPath, final String sqlValue) {
-            if (caseWise(fieldPath)) {
-                return cb.like(cb.upper(fieldPath), sqlValue.toUpperCase(), ESCAPE_CHAR);
-            } else {
-                return cb.like(fieldPath, sqlValue, ESCAPE_CHAR);
+            try {
+                if (caseWise(fieldPath)) {
+                    return cb.like(cb.upper(fieldPath), sqlValue.toUpperCase(), ESCAPE_CHAR);
+                } else {
+                    return cb.like(fieldPath, sqlValue, ESCAPE_CHAR);
+                }
+            } catch (final PersistenceException e) {
+                if ("%".equals(sqlValue) && fieldPath.getJavaType() != String.class &&
+                        "org.hibernate.type.descriptor.java.CoercionException".equals(e.getClass().getName())) {
+                    // hibernate throws an exception if we try to do == on non-string field with wildcard only
+                    return fieldPath.isNotNull();
+                } else {
+                    throw e;
+                }
             }
         }
 
+        @SuppressWarnings("java:S1872") // java:S1872 - sometimes class could be unavailable at runtime
         private Predicate notLike(final Path<String> fieldPath, final String sqlValue) {
-            if (caseWise(fieldPath)) {
-                return cb.notLike(cb.upper(fieldPath), sqlValue.toUpperCase(), ESCAPE_CHAR);
-            } else {
-                return cb.notLike(fieldPath, sqlValue, ESCAPE_CHAR);
+            try {
+                if (caseWise(fieldPath)) {
+                    return cb.notLike(cb.upper(fieldPath), sqlValue.toUpperCase(), ESCAPE_CHAR);
+                } else {
+                    return cb.notLike(fieldPath, sqlValue, ESCAPE_CHAR);
+                }
+            } catch (final PersistenceException e) {
+                if ("%".equals(sqlValue) && fieldPath.getJavaType() != String.class &&
+                        "org.hibernate.type.descriptor.java.CoercionException".equals(e.getClass().getName())) {
+                    // hibernate throws an exception if we try to do == on non-string field with wildcard only
+                    return fieldPath.isNull();
+                } else {
+                    throw e;
+                }
             }
         }
 
