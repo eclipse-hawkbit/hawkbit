@@ -26,7 +26,7 @@ public class TargetAssignmentsChecker {
     private final EntityManager entityManager;
 
     public TargetAssignmentsChecker(final EntityManager entityManager,
-                                    final SystemSecurityContext systemSecurityContext, final TenantConfigurationManagement tenantConfigurationManagement) {
+            final SystemSecurityContext systemSecurityContext, final TenantConfigurationManagement tenantConfigurationManagement) {
         this.entityManager = entityManager;
         this.systemSecurityContext = systemSecurityContext;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
@@ -51,20 +51,15 @@ public class TargetAssignmentsChecker {
 
     /**
      * Deletes the first n target actions of a target
+     * 
      * @param targetId - target id
      * @param numberOfActions - number of actions to be deleted
      */
     public void deleteLastTargetActions(long targetId, int numberOfActions) {
         // Workaround for the case where JPQL or Criteria API do not support LIMIT
         log.info("Deleting last {} actions of target {}", numberOfActions, targetId);
-        final String SQL = "DELETE FROM sp_action WHERE id IN(" +
-                "SELECT id FROM (" +
-                    "SELECT id FROM sp_action" +
-                    " WHERE target=" + Jpa.nativeQueryParamPrefix() + "target" +
-                    " ORDER BY id ASC" +
-                    " LIMIT " + numberOfActions
-                + ") AS sub"
-                +")";
+        final String SQL = "DELETE FROM sp_action WHERE id IN(" + "SELECT id FROM (" + "SELECT id FROM sp_action" + " WHERE target=" + Jpa
+                .nativeQueryParamPrefix() + "target" + " ORDER BY id ASC" + " LIMIT " + numberOfActions + ") AS sub" + ")";
         Query query = entityManager.createNativeQuery(SQL);
         query.setParameter("target", targetId);
         query.executeUpdate();

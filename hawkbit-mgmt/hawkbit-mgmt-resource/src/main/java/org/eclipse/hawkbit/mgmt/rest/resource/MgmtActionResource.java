@@ -50,6 +50,7 @@ public class MgmtActionResource implements MgmtActionRestApi {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger("DEPRECATED_USAGE");
+
     @Override
     public ResponseEntity<PagedList<MgmtAction>> getActions(
             final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam,
@@ -96,7 +97,7 @@ public class MgmtActionResource implements MgmtActionRestApi {
     }
 
     @Override
-    @AuditLog(entity = "Actions",type = AuditLog.Type.DELETE, description = "Delete Action", logResponse = true)
+    @AuditLog(entity = "Actions", type = AuditLog.Type.DELETE, description = "Delete Action", logResponse = true)
     public ResponseEntity<Void> deleteAction(Long actionId) {
         deploymentManagement.deleteAction(actionId);
         return ResponseEntity.ok().build();

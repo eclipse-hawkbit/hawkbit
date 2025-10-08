@@ -178,7 +178,8 @@ public class JpaRolloutManagement implements RolloutManagement {
         this.contextAware = contextAware;
         this.repositoryProperties = repositoryProperties;
 
-        this.onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, actionRepository, actionStatusRepository,
+        this.onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, actionRepository,
+                actionStatusRepository,
                 quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties, null);
     }
 
@@ -203,8 +204,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout create(
             final Create rollout, final int amountGroup, final boolean confirmationRequired,
             final RolloutGroupConditions conditions, final DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
@@ -231,8 +232,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         rolloutRequest.setDynamic(rollout.isDynamic()); // TODO - copy compares isDynamic == false and don't set it to false - remain null
         // scheduled rollout, the creator shall have permissions to start rollout
         if (rolloutRequest.getStartAt() != null && rolloutRequest.getStartAt() != Long.MAX_VALUE && // if scheduled rollout
-                !systemSecurityContext.hasPermission(SpPermission.HANDLE_ROLLOUT) &&
-                !systemSecurityContext.hasPermission(SpRole.SYSTEM_ROLE)) {
+                !systemSecurityContext.hasPermission(SpPermission.HANDLE_ROLLOUT) && !systemSecurityContext.hasPermission(SpRole.SYSTEM_ROLE)) {
             throw new InsufficientPermissionException("You need permission to start rollouts to create a scheduled rollout");
         }
         if (dynamicRolloutGroupTemplate != null && !rolloutRequest.isDynamic()) {
@@ -245,8 +245,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout create(
             @NotNull @Valid Create create, int amountGroup, boolean confirmationRequired,
             @NotNull RolloutGroupConditions conditions) {
@@ -255,8 +255,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout create(final Create rollout, final List<GroupCreate> groups, final RolloutGroupConditions conditions) {
         if (groups.isEmpty()) {
             throw new ValidationException("The amount of groups cannot be 0");
@@ -340,13 +340,13 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void pauseRollout(final long rolloutId) {
         final JpaRollout rollout = rolloutRepository.getById(rolloutId);
         if (RolloutStatus.RUNNING != rollout.getStatus()) {
-            throw new RolloutIllegalStateException("Rollout can only be paused in state running but current state is " +
-                    rollout.getStatus().name().toLowerCase());
+            throw new RolloutIllegalStateException("Rollout can only be paused in state running but current state is " + rollout.getStatus()
+                    .name().toLowerCase());
         }
         // setting the complete rollout only in paused state. This is sufficient due the currently running groups will be completed and
         // new groups are not started until rollout goes back to running state again. The periodically check for running rollouts will skip
@@ -357,13 +357,13 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void resumeRollout(final long rolloutId) {
         final JpaRollout rollout = rolloutRepository.getById(rolloutId);
         if (RolloutStatus.PAUSED != rollout.getStatus()) {
-            throw new RolloutIllegalStateException("Rollout can only be resumed in state paused but current state is " +
-                    rollout.getStatus().name().toLowerCase());
+            throw new RolloutIllegalStateException("Rollout can only be resumed in state paused but current state is " + rollout.getStatus()
+                    .name().toLowerCase());
         }
         rollout.setStatus(RolloutStatus.RUNNING);
         rolloutRepository.save(rollout);
@@ -371,16 +371,16 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout approveOrDeny(final long rolloutId, final Rollout.ApprovalDecision decision) {
         return approveOrDeny0(rolloutId, decision, null);
     }
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout approveOrDeny(final long rolloutId, final Rollout.ApprovalDecision decision, final String remark) {
         return approveOrDeny0(rolloutId, decision, remark);
     }
@@ -411,8 +411,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout start(final long rolloutId) {
         log.debug("startRollout called for rollout {}", rolloutId);
 
@@ -425,8 +425,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout update(final Update update) {
         final JpaRollout rollout = rolloutRepository.getById(update.getId());
         checkIfDeleted(update.getId(), rollout.getStatus());
@@ -437,8 +437,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout stop(long rolloutId) {
         final JpaRollout jpaRollout = rolloutRepository.getById(rolloutId);
 
@@ -454,8 +454,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long rolloutId) {
         this.delete0(rolloutRepository.getById(rolloutId));
     }
@@ -483,8 +483,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void triggerNextGroup(final long rolloutId) {
         final JpaRollout rollout = rolloutRepository.getById(rolloutId);
         if (RolloutStatus.RUNNING != rollout.getStatus()) {
@@ -521,10 +521,10 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     private void softCancelActionsOfRollout(final Rollout rollout) {
         final List<JpaAction> actions = actionRepository.findAll(
-                        ActionSpecifications
-                                .byRolloutIdAndActiveAndStatusIsNot(rollout.getId(),
-                                        List.of(Action.Status.CANCELING)), // avoid cancelling state here, because it is count as still active
-                        Pageable.ofSize(MAX_ACTIONS))
+                ActionSpecifications
+                        .byRolloutIdAndActiveAndStatusIsNot(rollout.getId(),
+                                List.of(Action.Status.CANCELING)), // avoid cancelling state here, because it is count as still active
+                Pageable.ofSize(MAX_ACTIONS))
                 .getContent();
         log.info("Found {} active actions for rollout {}, performing soft cancel.", actions.size(), rollout.getId());
 
@@ -581,15 +581,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     private int updateTargetAssignedDsWithFirstActiveAction(List<Long> targetIds) {
         final Query updateQuery = entityManager.createNativeQuery(
-                "UPDATE sp_target t " +
-                        "SET t.assigned_distribution_set = ( " +
-                        "SELECT a.distribution_set" +
-                        "   FROM sp_action a" +
-                        "   WHERE a.target = t.id AND a.active = 1" +
-                        "   ORDER BY a.id ASC" +
-                        "   LIMIT 1" +
-                        ") " +
-                        "WHERE t.id IN (" + Jpa.formatNativeQueryInClause("tid", targetIds) + ")"
+                "UPDATE sp_target t " + "SET t.assigned_distribution_set = ( " + "SELECT a.distribution_set" + "   FROM sp_action a" + "   WHERE a.target = t.id AND a.active = 1" + "   ORDER BY a.id ASC" + "   LIMIT 1" + ") " + "WHERE t.id IN (" + Jpa
+                        .formatNativeQueryInClause("tid", targetIds) + ")"
         );
         Jpa.setNativeQueryInParameter(updateQuery, "tid", targetIds);
         final int updated = updateQuery.executeUpdate();
@@ -600,11 +593,9 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     private int updateTargetAssignedDsWithInstalledIfNoActiveActions(List<Long> targetIds) {
         final Query updateQuery = entityManager.createNativeQuery(
-                "UPDATE sp_target t " +
-                        "SET t.assigned_distribution_set = t.installed_distribution_set, t.update_status = 1 " +
-                        "WHERE t.id IN (" + Jpa.formatNativeQueryInClause("tid", targetIds) + ") " +
-                        "    AND (SELECT count(*) FROM sp_action a " +
-                        "        WHERE a.target=t.id and a.active=1) = 0"
+                "UPDATE sp_target t " + "SET t.assigned_distribution_set = t.installed_distribution_set, t.update_status = 1 " + "WHERE t.id IN (" + Jpa
+                        .formatNativeQueryInClause("tid",
+                                targetIds) + ") " + "    AND (SELECT count(*) FROM sp_action a " + "        WHERE a.target=t.id and a.active=1) = 0"
         );
         Jpa.setNativeQueryInParameter(updateQuery, "tid", targetIds);
         final int updated = updateQuery.executeUpdate();

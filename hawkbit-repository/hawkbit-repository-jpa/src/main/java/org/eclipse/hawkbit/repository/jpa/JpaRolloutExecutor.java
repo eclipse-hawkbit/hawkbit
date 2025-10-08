@@ -94,8 +94,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     /**
      * In case of DOWNLOAD_ONLY, actions can be finished with DOWNLOADED status.
      */
-    private static final List<Status> DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES =
-            List.of(Status.ERROR, Status.FINISHED, Status.CANCELED, Status.DOWNLOADED);
+    private static final List<Status> DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES = List.of(Status.ERROR, Status.FINISHED, Status.CANCELED,
+            Status.DOWNLOADED);
     private static final Comparator<RolloutGroup> DESC_COMP = Comparator.comparingLong(RolloutGroup::getId).reversed();
     private static final String TRANSACTION_ASSIGNING_TARGETS_TO_ROLLOUT_GROUP_FAILED = "Transaction assigning Targets to RolloutGroup failed";
 
@@ -155,12 +155,12 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     public void execute(final Rollout rollout) {
         rollout.getAccessControlContext().ifPresentOrElse(
                 context -> // has stored context - executes it with it
-                        contextAware.runInContext(context, () -> execute0(rollout)),
+                contextAware.runInContext(context, () -> execute0(rollout)),
                 () -> // has no stored context - executes it in the tenant & user scope
-                        contextAware.runAsTenantAsUser(contextAware.getCurrentTenant(), rollout.getCreatedBy(), () -> {
-                            execute0(rollout);
-                            return null;
-                        }));
+                contextAware.runAsTenantAsUser(contextAware.getCurrentTenant(), rollout.getCreatedBy(), () -> {
+                    execute0(rollout);
+                    return null;
+                }));
     }
 
     private void execute0(final Rollout rollout) {
@@ -218,8 +218,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         log.debug("handleCreateRollout called for rollout {}", rollout.getId());
 
         final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(
-                        rollout.getId(),
-                        PageRequest.of(0, quotaManagement.getMaxRolloutGroupsPerRollout(), Sort.by(Direction.ASC, "id")))
+                rollout.getId(),
+                PageRequest.of(0, quotaManagement.getMaxRolloutGroupsPerRollout(), Sort.by(Direction.ASC, "id")))
                 .getContent();
 
         int readyGroups = 0;
@@ -515,11 +515,11 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private boolean isRolloutGroupComplete(final JpaRollout rollout, final JpaRolloutGroup rolloutGroup) {
-        final Long actionsLeftForRollout =
-                actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(
-                        rollout, rolloutGroup,
-                        ActionType.DOWNLOAD_ONLY == rollout.getActionType() ?
-                                DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES : DEFAULT_ACTION_TERMINATION_STATUSES);
+        final Long actionsLeftForRollout = actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(
+                rollout, rolloutGroup,
+                ActionType.DOWNLOAD_ONLY == rollout.getActionType()
+                        ? DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES
+                        : DEFAULT_ACTION_TERMINATION_STATUSES);
         return actionsLeftForRollout == 0;
     }
 

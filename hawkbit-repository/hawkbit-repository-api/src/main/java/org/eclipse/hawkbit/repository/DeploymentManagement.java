@@ -300,6 +300,7 @@ public interface DeploymentManagement extends PermissionSupport {
 
     /**
      * Deletes the current action by id.
+     * 
      * @param actionId - action id
      */
     @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
@@ -307,6 +308,7 @@ public interface DeploymentManagement extends PermissionSupport {
 
     /**
      * Deletes actions matching the provided rsql filter
+     * 
      * @param rsql - rsql filter for actions to be deleted
      */
     @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
@@ -314,6 +316,7 @@ public interface DeploymentManagement extends PermissionSupport {
 
     /**
      * Deletes actions present in provided list of ids
+     * 
      * @param actionIds - list of action ids to be deleted
      */
     @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)

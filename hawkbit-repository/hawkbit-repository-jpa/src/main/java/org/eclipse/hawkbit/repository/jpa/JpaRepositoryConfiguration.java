@@ -303,8 +303,8 @@ public class JpaRepositoryConfiguration {
 
     /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
-     *         accessible in beans which cannot access the service directly, e.g.
-     *         JPA entities.
+     *             accessible in beans which cannot access the service directly, e.g.
+     *             JPA entities.
      */
     @Bean
     SystemSecurityContextHolder systemSecurityContextHolder() {
@@ -313,8 +313,8 @@ public class JpaRepositoryConfiguration {
 
     /**
      * @return the {@link TenantConfigurationManagement} singleton bean which make
-     *         it accessible in beans which cannot access the service directly, e.g.
-     *         JPA entities.
+     *             it accessible in beans which cannot access the service directly, e.g.
+     *             JPA entities.
      */
     @Bean
     TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
@@ -323,8 +323,8 @@ public class JpaRepositoryConfiguration {
 
     /**
      * @return the {@link TenantAwareHolder} singleton bean which holds the current
-     *         {@link TenantAware} service and make it accessible in beans which
-     *         cannot access the service directly, e.g. JPA entities.
+     *             {@link TenantAware} service and make it accessible in beans which
+     *             cannot access the service directly, e.g. JPA entities.
      */
     @Bean
     TenantAwareHolder tenantAwareHolder() {
@@ -333,8 +333,8 @@ public class JpaRepositoryConfiguration {
 
     /**
      * @return the {@link SecurityTokenGeneratorHolder} singleton bean which holds
-     *         the current {@link SecurityTokenGenerator} service and make it
-     *         accessible in beans which cannot access the service via injection
+     *             the current {@link SecurityTokenGenerator} service and make it
+     *             accessible in beans which cannot access the service via injection
      */
     @Bean
     SecurityTokenGeneratorHolder securityTokenGeneratorHolder() {

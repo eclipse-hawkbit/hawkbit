@@ -122,15 +122,21 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      * Maximum amount of Actions that are started at once.
      */
     private static final int ACTION_PAGE_LIMIT = 1000;
-    private static final String QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED_DEFAULT = "DELETE FROM sp_action " + "WHERE tenant=" + Jpa.nativeQueryParamPrefix() + "tenant" + " AND status IN (%s)" + " AND last_modified_at<" + Jpa.nativeQueryParamPrefix() + "last_modified_at LIMIT " + ACTION_PAGE_LIMIT;
+    private static final String QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED_DEFAULT = "DELETE FROM sp_action " + "WHERE tenant=" + Jpa
+            .nativeQueryParamPrefix() + "tenant" + " AND status IN (%s)" + " AND last_modified_at<" + Jpa
+                    .nativeQueryParamPrefix() + "last_modified_at LIMIT " + ACTION_PAGE_LIMIT;
     private static final EnumMap<Database, String> QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED;
 
     static {
         QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED = new EnumMap<>(Database.class);
         QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.put(Database.SQL_SERVER,
-                "DELETE TOP (" + ACTION_PAGE_LIMIT + ") FROM sp_action " + "WHERE tenant=" + Jpa.nativeQueryParamPrefix() + "tenant" + " AND status IN (%s)" + " AND last_modified_at<" + Jpa.nativeQueryParamPrefix() + "last_modified_at ");
+                "DELETE TOP (" + ACTION_PAGE_LIMIT + ") FROM sp_action " + "WHERE tenant=" + Jpa
+                        .nativeQueryParamPrefix() + "tenant" + " AND status IN (%s)" + " AND last_modified_at<" + Jpa
+                                .nativeQueryParamPrefix() + "last_modified_at ");
         QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.put(Database.POSTGRESQL,
-                "DELETE FROM sp_action " + "WHERE id IN (SELECT id FROM sp_action " + "WHERE tenant=" + Jpa.nativeQueryParamPrefix() + "tenant" + " AND status IN (%s)" + " AND last_modified_at<" + Jpa.nativeQueryParamPrefix() + "last_modified_at LIMIT " + ACTION_PAGE_LIMIT + ")");
+                "DELETE FROM sp_action " + "WHERE id IN (SELECT id FROM sp_action " + "WHERE tenant=" + Jpa
+                        .nativeQueryParamPrefix() + "tenant" + " AND status IN (%s)" + " AND last_modified_at<" + Jpa
+                                .nativeQueryParamPrefix() + "last_modified_at LIMIT " + ACTION_PAGE_LIMIT + ")");
     }
 
     private final EntityManager entityManager;
@@ -164,9 +170,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         this.auditorProvider = auditorProvider;
         this.txManager = txManager;
         onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, actionRepository, actionStatusRepository,
-                quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties, targetAssignmentsChecker);
+                quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties,
+                targetAssignmentsChecker);
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, afterCommit, actionRepository, actionStatusRepository,
-                quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties, targetAssignmentsChecker);
+                quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties,
+                targetAssignmentsChecker);
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;
@@ -217,8 +225,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action cancelAction(final long actionId) {
         return cancelAction0(actionId);
     }
@@ -717,8 +725,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private DistributionSetAssignmentResult assignDistributionSetToTargetsWithRetry(
             final String initiatedBy, final Long dsId, final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy) {
-        return retryTemplate.execute(retryContext ->
-                assignDistributionSetToTargets(initiatedBy, dsId, targetsWithActionType, actionMessage, assignmentStrategy));
+        return retryTemplate.execute(retryContext -> assignDistributionSetToTargets(initiatedBy, dsId, targetsWithActionType, actionMessage,
+                assignmentStrategy));
     }
 
     /**
@@ -741,7 +749,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      * @param assignmentStrategy the assignment strategy (online /offline)
      * @return the assignment result
      * @throws IncompleteDistributionSetException if mandatory {@link SoftwareModuleType} are not assigned as define by the
-     *         {@link DistributionSetType}.
+     *             {@link DistributionSetType}.
      */
     private DistributionSetAssignmentResult assignDistributionSetToTargets(
             final String initiatedBy, final Long dsId, final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
@@ -803,8 +811,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         // not active before and the manual assignment which has been done cancels them
         targetEntitiesIdsChunks.forEach(this::cancelInactiveScheduledActionsForTargets);
         setAssignedDistributionSetAndTargetUpdateStatus(assignmentStrategy, distributionSetEntity, targetEntitiesIdsChunks);
-        final Map<TargetWithActionType, JpaAction> assignedActions =
-                createActions(targetsWithActionType, targetEntities, distributionSetEntity, assignmentStrategy, initiatedBy);
+        final Map<TargetWithActionType, JpaAction> assignedActions = createActions(targetsWithActionType, targetEntities, distributionSetEntity,
+                assignmentStrategy, initiatedBy);
         // create initial action status when action is created, so we remember
         // the initial running status because we will change the status
         // of the action itself and with this action status we have a nicer action history.
@@ -1020,8 +1028,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         targetRepository.findOne(TargetSpecifications.hasId(action.getTarget().getId())).ifPresentOrElse(
                 target -> targetRepository.getAccessController()
                         .ifPresent(acm -> acm.assertOperationAllowed(AccessController.Operation.UPDATE, target)), () -> {
-                    throw new EntityNotFoundException(Action.class, action);
-                });
+                            throw new EntityNotFoundException(Action.class, action);
+                        });
         return action;
     }
 
