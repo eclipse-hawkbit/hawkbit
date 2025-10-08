@@ -568,7 +568,6 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action2.getId(), getJsonClosedCancelActionFeedback(), status().isOk());
         findTargetAndAssertUpdateStatus(Optional.of(ds), TargetUpdateStatus.IN_SYNC, 0, Optional.of(ds));
         assertTargetCountByStatus(0, 0, 1);
-        assertThat(deploymentManagement.findInActiveActionsByTarget(DEFAULT_CONTROLLER_ID, PAGE)).hasSize(2);
         assertThat(countActionStatusAll()).isEqualTo(4);
         assertThat(deploymentManagement.findActionStatusByAction(action.getId(), PAGE).getContent())
                 .haveAtLeast(1, new ActionStatusCondition(Status.ERROR));

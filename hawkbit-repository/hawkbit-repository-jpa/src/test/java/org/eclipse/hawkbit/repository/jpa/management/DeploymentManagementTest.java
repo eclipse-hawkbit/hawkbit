@@ -161,7 +161,6 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> deploymentManagement.findActionsByTarget("id==*", NOT_EXIST_ID, PAGE), "Target");
 
         verifyThrownExceptionBy(() -> deploymentManagement.findActiveActionsByTarget(NOT_EXIST_ID, PAGE), "Target");
-        verifyThrownExceptionBy(() -> deploymentManagement.findInActiveActionsByTarget(NOT_EXIST_ID, PAGE), "Target");
         verifyThrownExceptionBy(() -> deploymentManagement.forceQuitAction(NOT_EXIST_IDL), "Action");
         verifyThrownExceptionBy(() -> deploymentManagement.forceTargetAction(NOT_EXIST_IDL), "Action");
     }
@@ -1443,9 +1442,6 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         targ = targetManagement.getByControllerId(targ.getControllerId());
         assertEquals(0, deploymentManagement.findActiveActionsByTarget(targ.getControllerId(), PAGE).getTotalElements(),
                 "active target actions are wrong");
-        assertEquals(1,
-                deploymentManagement.findInActiveActionsByTarget(targ.getControllerId(), PAGE).getTotalElements(),
-                "active actions are wrong");
 
         assertEquals(TargetUpdateStatus.IN_SYNC, targ.getUpdateStatus(), "tagret update status is not correct");
         assertEquals(dsA, deploymentManagement.findAssignedDistributionSet(targ.getControllerId()).get(),

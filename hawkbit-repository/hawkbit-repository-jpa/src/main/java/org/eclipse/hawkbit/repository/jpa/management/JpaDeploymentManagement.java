@@ -348,13 +348,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    public Page<Action> findInActiveActionsByTarget(final String controllerId, final Pageable pageable) {
-        assertTargetReadAllowed(controllerId);
-        return actionRepository.findAll(ActionSpecifications.byTargetControllerIdAndActive(controllerId, false), pageable)
-                .map(Action.class::cast);
-    }
-
-    @Override
     public List<Action> findActiveActionsWithHighestWeight(final String controllerId, final int maxActionCount) {
         assertTargetReadAllowed(controllerId);
         return findActiveActionsWithHighestWeightConsideringDefault(controllerId, maxActionCount);
