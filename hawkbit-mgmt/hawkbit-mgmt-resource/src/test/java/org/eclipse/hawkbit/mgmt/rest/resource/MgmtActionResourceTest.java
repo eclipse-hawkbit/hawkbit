@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
 /**
@@ -479,9 +480,6 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         mvc.perform(put(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
-        mvc.perform(delete(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isMethodNotAllowed());
     }
 
     /**
@@ -508,6 +506,97 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/" + 101))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldSuccessfullyDeleteSingleAction() throws Exception {
+        List<DistributionSetAssignmentResult> assignmentResults = createTargetsAndPerformAssignment(2);
+        Action action1 = assignmentResults.get(0).getAssignedEntity().get(0);
+        Action action2 = assignmentResults.get(1).getAssignedEntity().get(0);
+
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+
+                // verify action 1
+                .andExpect(jsonPath("content.[0].id", equalTo(action1.getId().intValue())))
+                .andExpect(jsonPath("content.[1].id", equalTo(action2.getId().intValue())));
+
+        mvc.perform(delete(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/" + action1.getId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/" + action1.getId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldSuccessfullyDeleteMultipleActions() throws Exception {
+        final List<DistributionSetAssignmentResult> assignmentResults = createTargetsAndPerformAssignment(4);
+
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+
+                // verify action 1
+                .andExpect(jsonPath("content.[0].id", equalTo(assignmentResults.get(0).getAssignedEntity().get(0).getId().intValue())))
+                .andExpect(jsonPath("content.[1].id", equalTo(assignmentResults.get(1).getAssignedEntity().get(0).getId().intValue())))
+                .andExpect(jsonPath("content.[2].id", equalTo(assignmentResults.get(2).getAssignedEntity().get(0).getId().intValue())))
+                .andExpect(jsonPath("content.[3].id", equalTo(assignmentResults.get(3).getAssignedEntity().get(0).getId().intValue())));
+
+        final List<Long> actionIdsToDelete = new ArrayList<>();
+        long deletedActionId1 = assignmentResults.get(2).getAssignedEntity().get(0).getId();
+        actionIdsToDelete.add(deletedActionId1);
+        long deletedActionId2 = assignmentResults.get(3).getAssignedEntity().get(0).getId();
+        actionIdsToDelete.add(deletedActionId2);
+
+        mvc.perform(delete(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)
+                .content(toJson(actionIdsToDelete)).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/" + deletedActionId1))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/" + deletedActionId2))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
+        Action deletedAction3 = assignmentResults.get(1).getAssignedEntity().get(0);
+        String rsql = "target.name==" + deletedAction3.getTarget().getName();
+
+        mvc.perform(delete(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, rsql).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/" + deletedAction3.getId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
+
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/" + assignmentResults.get(0).getAssignedEntity().get(0).getId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldReceiveBadRequestIfBodyAndRsqlAreNotProvided() throws Exception {
+        mvc.perform(delete(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    private List<DistributionSetAssignmentResult> createTargetsAndPerformAssignment(int n) {
+        final List<Target> targets = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            targets.add(testdataFactory.createTarget("target-" + i));
+        }
+
+        final List<DistributionSetAssignmentResult> results = new ArrayList<>();
+        for (Target target : targets) {
+            DistributionSet distributionSet = testdataFactory.createDistributionSet();
+            results.add(assignDistributionSet(distributionSet.getId(), target.getControllerId()));
+        }
+        return results;
     }
 
     private static String generateActionLink(final String targetId, final Long actionId) {

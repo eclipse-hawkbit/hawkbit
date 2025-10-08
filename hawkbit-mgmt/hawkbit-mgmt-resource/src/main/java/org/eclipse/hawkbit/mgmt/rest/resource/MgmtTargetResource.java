@@ -227,6 +227,23 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
+    @AuditLog(entity = "Target", type = AuditLog.Type.DELETE, description = "Delete Actions For Target")
+    public ResponseEntity<Void> deleteActionsForTarget(final String targetId, final int numberOfActions, final List<Long> actionIds) {
+
+        if (numberOfActions <= 0 && actionIds == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (actionIds != null) {
+            deploymentManagement.deleteTargetActionsByIds(targetId, actionIds);
+        } else {
+            deploymentManagement.deleteTargetActions(targetId, numberOfActions);
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
     public ResponseEntity<MgmtAction> getAction(final String targetId, final Long actionId) {
         return getValidatedAction(targetId, actionId)
                 .map(action -> ResponseEntity.ok(MgmtTargetMapper.toResponseWithLinks(targetId, action)))

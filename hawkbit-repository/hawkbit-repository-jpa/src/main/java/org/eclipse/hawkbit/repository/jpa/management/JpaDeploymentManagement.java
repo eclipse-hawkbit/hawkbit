@@ -54,6 +54,7 @@ import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledExcep
 import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
+import org.eclipse.hawkbit.repository.jpa.actions.TargetAssignmentsChecker;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
@@ -145,6 +146,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final AuditorAware<String> auditorAware;
     private final Database database;
     private final RetryTemplate retryTemplate;
+    private final TargetAssignmentsChecker targetAssignmentsChecker;
 
     @SuppressWarnings("java:S107")
     protected JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
@@ -153,7 +155,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final AfterTransactionCommitExecutor afterCommit, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final AuditorAware<String> auditorAware,
-            final JpaProperties jpaProperties, final RepositoryProperties repositoryProperties) {
+            final JpaProperties jpaProperties, final RepositoryProperties repositoryProperties,
+            final TargetAssignmentsChecker targetAssignmentsChecker) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
         this.entityManager = entityManager;
         this.distributionSetManagement = distributionSetManagement;
@@ -161,15 +164,16 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         this.auditorProvider = auditorProvider;
         this.txManager = txManager;
         onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, actionRepository, actionStatusRepository,
-                quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties);
+                quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties, targetAssignmentsChecker);
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, afterCommit, actionRepository, actionStatusRepository,
-                quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties);
+                quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties, targetAssignmentsChecker);
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;
         this.auditorAware = auditorAware;
         this.database = jpaProperties.getDatabase();
         this.retryTemplate = createRetryTemplate();
+        this.targetAssignmentsChecker = targetAssignmentsChecker;
     }
 
     @Override
@@ -399,6 +403,45 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             return actionRepository.save(action);
         }
         return action;
+    }
+
+    @Override
+    public void deleteAction(final long actionId) {
+        log.info("Deleting action {}", actionId);
+        actionRepository.deleteById(actionId);
+    }
+
+    @Override
+    public void deleteActionsByRsql(final String rsql) {
+        log.info("Deleting actions matching rsql {}", rsql);
+        final Specification<JpaAction> specification = QLSupport.getInstance().buildSpec(rsql, ActionFields.class);
+        actionRepository.delete(specification);
+    }
+
+    @Override
+    public void deleteActionsByIds(final List<Long> actionIds) {
+        log.info("Deleting actions with ids {}", actionIds);
+        actionRepository.deleteByIdIn(actionIds);
+    }
+
+    @Override
+    public void deleteTargetActionsByIds(final String target, final List<Long> actionsIds) {
+        log.info("Delete actions for target {} with action ids {}", target, actionsIds);
+        actionRepository.delete(ActionSpecifications.byControllerIdAndIdIn(target, actionsIds));
+    }
+
+    @Override
+    @Transactional
+    public void deleteTargetActions(final String target, final int numberOfActions) {
+        final JpaTarget jpaTarget = targetRepository.findByControllerId(target)
+                .orElseThrow(EntityNotFoundException::new);
+
+        final long targetActions = actionRepository.countByTargetId(jpaTarget.getId());
+        if (targetActions <= numberOfActions) {
+            throw new IllegalArgumentException("Number of actions should be smaller than total number of target actions.");
+        }
+
+        targetAssignmentsChecker.deleteLastTargetActions(jpaTarget.getId(), (int) targetActions - numberOfActions);
     }
 
     @Override
@@ -777,14 +820,22 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private void enforceMaxActionsPerTarget(final Collection<DeploymentRequest> deploymentRequests) {
-        final int quota = quotaManagement.getMaxActionsPerTarget();
-
         final Map<String, Long> countOfTargetInRequest = deploymentRequests.stream().map(DeploymentRequest::getControllerId)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-        countOfTargetInRequest.forEach(
-                (controllerId, count) -> QuotaHelper.assertAssignmentQuota(controllerId, count, quota, Action.class, Target.class,
-                        actionRepository::countByTargetControllerId));
+        countOfTargetInRequest.forEach(this::checkMaxAssignmentQuota);
+    }
+
+    private void checkMaxAssignmentQuota(final String controllerId, long requested) {
+        final int quota = quotaManagement.getMaxActionsPerTarget();
+        systemSecurityContext.runAsSystem(() -> {
+            final Optional<JpaTarget> opt = targetRepository.findByControllerId(controllerId);
+            if (opt.isPresent()) {
+                final Target target = opt.get();
+                targetAssignmentsChecker.checkActionsPerTargetQuota(target.getId(), requested, quota, actionRepository::countByTargetId);
+            }
+            return null;
+        });
     }
 
     private void closeOrCancelActiveActions(final AbstractDsAssignmentStrategy assignmentStrategy, final List<List<Long>> targetIdsChunks) {

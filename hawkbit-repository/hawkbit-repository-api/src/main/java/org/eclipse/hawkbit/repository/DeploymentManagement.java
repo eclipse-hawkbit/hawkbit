@@ -299,6 +299,45 @@ public interface DeploymentManagement extends PermissionSupport {
     Action forceTargetAction(long actionId);
 
     /**
+     * Deletes the current action by id.
+     * @param actionId - action id
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
+    void deleteAction(long actionId);
+
+    /**
+     * Deletes actions matching the provided rsql filter
+     * @param rsql - rsql filter for actions to be deleted
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
+    void deleteActionsByRsql(String rsql);
+
+    /**
+     * Deletes actions present in provided list of ids
+     * @param actionIds - list of action ids to be deleted
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
+    void deleteActionsByIds(List<Long> actionIds);
+
+    /**
+     * Deletes actions in scope of the target ONLY by list of action ids.
+     *
+     * @param target - target controllerId
+     * @param actionsIds - list of action ids to be deleted
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
+    void deleteTargetActionsByIds(final String target, final List<Long> actionsIds);
+
+    /**
+     * Deletes target actions and leaves the LAST N actions in the action history only.
+     *
+     * @param target - target controllerId
+     * @param numberOfActions - number of actions to be left (NOT deleted)
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
+    void deleteTargetActions(final String target, final int numberOfActions);
+
+    /**
      * Sets the status of inactive scheduled {@link Action}s for the specified {@link Target}s to {@link Status#CANCELED}
      *
      * @param targetIds ids of the {@link Target}s the actions belong to
