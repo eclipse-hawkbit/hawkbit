@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
  * Feature: Component Tests - Access Control<br/>
  * Story: Test Distribution Set Access Controller
  */
-class TargetTypeQueryManagementTest extends AbstractAccessControllerTest {
+class TargetTypeQueryManagementTest extends AbstractAccessControllerManagementTest {
 
     @Test
     void verifyAutoAssignmentRestrictionByDs() {

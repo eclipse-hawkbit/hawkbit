@@ -39,7 +39,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface TargetTypeManagement<T extends TargetType>
         extends RepositoryManagement<T, TargetTypeManagement.Create, TargetTypeManagement.Update> {
 
-    String HAS_UPDATE_TARGET_TYPE_AND_READ_DISTRIBUTION_SET = SpringEvalExpressions.HAS_UPDATE_REPOSITORY + " and hasAuthority('READ_" + SpPermission.DISTRIBUTION_SET + "')";
+    String HAS_UPDATE_TARGET_TYPE_AND_READ_DISTRIBUTION_SET_TYPE = SpringEvalExpressions.HAS_UPDATE_REPOSITORY + " and hasAuthority('READ_" + SpPermission.DISTRIBUTION_SET_TYPE + "')";
 
     @Override
     default String permissionGroup() {
@@ -58,7 +58,7 @@ public interface TargetTypeManagement<T extends TargetType>
      * @param distributionSetTypeIds Distribution set ID
      * @return Target type
      */
-    @PreAuthorize(HAS_UPDATE_TARGET_TYPE_AND_READ_DISTRIBUTION_SET)
+    @PreAuthorize(HAS_UPDATE_TARGET_TYPE_AND_READ_DISTRIBUTION_SET_TYPE)
     TargetType assignCompatibleDistributionSetTypes(long id, @NotEmpty Collection<Long> distributionSetTypeIds);
 
     /**
@@ -66,7 +66,7 @@ public interface TargetTypeManagement<T extends TargetType>
      * @param distributionSetTypeIds Distribution set ID
      * @return Target type
      */
-    @PreAuthorize(HAS_UPDATE_TARGET_TYPE_AND_READ_DISTRIBUTION_SET)
+    @PreAuthorize(HAS_UPDATE_TARGET_TYPE_AND_READ_DISTRIBUTION_SET_TYPE)
     TargetType unassignDistributionSetType(long id, long distributionSetTypeIds);
 
     @SuperBuilder

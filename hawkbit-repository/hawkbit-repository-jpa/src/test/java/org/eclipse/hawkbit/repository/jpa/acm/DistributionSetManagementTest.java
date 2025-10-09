@@ -32,7 +32,7 @@ import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.junit.jupiter.api.Test;
 
-class DistributionSetManagementTest extends AbstractAccessControllerTest {
+class DistributionSetManagementTest extends AbstractAccessControllerManagementTest {
 
     @Test
     void verifyCreate() {

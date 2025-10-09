@@ -29,11 +29,11 @@ import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.junit.jupiter.api.Test;
 
-class SoftwareModuleTypeManagementTest extends AbstractAccessControllerTest {
+class SoftwareModuleTypeManagementTest extends AbstractAccessControllerManagementTest {
 
     @Test
     void verifyCreate() {
-        // permissions to read only type1 sm types and create new type with name 'permitted'
+        // permissions to read all and create new type with name 'permitted'
         runAs(withAuthorities(READ_PREFIX + SOFTWARE_MODULE_TYPE, CREATE_PREFIX + SOFTWARE_MODULE_TYPE + "/key==permitted"), () -> {
             assertThat(testdataFactory.findOrCreateSoftwareModuleType("permitted")).isNotNull();
             assertThatThrownBy(() -> testdataFactory.findOrCreateSoftwareModuleType("not_permitted_2"))

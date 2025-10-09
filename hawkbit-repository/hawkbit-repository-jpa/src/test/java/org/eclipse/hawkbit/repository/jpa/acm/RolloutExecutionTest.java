@@ -18,14 +18,16 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TARGET;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_TARGET;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
 
+import java.util.Arrays;
 import java.util.Optional;
 
+import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.jpa.rollout.RolloutScheduler;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.jupiter.api.Test;
 
-class RolloutExecutionTest extends AbstractAccessControllerTest {
+class RolloutExecutionTest extends AbstractAccessControllerManagementTest {
 
     @Test
     void verifyOnlyUpdatableTargetsArePartOfRolloutExecutedByScheduler() {
@@ -66,7 +68,8 @@ class RolloutExecutionTest extends AbstractAccessControllerTest {
 
         assertThat(rolloutGroupManagement.findByRollout(rollout.getId(), UNPAGED).getContent().stream()
                 .flatMap(rolloutGroup -> rolloutGroupManagement.findTargetsOfRolloutGroup(rolloutGroup.getId(), UNPAGED).stream()))
+                .extracting(Identifiable::getId)
                 .as("Only updatable targets should be part of the rollout")
-                .containsExactly(expectedTargets);
+                .containsExactly(Arrays.stream(expectedTargets).map(Identifiable::getId).toArray(Long[]::new));
     }
 }

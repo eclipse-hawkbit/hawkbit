@@ -30,11 +30,11 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.junit.jupiter.api.Test;
 
-class DistributionSetTypeManagementTest extends AbstractAccessControllerTest {
+class DistributionSetTypeManagementTest extends AbstractAccessControllerManagementTest {
 
     @Test
     void verifyCreate() {
-        // permissions to read only type1 ds types and create new type with name 'permitted'
+        // permissions to read all and create new type with name 'permitted'
         runAs(withAuthorities(READ_PREFIX + DISTRIBUTION_SET_TYPE, CREATE_PREFIX + DISTRIBUTION_SET_TYPE + "/name==permitted"), () -> {
             assertThat(testdataFactory.findOrCreateDistributionSetType("newType", "permitted")).isNotNull();
             assertThatThrownBy(() -> testdataFactory.findOrCreateDistributionSetType("newType_2", "not_permitted_2"))

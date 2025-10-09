@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.junit.jupiter.api.Test;
 
-class RolloutManagementTest extends AbstractAccessControllerTest {
+class RolloutManagementTest extends AbstractAccessControllerManagementTest {
 
     /**
      * Test is verifying that rollout details are showing details without restrictions
