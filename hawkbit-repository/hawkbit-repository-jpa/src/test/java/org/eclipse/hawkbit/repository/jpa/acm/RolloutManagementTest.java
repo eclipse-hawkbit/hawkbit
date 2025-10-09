@@ -17,13 +17,8 @@ import static org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status
 import static org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status.SCHEDULED;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
 
-import java.util.List;
-
-import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.junit.jupiter.api.Test;
 
 class RolloutManagementTest extends AbstractAccessControllerTest {
