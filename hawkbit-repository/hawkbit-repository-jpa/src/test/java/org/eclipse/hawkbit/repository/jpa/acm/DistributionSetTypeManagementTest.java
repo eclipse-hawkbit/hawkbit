@@ -48,11 +48,11 @@ class DistributionSetTypeManagementTest extends AbstractAccessControllerTest {
         runAs(withAuthorities(READ_PREFIX + DISTRIBUTION_SET_TYPE + "/id==" + dsType1.getId()), () -> {
             // perform distributionSetTypeManagement#findAll and verify
             Assertions.<DistributionSetType> assertThat(distributionSetTypeManagement.findAll(UNPAGED))
-                    .hasSize(1).containsExactly(dsType1);
+                    .containsExactly(dsType1);
             assertThat(distributionSetTypeManagement.count()).isEqualTo(1);
 
             Assertions.<DistributionSetType> assertThat(distributionSetTypeManagement.findByRsql("name==*", UNPAGED))
-                    .hasSize(1).containsExactly(dsType1);
+                    .containsExactly(dsType1);
             assertThat(distributionSetTypeManagement.countByRsql("name==*")).isEqualTo(1);
 
             assertThat(distributionSetTypeManagement.exists(dsType1.getId())).isTrue();
@@ -62,7 +62,7 @@ class DistributionSetTypeManagementTest extends AbstractAccessControllerTest {
             assertThat(distributionSetTypeManagement.find(dsType2.getId())).isEmpty();
 
             Assertions.<DistributionSetType> assertThat(distributionSetTypeManagement.get(List.of(dsType1.getId())))
-                    .hasSize(1).contains(dsType1);
+                    .containsExactly(dsType1);
             final List<Long> noPermissionIdList = List.of(dsType2.getId());
             assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> distributionSetTypeManagement.get(noPermissionIdList));
             final List<Long> allPermissionsIdList = List.of(dsType1.getId(), dsType2.getId());
@@ -125,8 +125,8 @@ class DistributionSetTypeManagementTest extends AbstractAccessControllerTest {
             // soft delete since dsType1 is assigned to ds1Type1
             assertThat(distributionSetTypeManagement.find(dsType1.getId())).hasValueSatisfying(DistributionSetType::isDeleted);
 
-            final Long ds2Type2Id = dsType2.getId();
-            assertThatThrownBy(() -> distributionSetTypeManagement.delete(ds2Type2Id)).isInstanceOf(InsufficientPermissionException.class);
+            final Long dsType2Id = dsType2.getId();
+            assertThatThrownBy(() -> distributionSetTypeManagement.delete(dsType2Id)).isInstanceOf(InsufficientPermissionException.class);
         });
     }
 }

@@ -40,7 +40,7 @@ class RolloutExecutionTest extends AbstractAccessControllerTest {
         }));
     }
 
-    void verify(final Runnable run) {
+    private void verify(final Runnable run) {
         final Target[] expectedTargets = new Target[] { target1Type1 };
         runAs(withAuthorities(
                         READ_TARGET, UPDATE_TARGET + "/type.id==" + targetType1.getId(),

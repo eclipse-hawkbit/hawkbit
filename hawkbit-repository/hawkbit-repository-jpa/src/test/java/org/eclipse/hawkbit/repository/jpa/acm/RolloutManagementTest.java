@@ -32,19 +32,17 @@ class RolloutManagementTest extends AbstractAccessControllerTest {
         rolloutManagement.start(rollout.getId());
         rolloutHandler.handleAll();
 
-        runAs(withAuthorities(READ_TARGET + "/type.id==" + targetType1.getId(), READ_ROLLOUT),
-                () -> {
-                    assertThat(targetManagement.findAll(UNPAGED).stream().map(Identifiable::getId).toList())
-                            .as("Only readable targets should be returned")
-                            .containsExactly(target1Type1.getId());
-                    assertThat(rolloutManagement.getWithDetailedStatus(rollout.getId())).satisfies(rolloutWithDetails -> {
-                        assertThat(rolloutWithDetails.getTotalTargets()).as("All targets shall be returned").isEqualTo(3);
-                        assertThat(rolloutWithDetails.getRolloutGroupsCreated()).isEqualTo(rollout.getRolloutGroupsCreated());
-                        assertThat(rolloutWithDetails.getTotalTargetCountStatus().getFinishedPercent()).isZero();
-                        assertThat(rolloutWithDetails.getTotalTargetCountStatus().getTotalTargetCountByStatus(RUNNING)).isEqualTo(1);
-                        assertThat(rolloutWithDetails.getTotalTargetCountStatus().getTotalTargetCountByStatus(SCHEDULED)).isEqualTo(2);
-                        assertThat(rolloutWithDetails.getTotalTargetCountStatus().getTotalTargetCountByStatus(NOTSTARTED)).isZero();
-                    });
-                });
+        runAs(withAuthorities(READ_TARGET + "/type.id==" + targetType1.getId(), READ_ROLLOUT), () -> {
+            assertThat(targetManagement.findAll(UNPAGED).stream().map(Identifiable::getId).toList())
+                    .as("Only readable targets should be returned").containsExactly(target1Type1.getId());
+            assertThat(rolloutManagement.getWithDetailedStatus(rollout.getId())).satisfies(rolloutWithDetails -> {
+                assertThat(rolloutWithDetails.getTotalTargets()).as("All targets shall be returned").isEqualTo(3);
+                assertThat(rolloutWithDetails.getRolloutGroupsCreated()).isEqualTo(rollout.getRolloutGroupsCreated());
+                assertThat(rolloutWithDetails.getTotalTargetCountStatus().getFinishedPercent()).isZero();
+                assertThat(rolloutWithDetails.getTotalTargetCountStatus().getTotalTargetCountByStatus(RUNNING)).isEqualTo(1);
+                assertThat(rolloutWithDetails.getTotalTargetCountStatus().getTotalTargetCountByStatus(SCHEDULED)).isEqualTo(2);
+                assertThat(rolloutWithDetails.getTotalTargetCountStatus().getTotalTargetCountByStatus(NOTSTARTED)).isZero();
+            });
+        });
     }
 }

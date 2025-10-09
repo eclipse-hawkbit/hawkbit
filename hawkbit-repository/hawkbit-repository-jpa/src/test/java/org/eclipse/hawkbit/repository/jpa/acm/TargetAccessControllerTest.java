@@ -69,11 +69,11 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
         runAs(withUser("user", READ_TARGET + "/controllerId==" + permittedTarget.getControllerId()), () -> {
             // verify targetManagement#findAll
             assertThat(targetManagement.findAll(Pageable.unpaged()).get().map(Identifiable::getId).toList())
-                    .containsOnly(permittedTarget.getId());
+                    .containsExactly(permittedTarget.getId());
 
             // verify targetManagement#findByRsql
             assertThat(targetManagement.findByRsql("id==*", Pageable.unpaged()).get().map(Identifiable::getId).toList())
-                    .containsOnly(permittedTarget.getId());
+                    .containsExactly(permittedTarget.getId());
 
             // verify targetManagement#getByControllerID
             assertThat(targetManagement.getByControllerId(permittedTarget.getControllerId())).isNotNull();
@@ -88,7 +88,7 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
             // verify targetManagement#getByControllerId
             assertThat(targetManagement
                     .findByControllerId(List.of(permittedTarget.getControllerId(), hiddenTargetControllerId))
-                    .stream().map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
+                    .stream().map(Identifiable::getId).toList()).containsExactly(permittedTarget.getId());
 
             // verify targetManagement#get
             assertThat(targetManagement.find(permittedTarget.getId())).isPresent();
@@ -131,11 +131,11 @@ class TargetAccessControllerTest extends AbstractJpaIntegrationTest {
                     // verify targetManagement#findByTag
                     assertThat(
                             targetManagement.findByTag(myTagId, Pageable.unpaged()).get().map(Identifiable::getId).toList())
-                            .containsOnly(permittedTarget.getId(), readOnlyTarget.getId());
+                            .containsExactlyInAnyOrder(permittedTarget.getId(), readOnlyTarget.getId());
 
                     // verify targetManagement#findByRsqlAndTag
                     assertThat(targetManagement.findByRsqlAndTag("id==*", myTagId, Pageable.unpaged()).get()
-                            .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId(), readOnlyTarget.getId());
+                            .map(Identifiable::getId).toList()).containsExactlyInAnyOrder(permittedTarget.getId(), readOnlyTarget.getId());
 
                     // verify targetManagement#assignTag on permitted target
                     assertThat(targetManagement.assignTag(Collections.singletonList(permittedTarget.getControllerId()), myTagId)).hasSize(1);
