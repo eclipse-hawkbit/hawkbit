@@ -50,11 +50,11 @@ class TargetTypeAccessControllerTest extends AbstractJpaIntegrationTest {
         runAs(withUser("user", READ_TARGET_TYPE + "/id==" + permittedTargetType.getId()), () -> {
             // verify targetTypeManagement#findAll
             assertThat(targetTypeManagement.findAll(Pageable.unpaged()).get().map(Identifiable::getId).toList())
-                    .containsOnly(permittedTargetType.getId());
+                    .containsExactly(permittedTargetType.getId());
 
             // verify targetTypeManagement#findByRsql
             assertThat(targetTypeManagement.findByRsql("name==*", Pageable.unpaged()).get().map(Identifiable::getId).toList())
-                    .containsOnly(permittedTargetType.getId());
+                    .containsExactly(permittedTargetType.getId());
 
             // verify targetTypeManagement#count
             assertThat(targetTypeManagement.count()).isEqualTo(1);

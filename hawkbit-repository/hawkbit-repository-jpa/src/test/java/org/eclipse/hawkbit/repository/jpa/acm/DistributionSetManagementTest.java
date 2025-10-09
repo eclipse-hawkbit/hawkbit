@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.assertj.core.api.Assertions;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement.Create;
+import org.eclipse.hawkbit.repository.DistributionSetManagement.Update;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
@@ -59,18 +59,16 @@ class DistributionSetManagementTest extends AbstractAccessControllerTest {
     void verifyRead() {
         // permissions to read only type1 ds
         runAs(withAuthorities(READ_DISTRIBUTION_SET + "/type.id==" + dsType1.getId()), () -> {
-            Assertions.<DistributionSet> assertThat(distributionSetManagement.findAll(UNPAGED)).hasSize(1).containsExactlyInAnyOrder(ds1Type1);
+            Assertions.<DistributionSet> assertThat(distributionSetManagement.findAll(UNPAGED)).containsExactlyInAnyOrder(ds1Type1);
             assertThat(distributionSetManagement.count()).isEqualTo(1);
 
-            Assertions.<DistributionSet> assertThat(distributionSetManagement.findByRsql("name==*", UNPAGED)).hasSize(1).hasSize(1)
-                    .containsExactly(ds1Type1);
+            Assertions.<DistributionSet> assertThat(distributionSetManagement.findByRsql("name==*", UNPAGED)).containsExactly(ds1Type1);
             assertThat(distributionSetManagement.countByRsql("name==*")).isEqualTo(1);
 
-            Assertions.<DistributionSet> assertThat(distributionSetManagement.findByTag(dsTag1.getId(), UNPAGED)).hasSize(1)
-                    .containsExactly(ds1Type1);
+            Assertions.<DistributionSet> assertThat(distributionSetManagement.findByTag(dsTag1.getId(), UNPAGED)).containsExactly(ds1Type1);
             assertThat(distributionSetManagement.findByTag(dsTag2.getId(), UNPAGED)).isEmpty();
 
-            Assertions.<DistributionSet> assertThat(distributionSetManagement.findByRsqlAndTag("name==*", dsTag1.getId(), UNPAGED)).hasSize(1)
+            Assertions.<DistributionSet> assertThat(distributionSetManagement.findByRsqlAndTag("name==*", dsTag1.getId(), UNPAGED))
                     .containsExactly(ds1Type1);
             assertThat(distributionSetManagement.findByRsqlAndTag("name==*", dsTag2.getId(), UNPAGED)).isEmpty();
 
@@ -84,7 +82,7 @@ class DistributionSetManagementTest extends AbstractAccessControllerTest {
             assertThatThrownBy(() -> distributionSetManagement.getWithDetails(ds2Type2Id)).isInstanceOf(EntityNotFoundException.class);
             assertThat(distributionSetManagement.find(ds2Type2Id)).isEmpty();
 
-            Assertions.<DistributionSet> assertThat(distributionSetManagement.get(List.of(ds1Type1Id))).hasSize(1).contains(ds1Type1);
+            Assertions.<DistributionSet> assertThat(distributionSetManagement.get(List.of(ds1Type1Id))).contains(ds1Type1);
             final List<Long> noPermissionsTestDataDsIdList = List.of(ds2Type2Id);
             assertThatThrownBy(() -> distributionSetManagement.get(noPermissionsTestDataDsIdList)).isInstanceOf(EntityNotFoundException.class);
             final List<Long> containingNoPermissionTestDataDsIsList = List.of(ds1Type1Id, ds2Type2Id);
@@ -144,10 +142,8 @@ class DistributionSetManagementTest extends AbstractAccessControllerTest {
             assertThatThrownBy(() -> distributionSetManagement.deleteMetadata(ds2Type2Id, ds2MdKey))
                     .isInstanceOf(InsufficientPermissionException.class);
 
-            final DistributionSetManagement.Update distributionSet1Update = DistributionSetManagement.Update.builder()
-                    .id(ds1Type1.getId()).description(randomString(16)).build();
-            final DistributionSetManagement.Update distributionSet2Update = DistributionSetManagement.Update.builder()
-                    .id(ds2Type2Id).description(randomString(16)).build();
+            final Update distributionSet1Update = Update.builder().id(ds1Type1.getId()).description(randomString(16)).build();
+            final Update distributionSet2Update = Update.builder().id(ds2Type2Id).description(randomString(16)).build();
             DistributionSet ds1Type1 = distributionSetManagement.update(distributionSet1Update);
             assertThat(ds1Type1).extracting(NamedEntity::getDescription).isEqualTo(distributionSet1Update.getDescription());
             assertThatThrownBy(() -> distributionSetManagement.update(distributionSet2Update))
@@ -176,27 +172,4 @@ class DistributionSetManagementTest extends AbstractAccessControllerTest {
             assertThatThrownBy(() -> distributionSetManagement.invalidate(ds2Type2)).isInstanceOf(InsufficientPermissionException.class);
         });
     }
-//
-//    private TestData createCompleteDistributionSetWithNewType() {
-//        // create type
-//        final DistributionSetType distributionSetType = testdataFactory.findOrCreateDistributionSetType(randomString(16), randomString(16),
-//                List.of(osType), List.of(appType));
-//
-//        final DistributionSetTag distributionSetTag = distributionSetTagManagement.create(
-//                DistributionSetTagManagement.Create.builder().name(randomString(16)).build());
-//
-//        final SoftwareModule moduleOs = testdataFactory.createSoftwareModuleOs();
-//
-//        final Long distributionSetId = distributionSetManagement.create(
-//                Create.builder().type(distributionSetType).name(randomString(16)).version("1.0")
-//                        .modules(Set.of(moduleOs)).build()).getId();
-//
-//        final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(distributionSetId, createTarget().getControllerId());
-//        assertThat(assignmentResult.getAssignedEntity()).hasSize(1);
-//
-//        return new TestData(distributionSetType,
-//                distributionSetManagement.assignTag(Collections.singletonList(distributionSetId), distributionSetTag.getId()).get(0),
-//                distributionSetTag, assignmentResult.getAssignedEntity().get(0));
-//    }
-
 }
