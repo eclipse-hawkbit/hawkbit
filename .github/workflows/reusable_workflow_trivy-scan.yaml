@@ -69,34 +69,34 @@ jobs:
           fi
 
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-ddi-server
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'scans/eclipse-hawkbit/hawkbit/hawkbit-ddi-server:latest.sarif'
           category: "Container Images (hawkbit-ddi-server)"
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-dmf-server
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'scans/eclipse-hawkbit/hawkbit/hawkbit-dmf-server:latest.sarif'
           category: "Container Images (hawkbit-dmf-server)"
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-mgmt-server
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'scans/eclipse-hawkbit/hawkbit/hawkbit-mgmt-server:latest.sarif'
           category: "Container Images (hawkbit-mgmt-server)"
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-simple-ui
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'scans/eclipse-hawkbit/hawkbit/hawkbit-simple-ui:latest.sarif'
           category: "Container Images (hawkbit-simple-ui)"
 
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-update-server
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'scans/eclipse-hawkbit/hawkbit/hawkbit-update-server:latest.sarif'
           category: "Container Images (hawkbit-update-server)"
 
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-repository-jpa-init
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'scans/eclipse-hawkbit/hawkbit/hawkbit-repository-jpa-init:latest.sarif'
           category: "Container Images (hawkbit-repository-jpa-init)"
