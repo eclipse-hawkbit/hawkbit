@@ -21,8 +21,8 @@ import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.run
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.rollout.RolloutScheduler;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.jupiter.api.Test;
 
 class RolloutExecutionTest extends AbstractAccessControllerTest {
@@ -41,49 +41,32 @@ class RolloutExecutionTest extends AbstractAccessControllerTest {
     }
 
     void verify(final Runnable run) {
+        final Target[] expectedTargets = new Target[] { target1Type1 };
         runAs(withAuthorities(
                         READ_TARGET, UPDATE_TARGET + "/type.id==" + targetType1.getId(),
                         READ_DISTRIBUTION_SET,
                         CREATE_ROLLOUT, READ_ROLLOUT, HANDLE_ROLLOUT),
-                () -> {
-                    assertThat(targetManagement.findAll(UNPAGED))
-                            .as("targetManagement#findAll operation should see all created targets")
-                            .hasSize(3);
-
-                    final Rollout rollout = createRolloutConsideringAllTargets(ds2Type2);
-                    rolloutManagement.start(rollout.getId());
-
-                    final RolloutScheduler rolloutScheduler = new RolloutScheduler(
-                            rolloutHandler, systemManagement, systemSecurityContext, 1, Optional.empty());
-                    rolloutScheduler.runningRolloutScheduler();
-
-                    assertThat(rolloutGroupManagement.findByRollout(rollout.getId(), UNPAGED).getContent().stream()
-                            .flatMap(rolloutGroup -> rolloutGroupManagement.findTargetsOfRolloutGroup(rolloutGroup.getId(), UNPAGED).stream()))
-                            .as("Only updatable targets should be part of the rollout")
-                            .containsExactly(target1Type1);
-                });
+                () -> extracted(run, expectedTargets));
         runAs(withAuthorities(
                         READ_TARGET, UPDATE_TARGET + "/type.id==" + targetType2.getId(),
                         READ_DISTRIBUTION_SET,
                         CREATE_ROLLOUT, READ_ROLLOUT, HANDLE_ROLLOUT),
-                () -> {
-                    assertThat(targetManagement.findAll(UNPAGED))
-                            .as("targetManagement#findAll operation should see all created targets")
-                            .hasSize(3);
-
-                    final Rollout rollout = createRolloutConsideringAllTargets(ds2Type2);
-                    rolloutManagement.start(rollout.getId());
-
-                    run.run();
-
-                    assertThat(rolloutGroupManagement.findByRollout(rollout.getId(), UNPAGED).getContent().stream()
-                            .flatMap(rolloutGroup -> rolloutGroupManagement.findTargetsOfRolloutGroup(rolloutGroup.getId(), UNPAGED).stream()))
-                            .as("Only updatable targets should be part of the rollout")
-                            .containsExactly(target2Type2, target3Type2);
-                });
+                () -> extracted(run, target2Type2, target3Type2));
     }
 
-    private Rollout createRolloutConsideringAllTargets(final DistributionSet ds) {
-        return testdataFactory.createRolloutByVariables(randomString(16), "description", 5, "id==*", ds, "50", "80");
+    private void extracted(final Runnable run, final Target... expectedTargets) {
+        assertThat(targetManagement.findAll(UNPAGED))
+                .as("targetManagement#findAll operation should see all created targets")
+                .hasSize(3);
+
+        final Rollout rollout = testdataFactory.createRolloutByVariables(randomString(16), "description", 5, "id==*", ds2Type2, "50", "80");
+        rolloutManagement.start(rollout.getId());
+
+        run.run();
+
+        assertThat(rolloutGroupManagement.findByRollout(rollout.getId(), UNPAGED).getContent().stream()
+                .flatMap(rolloutGroup -> rolloutGroupManagement.findTargetsOfRolloutGroup(rolloutGroup.getId(), UNPAGED).stream()))
+                .as("Only updatable targets should be part of the rollout")
+                .containsExactly(expectedTargets);
     }
 }
