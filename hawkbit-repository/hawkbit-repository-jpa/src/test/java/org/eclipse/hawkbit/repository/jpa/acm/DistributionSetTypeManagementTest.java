@@ -96,7 +96,8 @@ class DistributionSetTypeManagementTest extends AbstractAccessControllerManageme
         final DistributionSetType dsType2 = testdataFactory.findOrCreateDistributionSetType(
                 "DsType2_override", "DistributionSetType-2-override", List.of(smType2), List.of(smType1));
         runAs(withAuthorities(READ_PREFIX + DISTRIBUTION_SET_TYPE, UPDATE_PREFIX + DISTRIBUTION_SET_TYPE + "/id==" + dsType1.getId()), () -> {
-            final List<Long> osAndAppTypeIds = List.of(osType.getId(), appType.getId());
+            final Long osTypeId = osType.getId();
+            final List<Long> osAndAppTypeIds = List.of(osTypeId, appType.getId());
             // verify distributionSetTypeManagement#assignCompatibleDistributionSetTypes
             DistributionSetType dsType1Up = distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType1.getId(), osAndAppTypeIds);
             assertThat(dsType1Up).satisfies(
@@ -108,10 +109,10 @@ class DistributionSetTypeManagementTest extends AbstractAccessControllerManageme
                     .isInstanceOf(InsufficientPermissionException.class);
 
             assertThat(distributionSetTypeManagement
-                    .unassignSoftwareModuleType(dsType1.getId(), osType.getId()))
+                    .unassignSoftwareModuleType(dsType1.getId(), osTypeId))
                     .satisfies(updatedType -> assertThat(updatedType.containsModuleType(osType)).isFalse());
             assertThatThrownBy(
-                    () -> distributionSetTypeManagement.unassignSoftwareModuleType(dsType2Id, osType.getId()))
+                    () -> distributionSetTypeManagement.unassignSoftwareModuleType(dsType2Id, osTypeId))
                     .isInstanceOf(InsufficientPermissionException.class);
         });
     }

@@ -76,14 +76,16 @@ class TargetTypeManagementTest extends AbstractAccessControllerManagementTest {
                     final Update targetTypeUpdate = Update.builder().id(targetType2.getId()).description("anotherDesc").build();
                     assertThatThrownBy(() -> targetTypeManagement.update(targetTypeUpdate)).isInstanceOf(InsufficientPermissionException.class);
 
-                    targetTypeManagement.assignCompatibleDistributionSetTypes(targetType1.getId(), List.of(dsType2.getId()));
+                    final Long dsType2Id = dsType2.getId();
+                    final List<Long> dsType2IdList = List.of(dsType2Id);
+                    targetTypeManagement.assignCompatibleDistributionSetTypes(targetType1.getId(), dsType2IdList);
                     final Long targetType2Id = targetType2.getId();
                     assertThatThrownBy(
-                            () -> targetTypeManagement.assignCompatibleDistributionSetTypes(targetType2Id, List.of(dsType2.getId())))
+                            () -> targetTypeManagement.assignCompatibleDistributionSetTypes(targetType2Id, dsType2IdList))
                             .isInstanceOf(InsufficientPermissionException.class);
 
-                    targetTypeManagement.unassignDistributionSetType(targetType1.getId(), dsType2.getId());
-                    assertThatThrownBy(() -> targetTypeManagement.unassignDistributionSetType(targetType2Id, dsType2.getId()))
+                    targetTypeManagement.unassignDistributionSetType(targetType1.getId(), dsType2Id);
+                    assertThatThrownBy(() -> targetTypeManagement.unassignDistributionSetType(targetType2Id, dsType2Id))
                             .isInstanceOf(InsufficientPermissionException.class);
                 });
     }

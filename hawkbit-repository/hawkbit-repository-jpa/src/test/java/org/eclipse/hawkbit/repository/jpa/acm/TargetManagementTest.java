@@ -52,7 +52,7 @@ class TargetManagementTest extends AbstractAccessControllerManagementTest {
         });
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "rawtypes", "unchecked", "java:S5961" }) // better to keep together
     @Test
     void verifyRead() {
         assertThat(assignDistributionSet(ds2Type2, List.of(target1Type1, target2Type2, target3Type2)).getAssigned()).isEqualTo(3);
@@ -128,7 +128,6 @@ class TargetManagementTest extends AbstractAccessControllerManagementTest {
 
     @Test
     void verifyReadCompatibleRelated() {
-//        assertThat(assignDistributionSet(ds2Type2, List.of(target1Type1, target2Type2, target3Type2)).getAssigned()).isEqualTo(3);
         prepareFinishedUpdates(ds2Type2, target1Type1, target2Type2);
         final Target target1Type1 = targetManagement.get(super.target1Type1.getId());
         runAs(withAuthorities(
@@ -250,9 +249,9 @@ class TargetManagementTest extends AbstractAccessControllerManagementTest {
                     assertThatThrownBy(() -> targetManagement.unassignType(noPermissionsTestDataControllerId))
                             .isInstanceOf(InsufficientPermissionException.class);
 
-                    assertThat(assignDistributionSet(ds2Type2.getId(), target1Type1.getControllerId()).getAssigned()).isEqualTo(1);
-                    assertThatThrownBy(() -> assignDistributionSet(ds2Type2.getId(), target2Type2ControllerId)).isInstanceOf(
-                            AssertionError.class);
+                    final Long ds2Type2Id = ds2Type2.getId();
+                    assertThat(assignDistributionSet(ds2Type2Id, target1Type1.getControllerId()).getAssigned()).isEqualTo(1);
+                    assertThatThrownBy(() -> assignDistributionSet(ds2Type2Id, target2Type2ControllerId)).isInstanceOf(AssertionError.class);
                     // bunch assignment skips denied since at least one target without update permissions is present
                     assertThat(assignDistributionSet(
                             ds3Type2.getId(), List.of(target1Type1.getControllerId(), target2Type2ControllerId), Action.ActionType.FORCED)
