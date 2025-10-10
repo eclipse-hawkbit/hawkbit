@@ -53,10 +53,7 @@ public class CleanupTestExecutionListener extends AbstractTestExecutionListener 
         final List<String> tenants = systemSecurityContext.runAsSystem(() -> systemManagement.findTenants(PAGE).getContent());
         tenants.forEach(tenant -> {
             try {
-                systemSecurityContext.runAsSystem(() -> {
-                    systemManagement.deleteTenant(tenant);
-                    return null;
-                });
+                systemSecurityContext.runAsSystem(() -> systemManagement.deleteTenant(tenant));
             } catch (final Exception e) {
                 log.error("Error while delete tenant", e);
             }

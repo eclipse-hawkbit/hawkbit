@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.acm;
 
-import static org.eclipse.hawkbit.security.SecurityContextTenantAware.SYSTEM_USER;
-
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -24,6 +22,7 @@ import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.GrantedAuthority;
@@ -58,8 +57,8 @@ public class DefaultAccessController<A extends Enum<A> & QueryField, T> implemen
 
     @Override
     public Optional<Specification<T>> getAccessRules(final Operation operation) {
-        if (contextAware.getCurrentTenant() != null && SYSTEM_USER.equals(contextAware.getCurrentUsername())) {
-            // as tenant, no restrictions
+        if (SystemSecurityContext.isCurrentThreadSystemCode()) {
+            // system code - no restrictions. this runs with SYSTEM_ROLE, so no restrictions apply anyway - not scopes, but this way should be faster
             return Optional.empty();
         }
 
@@ -73,8 +72,8 @@ public class DefaultAccessController<A extends Enum<A> & QueryField, T> implemen
 
     @Override
     public void assertOperationAllowed(final Operation operation, final T entity) throws InsufficientPermissionException {
-        if (contextAware.getCurrentTenant() != null && SYSTEM_USER.equals(contextAware.getCurrentUsername())) {
-            // as tenant, no restrictions
+        if (SystemSecurityContext.isCurrentThreadSystemCode()) {
+            // system code - no restrictions. this runs with SYSTEM_ROLE, so no restrictions apply anyway - not scopes, but this way should be faster
             return;
         }
 

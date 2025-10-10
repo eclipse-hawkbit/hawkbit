@@ -10,9 +10,6 @@
 package org.eclipse.hawkbit.repository.test.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.im.authentication.SpRole.SYSTEM_ROLE;
-import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
-import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withUserAndTenant;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -57,7 +54,6 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
-import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -78,6 +74,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.PageRequest;
@@ -162,6 +159,7 @@ public class TestdataFactory {
     private final RolloutHandler rolloutHandler;
     private final QuotaManagement quotaManagement;
     private final TenantAware tenantAware;
+    private final SystemSecurityContext systemSecurityContext;
 
     public TestdataFactory(
             final ControllerManagement controllerManagement, final ArtifactManagement artifactManagement,
@@ -177,7 +175,8 @@ public class TestdataFactory {
             final TargetTagManagement<? extends TargetTag> targetTagManagement,
             final DeploymentManagement deploymentManagement,
             final RolloutManagement rolloutManagement, final RolloutHandler rolloutHandler,
-            final QuotaManagement quotaManagement, final TenantAware tenantAware) {
+            final QuotaManagement quotaManagement,
+            final TenantAware tenantAware, final SystemSecurityContext systemSecurityContext) {
         this.controllerManagement = controllerManagement;
         this.softwareModuleManagement = softwareModuleManagement;
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
@@ -195,6 +194,7 @@ public class TestdataFactory {
         this.rolloutHandler = rolloutHandler;
         this.quotaManagement = quotaManagement;
         this.tenantAware = tenantAware;
+        this.systemSecurityContext = systemSecurityContext;
     }
 
     public static String randomString(final int len) {
@@ -203,14 +203,6 @@ public class TestdataFactory {
 
     public static byte[] randomBytes(final int len) {
         return randomString(len).getBytes();
-    }
-
-    public Action performAssignment(final DistributionSet distributionSet) {
-        final Target target = createTarget(randomString(5));
-        final DeploymentRequest deploymentRequest = new DeploymentRequest(
-                target.getControllerId(), distributionSet.getId(), ActionType.FORCED, 0, null, null, null, null, false);
-        deploymentManagement.assignDistributionSets(Collections.singletonList(deploymentRequest));
-        return deploymentManagement.findActionsByTarget(target.getControllerId(), Pageable.unpaged()).getContent().get(0);
     }
 
     /**
@@ -1294,7 +1286,7 @@ public class TestdataFactory {
         if (tenant == null) {
             throw new IllegalStateException("Tenant is null");
         }
-        runAs(withUserAndTenant("system", tenant, false, false, false, SYSTEM_ROLE), rolloutHandler::handleAll);
+        systemSecurityContext.runAsSystem(rolloutHandler::handleAll);
     }
 
     private Rollout reloadRollout(final Rollout rollout) {

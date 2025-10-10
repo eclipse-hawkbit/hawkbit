@@ -21,7 +21,6 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_ROLLOUT;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TARGET;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_TARGET;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
-import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withUser;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,12 +36,9 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Pageable;
 
 class TargetManagementTest extends AbstractAccessControllerManagementTest {
 
@@ -130,57 +126,69 @@ class TargetManagementTest extends AbstractAccessControllerManagementTest {
         });
     }
 
-    @Disabled
     @Test
-    void verifyReadRolloutRelated() {
-        assertThat(assignDistributionSet(ds2Type2, List.of(target1Type1, target2Type2, target3Type2)).getAssigned()).isEqualTo(3);
+    void verifyReadCompatibleRelated() {
+//        assertThat(assignDistributionSet(ds2Type2, List.of(target1Type1, target2Type2, target3Type2)).getAssigned()).isEqualTo(3);
         prepareFinishedUpdates(ds2Type2, target1Type1, target2Type2);
         final Target target1Type1 = targetManagement.get(super.target1Type1.getId());
         runAs(withAuthorities(
-                READ_TARGET + "/type.id==" + targetType1.getId(),
-                READ_DISTRIBUTION_SET,
-                CREATE_ROLLOUT, READ_ROLLOUT, HANDLE_ROLLOUT), () -> {
+                READ_TARGET + "/type.id==" + targetType2.getId(), // we want to have 2 updatable targets
+                READ_DISTRIBUTION_SET), () -> {
             assertThat(targetManagement.findByInstalledDistributionSet(ds2Type2.getId(), UNPAGED))
-                    .extracting(Identifiable::getId).containsExactly(target1Type1.getId());
+                    .extracting(Identifiable::getId).containsExactly(target2Type2.getId());
             assertThat(targetManagement.findByInstalledDistributionSetAndRsql(ds2Type2.getId(), "id==*", UNPAGED))
-                    .extracting(Identifiable::getId).containsExactly(target1Type1.getId());
-
-            assertThat(targetManagement.findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(
-                    ds2Type2.getId(), "id==*", UNPAGED))
-                    .hasSize(1)
-                    .extracting(Identifiable::getId).containsOnly(target1Type1.getId());
+                    .extracting(Identifiable::getId).containsExactly(target2Type2.getId());
+        });
+        runAs(withAuthorities(
+                READ_TARGET, UPDATE_TARGET + "/type.id==" + targetType2.getId(), // we want to have 2 updatable targets
+                READ_DISTRIBUTION_SET), () -> {
+            assertThat(targetManagement.findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(ds2Type2.getId(), "id==*", UNPAGED))
+                    .extracting(Identifiable::getId).containsExactly(target3Type2.getId());
 
             assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(
-                    target1Type1.getControllerId(), ds2Type2.getId(), "id==*")).isTrue();
+                    target1Type1.getControllerId(), ds2Type2.getId(), "id==*")).isFalse();
             assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(
                     target2Type2.getControllerId(), ds2Type2.getId(), "id==*")).isFalse();
+            assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(
+                    target3Type2.getControllerId(), ds2Type2.getId(), "id==*")).isTrue();
+        });
+    }
 
+    @Test
+    void verifyReadRolloutRelated() {
+        final Target target1Type1 = targetManagement.get(super.target1Type1.getId());
+        runAs(withAuthorities(
+                READ_TARGET, UPDATE_TARGET + "/type.id==" + targetType1.getId(),
+                READ_DISTRIBUTION_SET,
+                CREATE_ROLLOUT, READ_ROLLOUT, HANDLE_ROLLOUT), () -> {
             assertThat(targetManagement.findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-                    List.of(1L), "id==*", ds2Type2.getType(), UNPAGED))
-                    .hasSize(1)
-                    .extracting(Identifiable::getId).containsOnly(target1Type1.getId());
-            assertThat(targetManagement.countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable("id==*", List.of(1L),
-                    ds2Type2.getType())).isEqualTo(1);
-
-            final Rollout rollout = testdataFactory.createRolloutByVariables(
-                    "testRollout", "testDescription", 3, "id==*", ds2Type2, "50", "5");
-
-            final List<Long> foundTargetIds = rolloutGroupManagement.findByRollout(rollout.getId(), UNPAGED).getContent().stream()
-                    .flatMap(rolloutGroup -> targetManagement.findByInRolloutGroupWithoutAction(rolloutGroup.getId(), UNPAGED)
-                            .getContent().stream()).map(Identifiable::getId).toList();
-            assertThat(foundTargetIds).hasSize(1).contains(target1Type1.getId());
-
-            assertThat(targetManagement.findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-                    List.of(1L), "id==*", ds2Type2.getType(), UNPAGED))
-                    .hasSize(1)
-                    .extracting(Identifiable::getId).containsOnly(target1Type1.getId());
+                    List.of(1L), "id==*", ds2Type2.getType(), UNPAGED).stream().toList())
+                    .containsExactly(target1Type1);
             assertThat(targetManagement.countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable("id==*", List.of(1L), ds2Type2.getType()))
                     .isEqualTo(1);
+
+            final Rollout rollout = testdataFactory.createRolloutByVariables("testRollout", "testDescription", 3, "id==*", ds2Type2, "50", "5");
+            final List<Long> groups = rolloutGroupManagement.findByRollout(rollout.getId(), UNPAGED).getContent().stream().
+                    map(Identifiable::getId).toList();
+            assertThat(groups.stream().flatMap(
+                    group -> targetManagement.findByInRolloutGroupWithoutAction(group, UNPAGED).get()).toList())
+                    .containsExactly(target1Type1);
+            assertThat(groups.stream().flatMap(
+                    group -> rolloutGroupManagement.findTargetsOfRolloutGroup(group, UNPAGED).get()).toList())
+                    .containsExactly(target1Type1);
+
+            assertThat(targetManagement.findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(groups, "id==*", ds2Type2.getType(), UNPAGED))
+                    .isEmpty();
+            assertThat(targetManagement.countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable("id==*", groups, ds2Type2.getType()))
+                    .isZero();
+
+            // as system in context - doesn't apply scopes
             final Rollout runAsSystem = systemSecurityContext.runAsSystem(
-                    () -> testdataFactory.createRolloutByVariables("testRollout", "testDescription", 3, "id==*", ds2Type2, "50", "5"));
+                    () -> testdataFactory.createRolloutByVariables(
+                            "testRolloutAsSystem", "testDescriptionAsSystem", 3, "id==*", ds2Type2, "50", "5"));
             assertThat(rolloutGroupManagement.findByRollout(runAsSystem.getId(), UNPAGED).getContent().stream()
-                    .flatMap(rolloutGroup -> targetManagement.findByInRolloutGroupWithoutAction(rolloutGroup.getId(), UNPAGED)
-                            .getContent().stream()).map(Identifiable::getId).toList())
+                    .flatMap(
+                            group -> targetManagement.findByInRolloutGroupWithoutAction(group.getId(), UNPAGED).getContent().stream()).toList())
                     .hasSize(3);
         });
     }
@@ -287,45 +295,5 @@ class TargetManagementTest extends AbstractAccessControllerManagementTest {
                     controllerManagement.addUpdateActionStatus(
                             Action.ActionStatusCreate.builder().actionId(action.getId()).status(Action.Status.FINISHED).build());
                 });
-    }
-
-    /**
-     * Verifies only manageable targets are part of the rollout
-     */
-    @Test
-    void verifyRolloutTargetScope() {
-        final DistributionSet ds = testdataFactory.createDistributionSet("myDs");
-        distributionSetManagement.lock(ds);
-
-        final String[] updateTargetControllerIds = { "update1", "update2", "update3" };
-        final List<Target> updateTargets = testdataFactory.createTargets(updateTargetControllerIds);
-        final String[] readTargetControllerIds = { "read1", "read2", "read3", "read4" };
-        final List<Target> readTargets = testdataFactory.createTargets(readTargetControllerIds);
-        final List<Target> hiddenTargets = testdataFactory.createTargets("hidden1", "hidden2", "hidden3", "hidden4", "hidden5");
-
-        runAs(withUser("user",
-                READ_DISTRIBUTION_SET,
-                READ_TARGET + "/controllerId=in=(" + String.join(", ", List.of(updateTargetControllerIds)) + ")" +
-                        " or controllerId=in=(" + String.join(", ", List.of(readTargetControllerIds)) + ")",
-                UPDATE_TARGET + "/controllerId=in=(" + String.join(", ", List.of(updateTargetControllerIds)) + ")",
-                CREATE_ROLLOUT, READ_ROLLOUT), () -> {
-            final Rollout rollout = testdataFactory.createRolloutByVariables(
-                    "testRollout", "description", updateTargets.size(), "id==*", ds, "50", "5");
-            assertThat(rollout.getTotalTargets()).isEqualTo(updateTargets.size());
-
-            final List<RolloutGroup> content = rolloutGroupManagement.findByRollout(rollout.getId(), Pageable.unpaged()).getContent();
-            assertThat(content).hasSize(updateTargets.size());
-
-            final List<Target> rolloutTargets = content.stream().flatMap(
-                            group -> rolloutGroupManagement.findTargetsOfRolloutGroup(group.getId(), Pageable.unpaged()).get())
-                    .toList();
-
-            assertThat(rolloutTargets).hasSize(updateTargets.size()).allMatch(
-                            target -> updateTargets.stream().anyMatch(readTarget -> readTarget.getId().equals(target.getId())))
-                    .noneMatch(target -> readTargets.stream()
-                            .anyMatch(readTarget -> readTarget.getId().equals(target.getId())))
-                    .noneMatch(target -> hiddenTargets.stream()
-                            .anyMatch(readTarget -> readTarget.getId().equals(target.getId())));
-        });
     }
 }

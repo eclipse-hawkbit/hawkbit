@@ -55,6 +55,22 @@ public class SystemSecurityContext {
     }
 
     /**
+     * Runs a given {@link Runnable} within a system security context, which is permitted to call secured system code. Often the system needs
+     * to call secured methods by its own without relying on the current security context e.g. if the current security context does not contain
+     * the necessary permission it's necessary to execute code as system code to execute necessary methods and functionality. <br/>
+     * The security context will be switched to the system code and back after the callable is called. <br/>
+     * The system code is executed for a current tenant by using the {@link TenantAware#getCurrentTenant()}.
+     *
+     * @param runnable the runnable to call within the system security context
+     */
+    public void runAsSystem(final Runnable runnable) {
+        runAsSystemAsTenant(() -> {
+            runnable.run();
+            return null;
+        }, tenantAware.getCurrentTenant());
+    }
+
+    /**
      * Runs a given {@link Callable} within a system security context, which is permitted to call secured system code. Often the system needs
      * to call secured methods by its own without relying on the current security context e.g. if the current security context does not contain
      * the necessary permission it's necessary to execute code as system code to execute necessary methods and functionality. <br/>
@@ -120,7 +136,7 @@ public class SystemSecurityContext {
     /**
      * @return {@code true} if the current running code is running as system code block.
      */
-    public boolean isCurrentThreadSystemCode() {
+    public static boolean isCurrentThreadSystemCode() {
         return SecurityContextHolder.getContext().getAuthentication() instanceof SystemCodeAuthentication;
     }
 

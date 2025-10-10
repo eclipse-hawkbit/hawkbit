@@ -84,7 +84,7 @@ public class MdcHandler {
 
         final String user = springSecurityAuditorAware
                 .getCurrentAuditor()
-                .filter(username -> !username.equals("system")) // null and system are the same - system user
+                .filter(username -> !username.equals(SecurityContextTenantAware.SYSTEM_USER)) // null and system are the same - system user
                 .orElse(null);
 
         return callWithTenantAndUser0(callable, tenant, user);

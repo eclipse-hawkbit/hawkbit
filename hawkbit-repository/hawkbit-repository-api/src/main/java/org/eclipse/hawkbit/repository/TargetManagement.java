@@ -54,11 +54,14 @@ import org.springframework.util.ObjectUtils;
 /**
  * Management service for {@link Target}s.
  */
+@SuppressWarnings("java:S1192") // java:S1192 nothing meaningful to add + would be interface constant
 public interface TargetManagement<T extends Target>
         extends RepositoryManagement<T, TargetManagement.Create, TargetManagement.Update> {
 
     String HAS_READ_TARGET_AND_READ_ROLLOUT = HAS_READ_REPOSITORY + " and hasAuthority('READ_" + SpPermission.ROLLOUT + "')";
+    String HAS_UPDATE_TARGET_AND_READ_ROLLOUT = HAS_UPDATE_REPOSITORY + " and hasAuthority('READ_" + SpPermission.ROLLOUT + "')";
     String HAS_READ_TARGET_AND_READ_DISTRIBUTION_SET = HAS_READ_REPOSITORY + " and hasAuthority('READ_" + SpPermission.DISTRIBUTION_SET + "')";
+    String HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET = HAS_UPDATE_REPOSITORY + " and hasAuthority('READ_" + SpPermission.DISTRIBUTION_SET + "')";
 
     String DETAILS_AUTO_CONFIRMATION_STATUS = "autoConfirmationStatus";
     String DETAILS_TAGS = "tags";
@@ -87,7 +90,7 @@ public interface TargetManagement<T extends Target>
      * @param targetFilterQuery to execute
      * @return true if it matches
      */
-    @PreAuthorize(HAS_READ_TARGET_AND_READ_DISTRIBUTION_SET)
+    @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
     boolean isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(
             @NotNull String controllerId, long distributionSetId, @NotNull String targetFilterQuery);
 
@@ -137,7 +140,7 @@ public interface TargetManagement<T extends Target>
      * @return a page of the found {@link Target}s
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(HAS_READ_TARGET_AND_READ_DISTRIBUTION_SET)
+    @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
     Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(
             long distributionSetId, @NotNull String rsql, @NotNull Pageable pageable);
 
@@ -151,7 +154,7 @@ public interface TargetManagement<T extends Target>
      * @param pageable the pageable to enhance the query for paging and sorting
      * @return a page of the found {@link Target}s
      */
-    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
+    @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_ROLLOUT)
     Slice<Target> findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
             @NotEmpty Collection<Long> groups, @NotNull String rsql, @NotNull DistributionSetType distributionSetType,
             @NotNull Pageable pageable);
@@ -169,7 +172,7 @@ public interface TargetManagement<T extends Target>
     Slice<Target> findByFailedRolloutAndNotInRolloutGroups(
             @NotNull String rolloutId, @NotEmpty Collection<Long> groups, @NotNull Pageable pageable);
 
-    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
+    @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_ROLLOUT)
     Slice<Target> findByRsqlAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
             final long rolloutId, @NotNull String rsql, @NotNull DistributionSetType distributionSetType, @NotNull Pageable pageable);
 
@@ -293,7 +296,7 @@ public interface TargetManagement<T extends Target>
      * @return the count of found {@link Target}s
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(HAS_READ_TARGET_AND_READ_DISTRIBUTION_SET)
+    @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
     long countByRsqlAndNonDsAndCompatibleAndUpdatable(long distributionSetId, @NotNull String rsql);
 
     /**
@@ -305,7 +308,7 @@ public interface TargetManagement<T extends Target>
      * @param distributionSetType type of the {@link DistributionSet} the targets must be compatible with
      * @return count of the found {@link Target}s
      */
-    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
+    @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_ROLLOUT)
     long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
             @NotNull String rsql, @NotEmpty Collection<Long> groups, @NotNull DistributionSetType distributionSetType);
 

@@ -32,7 +32,7 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(example = """
         {
-          "createdBy" : "system",
+          "createdBy" : "admin",
           "createdAt" : 1682408579390,
           "lastModifiedBy" : "bumlux",
           "lastModifiedAt" : 1682408579394,

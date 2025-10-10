@@ -36,10 +36,7 @@ class RolloutExecutionTest extends AbstractAccessControllerManagementTest {
 
     @Test
     void verifyOnlyUpdatableTargetsArePartOfRollout() {
-        verify(() -> systemSecurityContext.runAsSystem(() -> {
-            rolloutHandler.handleAll();
-            return null;
-        }));
+        verify(() -> systemSecurityContext.runAsSystem(rolloutHandler::handleAll));
     }
 
     private void verify(final Runnable run) {
