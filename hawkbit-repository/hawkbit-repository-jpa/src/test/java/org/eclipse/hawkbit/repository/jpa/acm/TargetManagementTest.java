@@ -117,10 +117,10 @@ class TargetManagementTest extends AbstractAccessControllerManagementTest {
                     .isInstanceOf(InsufficientPermissionException.class);
 
             // find by tags
-            assertThat(targetManagement.findByTag(targetType2.getId(), UNPAGED))
+            assertThat(targetManagement.findByTag(targetTag2.getId(), UNPAGED))
                     .extracting(Identifiable::getId)
                     .containsOnly(target1Type1.getId());
-            assertThat(targetManagement.findByRsqlAndTag("id==*", targetType2.getId(), UNPAGED))
+            assertThat(targetManagement.findByRsqlAndTag("id==*", targetTag2.getId(), UNPAGED))
                     .extracting(Identifiable::getId)
                     .containsOnly(target1Type1.getId());
         });
