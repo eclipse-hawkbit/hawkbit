@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModule.MetadataValueCreate;
 import org.junit.jupiter.api.Test;
 
-class SoftwareModuleManagementTest extends AbstractAccessControllerTest {
+class SoftwareModuleManagementTest extends AbstractAccessControllerManagementTest {
 
     @Test
     void verifyRead() {

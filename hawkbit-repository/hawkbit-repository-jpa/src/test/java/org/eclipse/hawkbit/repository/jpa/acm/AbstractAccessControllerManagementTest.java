@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
@@ -26,7 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(properties = "hawkbit.acm.access-controller.enabled=true")
-abstract class AbstractAccessControllerTest extends AbstractJpaIntegrationTest {
+abstract class AbstractAccessControllerManagementTest extends AbstractJpaIntegrationTest {
 
     protected SoftwareModuleType smType1;
     protected SoftwareModuleType smType2;
@@ -44,10 +45,13 @@ abstract class AbstractAccessControllerTest extends AbstractJpaIntegrationTest {
 
     protected TargetType targetType1;
     protected TargetType targetType2;
+    protected TargetTag targetTag1;
+    protected TargetTag targetTag2;
     protected Target target1Type1;
     protected Target target2Type2;
     protected Target target3Type2;
 
+    @SuppressWarnings("java:S1117") // java:S1117 - intentional hiding of fiends - they are the same
     @BeforeEach
     @Override
     public void beforeAll() throws Exception {
@@ -61,9 +65,9 @@ abstract class AbstractAccessControllerTest extends AbstractJpaIntegrationTest {
 
         dsType1 = testdataFactory.findOrCreateDistributionSetType("DsType1", "DistributionSetType-1", List.of(smType1), List.of());
         dsType2 = testdataFactory.findOrCreateDistributionSetType("DsType2", "DistributionSetType-2", List.of(smType2), List.of(smType1));
-        final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
-        dsTag1 = tags.get(0);
-        dsTag2 = tags.get(1);
+        final List<DistributionSetTag> dsTags = testdataFactory.createDistributionSetTags(2);
+        dsTag1 = dsTags.get(0);
+        dsTag2 = dsTags.get(1);
         ds1Type1 = distributionSetManagement.lock(
                 distributionSetManagement.assignTag(
                         List.of(testdataFactory.createDistributionSet("Ds1Type1", "1.0", dsType1, List.of(sm1Type1)).getId()),
@@ -79,9 +83,18 @@ abstract class AbstractAccessControllerTest extends AbstractJpaIntegrationTest {
 
         targetType1 = testdataFactory.createTargetType("TargetType1", Set.of(dsType1, dsType2));
         targetType2 = testdataFactory.createTargetType("TargetType2", Set.of(dsType2));
-        target1Type1 = testdataFactory.createTarget("controller_1", "Controller-1", targetType1);
-        target2Type2 = testdataFactory.createTarget("controller_2", "Controller-2", targetType2);
-        target3Type2 = testdataFactory.createTarget("controller_3", "Controller-3", targetType2);
+        final List<? extends TargetTag> targetTags = testdataFactory.createTargetTags(2, "acm_");
+        targetTag1 = targetTags.get(0);
+        targetTag2 = targetTags.get(1);
+        final Target target1Type1 = testdataFactory.createTarget("controller_1", "Controller-1", targetType1);
+        final Target target2Type2 = testdataFactory.createTarget("controller_2", "Controller-2", targetType2);
+        final Target target3Type2 = testdataFactory.createTarget("controller_3", "Controller-3", targetType2);
+        targetManagement.assignTag(List.of(target1Type1.getControllerId(), target2Type2.getControllerId()), targetTag1.getId());
+        targetManagement.assignTag(
+                List.of(target1Type1.getControllerId(), target2Type2.getControllerId(), target3Type2.getControllerId()), targetTag2.getId());
+        this.target1Type1 = targetManagement.get(target1Type1.getId());
+        this.target2Type2 = targetManagement.get(target2Type2.getId());
+        this.target3Type2 = targetManagement.get(target3Type2.getId());
     }
 
     protected static WithUser withAuthorities(final String... authorities) {
