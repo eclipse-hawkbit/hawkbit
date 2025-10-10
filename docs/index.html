@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="description" content="Description">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+</head>
+
+<body>
+    <div id="app"></div>
+    <script>
+        window.$docsify = {
+               copyCode: {
+                 buttonText: 'Copy',
+                 errorText: 'Error',
+                 successText: 'Copied',
+                },
+                name: '<span>hawkBit</span>',
+//                repo: 'eclipse-hawkbit/hawkbit',
+                themeColor: '#0ea5ea',
+                coverpage: true,    
+                auto2top: true,
+                loadSidebar: true,
+                subMaxLevel: 2,
+                maxLevel: 2,
+                sidebarDisplayLevel: 1,
+
+                search: {
+                    placeholder: 'Type to search',
+                    noData: 'No results!',
+                    paths: 'auto',
+                    depth: 3
+                }
+            }
+    </script>
+    <!-- Docsify v4 -->
+    <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+    <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-clike.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-java.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-markdown.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-properties.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-nginx.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-ini.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-http.min.js"></script>
+    <!-- Latest v2.x.x -->
+    <script src="https://unpkg.com/docsify-copy-code@2"></script>
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+
+<style>
+  .sidebar .sidebar-sep {
+    margin: 12px 0;
+    border: 0;
+    height: 1px;
+    background: #0ea5ea;
+  }
+</style>
+    
+<style>
+  .rn-list { display:grid; gap:1rem; }
+  .rn-card {
+    border:1px solid rgba(0,0,0,.08);
+    border-radius:12px;
+    padding:16px;
+    background: var(--docsearch-modal-background, #fff);
+  }
+  .rn-header { display:flex; align-items:baseline; gap:.5rem; justify-content:space-between; }
+  .rn-title { margin:0; font-size:1.1rem; font-weight:600; } /* ← no real <h*> */
+  .rn-badge { font-size:.75rem; padding:.1rem .4rem; border-radius:4px; border:1px solid rgba(0,0,0,.15); }
+  .rn-date { font-size:1rem; opacity:.75; }
+
+  .rn-search {
+    display:block;
+    width:100%;
+    max-width:520px;
+    padding:.6rem .8rem;
+    margin:0 0 1rem 0;
+    border:1px solid rgba(0,0,0,.15);
+    border-radius:10px;
+    outline:none;
+    box-sizing:border-box;
+  }
+  .rn-search:focus {
+    border-color: rgba(64,128,255,.5);
+    box-shadow:0 0 0 3px rgba(64,128,255,.15);
+  }
+
+  .rn-body { font-size:.95rem; line-height:1.6; }
+  .rn-body p { margin:.45rem 0; }
+  .rn-body ul, .rn-body ol { margin:.4rem 0 .6rem 1.2rem; }
+  .rn-body a { text-decoration:none; border-bottom:1px dotted currentColor; }
+  .rn-body code {
+    background:rgba(0,0,0,.06);
+    padding:.1rem .3rem;
+    border-radius:.3rem;
+    font-size:.9em;
+  }
+  .rn-h { margin:.35rem 0 .15rem; font-weight:600; }      /* “fake headings” inside cards */
+  .rn-h1 { font-size:1rem; }
+  .rn-h2 { font-size:1rem; }
+  .rn-h3 { font-size:.98rem; }
+
+  .rn-actions { margin-top:.6rem; }
+  .rn-btn {
+    display:inline-block;
+    padding:.5rem .8rem;
+    border-radius:8px;
+    border:1px solid rgba(0,0,0,.15);
+    text-decoration:none;
+  }
+
+  /* Scope details styling to release cards only */
+  .rn-card details summary { cursor:pointer; font-weight:600; margin:.25rem 0; }
+</style>
+
+<script>
+(function () {
+  // --- settings ---
+  const owner = 'eclipse-hawkbit';
+  const repo  = 'hawkbit';
+  const targetFile = 'markdown/release-notes.md';
+  const perPage = 100;
+
+  // Compile markdown BUT render headings as <p class="rn-h rn-h{level}"><strong>..</strong></p>
+  // so Docsify won't see <h1..h6> and won't add them to the sidebar.
+  function compileMd(md) {
+    const renderer = new marked.Renderer();
+    renderer.heading = (text, level) =>
+      `<p class="rn-h rn-h${level}"><strong>${text}</strong></p>`;
+    const html = marked.parse(md || '', { renderer });
+    return DOMPurify.sanitize(html, { USE_PROFILES: { html: true }});
+  }
+
+  // Follow GitHub API pagination via Link header
+  async function fetchAllReleases(page = 1, acc = []) {
+    const url = `https://api.github.com/repos/${owner}/${repo}/releases?per_page=${perPage}&page=${page}`;
+    const res = await fetch(url, { headers: { 'Accept': 'application/vnd.github+json' } });
+    if (!res.ok) throw new Error('GitHub API error: ' + res.status);
+    const list = await res.json();
+    const link = res.headers.get('Link') || '';
+    const next = /<([^>]+)>;\s*rel="next"/.exec(link);
+    const all  = acc.concat(list);
+    return next ? fetchAllReleases(page + 1, all) : all;
+  }
+
+  function renderCard(r, prevTag) {
+    const name  = r.name || r.tag_name;
+    const date  = r.published_at ? new Date(r.published_at).toISOString().slice(0,10) : '';
+    const pre   = r.prerelease ? '<span class="rn-badge">pre-release</span>' : '';
+    const bodyHtml = compileMd(r.body || '');
+    const compareBtn = prevTag
+      ? `<a class="rn-btn" href="https://github.com/${owner}/${repo}/compare/${encodeURIComponent(prevTag)}...${encodeURIComponent(r.tag_name)}" target="_blank" rel="noopener">Compare</a>`
+      : '';
+
+    return `
+      <div class="rn-card">
+        <div class="rn-header">
+          <div class="rn-title">${name}</div>
+          <div>${pre} <span class="rn-date">${date}</span></div>
+        </div>
+        <details>
+          <summary>View release notes</summary>
+          <div class="rn-body">${bodyHtml || '<p>No summary provided.</p>'}</div>
+        </details>
+        <div class="rn-actions">
+          <a class="rn-btn" href="${r.html_url}" target="_blank" rel="noopener">Open on GitHub</a>
+          ${compareBtn}
+        </div>
+      </div>
+    `;
+  }
+
+  function mountUI(root, releases) {
+    releases.sort((a,b) => new Date(b.published_at||b.created_at) - new Date(a.published_at||a.created_at));
+    root.innerHTML = `
+      <input class="rn-search" id="rn-search" placeholder="Filter releases (e.g. 0.4, prerelease, 2024)" />
+      <div class="rn-list">
+        ${releases.map((r, i) => renderCard(r, i < releases.length - 1 ? releases[i + 1].tag_name : null)).join('')}
+      </div>
+    `;
+    const input = root.querySelector('#rn-search');
+    const cards = Array.from(root.querySelectorAll('.rn-card'));
+    input.addEventListener('input', () => {
+      const q = input.value.toLowerCase();
+      cards.forEach(c => { c.style.display = c.textContent.toLowerCase().includes(q) ? '' : 'none'; });
+    });
+  }
+
+  // ---- docsify plugin ----
+  function plugin(hook, vm) {
+    hook.afterEach(function (html, next) {
+      const isRN = vm.route.file === targetFile || vm.route.path.toLowerCase().includes('release-notes');
+      if (!isRN) return next(html);
+      next('<div id="release-notes-root"><p>Loading releases…</p></div>');
+    });
+
+    hook.doneEach(async function () {
+      const isRN =
+        (vm.route.file || '').toLowerCase() === targetFile.toLowerCase() ||
+        vm.route.path.toLowerCase().includes('release-notes');
+      if (!isRN) return;
+
+      const root = Docsify.dom.find('#release-notes-root');
+      if (!root) return;
+
+      try {
+        const releases = await fetchAllReleases();
+        mountUI(root, releases);
+      } catch (e) {
+        console.error(e);
+        root.innerHTML = `
+          <p>Couldn’t load releases from GitHub right now.</p>
+          <p><a class="rn-btn" href="https://github.com/${owner}/${repo}/releases" target="_blank" rel="noopener">
+            Open on GitHub ↗
+          </a></p>`;
+      }
+    });
+  }
+
+  window.$docsify = window.$docsify || {};
+  window.$docsify.plugins = [].concat(plugin, window.$docsify.plugins || []);
+})();
+</script>
+
+</html>
