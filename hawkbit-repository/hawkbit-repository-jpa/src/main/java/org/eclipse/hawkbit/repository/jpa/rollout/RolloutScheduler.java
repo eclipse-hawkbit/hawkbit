@@ -73,7 +73,6 @@ public class RolloutScheduler {
                     handleAllAsync(tenant);
                 }
             });
-            return null;
         });
 
         meterRegistry

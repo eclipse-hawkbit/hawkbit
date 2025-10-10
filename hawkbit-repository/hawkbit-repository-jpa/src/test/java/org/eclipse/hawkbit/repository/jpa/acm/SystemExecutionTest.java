@@ -106,10 +106,7 @@ class SystemExecutionTest extends AbstractAccessControllerManagementTest {
 
         final Specification mockAsSystem = mock(Specification.class);
         for (Operation operation : Operation.values()) {
-            systemSecurityContext.runAsSystem(() -> {
-                accessController.appendAccessRules(operation, mockAsSystem);
-                return null;
-            });
+            systemSecurityContext.runAsSystem(() -> accessController.appendAccessRules(operation, mockAsSystem));
         }
         verifyNoInteractions(mockAsSystem);
     }

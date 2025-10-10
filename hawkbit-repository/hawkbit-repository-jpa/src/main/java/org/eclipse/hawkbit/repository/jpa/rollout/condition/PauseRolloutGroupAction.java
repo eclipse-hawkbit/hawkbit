@@ -61,7 +61,6 @@ public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator<Roll
                 // if only the latest state is != paused then pause
                 rolloutManagement.pauseRollout(rollout.getId());
             }
-            return null;
         });
     }
 }

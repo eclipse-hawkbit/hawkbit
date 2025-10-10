@@ -91,7 +91,7 @@ class VirtualPropertyResolverTest {
     @ParameterizedTest
     @ValueSource(strings = { "${NOW_TS}", "${OVERDUE_TS}", "${overdue_ts}" })
     void resolveNowTimestampPlaceholder(final String placeholder) {
-        when(securityContext.runAsSystem(Mockito.any())).thenAnswer(a -> ((Callable<?>) a.getArgument(0)).call());
+        when(securityContext.runAsSystem(Mockito.any(Callable.class))).thenAnswer(a -> ((Callable<?>) a.getArgument(0)).call());
         final String testString = "lhs=lt=" + placeholder;
 
         final String resolvedPlaceholders = substitutor.replace(testString);

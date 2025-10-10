@@ -134,7 +134,6 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
         systemSecurityContext.runAsSystem(() -> {
             log.debug("Cancel auto assignments after ds invalidation. ID: {}", setId);
             targetFilterQueryManagement.cancelAutoAssignmentForDistributionSet(setId);
-            return null;
         });
     }
 }
