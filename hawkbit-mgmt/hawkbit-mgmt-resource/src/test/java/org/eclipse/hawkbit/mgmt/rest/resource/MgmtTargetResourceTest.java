@@ -81,6 +81,7 @@ import org.eclipse.hawkbit.util.IpUtil;
 import org.hamcrest.Matchers;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -162,7 +163,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .address(knownNewAddress).targetType(targetType).build());
 
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.controllerId", equalTo(knownControllerId)))
@@ -171,7 +172,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.targetType").exists());
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.controllerId", equalTo(knownControllerId)))
@@ -182,7 +183,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     /**
-     * Ensures that when targetType value of -1 is provided the target type is unassigned from the target when updating multiple fields in target object.
+     * Ensures that when targetType value of -1 is provided the target type is unassigned from the target when updating multiple fields in
+     * target object.
      */
     @Test
     void updateTargetNameAndUnassignTargetType() throws Exception {
@@ -204,7 +206,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .address(knownNewAddress).targetType(targetType).build());
 
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.controllerId", equalTo(knownControllerId)))
@@ -214,7 +216,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         //check if controller name is updated AND target type is missing (not assigned)
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.controllerId", equalTo(knownControllerId)))
@@ -254,9 +256,10 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final MgmtTargetAutoConfirmUpdate body = new MgmtTargetAutoConfirmUpdate("custom_initiator_value",
                 "custom_remark_value");
 
-        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + TARGET_V1_AUTO_CONFIRM + "/"
-                        + TARGET_V1_ACTIVATE_AUTO_CONFIRM, testTarget.getControllerId())
-                        .content(objectMapper.writeValueAsString(body)).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(post(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + TARGET_V1_AUTO_CONFIRM + "/" + TARGET_V1_ACTIVATE_AUTO_CONFIRM,
+                testTarget.getControllerId())
+                .content(objectMapper.writeValueAsString(body)).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
     }
@@ -269,14 +272,16 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final Target testTarget = testdataFactory.createTarget("targetId");
         confirmationManagement.activateAutoConfirmation(testTarget.getControllerId(), null, null);
 
-        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + TARGET_V1_AUTO_CONFIRM + "/"
-                        + TARGET_V1_DEACTIVATE_AUTO_CONFIRM, testTarget.getControllerId()))
+        mvc.perform(post(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + TARGET_V1_AUTO_CONFIRM + "/" + TARGET_V1_DEACTIVATE_AUTO_CONFIRM,
+                testTarget.getControllerId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
     }
 
     /**
-     * Test confirmation of single Action with confirm status. Check that Action goes into Running status with appropriate messages and status code
+     * Test confirmation of single Action with confirm status. Check that Action goes into Running status with appropriate messages and status
+     * code
      */
     @Test
     void updateActionConfirmationWithConfirm() throws Exception {
@@ -290,7 +295,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     /**
-     * Test confirmation of single Action with deny status. Check that Action stays in WAIT_FOR_CONFIRMATION status with appropriate messages and status code
+     * Test confirmation of single Action with deny status. Check that Action stays in WAIT_FOR_CONFIRMATION status with appropriate messages
+     * and status code
      */
     @Test
     void updateActionConfirmationWithDeny() throws Exception {
@@ -304,7 +310,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     /**
-     * Test confirmation of single Action with wrong ControllerId - e.g. the given Action is not assigned to the given Target - confirmation call must fail.
+     * Test confirmation of single Action with wrong ControllerId - e.g. the given Action is not assigned to the given Target - confirmation
+     * call must fail.
      */
     @Test
     void updateActionConfirmationFailsIfActionNotAssignedToTarget() throws Exception {
@@ -344,12 +351,12 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
             final HttpStatus expectedHttpResponseStatus, final Status expectedGeneratedStatus) throws Exception {
         String url = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + controllerId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId + "/confirmation";
         mvc.perform(put(url).content(String.format("{\"confirmation\":\"%s\",\"details\":[\"%s\",\"%s\"],\"code\":%d}",
-                                payloadConfirmation.getName(),
-                                payloadMessages[0],
-                                payloadMessages[1],
-                                payloadCode
-                        ))
-                        .contentType(MediaType.APPLICATION_JSON))
+                payloadConfirmation.getName(),
+                payloadMessages[0],
+                payloadMessages[1],
+                payloadCode
+        ))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().is(expectedHttpResponseStatus.value()));
 
@@ -395,10 +402,11 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final ActionStatus status = deploymentManagement.findActionStatusByAction(action.getId(), PAGE).getContent()
                 .stream().sorted((e1, e2) -> Long.compare(e2.getId(), e1.getId())).toList().get(0);
 
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions.get(0).getId() + "/status")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize))
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:DESC"))
+        mvc.perform(get(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions
+                        .get(0).getId() + "/status")
+                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize))
+                .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:DESC"))
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(3)))
@@ -487,7 +495,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String rsqlPendingOrFinishedStatus = rsqlFinishedStatus + "," + rsqlPendingStatus;
         // pending status one result
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions?q=" + rsqlPendingStatus,
-                        createTarget.getControllerId()))
+                createTarget.getControllerId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(1)))
@@ -496,7 +504,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // finished status none result
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions?q=" + rsqlFinishedStatus,
-                        createTarget.getControllerId()))
+                createTarget.getControllerId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(0)))
@@ -504,8 +512,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // pending or finished status one result
         mvc.perform(get(
-                        MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions?q=" + rsqlPendingOrFinishedStatus,
-                        createTarget.getControllerId()))
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions?q=" + rsqlPendingOrFinishedStatus,
+                createTarget.getControllerId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(1)))
@@ -523,9 +531,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // test - cancel the active action
         mvc.perform(
-                        delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}",
-                                tA.getControllerId(), deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE)
-                                        .getContent().get(0).getId()))
+                delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}",
+                        tA.getControllerId(), deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE)
+                                .getContent().get(0).getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
 
@@ -561,7 +569,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // test - cancel an cancel action returns forbidden
         mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}",
-                        tA.getControllerId(), cancelActions.get(0).getId()))
+                tA.getControllerId(), cancelActions.get(0).getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
     }
@@ -586,7 +594,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // test - force quit: Canceled actions should return 204
         mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}?force=true",
-                        tA.getControllerId(), cancelActions.get(0).getId()))
+                tA.getControllerId(), cancelActions.get(0).getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
     }
@@ -601,9 +609,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // test - cancel an cancel action returns forbidden
         mvc.perform(
-                        delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}?force=true",
-                                tA.getControllerId(), deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE)
-                                        .getContent().get(0).getId()))
+                delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}?force=true",
+                        tA.getControllerId(), deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE)
+                                .getContent().get(0).getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
     }
@@ -640,7 +648,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     void updateTargetWhichDoesNotExistsLeadsToNotFound() throws Exception {
         final String knownControllerId = "knownControllerIdUpdate";
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content("{}")
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
     }
@@ -660,7 +668,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 Create.builder().controllerId(knownControllerId).name(knownNameNotModify).description("old description").build());
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.controllerId", equalTo(knownControllerId)))
@@ -688,7 +696,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 Create.builder().controllerId(knownControllerId).name(knownNameNotModify).description("old description").build());
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
@@ -709,7 +717,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         targetManagement.create(Create.builder().controllerId(knownControllerId).name(knownNameNotModify).build());
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.controllerId", equalTo(knownControllerId)))
@@ -736,7 +744,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         targetManagement.create(Create.builder().controllerId(knownControllerId).name(knownNameNotModify).address(knownNewAddress).build());
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.controllerId", equalTo(knownControllerId)))
@@ -807,7 +815,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String linksHrefPrefix = "http://localhost/rest/v1/targets/";
 
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
+                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(knownTargetAmount)))
@@ -838,8 +846,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         createTargetsAlphabetical(knownTargetAmount);
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(knownTargetAmount)))
+                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
+                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(knownTargetAmount)))
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(knownTargetAmount)))
@@ -1011,7 +1019,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     /**
-     * Ensures that a target creation with empty name and a controllerId that exceeds the name length limitation is successful and the name gets truncated.
+     * Ensures that a target creation with empty name and a controllerId that exceeds the name length limitation is successful and the name gets
+     * truncated.
      */
     @Test
     void createTargetWithEmptyNameAndLongControllerId() throws Exception {
@@ -1024,7 +1033,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String expectedTargetName = randomString.substring(0, Math.min(JpaTarget.CONTROLLER_ID_MAX_SIZE, NamedEntity.NAME_MAX_SIZE));
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING).content(targetList)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("[0].controllerId", equalTo(randomString)))
                 .andExpect(jsonPath("[0].name", equalTo(expectedTargetName)));
@@ -1098,7 +1107,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     /**
-     * Verifies that a  properties of new targets are validated as in allowed size range.
+     * Verifies that a properties of new targets are validated as in allowed size range.
      */
     @Test
     void createTargetWithInvalidPropertyBadRequest() throws Exception {
@@ -1187,7 +1196,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String createTargetsJson = getCreateTargetsListJsonString(knownControllerId, knownName, knownDescription);
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING).content(createTargetsJson)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().is2xxSuccessful());
 
@@ -1212,7 +1221,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         // create a taret first to provoke a already exists error
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING).content(createTargetsJson)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().is2xxSuccessful());
         // create another one to retrieve the entity already exists exception
@@ -1241,8 +1250,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String knownTargetId = "targetId";
         testdataFactory.createTarget(knownTargetId);
 
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS))
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("size", equalTo(0)))
@@ -1258,8 +1266,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String knownTargetId = "targetId";
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
 
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions.get(1).getId()))
+        mvc.perform(get(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions
+                        .get(1).getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("id", equalTo(actions.get(1).getId().intValue())))
@@ -1287,8 +1296,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverrideWithMaintenanceWindow(knownTargetId,
                 schedule, duration, timezone);
 
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions.get(1).getId()))
+        mvc.perform(get(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions
+                        .get(1).getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("id", equalTo(actions.get(1).getId().intValue())))
@@ -1316,8 +1326,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String knownTargetId = "targetId";
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
 
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions.get(0).getId()))
+        mvc.perform(get(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions
+                        .get(0).getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("id", equalTo(actions.get(0).getId().intValue())))
@@ -1345,8 +1356,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverrideWithMaintenanceWindow(knownTargetId,
                 schedule, duration, timezone);
 
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions.get(0).getId()))
+        mvc.perform(get(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions
+                        .get(0).getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("id", equalTo(actions.get(0).getId().intValue())))
@@ -1394,8 +1406,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverrideWithMaintenanceWindow(knownTargetId,
                 schedule, duration, timezone);
 
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS).param(
+                MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("content.[1].id", equalTo(actions.get(1).getId().intValue())))
@@ -1436,9 +1448,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .toList();
 
         // sort is default descending order, latest status first
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTION_STATUS))
+        mvc.perform(get(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action
+                        .getId() + "/" + MgmtRestConstants.TARGET_V1_ACTION_STATUS))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(0).getId().intValue())))
@@ -1466,10 +1478,10 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .toList();
 
         // descending order
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTION_STATUS).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING,
-                        "CREATEDAT:DESC"))
+        mvc.perform(get(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action
+                        .getId() + "/" + MgmtRestConstants.TARGET_V1_ACTION_STATUS).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING,
+                                "CREATEDAT:DESC"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(1).getId().intValue())))
@@ -1485,10 +1497,10 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
 
         // ascending order
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTION_STATUS).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING,
-                        "CREATEDAT:ASC"))
+        mvc.perform(get(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action
+                        .getId() + "/" + MgmtRestConstants.TARGET_V1_ACTION_STATUS).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING,
+                                "CREATEDAT:ASC"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("content.[1].id", equalTo(actionStatus.get(1).getId().intValue())))
@@ -1517,10 +1529,10 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .toList();
 
         // Page 1
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTION_STATUS).param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT,
-                        String.valueOf(1)))
+        mvc.perform(get(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action
+                        .getId() + "/" + MgmtRestConstants.TARGET_V1_ACTION_STATUS).param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT,
+                                String.valueOf(1)))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(1).getId().intValue())))
@@ -1533,11 +1545,11 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(1)));
 
         // Page 2
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action.getId() + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTION_STATUS)
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1)))
+        mvc.perform(get(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action
+                        .getId() + "/" + MgmtRestConstants.TARGET_V1_ACTION_STATUS)
+                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
+                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1)))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("content.[0].id", equalTo(actionStatus.get(0).getId().intValue())))
@@ -1557,10 +1569,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
 
         // page 1: one entry
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS)
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS)
+                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
+                .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("content.[0].id", equalTo(actions.get(0).getId().intValue())))
@@ -1573,12 +1584,11 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(1)));
 
         // page 2: one entry
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS)
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1))
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1))
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS)
+                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
+                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1))
+                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1))
+                .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("content.[0].id", equalTo(actions.get(1).getId().intValue())))
@@ -1603,9 +1613,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         assertThat(deploymentManagement.findAction(actionId).get().getActionType()).isEqualTo(ActionType.SOFT);
 
         final String body = new JSONObject().put("forceType", "forced").toString();
-        mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId).content(body)
-                        .contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target
+                .getControllerId() + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId).content(body)
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("id", equalTo(actionId.intValue())))
@@ -1632,7 +1642,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
-                        .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("assigned", equalTo(1)))
@@ -1645,7 +1655,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // repeating DS assignment leads again to OK
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
-                        .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("assigned", equalTo(0)))
@@ -1677,7 +1687,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         }
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
-                        .content(jsonPayload.toString()).contentType(MediaType.APPLICATION_JSON))
+                .content(jsonPayload.toString()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("assigned", equalTo(1)))
@@ -1695,7 +1705,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                     if (!confirmationFlowActive) {
                         return !action.isWaitingConfirmation();
                     }
-                    return confirmationRequired == null ? action.isWaitingConfirmation()
+                    return confirmationRequired == null
+                            ? action.isWaitingConfirmation()
                             : confirmationRequired == action.isWaitingConfirmation();
                 });
     }
@@ -1709,8 +1720,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
-                        .content("{\"id\":" + set.getId() + ",\"type\": \"downloadonly\"}")
-                        .contentType(MediaType.APPLICATION_JSON))
+                .content("{\"id\":" + set.getId() + ",\"type\": \"downloadonly\"}")
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("assigned", equalTo(1)))
@@ -1733,9 +1744,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         Target target = testdataFactory.createTarget();
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
-        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId()
-                        + "/assignedDS?offline=true").content("{\"id\":" + set.getId() + "}")
-                        .contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS?offline=true").content(
+                "{\"id\":" + set.getId() + "}")
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("assigned", equalTo(1)))
@@ -1749,9 +1760,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         assertThat(target.getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
 
         // repeating DS assignment leads again to OK
-        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId()
-                        + "/assignedDS?offline=true").content("{\"id\":" + set.getId() + "}")
-                        .contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS?offline=true").content(
+                "{\"id\":" + set.getId() + "}")
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("assigned", equalTo(0)))
@@ -1772,7 +1783,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .put("forcetime", forceTime).toString();
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/fsdfsd/assignedDS").content(body)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
         implicitLock(set);
@@ -1798,7 +1809,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .put("maintenanceWindow", new JSONObject().put("schedule", getTestSchedule(0))).toString();
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
-                        .content(body).contentType(MediaType.APPLICATION_JSON))
+                .content(body).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
     }
@@ -1816,7 +1827,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .put("maintenanceWindow", new JSONObject().put("duration", getTestDuration(10))).toString();
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
-                        .content(body).contentType(MediaTypes.HAL_JSON_VALUE))
+                .content(body).contentType(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
     }
@@ -1836,13 +1847,14 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .toString();
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
-                        .content(body).contentType(MediaType.APPLICATION_JSON))
+                .content(body).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
     }
 
     /**
-     * Assigns distribution set to target with maintenance window next execution start (should be ignored, calculated automaticaly based on schedule, duration and timezone)
+     * Assigns distribution set to target with maintenance window next execution start (should be ignored, calculated automaticaly based on
+     * schedule, duration and timezone)
      */
     @Test
     void assignDistributionSetToTargetWithMaintenanceWindowNextExecutionStart() throws Exception {
@@ -1852,17 +1864,17 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final long nextExecutionStart = System.currentTimeMillis();
 
         final String body = new JSONObject().put("id", set.getId()).put("maintenanceWindow",
-                        new JSONObject().put("schedule", getTestSchedule(10)).put("duration", getTestDuration(10))
-                                .put("timezone", getTestTimeZone()).put("nextStartAt", String.valueOf(nextExecutionStart)))
+                new JSONObject().put("schedule", getTestSchedule(10)).put("duration", getTestDuration(10))
+                        .put("timezone", getTestTimeZone()).put("nextStartAt", String.valueOf(nextExecutionStart)))
                 .toString();
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
-                        .content(body).contentType(MediaType.APPLICATION_JSON))
+                .content(body).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS))
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target
+                .getControllerId() + "/" + MgmtRestConstants.TARGET_V1_ACTIONS))
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(jsonPath("content.[0].maintenanceWindow.nextStartAt", not(nextExecutionStart)));
@@ -1883,7 +1895,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .toString();
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + target.getControllerId() + "/assignedDS")
-                        .content(body).contentType(MediaType.APPLICATION_JSON))
+                .content(body).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
     }
@@ -1894,29 +1906,29 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/fsdfsd/assignedDS")
-                        .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
         testdataFactory.createTarget("fsdfsd");
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/fsdfsd/assignedDS")
-                        .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/fsdfsd/assignedDS")
-                        .content("{\"id\":12345678}").contentType(MediaType.APPLICATION_JSON))
+                .content("{\"id\":12345678}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
         mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/fsdfsd/assignedDS")
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/fsdfsd/assignedDS")
-                        .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
@@ -1927,34 +1939,33 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String knownTargetId = "targetId";
 
         // target does not exist
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS))
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
         final Long actionId = actions.get(0).getId();
 
         // should work now
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId))
+        mvc.perform(get(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         // action does not exist
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/12321"))
+        mvc.perform(get(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/12321"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
         // not allowed methods
-        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId))
+        mvc.perform(post(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
         // Invalid content
-        mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId))
+        mvc.perform(put(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isUnsupportedMediaType());
     }
@@ -1964,36 +1975,36 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String knownTargetId = "targetId";
 
         // target does not exist
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/1/status"))
+        mvc.perform(get(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/1/status"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
         final Long actionId = actions.get(0).getId();
 
         // should work now
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId + "/status"))
+        mvc.perform(get(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId + "/status"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         // action does not exist
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/12321/status"))
+        mvc.perform(get(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/12321/status"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
         // not allowed methods
-        mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId + "/status"))
+        mvc.perform(delete(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId + "/status"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
-        mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId + "/status"))
+        mvc.perform(put(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId + "/status"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
-        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                        + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId + "/status"))
+        mvc.perform(post(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId + "/status"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
     }
@@ -2110,7 +2121,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         metaData1.put(new JSONObject().put(JSON_PATH_KEY, knownKey2).put(JSON_PATH_VALUE, knownValue2));
 
         mvc.perform(post("/rest/v1/targets/{targetId}/metadata", knownControllerId).accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON).content(metaData1.toString()))
+                .contentType(MediaType.APPLICATION_JSON).content(metaData1.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
                 .andExpect(content().string(""));
@@ -2127,8 +2138,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         }
 
         mvc.perform(post("/rest/v1/targets/{targetId}/metadata", knownControllerId)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON).content(metaData2.toString()))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(metaData2.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
 
@@ -2149,8 +2160,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final JSONObject jsonObject = new JSONObject().put(JSON_PATH_KEY, KNOWN_KEY).put(JSON_PATH_VALUE, updateValue);
 
         mvc.perform(put("/rest/v1/targets/{targetId}/metadata/{key}", knownControllerId, KNOWN_KEY)
-                        .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonObject.toString()))
+                .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(""));
@@ -2266,7 +2277,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         dsIds.forEach(id -> body.put(getAssignmentObject(id, MgmtActionType.FORCED, 67)));
 
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
     }
@@ -2281,7 +2292,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         final JSONArray body = new JSONArray().put(getAssignmentObject(dsId, MgmtActionType.FORCED));
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
     }
@@ -2298,7 +2309,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final JSONArray body = new JSONArray().put(assignment).put(assignment);
 
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(1)));
@@ -2318,7 +2329,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         enableMultiAssignments();
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString())
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(2)));
@@ -2338,12 +2349,12 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         enableMultiAssignments();
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyInvalid.toString())
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.repo.constraintViolation")));
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyValid.toString())
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
@@ -2363,7 +2374,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final JSONObject bodyValid = getAssignmentObject(dsId, MgmtActionType.FORCED, 98);
 
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyValid.toString())
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
     }
@@ -2381,7 +2392,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         enableMultiAssignments();
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyValid.toString())
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
@@ -2405,7 +2416,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         assignDistributionSet(dsId, targetId, customWeightLow);
 
         mvc.perform(get("/rest/v1/targets/{targetId}/actions", targetId)
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "WEIGHT:ASC"))
+                .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "WEIGHT:ASC"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("content.[0].weight", equalTo(customWeightLow)))
@@ -2443,7 +2454,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 PageRequest.of(0, 100));
         assertThat(action.getContent()).hasSize(1);
         mvc.perform(get("/rest/v1/targets/{targetId}/actions/{actionId}", target.getControllerId(),
-                        action.getContent().get(0).getId()))
+                action.getContent().get(0).getId()))
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(jsonPath("$.rollout", equalTo(rollout.getId().intValue())))
@@ -2536,7 +2547,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // test query target over rest resource
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING).content(targetList)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("[0].controllerId", equalTo("targetcontroller")))
                 .andExpect(jsonPath("[0].targetType", equalTo(targetTypes.get(0).getId().intValue())));
@@ -2563,7 +2574,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String body = new JSONObject().put("targetType", targetTypes.get(1).getId().intValue()).toString();
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + controllerId).content(body)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("controllerId", equalTo(controllerId)))
                 .andExpect(jsonPath("targetType", equalTo(targetTypes.get(1).getId().intValue())));
@@ -2607,7 +2618,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // assign target type over rest resource
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetControllerId + "/targettype")
-                        .content("{\"id\":" + targetType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                .content("{\"id\":" + targetType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
@@ -2629,7 +2640,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // assign invalid target type over rest resource
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetControllerId + "/targettype")
-                        .content("{\"id\":" + invalidTargetTypeId + "}").contentType(MediaType.APPLICATION_JSON))
+                .content("{\"id\":" + invalidTargetTypeId + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
@@ -2666,7 +2677,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // unassign target type over rest resource
         mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetControllerId + "/targettype")
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         assertThat(targetManagement.getByControllerId(targetControllerId).getTargetType()).isNull();
@@ -2680,41 +2691,41 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // GET is not allowed
         mvc.perform(get(
-                        MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING,
-                        knownTargetId))
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING,
+                knownTargetId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
         // PUT is not allowed
         mvc.perform(put(
-                        MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING,
-                        knownTargetId))
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING,
+                knownTargetId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
         // POST does not exist with path parameter targettype
-        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING
-                        + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING + "/123", knownTargetId))
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING + "/123",
+                knownTargetId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
         // DELETE does not exist with path parameter targettype
-        mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING
-                        + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING + "/123", knownTargetId))
+        mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING + "/123",
+                knownTargetId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
         // Invalid content
         mvc.perform(post(
-                        MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING,
-                        knownTargetId))
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING,
+                knownTargetId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isUnsupportedMediaType());
 
         // Bad request if id field is missing
         mvc.perform(post(
-                        MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING,
-                        knownTargetId).content("{\"unknownfield\":123}").contentType(MediaType.APPLICATION_JSON))
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING,
+                knownTargetId).content("{\"unknownfield\":123}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
     }
@@ -2728,11 +2739,12 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // GET with all possible responses
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + TARGET_V1_AUTO_CONFIRM,
-                        knownTargetId))
+                knownTargetId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("active", equalTo(Boolean.TRUE)))
-                .andExpect(initiator == null ? jsonPath("initiator").doesNotExist()
+                .andExpect(initiator == null
+                        ? jsonPath("initiator").doesNotExist()
                         : jsonPath("initiator", equalTo(initiator)))
                 .andExpect(remark == null ? jsonPath("remark").doesNotExist() : jsonPath("remark", equalTo(remark)))
                 .andExpect(jsonPath("_links.deactivate").exists())
@@ -2773,7 +2785,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // GET for not existing target
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + TARGET_V1_AUTO_CONFIRM,
-                        knownTargetId))
+                knownTargetId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
@@ -2781,7 +2793,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // GET for auto-confirm not active
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + TARGET_V1_AUTO_CONFIRM,
-                        knownTargetId))
+                knownTargetId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("active", equalTo(Boolean.FALSE)))
@@ -2825,7 +2837,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // no status update yet -> no status code
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}",
-                        target.getControllerId(), action.getId()))
+                target.getControllerId(), action.getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("lastStatusCode").doesNotExist());
@@ -2833,7 +2845,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         // update action status with status code
         updateActionStatus(action, Status.RUNNING, 100);
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}",
-                        target.getControllerId(), action.getId()))
+                target.getControllerId(), action.getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("lastStatusCode", equalTo(100)))
@@ -2842,7 +2854,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         // update action status without a status code
         updateActionStatus(action, Status.RUNNING, null);
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}",
-                        target.getControllerId(), action.getId()))
+                target.getControllerId(), action.getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("lastStatusCode").doesNotExist())
@@ -2851,11 +2863,73 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         // update action status with status code
         updateActionStatus(action, Status.ERROR, 432);
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}",
-                        target.getControllerId(), action.getId()))
+                target.getControllerId(), action.getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("lastStatusCode", equalTo(432)))
                 .andExpect(jsonPath("detailStatus", equalTo("error")));
+    }
+
+    @Test
+    void testDeletionOfLastNTargetActions() throws Exception {
+        final Target testTarget = testdataFactory.createTarget("testTarget");
+
+        for (int i = 0; i < 10; i++) {
+            final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+            assignDistributionSet(distributionSet.getId(), testTarget.getControllerId());
+        }
+
+        long actionsPerTarget = actionRepository.countByTargetId(testTarget.getId());
+        Assertions.assertEquals(10, actionsPerTarget);
+        List<Action> oldActions = deploymentManagement.findActionsByTarget(testTarget.getControllerId(), PAGE).getContent();
+
+        mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions", testTarget.getControllerId())
+                .param("numberOfActions", "5"))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        //the last 5 actions should be left
+        List<Action> actions = deploymentManagement.findActionsByTarget(testTarget.getControllerId(), PAGE).getContent();
+        Assertions.assertEquals(5, actions.size());
+        for (int i = 0; i < 5; i++) {
+            // last 5 actions should remain
+            Assertions.assertEquals(oldActions.get(i + 5), actions.get(i));
+        }
+    }
+
+    @Test
+    void testThatDeletionOfLastNTargetActionsReturnsBadRequestWhenNeeded() throws Exception {
+        final Target testTarget = testdataFactory.createTarget();
+        // either numberOfActions or actionIds list should be present
+        mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions", testTarget.getControllerId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testDeletionOfTargetActionsById() throws Exception {
+        final Target testTarget = testdataFactory.createTarget("testTarget");
+        for (int i = 0; i < 10; i++) {
+            final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+            long dsId = distributionSet.getId();
+            assignDistributionSet(dsId, testTarget.getControllerId());
+        }
+
+        final List<Long> evenActionIds = deploymentManagement.findActionsByTarget(testTarget.getControllerId(), PAGE).getContent()
+                .stream()
+                .filter(action -> action.getId() % 2 == 0)
+                .map(Identifiable::getId).toList();
+
+        mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions", testTarget.getControllerId())
+                .content(toJson(evenActionIds))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        long remaining = actionRepository.countByTargetId(testTarget.getId());
+        Assertions.assertEquals(10 - evenActionIds.size(), remaining);
+        List<Action> remainingActions = deploymentManagement.findActionsByTarget(testTarget.getControllerId(), PAGE).getContent();
+        remainingActions.forEach(action -> Assertions.assertTrue(action.getId() % 2 != 0));
     }
 
     private static Stream<Arguments> confirmationOptions() {
@@ -2892,24 +2966,24 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
             controllerManagement.updateActionExternalRef(actions.get(1).getId(), externalRefs.get(1));
         }
 
-        final ResultActions resultActions =
-                mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                                + MgmtRestConstants.TARGET_V1_ACTIONS).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
-                        .andDo(MockMvcResultPrinter.print())
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("content.[1].id", equalTo(actions.get(1).getId().intValue())))
-                        .andExpect(jsonPath("content.[1].type", equalTo("update")))
-                        .andExpect(jsonPath("content.[1].status", equalTo("pending")))
-                        .andExpect(jsonPath("content.[1]._links.self.href",
-                                equalTo(generateActionSelfLink(knownTargetId, actions.get(1).getId()))))
-                        .andExpect(jsonPath("content.[0].id", equalTo(actions.get(0).getId().intValue())))
-                        .andExpect(jsonPath("content.[0].type", equalTo("cancel")))
-                        .andExpect(jsonPath("content.[0].status", equalTo("pending")))
-                        .andExpect(jsonPath("content.[0]._links.self.href",
-                                equalTo(generateActionSelfLink(knownTargetId, actions.get(0).getId()))))
-                        .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
-                        .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
-                        .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
+        final ResultActions resultActions = mvc.perform(get(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS).param(
+                        MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("content.[1].id", equalTo(actions.get(1).getId().intValue())))
+                .andExpect(jsonPath("content.[1].type", equalTo("update")))
+                .andExpect(jsonPath("content.[1].status", equalTo("pending")))
+                .andExpect(jsonPath("content.[1]._links.self.href",
+                        equalTo(generateActionSelfLink(knownTargetId, actions.get(1).getId()))))
+                .andExpect(jsonPath("content.[0].id", equalTo(actions.get(0).getId().intValue())))
+                .andExpect(jsonPath("content.[0].type", equalTo("cancel")))
+                .andExpect(jsonPath("content.[0].status", equalTo("pending")))
+                .andExpect(jsonPath("content.[0]._links.self.href",
+                        equalTo(generateActionSelfLink(knownTargetId, actions.get(0).getId()))))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
+                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
 
         if (withExternalRef) {
             resultActions
@@ -2919,8 +2993,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     private String generateActionSelfLink(final String knownTargetId, final Long actionId) {
-        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId;
+        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId;
     }
 
     private String generateActionDsLink(final Long dsId) {
@@ -2928,14 +3001,12 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     private String generateCanceledactionreferenceLink(final String knownTargetId, final Action action) {
-        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action.getId();
+        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + action
+                .getId();
     }
 
     private String generateStatusreferenceLink(final String knownTargetId, final Long actionId) {
-        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId + "/" + MgmtRestConstants.TARGET_V1_ACTION_STATUS
-                + "?offset=0&limit=50&sort=id%3ADESC";
+        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId + "/" + MgmtRestConstants.TARGET_V1_ACTION_STATUS + "?offset=0&limit=50&sort=id%3ADESC";
     }
 
     private List<Action> generateTargetWithTwoUpdatesWithOneOverride(final String knownTargetId) {
@@ -2981,7 +3052,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String body = new JSONObject().put("requestAttributes", true).toString();
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId).content(body)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
@@ -2992,7 +3063,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String body = new JSONObject().put("description", "verify attribute can be missing").toString();
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId).content(body)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
     }
@@ -3001,7 +3072,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String body = new JSONObject().put("requestAttributes", false).toString();
 
         mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId).content(body)
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 

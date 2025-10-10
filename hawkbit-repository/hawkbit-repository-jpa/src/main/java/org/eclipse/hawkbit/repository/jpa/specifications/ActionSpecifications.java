@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.springframework.data.jpa.domain.Specification;
@@ -87,7 +88,7 @@ public final class ActionSpecifications {
     }
 
     public static Specification<JpaAction> byRolloutIdAndActive(final Long rolloutId) {
-        return (root,  query,  cb) -> cb.and(
+        return (root, query, cb) -> cb.and(
                 cb.equal(root.get(JpaAction_.rollout).get(AbstractJpaBaseEntity_.id), rolloutId),
                 cb.equal(root.get(JpaAction_.active), true)
         );
@@ -101,7 +102,19 @@ public final class ActionSpecifications {
         );
     }
 
-    public static Specification<JpaAction> byDistributionSetIdAndActiveAndStatusIsNot(final Long distributionSetId, final Action.Status status) {
+    public static Specification<JpaAction> byControllerIdAndIdIn(final String controllerId, final List<Long> actionIds) {
+        return ((root, query, cb) -> {
+            final Join<JpaAction, JpaTarget> targetJoin = root.join(JpaAction_.target);
+            return cb.and(
+                    cb.equal(targetJoin.get(JpaTarget_.controllerId), controllerId),
+                    root.get(AbstractJpaBaseEntity_.id).in(actionIds)
+            );
+        });
+
+    }
+
+    public static Specification<JpaAction> byDistributionSetIdAndActiveAndStatusIsNot(final Long distributionSetId,
+            final Action.Status status) {
         return (root, query, cb) -> cb.and(
                 cb.equal(root.get(JpaAction_.distributionSet).get(AbstractJpaBaseEntity_.id), distributionSetId),
                 cb.equal(root.get(JpaAction_.active), true),

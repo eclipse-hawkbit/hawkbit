@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
+import org.eclipse.hawkbit.repository.jpa.actions.TargetAssignmentsChecker;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -54,9 +55,10 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             final AfterTransactionCommitExecutor afterCommit,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
-            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
+            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties,
+            final TargetAssignmentsChecker targetAssignmentsChecker) {
         super(targetRepository, afterCommit, actionRepository, actionStatusRepository,
-                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties);
+                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties, targetAssignmentsChecker);
     }
 
     public void sendDeploymentEvents(final long distributionSetId, final List<Action> actions) {
@@ -77,8 +79,8 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             final List<JpaTarget> targets, final JpaDistributionSet set) {
         final JpaAction result = super.createTargetAction(initiatedBy, targetWithActionType, targets, set);
         if (result != null) {
-            final boolean confirmationRequired = targetWithActionType.isConfirmationRequired()
-                    && result.getTarget().getAutoConfirmationStatus() == null;
+            final boolean confirmationRequired = targetWithActionType.isConfirmationRequired() && result.getTarget()
+                    .getAutoConfirmationStatus() == null;
             if (isConfirmationFlowEnabled() && confirmationRequired) {
                 result.setStatus(Status.WAIT_FOR_CONFIRMATION);
             } else {
@@ -124,7 +126,8 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    public void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds, final String currentUser) {
+    public void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds,
+            final String currentUser) {
         final long now = System.currentTimeMillis();
         targetIds.forEach(targetIdsChunk -> {
             if (targetRepository.count(AccessController.Operation.UPDATE,
@@ -185,7 +188,7 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     void sendCancellationMessages(final List<JpaAction> actions, final String tenant) {
-        if(isMultiAssignmentsEnabled()) {
+        if (isMultiAssignmentsEnabled()) {
             sendMultiActionCancelEvent(tenant, Collections.unmodifiableList(actions));
         } else {
             actions.forEach(this::cancelAssignDistributionSetEvent);

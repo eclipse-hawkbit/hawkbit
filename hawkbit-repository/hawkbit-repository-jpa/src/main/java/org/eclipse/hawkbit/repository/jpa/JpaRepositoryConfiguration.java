@@ -48,6 +48,7 @@ import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
+import org.eclipse.hawkbit.repository.jpa.actions.TargetAssignmentsChecker;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
@@ -302,8 +303,8 @@ public class JpaRepositoryConfiguration {
 
     /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
-     *         accessible in beans which cannot access the service directly, e.g.
-     *         JPA entities.
+     *             accessible in beans which cannot access the service directly, e.g.
+     *             JPA entities.
      */
     @Bean
     SystemSecurityContextHolder systemSecurityContextHolder() {
@@ -312,8 +313,8 @@ public class JpaRepositoryConfiguration {
 
     /**
      * @return the {@link TenantConfigurationManagement} singleton bean which make
-     *         it accessible in beans which cannot access the service directly, e.g.
-     *         JPA entities.
+     *             it accessible in beans which cannot access the service directly, e.g.
+     *             JPA entities.
      */
     @Bean
     TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
@@ -322,8 +323,8 @@ public class JpaRepositoryConfiguration {
 
     /**
      * @return the {@link TenantAwareHolder} singleton bean which holds the current
-     *         {@link TenantAware} service and make it accessible in beans which
-     *         cannot access the service directly, e.g. JPA entities.
+     *             {@link TenantAware} service and make it accessible in beans which
+     *             cannot access the service directly, e.g. JPA entities.
      */
     @Bean
     TenantAwareHolder tenantAwareHolder() {
@@ -332,8 +333,8 @@ public class JpaRepositoryConfiguration {
 
     /**
      * @return the {@link SecurityTokenGeneratorHolder} singleton bean which holds
-     *         the current {@link SecurityTokenGenerator} service and make it
-     *         accessible in beans which cannot access the service via injection
+     *             the current {@link SecurityTokenGenerator} service and make it
+     *             accessible in beans which cannot access the service via injection
      */
     @Bean
     SecurityTokenGeneratorHolder securityTokenGeneratorHolder() {
@@ -365,6 +366,12 @@ public class JpaRepositoryConfiguration {
     }
 
     @Bean
+    TargetAssignmentsChecker maxActionAssignedToTargetChecker(final EntityManager entityManager,
+            final SystemSecurityContext systemSecurityContext, final TenantConfigurationManagement tenantConfigurationManagement) {
+        return new TargetAssignmentsChecker(entityManager, systemSecurityContext, tenantConfigurationManagement);
+    }
+
+    @Bean
     @ConditionalOnMissingBean
     RolloutHandler rolloutHandler(final TenantAware tenantAware, final RolloutManagement rolloutManagement,
             final RolloutExecutor rolloutExecutor, final LockRegistry lockRegistry,
@@ -383,11 +390,12 @@ public class JpaRepositoryConfiguration {
             final RolloutGroupEvaluationManager evaluationManager, final RolloutApprovalStrategy rolloutApprovalStrategy,
             final EntityManager entityManager, final PlatformTransactionManager txManager,
             final AfterTransactionCommitExecutor afterCommit,
-            final TenantAware tenantAware, final ContextAware contextAware, final RepositoryProperties repositoryProperties) {
+            final TenantAware tenantAware, final ContextAware contextAware, final RepositoryProperties repositoryProperties,
+            final TargetAssignmentsChecker targetAssignmentsChecker) {
         return new JpaRolloutExecutor(actionRepository, rolloutGroupRepository, rolloutTargetGroupRepository,
                 rolloutRepository, targetManagement, deploymentManagement, rolloutGroupManagement, rolloutManagement,
                 quotaManagement, evaluationManager, rolloutApprovalStrategy, entityManager, txManager, afterCommit,
-                tenantAware, contextAware, repositoryProperties);
+                tenantAware, contextAware, repositoryProperties, targetAssignmentsChecker);
     }
 
     /**
