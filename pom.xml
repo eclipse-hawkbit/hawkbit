@@ -598,6 +598,9 @@
                                         <exclude>docker/**</exclude>
                                         <exclude>licenses/LICENSE*</exclude>
                                         <exclude>**/*.sql</exclude>
+                                        <exclude>docs/**</exclude>
+                                        <exclude>/docs/rest-api/**</exclude>
+                                        <exclude>/docs/images/**</exclude>
                                         <exclude>**/application-local.properties</exclude>
                                         <exclude>eclipse_codeformatter.xml</exclude>
                                         <exclude>intellij_codeformatter.xml</exclude>
