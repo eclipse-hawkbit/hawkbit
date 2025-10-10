@@ -39,11 +39,11 @@ class SoftwareModuleManagementTest extends AbstractAccessControllerManagementTes
             Assertions.<SoftwareModule> assertThat(softwareModuleManagement.findByRsql("name==*", UNPAGED)).containsExactly(sm1Type1);
             Assertions.assertThat(softwareModuleManagement.countByRsql("name==*")).isEqualTo(1);
 
-            final Long sm2Type2Id = sm2Type2.getId();
-            Assertions.<SoftwareModule> assertThat(softwareModuleManagement.findByAssignedTo(sm2Type2Id, UNPAGED).toList())
+            Assertions.<SoftwareModule> assertThat(softwareModuleManagement.findByAssignedTo(ds2Type2.getId(), UNPAGED).toList())
                     .containsExactly(sm1Type1); // no sm2Type2
 
             assertThat(softwareModuleManagement.getMetadata(sm1Type1.getId())).isEmpty();
+            final Long sm2Type2Id = sm2Type2.getId();
             assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() -> softwareModuleManagement.getMetadata(sm2Type2Id));
         });
     }
