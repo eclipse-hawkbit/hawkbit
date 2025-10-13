@@ -48,7 +48,7 @@ To finally accept a cancellation, you must send a `closed` status.execution type
 </div>
 
 <iframe 
-  src="../rest-api/ddi.html" 
+  src="rest-api/ddi.html" 
   width="100%" 
   height="1080px" 
   style="border: 1px solid #000000; border-radius: 16px;">
