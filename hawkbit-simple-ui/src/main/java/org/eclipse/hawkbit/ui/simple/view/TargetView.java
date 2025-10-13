@@ -711,7 +711,7 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
             type.setWidthFull();
             type.setEmptySelectionAllowed(true);
             type.setItemLabelGenerator(item -> item == null ? "" : item.getName());
-            controllerId = Utils.textField(FILTER, e -> register.setEnabled(!e.getHasValue().isEmpty()));
+            controllerId = Utils.textField(CONTROLLER_ID, e -> register.setEnabled(!e.getHasValue().isEmpty()));
             controllerId.focus();
             name = Utils.textField(Constants.NAME);
             name.setWidthFull();
