@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.ui.simple.security;
 import java.util.Optional;
 
 import com.vaadin.flow.spring.security.AuthenticationContext;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -27,6 +28,7 @@ public class AuthenticatedUser {
         return authenticationContext.getPrincipalName();
     }
 
+    @CacheEvict(cacheNames = "userDetails", key = "#authenticationContext.getPrincipalName().get()")
     public void logout() {
         authenticationContext.logout();
     }
