@@ -142,10 +142,7 @@ public class AutoAssignChecker implements AutoAssignExecutor {
                             () -> // has no stored context - executes it in the tenant & user scope
                                     contextAware.runAsTenantAsUser(
                                             contextAware.getCurrentTenant(),
-                                            getAutoAssignmentInitiatedBy(filterQuery), () -> {
-                                                consumer.accept(filterQuery);
-                                                return null;
-                                            })
+                                            getAutoAssignmentInitiatedBy(filterQuery), () -> consumer.accept(filterQuery))
                     );
                 } catch (final RuntimeException ex) {
                     if (log.isDebugEnabled()) {

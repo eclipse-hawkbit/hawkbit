@@ -47,7 +47,7 @@ public interface SystemManagement {
 
     /**
      * Runs consumer for each tenant as
-     * {@link TenantAware#runAsTenant(String, org.eclipse.hawkbit.tenancy.TenantAware.TenantRunner)}
+     * {@link TenantAware#runAsTenant(String, java.util.concurrent.Callable)}
      * silently (i.e. exceptions will be logged but operations will continue for further tenants).
      *
      * @param consumer to run as tenant

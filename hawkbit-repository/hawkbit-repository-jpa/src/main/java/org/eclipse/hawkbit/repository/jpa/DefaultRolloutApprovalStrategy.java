@@ -15,46 +15,37 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.util.ObjectUtils;
 
 /**
- * Default implementation of {@link RolloutApprovalStrategy}. Decides whether
- * approval is needed based on configuration of the tenant as well as the roles
- * of the user who created the Rollout. Provides a no-operation implementation
- * of {@link RolloutApprovalStrategy#onApprovalRequired(Rollout)}.
+ * Default implementation of {@link RolloutApprovalStrategy}. Decides whether approval is needed based on configuration of the tenant as well
+ * as the roles of the user who created the Rollout. Provides a no-operation implementation of
+ * {@link RolloutApprovalStrategy#onApprovalRequired(Rollout)}.
  */
 public class DefaultRolloutApprovalStrategy implements RolloutApprovalStrategy {
-
-    private final UserAuthoritiesResolver userAuthoritiesResolver;
 
     private final TenantConfigurationManagement tenantConfigurationManagement;
 
     private final SystemSecurityContext systemSecurityContext;
 
     DefaultRolloutApprovalStrategy(
-            final UserAuthoritiesResolver userAuthoritiesResolver,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final SystemSecurityContext systemSecurityContext) {
-        this.userAuthoritiesResolver = userAuthoritiesResolver;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
     }
 
     /**
-     * Returns true, if rollout approval is enabled and rollout creator doesn't
-     * have approval role.
+     * Returns true, if rollout approval is enabled and rollout creator doesn't have approval role. It have to be called in the user context
      */
     @Override
     public boolean isApprovalNeeded(final Rollout rollout) {
-        return isApprovalEnabled() && hasNoApproveRolloutPermission(getActorAuthorities(rollout));
+        return isApprovalEnabled() && hasNoApproveRolloutPermission(
+                getCurrentAuthentication().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList());
     }
 
     /***
@@ -84,20 +75,5 @@ public class DefaultRolloutApprovalStrategy implements RolloutApprovalStrategy {
     private boolean isApprovalEnabled() {
         return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
                 .getConfigurationValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue());
-    }
-
-    private Collection<String> getActorAuthorities(final Rollout rollout) {
-        // rollout state transition from CREATING to CREATED is managed by
-        // scheduler under SYSTEM user context, thus we get the
-        // user based on the properties of initially created rollout entity
-        if (RolloutStatus.CREATING == rollout.getStatus()) {
-            final String actor = rollout.getLastModifiedBy() != null ? rollout.getLastModifiedBy() : rollout.getCreatedBy();
-            if (!ObjectUtils.isEmpty(actor)) {
-                return systemSecurityContext.runAsSystem(() -> userAuthoritiesResolver.getUserAuthorities(rollout.getTenant(), actor));
-            }
-        }
-
-        return ((User) getCurrentAuthentication().getPrincipal()).getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority).toList();
     }
 }

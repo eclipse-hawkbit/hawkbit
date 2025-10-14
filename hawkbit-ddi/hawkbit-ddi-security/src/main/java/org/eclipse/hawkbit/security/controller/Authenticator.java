@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.security.controller;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Callable;
 
 import lombok.EqualsAndHashCode;
 import org.eclipse.hawkbit.im.authentication.SpRole;
@@ -49,7 +50,7 @@ public interface Authenticator {
         protected final TenantConfigurationManagement tenantConfigurationManagement;
         protected final TenantAware tenantAware;
         protected final SystemSecurityContext systemSecurityContext;
-        private final TenantAware.TenantRunner<Boolean> isEnabledTenantRunner;
+        private final Callable<Boolean> isEnabledGetter;
 
         protected AbstractAuthenticator(
                 final TenantConfigurationManagement tenantConfigurationManagement,
@@ -57,12 +58,12 @@ public interface Authenticator {
             this.tenantConfigurationManagement = tenantConfigurationManagement;
             this.tenantAware = tenantAware;
             this.systemSecurityContext = systemSecurityContext;
-            isEnabledTenantRunner = () -> systemSecurityContext.runAsSystem(
+            isEnabledGetter = () -> systemSecurityContext.runAsSystem(
                     () -> tenantConfigurationManagement.getConfigurationValue(getTenantConfigurationKey(), Boolean.class).getValue());
         }
 
         protected boolean isEnabled(final ControllerSecurityToken securityToken) {
-            return tenantAware.runAsTenant(securityToken.getTenant(), isEnabledTenantRunner);
+            return tenantAware.runAsTenant(securityToken.getTenant(), isEnabledGetter);
         }
 
         protected abstract String getTenantConfigurationKey();

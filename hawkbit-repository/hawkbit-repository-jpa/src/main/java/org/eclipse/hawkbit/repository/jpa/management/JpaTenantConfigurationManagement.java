@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_GATEWAY_SECURITY_TOKEN;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
@@ -28,7 +29,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.TenantConfigurationDeletedEvent;
@@ -248,10 +248,9 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     private void checkAccess(final String configurationKeyName) {
         if (AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY.equalsIgnoreCase(configurationKeyName)) {
             final SystemSecurityContext systemSecurityContext = SystemSecurityContextHolder.getInstance().getSystemSecurityContext();
-            if (!systemSecurityContext.isCurrentThreadSystemCode() &&
-                    !systemSecurityContext.hasPermission(SpPermission.READ_GATEWAY_SECURITY_TOKEN)) {
+            if (!SystemSecurityContext.isCurrentThreadSystemCode() && !systemSecurityContext.hasPermission(READ_GATEWAY_SECURITY_TOKEN)) {
                 throw new InsufficientPermissionException(
-                        "Can't read gateway security token! " + SpPermission.READ_GATEWAY_SECURITY_TOKEN + " is required!");
+                        "Can't read gateway security token! " + READ_GATEWAY_SECURITY_TOKEN + " is required!");
             }
         }
     }

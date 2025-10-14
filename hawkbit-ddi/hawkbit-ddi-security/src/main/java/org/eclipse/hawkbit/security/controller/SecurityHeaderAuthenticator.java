@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.security.controller;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -47,7 +48,7 @@ public class SecurityHeaderAuthenticator extends Authenticator.AbstractAuthentic
     // header exists multiple times in the request for all trusted chains.
     private final String sslIssuerHashBasicHeader;
 
-    private final TenantAware.TenantRunner<String> sslIssuerNameConfigTenantRunner;
+    private final Callable<String> sslIssuerNameConfigGetter;
 
     public SecurityHeaderAuthenticator(
             final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
@@ -56,7 +57,7 @@ public class SecurityHeaderAuthenticator extends Authenticator.AbstractAuthentic
         super(tenantConfigurationManagement, tenantAware, systemSecurityContext);
         this.caCommonNameHeader = caCommonNameHeader;
         this.sslIssuerHashBasicHeader = caAuthorityNameHeader;
-        sslIssuerNameConfigTenantRunner = () -> systemSecurityContext.runAsSystem(
+        sslIssuerNameConfigGetter = () -> systemSecurityContext.runAsSystem(
                 () -> tenantConfigurationManagement.getConfigurationValue(
                         TenantConfigurationKey.AUTHENTICATION_HEADER_AUTHORITY_NAME, String.class).getValue());
     }
@@ -81,7 +82,7 @@ public class SecurityHeaderAuthenticator extends Authenticator.AbstractAuthentic
 
         final String sslIssuerHashValue = getIssuerHashHeader(
                 controllerSecurityToken,
-                tenantAware.runAsTenant(controllerSecurityToken.getTenant(), sslIssuerNameConfigTenantRunner));
+                tenantAware.runAsTenant(controllerSecurityToken.getTenant(), sslIssuerNameConfigGetter));
         if (sslIssuerHashValue == null) {
             log.debug("The request contains the 'common name' header but trusted hash is not found");
             return null;

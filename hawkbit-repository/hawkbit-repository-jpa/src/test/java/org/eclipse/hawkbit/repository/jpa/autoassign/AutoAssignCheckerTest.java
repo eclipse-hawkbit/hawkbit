@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.autoassign;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -27,8 +28,8 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,9 +48,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 class AutoAssignCheckerTest {
 
     @Mock
-    private TargetFilterQueryManagement targetFilterQueryManagement;
+    private TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
     @Mock
-    private TargetManagement targetManagement;
+    private TargetManagement<? extends Target> targetManagement;
     @Mock
     private DeploymentManagement deploymentManagement;
     @Mock
@@ -57,12 +58,12 @@ class AutoAssignCheckerTest {
     @Mock
     private ContextAware contextAware;
 
-    private AutoAssignChecker sut;
+    private AutoAssignChecker autoAssignChecker;
 
     @BeforeEach
     void before() {
-        sut = new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
-                transactionManager, contextAware);
+        autoAssignChecker = new AutoAssignChecker(
+                targetFilterQueryManagement, targetManagement, deploymentManagement, transactionManager, contextAware);
     }
 
     /**
@@ -75,18 +76,15 @@ class AutoAssignCheckerTest {
         final long ds = getRandomLong();
         final TargetFilterQuery matching = mockFilterQuery(ds);
         final TargetFilterQuery notMatching = mockFilterQuery(ds);
-        when(targetFilterQueryManagement.findWithAutoAssignDS(any()))
-                .thenReturn(new SliceImpl<>(Arrays.asList(notMatching, matching)));
-
-        when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, ds, matching.getQuery()))
-                .thenReturn(true);
+        when(targetFilterQueryManagement.findWithAutoAssignDS(any())).thenReturn(new SliceImpl<>(Arrays.asList(notMatching, matching)));
+        when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, ds, matching.getQuery())).thenReturn(true);
         when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, ds, notMatching.getQuery()))
                 .thenReturn(false);
 
-        sut.checkSingleTarget(target);
+        autoAssignChecker.checkSingleTarget(target);
 
-        verify(deploymentManagement).assignDistributionSets(eq(matching.getAutoAssignInitiatedBy()),
-                Mockito.argThat(deployReqMatcher(target, ds)), any());
+        verify(deploymentManagement).assignDistributionSets(
+                eq(matching.getAutoAssignInitiatedBy()), Mockito.argThat(deployReqMatcher(target, ds)), any());
         Mockito.verifyNoMoreInteractions(deploymentManagement);
     }
 
@@ -118,8 +116,9 @@ class AutoAssignCheckerTest {
 
     private void mockRunningAsNonSystem() {
         when(contextAware.getCurrentTenant()).thenReturn(getRandomString());
-        when(contextAware.runAsTenantAsUser(any(String.class), any(String.class), any(TenantAware.TenantRunner.class)))
-                .thenAnswer(i -> ((TenantAware.TenantRunner) i.getArgument(2)).run());
+        doAnswer(i -> {
+            ((Runnable) i.getArgument(2)).run();
+            return null;
+        }).when(contextAware).runAsTenantAsUser(any(String.class), any(String.class), any(Runnable.class));
     }
-
 }

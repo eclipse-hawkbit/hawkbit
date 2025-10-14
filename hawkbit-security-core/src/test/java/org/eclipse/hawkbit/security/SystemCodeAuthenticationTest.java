@@ -15,7 +15,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
+import java.util.concurrent.Callable;
 
+import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.jupiter.api.Test;
@@ -39,14 +41,15 @@ class SystemCodeAuthenticationTest {
             return "user";
         }
 
+        @SneakyThrows
         @Override
-        public <T> T runAsTenant(final String tenant, final TenantRunner<T> tenantRunner) {
-            return tenantRunner.run();
+        public <T> T runAsTenant(final String tenant, final Callable<T> callable) {
+            return callable.call();
         }
 
         @Override
-        public <T> T runAsTenantAsUser(final String tenant, final String username, final TenantRunner<T> tenantRunner) {
-            return tenantRunner.run();
+        public void runAsTenantAsUser(final String tenant, final String username, final Runnable runnable) {
+            runnable.run();
         }
     });
 
