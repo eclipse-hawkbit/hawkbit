@@ -86,7 +86,7 @@ public class JpaRolloutHandler implements RolloutHandler {
                 }
             });
             meterRegistry
-                    .map(mReg -> mReg.timer("hawkbit.rollout.handler", TenantMetricsConfiguration.TENANT_TAG, tenantAware.getCurrentTenant()))
+                    .map(mReg -> mReg.timer("hawkbit.rollout.handler.all", TenantMetricsConfiguration.TENANT_TAG, tenantAware.getCurrentTenant()))
                     .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
 
             log.debug("Finished handling of the rollouts.");

@@ -27,7 +27,7 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.jupiter.api.Test;
 
-class DeploymentManagementTest extends AbstractAccessControllerTest {
+class DeploymentManagementTest extends AbstractAccessControllerManagementTest {
 
     @Test
     void verifyAssignments() {

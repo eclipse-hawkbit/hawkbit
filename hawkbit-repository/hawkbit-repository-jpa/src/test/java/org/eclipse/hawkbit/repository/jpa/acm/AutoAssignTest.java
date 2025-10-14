@@ -27,10 +27,9 @@ import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.integration.support.locks.LockRegistry;
 
-class AutoAssignTest extends AbstractAccessControllerTest {
+class AutoAssignTest extends AbstractAccessControllerManagementTest {
 
     @Autowired
     AutoAssignExecutor autoAssignExecutor;
@@ -77,8 +76,8 @@ class AutoAssignTest extends AbstractAccessControllerTest {
         // do the assignment
         assigner.run();
 
-        assertThat(targetManagement.findByAssignedDistributionSet(targetFilterQuery.getAutoAssignDistributionSet().getId(), Pageable.unpaged())
-                        .map(Identifiable::getId).toList())
+        assertThat(targetManagement.findByAssignedDistributionSet(targetFilterQuery.getAutoAssignDistributionSet().getId(), UNPAGED)
+                .map(Identifiable::getId).toList())
                 .as("Only updatable targets should be part of the rollout")
                 // all targets are distribution set type 2 compatible, but since user has UPDATE_TARGET only for targets of type 2
                 // only target2 and target3 shall be assigned

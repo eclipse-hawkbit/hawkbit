@@ -11,10 +11,6 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitizeActionSortParam;
 
-import java.util.Optional;
-
-import jakarta.servlet.http.HttpServletRequest;
-
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
@@ -22,13 +18,11 @@ import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtActionMapper;
+import org.eclipse.hawkbit.mgmt.rest.resource.util.LogUtility;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -49,28 +43,13 @@ public class MgmtActionResource implements MgmtActionRestApi {
         this.deploymentManagement = deploymentManagement;
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("DEPRECATED_USAGE");
     @Override
     public ResponseEntity<PagedList<MgmtAction>> getActions(
             final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam,
             final String representationModeParam) {
-        try {
-            if (LOGGER.isDebugEnabled()) {
-                final HttpServletRequest httpServletRequest = RequestResponseContextHolder.getHttpServletRequest();
-                final String remoteHost = httpServletRequest.getRemoteHost();
-                final String refererOrOrigin = Optional.ofNullable(httpServletRequest.getHeader("Referer"))
-                        .map(referer -> "Referer: " + referer)
-                        .orElseGet(() -> "Origin: " + httpServletRequest.getHeader("Origin"));
-                if (rsqlParam != null && rsqlParam.contains("status")) {
-                    LOGGER.debug("[DEPRECATED] [{}/{}] Usage of getActions with RSQL that is up to modification: rsql='{}'.",
-                            remoteHost, refererOrOrigin, rsqlParam);
-                } else {
-                    LOGGER.debug("[DEPRECATED] [{}/{}] Usage of getActions:result that is up to modification.", remoteHost, refererOrOrigin);
-                }
-            }
-        } catch (final Exception e) {
-            LOGGER.error("[DEPRECATED] Unexpected logging exception!", e);
-        }
+        LogUtility.logDeprecated(rsqlParam != null && rsqlParam.contains("status")
+                ? "Usage of getActions with RSQL that is up to modification: rsql=" + rsqlParam
+                : "Usage of getActions:result that is up to modification.");
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeActionSortParam(sortParam));
 
         final Slice<Action> actions;
@@ -89,6 +68,7 @@ public class MgmtActionResource implements MgmtActionRestApi {
 
     @Override
     public ResponseEntity<MgmtAction> getAction(final Long actionId) {
+        LogUtility.logDeprecated("Usage of getActions:result that is up to modification.");
         final Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 

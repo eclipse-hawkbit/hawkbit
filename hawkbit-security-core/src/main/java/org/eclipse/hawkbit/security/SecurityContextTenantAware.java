@@ -40,6 +40,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
  */
 public class SecurityContextTenantAware implements ContextAware {
 
+    // Note! no system user shall be used as a regular user!
     public static final String SYSTEM_USER = "system";
 
     private static final Collection<? extends GrantedAuthority> SYSTEM_AUTHORITIES = List.of(new SimpleGrantedAuthority(SpRole.SYSTEM_ROLE));
@@ -181,7 +182,8 @@ public class SecurityContextTenantAware implements ContextAware {
         private final TenantAwareUser principal;
         private final TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails;
 
-        private AuthenticationDelegate(final Authentication delegate, final String tenant, final String username,
+        private AuthenticationDelegate(
+                final Authentication delegate, final String tenant, final String username,
                 final Collection<? extends GrantedAuthority> authorities) {
             this.delegate = delegate;
             principal = new TenantAwareUser(username, username, authorities, tenant);

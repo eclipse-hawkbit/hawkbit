@@ -74,7 +74,7 @@
         <io-protostuff.version>1.8.0</io-protostuff.version>
         <!-- test -->
         <rabbitmq.http-client.version>5.4.0</rabbitmq.http-client.version>
-        <classgraph.version>4.8.181</classgraph.version>
+        <classgraph.version>4.8.184</classgraph.version>
         <awaitility.version>4.3.0</awaitility.version>
         <!-- Misc libraries versions - END -->
 
@@ -84,7 +84,7 @@
         <maven.site.plugin.version>3.21.0</maven.site.plugin.version>
 
         <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
-        <jacoco.maven.plugin.version>0.8.13</jacoco.maven.plugin.version>
+        <jacoco.maven.plugin.version>0.8.14</jacoco.maven.plugin.version>
 
         <license.tool.plugin.version>1.1.0</license.tool.plugin.version>
         <license.maven.plugin.version>5.0.0</license.maven.plugin.version>
@@ -598,6 +598,9 @@
                                         <exclude>docker/**</exclude>
                                         <exclude>licenses/LICENSE*</exclude>
                                         <exclude>**/*.sql</exclude>
+                                        <exclude>docs/**</exclude>
+                                        <exclude>/docs/rest-api/**</exclude>
+                                        <exclude>/docs/images/**</exclude>
                                         <exclude>**/application-local.properties</exclude>
                                         <exclude>eclipse_codeformatter.xml</exclude>
                                         <exclude>intellij_codeformatter.xml</exclude>
