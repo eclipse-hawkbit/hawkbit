@@ -237,7 +237,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         if (actionIds != null) {
             deploymentManagement.deleteTargetActionsByIds(targetId, actionIds);
         } else {
-            deploymentManagement.deleteTargetActions(targetId, numberOfActions);
+            deploymentManagement.deleteOldestTargetActions(targetId, numberOfActions);
         }
 
         return ResponseEntity.ok().build();

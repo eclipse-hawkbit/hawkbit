@@ -37,7 +37,6 @@ import org.eclipse.hawkbit.repository.event.remote.RolloutStoppedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
-import org.eclipse.hawkbit.repository.jpa.actions.TargetAssignmentsChecker;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.management.JpaRolloutManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -51,6 +50,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.RolloutTargetGroupRepositor
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.EvaluatorNotConfiguredException;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupEvaluationManager;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -116,7 +116,6 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private final TenantAware tenantAware;
     private final ContextAware contextAware;
     private final RepositoryProperties repositoryProperties;
-    private final TargetAssignmentsChecker targetAssignmentsChecker;
     private final Map<Long, AtomicLong> lastDynamicGroupFill = new ConcurrentHashMap<>();
 
     @SuppressWarnings("java:S107")
@@ -129,8 +128,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final RolloutGroupEvaluationManager evaluationManager, final RolloutApprovalStrategy rolloutApprovalStrategy,
             final EntityManager entityManager, final PlatformTransactionManager txManager,
             final AfterTransactionCommitExecutor afterCommit,
-            final TenantAware tenantAware, final ContextAware contextAware, final RepositoryProperties repositoryProperties,
-            final TargetAssignmentsChecker targetAssignmentsChecker) {
+            final TenantAware tenantAware, final ContextAware contextAware, final RepositoryProperties repositoryProperties) {
         this.actionRepository = actionRepository;
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.rolloutTargetGroupRepository = rolloutTargetGroupRepository;
@@ -148,7 +146,6 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         this.tenantAware = tenantAware;
         this.contextAware = contextAware;
         this.repositoryProperties = repositoryProperties;
-        this.targetAssignmentsChecker = targetAssignmentsChecker;
     }
 
     @Override
@@ -863,6 +860,10 @@ public class JpaRolloutExecutor implements RolloutExecutor {
      */
     private void assertActionsPerTargetQuota(final Target target, final int requested) {
         final int quota = quotaManagement.getMaxActionsPerTarget();
-        targetAssignmentsChecker.checkActionsPerTargetQuota(target.getId(), requested, quota, actionRepository::countByTargetId);
+        try {
+            QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class, actionRepository::countByTargetId);
+        } catch (final AssignmentQuotaExceededException ex) {
+            deploymentManagement.maxAssignmentsExceededHandle(target.getId(), ex);
+        }
     }
 }

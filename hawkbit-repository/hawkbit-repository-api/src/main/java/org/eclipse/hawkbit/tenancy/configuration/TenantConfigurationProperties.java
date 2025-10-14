@@ -136,7 +136,7 @@ public class TenantConfigurationProperties {
         /**
          * Configuration value for percentage of oldest actions to be cleaned if @maxActionsPerTarget quota is hit
          */
-        public static final String ACTIONS_PURGE_PERCENTAGE_ON_QUOTA_HIT = "percentage.of.actions.cleaned.on.quota.hit";
+        public static final String ACTIONS_PURGE_PERCENTAGE_ON_QUOTA_HIT = "actions.cleanup.onQuotaHit.percent";
 
         private static final Map<Class<? extends Serializable>, TenantConfigurationValidator> DEFAULT_TYPE_VALIDATORS = Map.of(
                 Boolean.class, new TenantConfigurationBooleanValidator(),

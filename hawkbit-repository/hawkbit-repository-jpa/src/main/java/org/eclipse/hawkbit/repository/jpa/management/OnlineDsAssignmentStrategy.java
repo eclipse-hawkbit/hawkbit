@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -25,9 +26,9 @@ import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
-import org.eclipse.hawkbit.repository.jpa.actions.TargetAssignmentsChecker;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -56,9 +57,9 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
             final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties,
-            final TargetAssignmentsChecker targetAssignmentsChecker) {
+            final BiFunction<Long, AssignmentQuotaExceededException, Void> handler) {
         super(targetRepository, afterCommit, actionRepository, actionStatusRepository,
-                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties, targetAssignmentsChecker);
+                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties, handler);
     }
 
     public void sendDeploymentEvents(final long distributionSetId, final List<Action> actions) {

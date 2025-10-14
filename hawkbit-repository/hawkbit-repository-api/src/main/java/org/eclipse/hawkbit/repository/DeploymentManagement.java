@@ -302,21 +302,21 @@ public interface DeploymentManagement extends PermissionSupport {
      * Deletes the current action by id.
      * @param actionId - action id
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
+    @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TARGET + "')")
     void deleteAction(long actionId);
 
     /**
      * Deletes actions matching the provided rsql filter
      * @param rsql - rsql filter for actions to be deleted
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
+    @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TARGET + "')")
     void deleteActionsByRsql(String rsql);
 
     /**
      * Deletes actions present in provided list of ids
      * @param actionIds - list of action ids to be deleted
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
+    @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TARGET + "')")
     void deleteActionsByIds(List<Long> actionIds);
 
     /**
@@ -325,17 +325,17 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param target - target controllerId
      * @param actionsIds - list of action ids to be deleted
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
+    @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TARGET + "')")
     void deleteTargetActionsByIds(final String target, final List<Long> actionsIds);
 
     /**
      * Deletes target actions and leaves the LAST N actions in the action history only.
      *
      * @param target - target controllerId
-     * @param numberOfActions - number of actions to be left (NOT deleted)
+     * @param keepLast - number of actions to be left/kept (NOT deleted)
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_DELETE_REPOSITORY)
-    void deleteTargetActions(final String target, final int numberOfActions);
+    @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TARGET + "')")
+    void deleteOldestTargetActions(final String target, final int keepLast);
 
     /**
      * Sets the status of inactive scheduled {@link Action}s for the specified {@link Target}s to {@link Status#CANCELED}
@@ -411,4 +411,7 @@ public interface DeploymentManagement extends PermissionSupport {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     void cancelActionsForDistributionSet(final ActionCancellationType cancelationType, final DistributionSet set);
+
+    @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
+    void maxAssignmentsExceededHandle(Long targetId, AssignmentQuotaExceededException ex);
 }

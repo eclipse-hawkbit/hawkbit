@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
@@ -20,9 +21,9 @@ import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
-import org.eclipse.hawkbit.repository.jpa.actions.TargetAssignmentsChecker;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -50,10 +51,9 @@ class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             final AfterTransactionCommitExecutor afterCommit,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
-            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties,
-            final TargetAssignmentsChecker targetAssignmentsChecker) {
+            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties, final BiFunction<Long, AssignmentQuotaExceededException, Void> handler) {
         super(targetRepository, afterCommit, actionRepository, actionStatusRepository,
-                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties, targetAssignmentsChecker);
+                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties, handler);
     }
 
     @Override

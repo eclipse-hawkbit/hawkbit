@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 
 import jakarta.persistence.criteria.JoinType;
@@ -25,7 +26,7 @@ import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
-import org.eclipse.hawkbit.repository.jpa.actions.TargetAssignmentsChecker;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
@@ -38,6 +39,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
+import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -65,7 +67,7 @@ public abstract class AbstractDsAssignmentStrategy {
     private final BooleanSupplier multiAssignmentsConfig;
     private final BooleanSupplier confirmationFlowConfig;
     private final RepositoryProperties repositoryProperties;
-    private final TargetAssignmentsChecker targetAssignmentsChecker;
+    private final BiFunction<Long, AssignmentQuotaExceededException, Void> assignmentsExceededHandler;
 
     @SuppressWarnings("java:S107")
     AbstractDsAssignmentStrategy(
@@ -74,7 +76,7 @@ public abstract class AbstractDsAssignmentStrategy {
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
             final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties,
-            final TargetAssignmentsChecker targetAssignmentsChecker) {
+            final BiFunction<Long, AssignmentQuotaExceededException, Void> assignmentsExceededHandler) {
         this.targetRepository = targetRepository;
         this.afterCommit = afterCommit;
         this.actionRepository = actionRepository;
@@ -83,7 +85,7 @@ public abstract class AbstractDsAssignmentStrategy {
         this.multiAssignmentsConfig = multiAssignmentsConfig;
         this.confirmationFlowConfig = confirmationFlowConfig;
         this.repositoryProperties = repositoryProperties;
-        this.targetAssignmentsChecker = targetAssignmentsChecker;
+        this.assignmentsExceededHandler = assignmentsExceededHandler;
     }
 
     public JpaAction createTargetAction(
@@ -297,6 +299,10 @@ public abstract class AbstractDsAssignmentStrategy {
 
     private void assertActionsPerTargetQuota(final Target target, final int requested) {
         final int quota = quotaManagement.getMaxActionsPerTarget();
-        targetAssignmentsChecker.checkActionsPerTargetQuota(target.getId(), requested, quota, actionRepository::countByTargetId);
+        try {
+            QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class, actionRepository::countByTargetId);
+        } catch (AssignmentQuotaExceededException ex) {
+            assignmentsExceededHandler.apply(target.getId(), ex);
+        }
     }
 }
