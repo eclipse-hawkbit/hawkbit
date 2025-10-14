@@ -50,6 +50,10 @@ Software Content Definition:
 
 The public defined entities and their relation which are reflected by the Management API.
 
+<p align="center">
+  <img src="images/domain_model.png" alt="Domain Model Entity Relationship" width="1100"/>
+</p>
+
 ---
 
 ## Deleting and Archiving Software Modules
