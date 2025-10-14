@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -106,12 +107,21 @@ public class SecurityContextTenantAware implements ContextAware {
     }
 
     @Override
-    public <T> T runAsTenant(final String tenant, final TenantRunner<T> tenantRunner) {
-        return runInContext(buildUserSecurityContext(tenant, SYSTEM_USER, SYSTEM_AUTHORITIES), tenantRunner::run);
+    @SuppressWarnings("java:S112") // java:S112 - it is generic class so a generic exception is fine
+    public <T> T runAsTenant(final String tenant, final Callable<T> callable) {
+        return runInContext(buildUserSecurityContext(tenant, SYSTEM_USER, SYSTEM_AUTHORITIES), () -> {
+            try {
+                return callable.call();
+            } catch (final RuntimeException e) {
+                throw e;
+            } catch (final Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override
-    public <T> T runAsTenantAsUser(final String tenant, final String username, final TenantRunner<T> tenantRunner) {
+    public void runAsTenantAsUser(final String tenant, final String username, final Runnable runnable) {
         Objects.requireNonNull(tenant);
         Objects.requireNonNull(username);
 
@@ -119,7 +129,10 @@ public class SecurityContextTenantAware implements ContextAware {
                 () -> authoritiesResolver.getUserAuthorities(tenant, username).stream()
                         .map(SimpleGrantedAuthority::new)
                         .toList());
-        return runInContext(buildUserSecurityContext(tenant, username, authorities), tenantRunner::run);
+        runInContext(buildUserSecurityContext(tenant, username, authorities), () -> {
+            runnable.run();
+            return null;
+        });
     }
 
     @Override
@@ -151,11 +164,11 @@ public class SecurityContextTenantAware implements ContextAware {
         }
     }
 
-    private static <T> T runAsSystem(final TenantRunner<T> tenantRunner) {
+    private static <T> T runAsSystem(final Callable<T> callable) {
         final SecurityContext currentContext = SecurityContextHolder.getContext();
         SystemSecurityContext.setSystemContext(currentContext);
         try {
-            return MdcHandler.getInstance().callWithAuthRE(tenantRunner::run);
+            return MdcHandler.getInstance().callWithAuthRE(callable);
         } finally {
             SecurityContextHolder.setContext(currentContext);
         }
