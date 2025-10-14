@@ -3,6 +3,7 @@
   - [What is hawkBit](what-is-hawkbit.md)
   - [Quick Start](quick-start.md)
   - [Features](features.md)
+  - [Architecture](architecture.md)
 
 - Guides
   - [Run hawkBit](run-hawkbit.md)
