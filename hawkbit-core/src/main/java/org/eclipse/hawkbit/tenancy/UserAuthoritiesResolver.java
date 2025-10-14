@@ -18,11 +18,10 @@ import java.util.Collection;
 public interface UserAuthoritiesResolver {
 
     /**
-     * User authorities/roles lookup based on the tenant and the username
+     * User authorities/roles lookup based on the username and the tenant context
      *
-     * @param tenant The tenant that this user belongs to
      * @param username The username of the user
      * @return a {@link Collection} of authorities/roles for this user
      */
-    Collection<String> getUserAuthorities(String tenant, String username);
+    Collection<String> getUserAuthorities(String username);
 }

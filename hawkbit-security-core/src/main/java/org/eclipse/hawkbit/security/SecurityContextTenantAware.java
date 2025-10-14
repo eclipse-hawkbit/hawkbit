@@ -66,8 +66,7 @@ public class SecurityContextTenantAware implements ContextAware {
      * @param securityContextSerializer Serializer that is used to serialize / deserialize {@link SecurityContext}s.
      */
     public SecurityContextTenantAware(
-            final UserAuthoritiesResolver authoritiesResolver,
-            @Nullable final SecurityContextSerializer securityContextSerializer) {
+            final UserAuthoritiesResolver authoritiesResolver, @Nullable final SecurityContextSerializer securityContextSerializer) {
         this(authoritiesResolver, securityContextSerializer, null);
     }
 
@@ -78,8 +77,7 @@ public class SecurityContextTenantAware implements ContextAware {
      * @param securityContextSerializer Serializer that is used to serialize / deserialize {@link SecurityContext}s.
      */
     public SecurityContextTenantAware(
-            final UserAuthoritiesResolver authoritiesResolver,
-            @Nullable final SecurityContextSerializer securityContextSerializer,
+            final UserAuthoritiesResolver authoritiesResolver, @Nullable final SecurityContextSerializer securityContextSerializer,
             @Nullable final TenantResolver tenantResolver) {
         this.authoritiesResolver = authoritiesResolver;
         this.securityContextSerializer = securityContextSerializer == null ? SecurityContextSerializer.NOP : securityContextSerializer;
@@ -125,8 +123,9 @@ public class SecurityContextTenantAware implements ContextAware {
         Objects.requireNonNull(tenant);
         Objects.requireNonNull(username);
 
-        final List<SimpleGrantedAuthority> authorities = runAsSystem(
-                () -> authoritiesResolver.getUserAuthorities(tenant, username).stream()
+        final List<SimpleGrantedAuthority> authorities = runAsTenant(
+                tenant,
+                () -> authoritiesResolver.getUserAuthorities(username).stream()
                         .map(SimpleGrantedAuthority::new)
                         .toList());
         runInContext(buildUserSecurityContext(tenant, username, authorities), () -> {
@@ -161,16 +160,6 @@ public class SecurityContextTenantAware implements ContextAware {
             } finally {
                 SecurityContextHolder.setContext(originalContext);
             }
-        }
-    }
-
-    private static <T> T runAsSystem(final Callable<T> callable) {
-        final SecurityContext currentContext = SecurityContextHolder.getContext();
-        SystemSecurityContext.setSystemContext(currentContext);
-        try {
-            return MdcHandler.getInstance().callWithAuthRE(callable);
-        } finally {
-            SecurityContextHolder.setContext(currentContext);
         }
     }
 

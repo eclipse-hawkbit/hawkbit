@@ -33,7 +33,7 @@ public class InMemoryUserAuthoritiesResolver implements UserAuthoritiesResolver 
     }
 
     @Override
-    public Collection<String> getUserAuthorities(final String tenant, final String username) {
+    public Collection<String> getUserAuthorities(final String username) {
         // we can ignore the tenant here (no multi-tenancy by default)
         final Collection<String> authorities = usernamesToAuthorities.get(username);
         if (authorities == null) {
