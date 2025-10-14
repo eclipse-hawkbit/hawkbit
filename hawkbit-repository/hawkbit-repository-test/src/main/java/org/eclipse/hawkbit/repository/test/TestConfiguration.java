@@ -141,7 +141,7 @@ public class TestConfiguration implements AsyncConfigurer {
 
     @Bean
     UserAuthoritiesResolver authoritiesResolver() {
-        return (tenant, username) -> Collections.emptyList();
+        return username -> Collections.emptyList();
     }
 
     @Bean
