@@ -405,6 +405,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
+    @Transactional
     public void deleteAction(final long actionId) {
         log.info("Deleting action {}", actionId);
         actionRepository.getAccessController().ifPresent(accessController ->
@@ -414,6 +415,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
+    @Transactional
     public void deleteActionsByRsql(final String rsql) {
         log.info("Deleting actions matching rsql {}", rsql);
         final Specification<JpaAction> specification = QLSupport.getInstance().buildSpec(rsql, ActionFields.class);
@@ -423,6 +425,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
+    @Transactional
     public void deleteActionsByIds(final List<Long> actionIds) {
         log.info("Deleting actions with ids {}", actionIds);
         actionRepository.getAccessController().ifPresent(accessController ->
@@ -431,6 +434,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
+    @Transactional
     public void deleteTargetActionsByIds(final String target, final List<Long> actionsIds) {
         log.info("Delete actions for target {} with action ids {}", target, actionsIds);
         targetRepository.getAccessController()
