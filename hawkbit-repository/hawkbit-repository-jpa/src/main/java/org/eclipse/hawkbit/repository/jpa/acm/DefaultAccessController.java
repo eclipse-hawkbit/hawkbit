@@ -18,12 +18,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,8 +32,6 @@ public class DefaultAccessController<A extends Enum<A> & QueryField, T> implemen
 
     private final Class<A> queryFieldType;
     private final Map<Operation, List<String>> permissions = new EnumMap<>(Operation.class);
-
-    private ContextAware contextAware;
 
     public DefaultAccessController(final Class<A> queryFieldType, final String... permissionTypes) {
         if (ObjectUtils.isEmpty(permissionTypes)) {
@@ -48,11 +44,6 @@ public class DefaultAccessController<A extends Enum<A> & QueryField, T> implemen
                 permissions.computeIfAbsent(operation, k -> new ArrayList<>()).add(operation.name() + "_" + permissionType.toUpperCase());
             }
         }
-    }
-
-    @Autowired
-    void setContextAware(final ContextAware contextAware) {
-        this.contextAware = contextAware;
     }
 
     @Override
