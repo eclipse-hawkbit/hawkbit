@@ -51,7 +51,6 @@ import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
-import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -121,7 +120,7 @@ public class JpaTargetManagement
                 TargetSpecifications.hasControllerId(controllerId));
 
         final Specification<JpaTarget> combinedSpecification = Objects
-                .requireNonNull(SpecificationsBuilder.combineWithAnd(specList));
+                .requireNonNull(JpaManagementHelper.combineWithAnd(specList));
         return jpaRepository.exists(AccessController.Operation.UPDATE, combinedSpecification);
     }
 

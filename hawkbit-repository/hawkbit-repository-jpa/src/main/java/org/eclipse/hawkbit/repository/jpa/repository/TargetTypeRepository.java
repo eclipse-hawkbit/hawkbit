@@ -13,7 +13,6 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -27,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface TargetTypeRepository extends BaseEntityRepository<JpaTargetType> {
 
     default List<JpaTargetType> findByDsType(@Param("id") final Long dsTypeId) {
-        return findAll(Specification.where(TargetTypeSpecification.hasDsSetType(dsTypeId)));
+        return findAll(TargetTypeSpecification.hasDsSetType(dsTypeId));
     }
 
     @Modifying
