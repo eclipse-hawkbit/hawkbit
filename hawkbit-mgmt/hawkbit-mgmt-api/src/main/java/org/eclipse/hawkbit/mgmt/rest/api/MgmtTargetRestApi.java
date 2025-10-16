@@ -405,10 +405,12 @@ public interface MgmtTargetRestApi {
 
 
     /**
-     * Deletes all actions for the provided target EXCEPT the latest N actions OR by provided action IDs list.
+     * Deletes all actions for the provided target by provided action IDs list
+     * OR
+     * Deletes all EXCEPT the latest N actions
      *
      * @param targetId - target id
-     * @param numberOfActions - the number of last target actions to be left
+     * @param keepLast - the number of last target actions to be left
      * @param actionIds - Specific action id list for actions to be deleted
      */
     @Operation(summary = "Deletes all actions for the provided target EXCEPT the latest N actions OR by provided action IDs list.", description = "Deletes/Purges the action history of the target except the last N actions OR deletes only the actions in the provided action ids list. Required Permission: DELETE_REPOSITORY")
@@ -435,7 +437,7 @@ public interface MgmtTargetRestApi {
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> deleteActionsForTarget(
             @PathVariable("targetId") String targetId,
-            @RequestParam(name = "numberOfActions", required = false, defaultValue = "0") int numberOfActions,
+            @RequestParam(name = "keepLast", required = false, defaultValue = "-1") int keepLast,
             @Schema(description = "List of action ids to be deleted", example = "[253, 255]", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
             @RequestBody(required = false) List<Long> actionIds);
 

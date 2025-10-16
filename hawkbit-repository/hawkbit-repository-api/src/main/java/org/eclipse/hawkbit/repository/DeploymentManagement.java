@@ -413,5 +413,5 @@ public interface DeploymentManagement extends PermissionSupport {
     void cancelActionsForDistributionSet(final ActionCancellationType cancelationType, final DistributionSet set);
 
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
-    void maxAssignmentsExceededHandle(Long targetId, AssignmentQuotaExceededException ex);
+    void handleMaxAssignmentsExceeded(Long targetId, Integer requested, AssignmentQuotaExceededException ex);
 }

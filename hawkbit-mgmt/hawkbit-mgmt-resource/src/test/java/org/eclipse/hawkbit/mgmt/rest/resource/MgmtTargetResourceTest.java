@@ -2873,7 +2873,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         List<Action> oldActions = deploymentManagement.findActionsByTarget(testTarget.getControllerId(), PAGE).getContent();
 
         mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions", testTarget.getControllerId())
-                .param("numberOfActions", "5"))
+                .param("keepLast", "5"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
@@ -2891,6 +2891,14 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final Target testTarget = testdataFactory.createTarget();
         // either numberOfActions or actionIds list should be present
         mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions", testTarget.getControllerId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+
+        // both parameters present should also lead to bad request
+        mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions", testTarget.getControllerId())
+                        .param("keepLast", "5")
+                        .content(toJson(List.of(1,2,3)))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
     }

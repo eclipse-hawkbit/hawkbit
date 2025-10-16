@@ -228,16 +228,19 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     @AuditLog(entity = "Target", type = AuditLog.Type.DELETE, description = "Delete Actions For Target")
-    public ResponseEntity<Void> deleteActionsForTarget(final String targetId, final int numberOfActions, final List<Long> actionIds) {
+    public ResponseEntity<Void> deleteActionsForTarget(final String targetId, final int keepLast, final List<Long> actionIds) {
 
-        if (numberOfActions <= 0 && actionIds == null) {
-            return ResponseEntity.badRequest().build();
+        if (keepLast <= 0 && actionIds == null) {
+            throw new IllegalArgumentException("Either keepLast OR action ID list should be provided!");
         }
 
         if (actionIds != null) {
+            if (keepLast > 0) {
+                throw new IllegalArgumentException("Only one of the parameters should be provided!");
+            }
             deploymentManagement.deleteTargetActionsByIds(targetId, actionIds);
         } else {
-            deploymentManagement.deleteOldestTargetActions(targetId, numberOfActions);
+            deploymentManagement.deleteOldestTargetActions(targetId, keepLast);
         }
 
         return ResponseEntity.ok().build();

@@ -580,8 +580,16 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
-    void shouldReceiveBadRequestIfBodyAndRsqlAreNotProvided() throws Exception {
+    void shouldReceiveBadRequestWhenNeeded() throws Exception {
+        // bad request on both empty parameters
         mvc.perform(delete(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        // bad request when both parameters are present
+        mvc.perform(delete(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING).contentType(MediaType.APPLICATION_JSON)
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, "target.name==test")
+                        .content(toJson(List.of(1,2,3)))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 

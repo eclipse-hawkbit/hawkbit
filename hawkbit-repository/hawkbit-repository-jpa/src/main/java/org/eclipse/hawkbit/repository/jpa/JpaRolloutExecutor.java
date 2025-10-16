@@ -863,7 +863,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         try {
             QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class, actionRepository::countByTargetId);
         } catch (final AssignmentQuotaExceededException ex) {
-            deploymentManagement.maxAssignmentsExceededHandle(target.getId(), ex);
+            deploymentManagement.handleMaxAssignmentsExceeded(target.getId(), requested, ex);
         }
     }
 }

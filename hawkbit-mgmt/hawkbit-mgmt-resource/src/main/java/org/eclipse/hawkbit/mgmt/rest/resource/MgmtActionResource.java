@@ -85,9 +85,16 @@ public class MgmtActionResource implements MgmtActionRestApi {
     @Override
     @AuditLog(entity = "Actions", type = AuditLog.Type.DELETE, description = "Delete Actions", logResponse = true)
     public ResponseEntity<Void> deleteActions(String rsqlParam, List<Long> actionIds) {
+
+        final boolean isActionIdsEmpty = !ObjectUtils.isEmpty(actionIds);
         if (!ObjectUtils.isEmpty(rsqlParam)) {
+
+            if (isActionIdsEmpty) {
+                throw new IllegalArgumentException("Only one of the parameters should be provided!");
+            }
+
             deploymentManagement.deleteActionsByRsql(rsqlParam);
-        } else if (!ObjectUtils.isEmpty(actionIds)) {
+        } else if (isActionIdsEmpty) {
             deploymentManagement.deleteActionsByIds(actionIds);
         } else {
             throw new IllegalArgumentException("Either action id list or rsql filter should be provided.");

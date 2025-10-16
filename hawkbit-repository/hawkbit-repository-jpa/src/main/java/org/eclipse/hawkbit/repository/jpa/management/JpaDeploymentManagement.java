@@ -24,7 +24,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -38,9 +37,9 @@ import jakarta.persistence.criteria.Root;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.function.TriConsumer;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -585,22 +584,29 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    public void maxAssignmentsExceededHandle(Long targetId, AssignmentQuotaExceededException ex) {
-        maxAssignmentsExceededHandler.apply(targetId, ex);
+    public void handleMaxAssignmentsExceeded(Long targetId, Integer requested, AssignmentQuotaExceededException ex) {
+        maxAssignmentsExceededHandler.accept(targetId, requested, ex);
     }
 
-    public BiFunction<Long, AssignmentQuotaExceededException, Void> maxAssignmentsExceededHandler = (targetId,  quotaExceededException) -> {
+    private final TriConsumer<Long, Integer, AssignmentQuotaExceededException> maxAssignmentsExceededHandler = (targetId, requested,quotaExceededException) -> {
         int actionsPurgePercentage = getActionsPurgePercentage();
         int quota = quotaManagement.getMaxActionsPerTarget();
         if (actionsPurgePercentage > 0 && actionsPurgePercentage < 100) {
             int numberOfActions = (int) ((actionsPurgePercentage / 100.0) * quota);
+            if (requested > numberOfActions) {
+                log.warn("Requested number of actions {} bigger than configured for deletion {}", requested, numberOfActions);
+                throw quotaExceededException;
+            }
+            int totalTargetActions = Math.toIntExact(actionRepository.countByTargetId(targetId));
+            if (totalTargetActions < quota) {
+                numberOfActions = totalTargetActions - (quota - numberOfActions);
+            }
             log.info("Actions purge percentage {}, will delete {} oldest actions for target {}",
                     actionsPurgePercentage, numberOfActions, targetId);
             deleteOldestTargetActions(targetId, numberOfActions);
         } else {
             throw quotaExceededException;
         }
-        return null;
     };
 
     /**
@@ -892,7 +898,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                     QuotaHelper.assertAssignmentQuota(controllerId, requested, quota, Action.class, Target.class,
                             actionRepository::countByTargetControllerId);
                 } catch (final AssignmentQuotaExceededException ex) {
-                    maxAssignmentsExceededHandler.apply(target.getId(), ex);
+                    // assume requested are always smaller than int size
+                    maxAssignmentsExceededHandler.accept(target.getId(), Math.toIntExact(requested), ex);
                 }
             }
             return null;

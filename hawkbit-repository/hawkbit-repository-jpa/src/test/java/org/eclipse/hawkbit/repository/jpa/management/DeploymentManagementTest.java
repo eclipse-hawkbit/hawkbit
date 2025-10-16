@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.eclipse.hawkbit.repository.model.Action.Status.RUNNING;
 import static org.eclipse.hawkbit.repository.model.Action.Status.WAIT_FOR_CONFIRMATION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -1686,7 +1687,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         long actions = deploymentManagement.countActionsByTarget(target.getControllerId());
         // quota in tests is set to 20 ...
-        org.junit.jupiter.api.Assertions.assertEquals(20, actions);
+        assertEquals(20, actions);
 
         // extract the first 5 action ids
         List<Action> firstSample = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent();
@@ -1695,7 +1696,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         DistributionSet exceededQuotaDsAssign = testdataFactory.createDistributionSet("exceededQuotaAssignment");
 
         // should throw quota exception if not explicitly configured to purge actions
-        org.junit.jupiter.api.Assertions.assertThrows(AssignmentQuotaExceededException.class,
+        assertThrows(AssignmentQuotaExceededException.class,
                 () -> assignDistributionSet(exceededQuotaDsAssign.getId(), target.getControllerId()));
 
         // set purge config to 25 %
@@ -1705,12 +1706,12 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(exceededQuotaDsAssign.getId(), target.getControllerId());
         // 16 actions should be present
         actions = deploymentManagement.countActionsByTarget(target.getControllerId());
-        org.junit.jupiter.api.Assertions.assertEquals(16, actions);
+        assertEquals(16, actions);
 
         List<Action> actionsList = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent();
         // first 5 should have been purged so the first actionId should be the last purged action id + 1
-        org.junit.jupiter.api.Assertions.assertEquals(shouldBePurgedActionsList.get(shouldBePurgedActionsList.size() - 1) + 1, actionsList.get(0).getId());
-        org.junit.jupiter.api.Assertions.assertEquals(firstSample.get(firstSample.size() - 1).getId() + 1, actionsList.get(15).getId());
+        assertEquals(shouldBePurgedActionsList.get(shouldBePurgedActionsList.size() - 1) + 1, actionsList.get(0).getId());
+        assertEquals(firstSample.get(firstSample.size() - 1).getId() + 1, actionsList.get(15).getId());
     }
 
     @Test
@@ -1725,7 +1726,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             rolloutHandler.handleAll();
         }
 
-        org.junit.jupiter.api.Assertions.assertEquals(20, deploymentManagement.countActionsByTarget(target.getControllerId()));
+        assertEquals(20, deploymentManagement.countActionsByTarget(target.getControllerId()));
         List<Action> firstSample = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent();
         List<Long> shouldBePurgedActionsList = firstSample.stream().map(Identifiable::getId).limit(5).toList();
 
@@ -1737,17 +1738,40 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // don't assert quota exception here because rollout executor does not throw such in order to not interrupt other executions
         rolloutHandler.handleAll();
         //check that the old number of actions remain instead
-        org.junit.jupiter.api.Assertions.assertEquals(20, deploymentManagement.countActionsByTarget(target.getControllerId()));
+        assertEquals(20, deploymentManagement.countActionsByTarget(target.getControllerId()));
 
         // set purge config to 25 %
         tenantConfigurationManagement.addOrUpdateConfiguration("actions.cleanup.onQuotaHit.percent", 25);
         rolloutHandler.handleAll();
-        org.junit.jupiter.api.Assertions.assertEquals(16, deploymentManagement.countActionsByTarget(target.getControllerId()));
+        assertEquals(16, deploymentManagement.countActionsByTarget(target.getControllerId()));
 
         List<Action> actionsList = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent();
         // first 5 should have been purged so the first actionId should be the last purged action id + 1
-        org.junit.jupiter.api.Assertions.assertEquals(shouldBePurgedActionsList.get(shouldBePurgedActionsList.size() - 1) + 1, actionsList.get(0).getId());
-        org.junit.jupiter.api.Assertions.assertEquals(firstSample.get(firstSample.size() - 1).getId() + 1, actionsList.get(15).getId());
+        assertEquals(shouldBePurgedActionsList.get(shouldBePurgedActionsList.size() - 1) + 1, actionsList.get(0).getId());
+        assertEquals(firstSample.get(firstSample.size() - 1).getId() + 1, actionsList.get(15).getId());
+
+    }
+
+    @Test
+    void testThatOnlyNeededNumberOfActionsIsPurged() {
+        final Target target = testdataFactory.createTarget();
+        for (int i = 0; i < 18; i++) {
+            DistributionSet distributionSet = testdataFactory.createDistributionSet();
+            Rollout rollout = testdataFactory.createRolloutByVariables("rollout-" + i, "Description", 1, "controllerId==" + target
+                            .getControllerId(),
+                    distributionSet, "50", "50");
+            rolloutManagement.start(rollout.getId());
+            rolloutHandler.handleAll();
+        }
+
+        tenantConfigurationManagement.addOrUpdateConfiguration("actions.cleanup.onQuotaHit.percent", 25);
+        deploymentManagement.handleMaxAssignmentsExceeded(target.getId(), 5, new AssignmentQuotaExceededException());
+        // only 3 actions should be deleted in such case :
+        assertEquals(15, deploymentManagement.countActionsByTarget(target.getControllerId()));
+
+        // should throw the quota exception if requested is bigger than the configured limit of actions purge
+        assertThrows(AssignmentQuotaExceededException.class, () ->
+                deploymentManagement.handleMaxAssignmentsExceeded(target.getId(), 10, new AssignmentQuotaExceededException()));
 
     }
 
