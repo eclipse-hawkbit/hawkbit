@@ -56,6 +56,7 @@ import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetExcepti
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
@@ -65,7 +66,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
-import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -1354,9 +1354,9 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         List<? extends DistributionSet> allFoundDS = distributionSetManagement.findAll(PAGE).getContent();
         assertThat(allFoundDS).as("no ds should be founded").isEmpty();
 
-        assertThat(distributionSetRepository.findAll(SpecificationsBuilder.combineWithAnd(Arrays
-                        .asList(DistributionSetSpecification.isDeleted(true), DistributionSetSpecification.isCompleted(true))),
-                PAGE).getContent()).as("wrong size of founded ds").hasSize(noOfDistributionSets);
+        assertThat(distributionSetRepository.findAll(JpaManagementHelper.combineWithAnd(
+                List.of(DistributionSetSpecification.isDeleted(true), DistributionSetSpecification.isCompleted(true))), PAGE).getContent())
+                .as("wrong size of founded ds").hasSize(noOfDistributionSets);
 
         IntStream.range(0, deploymentResult.getDistributionSets().size()).forEach(i -> testdataFactory.sendUpdateActionStatusToTargets(
                 deploymentResult.getDeployedTargets(), Status.FINISHED, Collections.singletonList("blabla alles gut")));
@@ -1367,9 +1367,9 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // successfully and no activeAction is referring to created distribution sets
         allFoundDS = distributionSetManagement.findAll(pageRequest).getContent();
         assertThat(allFoundDS).as("no ds should be founded").isEmpty();
-        assertThat(distributionSetRepository.findAll(SpecificationsBuilder.combineWithAnd(Arrays
-                        .asList(DistributionSetSpecification.isDeleted(true), DistributionSetSpecification.isCompleted(true))),
-                PAGE).getContent()).as("wrong size of founded ds").hasSize(noOfDistributionSets);
+        assertThat(distributionSetRepository.findAll(JpaManagementHelper.combineWithAnd(
+                List.of(DistributionSetSpecification.isDeleted(true), DistributionSetSpecification.isCompleted(true))), PAGE).getContent())
+                .as("wrong size of founded ds").hasSize(noOfDistributionSets);
     }
 
     /**
