@@ -18,6 +18,7 @@ import java.util.Set;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -148,5 +149,31 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         assertThat(result).as("count of targets").hasSize(testTargets.size()).as("contains all compatible targets")
                 .containsExactlyInAnyOrderElementsOf(testTargets).as("does not contain incompatible targets")
                 .doesNotContainAnyElementsOf(targetsWithIncompatibleType);
+    }
+
+    @Test
+    void shouldFindTargetsWithoutTypeByTypeIdNot() {
+        final DistributionSet testDs = testdataFactory.createDistributionSet();
+        final TargetType targetType = testdataFactory.createTargetType("testType", Set.of(testDs.getType()));
+        final TargetType targetType2 = testdataFactory.createTargetType("testType_other", Set.of(testDs.getType()));
+        final TargetFilterQuery tfq = targetFilterQueryManagement
+                .create(TargetFilterQueryManagement.Create.builder()
+                        .name("test-not-filter").query("type.id=not=" + targetType2.getId()).build());
+        final List<Target> targets = testdataFactory.createTargets(20, "withOutType");
+        final List<Target> targetWithCompatibleTypes = testdataFactory.createTargetsWithType(20, "compatible", targetType);
+
+        final List<Target> result = targetManagement
+                .findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(testDs.getId(), tfq.getQuery(), PAGE).getContent();
+
+        // EclipseLink has problems with tenancy - https://github.com/eclipse-hawkbit/hawkbit/issues/2758
+        if (Jpa.JPA_VENDOR == Jpa.JpaVendor.ECLIPSELINK) {
+            assertThat(result)
+                    .as("count of targets").hasSize(targetWithCompatibleTypes.size())
+                    .as("contains only targets with type").containsAll(targetWithCompatibleTypes).doesNotContainAnyElementsOf(targets);
+        } else {
+            assertThat(result)
+                    .as("count of targets").hasSize(targets.size() + targetWithCompatibleTypes.size())
+                    .as("contains all targets").containsAll(targetWithCompatibleTypes).containsAll(targets);
+        }
     }
 }
