@@ -230,7 +230,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @AuditLog(entity = "Target", type = AuditLog.Type.DELETE, description = "Delete Actions For Target")
     public ResponseEntity<Void> deleteActionsForTarget(final String targetId, final int keepLast, final List<Long> actionIds) {
 
-        if (keepLast <= 0 && actionIds == null) {
+        if (keepLast < 0 && actionIds == null) {
             throw new IllegalArgumentException("Either keepLast OR action ID list should be provided!");
         }
 
