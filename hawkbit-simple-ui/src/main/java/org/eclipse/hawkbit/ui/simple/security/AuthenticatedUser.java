@@ -12,24 +12,25 @@ package org.eclipse.hawkbit.ui.simple.security;
 import java.util.Optional;
 
 import com.vaadin.flow.spring.security.AuthenticationContext;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AuthenticatedUser {
 
     private final AuthenticationContext authenticationContext;
+    private final GrantedAuthoritiesService grantedAuthoritiesService;
 
-    public AuthenticatedUser(final AuthenticationContext authenticationContext) {
+    public AuthenticatedUser(final AuthenticationContext authenticationContext, GrantedAuthoritiesService grantedAuthoritiesService) {
         this.authenticationContext = authenticationContext;
+        this.grantedAuthoritiesService = grantedAuthoritiesService;
     }
 
     public Optional<String> getName() {
         return authenticationContext.getPrincipalName();
     }
 
-    @CacheEvict(cacheNames = "userDetails", key = "#authenticationContext.getPrincipalName().get()")
     public void logout() {
+        this.getName().ifPresent(grantedAuthoritiesService::evictUserFromCache);
         authenticationContext.logout();
     }
 }

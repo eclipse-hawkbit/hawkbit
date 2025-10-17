@@ -12,13 +12,13 @@ package org.eclipse.hawkbit.ui.simple.security;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.vaadin.flow.spring.security.AuthenticationContext;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
@@ -27,11 +27,11 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class GrantedAuthoritiesService {
 
+    public static final String USER_CACHE = "userDetails";
     private HawkbitMgmtClient hawkbitClient;
-    private final AuthenticationContext authenticationContext;
 
-    @Cacheable(cacheNames = "userDetails", key = "#authenticationContext.getPrincipalName().get()")
-    public List<SimpleGrantedAuthority> getGrantedAuthorities() {
+    @Cacheable(cacheNames = "userDetails", key = "#authentication.getName()")
+    public List<SimpleGrantedAuthority> getGrantedAuthorities(Authentication authentication) {
         final List<String> roles = new LinkedList<>();
         roles.add("ANONYMOUS");
         if (hawkbitClient.hasSoftwareModulesRead()) {
@@ -53,8 +53,13 @@ public class GrantedAuthoritiesService {
     }
 
     @Scheduled(fixedRateString = "${caching.spring.userDetailsTTL:1h}")
-    @CacheEvict(cacheNames = "userDetails", allEntries = true)
+    @CacheEvict(cacheNames = USER_CACHE, allEntries = true)
     public void emptyCache() {
         log.debug("emptying userDetails cache");
+    }
+
+    @CacheEvict(cacheNames = "userDetails")
+    public void evictUserFromCache(String principalName) {
+        log.debug("remove user from {} cache", principalName);
     }
 }

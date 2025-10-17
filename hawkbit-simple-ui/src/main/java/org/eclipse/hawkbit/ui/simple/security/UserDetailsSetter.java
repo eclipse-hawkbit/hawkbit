@@ -49,7 +49,7 @@ class UserDetailsSetter extends OncePerRequestFilter {
         Authentication newAuthentication;
 
         if (!(authentication instanceof AnonymousAuthenticationToken) && authentication.isAuthenticated()) {
-            Collection<? extends GrantedAuthority> grantedAuthorities = grantedAuthoritiesService.getGrantedAuthorities();
+            Collection<? extends GrantedAuthority> grantedAuthorities = grantedAuthoritiesService.getGrantedAuthorities(authentication);
 
             if (authentication instanceof OAuth2AuthenticationToken oAuth2AuthenticationToken) {
                 newAuthentication = new OAuth2AuthenticationToken(oAuth2AuthenticationToken.getPrincipal(), grantedAuthorities,
