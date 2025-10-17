@@ -143,7 +143,7 @@ class ManagementSecurityTest extends AbstractJpaIntegrationTest {
                             // skip maxAssignmentsExceededHandler in DeploymentManagement since it throws quota exception
                             // because of actions.cleanup.onQuotaHit.percent not configured
                             // other option would be to configure it for all tests
-                            .filter(method -> !"maxAssignmentsExceededHandle".equals(method.getName()))
+                            .filter(method -> !"handleMaxAssignmentsExceeded".equals(method.getName()))
                             .map(method -> Arguments.of(clazz, method)))
                     // consumes the stream because scan result couldn't be used after being closed
                     .toList()
