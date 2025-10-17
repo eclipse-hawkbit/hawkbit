@@ -73,6 +73,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -224,6 +225,26 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         }
 
         return ResponseEntity.ok(new PagedList<>(MgmtTargetMapper.toResponse(targetId, activeActions.getContent()), totalActionCount));
+    }
+
+    @Override
+    @AuditLog(entity = "Target", type = AuditLog.Type.DELETE, description = "Delete Actions For Target")
+    public ResponseEntity<Void> deleteActionsForTarget(final String targetId, final int keepLast, final List<Long> actionIds) {
+
+        if (keepLast < 0 && ObjectUtils.isEmpty(actionIds)) {
+            throw new IllegalArgumentException("Either keepLast OR action ID list should be provided!");
+        }
+
+        if (!ObjectUtils.isEmpty(actionIds)) {
+            if (keepLast >= 0) {
+                throw new IllegalArgumentException("Only one of the parameters should be provided!");
+            }
+            deploymentManagement.deleteTargetActionsByIds(targetId, actionIds);
+        } else {
+            deploymentManagement.deleteOldestTargetActions(targetId, keepLast);
+        }
+
+        return ResponseEntity.ok().build();
     }
 
     @Override

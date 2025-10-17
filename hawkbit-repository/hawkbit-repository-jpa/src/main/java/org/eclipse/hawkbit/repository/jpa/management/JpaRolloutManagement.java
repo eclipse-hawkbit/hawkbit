@@ -179,7 +179,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         this.repositoryProperties = repositoryProperties;
 
         this.onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, actionRepository, actionStatusRepository,
-                quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties);
+                quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties, null);
     }
 
     public static String createRolloutLockKey(final String tenant) {

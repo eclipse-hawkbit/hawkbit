@@ -345,12 +345,7 @@ public class SpecificationBuilder<T> {
         }
 
         private String toSqlLikeValue(final String value) {
-            final String escaped;
-            if (database == Database.SQL_SERVER) {
-                escaped = value.replace("%", "[%]").replace("_", "[_]");
-            } else {
-                escaped = value.replace("%", ESCAPE_CHAR + "%").replace("_", ESCAPE_CHAR + "_");
-            }
+            final String escaped = value.replace("%", ESCAPE_CHAR + "%").replace("_", ESCAPE_CHAR + "_");
             final String finalizedValue;
             if (escaped.contains(ESCAPE_CHAR_WITH_ASTERISK)) {
                 finalizedValue = escaped.replace(ESCAPE_CHAR_WITH_ASTERISK, "$")

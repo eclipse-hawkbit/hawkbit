@@ -14,17 +14,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 
 import jakarta.persistence.criteria.JoinType;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.function.TriConsumer;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
@@ -65,6 +69,7 @@ public abstract class AbstractDsAssignmentStrategy {
     private final BooleanSupplier multiAssignmentsConfig;
     private final BooleanSupplier confirmationFlowConfig;
     private final RepositoryProperties repositoryProperties;
+    private final TriConsumer<Long, Integer, AssignmentQuotaExceededException> maxAssignmentExeededHandler;
 
     @SuppressWarnings("java:S107")
     AbstractDsAssignmentStrategy(
@@ -72,7 +77,8 @@ public abstract class AbstractDsAssignmentStrategy {
             final AfterTransactionCommitExecutor afterCommit,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
-            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
+            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties,
+            final TriConsumer<Long, Integer, AssignmentQuotaExceededException> maxAssignmentExeededHandler) {
         this.targetRepository = targetRepository;
         this.afterCommit = afterCommit;
         this.actionRepository = actionRepository;
@@ -81,6 +87,7 @@ public abstract class AbstractDsAssignmentStrategy {
         this.multiAssignmentsConfig = multiAssignmentsConfig;
         this.confirmationFlowConfig = confirmationFlowConfig;
         this.repositoryProperties = repositoryProperties;
+        this.maxAssignmentExeededHandler = maxAssignmentExeededHandler;
     }
 
     public JpaAction createTargetAction(
@@ -294,6 +301,10 @@ public abstract class AbstractDsAssignmentStrategy {
 
     private void assertActionsPerTargetQuota(final Target target, final int requested) {
         final int quota = quotaManagement.getMaxActionsPerTarget();
-        QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class, actionRepository::countByTargetId);
+        try {
+            QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class, actionRepository::countByTargetId);
+        } catch (AssignmentQuotaExceededException ex) {
+            maxAssignmentExeededHandler.accept(target.getId(), requested, ex);
+        }
     }
 }

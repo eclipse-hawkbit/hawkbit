@@ -133,6 +133,11 @@ public class TenantConfigurationProperties {
          */
         public static final String IMPLICIT_LOCK_ENABLED = "implicit.lock.enabled";
 
+        /**
+         * Configuration value for percentage of oldest actions to be cleaned if @maxActionsPerTarget quota is hit
+         */
+        public static final String ACTIONS_PURGE_PERCENTAGE_ON_QUOTA_HIT = "actions.cleanup.onQuotaHit.percent";
+
         private static final Map<Class<? extends Serializable>, TenantConfigurationValidator> DEFAULT_TYPE_VALIDATORS = Map.of(
                 Boolean.class, new TenantConfigurationBooleanValidator(),
                 Integer.class, new TenantConfigurationIntegerValidator(),
