@@ -451,7 +451,13 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 accessController.assertOperationAllowed(AccessController.Operation.UPDATE, jpaTarget));
 
         final long targetActions = actionRepository.countByTargetId(jpaTarget.getId());
-        final long oldestToDelete = targetActions > keepLast ? (targetActions - keepLast) : targetActions;
+
+        long oldestToDelete;
+        if (targetActions > keepLast) {
+            oldestToDelete = targetActions - keepLast;
+        } else {
+            return;
+        }
         deleteOldestTargetActions(jpaTarget.getId(), (int) oldestToDelete);
     }
 
