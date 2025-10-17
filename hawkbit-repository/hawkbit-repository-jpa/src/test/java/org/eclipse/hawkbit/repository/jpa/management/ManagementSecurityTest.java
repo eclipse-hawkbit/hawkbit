@@ -78,7 +78,6 @@ class ManagementSecurityTest extends AbstractJpaIntegrationTest {
     @BeforeEach
     public void beforeAll() {
         // override - shall not do anything
-        //tenantConfigurationManagement.addOrUpdateConfiguration("actions.cleanup.onQuotaHit.percent", 25);
     }
 
     @ParameterizedTest
