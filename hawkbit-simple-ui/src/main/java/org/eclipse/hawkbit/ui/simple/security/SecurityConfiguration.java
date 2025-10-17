@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.simple.security;
 
 import com.vaadin.flow.spring.security.VaadinAwareSecurityContextHolderStrategyConfiguration;
 import com.vaadin.flow.spring.security.VaadinSecurityConfigurer;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ui.simple.view.LoginView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,19 +25,27 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.oauth2.client.OAuth2LoginConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 
 @EnableWebSecurity
 @Configuration
 @EnableConfigurationProperties(OidcClientProperties.class)
+@Slf4j
 @Import(VaadinAwareSecurityContextHolderStrategyConfiguration.class)
 public class SecurityConfiguration {
 
     private Customizer<OAuth2LoginConfigurer<HttpSecurity>> oAuth2LoginConfigurerCustomizer;
+    @Autowired
+    private UserDetailsSetter userDetailsSetter;
+
+    @Autowired(required = false)
+    private InMemoryClientRegistrationRepository clientRegistrationRepository;
 
     @Autowired(required = false)
     public void setOAuth2LoginConfigurerCustomizer(
@@ -52,23 +61,24 @@ public class SecurityConfiguration {
     @Bean
     public AuthenticationFailureHandler customFailureHandler() {
         // Redirect back to login with your message
-        return (request, response, exception) ->
-            response.sendRedirect("/login?error=" + URLEncoder.encode(exception.getMessage(), StandardCharsets.UTF_8));
+        return (request, response, exception) -> response.sendRedirect("/login?error=" + URLEncoder.encode(exception.getMessage(),
+                StandardCharsets.UTF_8));
     }
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/images/*.png").permitAll());
-        if (oAuth2LoginConfigurerCustomizer != null) {
-            http.oauth2Login(oAuth2LoginConfigurerCustomizer);
-        } else {
-            http.formLogin(form -> form
-                    .loginPage("/login")
-                    .failureHandler(customFailureHandler()));
-        }
+        http.addFilterAfter(userDetailsSetter, AuthorizationFilter.class);
         return http.with(VaadinSecurityConfigurer.vaadin(), configurer -> {
             if (oAuth2LoginConfigurerCustomizer == null) {
                 configurer.loginView(LoginView.class);
+
+            } else {
+                var defaultClientRegistration = clientRegistrationRepository.iterator().next();
+                configurer.oauth2LoginPage(
+                        "/oauth2/authorization/" + defaultClientRegistration.getRegistrationId(),
+                        "{baseUrl}/"
+                );
             }
         }).build();
     }

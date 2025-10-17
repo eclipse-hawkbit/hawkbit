@@ -18,9 +18,11 @@ import org.springframework.stereotype.Component;
 public class AuthenticatedUser {
 
     private final AuthenticationContext authenticationContext;
+    private final GrantedAuthoritiesService grantedAuthoritiesService;
 
-    public AuthenticatedUser(final AuthenticationContext authenticationContext) {
+    public AuthenticatedUser(final AuthenticationContext authenticationContext, GrantedAuthoritiesService grantedAuthoritiesService) {
         this.authenticationContext = authenticationContext;
+        this.grantedAuthoritiesService = grantedAuthoritiesService;
     }
 
     public Optional<String> getName() {
@@ -28,6 +30,7 @@ public class AuthenticatedUser {
     }
 
     public void logout() {
+        this.getName().ifPresent(grantedAuthoritiesService::evictUserFromCache);
         authenticationContext.logout();
     }
 }
