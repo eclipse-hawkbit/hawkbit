@@ -24,8 +24,9 @@
 
     <logger name="org.flywaydb.core.internal.command.DbValidate" level="DEBUG"/>
     <logger name="org.flywaydb.core.internal.command.DbMigrate" level="DEBUG"/>
+    <logger name="org.eclipse.hawkbit.repository.jpa.init.HawkbitFlywayDbInit" level="DEBUG"/>
 
-    <root level="info">
+    <root level="${LOG_LEVEL:-INFO}">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.init;
 
+import java.util.Arrays;
+import java.util.ServiceLoader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,6 +19,8 @@ import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.CoreErrorCode;
 import org.flywaydb.core.api.ErrorCode;
 import org.flywaydb.core.api.FlywayException;
+import org.flywaydb.core.api.callback.Callback;
+import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.flywaydb.core.api.exception.FlywayValidateException;
 
 /**
@@ -69,25 +73,44 @@ public class HawkbitFlywayDbInit {
     private static final String USER = prop("username", "sa");
     private static final String PASSWORD = prop("password", "");
     private static final String TABLE = prop("table", "schema_version");
+    // comma separated, fully qualified class names of callbacks
+    private static final String[] CALLBACKS = Arrays
+            .stream(prop("callbacks", "").split(","))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .toArray(String[]::new);
 
     private static final String[] LOCATIONS = prop("locations", "db/migration").split(",");
     private static final String SQL_MIGRATION_SUFFIXES = prop("sql-migration-suffixes", suffix(URL)) + ".sql";
 
-    private static final String EXCEPTION_MESSAGE = "Exception message: {}";
-
+    // java:S3776 - better be at one place. not so complex
+    // java:S1181 - we want to catch Throwable to log it and exit with proper exit code
+    @SuppressWarnings({ "java:S3776", "java:S1181" })
     public static void main(final String[] args) {
-        final Flyway flyway = Flyway.configure()
+        log.info("Start ({}): {}@{}, table: {}, locations: {}, sql-migration-suffixes: {}",
+                MODE, USER, URL, TABLE, LOCATIONS, SQL_MIGRATION_SUFFIXES);
+
+        // configured via system properties callbacks are with prority. If not confiured - try to load via service loader
+        final Callback[] callbackViaServiceLoader = CALLBACKS.length == 0 ? ServiceLoader.load(Callback.class).stream()
+                .map(ServiceLoader.Provider::get)
+                .toArray(Callback[]::new) : new Callback[0];
+        FluentConfiguration fluentConfiguration = Flyway.configure()
                 .dataSource(URL, USER, PASSWORD)
                 .table(TABLE)
                 .locations(LOCATIONS)
                 .sqlMigrationSuffixes(SQL_MIGRATION_SUFFIXES)
                 .cleanDisabled(true)
                 .validateOnMigrate(true)
-                .envVars()
-                .load();
-        log.info(
-                "Start ({}): {}@{}, table: {}, locations: {}, sql-migration-suffixes: {}",
-                MODE, USER, URL, TABLE, LOCATIONS, SQL_MIGRATION_SUFFIXES);
+                .envVars();
+        if (CALLBACKS.length == 0) {
+            if (callbackViaServiceLoader.length != 0) {
+                fluentConfiguration = fluentConfiguration.callbacks(callbackViaServiceLoader);
+            }
+        } else {
+            fluentConfiguration = fluentConfiguration.callbacks(CALLBACKS);
+        }
+
+        final Flyway flyway = fluentConfiguration.load();
 
         if (MODE.equals(MIGRATE)) {
             try {
@@ -96,7 +119,7 @@ public class HawkbitFlywayDbInit {
                 final ErrorCode errorCode = e.getErrorCode();
                 final int errorCodeOrdinal = errorCode instanceof CoreErrorCode coreErrorCode ? coreErrorCode.ordinal() : -1;
                 log.error("Flyway migrate failed: error code = {}, error code ordinal = {}", errorCode, errorCodeOrdinal);
-                log.debug(EXCEPTION_MESSAGE, e.getMessage());
+                logException(e);
                 System.exit(EXIT_CODE_FAILED); // migration failed
             } catch (final Throwable e) {
                 log.error("Flyway validate failed (undeclared exception): ", e);
@@ -108,14 +131,15 @@ public class HawkbitFlywayDbInit {
             } catch (final FlywayValidateException e) {
                 final ErrorCode errorCode = e.getErrorCode();
                 final int errorCodeOrdinal = errorCode instanceof CoreErrorCode coreErrorCode ? coreErrorCode.ordinal() : -1;
-                log.error("Flyway validate failed (FlywayValidateException): error code = {}, error code ordinal = {}", errorCode, errorCodeOrdinal);
-                log.info(EXCEPTION_MESSAGE, e.getMessage());
+                log.error("Flyway validate failed (FlywayValidateException): error code = {}, error code ordinal = {}", errorCode,
+                        errorCodeOrdinal);
+                logException(e);
                 System.exit(EXIT_CODE_VALIDATE_FAILED); // validation failed, not real error but tables are not valid
             } catch (final FlywayException e) {
                 final ErrorCode errorCode = e.getErrorCode();
                 final int errorCodeOrdinal = errorCode instanceof CoreErrorCode coreErrorCode ? coreErrorCode.ordinal() : -1;
                 log.error("Flyway validate failed: error code = {}, error code ordinal = {}", errorCode, errorCodeOrdinal);
-                log.info(EXCEPTION_MESSAGE, e.getMessage());
+                logException(e);
                 System.exit(EXIT_CODE_FAILED); // validation failed
             } catch (final Throwable e) {
                 log.error("Flyway validate failed (undeclared exception): ", e);
@@ -124,6 +148,14 @@ public class HawkbitFlywayDbInit {
         }
 
         System.exit(EXIT_CODE_SUCCESS);
+    }
+
+    private static void logException(final FlywayException e) {
+        if (log.isDebugEnabled()) {
+            log.debug("Exception message: {}", e.getMessage(), e);
+        } else {
+            log.info("Exception: ", e);
+        }
     }
 
     private static String prop(final String key, final String defaultValue) {
