@@ -16,6 +16,9 @@ import org.springframework.context.annotation.PropertySource;
 
 /**
  * hawkBit Flyway autoconfiguration loading the flyway defaults properties.
+ * <p/>
+ * Used when this module is packed in a spring boot application in order to migrate the hawkbit jpa database schema at runtime.
+ * Another option will be to use hawkbit-repository-jpa-init module to migrate the database schema before hawkbit is started.
  */
 @Configuration
 @PropertySource("classpath:/hawkbit-jpa-flyway-defaults.properties")
