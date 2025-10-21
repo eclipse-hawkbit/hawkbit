@@ -28,16 +28,7 @@ public class DistributionSetUpdatedEvent extends RemoteEntityEvent<DistributionS
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private boolean complete;
-
-    /**
-     * Constructor.
-     *
-     * @param distributionSet Distribution Set
-     * @param complete <code>true</code> if {@link DistributionSet} is after the update {@link DistributionSet#isComplete()}
-     */
-    public DistributionSetUpdatedEvent(final DistributionSet distributionSet, final boolean complete) {
+    public DistributionSetUpdatedEvent(final DistributionSet distributionSet) {
         super(distributionSet);
-        this.complete = complete;
     }
 }

@@ -1357,8 +1357,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         List<? extends DistributionSet> allFoundDS = distributionSetManagement.findAll(PAGE).getContent();
         assertThat(allFoundDS).as("no ds should be founded").isEmpty();
 
-        assertThat(distributionSetRepository.findAll(JpaManagementHelper.combineWithAnd(
-                List.of(DistributionSetSpecification.isDeleted(true), DistributionSetSpecification.isCompleted(true))), PAGE).getContent())
+        assertThat(distributionSetRepository.findAll(DistributionSetSpecification.isDeleted(true), PAGE).getContent())
                 .as("wrong size of founded ds").hasSize(noOfDistributionSets);
 
         IntStream.range(0, deploymentResult.getDistributionSets().size()).forEach(i -> testdataFactory.sendUpdateActionStatusToTargets(
@@ -1369,9 +1368,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // verify that the result is the same, even though distributionSet dsA has been installed
         // successfully and no activeAction is referring to created distribution sets
         allFoundDS = distributionSetManagement.findAll(pageRequest).getContent();
-        assertThat(allFoundDS).as("no ds should be founded").isEmpty();
-        assertThat(distributionSetRepository.findAll(JpaManagementHelper.combineWithAnd(
-                List.of(DistributionSetSpecification.isDeleted(true), DistributionSetSpecification.isCompleted(true))), PAGE).getContent())
+        assertThat(allFoundDS).as("no ds should be found").isEmpty();
+        assertThat(distributionSetRepository.findAll(DistributionSetSpecification.isDeleted(true), PAGE).getContent())
                 .as("wrong size of founded ds").hasSize(noOfDistributionSets);
     }
 

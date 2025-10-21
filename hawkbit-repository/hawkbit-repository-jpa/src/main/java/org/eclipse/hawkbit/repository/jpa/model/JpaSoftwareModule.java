@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -144,6 +145,17 @@ public class JpaSoftwareModule
         } else {
             throw new UnsupportedOperationException("Only JpaArtifact is supported");
         }
+    }
+
+    @Override
+    public boolean isComplete() {
+        return Optional.ofNullable(type).map(smType -> {
+            if (smType.getMinArtifacts() > 0) {
+                return getArtifacts().size() >= smType.getMinArtifacts();
+            } else {
+                return true;
+            }
+        }).orElse(true);
     }
 
     public void removeArtifact(final Artifact artifact) {

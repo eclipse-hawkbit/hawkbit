@@ -46,6 +46,11 @@ public class JpaSoftwareModuleType extends AbstractJpaTypeEntity implements Soft
     private static final long serialVersionUID = 1L;
 
     @Setter(value = lombok.AccessLevel.PRIVATE) // used via reflection
+    @Column(name = "min_artifacts", nullable = false)
+    @Min(0)
+    private int minArtifacts;
+
+    @Setter(value = lombok.AccessLevel.PRIVATE) // used via reflection
     @Column(name = "max_ds_assignments", nullable = false)
     @Min(1)
     private int maxAssignments;

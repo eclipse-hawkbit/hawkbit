@@ -13,18 +13,21 @@ import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_D
 import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.IMPLICIT_LOCK_ENABLED;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
@@ -36,17 +39,20 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.ql.Node;
+import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
-import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParser;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -58,7 +64,9 @@ import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -67,8 +75,10 @@ import org.springframework.util.ObjectUtils;
 
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "distribution-set-management" }, matchIfMissing = true)
+@Slf4j
 public class JpaDistributionSetManagement
-        extends AbstractJpaRepositoryWithMetadataManagement<JpaDistributionSet, DistributionSetManagement.Create, DistributionSetManagement.Update, DistributionSetRepository, DistributionSetFields, String, String>
+        extends
+        AbstractJpaRepositoryWithMetadataManagement<JpaDistributionSet, DistributionSetManagement.Create, DistributionSetManagement.Update, DistributionSetRepository, DistributionSetFields, String, String>
         implements DistributionSetManagement<JpaDistributionSet> {
 
     private final DistributionSetTagManagement<JpaDistributionSetTag> distributionSetTagManagement;
@@ -102,6 +112,46 @@ public class JpaDistributionSetManagement
         this.quotaManagement = quotaManagement;
         this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
         this.repositoryProperties = repositoryProperties;
+    }
+
+    private static final String COMPLETE = "complete";
+
+    @Override
+    @SuppressWarnings("java:S3776") // java:S3776 - just too complex
+    public Page<JpaDistributionSet> findByRsql(final String rsql, final Pageable pageable) {
+        if (rsql != null && rsql.toLowerCase().contains(COMPLETE)) {
+            // limited support for 'complete' - could be removed in future
+            final Node node = RsqlParser.parse(rsql);
+            final Specification<JpaDistributionSet> notDeleted = (root, query, cb) -> cb.equal(root.get(DELETED), false);
+            final List<Specification<JpaDistributionSet>> specList = new ArrayList<>();
+            specList.add(notDeleted);
+            final AtomicReference<Node.Comparison> completedComparison = new AtomicReference<>();
+            if (node instanceof Node.Comparison comparison && COMPLETE.equalsIgnoreCase(comparison.getKey())) {
+                // all not deleted, won't add anything to spec
+                completedComparison.set(comparison);
+            } else if (node instanceof Node.Logical logical && logical.getOp() == Node.Logical.Operator.AND) {
+                final List<Node> sanitizedChildren = new ArrayList<>();
+                logical.getChildren().forEach(child -> {
+                    if (child instanceof Node.Comparison comparison && COMPLETE.equalsIgnoreCase(comparison.getKey())) {
+                        if (completedComparison.get() != null) {
+                            throw new RSQLParameterSyntaxException("Multiple 'complete' comparisons are not supported");
+                        }
+                        completedComparison.set(comparison);
+                    } else {
+                        sanitizedChildren.add(child);
+                    }
+                });
+                specList.add(QLSupport.getInstance()
+                        .buildSpec(new Node.Logical(Node.Logical.Operator.AND, sanitizedChildren), DistributionSetFields.class));
+            }
+            if (completedComparison.get() != null) { // really a comparison
+                log.warn("Usage of 'complete' in RSQL is deprecated and will be removed in future: {}", node);
+                final boolean completed = completeComparison(completedComparison);
+                return filter(JpaManagementHelper.findAllWithCountBySpec(jpaRepository, specList, pageable), completed);
+            }
+        }
+
+        return super.findByRsql(rsql, pageable);
     }
 
     @Override
@@ -199,7 +249,7 @@ public class JpaDistributionSetManagement
         if (distributionSet.isLocked()) {
             return jpaDistributionSet;
         } else {
-            if (!jpaDistributionSet.isComplete()) {
+            if (!distributionSet.isComplete()) {
                 throw new IncompleteDistributionSetException("Could not be locked while incomplete!");
             }
             lockSoftwareModules(jpaDistributionSet);
@@ -298,16 +348,13 @@ public class JpaDistributionSetManagement
     @Override
     public JpaDistributionSet getValidAndComplete(final long id) {
         final JpaDistributionSet distributionSet = getValid0(id);
-
         if (!distributionSet.isComplete()) {
             throw new IncompleteDistributionSetException(
                     "Distribution set of type " + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
         }
-
         if (distributionSet.isDeleted()) {
             throw new DeletedException(DistributionSet.class, id);
         }
-
         return distributionSet;
     }
 
@@ -355,6 +402,24 @@ public class JpaDistributionSetManagement
     protected void assertMetadataQuota(final long requested) {
         final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerDistributionSet();
         QuotaHelper.assertAssignmentQuota(requested, maxMetaData, String.class, DistributionSet.class);
+    }
+
+    private static boolean completeComparison(final AtomicReference<Node.Comparison> completeComparison) {
+        final Node.Comparison comparison = completeComparison.get();
+        if (comparison.getOp() == Node.Comparison.Operator.EQ) {
+            return Boolean.parseBoolean(String.valueOf(comparison.getValue()));
+        } else if (comparison.getOp() == Node.Comparison.Operator.NE) {
+            return !Boolean.parseBoolean(String.valueOf(comparison.getValue()));
+        } else {
+            throw new RSQLParameterSyntaxException("Unsupported operator for 'complete': " + comparison.getOp());
+        }
+    }
+
+    private static Page<JpaDistributionSet> filter(final Page<JpaDistributionSet> page, final boolean completed) {
+        final List<JpaDistributionSet> filtered = page.getContent().stream()
+                .filter(ds -> ds.isComplete() == completed)
+                .toList();
+        return new PageImpl<>(filtered, page.getPageable(), page.getTotalElements());
     }
 
     private static Collection<Long> notFound(final Collection<Long> distributionSetIds, final List<JpaDistributionSet> foundDistributionSets) {

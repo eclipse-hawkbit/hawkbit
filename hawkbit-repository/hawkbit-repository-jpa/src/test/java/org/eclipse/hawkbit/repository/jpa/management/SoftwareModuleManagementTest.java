@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -25,9 +26,12 @@ import jakarta.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.artifact.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement.Create;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement.Update;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.exception.IncompleteSoftwareModuleException;
 import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.jpa.RandomGeneratedInputStream;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -417,6 +421,30 @@ class SoftwareModuleManagementTest
         verifyThrownExceptionBy(() -> softwareModuleManagement.getMetadata(NOT_EXIST_IDL, NOT_EXIST_ID), "SoftwareModule");
         verifyThrownExceptionBy(() -> softwareModuleManagement.getMetadata(NOT_EXIST_IDL), "SoftwareModule");
         verifyThrownExceptionBy(() -> softwareModuleManagement.update(Update.builder().id(NOT_EXIST_IDL).build()), "SoftwareModule");
+    }
+
+    /**
+     * Verifies that when no SoftwareModules are assigned to a Distribution then the DistributionSet is not complete.
+     */
+    @Test
+    void incompleteIfSoftwareModule() {
+        final SoftwareModuleType softwareModuleType = softwareModuleTypeManagement
+                .create(SoftwareModuleTypeManagement.Create.builder().key("newType").name("new Type").minArtifacts(1).build());
+        final SoftwareModule softwareModuleIncomplete = softwareModuleManagement
+                .create(SoftwareModuleManagement.Create.builder().name("ds").version("1.0.0").type(softwareModuleType).build());
+        assertThat(softwareModuleIncomplete.isComplete()).isFalse();
+        assertThatExceptionOfType(IncompleteSoftwareModuleException.class)
+                .isThrownBy(() -> softwareModuleManagement.lock(softwareModuleIncomplete));
+
+        // add artifact - so it should become complete
+        artifactManagement.create(new ArtifactUpload(
+                new ByteArrayInputStream(randomBytes(10)), null, 10, null,
+                softwareModuleIncomplete.getId(), "file1", false));
+
+        final SoftwareModule softwareModuleComplete = softwareModuleManagement.get(softwareModuleIncomplete.getId());
+        assertThat(softwareModuleComplete.isComplete()).isTrue();
+        assertThatNoException().isThrownBy(() -> softwareModuleManagement.lock(softwareModuleComplete));
+        assertThat(softwareModuleManagement.get(softwareModuleIncomplete.getId()).isComplete()).isTrue();
     }
 
     private SoftwareModule createSoftwareModuleWithArtifacts(

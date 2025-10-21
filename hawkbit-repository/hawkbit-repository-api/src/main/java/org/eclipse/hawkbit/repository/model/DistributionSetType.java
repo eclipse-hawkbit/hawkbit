@@ -30,12 +30,6 @@ public interface DistributionSetType extends Type {
     Set<SoftwareModuleType> getOptionalModuleTypes();
 
     /**
-     * @param distributionSet to check for completeness
-     * @return <code>true</code> if the all mandatory software module types are in the system.
-     */
-    boolean checkComplete(DistributionSet distributionSet);
-
-    /**
      * Checks if the given {@link SoftwareModuleType} is in this {@link DistributionSetType}.
      *
      * @param softwareModuleType search for

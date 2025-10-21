@@ -109,18 +109,6 @@ class DistributionSetTypeManagementTest extends AbstractRepositoryManagementTest
     }
 
     /**
-     * Verifies that when no SoftwareModules are assigned to a Distribution then the DistributionSet is not complete.
-     */
-    @Test
-    void incompleteIfDistributionSetHasNoSoftwareModulesAssigned() {
-        final JpaDistributionSetType jpaDistributionSetType = (JpaDistributionSetType) distributionSetTypeManagement
-                .create(Create.builder().key("newType").name("new Type").build());
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet(
-                "DistributionOne", "3.1.2", jpaDistributionSetType, new ArrayList<>());
-        assertThat(jpaDistributionSetType.checkComplete(distributionSet)).isFalse();
-    }
-
-    /**
      * Verifies that the quota for software module types per distribution set type is enforced as expected.
      */
     @Test
