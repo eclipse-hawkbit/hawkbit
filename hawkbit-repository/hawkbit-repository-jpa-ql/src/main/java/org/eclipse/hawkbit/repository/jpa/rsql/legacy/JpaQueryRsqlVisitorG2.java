@@ -425,12 +425,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & QueryField, T>
     }
 
     private String toSQL(final String value) {
-        final String escaped;
-        if (database == Database.SQL_SERVER) {
-            escaped = value.replace("%", "[%]").replace("_", "[_]");
-        } else {
-            escaped = value.replace("%", ESCAPE_CHAR + "%").replace("_", ESCAPE_CHAR + "_");
-        }
+        final String escaped = value.replace("%", ESCAPE_CHAR + "%").replace("_", ESCAPE_CHAR + "_");
         return replaceIfRequired(escaped);
     }
 

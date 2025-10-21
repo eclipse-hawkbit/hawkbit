@@ -26,9 +26,13 @@ import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 /**
  * REST API providing (read-only) access to actions.
@@ -125,4 +129,47 @@ public interface MgmtActionRestApi {
     @GetMapping(value = MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/{actionId}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtAction> getAction(@PathVariable("actionId") Long actionId);
+
+    /**
+     * Handles the DELETE request for single action
+     *
+     * @param actionId - the id of action about to be deleted
+     * @return status OK if delete as successful.
+     */
+    @Operation(summary = "Delete a single action by id", description = "Handles the DELETE request for single action within Bosch IoT Rollouts. Required Permission: DELETE_REPOSITORY")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Action not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))) })
+    @DeleteMapping(value = MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/{actionId}")
+    ResponseEntity<Void> deleteAction(@PathVariable("actionId") Long actionId);
+
+    /**
+     * Handles the DELETE request for multiple actions
+     *
+     * @param actionIds - list of action ids to be deleted
+     * @param rsqlParam - rsql filter matching actions to be deleted
+     * @return status OK if delete as successful.
+     */
+    @Operation(summary = "Delete multiple actions by list OR rsql filter", description = "Handles the DELETE request for multiple actions within Bosch IoT Rollouts. Either action id list OR rsql filter SHOULD be provided. Required Permission: DELETE_REPOSITORY")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))) })
+    @DeleteMapping(value = MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)
+    ResponseEntity<Void> deleteActions(
+                    @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false, defaultValue = "")
+                    @Schema(description = """
+                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
+                    available fields.""")
+                    String rsqlParam,
+                    @Schema(description = "List of action ids to be deleted", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "[253, 255]")
+                    @RequestBody(required = false) List<Long> actionIds);
 }

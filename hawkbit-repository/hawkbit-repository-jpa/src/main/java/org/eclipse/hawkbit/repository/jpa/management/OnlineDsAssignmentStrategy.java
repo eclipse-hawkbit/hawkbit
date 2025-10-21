@@ -13,18 +13,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.function.TriConsumer;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -54,9 +58,10 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             final AfterTransactionCommitExecutor afterCommit,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
-            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
+            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties,
+            final TriConsumer<Long, Long, AssignmentQuotaExceededException> maxAssignmentExceededHandler) {
         super(targetRepository, afterCommit, actionRepository, actionStatusRepository,
-                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties);
+                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties, maxAssignmentExceededHandler);
     }
 
     public void sendDeploymentEvents(final long distributionSetId, final List<Action> actions) {

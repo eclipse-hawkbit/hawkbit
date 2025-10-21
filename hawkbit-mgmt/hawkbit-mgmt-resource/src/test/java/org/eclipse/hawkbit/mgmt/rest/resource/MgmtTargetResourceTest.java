@@ -81,6 +81,7 @@ import org.eclipse.hawkbit.util.IpUtil;
 import org.hamcrest.Matchers;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -2856,6 +2857,76 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("lastStatusCode", equalTo(432)))
                 .andExpect(jsonPath("detailStatus", equalTo("error")));
+    }
+
+    @Test
+    void testDeletionOfLastNTargetActions() throws Exception {
+        final Target testTarget = testdataFactory.createTarget("testTarget");
+
+        for (int i = 0; i < 10; i++) {
+            final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+            assignDistributionSet(distributionSet.getId(), testTarget.getControllerId());
+        }
+
+        long actionsPerTarget = actionRepository.countByTargetId(testTarget.getId());
+        Assertions.assertEquals(10, actionsPerTarget);
+        List<Action> oldActions = deploymentManagement.findActionsByTarget(testTarget.getControllerId(), PAGE).getContent();
+
+        mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions", testTarget.getControllerId())
+                .param("keepLast", "5"))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        //the last 5 actions should be left
+        List<Action> actions = deploymentManagement.findActionsByTarget(testTarget.getControllerId(), PAGE).getContent();
+        Assertions.assertEquals(5, actions.size());
+        for (int i = 0; i < 5; i++) {
+            // last 5 actions should remain
+            Assertions.assertEquals(oldActions.get(i + 5), actions.get(i));
+        }
+    }
+
+    @Test
+    void testThatDeletionOfLastNTargetActionsReturnsBadRequestWhenNeeded() throws Exception {
+        final Target testTarget = testdataFactory.createTarget();
+        // either numberOfActions or actionIds list should be present
+        mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions", testTarget.getControllerId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+
+        // both parameters present should also lead to bad request
+        mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions", testTarget.getControllerId())
+                        .param("keepLast", "5")
+                        .content(toJson(List.of(1,2,3)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testDeletionOfTargetActionsById() throws Exception {
+        final Target testTarget = testdataFactory.createTarget("testTarget");
+        for (int i = 0; i < 10; i++) {
+            final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+            long dsId = distributionSet.getId();
+            assignDistributionSet(dsId, testTarget.getControllerId());
+        }
+
+        final List<Long> evenActionIds = deploymentManagement.findActionsByTarget(testTarget.getControllerId(), PAGE).getContent()
+                        .stream()
+                        .filter(action -> action.getId() % 2 == 0)
+                .map(Identifiable::getId).toList();
+
+        mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions", testTarget.getControllerId())
+                        .content(toJson(evenActionIds))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        long remaining = actionRepository.countByTargetId(testTarget.getId());
+        Assertions.assertEquals(10 - evenActionIds.size(), remaining);
+        List<Action> remainingActions = deploymentManagement.findActionsByTarget(testTarget.getControllerId(), PAGE).getContent();
+        remainingActions.forEach(action -> Assertions.assertTrue(action.getId() % 2 != 0));
     }
 
     private static Stream<Arguments> confirmationOptions() {

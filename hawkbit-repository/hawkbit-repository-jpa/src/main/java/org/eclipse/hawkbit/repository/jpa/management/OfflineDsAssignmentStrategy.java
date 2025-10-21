@@ -12,13 +12,17 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.function.TriConsumer;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
@@ -48,9 +52,10 @@ class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             final AfterTransactionCommitExecutor afterCommit,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
-            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
+            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties,
+            final TriConsumer<Long, Long, AssignmentQuotaExceededException> maxAssignmentExceededHandler) {
         super(targetRepository, afterCommit, actionRepository, actionStatusRepository,
-                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties);
+                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties, maxAssignmentExceededHandler);
     }
 
     @Override

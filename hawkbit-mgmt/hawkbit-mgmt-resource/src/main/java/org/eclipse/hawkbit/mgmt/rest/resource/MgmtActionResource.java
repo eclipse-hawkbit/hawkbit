@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitizeActionSortParam;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionRestApi;
@@ -26,7 +27,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -69,6 +73,34 @@ public class MgmtActionResource implements MgmtActionRestApi {
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         return ResponseEntity.ok(MgmtActionMapper.toResponse(action, MgmtRepresentationMode.FULL));
+    }
+
+    @Override
+    @AuditLog(entity = "Actions",type = AuditLog.Type.DELETE, description = "Delete Action", logResponse = true)
+    public ResponseEntity<Void> deleteAction(Long actionId) {
+        deploymentManagement.deleteAction(actionId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @AuditLog(entity = "Actions", type = AuditLog.Type.DELETE, description = "Delete Actions", logResponse = true)
+    public ResponseEntity<Void> deleteActions(String rsqlParam, List<Long> actionIds) {
+
+        final boolean isActionIdsNotEmpty = !ObjectUtils.isEmpty(actionIds);
+        if (!ObjectUtils.isEmpty(rsqlParam)) {
+
+            if (isActionIdsNotEmpty) {
+                throw new IllegalArgumentException("Only one of the parameters should be provided!");
+            }
+
+            deploymentManagement.deleteActionsByRsql(rsqlParam);
+        } else if (isActionIdsNotEmpty) {
+            deploymentManagement.deleteActionsByIds(actionIds);
+        } else {
+            throw new IllegalArgumentException("Either action id list or rsql filter should be provided.");
+        }
+
+        return ResponseEntity.ok().build();
     }
 
     private MgmtRepresentationMode getRepresentationModeFromString(final String representationModeParam) {

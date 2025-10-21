@@ -56,7 +56,6 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -856,8 +855,12 @@ public class JpaRolloutExecutor implements RolloutExecutor {
      * @param target the target
      * @param requested number of actions to check
      */
-    private void assertActionsPerTargetQuota(final Target target, final int requested) {
+    private void assertActionsPerTargetQuota(final Target target, final long requested) {
         final int quota = quotaManagement.getMaxActionsPerTarget();
-        QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class, actionRepository::countByTargetId);
+        try {
+            QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class, actionRepository::countByTargetId);
+        } catch (final AssignmentQuotaExceededException ex) {
+            deploymentManagement.handleMaxAssignmentsExceeded(target.getId(), requested, ex);
+        }
     }
 }

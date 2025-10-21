@@ -403,6 +403,44 @@ public interface MgmtTargetRestApi {
                     in the result.""")
             String sortParam);
 
+
+    /**
+     * Deletes all actions for the provided target by provided action IDs list
+     * OR
+     * Deletes all EXCEPT the latest N actions
+     *
+     * @param targetId - target id
+     * @param keepLast - the number of last target actions to be left
+     * @param actionIds - Specific action id list for actions to be deleted
+     */
+    @Operation(summary = "Deletes all actions for the provided target EXCEPT the latest N actions OR by provided action IDs list.", description = "Deletes/Purges the action history of the target except the last N actions OR deletes only the actions in the provided action ids list. Required Permission: DELETE_REPOSITORY")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully deleted."),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
+                            "data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Target not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
+    @DeleteMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<Void> deleteActionsForTarget(
+            @PathVariable("targetId") String targetId,
+            @RequestParam(name = "keepLast", required = false, defaultValue = "-1") int keepLast,
+            @Schema(description = "List of action ids to be deleted", example = "[253, 255]", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+            @RequestBody(required = false) List<Long> actionIds);
+
     /**
      * Handles the GET request of retrieving a specific Actions of a specific Target.
      *

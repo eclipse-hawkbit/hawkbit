@@ -299,6 +299,45 @@ public interface DeploymentManagement extends PermissionSupport {
     Action forceTargetAction(long actionId);
 
     /**
+     * Deletes the current action by id.
+     * @param actionId - action id
+     */
+    @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TARGET + "')")
+    void deleteAction(long actionId);
+
+    /**
+     * Deletes actions matching the provided rsql filter
+     * @param rsql - rsql filter for actions to be deleted
+     */
+    @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TARGET + "')")
+    void deleteActionsByRsql(String rsql);
+
+    /**
+     * Deletes actions present in provided list of ids
+     * @param actionIds - list of action ids to be deleted
+     */
+    @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TARGET + "')")
+    void deleteActionsByIds(List<Long> actionIds);
+
+    /**
+     * Deletes actions in scope of the target ONLY by list of action ids.
+     *
+     * @param target - target controllerId
+     * @param actionsIds - list of action ids to be deleted
+     */
+    @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TARGET + "')")
+    void deleteTargetActionsByIds(final String target, final List<Long> actionsIds);
+
+    /**
+     * Deletes target actions and leaves the LAST N actions in the action history only.
+     *
+     * @param target - target controllerId
+     * @param keepLast - number of actions to be left/kept (NOT deleted)
+     */
+    @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TARGET + "')")
+    void deleteOldestTargetActions(final String target, final int keepLast);
+
+    /**
      * Sets the status of inactive scheduled {@link Action}s for the specified {@link Target}s to {@link Status#CANCELED}
      *
      * @param targetIds ids of the {@link Target}s the actions belong to
@@ -372,4 +411,7 @@ public interface DeploymentManagement extends PermissionSupport {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     void cancelActionsForDistributionSet(final ActionCancellationType cancelationType, final DistributionSet set);
+
+    @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
+    void handleMaxAssignmentsExceeded(Long targetId, Long requested, AssignmentQuotaExceededException ex);
 }
