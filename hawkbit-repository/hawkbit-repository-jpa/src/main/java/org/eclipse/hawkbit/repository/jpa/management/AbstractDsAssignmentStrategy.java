@@ -14,8 +14,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 
 import jakarta.persistence.criteria.JoinType;
@@ -69,7 +67,7 @@ public abstract class AbstractDsAssignmentStrategy {
     private final BooleanSupplier multiAssignmentsConfig;
     private final BooleanSupplier confirmationFlowConfig;
     private final RepositoryProperties repositoryProperties;
-    private final TriConsumer<Long, Integer, AssignmentQuotaExceededException> maxAssignmentExeededHandler;
+    private final TriConsumer<Long, Long, AssignmentQuotaExceededException> maxAssignmentExceededHandler;
 
     @SuppressWarnings("java:S107")
     AbstractDsAssignmentStrategy(
@@ -78,7 +76,7 @@ public abstract class AbstractDsAssignmentStrategy {
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
             final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties,
-            final TriConsumer<Long, Integer, AssignmentQuotaExceededException> maxAssignmentExeededHandler) {
+            final TriConsumer<Long, Long, AssignmentQuotaExceededException> maxAssignmentExceededHandler) {
         this.targetRepository = targetRepository;
         this.afterCommit = afterCommit;
         this.actionRepository = actionRepository;
@@ -87,7 +85,7 @@ public abstract class AbstractDsAssignmentStrategy {
         this.multiAssignmentsConfig = multiAssignmentsConfig;
         this.confirmationFlowConfig = confirmationFlowConfig;
         this.repositoryProperties = repositoryProperties;
-        this.maxAssignmentExeededHandler = maxAssignmentExeededHandler;
+        this.maxAssignmentExceededHandler = maxAssignmentExceededHandler;
     }
 
     public JpaAction createTargetAction(
@@ -299,12 +297,12 @@ public abstract class AbstractDsAssignmentStrategy {
                 .publishEvent(new CancelTargetAssignmentEvent(tenant, actions)));
     }
 
-    private void assertActionsPerTargetQuota(final Target target, final int requested) {
+    private void assertActionsPerTargetQuota(final Target target, final long requested) {
         final int quota = quotaManagement.getMaxActionsPerTarget();
         try {
             QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class, actionRepository::countByTargetId);
         } catch (AssignmentQuotaExceededException ex) {
-            maxAssignmentExeededHandler.accept(target.getId(), requested, ex);
+            maxAssignmentExceededHandler.accept(target.getId(), requested, ex);
         }
     }
 }

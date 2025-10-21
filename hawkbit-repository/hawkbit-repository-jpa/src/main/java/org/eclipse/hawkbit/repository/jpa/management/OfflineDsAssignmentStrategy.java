@@ -54,9 +54,9 @@ class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
             final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties,
-            final TriConsumer<Long, Integer, AssignmentQuotaExceededException> maxAssignmentExeededHandler) {
+            final TriConsumer<Long, Long, AssignmentQuotaExceededException> maxAssignmentExceededHandler) {
         super(targetRepository, afterCommit, actionRepository, actionStatusRepository,
-                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties, maxAssignmentExeededHandler);
+                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties, maxAssignmentExceededHandler);
     }
 
     @Override

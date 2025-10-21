@@ -1765,13 +1765,13 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         }
 
         tenantConfigurationManagement.addOrUpdateConfiguration("actions.cleanup.onQuotaHit.percent", 25);
-        deploymentManagement.handleMaxAssignmentsExceeded(target.getId(), 5, new AssignmentQuotaExceededException());
+        deploymentManagement.handleMaxAssignmentsExceeded(target.getId(), 5L, new AssignmentQuotaExceededException());
         // only 3 actions should be deleted in such case :
         assertEquals(15, deploymentManagement.countActionsByTarget(target.getControllerId()));
 
         // should throw the quota exception if requested is bigger than the configured limit of actions purge
         assertThrows(AssignmentQuotaExceededException.class, () ->
-                deploymentManagement.handleMaxAssignmentsExceeded(target.getId(), 10, new AssignmentQuotaExceededException()));
+                deploymentManagement.handleMaxAssignmentsExceeded(target.getId(), 10L, new AssignmentQuotaExceededException()));
 
     }
 
