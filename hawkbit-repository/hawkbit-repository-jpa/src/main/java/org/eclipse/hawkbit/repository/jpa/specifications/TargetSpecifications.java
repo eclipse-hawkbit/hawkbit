@@ -53,12 +53,12 @@ public final class TargetSpecifications {
     /**
      * {@link Specification} for retrieving {@link Target}s including {@link TargetTag}s.
      *
-     * @param controllerIDs to search for
+     * @param controllerIds to search for
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<JpaTarget> byControllerIdWithTagsInJoin(final Collection<String> controllerIDs) {
+    public static Specification<JpaTarget> byControllerIdWithTagsInJoin(final Collection<String> controllerIds) {
         return (targetRoot, query, cb) -> {
-            final Predicate predicate = targetRoot.get(JpaTarget_.controllerId).in(controllerIDs);
+            final Predicate predicate = targetRoot.get(JpaTarget_.controllerId).in(controllerIds);
             targetRoot.fetch(JpaTarget_.tags, JoinType.LEFT);
             query.distinct(true);
             return predicate;

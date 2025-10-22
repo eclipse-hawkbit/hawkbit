@@ -320,15 +320,4 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     @Transactional
     @Query("UPDATE JpaAction a SET a.externalRef = :externalRef WHERE a.id = :actionId")
     void updateExternalRef(@Param("actionId") Long actionId, @Param("externalRef") String externalRef);
-
-    /**
-     * Deletes all actions with the given IDs.
-     *
-     * @param actionIDs the IDs of the actions to be deleted.
-     */
-    @Modifying
-    @Transactional
-    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-    @Query("DELETE FROM JpaAction a WHERE a.id IN ?1")
-    void deleteByIdIn(Collection<Long> actionIDs);
 }

@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.acm;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.CREATE_PREFIX;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.CREATE_TARGET;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.DELETE_PREFIX;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.DELETE_TARGET;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.DISTRIBUTION_SET;
@@ -23,6 +22,7 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.SOFTWARE_MODULE
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SOFTWARE_MODULE_TYPE;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.TARGET_TYPE;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_PREFIX;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_TARGET;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -92,17 +92,22 @@ class SystemExecutionTest extends AbstractAccessControllerManagementTest {
                 () -> verifyAccessController(distributionSetTypeAccessController));
         runAs(withAuthorities(READ_TARGET, DELETE_TARGET + "/type.id==1"),
                 () -> verifyAccessController(targetAccessController));
-        runAs(withAuthorities(UPDATE_PREFIX + TARGET_TYPE + "/id==1"), () -> verifyAccessController(targetTypeAccessController));
-        runAs(withAuthorities(CREATE_TARGET + "/type.id==1"), () -> verifyAccessController(actionAccessController));
+        runAs(withAuthorities(CREATE_PREFIX + TARGET_TYPE + "/id==1"), () -> verifyAccessController(targetTypeAccessController));
+        // Action Access Controller maps CREATE/UPDATE/DELETE to UPDATE - so only UPDATE (or READ scope) is relevant
+        // and update will be called for every of the mapped - so 3 times
+        runAs(withAuthorities(UPDATE_TARGET + "/type.id==1"), () -> verifyAccessController(actionAccessController, 3));
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void verifyAccessController(final AccessController<?> accessController) {
+        verifyAccessController(accessController, 1);
+    }
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void verifyAccessController(final AccessController<?> accessController, final int times) {
         final Specification mock = mock(Specification.class);
         for (final Operation operation : Operation.values()) {
             accessController.appendAccessRules(operation, mock);
         }
-        verify(mock, times(1)).and(any()); // once for every access controller is scoped only
+        verify(mock, times(times)).and(any()); // once for every access controller is scoped only
 
         final Specification mockAsSystem = mock(Specification.class);
         for (Operation operation : Operation.values()) {
