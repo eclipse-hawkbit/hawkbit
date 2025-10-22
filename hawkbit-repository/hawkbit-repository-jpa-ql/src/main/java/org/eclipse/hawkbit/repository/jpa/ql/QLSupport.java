@@ -33,13 +33,11 @@ import org.eclipse.hawkbit.repository.jpa.rsql.legacy.SpecificationBuilderLegacy
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.orm.jpa.vendor.Database;
 
 /**
  * A utility class which is able to parse RSQL strings into an spring data
@@ -114,7 +112,6 @@ public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private QueryParser parser;
     private List<NodeTransformer> nodeTransformers;
-    private Database database;
     private EntityManager entityManager;
     private VirtualPropertyResolver virtualPropertyResolver;
 
@@ -137,11 +134,6 @@ public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
             final Order o2 = b2.getClass().getAnnotation(Order.class);
             return Integer.compare(o1 != null ? o1.value() : Ordered.LOWEST_PRECEDENCE, o2 != null ? o2.value() : Ordered.LOWEST_PRECEDENCE);
         }).toList();
-    }
-
-    @Autowired
-    void setDatabase(final JpaProperties jpaProperties) {
-        database = jpaProperties.getDatabase();
     }
 
     @Autowired
@@ -171,15 +163,15 @@ public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
      */
     public <A extends Enum<A> & QueryField, T> Specification<T> buildSpec(final String query, final Class<A> queryFieldType) {
         if (specBuilder == SpecBuilder.G3) {
-            return new SpecificationBuilder<T>(ignoreCase && !caseInsensitiveDB , database)
+            return new SpecificationBuilder<T>(ignoreCase && !caseInsensitiveDB)
                     .specification(transform(parse(query, queryFieldType), queryFieldType));
         } else {
-            return new SpecificationBuilderLegacy<A, T>(queryFieldType, virtualPropertyResolver, database).specification(query);
+            return new SpecificationBuilderLegacy<A, T>(queryFieldType, virtualPropertyResolver).specification(query);
         }
     }
 
     public <A extends Enum<A> & QueryField, T> Specification<T> buildSpec(final Node query, final Class<A> queryFieldType) {
-        return new SpecificationBuilder<T>(ignoreCase && !caseInsensitiveDB , database)
+        return new SpecificationBuilder<T>(ignoreCase && !caseInsensitiveDB)
                 .specification(transform(query, queryFieldType));
     }
 

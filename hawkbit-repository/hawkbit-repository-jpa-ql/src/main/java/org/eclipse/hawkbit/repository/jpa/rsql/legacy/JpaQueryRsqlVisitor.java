@@ -49,7 +49,6 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldExc
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeMismatchException;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -77,7 +76,6 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & QueryField, T> extends Abst
 
     private final CriteriaBuilder cb;
     private final CriteriaQuery<?> query;
-    private final Database database;
     private final boolean ensureIgnoreCase;
     private final Root<T> root;
     private final VirtualPropertyResolver virtualPropertyResolver;
@@ -89,7 +87,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & QueryField, T> extends Abst
 
     public JpaQueryRsqlVisitor(
             final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType,
-            final VirtualPropertyResolver virtualPropertyResolver, final Database database,
+            final VirtualPropertyResolver virtualPropertyResolver,
             final CriteriaQuery<?> query, final boolean ensureIgnoreCase) {
         super(enumType);
         this.root = root;
@@ -97,7 +95,6 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & QueryField, T> extends Abst
         this.query = query;
         this.virtualPropertyResolver = virtualPropertyResolver;
         this.simpleTypeConverter = new SimpleTypeConverter();
-        this.database = database;
         this.ensureIgnoreCase = ensureIgnoreCase;
     }
 
@@ -334,7 +331,8 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & QueryField, T> extends Abst
 
         final Predicate mapPredicate = mapToMapPredicate(fieldPath, queryPath);
 
-        final Predicate valuePredicate = addOperatorPredicate(node, queryPath.getEnumValue().isMap() ? (Path)toMapValuePath(fieldPath) : fieldPath, transformedValues, value, queryPath);
+        final Predicate valuePredicate = addOperatorPredicate(node,
+                queryPath.getEnumValue().isMap() ? (Path) toMapValuePath(fieldPath) : fieldPath, transformedValues, value, queryPath);
         return toSingleList(mapPredicate != null ? cb.and(mapPredicate, valuePredicate) : valuePredicate);
     }
 
@@ -495,7 +493,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & QueryField, T> extends Abst
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private Expression<String> getExpressionToCompare(final Path innerFieldPath, final A enumField) {
-        if (enumField.isMap()){
+        if (enumField.isMap()) {
             return toMapValuePath(innerFieldPath);
         } else {
             return pathOfString(innerFieldPath);

@@ -22,13 +22,12 @@ import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.SpecBuilder;
 import org.eclipse.hawkbit.repository.jpa.rsql.legacy.SpecificationBuilderLegacy;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.orm.jpa.vendor.Database;
 
 @SuppressWarnings("java:S2699") // java:S2699 - assertions are un the super methods that are called
 @Slf4j
 class SpecificationBuilderLegacyTest extends SpecificationBuilderTest {
 
-    private final SpecificationBuilderLegacy<RootField, Root> builder = new SpecificationBuilderLegacy<>(RootField.class, null, Database.H2);
+    private final SpecificationBuilderLegacy<RootField, Root> builder = new SpecificationBuilderLegacy<>(RootField.class, null);
 
     private static void runWithRsqlToSpecBuilder(final Runnable runnable, final SpecBuilder rsqlToSpecBuilder) {
         final SpecBuilder defaultBuilder = QLSupport.getInstance().getSpecBuilder();
@@ -44,6 +43,7 @@ class SpecificationBuilderLegacyTest extends SpecificationBuilderTest {
     void singularStringAttributeG1() {
         runWithRsqlToSpecBuilder(super::singularStringAttribute, LEGACY_G1);
     }
+
     @Override
     @Test
     void singularStringAttribute() {
@@ -54,6 +54,7 @@ class SpecificationBuilderLegacyTest extends SpecificationBuilderTest {
     void singularIntAttributeG1() {
         runWithRsqlToSpecBuilder(super::singularIntAttribute, LEGACY_G1);
     }
+
     @Override
     @Test
     void singularIntAttribute() {
@@ -64,6 +65,7 @@ class SpecificationBuilderLegacyTest extends SpecificationBuilderTest {
     void singularEntityAttributeG1() {
         runWithRsqlToSpecBuilder(super::singularEntityAttribute, LEGACY_G1);
     }
+
     @Override
     @Test
     void singularEntityAttribute() {
@@ -74,6 +76,7 @@ class SpecificationBuilderLegacyTest extends SpecificationBuilderTest {
     void pluralSubSetAttributeG1() {
         runWithRsqlToSpecBuilder(super::pluralSubSetAttribute, LEGACY_G1);
     }
+
     @Override
     @Test
     void pluralSubSetAttribute() {
@@ -91,6 +94,7 @@ class SpecificationBuilderLegacyTest extends SpecificationBuilderTest {
     void singularEntitySubSubAttributeG1() {
         runWithRsqlToSpecBuilder(super::singularEntitySubSubAttribute, LEGACY_G1);
     }
+
     @Override
     @Test
     void singularEntitySubSubAttribute() {

@@ -51,7 +51,7 @@ class SpecificationBuilderTest {
     @Autowired
     private EntityManager entityManager;
 
-    private final SpecificationBuilder<Root> builder = new SpecificationBuilder<>(false, Database.H2);
+    private final SpecificationBuilder<Root> builder = new SpecificationBuilder<>(false);
 
     @Test
     void singularStringAttribute() {
