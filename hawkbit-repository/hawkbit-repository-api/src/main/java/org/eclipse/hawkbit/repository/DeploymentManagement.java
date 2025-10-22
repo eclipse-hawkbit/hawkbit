@@ -412,6 +412,6 @@ public interface DeploymentManagement extends PermissionSupport {
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     void cancelActionsForDistributionSet(final ActionCancellationType cancelationType, final DistributionSet set);
 
-    @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY + " or " + SpringEvalExpressions.IS_SYSTEM_CODE)
     void handleMaxAssignmentsExceeded(Long targetId, Long requested, AssignmentQuotaExceededException ex);
 }
