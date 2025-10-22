@@ -28,18 +28,6 @@ public class EntityReadOnlyException extends AbstractServerRtException {
 
     private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_ENTITY_READ_ONLY;
 
-    public EntityReadOnlyException() {
-        super(THIS_ERROR);
-    }
-
-    public EntityReadOnlyException(final Throwable cause) {
-        super(THIS_ERROR, cause);
-    }
-
-    public EntityReadOnlyException(final String message, final Throwable cause) {
-        super(THIS_ERROR, message, cause);
-    }
-
     public EntityReadOnlyException(final String message) {
         super(THIS_ERROR, message);
     }

@@ -36,7 +36,6 @@ import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.DeletedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
@@ -47,7 +46,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.ql.Node;
 import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
-import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
@@ -85,7 +83,6 @@ public class JpaDistributionSetManagement
     private final SoftwareModuleRepository softwareModuleRepository;
     private final DistributionSetTagRepository distributionSetTagRepository;
     private final TargetFilterQueryRepository targetFilterQueryRepository;
-    private final ActionRepository actionRepository;
     private final QuotaManagement quotaManagement;
     private final TenantConfigHelper tenantConfigHelper;
     private final RepositoryProperties repositoryProperties;
@@ -98,7 +95,6 @@ public class JpaDistributionSetManagement
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
-            final ActionRepository actionRepository,
             final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement tenantConfigurationManagement,
@@ -108,7 +104,6 @@ public class JpaDistributionSetManagement
         this.softwareModuleRepository = softwareModuleRepository;
         this.distributionSetTagRepository = distributionSetTagRepository;
         this.targetFilterQueryRepository = targetFilterQueryRepository;
-        this.actionRepository = actionRepository;
         this.quotaManagement = quotaManagement;
         this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
         this.repositoryProperties = repositoryProperties;
@@ -173,13 +168,6 @@ public class JpaDistributionSetManagement
             }
         }
         return updated;
-    }
-
-    @Override
-    protected void checkUpdate(final Update update, final JpaDistributionSet distributionSet) {
-        if (update.getRequiredMigrationStep() != null && !update.getRequiredMigrationStep().equals(distributionSet.isRequiredMigrationStep())) {
-            assertDistributionSetIsNotAssignedToTargets(update.getId());
-        }
     }
 
     @Override
@@ -284,7 +272,6 @@ public class JpaDistributionSetManagement
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
     public JpaDistributionSet assignSoftwareModules(final long id, final Collection<Long> softwareModuleId) {
         final JpaDistributionSet set = getValid0(id);
-        assertDistributionSetIsNotAssignedToTargets(id);
         assertSoftwareModuleQuota(id, softwareModuleId.size());
 
         final Collection<JpaSoftwareModule> modules = softwareModuleRepository.findAllById(softwareModuleId);
@@ -303,7 +290,6 @@ public class JpaDistributionSetManagement
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
     public JpaDistributionSet unassignSoftwareModule(final long id, final long moduleId) {
         final JpaDistributionSet set = getValid0(id);
-        assertDistributionSetIsNotAssignedToTargets(id);
 
         final JpaSoftwareModule module = softwareModuleRepository.getById(moduleId);
         set.removeModule(module);
@@ -462,13 +448,6 @@ public class JpaDistributionSetManagement
     private void assertSoftwareModuleQuota(final Long id, final int requested) {
         QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxSoftwareModulesPerDistributionSet(),
                 SoftwareModule.class, DistributionSet.class, softwareModuleRepository::countByAssignedToId);
-    }
-
-    private void assertDistributionSetIsNotAssignedToTargets(final Long distributionSet) {
-        if (actionRepository.countByDistributionSetId(distributionSet) > 0) {
-            throw new EntityReadOnlyException(String.format(
-                    "Distribution set %s is already assigned to targets and cannot be changed", distributionSet));
-        }
     }
 
     private void lockSoftwareModules(final JpaDistributionSet distributionSet) {

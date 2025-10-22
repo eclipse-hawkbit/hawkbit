@@ -194,7 +194,6 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
     @SuppressWarnings("java:S1066") // javaS1066 - better readable that way
     public T update(final U update) {
         final T entity = getValid(update.getId());
-        checkUpdate(update, entity);
         // update getId has no setter in target JPA entity but shall have getter and the value shall be the same
         // otherwise the Utils will throw an exception that there is no counterpart setter for getId
         if (ObjectCopyUtil.copy(update, entity, false, this::attach)) {
@@ -222,7 +221,6 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
         final List<T> toSave = new ArrayList<>(toUpdate.values());
         for (final U u : update) {
             final T entity = toUpdate.get(u.getId());
-            checkUpdate(u, entity);
             // update getId has no setter in target JPA entity but shall have getter and the value shall be the same
             // otherwise the Utils will throw an exception that there is no counterpart setter for getId
             if (ObjectCopyUtil.copy(u, entity, false, this::attach)) {
@@ -261,8 +259,6 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
                 .map(isNotDeleted -> List.of(QLSupport.getInstance().<A, T> buildSpec(rsql, fieldsClass()), isNotDeleted))
                 .orElseGet(() -> List.of(QLSupport.getInstance().buildSpec(rsql, fieldsClass())));
     }
-
-    protected void checkUpdate(final U update, final T distributionSet) {}
 
     // return which are for soft deletion
     @SuppressWarnings("java:S1172") // java:S1172 - it is intended to be used by subclasses
