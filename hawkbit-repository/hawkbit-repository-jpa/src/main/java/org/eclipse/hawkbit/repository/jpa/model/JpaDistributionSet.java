@@ -13,6 +13,7 @@ import java.io.Serial;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -45,13 +46,13 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
-import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.core.annotation.Order;
 
@@ -122,9 +123,6 @@ public class JpaDistributionSet
     @Column(name = "meta_value", length = DistributionSet.METADATA_MAX_VALUE_SIZE)
     private Map<String, String> metadata = new HashMap<>();
 
-    @Column(name = "complete")
-    private boolean complete;
-
     @Setter
     @Column(name = "locked")
     private boolean locked;
@@ -161,6 +159,20 @@ public class JpaDistributionSet
         return this;
     }
 
+    @Override
+    public boolean isComplete() {
+        return Optional.ofNullable(type).map(dsType -> {
+            if (getModules().stream().anyMatch(module -> !module.isComplete())) {
+                return false; // incomplete module
+            }
+            final List<SoftwareModuleType> smTypes = getModules().stream()
+                    .map(SoftwareModule::getType)
+                    .distinct()
+                    .toList();
+            return !smTypes.isEmpty() && new HashSet<>(smTypes).containsAll(dsType.getMandatoryModuleTypes());
+        }).orElse(true);
+    }
+
     public void addModule(final SoftwareModule softwareModule) {
         if (isLocked()) {
             throw new LockedException(JpaDistributionSet.class, getId(), "ADD_SOFTWARE_MODULE");
@@ -180,9 +192,7 @@ public class JpaDistributionSet
                     .findAny().ifPresent(modules::remove);
         }
 
-        if (modules.add(softwareModule)) {
-            complete = type.checkComplete(this);
-        }
+        modules.add(softwareModule);
     }
 
     public void removeModule(final SoftwareModule softwareModule) {
@@ -190,8 +200,8 @@ public class JpaDistributionSet
             throw new LockedException(JpaDistributionSet.class, getId(), "REMOVE_SOFTWARE_MODULE");
         }
 
-        if (modules != null && modules.removeIf(m -> m.getId().equals(softwareModule.getId()))) {
-            complete = type.checkComplete(this);
+        if (modules != null) {
+            modules.removeIf(m -> m.getId().equals(softwareModule.getId()));
         }
     }
 
@@ -199,20 +209,17 @@ public class JpaDistributionSet
         return Collections.unmodifiableSet(tags);
     }
 
-    public boolean addTag(final DistributionSetTag tag) {
+    public void addTag(final DistributionSetTag tag) {
         if (tags == null) {
             tags = new HashSet<>();
         }
-
-        return tags.add(tag);
+        tags.add(tag);
     }
 
-    public boolean removeTag(final DistributionSetTag tag) {
-        if (tags == null) {
-            return false;
+    public void removeTag(final DistributionSetTag tag) {
+        if (tags != null) {
+            tags.remove(tag);
         }
-
-        return tags.remove(tag);
     }
 
     public void invalidate() {
@@ -226,7 +233,7 @@ public class JpaDistributionSet
 
     @Override
     public void fireUpdateEvent() {
-        publishEventWithEventPublisher(new DistributionSetUpdatedEvent(this, complete));
+        publishEventWithEventPublisher(new DistributionSetUpdatedEvent(this));
 
         if (deleted) {
             publishEventWithEventPublisher(new DistributionSetDeletedEvent(getTenant(), getId(), getClass()));

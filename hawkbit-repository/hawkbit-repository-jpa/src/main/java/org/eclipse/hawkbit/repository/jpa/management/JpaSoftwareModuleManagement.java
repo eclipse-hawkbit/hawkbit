@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.IncompleteSoftwareModuleException;
 import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
@@ -142,6 +143,9 @@ public class JpaSoftwareModuleManagement extends
         if (jpaSoftwareModule.isLocked()) {
             return jpaSoftwareModule;
         } else {
+            if (!softwareModule.isComplete()) {
+                throw new IncompleteSoftwareModuleException("Could not be locked while incomplete!");
+            }
             jpaSoftwareModule.lock();
             return jpaRepository.save(jpaSoftwareModule);
         }

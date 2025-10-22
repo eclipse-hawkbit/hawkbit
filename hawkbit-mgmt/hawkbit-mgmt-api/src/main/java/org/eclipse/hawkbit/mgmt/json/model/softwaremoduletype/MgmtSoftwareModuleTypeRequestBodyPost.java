@@ -33,6 +33,9 @@ public class MgmtSoftwareModuleTypeRequestBodyPost extends MgmtSoftwareModuleTyp
     @Schema(example = "Example key")
     private String key;
 
+    @Schema(description = "The minimum number of artifacts a software module if this type should have in order to be completed", example = "1")
+    private int minArtifacts;
+
     @JsonProperty(required = true)
     @Schema(example = "1")
     private int maxAssignments;

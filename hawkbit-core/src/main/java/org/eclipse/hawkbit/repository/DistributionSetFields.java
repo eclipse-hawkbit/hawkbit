@@ -32,7 +32,6 @@ public enum DistributionSetFields implements QueryField {
     LASTMODIFIEDAT("lastModifiedAt"),
     LASTMODIFIEDBY("lastModifiedBy"),
     VERSION("version"),
-    COMPLETE("complete"),
     MODULE("modules", SoftwareModuleFields.ID.getJpaEntityFieldName(), SoftwareModuleFields.NAME.getJpaEntityFieldName()),
     TAG("tags", "name"),
     METADATA("metadata"),

@@ -154,6 +154,10 @@ public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
         this.virtualPropertyResolver = virtualPropertyResolver;
     }
 
+    public <A extends Enum<A> & QueryField> Node parse(final String query, final Class<A> queryFieldType) {
+        return parser.parse(ignoreCase || caseInsensitiveDB ? query.toLowerCase() : query, queryFieldType);
+    }
+
     /**
      * Builds a JPA {@link Specification} which corresponds with the given RSQL query. The specification can be used to filter for JPA entities
      * with the given RSQL query.
@@ -168,16 +172,20 @@ public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
     public <A extends Enum<A> & QueryField, T> Specification<T> buildSpec(final String query, final Class<A> queryFieldType) {
         if (specBuilder == SpecBuilder.G3) {
             return new SpecificationBuilder<T>(ignoreCase && !caseInsensitiveDB , database)
-                    .specification(parseAndTransform(query, queryFieldType, ignoreCase || caseInsensitiveDB));
+                    .specification(transform(parse(query, queryFieldType), queryFieldType));
         } else {
             return new SpecificationBuilderLegacy<A, T>(queryFieldType, virtualPropertyResolver, database).specification(query);
         }
     }
 
+    public <A extends Enum<A> & QueryField, T> Specification<T> buildSpec(final Node query, final Class<A> queryFieldType) {
+        return new SpecificationBuilder<T>(ignoreCase && !caseInsensitiveDB , database)
+                .specification(transform(query, queryFieldType));
+    }
+
     @SuppressWarnings("java:S1117") // it is again ignoreCase
     public <A extends Enum<A> & QueryField> EntityMatcher entityMatcher(final String query, final Class<A> queryFieldType) {
-        final boolean ignoreCase = this.ignoreCase || caseInsensitiveDB; // sync with DB and case sensitivity requirements
-        return EntityMatcher.of(parseAndTransform(query, queryFieldType, ignoreCase), ignoreCase);
+        return EntityMatcher.of(transform(parse(query, queryFieldType), queryFieldType), ignoreCase || caseInsensitiveDB);
     }
 
     /**
@@ -195,9 +203,7 @@ public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
         buildSpec(query, queryFieldType).toPredicate(criteriaQuery.from((Class) jpaType), criteriaQuery, criteriaBuilder);
     }
 
-    private <A extends Enum<A> & QueryField> Node parseAndTransform(
-            final String query, final Class<A> queryFieldType, final boolean ignoreCase) {
-        Node node = parser.parse(ignoreCase ? query.toLowerCase() : query, queryFieldType);
+    private <A extends Enum<A> & QueryField> Node transform(Node node, final Class<A> queryFieldType) {
         for (final NodeTransformer transformer : nodeTransformers) {
             node = transformer.transform(node, queryFieldType);
         }

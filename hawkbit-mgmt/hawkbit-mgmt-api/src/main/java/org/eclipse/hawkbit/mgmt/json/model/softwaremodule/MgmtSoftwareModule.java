@@ -93,4 +93,7 @@ public class MgmtSoftwareModule extends MgmtNamedEntity {
 
     @Schema(description = "If the software module is deleted", example = "false")
     private boolean deleted;
+
+    @Schema(description = "True of the software module has sufficient number of artifacts", example = "true")
+    private Boolean complete;
 }

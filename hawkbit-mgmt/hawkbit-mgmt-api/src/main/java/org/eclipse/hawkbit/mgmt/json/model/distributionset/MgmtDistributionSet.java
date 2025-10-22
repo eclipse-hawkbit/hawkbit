@@ -147,11 +147,6 @@ public class MgmtDistributionSet extends MgmtNamedEntity {
             example = "OS (FW) mandatory, runtime (FW) and app (SW) optional")
     private String typeName;
 
-    @Schema(description = """
-            True of the distribution set software module setup is complete as defined by the
-            distribution set type""", example = "true")
-    private Boolean complete;
-
     @Schema(description = "If the distribution set is locked", example = "true")
     private boolean locked;
 
@@ -167,4 +162,8 @@ public class MgmtDistributionSet extends MgmtNamedEntity {
     private boolean requiredMigrationStep;
 
     private List<MgmtSoftwareModule> modules = new ArrayList<>();
+
+    @Schema(description = "True of the distribution set software module setup is complete as defined by the distribution set type",
+            example = "true")
+    private Boolean complete;
 }

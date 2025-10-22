@@ -12,14 +12,15 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import jakarta.validation.ConstraintViolationException;
@@ -33,6 +34,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
@@ -49,13 +51,16 @@ import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThis
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionCancellationType;
+import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Statistic;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
@@ -686,6 +691,95 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
         assertThatExceptionOfType(IncompleteDistributionSetException.class)
                 .as("Incomplete distributionSet should throw an exception")
                 .isThrownBy(() -> distributionSetManagement.getValidAndComplete(distributionSetId));
+    }
+
+    /**
+     * Verifies that when no SoftwareModules are assigned to a Distribution then the DistributionSet is not complete.
+     */
+    @Test
+    void incompleteIfNoSoftwareModulesAssigned() {
+        final SoftwareModuleType softwareModuleType = softwareModuleTypeManagement
+                .create(SoftwareModuleTypeManagement.Create.builder().key("newType").name("new Type").build());
+
+        final DistributionSetType distributionSetType = distributionSetTypeManagement
+                .create(DistributionSetTypeManagement.Create.builder()
+                        .key("newType").name("new Type").optionalModuleTypes(Set.of(softwareModuleType)).build());
+        final DistributionSet distributionSetIncomplete = testdataFactory.createDistributionSet(
+                "DistributionOne", "3.1.2", distributionSetType, new ArrayList<>());
+        assertThat(distributionSetIncomplete.isComplete()).isFalse();
+        assertThatExceptionOfType(IncompleteDistributionSetException.class)
+                .isThrownBy(() -> distributionSetManagement.lock(distributionSetIncomplete));
+        final long dsId = distributionSetIncomplete.getId();
+        assertThatExceptionOfType(IncompleteDistributionSetException.class)
+                .isThrownBy(() -> distributionSetManagement.getValidAndComplete(dsId));
+
+        final SoftwareModule softwareModule = softwareModuleManagement
+                .create(SoftwareModuleManagement.Create.builder().name("ds").version("1.0.0").type(softwareModuleType).build());
+        assertThat(softwareModule.isComplete()).isTrue();
+
+        distributionSetManagement.assignSoftwareModules(distributionSetIncomplete.getId(), List.of(softwareModule.getId()));
+
+        final DistributionSet distributionSetComplete = distributionSetManagement.get(distributionSetIncomplete.getId());
+        assertThat(distributionSetComplete.isComplete()).isTrue();
+        assertThatNoException().isThrownBy(() -> distributionSetManagement.lock(distributionSetComplete));
+        assertThat(softwareModuleManagement.get(softwareModule.getId()).isComplete()).isTrue();
+    }
+
+    @Test
+    void incompleteIfNoSoftwareModuleOfMandatorySoftwareModuleTypeAssigned() {
+        final SoftwareModuleType softwareModuleType = softwareModuleTypeManagement
+                .create(SoftwareModuleTypeManagement.Create.builder().key("newType").name("new Type").build());
+        final DistributionSetType distributionSetType = distributionSetTypeManagement
+                .create(DistributionSetTypeManagement.Create.builder()
+                        .key("newType").name("new Type").mandatoryModuleTypes(Set.of(softwareModuleType)).build());
+        final DistributionSet distributionSetIncomplete = testdataFactory.createDistributionSet(
+                "DistributionOne", "3.1.2", distributionSetType, new ArrayList<>());
+        assertThat(distributionSetIncomplete.isComplete()).isFalse();
+        assertThatExceptionOfType(IncompleteDistributionSetException.class)
+                .isThrownBy(() -> distributionSetManagement.lock(distributionSetIncomplete));
+        final long dsId = distributionSetIncomplete.getId();
+        assertThatExceptionOfType(IncompleteDistributionSetException.class)
+                .isThrownBy(() -> distributionSetManagement.getValidAndComplete(dsId));
+
+        final SoftwareModule softwareModule = softwareModuleManagement
+                .create(SoftwareModuleManagement.Create.builder().name("ds").version("1.0.0").type(softwareModuleType).build());
+        assertThat(softwareModule.isComplete()).isTrue();
+
+        distributionSetManagement.assignSoftwareModules(distributionSetIncomplete.getId(), List.of(softwareModule.getId()));
+
+        final DistributionSet distributionSetComplete = distributionSetManagement.get(distributionSetIncomplete.getId());
+        assertThat(distributionSetComplete.isComplete()).isTrue();
+        assertThatNoException().isThrownBy(() -> distributionSetManagement.lock(distributionSetComplete));
+        assertThat(softwareModuleManagement.get(softwareModule.getId()).isComplete()).isTrue();
+    }
+
+    @Test
+    void incompleteIfDistributionSetSoftwareModuleIsIncomplete() {
+        final SoftwareModuleType softwareModuleType = softwareModuleTypeManagement
+                .create(SoftwareModuleTypeManagement.Create.builder().key("newType").name("new Type").minArtifacts(1).build());
+        final SoftwareModule softwareModuleIncomplete = softwareModuleManagement
+                .create(SoftwareModuleManagement.Create.builder().name("ds").version("1.0.0").type(softwareModuleType).build());
+        assertThat(softwareModuleIncomplete.isComplete()).isFalse();
+
+        final DistributionSetType distributionSetType = distributionSetTypeManagement
+                .create(DistributionSetTypeManagement.Create.builder()
+                        .key("newType").name("new Type").optionalModuleTypes(Set.of(softwareModuleType)).build());
+        final DistributionSet distributionSetIncomplete = testdataFactory.createDistributionSet(
+                "DistributionOne", "3.1.2", distributionSetType, new ArrayList<>());
+        assertThat(distributionSetIncomplete.isComplete()).isFalse(); // no software modules assigned yet
+        distributionSetManagement.assignSoftwareModules(distributionSetIncomplete.getId(), List.of(softwareModuleIncomplete.getId()));
+        assertThat(distributionSetIncomplete.isComplete()).isFalse(); // has software module assigned, but incomplete
+
+        // add artifact - so it should become complete
+        artifactManagement.create(new ArtifactUpload(
+                new ByteArrayInputStream(randomBytes(10)), null, 10, null,
+                softwareModuleIncomplete.getId(), "file1", false));
+        assertThat(softwareModuleManagement.get(softwareModuleIncomplete.getId()).isComplete()).isTrue();
+
+        final DistributionSet distributionSetComplete = distributionSetManagement.get(distributionSetIncomplete.getId());
+        assertThat(distributionSetComplete.isComplete()).isTrue();
+        assertThatNoException().isThrownBy(() -> distributionSetManagement.lock(distributionSetComplete));
+        assertThat(softwareModuleManagement.get(softwareModuleIncomplete.getId()).isComplete()).isTrue();
     }
 
     /**

@@ -45,6 +45,7 @@ import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtRestModelMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtSoftwareModuleMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetFilterQueryMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetMapper;
+import org.eclipse.hawkbit.mgmt.rest.resource.util.LogUtility;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
@@ -116,6 +117,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     @Override
     public ResponseEntity<PagedList<MgmtDistributionSet>> getDistributionSets(
             final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
+        if (rsqlParam != null && rsqlParam.toLowerCase().contains("complete")) {
+            LogUtility.logDeprecated("Usage of MgmtDistributionSetResource.getActions with 'complete': 'complete' distribution set search field may be removed.");
+        }
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
         final Page<? extends DistributionSet> findDsPage;
         if (rsqlParam != null) {

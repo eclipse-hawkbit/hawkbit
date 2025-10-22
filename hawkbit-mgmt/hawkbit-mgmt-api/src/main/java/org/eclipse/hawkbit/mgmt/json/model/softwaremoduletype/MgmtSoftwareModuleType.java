@@ -40,6 +40,7 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
           "description" : "Updated description.",
           "key" : "application",
           "maxAssignments" : 2147483647,
+          "minArtifacts": 1,
           "deleted" : false,
           "_links" : {
             "self" : {
@@ -54,7 +55,9 @@ public class MgmtSoftwareModuleType extends MgmtTypeEntity {
     @Schema(description = "The technical identifier of the entity", example = "83")
     private Long id;
 
-    @Schema(description = "Software modules of that type can be assigned at this maximum number " +
-            "(e.g. operating system only once)", example = "1")
+    @Schema(description = "The minimum number of artifacts a software module if this type should have in order to be completed", example = "1")
+    private int minArtifacts;
+
+    @Schema(description = "Software modules of this type can be assigned at this maximum number (e.g. operating system only once)", example = "1")
     private int maxAssignments;
 }

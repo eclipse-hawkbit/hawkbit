@@ -63,6 +63,8 @@ public interface SoftwareModuleTypeManagement<T extends SoftwareModuleType>
 
         @Builder.Default
         private int maxAssignments = 1;
+        @Builder.Default
+        private int minArtifacts;
     }
 
     @SuperBuilder
