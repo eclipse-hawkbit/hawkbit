@@ -134,7 +134,6 @@ public class JpaDistributionSet
     @Column(name = "valid")
     private boolean valid;
 
-    @Setter
     @Column(name = "required_migration_step")
     private boolean requiredMigrationStep;
 
@@ -157,6 +156,17 @@ public class JpaDistributionSet
         modules.forEach(this::addModule); // skip if already present
         this.modules.stream().filter(module -> !modules.contains(module)).toList().forEach(this::removeModule);
         return this;
+    }
+
+    @SuppressWarnings("java:S1144") // used via reflection copy utils
+    private void setRequiredMigrationStep(final boolean requiredMigrationStep) {
+        if (this.requiredMigrationStep != requiredMigrationStep) {
+            if (isLocked()) {
+                throw new LockedException(JpaDistributionSet.class, getId(), "CHANGE_REQUIRED_MIGRATION_STEP");
+            }
+
+            this.requiredMigrationStep = requiredMigrationStep;
+        }
     }
 
     @Override

@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InvalidMd5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSha1HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSha256HashException;
+import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -109,6 +110,12 @@ public class JpaArtifactManagement implements ArtifactManagement {
                 softwareModuleId -> artifactRepository.count(null, ArtifactSpecifications.bySoftwareModuleId(softwareModuleId)));
 
         final JpaSoftwareModule softwareModule = softwareModuleRepository.getById(moduleId);
+        if (softwareModule.isLocked()) {
+            // check in order to:
+            // - on non-existing artifact - skip binary storing before, eventual, failing in new JpaSoftwareModule.addArtifact
+            // - if existing and overriding - no check will be made in new JpaSoftwareModule.addArtifact, so we sh to fail here
+            throw new LockedException(JpaSoftwareModule.class, softwareModule.getId(), "ADD_ARTIFACT");
+        }
 
         final String filename = artifactUpload.filename();
         final Artifact existing = softwareModule.getArtifactByFilename(filename).orElse(null);
@@ -243,12 +250,13 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     private Artifact storeArtifactMetadata(
-            final SoftwareModule softwareModule, final String providedFilename,
+            final JpaSoftwareModule softwareModule, final String providedFilename,
             final ArtifactHashes hash, final long fileSize,
             final Artifact existing) {
         final JpaArtifact artifact;
         if (existing == null) {
             artifact = new JpaArtifact(hash.sha1(), providedFilename, softwareModule);
+            softwareModule.addArtifact(artifact);
         } else {
             artifact = (JpaArtifact) existing;
             artifact.setSha1Hash(hash.sha1());

@@ -79,7 +79,6 @@ public class JpaSoftwareModule
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Setter
     @ManyToOne
     @JoinColumn(name = "sm_type", nullable = false, updatable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_software_module_sm_type"))
@@ -91,17 +90,14 @@ public class JpaSoftwareModule
             targetEntity = JpaArtifact.class, orphanRemoval = true)
     private List<JpaArtifact> artifacts;
 
-    @Setter
     @Column(name = "vendor", length = SoftwareModule.VENDOR_MAX_SIZE)
     @Size(max = SoftwareModule.VENDOR_MAX_SIZE)
     private String vendor;
 
-    @Setter
     @Column(name = "encrypted")
     private boolean encrypted;
 
     // no cascade option on an ElementCollection, the target objects are always persisted, merged, removed with their parent.
-    @Getter
     @ElementCollection
     @CollectionTable(
             name = "sp_sm_metadata",
@@ -130,23 +126,6 @@ public class JpaSoftwareModule
         return artifacts == null ? Collections.emptyList() : Collections.unmodifiableList(artifacts);
     }
 
-    public void addArtifact(final Artifact artifact) {
-        if (isLocked()) {
-            throw new LockedException(JpaSoftwareModule.class, getId(), "ADD_ARTIFACT");
-        }
-
-        if (artifact instanceof JpaArtifact jpaArtifact) {
-            if (artifacts == null) {
-                artifacts = new ArrayList<>(4);
-                artifacts.add(jpaArtifact);
-            } else if (!artifacts.contains(jpaArtifact)) {
-                artifacts.add(jpaArtifact);
-            }
-        } else {
-            throw new UnsupportedOperationException("Only JpaArtifact is supported");
-        }
-    }
-
     @Override
     public boolean isComplete() {
         return Optional.ofNullable(type).map(smType -> {
@@ -156,6 +135,18 @@ public class JpaSoftwareModule
                 return true;
             }
         }).orElse(true);
+    }
+
+    public void addArtifact(final JpaArtifact artifact) {
+        if (isLocked()) {
+            throw new LockedException(JpaSoftwareModule.class, getId(), "ADD_ARTIFACT");
+        }
+        if (artifacts == null) {
+            artifacts = new ArrayList<>(4);
+            artifacts.add(artifact);
+        } else if (!artifacts.contains(artifact)) {
+            artifacts.add(artifact);
+        }
     }
 
     public void removeArtifact(final Artifact artifact) {

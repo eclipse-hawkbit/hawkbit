@@ -43,7 +43,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.LockedException;
@@ -288,13 +287,11 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
 
         final Long dsId = ds.getId();
         // not allowed as it is assigned now
-        assertThatThrownBy(() -> distributionSetManagement.assignSoftwareModules(dsId, os2Id))
-                .isInstanceOf(EntityReadOnlyException.class);
+        assertThatThrownBy(() -> distributionSetManagement.assignSoftwareModules(dsId, os2Id)).isInstanceOf(LockedException.class);
 
         // not allowed as it is assigned now
         final Long appId = findFirstModuleByType(ds, appType).map(Identifiable::getId).orElseThrow();
-        assertThatThrownBy(() -> distributionSetManagement.unassignSoftwareModule(dsId, appId))
-                .isInstanceOf(EntityReadOnlyException.class);
+        assertThatThrownBy(() -> distributionSetManagement.unassignSoftwareModule(dsId, appId)).isInstanceOf(LockedException.class);
     }
 
     /**
