@@ -46,7 +46,6 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.ql.SpecificationBuilder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -56,9 +55,9 @@ import org.springframework.util.ObjectUtils;
  * @param <A> the enum for providing the field name of the entity field to filter on.
  * @param <T> the entity type referenced by the root
  * @deprecated Old implementation of RSQL Visitor (G2). Deprecated in favour of next gen implementation -
- *            {@link SpecificationBuilder}.
- *            It will be kept for some time in order to keep backward compatibility and to allow for a smooth transition. Also, in case of
- *            problems with the new implementation, this one can be used as a fallback.
+ *         {@link SpecificationBuilder}.
+ *         It will be kept for some time in order to keep backward compatibility and to allow for a smooth transition. Also, in case of
+ *         problems with the new implementation, this one can be used as a fallback.
  */
 @Deprecated(forRemoval = true, since = "0.9.0")
 @Slf4j
@@ -72,7 +71,6 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & QueryField, T>
     private final Root<T> root;
     private final CriteriaQuery<?> query;
     private final CriteriaBuilder cb;
-    private final Database database;
     private final VirtualPropertyResolver virtualPropertyResolver;
     private final boolean ensureIgnoreCase;
 
@@ -82,13 +80,12 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & QueryField, T>
     public JpaQueryRsqlVisitorG2(
             final Class<A> enumType,
             final Root<T> root, final CriteriaQuery<?> query, final CriteriaBuilder cb,
-            final Database database, final VirtualPropertyResolver virtualPropertyResolver, final boolean ensureIgnoreCase) {
+            final VirtualPropertyResolver virtualPropertyResolver, final boolean ensureIgnoreCase) {
         super(enumType);
         this.root = root;
         this.cb = cb;
         this.query = query;
         this.virtualPropertyResolver = virtualPropertyResolver;
-        this.database = database;
         this.ensureIgnoreCase = ensureIgnoreCase;
     }
 
@@ -150,7 +147,8 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & QueryField, T>
             mapEntryKeyPredicate = null;
         }
 
-        final Predicate valuePredicate = toOperatorAndValuePredicate(node, queryPath, queryPath.getEnumValue().isMap() ? toMapValuePath(fieldPath) : fieldPath, values);
+        final Predicate valuePredicate = toOperatorAndValuePredicate(node, queryPath,
+                queryPath.getEnumValue().isMap() ? toMapValuePath(fieldPath) : fieldPath, values);
 
         return mapEntryKeyPredicate == null ? valuePredicate : cb.and(mapEntryKeyPredicate, valuePredicate);
     }

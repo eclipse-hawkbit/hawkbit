@@ -125,6 +125,7 @@ class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     @Override
     public void cancelActiveActions(final List<List<Long>> targetIds) {
+        // Not supported by offline case
     }
 
     @Override

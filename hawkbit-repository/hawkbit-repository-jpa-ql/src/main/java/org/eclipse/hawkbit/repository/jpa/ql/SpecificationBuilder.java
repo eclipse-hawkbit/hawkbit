@@ -55,7 +55,6 @@ import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison;
 import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison.Operator;
 import org.eclipse.hawkbit.repository.jpa.ql.Node.Logical;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.util.ObjectUtils;
 
 @Slf4j
@@ -64,11 +63,9 @@ public class SpecificationBuilder<T> {
     private static final char ESCAPE_CHAR = '\\';
 
     private final boolean ensureIgnoreCase;
-    private final Database database;
 
-    public SpecificationBuilder(final boolean ensureIgnoreCase, final Database database) {
+    public SpecificationBuilder(final boolean ensureIgnoreCase) {
         this.ensureIgnoreCase = ensureIgnoreCase;
-        this.database = database;
     }
 
     public Specification<T> specification(final Node node) {
