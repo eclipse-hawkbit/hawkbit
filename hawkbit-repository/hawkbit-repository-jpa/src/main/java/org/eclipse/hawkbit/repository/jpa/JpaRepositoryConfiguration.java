@@ -106,7 +106,6 @@ import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -397,10 +396,9 @@ public class JpaRepositoryConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    RolloutApprovalStrategy rolloutApprovalStrategy(final UserAuthoritiesResolver userAuthoritiesResolver,
-            final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext) {
-        return new DefaultRolloutApprovalStrategy(userAuthoritiesResolver, tenantConfigurationManagement, systemSecurityContext);
+    RolloutApprovalStrategy rolloutApprovalStrategy(
+            final TenantConfigurationManagement tenantConfigurationManagement, final SystemSecurityContext systemSecurityContext) {
+        return new DefaultRolloutApprovalStrategy(tenantConfigurationManagement, systemSecurityContext);
     }
 
     /**

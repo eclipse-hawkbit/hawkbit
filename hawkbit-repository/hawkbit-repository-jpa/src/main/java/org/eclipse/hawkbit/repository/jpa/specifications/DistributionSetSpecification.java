@@ -58,26 +58,6 @@ public final class DistributionSetSpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link DistributionSet}s by its COMPLETED attribute.
-     *
-     * @param isCompleted TRUE/FALSE are compared to the attribute COMPLETED. If NULL the attribute is ignored
-     * @return the {@link DistributionSet} {@link Specification}
-     */
-    public static Specification<JpaDistributionSet> isCompleted(final Boolean isCompleted) {
-        return (dsRoot, query, cb) -> cb.equal(dsRoot.get(JpaDistributionSet_.complete), isCompleted);
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link DistributionSet}s by its VALID attribute.
-     *
-     * @param isValid TRUE/FALSE are compared to the attribute VALID. If NULL the attribute is ignored
-     * @return the {@link DistributionSet} {@link Specification}
-     */
-    public static Specification<JpaDistributionSet> isValid(final Boolean isValid) {
-        return (dsRoot, query, cb) -> cb.equal(dsRoot.get(JpaDistributionSet_.valid), isValid);
-    }
-
-    /**
      * {@link Specification} for retrieving {@link DistributionSet} with given {@link DistributionSet#getId()}s.
      *
      * @param distids to search

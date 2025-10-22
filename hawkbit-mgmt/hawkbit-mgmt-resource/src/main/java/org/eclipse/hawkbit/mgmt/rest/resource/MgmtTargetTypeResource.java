@@ -33,6 +33,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -55,15 +56,14 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
     public ResponseEntity<PagedList<MgmtTargetType>> getTargetTypes(
             final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeTargetTypeSortParam(sortParam));
-        final Page<? extends TargetType> findTargetTypesAll;
+        final Page<? extends TargetType> findTargetTypes;
         if (rsqlParam != null) {
-            findTargetTypesAll = targetTypeManagement.findByRsql(rsqlParam, pageable);
+            findTargetTypes = targetTypeManagement.findByRsql(rsqlParam, pageable);
         } else {
-            findTargetTypesAll = targetTypeManagement.findAll(pageable);
+            findTargetTypes = targetTypeManagement.findAll(pageable);
         }
-
-        final List<MgmtTargetType> rest = MgmtTargetTypeMapper.toListResponse(findTargetTypesAll.getContent());
-        return ResponseEntity.ok(new PagedList<>(rest,  targetTypeManagement.count()));
+        return ResponseEntity.ok(
+                new PagedList<>(MgmtTargetTypeMapper.toListResponse(findTargetTypes.getContent()),  findTargetTypes.getTotalElements()));
     }
 
     @Override

@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -25,6 +24,7 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -35,7 +35,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
-import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -84,12 +83,11 @@ class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         if (isMultiAssignmentsEnabled()) {
             mapper = ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids));
         } else {
-            mapper = ids -> targetRepository.findAll(SpecificationsBuilder.combineWithAnd(
-                    Arrays.asList(TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, setId),
-                            TargetSpecifications.notEqualToTargetUpdateStatus(TargetUpdateStatus.PENDING))));
+            mapper = ids -> targetRepository.findAll(JpaManagementHelper.combineWithAnd(List.of(
+                    TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, setId),
+                    TargetSpecifications.notEqualToTargetUpdateStatus(TargetUpdateStatus.PENDING))));
         }
-        return ListUtils.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream().map(mapper)
-                .flatMap(List::stream).toList();
+        return ListUtils.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream().map(mapper).flatMap(List::stream).toList();
     }
 
     @Override

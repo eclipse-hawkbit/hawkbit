@@ -3,6 +3,7 @@
   - [What is hawkBit](what-is-hawkbit.md)
   - [Quick Start](quick-start.md)
   - [Features](features.md)
+  - [Architecture](architecture.md)
 
 - Guides
   - [Run hawkBit](run-hawkbit.md)
@@ -40,6 +41,13 @@
 - [![License](https://img.shields.io/badge/License-EPL%202.0-green.svg)](https://opensource.org/licenses/EPL-2.0)
 
 <hr class="sidebar-sep" />
+
+- [Privacy Policy](http://www.eclipse.org/legal/privacy.php)
+- [Terms of Use](http://www.eclipse.org/legal/termsofuse.php)
+- [Copyright Agent](http://www.eclipse.org/legal/copyright.php)
+- [Legal](http://www.eclipse.org/legal)
+- [License](https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt)
+- **© 2025 The Eclipse hawkBit Project**
 
 <p align="center">
   <img src="images/eclipse_foundation_logo.png" alt="eclipse foundation logo" width="180">

@@ -71,6 +71,13 @@ public interface SoftwareModule extends NamedVersionedEntity {
     boolean isDeleted();
 
     /**
+     * Returns if the software module could be assumed as completed. I.e. all requirements (e.g. min artifacts) are satisfied.
+     *
+     * @return <code>true</code> if artifacts are more or equals to {@link SoftwareModuleType#getMinArtifacts()} if the software module type.
+     */
+    boolean isComplete();
+
+    /**
      * @param artifactId to look for
      * @return found {@link Artifact}
      */

@@ -31,7 +31,7 @@ class DistributionSetUpdatedEventTest extends AbstractRemoteEntityEventTest<Dist
 
     @Override
     protected RemoteEntityEvent<?> createRemoteEvent(final DistributionSet baseEntity, final Class<? extends RemoteEntityEvent<?>> eventType) {
-        return new DistributionSetUpdatedEvent(baseEntity, true);
+        return new DistributionSetUpdatedEvent(baseEntity);
     }
 
     @Override

@@ -40,12 +40,6 @@ public interface DistributionSet extends NamedVersionedEntity {
     Set<SoftwareModule> getModules();
 
     /**
-     * @return <code>true</code> if all defined {@link DistributionSetType#getMandatoryModuleTypes()} of {@link #getType()} are present in
-     *         this {@link DistributionSet}.
-     */
-    boolean isComplete();
-
-    /**
      * @return <code>true</code> if this {@link DistributionSet} is locked. If so it's 'functional' properties (e.g. software modules) could not
      *         be modified anymore.
      */
@@ -66,4 +60,12 @@ public interface DistributionSet extends NamedVersionedEntity {
      *         active and not automatically canceled if overridden by a newer update.
      */
     boolean isRequiredMigrationStep();
+
+    /**
+     * Returns if the distribution set could be assumed as completed. I.e. all requirements (e.g. mandatory software module types) are satisfied.
+     *
+     * @return <code>true</code> if all defined {@link DistributionSetType#getMandatoryModuleTypes()} of {@link #getType()} are present in
+     *         this {@link DistributionSet}.
+     */
+    boolean isComplete();
 }

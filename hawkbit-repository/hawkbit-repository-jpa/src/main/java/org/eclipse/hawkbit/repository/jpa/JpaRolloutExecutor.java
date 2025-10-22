@@ -154,10 +154,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 context -> // has stored context - executes it with it
                         contextAware.runInContext(context, () -> execute0(rollout)),
                 () -> // has no stored context - executes it in the tenant & user scope
-                        contextAware.runAsTenantAsUser(contextAware.getCurrentTenant(), rollout.getCreatedBy(), () -> {
-                            execute0(rollout);
-                            return null;
-                        }));
+                        contextAware.runAsTenantAsUser(contextAware.getCurrentTenant(), rollout.getCreatedBy(), () -> execute0(rollout)));
     }
 
     private void execute0(final Rollout rollout) {

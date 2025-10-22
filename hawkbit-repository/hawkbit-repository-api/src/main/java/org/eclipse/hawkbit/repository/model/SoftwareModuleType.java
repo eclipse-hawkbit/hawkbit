@@ -16,7 +16,12 @@ package org.eclipse.hawkbit.repository.model;
 public interface SoftwareModuleType extends Type {
 
     /**
-     * @return maximum assignments of an {@link SoftwareModule} of this type to a {@link DistributionSet}.
+     * @return thet minimum number of artifacts a {@link SoftwareModule} of this type should have in order to be completed.
+     */
+    int getMinArtifacts();
+
+    /**
+     * @return the maximum assignments of a {@link SoftwareModule} of this type to a {@link DistributionSet}.
      */
     int getMaxAssignments();
 }

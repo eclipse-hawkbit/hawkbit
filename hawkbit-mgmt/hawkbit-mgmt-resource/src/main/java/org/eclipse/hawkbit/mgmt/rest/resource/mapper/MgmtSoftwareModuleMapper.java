@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.MgmtDownloadArtifactResource;
 import org.eclipse.hawkbit.mgmt.rest.resource.MgmtSoftwareModuleResource;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement.Create;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -63,17 +64,15 @@ public final class MgmtSoftwareModuleMapper {
         if (metadata == null) {
             return Collections.emptyMap();
         }
-
         return metadata.stream().collect(Collectors.toMap(
                 MgmtSoftwareModuleMetadata::getKey,
                 metadataRest -> new MetadataValueCreate(metadataRest.getValue(), metadataRest.isTargetVisible())));
     }
 
-    public List<SoftwareModuleManagement.Create> smFromRequest(final Collection<MgmtSoftwareModuleRequestBodyPost> smsRest) {
+    public List<Create> smFromRequest(final Collection<MgmtSoftwareModuleRequestBodyPost> smsRest) {
         if (smsRest == null) {
             return Collections.emptyList();
         }
-
         return smsRest.stream().map(this::fromRequest).toList();
     }
 
@@ -81,7 +80,6 @@ public final class MgmtSoftwareModuleMapper {
         if (softwareModules == null) {
             return Collections.emptyList();
         }
-
         return new ResponseList<>(softwareModules.stream().map(MgmtSoftwareModuleMapper::toResponse).toList());
     }
 
@@ -89,7 +87,6 @@ public final class MgmtSoftwareModuleMapper {
         if (metadata == null) {
             return Collections.emptyList();
         }
-
         return metadata.entrySet().stream().map(e -> toResponseSwMetadata(e.getKey(), e.getValue())).toList();
     }
 
@@ -105,7 +102,6 @@ public final class MgmtSoftwareModuleMapper {
         if (softwareModule == null) {
             return null;
         }
-
         final MgmtSoftwareModule response = new MgmtSoftwareModule();
         MgmtRestModelMapper.mapNamedToNamed(response, softwareModule);
         response.setId(softwareModule.getId());
@@ -116,10 +112,8 @@ public final class MgmtSoftwareModuleMapper {
         response.setLocked(softwareModule.isLocked());
         response.setDeleted(softwareModule.isDeleted());
         response.setEncrypted(softwareModule.isEncrypted());
-
-        response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getSoftwareModule(response.getId()))
-                .withSelfRel().expand());
-
+        response.setComplete(softwareModule.isComplete());
+        response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getSoftwareModule(response.getId())).withSelfRel().expand());
         return response;
     }
 
@@ -136,16 +130,11 @@ public final class MgmtSoftwareModuleMapper {
         final MgmtArtifact artifactRest = new MgmtArtifact();
         artifactRest.setId(artifact.getId());
         artifactRest.setSize(artifact.getSize());
-        artifactRest.setHashes(
-                new MgmtArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash(), artifact.getSha256Hash()));
-
+        artifactRest.setHashes(new MgmtArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash(), artifact.getSha256Hash()));
         artifactRest.setProvidedFilename(artifact.getFilename());
-
         MgmtRestModelMapper.mapBaseToBase(artifactRest, artifact);
-
         artifactRest.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class)
                 .getArtifact(artifact.getSoftwareModule().getId(), artifact.getId(), null)).withSelfRel().expand());
-
         return artifactRest;
     }
 
@@ -165,8 +154,8 @@ public final class MgmtSoftwareModuleMapper {
         urls.forEach(entry -> response.add(Link.of(entry.ref()).withRel(entry.rel()).expand()));
     }
 
-    private SoftwareModuleManagement.Create fromRequest(final MgmtSoftwareModuleRequestBodyPost smsRest) {
-        return SoftwareModuleManagement.Create.builder()
+    private Create fromRequest(final MgmtSoftwareModuleRequestBodyPost smsRest) {
+        return Create.builder()
                 .type(getSoftwareModuleTypeFromKeyString(smsRest.getType()))
                 .name(smsRest.getName()).version(smsRest.getVersion()).description(smsRest.getDescription()).vendor(smsRest.getVendor())
                 .encrypted(smsRest.isEncrypted())
@@ -177,7 +166,6 @@ public final class MgmtSoftwareModuleMapper {
         if (type == null) {
             throw new ValidationException("type cannot be null");
         }
-
         return softwareModuleTypeManagement.findByKey(type.trim())
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, type.trim()));
     }

@@ -57,7 +57,7 @@ A Distribution Set entity may have for example URIs to artifacts, Software Modul
 </div>
 
 <iframe 
-  src="../rest-api/mgmt.html" 
+  src="rest-api/mgmt.html" 
   width="100%" 
   height="1080px" 
   style="border: 1px solid #000000; border-radius: 16px;">

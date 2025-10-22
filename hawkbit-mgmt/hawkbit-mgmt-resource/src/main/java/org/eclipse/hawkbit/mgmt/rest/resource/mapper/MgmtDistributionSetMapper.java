@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,9 +32,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
-import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
@@ -60,7 +57,7 @@ public class MgmtDistributionSetMapper {
     public List<DistributionSetManagement.Create> fromRequest(
             final Collection<MgmtDistributionSetRequestBodyPost> sets,
             final String defaultDsKey, final Map<String, DistributionSetType> dsTypeKeyToDsType) {
-        return sets.stream().<DistributionSetManagement.Create>map(dsRest -> {
+        return sets.stream().<DistributionSetManagement.Create> map(dsRest -> {
             final Set<Long> modules = new HashSet<>();
             if (dsRest.getOs() != null) {
                 modules.add(dsRest.getOs().getId());
@@ -195,7 +192,7 @@ public class MgmtDistributionSetMapper {
     }
 
     private Set<? extends SoftwareModule> findSoftwareModuleWithExceptionIfNotFound(final Set<Long> softwareModuleIds) {
-         if (CollectionUtils.isEmpty(softwareModuleIds)) {
+        if (CollectionUtils.isEmpty(softwareModuleIds)) {
             return Collections.emptySet();
         }
 

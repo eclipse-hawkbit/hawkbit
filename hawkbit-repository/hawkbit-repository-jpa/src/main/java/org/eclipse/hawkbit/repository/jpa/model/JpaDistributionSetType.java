@@ -113,15 +113,6 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
     }
 
     @Override
-    public boolean checkComplete(final DistributionSet distributionSet) {
-        final List<SoftwareModuleType> smTypes = distributionSet.getModules().stream()
-                .map(SoftwareModule::getType)
-                .distinct()
-                .toList();
-        return !smTypes.isEmpty() && new HashSet<>(smTypes).containsAll(getMandatoryModuleTypes());
-    }
-
-    @Override
     public String toString() {
         return "DistributionSetType [key=" + getKey() + ", isDeleted()=" + isDeleted() + ", getId()=" + getId() + "]";
     }
