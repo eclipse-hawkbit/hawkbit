@@ -320,22 +320,22 @@ public interface DeploymentManagement extends PermissionSupport {
     void deleteActionsByIds(List<Long> actionIds);
 
     /**
-     * Deletes actions in scope of the target ONLY by list of action ids.
+     * Deletes actions in scope of the controllerId ONLY by list of action ids.
      *
-     * @param target - target controllerId
+     * @param controllerId - controllerId controllerId
      * @param actionsIds - list of action ids to be deleted
      */
     @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TARGET + "')")
-    void deleteTargetActionsByIds(final String target, final List<Long> actionsIds);
+    void deleteTargetActionsByIds(final String controllerId, final List<Long> actionsIds);
 
     /**
-     * Deletes target actions and leaves the LAST N actions in the action history only.
+     * Deletes controllerId actions and leaves the LAST N actions in the action history only.
      *
-     * @param target - target controllerId
+     * @param controllerId - controllerId controllerId
      * @param keepLast - number of actions to be left/kept (NOT deleted)
      */
     @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TARGET + "')")
-    void deleteOldestTargetActions(final String target, final int keepLast);
+    void deleteOldestTargetActions(final String controllerId, final int keepLast);
 
     /**
      * Sets the status of inactive scheduled {@link Action}s for the specified {@link Target}s to {@link Status#CANCELED}
@@ -413,5 +413,5 @@ public interface DeploymentManagement extends PermissionSupport {
     void cancelActionsForDistributionSet(final ActionCancellationType cancelationType, final DistributionSet set);
 
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
-    void handleMaxAssignmentsExceeded(Long targetId, Long requested, AssignmentQuotaExceededException ex);
+    void handleMaxAssignmentsExceeded(Long targetId, Long requested, AssignmentQuotaExceededException quotaExceededException);
 }

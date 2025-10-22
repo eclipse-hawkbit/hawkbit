@@ -80,7 +80,7 @@ public class AccessControllerConfiguration {
             @Override
             @SuppressWarnings("unchecked")
             public Optional<Specification<JpaAction>> getAccessRules(final Operation operation) {
-                return targetAccessController.getAccessRules(operation).map(targetSpec -> (actionRoot, query, cb) -> {
+                return targetAccessController.getAccessRules(map(operation)).map(targetSpec -> (actionRoot, query, cb) -> {
                     final Join<JpaAction, JpaTarget> targetJoin = actionRoot.join(JpaAction_.target);
                     final EntityType<JpaTarget> targetModel = query.from(JpaTarget.class).getModel();
                     final Root<JpaTarget> targetRoot = (Root<JpaTarget>) Proxy.newProxyInstance(
@@ -101,7 +101,15 @@ public class AccessControllerConfiguration {
 
             @Override
             public void assertOperationAllowed(final Operation operation, final JpaAction entity) throws InsufficientPermissionException {
-                targetAccessController.assertOperationAllowed(operation, entity.getTarget());
+                targetAccessController.assertOperationAllowed(map(operation), entity.getTarget());
+            }
+
+            // all CREATE/UPDATE/DELETE action operations are mapped to UPDATE_TARGET permissions / actions
+            private static Operation map(final Operation actionOperation) {
+                return switch (actionOperation) {
+                    case READ -> Operation.READ;
+                    case CREATE, UPDATE, DELETE -> Operation.UPDATE;
+                };
             }
         };
     }

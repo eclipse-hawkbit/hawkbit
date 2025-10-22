@@ -9,30 +9,25 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang3.function.TriConsumer;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
+import org.eclipse.hawkbit.repository.jpa.management.JpaDeploymentManagement.MaxAssignmentsExceededInfo;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -59,7 +54,7 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
             final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties,
-            final TriConsumer<Long, Long, AssignmentQuotaExceededException> maxAssignmentExceededHandler) {
+            final Consumer<MaxAssignmentsExceededInfo> maxAssignmentExceededHandler) {
         super(targetRepository, afterCommit, actionRepository, actionStatusRepository,
                 quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties, maxAssignmentExceededHandler);
     }
@@ -129,7 +124,8 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    public void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds, final String currentUser) {
+    public void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds,
+            final String currentUser) {
         final long now = System.currentTimeMillis();
         targetIds.forEach(targetIdsChunk -> {
             if (targetRepository.count(AccessController.Operation.UPDATE,
@@ -154,22 +150,13 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    public Set<Long> cancelActiveActions(final List<List<Long>> targetIds) {
-        return targetIds.stream().map(this::overrideObsoleteUpdateActions).flatMap(Collection::stream).collect(Collectors.toSet());
+    public void cancelActiveActions(final List<List<Long>> targetIds) {
+        targetIds.forEach(this::overrideObsoleteUpdateActions);
     }
 
     @Override
     public void closeActiveActions(final List<List<Long>> targetIds) {
         targetIds.forEach(this::closeObsoleteUpdateActions);
-    }
-
-    @Override
-    public void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult) {
-        if (isMultiAssignmentsEnabled()) {
-            sendDeploymentEvents(Collections.singletonList(assignmentResult));
-        } else {
-            sendDistributionSetAssignedEvent(assignmentResult);
-        }
     }
 
     @Override
@@ -190,7 +177,7 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     void sendCancellationMessages(final List<JpaAction> actions, final String tenant) {
-        if(isMultiAssignmentsEnabled()) {
+        if (isMultiAssignmentsEnabled()) {
             sendMultiActionCancelEvent(tenant, Collections.unmodifiableList(actions));
         } else {
             actions.forEach(this::cancelAssignDistributionSetEvent);
@@ -224,12 +211,10 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         sendMultiActionAssignEvent(tenant, filteredActions);
     }
 
-    private DistributionSetAssignmentResult sendDistributionSetAssignedEvent(
-            final DistributionSetAssignmentResult assignmentResult) {
+    private void sendDistributionSetAssignedEvent(final DistributionSetAssignmentResult assignmentResult) {
         final List<Action> filteredActions = filterCancellations(assignmentResult.getAssignedEntity()).toList();
         final DistributionSet set = assignmentResult.getDistributionSet();
         sendTargetAssignDistributionSetEvent(set.getTenant(), set.getId(), filteredActions);
-        return assignmentResult;
     }
 
     private void sendTargetAssignDistributionSetEvent(final String tenant, final long distributionSetId,

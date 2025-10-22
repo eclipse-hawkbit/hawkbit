@@ -385,14 +385,13 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private void deleteScheduledActions(final JpaRollout rollout, final Slice<JpaAction> scheduledActions) {
-        final boolean hasScheduledActions = scheduledActions.getNumberOfElements() > 0;
-
-        if (hasScheduledActions) {
+        if (scheduledActions.getNumberOfElements() > 0) {
+            // has scheduled actions - delete them
             try {
                 final List<Long> actionIds = StreamSupport.stream(scheduledActions.spliterator(), false)
                         .map(Action::getId)
                         .toList();
-                actionRepository.deleteByIdIn(actionIds);
+                actionRepository.deleteAllById(actionIds);
                 afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
                         .publishEvent(new RolloutUpdatedEvent(rollout)));
             } catch (final RuntimeException e) {

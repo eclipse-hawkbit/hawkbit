@@ -43,11 +43,6 @@ public final class ActionSpecifications {
                 cb.equal(root.get(JpaAction_.active), true));
     }
 
-    public static Specification<JpaAction> byIdIn(final List<Long> actionIds) {
-        return ((root, query, cb) ->
-                root.get(AbstractJpaBaseEntity_.id).in(actionIds));
-    }
-
     public static Specification<JpaAction> byTargetControllerId(final String controllerId) {
         return (root, query, cb) -> cb.equal(root.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId);
     }
