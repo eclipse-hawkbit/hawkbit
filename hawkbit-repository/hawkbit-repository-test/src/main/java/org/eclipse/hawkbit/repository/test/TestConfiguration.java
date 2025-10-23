@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.artifact.fs.FileArtifactProperties;
 import org.eclipse.hawkbit.artifact.fs.FileArtifactStorage;
 import org.eclipse.hawkbit.artifact.urlresolver.PropertyBasedArtifactUrlResolver;
 import org.eclipse.hawkbit.artifact.urlresolver.PropertyBasedArtifactUrlResolverProperties;
-import org.eclipse.hawkbit.tenancy.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.im.authentication.Hierarchy;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
@@ -38,6 +37,7 @@ import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.HawkbitCacheManager;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.TenantAware.DefaultTenantResolver;
 import org.eclipse.hawkbit.tenancy.TenantAware.TenantResolver;
@@ -104,7 +104,7 @@ public class TestConfiguration implements AsyncConfigurer {
      */
     @Bean
     RolloutStatusCache rolloutStatusCache(final TenantAware tenantAware) {
-        return new RolloutStatusCache(tenantAware, 0);
+        return new RolloutStatusCache(tenantAware);
     }
 
     @Bean
@@ -159,8 +159,8 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    TenantAwareCacheManager cacheManager(final TenantAware tenantAware) {
-        return new TenantAwareCacheManager(new CaffeineCacheManager(), tenantAware);
+    HawkbitCacheManager cacheManager() {
+        return HawkbitCacheManager.getInstance();
     }
 
     @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)

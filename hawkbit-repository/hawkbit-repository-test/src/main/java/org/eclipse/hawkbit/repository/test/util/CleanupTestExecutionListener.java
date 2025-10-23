@@ -14,9 +14,9 @@ import java.util.List;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.tenancy.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.HawkbitCacheManager;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,7 +38,6 @@ public class CleanupTestExecutionListener extends AbstractTestExecutionListener 
         SecurityContextSwitch.callAsPrivileged(() -> {
             final ApplicationContext applicationContext = testContext.getApplicationContext();
             clearTestRepository(
-                    applicationContext.getBean(TenantAwareCacheManager.class),
                     applicationContext.getBean(SystemSecurityContext.class),
                     applicationContext.getBean(SystemManagement.class));
             return null;
@@ -46,10 +45,8 @@ public class CleanupTestExecutionListener extends AbstractTestExecutionListener 
     }
 
     private void clearTestRepository(
-            final TenantAwareCacheManager cacheManager,
             final SystemSecurityContext systemSecurityContext,
             final SystemManagement systemManagement) {
-
         final List<String> tenants = systemSecurityContext.runAsSystem(() -> systemManagement.findTenants(PAGE).getContent());
         tenants.forEach(tenant -> {
             try {
@@ -58,6 +55,6 @@ public class CleanupTestExecutionListener extends AbstractTestExecutionListener 
                 log.error("Error while delete tenant", e);
             }
         });
-        cacheManager.getDirectCacheNames().forEach(name -> cacheManager.getDirectCache(name).clear());
+        HawkbitCacheManager.getInstance().evictTenant(null);
     }
 }

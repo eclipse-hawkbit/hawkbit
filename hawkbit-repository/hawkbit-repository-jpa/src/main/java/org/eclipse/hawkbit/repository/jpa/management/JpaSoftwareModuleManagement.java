@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_DELAY;
 import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
+import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor.afterCommit;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -33,7 +34,6 @@ import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
-import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleSpecification;
@@ -195,8 +195,7 @@ public class JpaSoftwareModuleManagement extends
         jpaRepository.getAccessController()
                 .ifPresent(accessController -> accessController.assertOperationAllowed(AccessController.Operation.DELETE, swModule));
         final Set<String> sha1Hashes = swModule.getArtifacts().stream().map(Artifact::getSha1Hash).collect(Collectors.toSet());
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit()
-                .afterCommit(() -> sha1Hashes.forEach(((JpaArtifactManagement) artifactManagement)::clearArtifactBinary));
+        afterCommit(() -> sha1Hashes.forEach(((JpaArtifactManagement) artifactManagement)::clearArtifactBinary));
     }
 
     private void assertDistributionSetExists(final long distributionSetId) {

@@ -16,7 +16,7 @@ import jakarta.persistence.EntityManager;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.ArtifactStorage;
-import org.eclipse.hawkbit.tenancy.cache.TenantCacheManager;
+import org.eclipse.hawkbit.tenancy.HawkbitCacheManager;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -98,8 +98,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     private final SystemSecurityContext systemSecurityContext;
     private final TenantAware tenantAware;
     private final PlatformTransactionManager txManager;
-    private final TenantCacheManager cacheManager;
-    private final RolloutStatusCache rolloutStatusCache;
     private final EntityManager entityManager;
     private final RepositoryProperties repositoryProperties;
 
@@ -116,7 +114,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
             final TenantConfigurationRepository tenantConfigurationRepository, final TenantMetaDataRepository tenantMetaDataRepository,
             final TenantStatsManagement systemStatsManagement, final SystemManagementCacheKeyGenerator currentTenantCacheKeyGenerator,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final PlatformTransactionManager txManager,
-            final TenantCacheManager cacheManager, final RolloutStatusCache rolloutStatusCache,
             final EntityManager entityManager, final RepositoryProperties repositoryProperties,
             final JpaProperties properties) {
         this.targetRepository = targetRepository;
@@ -136,8 +133,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;
         this.txManager = txManager;
-        this.cacheManager = cacheManager;
-        this.rolloutStatusCache = rolloutStatusCache;
         this.entityManager = entityManager;
         this.repositoryProperties = repositoryProperties;
 
@@ -166,8 +161,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         }
 
         final String tenant = t.toUpperCase();
-        cacheManager.evictCaches(tenant);
-        rolloutStatusCache.evictCaches(tenant);
+        HawkbitCacheManager.getInstance().evictTenant(tenant);
         tenantAware.runAsTenant(tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "deleteTenant", status -> {
             tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
             tenantConfigurationRepository.deleteByTenant(tenant);

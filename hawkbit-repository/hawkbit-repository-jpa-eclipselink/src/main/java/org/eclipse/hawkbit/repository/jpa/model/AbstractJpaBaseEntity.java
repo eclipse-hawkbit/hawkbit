@@ -28,7 +28,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
+import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.springframework.data.annotation.CreatedBy;
@@ -199,7 +199,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     protected static void doNotify(final Runnable runnable) {
         // fire events onl AFTER transaction commit
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(runnable);
+        AfterTransactionCommitExecutor.afterCommit(runnable);
     }
 
     protected boolean isController() {
