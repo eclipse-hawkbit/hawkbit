@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor.afterCommit;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -52,7 +54,6 @@ import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
-import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -60,13 +61,13 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
+import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRolloutGroupSuccessAction;
-import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
@@ -85,8 +86,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.utils.ObjectCopyUtil;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.utils.ObjectCopyUtil;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
@@ -121,7 +122,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             RolloutStatus.PAUSED, RolloutStatus.APPROVAL_DENIED);
 
     @Value("${hawkbit.repository.jpa.management.rollout.max.actions.per.transaction:5000}")
-    private int MAX_ACTIONS;
+    private int maxActions;
 
     private final EntityManager entityManager;
     private final RolloutRepository rolloutRepository;
@@ -136,7 +137,6 @@ public class JpaRolloutManagement implements RolloutManagement {
     private final TenantAware tenantAware;
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final QuotaManagement quotaManagement;
-    private final AfterTransactionCommitExecutor afterCommit;
     private final SystemSecurityContext systemSecurityContext;
     private final ContextAware contextAware;
     private final RepositoryProperties repositoryProperties;
@@ -157,7 +157,6 @@ public class JpaRolloutManagement implements RolloutManagement {
             final TenantAware tenantAware,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final QuotaManagement quotaManagement,
-            final AfterTransactionCommitExecutor afterCommit,
             final SystemSecurityContext systemSecurityContext, final ContextAware contextAware,
             final RepositoryProperties repositoryProperties) {
         this.entityManager = entityManager;
@@ -173,12 +172,11 @@ public class JpaRolloutManagement implements RolloutManagement {
         this.tenantAware = tenantAware;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.quotaManagement = quotaManagement;
-        this.afterCommit = afterCommit;
         this.systemSecurityContext = systemSecurityContext;
         this.contextAware = contextAware;
         this.repositoryProperties = repositoryProperties;
 
-        this.onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, actionRepository, actionStatusRepository,
+        this.onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository,
                 quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties, null);
     }
 
@@ -187,7 +185,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     public void publishRolloutGroupCreatedEventAfterCommit(final RolloutGroup group, final Rollout rollout) {
-        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
+        afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new RolloutGroupCreatedEvent(group, rollout.getId())));
     }
 
@@ -524,7 +522,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                         ActionSpecifications
                                 .byRolloutIdAndActiveAndStatusIsNot(rollout.getId(),
                                         List.of(Action.Status.CANCELING)), // avoid cancelling state here, because it is count as still active
-                        Pageable.ofSize(MAX_ACTIONS))
+                        Pageable.ofSize(maxActions))
                 .getContent();
         log.info("Found {} active actions for rollout {}, performing soft cancel.", actions.size(), rollout.getId());
 
@@ -535,7 +533,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private void forceQuitActionsOfRollout(final Rollout rollout) {
-        final List<JpaAction> actions = findActiveActionsForRollout(rollout.getId(), Pageable.ofSize(MAX_ACTIONS))
+        final List<JpaAction> actions = findActiveActionsForRollout(rollout.getId(), Pageable.ofSize(maxActions))
                 .getContent();
         log.info("Found {} active actions for rollout {}", actions.size(), rollout.getId());
 

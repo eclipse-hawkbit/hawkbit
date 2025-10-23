@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_GATEWAY_SECURITY_TOKEN;
+import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor.afterCommit;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
@@ -37,7 +38,6 @@ import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValueChangeNotAllowedException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
-import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
 import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
@@ -48,13 +48,13 @@ import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.HawkbitCacheManager;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
@@ -79,28 +79,24 @@ import org.springframework.validation.annotation.Validated;
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "tenant-configuration-management" }, matchIfMissing = true)
 public class JpaTenantConfigurationManagement implements TenantConfigurationManagement {
 
+    private static final String CACHE_TENANT_CONFIGURATION_NAME = "tenantConfiguration";
     private static final ConfigurableConversionService CONVERSION_SERVICE = new DefaultConversionService();
 
     private final TenantConfigurationRepository tenantConfigurationRepository;
     private final TenantConfigurationProperties tenantConfigurationProperties;
     private final ApplicationContext applicationContext;
-    private final CacheManager cacheManager;
-    private final AfterTransactionCommitExecutor afterCommitExecutor;
 
     public JpaTenantConfigurationManagement(
             final TenantConfigurationRepository tenantConfigurationRepository,
             final TenantConfigurationProperties tenantConfigurationProperties,
-            final CacheManager cacheManager, final AfterTransactionCommitExecutor afterCommitExecutor,
             final ApplicationContext applicationContext) {
         this.tenantConfigurationRepository = tenantConfigurationRepository;
         this.tenantConfigurationProperties = tenantConfigurationProperties;
-        this.cacheManager = cacheManager;
-        this.afterCommitExecutor = afterCommitExecutor;
         this.applicationContext = applicationContext;
     }
 
     @Override
-    @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
+    @CacheEvict(value = CACHE_TENANT_CONFIGURATION_NAME, key = "#configurationKeyName")
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
@@ -114,8 +110,8 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public <T extends Serializable> Map<String, TenantConfigurationValue<T>> addOrUpdateConfiguration(final Map<String, T> configurations) {
         // Register a callback to be invoked after the transaction is committed - for cache eviction
-        afterCommitExecutor.afterCommit(() -> {
-            final Cache cache = cacheManager.getCache("tenantConfiguration");
+        afterCommit(() -> {
+            final Cache cache = HawkbitCacheManager.getInstance().getCache(CACHE_TENANT_CONFIGURATION_NAME);
             if (cache != null) {
                 configurations.keySet().forEach(cache::evict);
             }
@@ -125,7 +121,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     }
 
     @Override
-    @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
+    @CacheEvict(value = CACHE_TENANT_CONFIGURATION_NAME, key = "#configurationKeyName")
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
@@ -134,8 +130,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     }
 
     @Override
-// TODO - check if cache works
-//    @Cacheable(value = "tenantConfiguration", key = "#configurationKeyName")
+    @Cacheable(value = CACHE_TENANT_CONFIGURATION_NAME, key = "#configurationKeyName")
     public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(final String configurationKeyName) {
         checkAccess(configurationKeyName);
 
@@ -145,7 +140,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     }
 
     @Override
-    @Cacheable(value = "tenantConfiguration", key = "#configurationKeyName")
+    @Cacheable(value = CACHE_TENANT_CONFIGURATION_NAME, key = "#configurationKeyName")
     public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(
             final String configurationKeyName, final Class<T> propertyType) {
         checkAccess(configurationKeyName);
@@ -163,8 +158,8 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
 
         final TenantConfigurationKey key = tenantConfigurationProperties.fromKeyName(configurationKeyName);
         if (!key.getDataType().isAssignableFrom(propertyType)) {
-            throw new TenantConfigurationValidatorException(String.format(
-                    "Cannot parse the database value of type %s into the type %s.", key.getDataType(), propertyType));
+            throw new TenantConfigurationValidatorException(
+                    String.format("Cannot parse the database value of type %s into the type %s.", key.getDataType(), propertyType));
         }
 
         return CONVERSION_SERVICE.convert(key.getDefaultValue(), propertyType);
@@ -372,7 +367,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     }
 
     private void evictCacheEntryByKeyIfPresent(final String key) {
-        final Cache cache = cacheManager.getCache("tenantConfiguration");
+        final Cache cache = HawkbitCacheManager.getInstance().getCache(CACHE_TENANT_CONFIGURATION_NAME);
         if (cache != null) {
             cache.evictIfPresent(key);
         }

@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -49,6 +50,8 @@ import org.springframework.validation.annotation.Validated;
 public class JpaTargetTypeManagement
         extends AbstractJpaRepositoryManagement<JpaTargetType, TargetTypeManagement.Create, TargetTypeManagement.Update, TargetTypeRepository, TargetTypeFields>
         implements TargetTypeManagement<JpaTargetType>{
+
+    private static final String CACHE_TARGET_TYPE_NAME = "targetType";
 
     private final TargetRepository targetRepository;
     private final DistributionSetTypeRepository distributionSetTypeRepository;
@@ -76,6 +79,7 @@ public class JpaTargetTypeManagement
     }
 
     @Override
+    @Cacheable(value = CACHE_TARGET_TYPE_NAME, key = "#key")
     public Optional<TargetType> findByKey(final String key) {
         return jpaRepository.findOne(TargetTypeSpecification.hasKey(key)).map(TargetType.class::cast);
     }

@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor.afterCommit;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -26,7 +28,6 @@ import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEv
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
-import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.management.JpaDeploymentManagement.MaxAssignmentsExceededInfo;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -49,13 +50,13 @@ import org.springframework.util.CollectionUtils;
  */
 class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
-    OnlineDsAssignmentStrategy(final TargetRepository targetRepository,
-            final AfterTransactionCommitExecutor afterCommit,
+    OnlineDsAssignmentStrategy(
+            final TargetRepository targetRepository,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
             final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties,
             final Consumer<MaxAssignmentsExceededInfo> maxAssignmentExceededHandler) {
-        super(targetRepository, afterCommit, actionRepository, actionStatusRepository,
+        super(targetRepository, actionRepository, actionStatusRepository,
                 quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties, maxAssignmentExceededHandler);
     }
 
@@ -124,8 +125,8 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    public void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds,
-            final String currentUser) {
+    public void setAssignedDistributionSetAndTargetStatus(
+            final JpaDistributionSet set, final List<List<Long>> targetIds, final String currentUser) {
         final long now = System.currentTimeMillis();
         targetIds.forEach(targetIdsChunk -> {
             if (targetRepository.count(AccessController.Operation.UPDATE,
@@ -223,10 +224,8 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             return;
         }
 
-        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new TargetAssignDistributionSetEvent(
-                        tenant, distributionSetId, actions,
-                        actions.get(0).isMaintenanceWindowAvailable())));
+        afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new TargetAssignDistributionSetEvent(tenant, distributionSetId, actions, actions.get(0).isMaintenanceWindowAvailable())));
     }
 
     /**
@@ -237,8 +236,7 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
      * @param actions assigned to the targets
      */
     private void sendMultiActionCancelEvent(final String tenant, final List<Action> actions) {
-        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new MultiActionCancelEvent(tenant, actions)));
+        afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new MultiActionCancelEvent(tenant, actions)));
     }
 
     /**
@@ -248,7 +246,6 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
      * @param actions assigned to the targets
      */
     private void sendMultiActionAssignEvent(final String tenant, final List<Action> actions) {
-        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new MultiActionAssignEvent(tenant, actions)));
+        afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new MultiActionAssignEvent(tenant, actions)));
     }
 }

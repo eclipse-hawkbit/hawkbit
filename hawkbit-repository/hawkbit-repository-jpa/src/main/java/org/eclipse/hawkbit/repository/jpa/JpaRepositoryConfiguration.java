@@ -57,8 +57,6 @@ import org.eclipse.hawkbit.repository.jpa.autocleanup.CleanupTask;
 import org.eclipse.hawkbit.repository.jpa.cluster.DistributedLockRepository;
 import org.eclipse.hawkbit.repository.jpa.cluster.LockProperties;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
-import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitDefaultServiceExecutor;
-import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -67,7 +65,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
-import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison;
@@ -79,8 +76,6 @@ import org.eclipse.hawkbit.repository.jpa.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.RolloutTargetGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
@@ -151,7 +146,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @EnableScheduling
 @EnableRetry
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
-@ComponentScan("org.eclipse.hawkbit.repository.jpa.management")
+@ComponentScan("org.eclipse.hawkbit.repository.jpa")
 @PropertySource("classpath:/hawkbit-jpa-defaults.properties")
 @Import({ JpaConfiguration.class, RepositoryConfiguration.class, LockProperties.class, DataSourceAutoConfiguration.class,
         SystemManagementCacheKeyGenerator.class })
@@ -277,12 +272,6 @@ public class JpaRepositoryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    AfterTransactionCommitDefaultServiceExecutor afterTransactionCommitDefaultServiceExecutor() {
-        return new AfterTransactionCommitDefaultServiceExecutor();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
     QuotaManagement staticQuotaManagement(final HawkbitSecurityProperties securityProperties) {
         return new PropertiesQuotaManagement(securityProperties);
     }
@@ -348,14 +337,6 @@ public class JpaRepositoryConfiguration {
     }
 
     /**
-     * @return the singleton instance of the {@link AfterTransactionCommitExecutorHolder}
-     */
-    @Bean
-    AfterTransactionCommitExecutorHolder afterTransactionCommitExecutorHolder() {
-        return AfterTransactionCommitExecutorHolder.getInstance();
-    }
-
-    /**
      * @return {@link ExceptionMappingAspectHandler} aspect bean
      */
     @Bean
@@ -369,24 +350,6 @@ public class JpaRepositoryConfiguration {
             final RolloutExecutor rolloutExecutor, final LockRegistry lockRegistry,
             final PlatformTransactionManager txManager, final Optional<MeterRegistry> meterRegistry) {
         return new JpaRolloutHandler(tenantAware, rolloutManagement, rolloutExecutor, lockRegistry, txManager, meterRegistry);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    RolloutExecutor rolloutExecutor(
-            final ActionRepository actionRepository, final RolloutGroupRepository rolloutGroupRepository,
-            final RolloutTargetGroupRepository rolloutTargetGroupRepository,
-            final RolloutRepository rolloutRepository, final TargetManagement<? extends Target> targetManagement,
-            final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
-            final RolloutManagement rolloutManagement, final QuotaManagement quotaManagement,
-            final RolloutGroupEvaluationManager evaluationManager, final RolloutApprovalStrategy rolloutApprovalStrategy,
-            final EntityManager entityManager, final PlatformTransactionManager txManager,
-            final AfterTransactionCommitExecutor afterCommit,
-            final TenantAware tenantAware, final ContextAware contextAware, final RepositoryProperties repositoryProperties) {
-        return new JpaRolloutExecutor(actionRepository, rolloutGroupRepository, rolloutTargetGroupRepository,
-                rolloutRepository, targetManagement, deploymentManagement, rolloutGroupManagement, rolloutManagement,
-                quotaManagement, evaluationManager, rolloutApprovalStrategy, entityManager, txManager, afterCommit,
-                tenantAware, contextAware, repositoryProperties);
     }
 
     /**
