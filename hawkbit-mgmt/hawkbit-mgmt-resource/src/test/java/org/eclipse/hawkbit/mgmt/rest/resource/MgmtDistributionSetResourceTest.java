@@ -49,6 +49,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement.Update;
+import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.Create;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
@@ -1329,16 +1330,22 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     @Test
     void filterDistributionSetComplete() throws Exception {
         final int amount = 10;
-        testdataFactory.createDistributionSets(amount);
+        final List<String> dsIds = testdataFactory.createDistributionSets(amount).stream()
+                .map(Identifiable::getId).map(String::valueOf).toList();
         distributionSetManagement
                 .create(DistributionSetManagement.Create.builder()
                         .type(distributionSetTypeManagement.findByKey("os").orElseThrow())
                         .name("incomplete").version("2")
                         .build());
 
-        final String rsqlFindLikeDs1OrDs2 = "complete==" + Boolean.TRUE;
+        mvc.perform(get("/rest/v1/distributionsets?q=complete==true"))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("size", equalTo(10)))
+                .andExpect(jsonPath("total", equalTo(10)));
 
-        mvc.perform(get("/rest/v1/distributionsets?q=" + rsqlFindLikeDs1OrDs2))
+        // and more complex (case insensitive) query
+        mvc.perform(get("/rest/v1/distributionsets?q=complete==true;valid==true;id=IN=(" + String.join(",", dsIds) + ")"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("size", equalTo(10)))

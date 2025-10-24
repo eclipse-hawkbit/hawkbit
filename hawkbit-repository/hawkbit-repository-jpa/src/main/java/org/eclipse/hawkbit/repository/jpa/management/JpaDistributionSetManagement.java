@@ -50,7 +50,6 @@ import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParser;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -116,7 +115,7 @@ public class JpaDistributionSetManagement
     public Page<JpaDistributionSet> findByRsql(final String rsql, final Pageable pageable) {
         if (rsql != null && rsql.toLowerCase().contains(COMPLETE)) {
             // limited support for 'complete' - could be removed in future
-            final Node node = RsqlParser.parse(rsql);
+            final Node node = QLSupport.getInstance().parse(rsql);
             final Specification<JpaDistributionSet> notDeleted = (root, query, cb) -> cb.equal(root.get(DELETED), false);
             final List<Specification<JpaDistributionSet>> specList = new ArrayList<>();
             specList.add(notDeleted);

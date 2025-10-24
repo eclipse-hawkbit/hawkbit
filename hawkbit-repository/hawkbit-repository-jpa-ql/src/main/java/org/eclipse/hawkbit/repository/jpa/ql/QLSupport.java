@@ -146,6 +146,10 @@ public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
         this.virtualPropertyResolver = virtualPropertyResolver;
     }
 
+    public Node parse(final String query) {
+        return parse(query, null);
+    }
+
     public <A extends Enum<A> & QueryField> Node parse(final String query, final Class<A> queryFieldType) {
         return parser.parse(ignoreCase || caseInsensitiveDB ? query.toLowerCase() : query, queryFieldType);
     }

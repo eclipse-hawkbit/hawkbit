@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.ui.simple.security;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 import com.vaadin.flow.spring.security.VaadinAwareSecurityContextHolderStrategyConfiguration;
 import com.vaadin.flow.spring.security.VaadinSecurityConfigurer;
 import lombok.extern.slf4j.Slf4j;
@@ -27,11 +30,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
 @EnableWebSecurity
 @Configuration
@@ -41,11 +41,6 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 public class SecurityConfiguration {
 
     private Customizer<OAuth2LoginConfigurer<HttpSecurity>> oAuth2LoginConfigurerCustomizer;
-    @Autowired
-    private UserDetailsSetter userDetailsSetter;
-
-    @Autowired(required = false)
-    private InMemoryClientRegistrationRepository clientRegistrationRepository;
 
     @Autowired(required = false)
     public void setOAuth2LoginConfigurerCustomizer(
@@ -66,7 +61,10 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(
+            final HttpSecurity http,
+            final UserDetailsSetter userDetailsSetter,
+            @Autowired(required = false) InMemoryClientRegistrationRepository clientRegistrationRepository) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/images/*.png").permitAll());
         http.addFilterAfter(userDetailsSetter, AuthorizationFilter.class);
         return http.with(VaadinSecurityConfigurer.vaadin(), configurer -> {
