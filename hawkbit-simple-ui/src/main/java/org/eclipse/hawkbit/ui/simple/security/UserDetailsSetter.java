@@ -40,6 +40,7 @@ class UserDetailsSetter extends OncePerRequestFilter {
     private final SecurityContextHolderStrategy securityContextHolderStrategy;
     private final GrantedAuthoritiesService grantedAuthoritiesService;
 
+    @SuppressWarnings("java:S1066") // java:S1066 - readability preferred
     @Override
     protected void doFilterInternal(@NotNull final HttpServletRequest request, @NotNull final HttpServletResponse response,
             @NotNull final FilterChain filterChain)
