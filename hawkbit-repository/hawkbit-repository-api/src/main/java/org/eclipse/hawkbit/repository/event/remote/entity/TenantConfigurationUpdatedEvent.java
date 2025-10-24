@@ -14,17 +14,24 @@ import java.io.Serial;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager.CacheEvictEvent;
 
 /**
  * Defines the remote event of updating a {@link TenantConfiguration}.
  */
 @NoArgsConstructor // for serialization libs like jackson
-public class TenantConfigurationUpdatedEvent extends RemoteEntityEvent<TenantConfiguration> implements EntityUpdatedEvent {
+public class TenantConfigurationUpdatedEvent extends RemoteEntityEvent<TenantConfiguration> implements EntityUpdatedEvent, CacheEvictEvent {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     public TenantConfigurationUpdatedEvent(final TenantConfiguration tenantConfiguration) {
         super(tenantConfiguration);
+    }
+
+    // overrides since the default impl is based on entity id while the tenant cache is key (string) based
+    @Override
+    public String getCacheKey() {
+        return getEntity().map(TenantConfiguration::getKey).orElse(null); // null will clean all tenant cache
     }
 }

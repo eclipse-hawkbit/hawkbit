@@ -17,6 +17,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.entity.EntityDeletedEvent;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager.CacheEvictEvent;
 
 /**
  * Defines the remote event of deleting a {@link org.eclipse.hawkbit.repository.model.TenantConfiguration}.
@@ -25,7 +27,7 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class TenantConfigurationDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
+public class TenantConfigurationDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent, CacheEvictEvent {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -40,5 +42,11 @@ public class TenantConfigurationDeletedEvent extends RemoteIdEvent implements En
         super(tenant, entityId, entityClass);
         this.configKey = configKey;
         this.configValue = configValue;
+    }
+
+    // overrides since the default impl is based on entity id while the tenant cache is key (string) based
+    @Override
+    public String getCacheKey() {
+        return configKey;
     }
 }

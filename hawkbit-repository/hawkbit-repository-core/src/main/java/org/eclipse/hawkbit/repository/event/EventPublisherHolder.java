@@ -13,6 +13,7 @@ import java.util.Set;
 
 import jakarta.annotation.PostConstruct;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
@@ -107,12 +108,12 @@ public final class EventPublisherHolder {
         }
 
         @Override
-        public void publishEvent(final Object event) {
+        public void publishEvent(@NonNull final Object event) {
             routeEvent(event);
         }
 
         @Override
-        public void publishEvent(final ApplicationEvent event) {
+        public void publishEvent(@NonNull final ApplicationEvent event) {
             routeEvent(event);
         }
 
@@ -137,8 +138,8 @@ public final class EventPublisherHolder {
                     log.debug("Publishing Service event: {} to remote channel: {}", serviceEvent, serviceEventChannel);
                     streamBridge.send(serviceEventChannel, serviceEvent);
                 } else {
-                    log.error("No Service event created for: {}. Skipping send Service event to Service channel. {}", remoteEvent.getClass(),
-                            serviceEventChannel);
+                    log.error("No Service event created for: {}. Skipping send Service event to Service channel. {}",
+                            remoteEvent.getClass(), serviceEventChannel);
                 }
             }
         }

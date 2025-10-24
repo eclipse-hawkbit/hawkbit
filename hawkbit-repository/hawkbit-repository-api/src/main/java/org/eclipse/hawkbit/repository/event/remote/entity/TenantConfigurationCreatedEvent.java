@@ -27,4 +27,10 @@ public class TenantConfigurationCreatedEvent extends RemoteEntityEvent<TenantCon
     public TenantConfigurationCreatedEvent(final TenantConfiguration tenantConfiguration) {
         super(tenantConfiguration);
     }
+
+    // overrides since the default impl is based on entity id while the tenant cache is key (string) based
+    @Override
+    public String getCacheKey() {
+        return getEntity().map(TenantConfiguration::getKey).orElse(null); // null will clean all tenant cache
+    }
 }
