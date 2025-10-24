@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor.afterCommit;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +29,6 @@ import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
-import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.management.JpaDeploymentManagement.MaxAssignmentsExceededInfo;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -59,7 +60,6 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractDsAssignmentStrategy {
 
     protected final TargetRepository targetRepository;
-    protected final AfterTransactionCommitExecutor afterCommit;
     protected final ActionRepository actionRepository;
 
     private final ActionStatusRepository actionStatusRepository;
@@ -72,13 +72,11 @@ public abstract class AbstractDsAssignmentStrategy {
     @SuppressWarnings("java:S107")
     AbstractDsAssignmentStrategy(
             final TargetRepository targetRepository,
-            final AfterTransactionCommitExecutor afterCommit,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
             final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties,
             final Consumer<MaxAssignmentsExceededInfo> maxAssignmentExceededHandler) {
         this.targetRepository = targetRepository;
-        this.afterCommit = afterCommit;
         this.actionRepository = actionRepository;
         this.actionStatusRepository = actionStatusRepository;
         this.quotaManagement = quotaManagement;
@@ -133,7 +131,7 @@ public abstract class AbstractDsAssignmentStrategy {
     }
 
     protected void sendTargetUpdatedEvent(final JpaTarget target) {
-        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetUpdatedEvent(target)));
+        afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetUpdatedEvent(target)));
     }
 
     /**
@@ -209,8 +207,7 @@ public abstract class AbstractDsAssignmentStrategy {
      * @param action the action of the assignment
      */
     protected void cancelAssignDistributionSetEvent(final Action action) {
-        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new CancelTargetAssignmentEvent(action)));
+        afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new CancelTargetAssignmentEvent(action)));
     }
 
     protected boolean isMultiAssignmentsEnabled() {
@@ -279,8 +276,8 @@ public abstract class AbstractDsAssignmentStrategy {
             return;
         }
         final String tenant = actions.get(0).getTenant();
-        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new CancelTargetAssignmentEvent(tenant, actions)));
+        afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new CancelTargetAssignmentEvent(tenant, actions)));
     }
 
     private void assertActionsPerTargetQuota(final Target target) {

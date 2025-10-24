@@ -45,12 +45,11 @@ class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     OfflineDsAssignmentStrategy(
             final TargetRepository targetRepository,
-            final AfterTransactionCommitExecutor afterCommit,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
             final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties,
             final Consumer<MaxAssignmentsExceededInfo> maxAssignmentExceededHandler) {
-        super(targetRepository, afterCommit, actionRepository, actionStatusRepository,
+        super(targetRepository, actionRepository, actionStatusRepository,
                 quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties, maxAssignmentExceededHandler);
     }
 

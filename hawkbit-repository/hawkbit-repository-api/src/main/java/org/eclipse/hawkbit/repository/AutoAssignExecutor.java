@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.autoassign;
+package org.eclipse.hawkbit.repository;
 
 /**
  * An interface declaration which contains the check for the auto assignment logic.

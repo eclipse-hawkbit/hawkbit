@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.rollout;
+package org.eclipse.hawkbit.repository.jpa.scheduler;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +16,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.jpa.rollout.BlockWhenFullPolicy;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantMetricsConfiguration;
 import org.springframework.scheduling.annotation.Scheduled;

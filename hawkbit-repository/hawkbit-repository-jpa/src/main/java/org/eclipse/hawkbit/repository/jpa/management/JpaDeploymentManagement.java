@@ -57,7 +57,6 @@ import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
-import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -151,7 +150,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     protected JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
             final JpaDistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
             final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
-            final AfterTransactionCommitExecutor afterCommit, final PlatformTransactionManager txManager,
+            final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final AuditorAware<String> auditorAware,
             final JpaProperties jpaProperties, final RepositoryProperties repositoryProperties) {
@@ -166,10 +165,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                         maxAssignmentsExceededInfo.targetId,
                         maxAssignmentsExceededInfo.requested,
                         maxAssignmentsExceededInfo.quotaExceededException);
-        onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, actionRepository, actionStatusRepository,
+        onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository,
                 quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties,
                 maxAssignmentsExceededHandler);
-        offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, afterCommit, actionRepository, actionStatusRepository,
+        offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository,
                 quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties,
                 maxAssignmentsExceededHandler);
         this.tenantConfigurationManagement = tenantConfigurationManagement;

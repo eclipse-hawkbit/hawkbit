@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.Identifiable;
-import org.eclipse.hawkbit.repository.jpa.rollout.RolloutScheduler;
+import org.eclipse.hawkbit.repository.jpa.scheduler.RolloutScheduler;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.jupiter.api.Test;

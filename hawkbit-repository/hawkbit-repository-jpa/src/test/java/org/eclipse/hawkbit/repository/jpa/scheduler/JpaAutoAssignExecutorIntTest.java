@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.autoassign;
+package org.eclipse.hawkbit.repository.jpa.scheduler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -44,18 +44,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
 /**
- * Test class for {@link AutoAssignChecker}.
+ * Test class for {@link JpaAutoAssignExecutor}.
  * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Auto assign checker
  */
 @SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
-class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
+class JpaAutoAssignExecutorIntTest extends AbstractJpaIntegrationTest {
 
     private static final String SPACE_AND_DESCRIPTION = " description";
 
     @Autowired
-    private AutoAssignChecker autoAssignChecker;
+    private JpaAutoAssignExecutor autoAssignChecker;
     @Autowired
     private DeploymentManagement deploymentManagement;
 

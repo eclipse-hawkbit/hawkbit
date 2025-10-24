@@ -36,7 +36,6 @@ public interface TenantConfigurationRepository extends BaseEntityRepository<JpaT
     /**
      * Deletes a tenant configuration by tenant and key.
      *
-     * @param tenant the tenant for this configuration
      * @param keyName the name of the key to be deleted
      */
     void deleteByKey(String keyName);
@@ -44,7 +43,7 @@ public interface TenantConfigurationRepository extends BaseEntityRepository<JpaT
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
      * reasons (this is a "delete everything" query after all) we add the tenant
-     * manually to query even if this will by done by {@link EntityManager}
+     * manually to query even if this will be done by {@link EntityManager}
      * anyhow. The DB should take care of optimizing this away.
      *
      * @param tenant to delete data from
@@ -53,5 +52,4 @@ public interface TenantConfigurationRepository extends BaseEntityRepository<JpaT
     @Transactional
     @Query("DELETE FROM JpaTenantConfiguration t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
-
 }

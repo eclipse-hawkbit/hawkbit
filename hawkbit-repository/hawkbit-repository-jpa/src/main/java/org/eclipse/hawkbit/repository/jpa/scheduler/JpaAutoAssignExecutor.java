@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.autoassign;
+package org.eclipse.hawkbit.repository.jpa.scheduler;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
+import org.eclipse.hawkbit.repository.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -43,7 +44,8 @@ import org.springframework.util.StringUtils;
  * query, that match the TFQ and that don't have the auto assign DS in their action history.
  */
 @Slf4j
-public class AutoAssignChecker implements AutoAssignExecutor {
+@Service
+public class JpaAutoAssignExecutor implements AutoAssignExecutor {
 
     /**
      * The message which is added to the action status when a distribution set is assigned to a target.
@@ -62,7 +64,7 @@ public class AutoAssignChecker implements AutoAssignExecutor {
     private final PlatformTransactionManager transactionManager;
     private final ContextAware contextAware;
 
-    public AutoAssignChecker(
+    public JpaAutoAssignExecutor(
             final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
             final TargetManagement<? extends Target> targetManagement, final DeploymentManagement deploymentManagement,
             final PlatformTransactionManager transactionManager, final ContextAware contextAware) {
