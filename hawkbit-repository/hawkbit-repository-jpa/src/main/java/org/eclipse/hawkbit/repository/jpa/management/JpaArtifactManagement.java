@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor.afterCommit;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
@@ -38,7 +40,6 @@ import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
-import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.ArtifactSpecifications;
@@ -185,7 +186,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         artifactRepository.deleteById(id);
 
         final String sha1Hash = toDelete.getSha1Hash();
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() -> clearArtifactBinary(sha1Hash));
+        afterCommit(() -> clearArtifactBinary(sha1Hash));
     }
 
     /**
@@ -202,11 +203,10 @@ public class JpaArtifactManagement implements ArtifactManagement {
     void clearArtifactBinary(final String sha1Hash) {
         DeploymentHelper.runInNewTransaction(txManager, "clearArtifactBinary", status -> {
             // countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse will skip ACM checks and will return total count as it should be
-            if (artifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(sha1Hash,
-                    tenantAware.getCurrentTenant()) <= 0) { // 1 artifact is the one being deleted!
+            if (artifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(sha1Hash, tenantAware.getCurrentTenant()) <= 0) {
                 // removes the real artifact ONLY AFTER the delete of artifact or software module
                 // in local history has passed successfully (caller has permission and no errors)
-                AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() -> {
+                afterCommit(() -> {
                     try {
                         log.debug("deleting artifact from repository {}", sha1Hash);
                         artifactStorage.deleteBySha1(tenantAware.getCurrentTenant(), sha1Hash);

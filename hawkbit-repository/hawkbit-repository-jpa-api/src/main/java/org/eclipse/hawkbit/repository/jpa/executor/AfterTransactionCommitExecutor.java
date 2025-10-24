@@ -9,18 +9,66 @@
  */
 package org.eclipse.hawkbit.repository.jpa.executor;
 
-/**
- * A interface to register a runnable, which will be executed after a successful
- * spring transaction.
- */
-@FunctionalInterface
-public interface AfterTransactionCommitExecutor {
+import java.util.ArrayList;
+import java.util.List;
 
-    /**
-     * Register a runnable which will be executed after a successful spring
-     * transaction.
-     *
-     * @param runnable the after commit runnable
-     */
-    void afterCommit(Runnable runnable);
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+/**
+ * A hook to register a runnable, which will be executed after a successful spring transaction.
+ */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Slf4j
+public class AfterTransactionCommitExecutor {
+
+    // Exception squid:S1217 - we want to run this synchronous
+    @SuppressWarnings("squid:S1217")
+    public static void afterCommit(final Runnable runnable) {
+        log.debug("Submitting new runnable {} to run after transaction commit", runnable);
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.getSynchronizations().stream().filter(TransactionSynchronizationImpl.class::isInstance)
+                    .map(TransactionSynchronizationImpl.class::cast).findAny().orElseGet(() -> {
+                        final TransactionSynchronizationImpl newTS = new TransactionSynchronizationImpl();
+                        TransactionSynchronizationManager.registerSynchronization(newTS);
+                        return newTS;
+                    }).afterCommit(runnable);
+        } else {
+            log.info("Transaction synchronization is NOT ACTIVE/ INACTIVE. Executing right now runnable {}", runnable);
+            runnable.run();
+        }
+    }
+
+    private static class TransactionSynchronizationImpl implements TransactionSynchronization {
+
+        private final List<Runnable> afterCommitRunnables = new ArrayList<>();
+
+        @Override
+        // Exception squid:S1217 - Is aspectJ proxy
+        @SuppressWarnings({ "squid:S1217" })
+        public void afterCommit() {
+            log.debug("Transaction successfully committed, executing {} runnables", afterCommitRunnables.size());
+            for (final Runnable afterCommitRunnable : afterCommitRunnables) {
+                log.debug("Executing runnable {}", afterCommitRunnable);
+                try {
+                    afterCommitRunnable.run();
+                } catch (final RuntimeException e) {
+                    log.error("Failed to execute runnable {}", afterCommitRunnable, e);
+                }
+            }
+        }
+
+        @Override
+        @SuppressWarnings({ "squid:S1217" })
+        public void afterCompletion(final int status) {
+            log.debug("Transaction completed after commit with status {}", status == TransactionSynchronization.STATUS_COMMITTED ? "COMMITTED" : "ROLLEDBACK");
+        }
+
+        private void afterCommit(final Runnable runnable) {
+            afterCommitRunnables.add(runnable);
+        }
+    }
 }

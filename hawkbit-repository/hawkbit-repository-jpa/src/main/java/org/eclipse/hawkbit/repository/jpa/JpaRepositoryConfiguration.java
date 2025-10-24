@@ -19,11 +19,11 @@ import jakarta.validation.Validation;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import org.aopalliance.intercept.MethodInvocation;
-import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryption;
 import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryptionSecretsStorage;
 import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.ActionFields;
+import org.eclipse.hawkbit.repository.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
 import org.eclipse.hawkbit.repository.QueryField;
@@ -32,16 +32,12 @@ import org.eclipse.hawkbit.repository.RepositoryConfiguration;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutExecutor;
-import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
@@ -49,16 +45,12 @@ import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
-import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
-import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoActionCleanup;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoCleanupScheduler;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.CleanupTask;
 import org.eclipse.hawkbit.repository.jpa.cluster.DistributedLockRepository;
 import org.eclipse.hawkbit.repository.jpa.cluster.LockProperties;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
-import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitDefaultServiceExecutor;
-import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -67,7 +59,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
-import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison;
@@ -79,13 +70,11 @@ import org.eclipse.hawkbit.repository.jpa.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.RolloutTargetGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
-import org.eclipse.hawkbit.repository.jpa.rollout.RolloutScheduler;
+import org.eclipse.hawkbit.repository.jpa.scheduler.RolloutScheduler;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.PauseRolloutGroupAction;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupActionEvaluator;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupConditionEvaluator;
@@ -94,11 +83,12 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRollou
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParser;
+import org.eclipse.hawkbit.repository.jpa.scheduler.AutoAssignScheduler;
+import org.eclipse.hawkbit.repository.jpa.scheduler.JpaAutoAssignExecutor;
+import org.eclipse.hawkbit.repository.jpa.scheduler.JpaRolloutHandler;
 import org.eclipse.hawkbit.repository.jpa.utils.ExceptionMapper;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
@@ -151,10 +141,12 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @EnableScheduling
 @EnableRetry
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
-@ComponentScan("org.eclipse.hawkbit.repository.jpa.management")
+@ComponentScan({ "org.eclipse.hawkbit.repository.jpa.management", "org.eclipse.hawkbit.repository.jpa.scheduler" })
 @PropertySource("classpath:/hawkbit-jpa-defaults.properties")
-@Import({ JpaConfiguration.class, RepositoryConfiguration.class, LockProperties.class, DataSourceAutoConfiguration.class,
-        SystemManagementCacheKeyGenerator.class })
+@Import({
+        RepositoryConfiguration.class,
+        JpaConfiguration.class, LockProperties.class, SystemManagementCacheKeyGenerator.class,
+        DataSourceAutoConfiguration.class})
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 public class JpaRepositoryConfiguration {
 
@@ -277,12 +269,6 @@ public class JpaRepositoryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    AfterTransactionCommitDefaultServiceExecutor afterTransactionCommitDefaultServiceExecutor() {
-        return new AfterTransactionCommitDefaultServiceExecutor();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
     QuotaManagement staticQuotaManagement(final HawkbitSecurityProperties securityProperties) {
         return new PropertiesQuotaManagement(securityProperties);
     }
@@ -348,14 +334,6 @@ public class JpaRepositoryConfiguration {
     }
 
     /**
-     * @return the singleton instance of the {@link AfterTransactionCommitExecutorHolder}
-     */
-    @Bean
-    AfterTransactionCommitExecutorHolder afterTransactionCommitExecutorHolder() {
-        return AfterTransactionCommitExecutorHolder.getInstance();
-    }
-
-    /**
      * @return {@link ExceptionMappingAspectHandler} aspect bean
      */
     @Bean
@@ -369,24 +347,6 @@ public class JpaRepositoryConfiguration {
             final RolloutExecutor rolloutExecutor, final LockRegistry lockRegistry,
             final PlatformTransactionManager txManager, final Optional<MeterRegistry> meterRegistry) {
         return new JpaRolloutHandler(tenantAware, rolloutManagement, rolloutExecutor, lockRegistry, txManager, meterRegistry);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    RolloutExecutor rolloutExecutor(
-            final ActionRepository actionRepository, final RolloutGroupRepository rolloutGroupRepository,
-            final RolloutTargetGroupRepository rolloutTargetGroupRepository,
-            final RolloutRepository rolloutRepository, final TargetManagement<? extends Target> targetManagement,
-            final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
-            final RolloutManagement rolloutManagement, final QuotaManagement quotaManagement,
-            final RolloutGroupEvaluationManager evaluationManager, final RolloutApprovalStrategy rolloutApprovalStrategy,
-            final EntityManager entityManager, final PlatformTransactionManager txManager,
-            final AfterTransactionCommitExecutor afterCommit,
-            final TenantAware tenantAware, final ContextAware contextAware, final RepositoryProperties repositoryProperties) {
-        return new JpaRolloutExecutor(actionRepository, rolloutGroupRepository, rolloutTargetGroupRepository,
-                rolloutRepository, targetManagement, deploymentManagement, rolloutGroupManagement, rolloutManagement,
-                quotaManagement, evaluationManager, rolloutApprovalStrategy, entityManager, txManager, afterCommit,
-                tenantAware, contextAware, repositoryProperties);
     }
 
     /**
@@ -426,25 +386,6 @@ public class JpaRepositoryConfiguration {
     }
 
     /**
-     * {@link AutoAssignChecker} bean.
-     *
-     * @param targetFilterQueryManagement to get all target filter queries
-     * @param targetManagement to get targets
-     * @param deploymentManagement to assign distribution sets to targets
-     * @param transactionManager to run transactions
-     * @return a new {@link AutoAssignChecker}
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    AutoAssignExecutor autoAssignExecutor(
-            final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
-            final TargetManagement<? extends Target> targetManagement,
-            final DeploymentManagement deploymentManagement,
-            final PlatformTransactionManager transactionManager, final ContextAware contextAware) {
-        return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement, transactionManager, contextAware);
-    }
-
-    /**
      * {@link AutoAssignScheduler} bean.
      * <p/>
      * Note: does not activate in test profile, otherwise it is hard to test the
@@ -454,7 +395,7 @@ public class JpaRepositoryConfiguration {
      * @param systemSecurityContext to run as system
      * @param autoAssignExecutor to run a check as tenant
      * @param lockRegistry to lock the tenant for auto assignment
-     * @return a new {@link AutoAssignChecker}
+     * @return a new {@link JpaAutoAssignExecutor}
      */
     @Bean
     @ConditionalOnMissingBean

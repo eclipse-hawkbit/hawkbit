@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.autoassign;
+package org.eclipse.hawkbit.repository.jpa.scheduler;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -45,7 +45,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * Story: Auto assign checker
  */
 @ExtendWith(MockitoExtension.class)
-class AutoAssignCheckerTest {
+class JpaAutoAssignExecutorTest {
 
     @Mock
     private TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
@@ -58,11 +58,11 @@ class AutoAssignCheckerTest {
     @Mock
     private ContextAware contextAware;
 
-    private AutoAssignChecker autoAssignChecker;
+    private JpaAutoAssignExecutor autoAssignChecker;
 
     @BeforeEach
     void before() {
-        autoAssignChecker = new AutoAssignChecker(
+        autoAssignChecker = new JpaAutoAssignExecutor(
                 targetFilterQueryManagement, targetManagement, deploymentManagement, transactionManager, contextAware);
     }
 

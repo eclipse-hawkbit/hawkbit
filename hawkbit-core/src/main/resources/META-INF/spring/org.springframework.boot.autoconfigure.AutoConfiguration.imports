@@ -1,2 +1,3 @@
+org.eclipse.hawkbit.tenancy.TenantCacheConfiguration
 org.eclipse.hawkbit.tenancy.TenantMetricsConfiguration.WebConfig
 org.eclipse.hawkbit.tenancy.TenantMetricsConfiguration.RepositoryConfig

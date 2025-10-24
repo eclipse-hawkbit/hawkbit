@@ -22,8 +22,8 @@ import org.eclipse.hawkbit.artifact.fs.FileArtifactProperties;
 import org.eclipse.hawkbit.artifact.fs.FileArtifactStorage;
 import org.eclipse.hawkbit.artifact.urlresolver.PropertyBasedArtifactUrlResolver;
 import org.eclipse.hawkbit.artifact.urlresolver.PropertyBasedArtifactUrlResolverProperties;
-import org.eclipse.hawkbit.tenancy.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.im.authentication.Hierarchy;
+import org.eclipse.hawkbit.repository.RepositoryConfiguration;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
@@ -49,10 +49,10 @@ import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
@@ -77,6 +77,10 @@ import org.springframework.security.concurrent.DelegatingSecurityContextSchedule
 @EnableAutoConfiguration
 @PropertySource("classpath:/hawkbit-test-defaults.properties")
 public class TestConfiguration implements AsyncConfigurer {
+
+    @Configuration
+    @Import(RepositoryConfiguration.class)
+    static class OverridePropertiesSourceFromRepositoryConfiguration {}
 
     @Override
     public Executor getAsyncExecutor() {
@@ -104,7 +108,7 @@ public class TestConfiguration implements AsyncConfigurer {
      */
     @Bean
     RolloutStatusCache rolloutStatusCache(final TenantAware tenantAware) {
-        return new RolloutStatusCache(tenantAware, 0);
+        return new RolloutStatusCache(tenantAware);
     }
 
     @Bean
@@ -156,11 +160,6 @@ public class TestConfiguration implements AsyncConfigurer {
             final TenantResolver tenantResolver) {
         // allow spying the security context
         return org.mockito.Mockito.spy(new SecurityContextTenantAware(authoritiesResolver, securityContextSerializer, tenantResolver));
-    }
-
-    @Bean
-    TenantAwareCacheManager cacheManager(final TenantAware tenantAware) {
-        return new TenantAwareCacheManager(new CaffeineCacheManager(), tenantAware);
     }
 
     @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)

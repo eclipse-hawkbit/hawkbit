@@ -124,5 +124,4 @@ class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTe
             return slowGroupRepo;
         }
     }
-
 }

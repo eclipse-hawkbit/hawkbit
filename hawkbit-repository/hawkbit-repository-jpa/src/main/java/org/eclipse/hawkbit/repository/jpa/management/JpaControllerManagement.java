@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor.afterCommit;
 import static org.eclipse.hawkbit.repository.model.Action.Status.DOWNLOADED;
 import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_MAX_KEY_SIZE;
@@ -70,7 +71,6 @@ import org.eclipse.hawkbit.repository.exception.SoftwareModuleNotAssignedToTarge
 import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
-import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -153,7 +153,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private final Duration maxPollingTime;
     private final PlatformTransactionManager txManager;
     private final EntityManager entityManager;
-    private final AfterTransactionCommitExecutor afterCommit;
     private final SystemSecurityContext systemSecurityContext;
     private final TenantAware tenantAware;
 
@@ -168,7 +167,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final TenantConfigurationManagement tenantConfigurationManagement, final ControllerPollProperties controllerPollProperties,
             final PlatformTransactionManager txManager, final EntityManager entityManager,
-            final AfterTransactionCommitExecutor afterCommit,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
             final ScheduledExecutorService executorService) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
@@ -190,7 +188,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 : DurationHelper.fromString(controllerPollProperties.getMaxPollingTime());
         this.txManager = txManager;
         this.entityManager = entityManager;
-        this.afterCommit = afterCommit;
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;
 
@@ -676,9 +673,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         }
 
         final Target result = targetRepository.save(jpaTarget);
-
-        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetPollEvent(result)));
-
+        afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetPollEvent(result)));
         return result;
     }
 
@@ -726,7 +721,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
         pollChunks.forEach(chunk -> {
             setLastTargetQuery(tenant, System.currentTimeMillis(), chunk);
-            chunk.forEach(controllerId -> afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
+            chunk.forEach(controllerId -> afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
                     .publishEvent(new TargetPollEvent(controllerId, tenant))));
         });
 
@@ -787,7 +782,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
             }
             toUpdate.setLastTargetQuery(System.currentTimeMillis());
-            afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetPollEvent(toUpdate)));
+            afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetPollEvent(toUpdate)));
             return targetRepository.save(toUpdate);
         }
         return toUpdate;
@@ -926,8 +921,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     private void cancelAssignDistributionSetEvent(final Action action) {
-        afterCommit.afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new CancelTargetAssignmentEvent(action)));
+        afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new CancelTargetAssignmentEvent(action)));
     }
 
     /**

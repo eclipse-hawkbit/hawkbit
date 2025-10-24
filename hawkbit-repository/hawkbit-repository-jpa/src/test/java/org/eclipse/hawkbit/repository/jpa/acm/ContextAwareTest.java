@@ -22,7 +22,7 @@ import java.util.concurrent.Callable;
 import lombok.SneakyThrows;
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
+import org.eclipse.hawkbit.repository.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;

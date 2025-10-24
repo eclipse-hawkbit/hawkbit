@@ -42,10 +42,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.protostuff</groupId>
             <artifactId>protostuff-core</artifactId>
             <optional>true</optional>

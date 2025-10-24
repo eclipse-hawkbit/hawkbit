@@ -17,9 +17,6 @@ import java.util.stream.Collectors;
 
 import jakarta.validation.constraints.NotNull;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import org.eclipse.hawkbit.tenancy.cache.TenantCacheManager;
-import org.eclipse.hawkbit.tenancy.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutStoppedEvent;
@@ -27,9 +24,9 @@ import org.eclipse.hawkbit.repository.event.remote.entity.AbstractActionEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.cache.Cache;
-import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.event.EventListener;
 
 /**
@@ -39,35 +36,17 @@ public class RolloutStatusCache {
 
     private static final String CACHE_RO_NAME = "RolloutStatus";
     private static final String CACHE_GR_NAME = "RolloutGroupStatus";
-    private static final long DEFAULT_SIZE = 50_000;
 
-    private final TenantCacheManager cacheManager;
+    private static final TenantAwareCacheManager CACHE_MANAGER = TenantAwareCacheManager.getInstance();
+
     private final TenantAware tenantAware;
 
-    /**
-     * @param tenantAware to get current tenant
-     * @param size the maximum size of the cache
-     */
-    public RolloutStatusCache(final TenantAware tenantAware, final long size) {
-        this.tenantAware = tenantAware;
-
-        final Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder().maximumSize(size);
-        final CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
-        caffeineCacheManager.setCaffeine(cacheBuilder);
-
-        this.cacheManager = new TenantAwareCacheManager(caffeineCacheManager, tenantAware);
-    }
-
-    /**
-     * @param tenantAware to get current tenant
-     */
     public RolloutStatusCache(final TenantAware tenantAware) {
-        this(tenantAware, DEFAULT_SIZE);
+        this.tenantAware = tenantAware;
     }
 
     /**
-     * Retrieves cached list of {@link TotalTargetCountActionStatus} of
-     * {@link Rollout}s.
+     * Retrieves cached list of {@link TotalTargetCountActionStatus} of {@link Rollout}s.
      *
      * @param rollouts rolloutIds to retrieve cache entries for
      * @return map of cached entries
@@ -77,8 +56,7 @@ public class RolloutStatusCache {
     }
 
     /**
-     * Retrieves cached list of {@link TotalTargetCountActionStatus} of
-     * {@link Rollout}s.
+     * Retrieves cached list of {@link TotalTargetCountActionStatus} of {@link Rollout}s.
      *
      * @param rolloutId to retrieve cache entries for
      * @return map of cached entries
@@ -88,8 +66,7 @@ public class RolloutStatusCache {
     }
 
     /**
-     * Retrieves cached list of {@link TotalTargetCountActionStatus} of
-     * {@link RolloutGroup}s.
+     * Retrieves cached list of {@link TotalTargetCountActionStatus} of {@link RolloutGroup}s.
      *
      * @param rolloutGroups rolloutGroupsIds to retrieve cache entries for
      * @return map of cached entries
@@ -99,8 +76,7 @@ public class RolloutStatusCache {
     }
 
     /**
-     * Retrieves cached list of {@link TotalTargetCountActionStatus} of
-     * {@link RolloutGroup}.
+     * Retrieves cached list of {@link TotalTargetCountActionStatus} of {@link RolloutGroup}.
      *
      * @param groupId to retrieve cache entries for
      * @return map of cached entries
@@ -120,8 +96,7 @@ public class RolloutStatusCache {
     }
 
     /**
-     * Put {@link TotalTargetCountActionStatus} for one {@link Rollout}s into
-     * cache.
+     * Put {@link TotalTargetCountActionStatus} for one {@link Rollout}s into cache.
      *
      * @param rolloutId the cache entries belong to
      * @param status list to cache
@@ -131,8 +106,7 @@ public class RolloutStatusCache {
     }
 
     /**
-     * Put {@link TotalTargetCountActionStatus} for multiple
-     * {@link RolloutGroup}s into cache.
+     * Put {@link TotalTargetCountActionStatus} for multiple {@link RolloutGroup}s into cache.
      *
      * @param put map of cached entries
      */
@@ -141,8 +115,7 @@ public class RolloutStatusCache {
     }
 
     /**
-     * Put {@link TotalTargetCountActionStatus} for multiple
-     * {@link RolloutGroup}s into cache.
+     * Put {@link TotalTargetCountActionStatus} for multiple {@link RolloutGroup}s into cache.
      *
      * @param groupId the cache entries belong to
      * @param status list to cache
@@ -154,52 +127,37 @@ public class RolloutStatusCache {
     @EventListener(classes = AbstractActionEvent.class)
     public void invalidateCachedTotalTargetCountActionStatus(final AbstractActionEvent event) {
         if (event.getRolloutId() != null) {
-            final Cache cache = tenantAware.runAsTenant(event.getTenant(), () -> cacheManager.getCache(CACHE_RO_NAME));
+            final Cache cache = tenantAware.runAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_RO_NAME));
             cache.evict(event.getRolloutId());
         }
 
         if (event.getRolloutGroupId() != null) {
-            final Cache cache = tenantAware.runAsTenant(event.getTenant(), () -> cacheManager.getCache(CACHE_GR_NAME));
+            final Cache cache = tenantAware.runAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_GR_NAME));
             cache.evict(event.getRolloutGroupId());
         }
     }
 
     @EventListener(classes = RolloutDeletedEvent.class)
     public void invalidateCachedTotalTargetCountOnRolloutDelete(final RolloutDeletedEvent event) {
-        final Cache cache = tenantAware.runAsTenant(event.getTenant(), () -> cacheManager.getCache(CACHE_RO_NAME));
+        final Cache cache = tenantAware.runAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_RO_NAME));
         cache.evict(event.getEntityId());
     }
 
     @EventListener(classes = RolloutGroupDeletedEvent.class)
     public void invalidateCachedTotalTargetCountOnRolloutGroupDelete(final RolloutGroupDeletedEvent event) {
-        final Cache cache = tenantAware.runAsTenant(event.getTenant(), () -> cacheManager.getCache(CACHE_GR_NAME));
+        final Cache cache = tenantAware.runAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_GR_NAME));
         cache.evict(event.getEntityId());
     }
 
     @EventListener(classes = RolloutStoppedEvent.class)
     public void invalidateCachedTotalTargetCountOnRolloutStopped(final RolloutStoppedEvent event) {
-        final Cache cache = tenantAware.runAsTenant(event.getTenant(), () -> cacheManager.getCache(CACHE_RO_NAME));
+        final Cache cache = tenantAware.runAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_RO_NAME));
         cache.evict(event.getRolloutId());
-
-        for (final long groupId : event.getRolloutGroupIds()) {
-            final Cache groupCache = tenantAware.runAsTenant(event.getTenant(),
-                    () -> cacheManager.getCache(CACHE_GR_NAME));
-            groupCache.evict(groupId);
-        }
+        event.getRolloutGroupIds().forEach(
+                groupId -> tenantAware.runAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_GR_NAME)).evict(groupId));
     }
 
-    /**
-     * Evicts all caches for a given tenant. All caches under a certain tenant
-     * gets evicted.
-     *
-     * @param tenant the tenant to evict caches
-     */
-    public void evictCaches(final String tenant) {
-        cacheManager.evictCaches(tenant);
-    }
-
-    private @NotNull Map<Long, List<TotalTargetCountActionStatus>> retrieveFromCache(final List<Long> ids,
-            @NotNull final Cache cache) {
+    private @NotNull Map<Long, List<TotalTargetCountActionStatus>> retrieveFromCache(final List<Long> ids, @NotNull final Cache cache) {
         return ids.stream()
                 .map(id -> cache.get(id, CachedTotalTargetCountActionStatus.class))
                 .filter(Objects::nonNull)
@@ -208,11 +166,9 @@ public class RolloutStatusCache {
 
     private List<TotalTargetCountActionStatus> retrieveFromCache(final Long id, @NotNull final Cache cache) {
         final CachedTotalTargetCountActionStatus cacheItem = cache.get(id, CachedTotalTargetCountActionStatus.class);
-
         if (cacheItem == null) {
             return Collections.emptyList();
         }
-
         return cacheItem.status();
     }
 
@@ -226,11 +182,11 @@ public class RolloutStatusCache {
     }
 
     private @NotNull Cache getRolloutStatusCache() {
-        return Objects.requireNonNull(cacheManager.getCache(CACHE_RO_NAME), "Cache '" + CACHE_RO_NAME + "' is null!");
+        return Objects.requireNonNull(CACHE_MANAGER.getCache(CACHE_RO_NAME), "Cache '" + CACHE_RO_NAME + "' is null!");
     }
 
     private @NotNull Cache getGroupStatusCache() {
-        return Objects.requireNonNull(cacheManager.getCache(CACHE_GR_NAME), "Cache '" + CACHE_RO_NAME + "' is null!");
+        return Objects.requireNonNull(CACHE_MANAGER.getCache(CACHE_GR_NAME), "Cache '" + CACHE_RO_NAME + "' is null!");
     }
 
     private record CachedTotalTargetCountActionStatus(long id, List<TotalTargetCountActionStatus> status) {}

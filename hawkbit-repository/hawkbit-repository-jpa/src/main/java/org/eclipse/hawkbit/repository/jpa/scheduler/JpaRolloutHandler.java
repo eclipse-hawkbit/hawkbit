@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa;
+package org.eclipse.hawkbit.repository.jpa.scheduler;
 
 import java.util.List;
 import java.util.Optional;
