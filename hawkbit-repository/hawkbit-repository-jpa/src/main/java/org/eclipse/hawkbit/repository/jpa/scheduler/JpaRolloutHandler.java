@@ -20,8 +20,8 @@ import org.eclipse.hawkbit.repository.RolloutExecutor;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
+import org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.tenancy.TenantMetricsConfiguration;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -86,7 +86,7 @@ public class JpaRolloutHandler implements RolloutHandler {
                 }
             });
             meterRegistry
-                    .map(mReg -> mReg.timer("hawkbit.rollout.handler.all", TenantMetricsConfiguration.TENANT_TAG, tenantAware.getCurrentTenant()))
+                    .map(mReg -> mReg.timer("hawkbit.rollout.handler.all", DefaultTenantConfiguration.TENANT_TAG, tenantAware.getCurrentTenant()))
                     .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
 
             log.debug("Finished handling of the rollouts.");
@@ -116,9 +116,8 @@ public class JpaRolloutHandler implements RolloutHandler {
         meterRegistry
                 .map(mReg -> mReg.timer(
                         "hawkbit.rollout.handler",
-                        TenantMetricsConfiguration.TENANT_TAG, tenantAware.getCurrentTenant(),
+                        DefaultTenantConfiguration.TENANT_TAG, tenantAware.getCurrentTenant(),
                         "rollout", String.valueOf(rolloutId)))
                 .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
-
     }
 }

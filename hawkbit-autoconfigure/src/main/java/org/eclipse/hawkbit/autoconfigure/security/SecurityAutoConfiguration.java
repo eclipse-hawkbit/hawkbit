@@ -58,12 +58,6 @@ import org.springframework.util.CollectionUtils;
 @Import(RepositoryConfiguration.class)
 public class SecurityAutoConfiguration {
 
-    @Bean
-    @ConditionalOnMissingBean
-    public TenantResolver tenantResolver() {
-        return new DefaultTenantResolver();
-    }
-
     /**
      * Creates a {@link ContextAware} (hence {@link TenantAware}) bean based on the given {@link UserAuthoritiesResolver},
      * {@link SecurityContextSerializer} and {@link TenantResolver}.

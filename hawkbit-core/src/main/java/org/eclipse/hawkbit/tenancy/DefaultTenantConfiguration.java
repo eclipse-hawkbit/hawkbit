@@ -17,10 +17,7 @@ import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.observation.ObservationRegistry;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import org.eclipse.hawkbit.tenancy.TenantAware.TenantResolver;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
 import org.springframework.boot.actuate.autoconfigure.observation.web.servlet.WebMvcObservationAutoConfiguration;
@@ -29,22 +26,35 @@ import org.springframework.boot.actuate.metrics.data.RepositoryTagsProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
-import org.springframework.data.repository.core.support.RepositoryMethodInvocationListener.RepositoryMethodInvocation;
+import org.springframework.data.repository.core.support.RepositoryMethodInvocationListener;
 import org.springframework.http.server.observation.DefaultServerRequestObservationConvention;
 import org.springframework.http.server.observation.ServerRequestObservationContext;
 import org.springframework.http.server.observation.ServerRequestObservationConvention;
 import org.springframework.web.filter.ServerHttpObservationFilter;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class TenantMetricsConfiguration {
+@AutoConfiguration
+public class DefaultTenantConfiguration {
 
     public static final String TENANT_TAG = "tenant";
+
+    @Bean
+    @ConditionalOnMissingBean
+    TenantAware.TenantResolver tenantResolver() {
+        return new TenantAware.DefaultTenantResolver();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    TenantAwareCacheManager cacheManager() {
+        return TenantAwareCacheManager.getInstance();
+    }
 
     @AutoConfiguration(afterName = {
             "org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration",
@@ -52,12 +62,12 @@ public class TenantMetricsConfiguration {
     @ConditionalOnProperty(name = "hawkbit.metrics.tenancy.web.enabled", havingValue = "true", matchIfMissing = true)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     @ConditionalOnClass(name = { "org.springframework.web.servlet.DispatcherServlet", "io.micrometer.observation.Observation" })
-    @ConditionalOnBean({ ObservationRegistry.class, TenantResolver.class })
+    @ConditionalOnBean({ ObservationRegistry.class, TenantAware.TenantResolver.class })
     public static class WebConfig {
 
         @Bean
         @Primary
-        public DefaultServerRequestObservationConvention serverRequestObservationConvention(final TenantResolver tenantResolver) {
+        public DefaultServerRequestObservationConvention serverRequestObservationConvention(final TenantAware.TenantResolver tenantResolver) {
             return new DefaultServerRequestObservationConvention() {
 
                 @NonNull
@@ -94,15 +104,15 @@ public class TenantMetricsConfiguration {
     @ConditionalOnClass(name = {
             "io.micrometer.core.instrument.Tag",
             "org.springframework.data.repository.core.support.RepositoryMethodInvocationListener" })
-    @ConditionalOnBean(TenantResolver.class)
+    @ConditionalOnBean(TenantAware.TenantResolver.class)
     public static class RepositoryConfig {
 
         @Bean
-        public RepositoryTagsProvider repositoryTagsProvider(final TenantResolver tenantResolver) {
+        public RepositoryTagsProvider repositoryTagsProvider(final TenantAware.TenantResolver tenantResolver) {
             return new DefaultRepositoryTagsProvider() {
 
                 @Override
-                public Iterable<Tag> repositoryTags(final RepositoryMethodInvocation invocation) {
+                public Iterable<Tag> repositoryTags(final RepositoryMethodInvocationListener.RepositoryMethodInvocation invocation) {
                     final Iterable<Tag> defaultTags = super.repositoryTags(invocation);
                     final String tenant = Optional.ofNullable(tenantResolver.resolveTenant()).orElse("n/a");
                     return () -> {

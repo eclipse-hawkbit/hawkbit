@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantMetricsConfiguration;
+import org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -86,7 +86,7 @@ public class AutoAssignScheduler {
                 meterRegistry
                         .map(mReg -> mReg.timer(
                                 "hawkbit.scheduler.executor",
-                                TenantMetricsConfiguration.TENANT_TAG, tenant))
+                                DefaultTenantConfiguration.TENANT_TAG, tenant))
                         .ifPresent(timer -> timer.record(System.nanoTime() - startNanoT, TimeUnit.NANOSECONDS));
             });
         } finally {
