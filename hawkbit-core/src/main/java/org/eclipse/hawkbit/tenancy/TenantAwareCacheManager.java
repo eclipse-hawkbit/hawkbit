@@ -19,6 +19,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.tenancy.TenantAware.TenantResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -34,6 +35,7 @@ import org.springframework.lang.Nullable;
  *     <li>If no tenant is resolved, a global cache manager is used.</li>
  * </ul>
  */
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @SuppressWarnings("java:S6548") // singleton holder ensures static access to spring resources in some places
 public class TenantAwareCacheManager implements CacheManager {
@@ -115,7 +117,12 @@ public class TenantAwareCacheManager implements CacheManager {
                         spec = defaultSpec;
                     }
                 }
-                return new CaffeineCache(n, Caffeine.from(spec).build(), false);
+                try {
+                    return new CaffeineCache(n, Caffeine.from(spec).build(), false);
+                } catch (final IllegalArgumentException e) {
+                    log.error("Invalid cache spec: {}", spec, e);
+                    throw new IllegalStateException("Invalid cache spec: " + spec, e);
+                }
             });
         }
 
