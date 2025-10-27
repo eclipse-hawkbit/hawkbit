@@ -181,7 +181,7 @@ public class RestConfiguration {
          * @param ex the exception which occurred
          * @return the entity to be responded containing the response status 500
          */
-        @ExceptionHandler(FileStreamingFailedException.class)
+        @ExceptionHandler({ FileStreamingFailedException.class, IllegalStateException.class })
         public ResponseEntity<Object> handleFileStreamingFailedException(final HttpServletRequest request, final Exception ex) {
             logRequest(request, ex);
 
@@ -274,8 +274,9 @@ public class RestConfiguration {
             return new ResponseEntity<>(createExceptionInfo(new MultiPartFileUploadException(responseCause)), HttpStatus.BAD_REQUEST);
         }
 
-        @ExceptionHandler({DataIntegrityViolationException.class})
-        public ResponseEntity<ExceptionInfo> handleDataAccessException(final HttpServletRequest request, final DataIntegrityViolationException ex) {
+        @ExceptionHandler({ DataIntegrityViolationException.class })
+        public ResponseEntity<ExceptionInfo> handleDataAccessException(final HttpServletRequest request,
+                final DataIntegrityViolationException ex) {
             if (log.isDebugEnabled()) {
                 logRequest(request, ex);
             } else {

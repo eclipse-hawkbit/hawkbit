@@ -32,13 +32,11 @@ serviceMatcher.isFromSelf(event)
 
 ### Caching
 
-Every node is maintaining its own caches independent from other nodes.  
+Every node is maintaining its own caches independent of the other nodes.  
 So there is no globally shared/synchronized cache instance within the cluster.  
 
 In order to keep nodes in sync, a **TTL (time to live)** can be set for all caches to ensure that after some time the cache is refreshed from the database.  
-To enable the TTL just set the property `hawkbit.cache.global.ttl` (value in milliseconds).  
-
-Of course, you can implement a shared cache, e.g. Redis. See [CacheAutoConfiguration](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-autoconfigure/src/main/java/org/eclipse/hawkbit/autoconfigure/cache/CacheAutoConfiguration.java).
+To enable the TTL just set the property `hawkbit.cache.global.ttl` (value in dDhHmMsS format).  
 
 ---
 
