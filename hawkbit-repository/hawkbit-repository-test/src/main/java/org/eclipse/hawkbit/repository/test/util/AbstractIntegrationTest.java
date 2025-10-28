@@ -409,8 +409,7 @@ public abstract class AbstractIntegrationTest {
         return assignDistributionSet(pset, Collections.singletonList(target));
     }
 
-    protected DistributionSetAssignmentResult assignDistributionSet(final long dsId, final String targetId,
-            final int weight) {
+    protected DistributionSetAssignmentResult assignDistributionSet(final long dsId, final String targetId, final int weight) {
         return assignDistributionSet(dsId, Collections.singletonList(targetId), weight);
     }
 

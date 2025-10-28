@@ -15,8 +15,9 @@ import jakarta.validation.constraints.NotNull;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager.CacheEvictEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -55,6 +56,7 @@ public class CleanupTestExecutionListener extends AbstractTestExecutionListener 
                 log.error("Error while delete tenant", e);
             }
         });
-        TenantAwareCacheManager.getInstance().evictTenant(null);
+        // evict global cache
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new CacheEvictEvent.Default(null, null, null));
     }
 }

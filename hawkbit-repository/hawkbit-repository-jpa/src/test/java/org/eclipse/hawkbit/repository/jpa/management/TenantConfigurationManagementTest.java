@@ -27,18 +27,20 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.T
 import org.junit.jupiter.api.Test;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
+import org.springframework.test.context.TestPropertySource;
 
 /**
  * Feature: Component Tests - Repository<br/>
  * Story: Tenant Configuration Management
  */
+@TestPropertySource(properties = {"hawkbit.cache.JpaTenantConfiguration.spec=maximumSize=0"}) // disable cache, its async processed
 class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest implements EnvironmentAware {
 
-    private Environment environment;
+    private Environment env;
 
     @Override
-    public void setEnvironment(final Environment environment) {
-        this.environment = environment;
+    public void setEnvironment(final Environment env) {
+        this.env = env;
     }
 
     /**
@@ -46,7 +48,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
      */
     @Test
     void storeTenantSpecificConfigurationAsString() {
-        final String envPropertyDefault = environment.getProperty("hawkbit.server.ddi.security.authentication.gatewaytoken.key");
+        final String envPropertyDefault = env.getProperty("hawkbit.server.ddi.security.authentication.gatewaytoken.key");
         assertThat(envPropertyDefault).isNotNull();
 
         // get the configuration from the system management
@@ -56,7 +58,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
         assertThat(defaultConfigValue.isGlobal()).isTrue();
         assertThat(defaultConfigValue.getValue()).isEqualTo(envPropertyDefault);
 
-        // update the tenant specific configuration
+        // update the tenant specific configuration, create
         final String newConfigurationValue = "thisIsAnotherTokenName";
         assertThat(newConfigurationValue).isNotEqualTo(defaultConfigValue.getValue());
         tenantConfigurationManagement.addOrUpdateConfiguration(
@@ -68,6 +70,19 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
 
         assertThat(updatedConfigurationValue.isGlobal()).isFalse();
         assertThat(updatedConfigurationValue.getValue()).isEqualTo(newConfigurationValue);
+
+        // update the tenant specific configuration, create
+        final String newConfigurationValue2 = "thisIsAnotherTokenName2";
+        assertThat(newConfigurationValue2).isNotEqualTo(updatedConfigurationValue.getValue());
+        tenantConfigurationManagement.addOrUpdateConfiguration(
+                TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, newConfigurationValue2);
+
+        // verify that new configuration value is used
+        final TenantConfigurationValue<String> updatedConfigurationValue2 = tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, String.class);
+
+        assertThat(updatedConfigurationValue2.isGlobal()).isFalse();
+        assertThat(updatedConfigurationValue2.getValue()).isEqualTo(newConfigurationValue2);
         // assertThat(tenantConfigurationManagement.getTenantConfigurations()).hasSize(1);
     }
 
@@ -94,7 +109,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
      */
     @Test
     void batchUpdateTenantSpecificConfiguration() {
-        Map<String, Serializable> configuration = new HashMap<>() {{
+        final Map<String, Serializable> configuration = new HashMap<>() {{
             put(TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, "token_123");
             put(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, true);
         }};
@@ -185,8 +200,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
 
         // delete the tenant specific configuration
         tenantConfigurationManagement.deleteConfiguration(configKey);
-        // ensure that now gateway token is set again, because is deleted and
-        // must be empty now
+        // ensure that now gateway token is set again, because is deleted and must be empty now
         assertThat(tenantConfigurationManagement.getConfigurationValue(configKey, String.class).getValue()).isEmpty();
     }
 
