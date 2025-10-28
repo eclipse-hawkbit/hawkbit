@@ -1344,7 +1344,14 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .andExpect(jsonPath("size", equalTo(10)))
                 .andExpect(jsonPath("total", equalTo(10)));
 
-        // and more complex (case insensitive) query
+        // and more complex (logical and to comparison conversion) query
+        mvc.perform(get("/rest/v1/distributionsets?q=complete==true;valid==true"))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("size", equalTo(10)))
+                .andExpect(jsonPath("total", equalTo(10)));
+
+        // and more complex (case-insensitive) query
         mvc.perform(get("/rest/v1/distributionsets?q=complete==true;valid==true;id=IN=(" + String.join(",", dsIds) + ")"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
