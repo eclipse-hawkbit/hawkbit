@@ -27,13 +27,11 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.T
 import org.junit.jupiter.api.Test;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
-import org.springframework.test.context.TestPropertySource;
 
 /**
  * Feature: Component Tests - Repository<br/>
  * Story: Tenant Configuration Management
  */
-@TestPropertySource(properties = {"hawkbit.cache.JpaTenantConfiguration.spec=maximumSize=0"}) // disable cache, its async processed
 class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest implements EnvironmentAware {
 
     private Environment env;

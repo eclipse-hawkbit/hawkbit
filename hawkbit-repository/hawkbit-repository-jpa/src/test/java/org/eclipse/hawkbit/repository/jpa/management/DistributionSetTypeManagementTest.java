@@ -36,7 +36,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.jupiter.api.Test;
@@ -72,7 +71,8 @@ class DistributionSetTypeManagementTest extends AbstractRepositoryManagementTest
 
         // remove OS
         distributionSetTypeManagement.unassignSoftwareModuleType(updatableType.getId(), osType.getId());
-        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getMandatoryModuleTypes()).containsOnly(runtimeType);
+        assertThat(distributionSetTypeManagement.findByKey(USED_BY_DS_TYPE_KEY).orElseThrow().getMandatoryModuleTypes()).containsOnly(
+                runtimeType);
     }
 
     /**

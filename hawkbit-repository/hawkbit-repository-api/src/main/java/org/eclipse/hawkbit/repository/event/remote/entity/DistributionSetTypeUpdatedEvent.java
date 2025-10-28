@@ -15,12 +15,13 @@ import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager.CacheEvictEvent;
 
 /**
  * Defines the remote event for updating a {@link SoftwareModuleType}.
  */
 @NoArgsConstructor // for serialization libs like jackson
-public class DistributionSetTypeUpdatedEvent extends RemoteEntityEvent<DistributionSetType> implements EntityUpdatedEvent {
+public class DistributionSetTypeUpdatedEvent extends RemoteEntityEvent<DistributionSetType> implements EntityUpdatedEvent, CacheEvictEvent {
 
     @Serial
     private static final long serialVersionUID = 1L;

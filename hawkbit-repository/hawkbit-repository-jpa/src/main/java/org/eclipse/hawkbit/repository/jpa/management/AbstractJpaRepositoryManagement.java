@@ -134,7 +134,6 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
     public T create(final C create) {
-        getCache().ifPresent(cache -> afterCommit(cache::clear));
         return jpaRepository.save(AccessController.Operation.CREATE, jpaEntity(create));
     }
 
@@ -142,46 +141,35 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
     public List<T> create(final Collection<C> create) {
-        getCache().ifPresent(cache -> afterCommit(cache::clear));
         return jpaRepository.saveAll(AccessController.Operation.CREATE, create.stream().map(this::jpaEntity).toList());
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public T get(final long id) {
         final Cache cache = getCache().orElse(null);
         if (cache == null) {
             return jpaRepository.getById(id);
         } else {
-            final T cached = (T) cache.get(id);
-            if (cached == null) {
-                final T entity = jpaRepository.getById(id);
-                if (entity != null) { // should not be null - but throw exception - but for sure check
-                    cache.put(id, entity);
+            try {
+                return cache.get(id, () -> jpaRepository.getById(id));
+            } catch (final Cache.ValueRetrievalException e) {
+                if (e.getCause() instanceof EntityNotFoundException enf) {
+                    throw enf;
+                } else {
+                    throw e;
                 }
-                return entity;
-            } else {
-                return cached;
             }
         }
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Optional<T> find(final long id) {
         final Cache cache = getCache().orElse(null);
         if (cache == null) {
             return jpaRepository.findById(id);
         } else {
-            final T cached = (T) cache.get(id);
-            if (cached == null) {
-                final Optional<T> entity = jpaRepository.findById(id);
-                // should not be null - but throw exception - but for sure check
-                entity.ifPresent(t -> cache.put(id, t));
-                return entity;
-            } else {
-                return Optional.of(cached);
-            }
+            // we cache only value - not optionals
+            return Optional.ofNullable(cache.get(id, () -> jpaRepository.findById(id).orElse(null)));
         }
     }
 
@@ -226,7 +214,6 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
     @SuppressWarnings("java:S1066") // javaS1066 - better readable that way
     public T update(final U update) {
-        getCache().ifPresent(cache -> afterCommit(() -> cache.evict(update.getId())));
         final T entity = getValid(update.getId());
         // update getId has no setter in target JPA entity but shall have getter and the value shall be the same
         // otherwise the Utils will throw an exception that there is no counterpart setter for getId
@@ -264,7 +251,6 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
         if (toSave.isEmpty()) {
             return toUpdate;
         } else {
-            getCache().ifPresent(cache -> afterCommit(() -> toSave.forEach(updated -> cache.evict(updated.getId()))));
             final List<T> savedEntities = jpaRepository.saveAll(toSave);
             final Map<Long, T> result = new HashMap<>(toUpdate);
             for (final T savedEntity : savedEntities) {
@@ -278,7 +264,6 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
     public void delete(final long id) {
-        getCache().ifPresent(cache -> afterCommit(() -> cache.evict(id)));
         delete0(List.of(id));
     }
 
@@ -286,7 +271,6 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
     public void delete(final Collection<Long> ids) {
-        getCache().ifPresent(cache -> afterCommit(() -> ids.forEach(cache::evict)));
         delete0(ids);
     }
 

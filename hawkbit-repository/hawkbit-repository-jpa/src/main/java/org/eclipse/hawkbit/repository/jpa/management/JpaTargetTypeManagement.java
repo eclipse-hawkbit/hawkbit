@@ -31,7 +31,9 @@ import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
+import org.springframework.cache.Cache;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.retry.annotation.Backoff;
@@ -77,6 +79,12 @@ public class JpaTargetTypeManagement
 
         super.delete0(ids);
     }
+
+    @Override
+    protected Optional<Cache> getCache() {
+        return Optional.of(TenantAwareCacheManager.getInstance().getCache(JpaTargetType.class.getSimpleName()));
+    }
+
 
     @Override
     @Cacheable(value = CACHE_TARGET_TYPE_NAME, key = "#key")

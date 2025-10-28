@@ -20,7 +20,9 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleTypeRepository;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
+import org.springframework.cache.Cache;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,6 +42,11 @@ public class JpaSoftwareModuleTypeManagement
         super(softwareModuleTypeRepository, entityManager);
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleRepository = softwareModuleRepository;
+    }
+
+    @Override
+    protected Optional<Cache> getCache() {
+        return Optional.of(TenantAwareCacheManager.getInstance().getCache(JpaSoftwareModuleType.class.getSimpleName()));
     }
 
     @Override
