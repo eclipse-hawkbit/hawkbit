@@ -14,12 +14,13 @@ import java.io.Serial;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager.CacheEvictEvent;
 
 /**
  * Defines the remote event of creating a new {@link DistributionSetType}.
  */
 @NoArgsConstructor // for serialization libs like jackson
-public class DistributionSetTypeCreatedEvent extends RemoteEntityEvent<DistributionSetType> implements EntityCreatedEvent {
+public class DistributionSetTypeCreatedEvent extends RemoteEntityEvent<DistributionSetType> implements EntityCreatedEvent, CacheEvictEvent {
 
     @Serial
     private static final long serialVersionUID = 1L;

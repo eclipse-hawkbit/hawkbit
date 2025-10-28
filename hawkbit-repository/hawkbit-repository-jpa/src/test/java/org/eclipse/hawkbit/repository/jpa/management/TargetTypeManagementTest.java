@@ -74,7 +74,7 @@ class TargetTypeManagementTest extends AbstractRepositoryManagementTest<TargetTy
     @ExpectEvents({ @Expect(type = TargetTypeUpdatedEvent.class) })
     void failIfReferNotExistingEntity() {
         verifyThrownExceptionBy(() -> targetTypeManagement.delete(NOT_EXIST_IDL), "TargetType");
-        verifyThrownExceptionBy(() -> targetTypeManagement.update(Update.builder().id(NOT_EXIST_IDL).build()),"TargetType");
+        verifyThrownExceptionBy(() -> targetTypeManagement.update(Update.builder().id(NOT_EXIST_IDL).build()), "TargetType");
     }
 
     /**

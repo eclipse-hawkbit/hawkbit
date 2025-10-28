@@ -12,16 +12,12 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import java.util.List;
-
 import jakarta.validation.ConstraintViolationException;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement.Create;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement.Update;
-import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.junit.jupiter.api.Test;

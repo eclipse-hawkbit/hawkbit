@@ -15,12 +15,13 @@ import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityDeletedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager.CacheEvictEvent;
 
 /**
  * Defines the remote event of deleting a {@link DistributionSetType}.
  */
 @NoArgsConstructor // for serialization libs like jackson
-public class DistributionSetTypeDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
+public class DistributionSetTypeDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent, CacheEvictEvent {
 
     @Serial
     private static final long serialVersionUID = 1L;

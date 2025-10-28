@@ -14,12 +14,13 @@ import java.io.Serial;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager.CacheEvictEvent;
 
 /**
  * Defines the remote event for updating a {@link TargetType}.
  */
 @NoArgsConstructor // for serialization libs like jackson
-public class TargetTypeUpdatedEvent extends RemoteEntityEvent<TargetType> implements EntityUpdatedEvent {
+public class TargetTypeUpdatedEvent extends RemoteEntityEvent<TargetType> implements EntityUpdatedEvent, CacheEvictEvent {
 
     @Serial
     private static final long serialVersionUID = 1L;
