@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.jpa.rollout.BlockWhenFullPolicy;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantMetricsConfiguration;
+import org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -94,7 +94,7 @@ public class RolloutScheduler {
         meterRegistry
                 .map(mReg -> mReg.timer(
                         "hawkbit.rollout.scheduler",
-                        TenantMetricsConfiguration.TENANT_TAG, tenant))
+                        DefaultTenantConfiguration.TENANT_TAG, tenant))
                 .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
     }
 
