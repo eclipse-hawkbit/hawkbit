@@ -66,7 +66,7 @@ import org.springframework.core.annotation.Order;
 @Table(name = "sp_distribution_set",
         uniqueConstraints = { @UniqueConstraint(columnNames = { "name", "version", "tenant" }, name = "uk_distribution_set") },
         indexes = {
-                @Index(name = "sp_idx_distribution_set_01", columnList = "tenant,deleted,complete"),
+                @Index(name = "sp_idx_distribution_set_01", columnList = "tenant,deleted"),
                 @Index(name = "sp_idx_distribution_set_prim", columnList = "tenant,id") })
 @NamedEntityGraph(name = "DistributionSet.detail",
         attributeNodes = { @NamedAttributeNode("modules"), @NamedAttributeNode("tags"), @NamedAttributeNode("type") })
