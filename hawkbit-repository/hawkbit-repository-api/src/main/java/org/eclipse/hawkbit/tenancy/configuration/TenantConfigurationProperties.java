@@ -105,17 +105,17 @@ public class TenantConfigurationProperties {
          */
         public static final String REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED = "repository.actions.autoclose.enabled";
         /**
-         * Switch to enable/disable automatic action cleanup.
-         */
-        public static final String ACTION_CLEANUP_ENABLED = "action.cleanup.enabled";
-        /**
          * Specifies the action expiry in milliseconds.
          */
-        public static final String ACTION_CLEANUP_ACTION_EXPIRY = "action.cleanup.actionExpiry";
+        public static final String ACTION_CLEANUP_AUTO_EXPIRY = "action.cleanup.auto.expiry";
         /**
          * Specifies the action status.
          */
-        public static final String ACTION_CLEANUP_ACTION_STATUS = "action.cleanup.actionStatus";
+        public static final String ACTION_CLEANUP_AUTO_STATUS = "action.cleanup.auto.status";
+        /**
+         * Configuration value for percentage of oldest actions to be cleaned if @maxActionsPerTarget quota is hit
+         */
+        public static final String ACTION_PURGE_PERCENTAGE_ON_QUOTA_HIT = "action.cleanup.onQuotaHit.percent";
         /**
          * Switch to enable/disable the multi-assignment feature.
          */
@@ -132,11 +132,6 @@ public class TenantConfigurationProperties {
          * Switch to enable/disable the implicit locking
          */
         public static final String IMPLICIT_LOCK_ENABLED = "implicit.lock.enabled";
-
-        /**
-         * Configuration value for percentage of oldest actions to be cleaned if @maxActionsPerTarget quota is hit
-         */
-        public static final String ACTIONS_PURGE_PERCENTAGE_ON_QUOTA_HIT = "actions.cleanup.onQuotaHit.percent";
 
         private static final Map<Class<? extends Serializable>, TenantConfigurationValidator> DEFAULT_TYPE_VALIDATORS = Map.of(
                 Boolean.class, new TenantConfigurationBooleanValidator(),

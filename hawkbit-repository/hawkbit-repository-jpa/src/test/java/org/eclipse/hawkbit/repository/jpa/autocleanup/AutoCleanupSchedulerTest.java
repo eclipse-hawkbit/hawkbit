@@ -11,10 +11,11 @@ package org.eclipse.hawkbit.repository.jpa.autocleanup;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoCleanupScheduler.CleanupTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,12 +45,10 @@ class AutoCleanupSchedulerTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void executeHandlerChain() {
-
-        new AutoCleanupScheduler(systemManagement, systemSecurityContext, lockRegistry, Arrays.asList(
-                new SuccessfulCleanup(), new SuccessfulCleanup(), new FailingCleanup(), new SuccessfulCleanup())).run();
-
+        new AutoCleanupScheduler(
+                List.of(new SuccessfulCleanup(), new SuccessfulCleanup(), new FailingCleanup(), new SuccessfulCleanup()),
+                systemManagement, systemSecurityContext, lockRegistry).run();
         assertThat(counter.get()).isEqualTo(4);
-
     }
 
     private class SuccessfulCleanup implements CleanupTask {

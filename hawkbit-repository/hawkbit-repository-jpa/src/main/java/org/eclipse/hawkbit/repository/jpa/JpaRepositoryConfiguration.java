@@ -47,7 +47,6 @@ import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoActionCleanup;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoCleanupScheduler;
-import org.eclipse.hawkbit.repository.jpa.autocleanup.CleanupTask;
 import org.eclipse.hawkbit.repository.jpa.cluster.DistributedLockRepository;
 import org.eclipse.hawkbit.repository.jpa.cluster.LockProperties;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
@@ -416,8 +415,7 @@ public class JpaRepositoryConfiguration {
      * @return a new {@link AutoActionCleanup} bean
      */
     @Bean
-    CleanupTask actionCleanup(final DeploymentManagement deploymentManagement,
-            final TenantConfigurationManagement configManagement) {
+    AutoCleanupScheduler.CleanupTask actionCleanup(final DeploymentManagement deploymentManagement, final TenantConfigurationManagement configManagement) {
         return new AutoActionCleanup(deploymentManagement, configManagement);
     }
 
@@ -434,10 +432,10 @@ public class JpaRepositoryConfiguration {
     @ConditionalOnMissingBean
     @Profile("!test")
     @ConditionalOnProperty(prefix = "hawkbit.autocleanup.scheduler", name = "enabled", matchIfMissing = true)
-    AutoCleanupScheduler autoCleanupScheduler(final SystemManagement systemManagement,
-            final SystemSecurityContext systemSecurityContext, final LockRegistry lockRegistry,
-            final List<CleanupTask> cleanupTasks) {
-        return new AutoCleanupScheduler(systemManagement, systemSecurityContext, lockRegistry, cleanupTasks);
+    AutoCleanupScheduler autoCleanupScheduler(
+            final List<AutoCleanupScheduler.CleanupTask> cleanupTasks,
+            final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext, final LockRegistry lockRegistry) {
+        return new AutoCleanupScheduler(cleanupTasks, systemManagement, systemSecurityContext, lockRegistry);
     }
 
     /**
