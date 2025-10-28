@@ -140,7 +140,7 @@ class ManagementSecurityTest extends AbstractJpaIntegrationTest {
                             // jacoco adds some methods with bytecode instrumentation
                             .filter(method -> !"$jacocoInit".equals(method.getName()))
                             // skip maxAssignmentsExceededHandler in DeploymentManagement since it throws quota exception
-                            // because of actions.cleanup.onQuotaHit.percent not configured
+                            // because of action.cleanup.onQuotaHit.percent not configured
                             // other option would be to configure it for all tests
                             .filter(method -> !"handleMaxAssignmentsExceeded".equals(method.getName()))
                             .map(method -> Arguments.of(clazz, method)))

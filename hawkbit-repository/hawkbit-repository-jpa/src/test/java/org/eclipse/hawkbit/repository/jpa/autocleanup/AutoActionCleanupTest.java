@@ -10,9 +10,8 @@
 package org.eclipse.hawkbit.repository.jpa.autocleanup;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_CLEANUP_ACTION_EXPIRY;
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_CLEANUP_ACTION_STATUS;
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_CLEANUP_ENABLED;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_CLEANUP_AUTO_EXPIRY;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_CLEANUP_AUTO_STATUS;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -44,7 +43,7 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
     @Test
     void runningActionsAreNotCleanedUp() {
         // cleanup config for this test case
-        setupCleanupConfiguration(true, 0, Action.Status.CANCELED, Action.Status.ERROR);
+        setupCleanupConfiguration(0, Action.Status.CANCELED, Action.Status.ERROR);
 
         final Target trg1 = testdataFactory.createTarget("trg1");
         final Target trg2 = testdataFactory.createTarget("trg2");
@@ -69,7 +68,7 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
     @Test
     void cleanupDisabled() {
         // cleanup config for this test case
-        setupCleanupConfiguration(false, 0, Action.Status.CANCELED);
+        setupCleanupConfiguration(-1L, Action.Status.CANCELED);
 
         final Target trg1 = testdataFactory.createTarget("trg1");
         final Target trg2 = testdataFactory.createTarget("trg2");
@@ -96,7 +95,7 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
     @Test
     void canceledAndFailedActionsAreCleanedUp() {
         // cleanup config for this test case
-        setupCleanupConfiguration(true, 0, Action.Status.CANCELED, Action.Status.ERROR);
+        setupCleanupConfiguration( 0, Action.Status.CANCELED, Action.Status.ERROR);
 
         final Target trg1 = testdataFactory.createTarget("trg1");
         final Target trg2 = testdataFactory.createTarget("trg2");
@@ -129,7 +128,7 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
     @Test
     void canceledActionsAreCleanedUp() {
         // cleanup config for this test case
-        setupCleanupConfiguration(true, 0, Action.Status.CANCELED);
+        setupCleanupConfiguration(0, Action.Status.CANCELED);
 
         final Target trg1 = testdataFactory.createTarget("trg1");
         final Target trg2 = testdataFactory.createTarget("trg2");
@@ -164,7 +163,7 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
     @SuppressWarnings("squid:S2925")
     void canceledAndFailedActionsAreCleanedUpWhenExpired() throws InterruptedException {
         // cleanup config for this test case
-        setupCleanupConfiguration(true, 500, Action.Status.CANCELED, Action.Status.ERROR);
+        setupCleanupConfiguration(500, Action.Status.CANCELED, Action.Status.ERROR);
 
         final Target trg1 = testdataFactory.createTarget("trg1");
         final Target trg2 = testdataFactory.createTarget("trg2");
@@ -206,11 +205,10 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(id).status(Status.ERROR).build());
     }
 
-    private void setupCleanupConfiguration(final boolean cleanupEnabled, final long expiry, final Status... status) {
-        tenantConfigurationManagement.addOrUpdateConfiguration(ACTION_CLEANUP_ENABLED, cleanupEnabled);
-        tenantConfigurationManagement.addOrUpdateConfiguration(ACTION_CLEANUP_ACTION_EXPIRY, expiry);
+    private void setupCleanupConfiguration(final long expiry, final Status... status) {
+        tenantConfigurationManagement.addOrUpdateConfiguration(ACTION_CLEANUP_AUTO_EXPIRY, expiry);
         tenantConfigurationManagement.addOrUpdateConfiguration(
-                ACTION_CLEANUP_ACTION_STATUS,
+                ACTION_CLEANUP_AUTO_STATUS,
                 Arrays.stream(status).map(Status::toString).collect(Collectors.joining(",")));
     }
 }
