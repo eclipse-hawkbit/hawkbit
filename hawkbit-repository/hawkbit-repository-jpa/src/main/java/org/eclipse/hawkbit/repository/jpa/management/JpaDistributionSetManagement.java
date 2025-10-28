@@ -135,8 +135,11 @@ public class JpaDistributionSetManagement
                         sanitizedChildren.add(child);
                     }
                 });
-                specList.add(QLSupport.getInstance()
-                        .buildSpec(new Node.Logical(Node.Logical.Operator.AND, sanitizedChildren), DistributionSetFields.class));
+                specList.add(QLSupport.getInstance().buildSpec(
+                        sanitizedChildren.size() == 1
+                                ? sanitizedChildren.get(0)
+                                : new Node.Logical(Node.Logical.Operator.AND, sanitizedChildren),
+                        DistributionSetFields.class));
             }
             if (completedComparison.get() != null) { // really a comparison
                 log.warn("Usage of 'complete' in RSQL is deprecated and will be removed in future: {}", node);
