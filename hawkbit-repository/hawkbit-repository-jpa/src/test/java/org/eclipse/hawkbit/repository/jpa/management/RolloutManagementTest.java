@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -61,6 +60,7 @@ import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -1865,11 +1865,18 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
+        final int amountTargetsPerGroup = amountTargetsForRollout / amountGroups;
         final String successCondition = "50";
         final String errorCondition = "80";
         final Rollout createdRollout = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(
                 amountTargetsForRollout,
                 amountOtherTargets, amountGroups, successCondition, errorCondition);
+        final Page<JpaRolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutId(createdRollout.getId(), PAGE);
+        assertThat(rolloutGroups.getTotalElements()).isEqualTo(amountGroups);
+
+        for (JpaRolloutGroup group : rolloutGroups) {
+            assertThat(rolloutTargetGroupRepository.countByRolloutGroup(group)).isEqualTo(amountTargetsPerGroup);
+        }
 
         // test
         rolloutManagement.delete(createdRollout.getId());
@@ -1879,8 +1886,10 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final Optional<JpaRollout> deletedRollout = rolloutRepository.findById(createdRollout.getId());
         assertThat(deletedRollout).isNotPresent();
         assertThat(rolloutGroupRepository.countByRolloutId(createdRollout.getId())).isZero();
-        await().atMost(Duration.ofSeconds(10)).pollInterval(Duration.ofSeconds(1))
-                .until(() -> rolloutTargetGroupRepository.count() == 0);
+
+        for (JpaRolloutGroup group : rolloutGroups) {
+            assertThat(rolloutTargetGroupRepository.countByRolloutGroup(group)).isZero();
+        }
     }
 
     @Test
