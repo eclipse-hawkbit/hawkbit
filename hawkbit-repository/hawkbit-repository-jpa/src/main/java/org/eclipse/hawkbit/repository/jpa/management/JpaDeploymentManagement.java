@@ -88,7 +88,6 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
@@ -629,7 +628,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private int getActionsPurgePercentage() {
-        return getConfigValue(TenantConfigurationKey.ACTION_PURGE_PERCENTAGE_ON_QUOTA_HIT, Integer.class);
+        return getConfigValue(TenantConfigurationKey.ACTION_CLEANUP_ON_QUOTA_HIT_PERCENTAGE, Integer.class);
     }
 
     protected boolean isActionsAutocloseEnabled() {

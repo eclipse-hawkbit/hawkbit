@@ -1649,7 +1649,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 () -> assignDistributionSet(exceededQuotaDsAssign.getId(), target.getControllerId()));
 
         // set purge config to 25 %
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.ACTION_PURGE_PERCENTAGE_ON_QUOTA_HIT, 25);
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.ACTION_CLEANUP_ON_QUOTA_HIT_PERCENTAGE, 25);
 
         // assign again
         assignDistributionSet(exceededQuotaDsAssign.getId(), target.getControllerId());
@@ -1688,7 +1688,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertEquals(20, deploymentManagement.countActionsByTarget(target.getControllerId()));
 
         // set purge config to 25 %
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.ACTION_PURGE_PERCENTAGE_ON_QUOTA_HIT, 25);
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.ACTION_CLEANUP_ON_QUOTA_HIT_PERCENTAGE, 25);
         rolloutHandler.handleAll();
         assertEquals(16, deploymentManagement.countActionsByTarget(target.getControllerId()));
 
@@ -1709,7 +1709,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             rolloutHandler.handleAll();
         }
 
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.ACTION_PURGE_PERCENTAGE_ON_QUOTA_HIT, 25);
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.ACTION_CLEANUP_ON_QUOTA_HIT_PERCENTAGE, 25);
         deploymentManagement.handleMaxAssignmentsExceeded(target.getId(), 5L, new AssignmentQuotaExceededException());
         // only 3 actions should be deleted in such case :
         assertEquals(15, deploymentManagement.countActionsByTarget(target.getControllerId()));
