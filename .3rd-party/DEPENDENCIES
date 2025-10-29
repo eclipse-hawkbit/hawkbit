@@ -11,7 +11,7 @@ maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jdk8/2.19.2, 
 maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-joda/2.19.2, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.19.2, Apache-2.0, approved, #23299
 maven/mavencentral/com.fasterxml.jackson.module/jackson-module-parameter-names/2.19.2, Apache-2.0, approved, clearlydefined
-maven/mavencentral/com.fasterxml/classmate/1.7.1, , restricted, clearlydefined
+maven/mavencentral/com.fasterxml/classmate/1.7.1, Apache-2.0, approved, #24482
 maven/mavencentral/com.github.ben-manes.caffeine/caffeine/3.2.2, Apache-2.0 AND (Apache-2.0 AND CC0-1.0), approved, #18889
 maven/mavencentral/com.github.javaparser/javaparser-core/3.26.4, (Apache-2.0 AND LGPL-2.1-or-later AND LGPL-3.0 AND LGPL-3.0-only) OR (Apache-2.0 AND LGPL-2.1-or-later AND LGPL-3.0-only), approved, clearlydefined
 maven/mavencentral/com.github.javaparser/javaparser-symbol-solver-core/3.26.4, Apache-2.0 OR (Apache-2.0 AND LGPL-3.0) OR (Apache-2.0 AND LGPL-3.0-only) OR (LGPL-3.0 AND LGPL-3.0-only), approved, clearlydefined
@@ -198,7 +198,7 @@ maven/mavencentral/org.apache.commons/commons-fileupload2-core/2.0.0-M4, Apache-
 maven/mavencentral/org.apache.commons/commons-fileupload2-jakarta-servlet6/2.0.0-M4, Apache-2.0, approved, #21710
 maven/mavencentral/org.apache.commons/commons-lang3/3.17.0, Apache-2.0, approved, #16044
 maven/mavencentral/org.apache.commons/commons-text/1.14.0, Apache-2.0, approved, #22632
-maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.5.1, Apache-2.0 AND MIT, restricted, clearlydefined
+maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.5.1, Apache-2.0 AND MPL-2.0, approved, #24483
 maven/mavencentral/org.apache.httpcomponents.core5/httpcore5-h2/5.3.6, Apache-2.0, approved, #16867
 maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.3.6, Apache-2.0, approved, #16866
 maven/mavencentral/org.apache.httpcomponents/httpclient/4.5.14, Apache-2.0, approved, #15248
@@ -235,7 +235,7 @@ maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib/1.9.25, Apache-2.0, approv
 maven/mavencentral/org.jetbrains/annotations/13.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.jline/jline-builtins/3.30.4, BSD-3-Clause, approved, clearlydefined
 maven/mavencentral/org.jline/jline-console/3.30.4, BSD-3-Clause, approved, clearlydefined
-maven/mavencentral/org.jline/jline-native/3.30.4, BSD-3-Clause, approved, clearlydefined
+maven/mavencentral/org.jline/jline-native/3.30.4, BSD-3-Clause AND Apache-2.0, approved, #24519
 maven/mavencentral/org.jline/jline-reader/3.30.4, BSD-3-Clause, approved, clearlydefined
 maven/mavencentral/org.jline/jline-style/3.30.4, BSD-3-Clause, approved, clearlydefined
 maven/mavencentral/org.jline/jline-terminal/3.30.4, BSD-3-Clause AND Apache-2.0, approved, #23127
@@ -337,6 +337,6 @@ maven/mavencentral/org.springframework/spring-webflux/6.2.12, Apache-2.0, approv
 maven/mavencentral/org.springframework/spring-webmvc/6.2.12, Apache-2.0, approved, #17532
 maven/mavencentral/org.springframework/spring-websocket/6.2.12, Apache-2.0, approved, #18223
 maven/mavencentral/org.webjars/swagger-ui/5.28.1, Apache-2.0 AND (Apache-2.0 AND MIT), approved, #23264
-maven/mavencentral/org.webjars/webjars-locator-lite/1.1.2, , restricted, clearlydefined
+maven/mavencentral/org.webjars/webjars-locator-lite/1.1.2, MIT, approved, #24484
 maven/mavencentral/org.xmlunit/xmlunit-core/2.10.4, Apache-2.0, approved, #14590
 maven/mavencentral/org.yaml/snakeyaml/2.4, Apache-2.0, approved, #19469
