@@ -115,7 +115,7 @@ public class TenantConfigurationProperties {
         /**
          * Configuration value for percentage of oldest actions to be cleaned if @maxActionsPerTarget quota is hit
          */
-        public static final String ACTION_PURGE_PERCENTAGE_ON_QUOTA_HIT = "action.cleanup.onQuotaHit.percent";
+        public static final String ACTION_CLEANUP_ON_QUOTA_HIT_PERCENTAGE = "action.cleanup.onQuotaHit.percent";
         /**
          * Switch to enable/disable the multi-assignment feature.
          */
