@@ -41,6 +41,7 @@ class PollingTimeTest {
     @Test
     void testComplexWithOverrides() {
         assertExpectedComplexWithOverrides("01:00:00~10%, group == 'eu' -> 00:02:00~15%, status != in_sync -> 00:05:00");
+        assertExpectedComplexWithOverrides("PT1H~10%, group == 'eu' -> PT2M~15%, status != in_sync -> PT5M");
     }
 
     @Test
@@ -48,16 +49,36 @@ class PollingTimeTest {
         assertExpectedComplexWithOverrides("01:00:00~10%, group == 'eu'  -> 00:02:00~15%, status != in_sync ->00:05:00");
         assertExpectedComplexWithOverrides(" 01:00:00~10%, group == 'eu'  -> 00:02:00~15%, status != in_sync ->00:05:00  ");
         assertExpectedComplexWithOverrides(" 01:00:00~10% , group == 'eu'  -> 00:02:00 ~15%, status != in_sync ->00:05:00  ");
+        assertExpectedComplexWithOverrides("PT1H~10%, group == 'eu'  -> PT2M~15%, status != in_sync ->PT5M");
+        assertExpectedComplexWithOverrides(" PT1H~10%, group == 'eu'  -> PT2M~15%, status != in_sync ->PT5M");
+        assertExpectedComplexWithOverrides(" PT1H~10% , group == 'eu'  -> PT2M~15%, status != in_sync ->PT5M");
+    }
+
+    @Test
+    void testComplexWithOverridesWithCommaInQl() {
+        assertExpectedComplexWithOverrides(
+                "01:00:00~10%, group == 'eu' -> 00:02:00~15%, status =in= (in_sync,pending) -> 00:05:00",
+                "group == 'eu'", "status =in= (in_sync,pending)");
+        assertExpectedComplexWithOverrides(
+                "PT1H~10%, group == 'eu' -> PT2M~15%, status =in= (in_sync,pending) -> PT5M",
+                "group == 'eu'", "status =in= (in_sync,pending)");
+        assertExpectedComplexWithOverrides(
+                "01:00:00~10%, group == 'eu' -> 00:02:00~15%, status =in= (in_sync,pending) -> 00:05:00, region == us -> 00:10:00",
+                "group == 'eu'", "status =in= (in_sync,pending)", "region == us");
     }
 
     private static void assertExpectedComplexWithOverrides(final String pollingTimeStr) {
+        assertExpectedComplexWithOverrides(pollingTimeStr, "group == 'eu'", "status != in_sync");
+    }
+
+    private static void assertExpectedComplexWithOverrides(final String pollingTimeStr, final String... expectedQls) {
         final PollingTime pollingTime = new PollingTime(pollingTimeStr);
         assertThat(pollingTime.getPollingInterval().getInterval()).hasToString("PT1H");
         assertThat(pollingTime.getPollingInterval().getDeviationPercent()).isEqualTo(10);
-        assertThat(pollingTime.getOverrides().get(0).qlStr()).isEqualTo("group == 'eu'");
+        assertThat(pollingTime.getOverrides().get(0).qlStr()).isEqualTo(expectedQls[0]);
         assertThat(pollingTime.getOverrides().get(0).pollingInterval().getInterval()).hasToString("PT2M");
         assertThat(pollingTime.getOverrides().get(0).pollingInterval().getDeviationPercent()).isEqualTo(15);
-        assertThat(pollingTime.getOverrides().get(1).qlStr()).isEqualTo("status != in_sync");
+        assertThat(pollingTime.getOverrides().get(1).qlStr()).isEqualTo(expectedQls[1]);
         assertThat(pollingTime.getOverrides().get(1).pollingInterval().getInterval()).hasToString("PT5M");
         assertThat(pollingTime.getOverrides().get(1).pollingInterval().getDeviationPercent()).isZero();
     }
