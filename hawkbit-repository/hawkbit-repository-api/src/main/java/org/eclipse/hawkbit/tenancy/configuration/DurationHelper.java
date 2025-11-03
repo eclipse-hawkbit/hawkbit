@@ -18,39 +18,36 @@ import lombok.NoArgsConstructor;
 
 /**
  * This class is a helper for converting a duration into a string and for the other way. The string is in the format expected
- * in configuration and database - in {@link Duration} default format or in custom format like "01:00:00" or "01:01:50:50"
- * (starting with seconds, minutes, hours, days from the end).
+ * in configuration and database - in {@link Duration} default format or in custom format like "01:00:00" or standard ISO-8601.
  */
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public final class DurationHelper {
 
     private static final DateTimeFormatter DURATION_FORMATER = DateTimeFormatter.ofPattern("HH:mm:ss");
-    private static final long SECONDS_PER_DAY = 24 * 60 * 60L; // 24 hours * 60 minutes * 60 seconds
     private static final Duration DAY = Duration.ofDays(1);
 
     /**
      * Converts a Duration into a formatted String
      *
      * @param duration duration, which will be converted into a formatted String
-     * @return String in the duration format, specified as HH:mm:ss or d+:HH:mm:ss
+     * @return String in the duration format, specified as HH:mm:ss (of possible, i.e. less than a day) or ISO-8601 format
      */
     public static String toString(final Duration duration) {
         if (duration == null) {
             return null;
         }
 
-        if (duration.compareTo(DAY) < 0) { // backward compatible HH:mm:ss
+        if (duration.compareTo(DAY) < 0) { // backward compatible HH:mm:ss (if possible, could be sent to devices via DDI)
             return LocalTime.ofSecondOfDay(duration.toSeconds()).format(DURATION_FORMATER);
-        } else { // custom format d+:HH:mm:ss
-            return duration.toDays() + ":" + LocalTime.ofSecondOfDay(duration.toSeconds() % SECONDS_PER_DAY).format(DURATION_FORMATER);
+        } else { // ISO-8601
+            return duration.toString();
         }
     }
 
     /**
      * Converts a formatted String into a Duration object.
      *
-     * @param durationStr String in {@link Duration} default format or in custom format like "01:00:00" or "01:01:50:50"
-     *                    (starting with seconds, minutes, hours, days from the end)
+     * @param durationStr String in {@link Duration} default format or in custom format like "01:00:00" or standard ISO-8601
      * @return duration as a {@link Duration} object
      * @throws DateTimeParseException when String is in wrong format
      */
@@ -76,12 +73,6 @@ public final class DurationHelper {
                         .ofHours(Long.parseLong(split[0]))
                         .plusMinutes(Long.parseLong(split[1]))
                         .plusSeconds(Long.parseLong(split[2]));
-            } else if (split.length == 4) { // d:HH:mm:ss
-                return Duration
-                        .ofDays(Long.parseLong(split[0]))
-                        .plusHours(Long.parseLong(split[1]))
-                        .plusMinutes(Long.parseLong(split[2]))
-                        .plusSeconds(Long.parseLong(split[3]));
             } else {
                 throw new IllegalArgumentException("No more then 4 chunks (split by ':') are allowed in duration");
             }

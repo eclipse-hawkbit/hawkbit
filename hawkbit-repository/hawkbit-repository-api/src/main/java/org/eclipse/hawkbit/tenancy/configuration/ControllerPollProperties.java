@@ -28,24 +28,28 @@ public class ControllerPollProperties implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Maximum polling time that can be configured system-wide and by tenant in HH:mm:ss notation.
-     */
-    private String maxPollingTime = "23:59:59";
-
-    /**
-     * Minimum polling time that can be configured by a tenant in HH:mm:ss notation.
+     * Minimum polling time that can be configured by a tenant in HH:mm:ss or ISO-8601 notation.
      */
     private String minPollingTime = "00:00:30";
 
     /**
-     * Controller polling time that can be configured system-wide and by tenant in HH:mm:ss(~\d{1,2}%)? notation, plus
+     * Maximum polling time that can be configured system-wide and by tenant in HH:mm:ss or ISO-8601 notation.
+     */
+    private String maxPollingTime = "23:59:59";
+
+    /**
+     * Controller polling time that can be configured system-wide and by tenant in (HH:mm:ss|ISO-8601)(~\d{1,2}%)? notation, plus
      * followed (optionally and ordered) by a comma separated @lt;QL filter@gt; -@gt; polling time that overrides the
      * default polling time for the targets that match the filter.
+     * <p/>
+     * If the computed polling time returned by DDI to device (i.e. poling time + deviation) is not less then a day  then it will be
+     * sent to device in ISO-8601 format. This may brake backward compatibility for devices expecting polling time in HH:mm:ss format.
+     * In order to prevent this, for legacy devices, keep the maxPollingTime less than a day.
      */
     private String pollingTime = "00:05:00";
 
     /**
-     * Controller polling overdue time that can be configured system-wide and by tenant in HH:mm:ss notation.
+     * Controller polling overdue time that can be configured system-wide and by tenant in HH:mm:ss or ISO-8601 notation.
      */
     private String pollingOverdueTime = "00:05:00";
 

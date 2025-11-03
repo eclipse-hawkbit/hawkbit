@@ -10,9 +10,7 @@
 package org.eclipse.hawkbit.tenancy.configuration;
 
 import java.time.Duration;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -25,31 +23,35 @@ import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorExce
 @Value
 public class PollingTime {
 
-    private static final Pattern OVERRIDE_PATTERN = Pattern.compile(
-            "\\s{0,5},\\s{0,5}(?<qlStr>[^,]*)\\s{0,5}->\\s{0,5}(?<pollInterval>" + PollingInterval.POLLING_INTERVALE_REGEX + ")\\s{0,5}");
-
     PollingInterval pollingInterval;
     List<Override> overrides;
 
+    @SuppressWarnings("java:S127")
     public PollingTime(final String pollingTime) {
         final int indexOfComma = pollingTime.indexOf(',');
         if (indexOfComma == -1) { // no overrides
             pollingInterval = new PollingInterval(pollingTime);
-            overrides = Collections.emptyList();
+            overrides = List.of();
         } else {
             // Extract the main polling interval and overrides
             final String pollingIntervalStr = pollingTime.substring(0, indexOfComma);
             pollingInterval = new PollingInterval(pollingIntervalStr);
             overrides = new ArrayList<>();
-            final String overridesStr = pollingTime.substring(indexOfComma).trim(); // with initial comma
-            final Matcher overridesMatcher = OVERRIDE_PATTERN.matcher(overridesStr);
-            for (int start = 0; start < overridesStr.length(); start = overridesMatcher.end()) {
-                if (overridesMatcher.find(start)) {
-                    overrides.add(new Override(
-                            overridesMatcher.group("qlStr").trim(),
-                            new PollingInterval(overridesMatcher.group("pollInterval").trim())));
+            final String overridesStr = pollingTime.substring(indexOfComma + 1).trim();
+            for (int start = 0; ; ) {
+                final int separatorIndex = overridesStr.indexOf("->", start);
+                if (separatorIndex == -1) {
+                    throw new TenantConfigurationValidatorException("Invalid pollingTime override: '" + overridesStr.substring(start) + "'");
                 } else {
-                    throw new TenantConfigurationValidatorException("Invalid pollingTime overrides: " + overridesStr);
+                    final String ql = overridesStr.substring(start, separatorIndex).trim();
+                    final int nextCommaIndex = overridesStr.indexOf(',', separatorIndex);
+                    if (nextCommaIndex == -1) { // last override
+                        overrides.add(new Override(ql, new PollingInterval(overridesStr.substring(separatorIndex + 2).trim())));
+                        break;
+                    } else {
+                        overrides.add(new Override(ql, new PollingInterval(overridesStr.substring(separatorIndex + 2, nextCommaIndex).trim())));
+                        start = nextCommaIndex + 1;
+                    }
                 }
             }
         }
@@ -61,7 +63,7 @@ public class PollingTime {
         @SuppressWarnings("java:S1068") // used for random delay only, no need of secure random
         private static final Random RANDOM = new Random();
 
-        public static final String POLLING_INTERVALE_REGEX = "\\s{0,5}(?<pollingInterval>\\d{2}:[0-5]\\d:[0-5]\\d)\\s{0,5}(~(?<deviationPercent>\\d{1,2})%)?\\s{0,5}";
+        private static final String POLLING_INTERVALE_REGEX = "(?<pollingInterval>[^~]+)(~(?<deviationPercent>\\d{1,2})%)?\\s{0,5}";
         private static final Pattern POLLING_INTERVAL_PATTERN = Pattern.compile(POLLING_INTERVALE_REGEX);
 
         Duration interval;
@@ -69,16 +71,17 @@ public class PollingTime {
 
         public PollingInterval(final String pollingInterval) {
             final Matcher matcher = POLLING_INTERVAL_PATTERN.matcher(pollingInterval);
-            if (matcher.matches()) {
-                try {
-                    this.interval = DurationHelper.fromString(matcher.group("pollingInterval"));
-                } catch (final DateTimeParseException ex) {
-                    throw new TenantConfigurationValidatorException(
-                            "The given configuration value is expected as a string in the format HH:mm:ss(~\\d{1,2})?.");
+            try {
+                if (matcher.matches()) {
+                    interval = DurationHelper.fromString(matcher.group("pollingInterval").trim());
+                    deviationPercent = Optional.ofNullable(matcher.group("deviationPercent"))
+                            .map(String::trim).map(Integer::parseInt).orElse(0);
+                } else {
+                    throw new IllegalArgumentException();
                 }
-                this.deviationPercent = Optional.ofNullable(matcher.group("deviationPercent")).map(Integer::parseInt).orElse(0);
-            } else {
-                throw new TenantConfigurationValidatorException("Invalid pollingInterval: " + pollingInterval);
+            } catch (final Exception e) {
+                throw new TenantConfigurationValidatorException(
+                        "Invalid pollingInterval: '" + pollingInterval + "', expecting: (HH:mm:ss|ISO-8601)(~\\d{1,2}%)?");
             }
         }
 
