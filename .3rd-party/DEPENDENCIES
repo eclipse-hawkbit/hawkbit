@@ -170,10 +170,10 @@ maven/mavencentral/io.protostuff/protostuff-collectionschema/1.8.0, Apache-2.0, 
 maven/mavencentral/io.protostuff/protostuff-core/1.8.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.protostuff/protostuff-runtime/1.8.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.smallrye/jandex/3.2.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/io.swagger.core.v3/swagger-annotations-jakarta/2.2.36, Apache-2.0, approved, #5947
-maven/mavencentral/io.swagger.core.v3/swagger-core-jakarta/2.2.36, Apache-2.0, approved, #5929
+maven/mavencentral/io.swagger.core.v3/swagger-annotations-jakarta/2.2.38, Apache-2.0, approved, #5947
+maven/mavencentral/io.swagger.core.v3/swagger-core-jakarta/2.2.38, Apache-2.0, approved, #5929
 maven/mavencentral/io.swagger.core.v3/swagger-models-jakarta/2.2.32, Apache-2.0, approved, #5919
-maven/mavencentral/io.swagger.core.v3/swagger-models-jakarta/2.2.36, Apache-2.0, approved, #5919
+maven/mavencentral/io.swagger.core.v3/swagger-models-jakarta/2.2.38, Apache-2.0, approved, #5919
 maven/mavencentral/jakarta.activation/jakarta.activation-api/2.1.4, EPL-2.0 OR BSD-3-Clause OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jaf
 maven/mavencentral/jakarta.annotation/jakarta.annotation-api/2.1.1, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.ca
 maven/mavencentral/jakarta.persistence/jakarta.persistence-api/3.1.0, EPL-2.0 OR BSD-3-Clause, approved, ee4j.jpa
@@ -254,9 +254,9 @@ maven/mavencentral/org.reflections/reflections/0.10.2, Apache-2.0 AND WTFPL, app
 maven/mavencentral/org.skyscreamer/jsonassert/1.5.3, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.slf4j/jul-to-slf4j/2.0.17, MIT, approved, #7698
 maven/mavencentral/org.slf4j/slf4j-api/2.0.17, MIT, approved, #5915
-maven/mavencentral/org.springdoc/springdoc-openapi-starter-common/2.8.13, Apache-2.0, approved, #18209
-maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-api/2.8.13, Apache-2.0, approved, #18210
-maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-ui/2.8.13, Apache-2.0, approved, #18211
+maven/mavencentral/org.springdoc/springdoc-openapi-starter-common/2.8.14, Apache-2.0, approved, #18209
+maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-api/2.8.14, Apache-2.0, approved, #18210
+maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-ui/2.8.14, Apache-2.0, approved, #18211
 maven/mavencentral/org.springframework.amqp/spring-amqp/3.2.8, Apache-2.0, approved, #18234
 maven/mavencentral/org.springframework.amqp/spring-rabbit-junit/3.2.8, Apache-2.0, approved, #23456
 maven/mavencentral/org.springframework.amqp/spring-rabbit-test/3.2.8, Apache-2.0, approved, #23489
@@ -336,7 +336,7 @@ maven/mavencentral/org.springframework/spring-web/6.2.12, Apache-2.0, approved, 
 maven/mavencentral/org.springframework/spring-webflux/6.2.12, Apache-2.0, approved, #17567
 maven/mavencentral/org.springframework/spring-webmvc/6.2.12, Apache-2.0, approved, #17532
 maven/mavencentral/org.springframework/spring-websocket/6.2.12, Apache-2.0, approved, #18223
-maven/mavencentral/org.webjars/swagger-ui/5.28.1, Apache-2.0 AND (Apache-2.0 AND MIT), approved, #23264
+maven/mavencentral/org.webjars/swagger-ui/5.30.1, , restricted, clearlydefined
 maven/mavencentral/org.webjars/webjars-locator-lite/1.1.2, MIT, approved, #24484
 maven/mavencentral/org.xmlunit/xmlunit-core/2.10.4, Apache-2.0, approved, #14590
 maven/mavencentral/org.yaml/snakeyaml/2.4, Apache-2.0, approved, #19469
