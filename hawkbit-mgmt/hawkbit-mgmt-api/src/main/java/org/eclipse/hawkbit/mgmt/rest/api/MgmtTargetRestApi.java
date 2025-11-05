@@ -239,7 +239,7 @@ public interface MgmtTargetRestApi {
      */
     @Operation(summary = "Delete target by id", description = "Handles the DELETE request of deleting a single target. Required Permission: DELETE_TARGET")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -269,7 +269,7 @@ public interface MgmtTargetRestApi {
      */
     @Operation(summary = "Unassign target type from target.", description = "Remove the target type from a target. The target type will be set to null. Required permission: UPDATE_TARGET")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully unassigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -296,7 +296,7 @@ public interface MgmtTargetRestApi {
      */
     @Operation(summary = "Assign target type to a target", description = "Assign or update the target type of a target. Required permission: UPDATE_TARGET")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -415,7 +415,7 @@ public interface MgmtTargetRestApi {
      */
     @Operation(summary = "Deletes all actions for the provided target EXCEPT the latest N actions OR by provided action IDs list.", description = "Deletes/Purges the action history of the target except the last N actions OR deletes only the actions in the provided action ids list. Required Permission: DELETE_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully deleted."),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted."),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -484,7 +484,7 @@ public interface MgmtTargetRestApi {
      */
     @Operation(summary = "Cancel action for a specific target", description = "Cancels an active action, only active actions can be deleted. Required Permission: UPDATE_TARGET")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Success"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -518,7 +518,7 @@ public interface MgmtTargetRestApi {
      */
     @Operation(summary = "Switch an action from soft to forced", description = "Handles the PUT request to switch an action from soft to forced. Required Permission: UPDATE_TARGET.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "200", description = "Successfully updated"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -561,7 +561,7 @@ public interface MgmtTargetRestApi {
             Required Permission: READ_REPOSITORY AND UPDATE_TARGET
             """)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully updated confirmation status of the action"),
+            @ApiResponse(responseCode = "204", description = "Successfully updated confirmation status of the action"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -677,7 +677,7 @@ public interface MgmtTargetRestApi {
      */
     @Operation(summary = "Assigns a distribution set to a specific target", description = "Handles the POST request for assigning a distribution set to a specific target. Required Permission: READ_REPOSITORY and UPDATE_TARGET")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "200", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -806,8 +806,7 @@ public interface MgmtTargetRestApi {
     })
     @PostMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata",
             consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
-    @ResponseStatus(HttpStatus.CREATED)
-    void createMetadata(@PathVariable("targetId") String targetId, @RequestBody List<MgmtMetadata> metadataRest);
+    ResponseEntity<Void> createMetadata(@PathVariable("targetId") String targetId, @RequestBody List<MgmtMetadata> metadataRest);
 
     /**
      * Gets a paged list of metadata for a target.
@@ -881,7 +880,7 @@ public interface MgmtTargetRestApi {
      */
     @Operation(summary = "Updates a single metadata value of a target", description = "Update a single metadata value for speficic key. Required permission: UPDATE_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully updated"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -905,8 +904,7 @@ public interface MgmtTargetRestApi {
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PutMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{metadataKey}")
-    @ResponseStatus(HttpStatus.OK)
-    void updateMetadata(
+    ResponseEntity<Void> updateMetadata(
             @PathVariable("targetId") String targetId,
             @PathVariable("metadataKey") String metadataKey,
             @RequestBody MgmtMetadataBodyPut metadata);
@@ -920,7 +918,7 @@ public interface MgmtTargetRestApi {
      */
     @Operation(summary = "Deletes a single metadata entry from a target", description = "Delete a single metadata. Required permission: UPDATE_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -939,8 +937,7 @@ public interface MgmtTargetRestApi {
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @DeleteMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{metadataKey}")
-    @ResponseStatus(HttpStatus.OK)
-    void deleteMetadata(@PathVariable("targetId") String targetId, @PathVariable("metadataKey") String metadataKey);
+    ResponseEntity<Void> deleteMetadata(@PathVariable("targetId") String targetId, @PathVariable("metadataKey") String metadataKey);
 
     /**
      * Get the current auto-confirm state for a specific target.
@@ -980,7 +977,7 @@ public interface MgmtTargetRestApi {
      */
     @Operation(summary = "Activate auto-confirm on a specific target", description = "Handles the POST request to activate auto-confirmation for a specific target. As a result all current active as well as future actions will automatically be confirmed by mentioning the initiator as triggered person. Actions will be automatically confirmed, as long as auto-confirmation is active. Required Permission: UPDATE_TARGET")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully activated auto-confirm"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -1017,7 +1014,7 @@ public interface MgmtTargetRestApi {
      */
     @Operation(summary = "Deactivate auto-confirm on a specific target", description = "Handles the POST request to deactivate auto-confirmation for a specific target. All active actions will remain unchanged while all future actions need to be confirmed, before processing with the deployment. Required Permission: UPDATE_TARGET")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "200", description = "Successfully deactivated auto-confirm"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",

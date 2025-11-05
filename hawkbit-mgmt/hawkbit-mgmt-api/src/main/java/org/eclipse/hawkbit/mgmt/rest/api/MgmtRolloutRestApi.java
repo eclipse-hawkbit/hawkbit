@@ -231,7 +231,7 @@ public interface MgmtRolloutRestApi {
                     "workflow is enabled in system configuration and rollout is in state WAITING_FOR_APPROVAL. " +
                     "Required Permission: APPROVE_ROLLOUT")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully approved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -265,7 +265,7 @@ public interface MgmtRolloutRestApi {
             "Only possible if approval workflow is enabled in system configuration and rollout is in state " +
             "WAITING_FOR_APPROVAL. Required Permission: APPROVE_ROLLOUT")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "200", description = "Successfully denied"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -297,7 +297,7 @@ public interface MgmtRolloutRestApi {
     @Operation(summary = "Start a Rollout", description = "Handles the POST request of starting a created rollout. " +
             "Required Permission: HANDLE_ROLLOUT")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully started"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -327,7 +327,7 @@ public interface MgmtRolloutRestApi {
     @Operation(summary = "Pause a Rollout", description = "Handles the POST request of pausing a running rollout. " +
             "Required Permission: HANDLE_ROLLOUT")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully paused"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -358,7 +358,7 @@ public interface MgmtRolloutRestApi {
     @Operation(summary = "Stop a Rollout", description = "Handles the POST request of stopping a running rollout. " +
             "Required Permission: HANDLE_ROLLOUT")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully stopped"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -391,7 +391,7 @@ public interface MgmtRolloutRestApi {
     @Operation(summary = "Delete a Rollout", description = "Handles the DELETE request of deleting a rollout. " +
             "Required Permission: DELETE_ROLLOUT")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -423,7 +423,7 @@ public interface MgmtRolloutRestApi {
     @Operation(summary = "Resume a Rollout", description = "Handles the POST request of resuming a paused rollout. " +
             "Required Permission: HANDLE_ROLLOUT")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully resumed"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -613,7 +613,7 @@ public interface MgmtRolloutRestApi {
     @Operation(summary = "Force trigger processing next group of a Rollout", description = "Handles the POST request " +
             "of triggering the next group of a rollout. Required Permission: UPDATE_ROLLOUT")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully triggered"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",

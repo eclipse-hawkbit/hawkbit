@@ -114,7 +114,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
         this.tagManagement.delete(targetTag.getId());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -137,7 +137,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     public ResponseEntity<Void> assignTarget(final Long targetTagId, final String controllerId) {
         log.debug("Assign target {} for target tag {}", controllerId, targetTagId);
         this.targetManagement.assignTag(List.of(controllerId), targetTagId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -154,7 +154,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
                 throw new EntityNotFoundException(Target.class, notFound.get());
             }
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -162,7 +162,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     public ResponseEntity<Void> unassignTarget(final Long targetTagId, final String controllerId) {
         log.debug("Unassign target {} for target tag {}", controllerId, targetTagId);
         targetManagement.unassignTag(List.of(controllerId), targetTagId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -180,7 +180,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
                 throw new EntityNotFoundException(Target.class, notFound.get());
             }
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     private TargetTag findTargetTagById(final Long targetTagId) {

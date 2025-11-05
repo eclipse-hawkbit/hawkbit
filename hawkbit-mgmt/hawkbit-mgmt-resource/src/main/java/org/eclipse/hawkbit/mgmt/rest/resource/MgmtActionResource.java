@@ -74,7 +74,7 @@ public class MgmtActionResource implements MgmtActionRestApi {
     @AuditLog(entity = "Actions",type = AuditLog.Type.DELETE, description = "Delete Action", logResponse = true)
     public ResponseEntity<Void> deleteAction(Long actionId) {
         deploymentManagement.deleteAction(actionId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -95,7 +95,7 @@ public class MgmtActionResource implements MgmtActionRestApi {
             throw new IllegalArgumentException("Either action id list or rsql filter should be provided.");
         }
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     private MgmtRepresentationMode getRepresentationModeFromString(final String representationModeParam) {

@@ -145,7 +145,7 @@ public interface MgmtTargetTypeRestApi {
     @Operation(summary = "Delete target type by id",
             description = "Handles the DELETE request for a single target type. Required Permission: DELETE_TARGET")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -177,7 +177,7 @@ public interface MgmtTargetTypeRestApi {
     @Operation(summary = "Update target type by id",
             description = "Handles the PUT request for a single target type. Required Permission: UPDATE_TARGET")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "200", description = "Successfully updated"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -294,7 +294,7 @@ public interface MgmtTargetTypeRestApi {
             description = "Handles the DELETE request for removing a distribution set type from a single target type. " +
                     "Required Permission: UPDATE_TARGET and READ_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully removed"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -330,7 +330,7 @@ public interface MgmtTargetTypeRestApi {
             description = "Handles the POST request for adding compatible distribution set types to a target type. " +
                     "Required Permission: UPDATE_TARGET and READ_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully added"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",

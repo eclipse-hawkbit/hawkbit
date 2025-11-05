@@ -159,48 +159,48 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     @Override
     public ResponseEntity<Void> approve(final Long rolloutId, final String remark) {
         rolloutManagement.approveOrDeny(rolloutId, Rollout.ApprovalDecision.APPROVED, remark);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     public ResponseEntity<Void> deny(final Long rolloutId, final String remark) {
         rolloutManagement.approveOrDeny(rolloutId, Rollout.ApprovalDecision.DENIED, remark);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, description = "Start Rollout")
     public ResponseEntity<Void> start(final Long rolloutId) {
         this.rolloutManagement.start(rolloutId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, description = "Pause Rollout")
     public ResponseEntity<Void> pause(final Long rolloutId) {
         this.rolloutManagement.pauseRollout(rolloutId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, description = "Stop Rollout")
     public ResponseEntity<Void> stop(Long rolloutId) {
         this.rolloutManagement.stop(rolloutId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     @AuditLog(entity = "Rollout", type = AuditLog.Type.DELETE, description = "Delete Rollout")
     public ResponseEntity<Void> delete(final Long rolloutId) {
         this.rolloutManagement.delete(rolloutId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, description = "Resume Rollout")
     public ResponseEntity<Void> resume(final Long rolloutId) {
         this.rolloutManagement.resumeRollout(rolloutId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -264,7 +264,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, description = "Trigger Next Rollout Group")
     public ResponseEntity<Void> triggerNextGroup(final Long rolloutId) {
         rolloutManagement.triggerNextGroup(rolloutId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override

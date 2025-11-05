@@ -147,7 +147,7 @@ public interface MgmtDistributionSetTypeRestApi {
     @Operation(summary = "Delete Distribution Set Type by Id", description = "Handles the DELETE request for a single" +
             " distribution set type. Required Permission: DELETE_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -407,7 +407,7 @@ public interface MgmtDistributionSetTypeRestApi {
             description = "Handles the DELETE request for removing a software module type from a single " +
                     "distribution set type. Required Permission: DELETE_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully removed"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -444,7 +444,7 @@ public interface MgmtDistributionSetTypeRestApi {
                     "Note that a DS type cannot be changed after it has been used by a DS. " +
                     "Required Permission: UPDATE_REPOSITORY and READ_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully removed"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -481,7 +481,7 @@ public interface MgmtDistributionSetTypeRestApi {
                     "distribution set type.Note that a DS type cannot be changed after it has been used by a DS. " +
                     "Required Permission: UPDATE_REPOSITORY and READ_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully added"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -525,7 +525,7 @@ public interface MgmtDistributionSetTypeRestApi {
                     "distribution set type.Note that a DS type cannot be changed after it has been used by a DS. " +
                     "Required Permission: UPDATE_REPOSITORY and READ_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully added"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",

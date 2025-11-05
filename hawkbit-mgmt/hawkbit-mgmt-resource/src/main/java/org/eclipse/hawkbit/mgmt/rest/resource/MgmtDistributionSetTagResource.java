@@ -108,7 +108,7 @@ class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRestApi {
     public ResponseEntity<Void> deleteDistributionSetTag(final Long distributionsetTagId) {
         log.debug("Delete {} distribution set tag", distributionsetTagId);
         distributionSetTagManagement.delete(distributionsetTagId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -131,7 +131,7 @@ class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRestApi {
     public ResponseEntity<Void> assignDistributionSet(final Long distributionSetTagId, final Long distributionSetId) {
         log.debug("Assign ds {} for ds tag {}", distributionSetId, distributionSetTagId);
         this.distributionSetManagement.assignTag(List.of(distributionSetId), distributionSetTagId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -139,7 +139,7 @@ class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRestApi {
         log.debug("Assign DistributionSet {} for ds tag {}", distributionSetIds.size(), distributionSetTagId);
         final List<? extends DistributionSet> assignedDs = this.distributionSetManagement.assignTag(distributionSetIds, distributionSetTagId);
         log.debug("Assigned DistributionSet {}", assignedDs.size());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -147,7 +147,7 @@ class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRestApi {
     public ResponseEntity<Void> unassignDistributionSet(final Long distributionsetTagId, final Long distributionsetId) {
         log.debug("Unassign ds {} for ds tag {}", distributionsetId, distributionsetTagId);
         this.distributionSetManagement.unassignTag(List.of(distributionsetId), distributionsetTagId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -156,7 +156,7 @@ class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRestApi {
         log.debug("Unassign DistributionSet {} for ds tag {}", distributionsetIds.size(), distributionsetTagId);
         final List<? extends DistributionSet> assignedDs = this.distributionSetManagement.unassignTag(distributionsetIds, distributionsetTagId);
         log.debug("Unassigned DistributionSet {}", assignedDs.size());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     private DistributionSetTag findDistributionTagById(final Long distributionsetTagId) {

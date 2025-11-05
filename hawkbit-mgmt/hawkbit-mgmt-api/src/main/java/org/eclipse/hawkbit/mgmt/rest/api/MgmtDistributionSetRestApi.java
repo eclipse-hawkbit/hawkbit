@@ -40,7 +40,6 @@ import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.rest.OpenApi;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -50,7 +49,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * REST Resource handling for DistributionSet CRUD operations.
@@ -194,7 +192,7 @@ public interface MgmtDistributionSetRestApi {
     @Operation(summary = "Delete Distribution Set by Id", description = "Handles the DELETE request for a single " +
             "Distribution Set. Required permission: DELETE_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -513,8 +511,7 @@ public interface MgmtDistributionSetRestApi {
     })
     @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata",
             consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
-    @ResponseStatus(HttpStatus.CREATED)
-    void createMetadata(
+    ResponseEntity<Void> createMetadata(
             @PathVariable("distributionSetId") Long distributionSetId,
             @RequestBody List<MgmtMetadata> metadataRest);
 
@@ -593,7 +590,7 @@ public interface MgmtDistributionSetRestApi {
     @Operation(summary = "Update single meta data value of a distribution set", description = "Update a single meta " +
             "data value for speficic key. Required permission: UPDATE_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "200", description = "Successfully updated"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -617,9 +614,9 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata/{metadataKey}")
-    @ResponseStatus(HttpStatus.OK)
-    void updateMetadata(
+    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata/{metadataKey}",
+            consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
+    ResponseEntity<Void> updateMetadata(
             @PathVariable("distributionSetId") Long distributionSetId,
             @PathVariable("metadataKey") String metadataKey,
             @RequestBody MgmtMetadataBodyPut metadata);
@@ -633,7 +630,7 @@ public interface MgmtDistributionSetRestApi {
     @Operation(summary = "Delete a single meta data entry from the distribution set", description = "Delete a single " +
             "meta data. Required permission: UPDATE_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -652,8 +649,7 @@ public interface MgmtDistributionSetRestApi {
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata/{metadataKey}")
-    @ResponseStatus(HttpStatus.OK)
-    void deleteMetadata(
+    ResponseEntity<Void> deleteMetadata(
             @PathVariable("distributionSetId") Long distributionSetId,
             @PathVariable("metadataKey") String metadataKey);
 
@@ -669,7 +665,7 @@ public interface MgmtDistributionSetRestApi {
             always be a list of software module IDs. Required permissions: READ_REPOSITORY and UPDATE_REPOSITORY
             """)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -710,7 +706,7 @@ public interface MgmtDistributionSetRestApi {
     @Operation(summary = "Delete the assignment of the software module from the distribution set",
             description = "Delete an assignment. Required permission: UPDATE_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -931,7 +927,7 @@ public interface MgmtDistributionSetRestApi {
             cancel all actions connected to this distribution set. Required permission: UPDATE_REPOSITORY, UPDATE_TARGET
             """)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully invalidated distribution set"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",

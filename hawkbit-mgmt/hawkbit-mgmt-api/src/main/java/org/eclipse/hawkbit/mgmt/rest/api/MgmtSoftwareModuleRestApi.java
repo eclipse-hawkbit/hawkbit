@@ -182,7 +182,7 @@ public interface MgmtSoftwareModuleRestApi {
      */
     @Operation(summary = "Delete artifact by Id", description = "Handles the DELETE request for a single Artifact assigned to a SoftwareModule. Required Permission: DELETE_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -374,7 +374,7 @@ public interface MgmtSoftwareModuleRestApi {
      */
     @Operation(summary = "Delete Software Module by Id", description = "Handles the DELETE request for a single softwaremodule within Hawkbit. Required Permission: DELETE_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -430,8 +430,7 @@ public interface MgmtSoftwareModuleRestApi {
     })
     @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata",
             consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
-    @ResponseStatus(HttpStatus.CREATED)
-    void createMetadata(@PathVariable("softwareModuleId") Long softwareModuleId, @RequestBody List<MgmtSoftwareModuleMetadata> metadataRest);
+    ResponseEntity<Void> createMetadata(@PathVariable("softwareModuleId") Long softwareModuleId, @RequestBody List<MgmtSoftwareModuleMetadata> metadataRest);
 
     /**
      * Gets a paged list of metadata for a software module.
@@ -526,8 +525,7 @@ public interface MgmtSoftwareModuleRestApi {
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PutMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata/{metadataKey}")
-    @ResponseStatus(HttpStatus.OK)
-    void updateMetadata(
+    ResponseEntity<Void> updateMetadata(
             @PathVariable("softwareModuleId") Long softwareModuleId,
             @PathVariable("metadataKey") String metadataKey,
             @RequestBody MgmtSoftwareModuleMetadataBodyPut metadata);
@@ -540,7 +538,7 @@ public interface MgmtSoftwareModuleRestApi {
      */
     @Operation(summary = "Delete single metadata entry from the software module", description = "Delete a single metadata. Required Permission: UPDATE_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "200", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -559,6 +557,5 @@ public interface MgmtSoftwareModuleRestApi {
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @DeleteMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata/{metadataKey}")
-    @ResponseStatus(HttpStatus.OK)
-    void deleteMetadata(@PathVariable("softwareModuleId") Long softwareModuleId, @PathVariable("metadataKey") String metadataKey);
+    ResponseEntity<Void> deleteMetadata(@PathVariable("softwareModuleId") Long softwareModuleId, @PathVariable("metadataKey") String metadataKey);
 }
