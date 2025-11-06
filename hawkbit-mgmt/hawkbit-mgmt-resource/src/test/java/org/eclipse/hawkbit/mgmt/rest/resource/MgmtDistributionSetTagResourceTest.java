@@ -257,7 +257,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
 
         mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + original.getId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         assertThat(distributionSetTagManagement.find(original.getId())).isNotPresent();
     }
@@ -350,7 +350,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
         mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
                         set.getId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         final List<? extends DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).toList()).containsOnly(set.getId());
@@ -372,7 +372,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                         .content(toJson(sets.stream().map(DistributionSet::getId).toList()))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         final List<? extends DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).toList())
@@ -399,7 +399,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
         mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
                         unassigned.getId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         final List<? extends DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).toList())
@@ -427,7 +427,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                         .content(toJson(List.of(unassigned0.getId(), unassigned1.getId())))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         final List<? extends DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).toList())

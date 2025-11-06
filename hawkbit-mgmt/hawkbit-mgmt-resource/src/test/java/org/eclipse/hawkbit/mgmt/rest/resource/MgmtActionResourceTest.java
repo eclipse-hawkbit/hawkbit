@@ -516,7 +516,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
 
         mvc.perform(delete(ACTION_V1_REQUEST_MAPPING + "/" + action1.getId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "/" + action1.getId()))
                 .andDo(MockMvcResultPrinter.print())
@@ -542,8 +542,9 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final long deletedActionId2 = assignmentResults.get(3).getAssignedEntity().get(0).getId();
         actionIdsToDelete.add(deletedActionId2);
 
-        mvc.perform(delete(ACTION_V1_REQUEST_MAPPING).content(toJson(actionIdsToDelete)).contentType(APPLICATION_JSON))
-                .andExpect(status().isOk());
+        mvc.perform(delete(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)
+                .content(toJson(actionIdsToDelete)).contentType(APPLICATION_JSON))
+                .andExpect(status().isNoContent());
 
         mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "/" + deletedActionId1))
                 .andDo(MockMvcResultPrinter.print())
@@ -554,8 +555,9 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final Action deletedAction3 = assignmentResults.get(1).getAssignedEntity().get(0);
         final String rsql = "target.name==" + deletedAction3.getTarget().getName();
 
-        mvc.perform(delete(ACTION_V1_REQUEST_MAPPING).param(REQUEST_PARAMETER_SEARCH, rsql).contentType(APPLICATION_JSON))
-                .andExpect(status().isOk());
+        mvc.perform(delete(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, rsql).contentType(APPLICATION_JSON))
+                .andExpect(status().isNoContent());
 
         mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "/" + deletedAction3.getId()))
                 .andDo(MockMvcResultPrinter.print())

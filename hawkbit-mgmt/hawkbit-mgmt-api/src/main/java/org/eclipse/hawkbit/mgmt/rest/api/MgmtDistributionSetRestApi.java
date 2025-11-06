@@ -445,7 +445,7 @@ public interface MgmtDistributionSetRestApi {
             "target IDs. Non-existing targets are silently ignored resulting in a valid response. " +
             "Required permissions: READ_REPOSITORY and UPDATE_TARGET")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "200", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",

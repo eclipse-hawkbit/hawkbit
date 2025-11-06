@@ -158,7 +158,7 @@ public final class FileStreamingUtil {
             throw new FileStreamingFailedException("fullfileRequest " + filename, e);
         }
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
     private static ResponseEntity<InputStream> extractRange(final HttpServletResponse response, final long length,
