@@ -336,7 +336,7 @@ maven/mavencentral/org.springframework/spring-web/6.2.12, Apache-2.0, approved, 
 maven/mavencentral/org.springframework/spring-webflux/6.2.12, Apache-2.0, approved, #17567
 maven/mavencentral/org.springframework/spring-webmvc/6.2.12, Apache-2.0, approved, #17532
 maven/mavencentral/org.springframework/spring-websocket/6.2.12, Apache-2.0, approved, #18223
-maven/mavencentral/org.webjars/swagger-ui/5.30.1, , restricted, clearlydefined
+maven/mavencentral/org.webjars/swagger-ui/5.30.1, Apache-2.0 AND (Apache-2.0 AND MIT), approved, #24622
 maven/mavencentral/org.webjars/webjars-locator-lite/1.1.2, MIT, approved, #24484
 maven/mavencentral/org.xmlunit/xmlunit-core/2.10.4, Apache-2.0, approved, #14590
 maven/mavencentral/org.yaml/snakeyaml/2.4, Apache-2.0, approved, #19469
