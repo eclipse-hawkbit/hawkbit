@@ -1014,7 +1014,7 @@ public interface MgmtTargetRestApi {
      */
     @Operation(summary = "Deactivate auto-confirm on a specific target", description = "Handles the POST request to deactivate auto-confirmation for a specific target. All active actions will remain unchanged while all future actions need to be confirmed, before processing with the deployment. Required Permission: UPDATE_TARGET")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully deactivated auto-confirm"),
+            @ApiResponse(responseCode = "204", description = "Successfully deactivated auto-confirm"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",

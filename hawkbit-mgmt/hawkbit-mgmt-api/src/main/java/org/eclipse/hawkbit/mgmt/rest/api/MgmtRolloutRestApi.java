@@ -265,7 +265,7 @@ public interface MgmtRolloutRestApi {
             "Only possible if approval workflow is enabled in system configuration and rollout is in state " +
             "WAITING_FOR_APPROVAL. Required Permission: APPROVE_ROLLOUT")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully denied"),
+            @ApiResponse(responseCode = "204", description = "Successfully denied"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",

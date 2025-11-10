@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequ
 import org.eclipse.hawkbit.rest.OpenApi;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -43,7 +42,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -538,7 +536,7 @@ public interface MgmtSoftwareModuleRestApi {
      */
     @Operation(summary = "Delete single metadata entry from the software module", description = "Delete a single metadata. Required Permission: UPDATE_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully deleted"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
