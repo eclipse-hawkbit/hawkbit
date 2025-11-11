@@ -6,11 +6,13 @@ on:
       - master
     paths-ignore:
       - '.3rd-party/**'
+      - 'docs/**'
       - 'site/**'
       - '**.md'
   pull_request:
     paths-ignore:
       - '.3rd-party/**'
+      - 'docs/**'
       - 'site/**'
       - '**.md'
   workflow_dispatch:

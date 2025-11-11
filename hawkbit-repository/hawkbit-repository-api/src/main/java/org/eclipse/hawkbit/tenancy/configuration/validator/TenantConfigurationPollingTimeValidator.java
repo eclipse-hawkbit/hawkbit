@@ -60,7 +60,7 @@ public class TenantConfigurationPollingTimeValidator extends TenantConfiguration
         }
         if (pollingInterval.compareTo(maxPollingInterval) > 0) {
             throw new TenantConfigurationValidatorException(String.format(
-                    "The polling interval is bigger then minimum polling interval. The allowed range is [%s, %s].",
+                    "The polling interval is bigger then maximum polling interval. The allowed range is [%s, %s].",
                     DurationHelper.toString(minPollingInterval), DurationHelper.toString(maxPollingInterval)));
         }
     }
