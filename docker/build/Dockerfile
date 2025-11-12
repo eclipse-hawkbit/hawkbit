@@ -1,7 +1,7 @@
 # set Java
 ARG JAVA_VERSION=21.0.9_10
 # extracts spring layers from the app jar (to optimize boot)
-FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine as build
+FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS build
 
 ARG HAWKBIT_APP=hawkbit-update-server
 ARG HAWKBIT_VERSION=pass_as_buils_arg
