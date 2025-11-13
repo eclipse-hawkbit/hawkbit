@@ -21,7 +21,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.text.StrLookup;
 import org.eclipse.hawkbit.repository.QueryField;
@@ -29,7 +28,6 @@ import org.eclipse.hawkbit.repository.exception.QueryException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison;
-import org.eclipse.hawkbit.repository.jpa.rsql.legacy.SpecificationBuilderLegacy;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -80,12 +78,6 @@ public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
 
     private static final QLSupport SINGLETON = new QLSupport();
 
-    public enum SpecBuilder {
-        LEGACY_G1, // legacy RSQL visitor
-        LEGACY_G2, // G2 RSQL visitor
-        G3 // G3 specification builder - still experimental / yet default
-    }
-
     /**
      * If QL comparison operators shall ignore the case. If ignore case is <code>true</code> "x == ax" will match "x == aX"
      */
@@ -101,15 +93,6 @@ public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
     @Value("${hawkbit.ql.case-insensitive-db:false}")
     private boolean caseInsensitiveDB;
 
-    /**
-     * @deprecated in favour fixed final visitor / spec builder of G2 RSQL visitor / G3 spec builder. since 0.6.0
-     */
-    @Setter // for tests only
-    @Deprecated(forRemoval = true, since = "0.6.0")
-    @Value("${hawkbit.ql.spec-builder:G3}") //
-    private SpecBuilder specBuilder;
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private QueryParser parser;
     private List<NodeTransformer> nodeTransformers;
     private EntityManager entityManager;
@@ -166,12 +149,8 @@ public class QLSupport implements ApplicationListener<ContextRefreshedEvent> {
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
     public <A extends Enum<A> & QueryField, T> Specification<T> buildSpec(final String query, final Class<A> queryFieldType) {
-        if (specBuilder == SpecBuilder.G3) {
-            return new SpecificationBuilder<T>(ignoreCase && !caseInsensitiveDB)
+        return new SpecificationBuilder<T>(ignoreCase && !caseInsensitiveDB)
                     .specification(transform(parse(query, queryFieldType), queryFieldType));
-        } else {
-            return new SpecificationBuilderLegacy<A, T>(queryFieldType, virtualPropertyResolver).specification(query);
-        }
     }
 
     public <A extends Enum<A> & QueryField, T> Specification<T> buildSpec(final Node query, final Class<A> queryFieldType) {

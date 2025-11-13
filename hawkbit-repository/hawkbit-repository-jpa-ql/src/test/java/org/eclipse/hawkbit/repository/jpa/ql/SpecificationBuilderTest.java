@@ -10,9 +10,6 @@
 package org.eclipse.hawkbit.repository.jpa.ql;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.repository.jpa.ql.QLSupport.SpecBuilder.G3;
-import static org.eclipse.hawkbit.repository.jpa.ql.QLSupport.SpecBuilder.LEGACY_G1;
-import static org.eclipse.hawkbit.repository.jpa.ql.QLSupport.SpecBuilder.LEGACY_G2;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +19,6 @@ import java.util.stream.StreamSupport;
 import jakarta.persistence.EntityManager;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.SpecBuilder;
 import org.eclipse.hawkbit.repository.jpa.ql.utils.HawkbitQlToSql;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParser;
 import org.junit.jupiter.api.Test;
@@ -32,7 +28,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.orm.jpa.vendor.Database;
 
 @SuppressWarnings("java:S5961") // complex check because the matter is very complex
 @DataJpaTest(properties = {
@@ -63,14 +58,10 @@ class SpecificationBuilderTest {
 
         assertThat(filter("strValue==rootx")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
         assertThat(filter("strValue==nostr")).isEmpty();
-        if (getRsqlToSpecBuilder() != LEGACY_G1) {
-            assertThat(filter("strValue=is=null")).hasSize(1).containsExactlyInAnyOrder(root5);
-        }
+        assertThat(filter("strValue=is=null")).hasSize(1).containsExactlyInAnyOrder(root5);
         assertThat(filter("strValue!=rootx")).hasSize(3).containsExactlyInAnyOrder(root3, root4, root5);
         assertThat(filter("strValue!=nostr")).hasSize(5);
-        if (getRsqlToSpecBuilder() != LEGACY_G1) {
-            assertThat(filter("strValue=not=null")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
-        }
+        assertThat(filter("strValue=not=null")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
         assertThat(filter("strValue<rooty")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
         assertThat(filter("strValue<=rooty")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
         assertThat(filter("strValue>rootx")).hasSize(2).containsExactlyInAnyOrder(root3, root4);
@@ -89,20 +80,16 @@ class SpecificationBuilderTest {
         assertThat(filter("strValue==*")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
         assertThat(filter("strValue!=*")).hasSize(1).containsExactlyInAnyOrder(root5);
 
-        if (getRsqlToSpecBuilder() != LEGACY_G1) {
-            // null checks
-            assertThat(filter("strValue=is=null")).hasSize(1).containsExactlyInAnyOrder(root5);
-            assertThat(filter("strValue=not=null")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
-        }
+        // null checks
+        assertThat(filter("strValue=is=null")).hasSize(1).containsExactlyInAnyOrder(root5);
+        assertThat(filter("strValue=not=null")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
 
         assertThat(filter("strValue==*tx and strValue==rooty")).isEmpty();
         assertThat(filter("strValue==*tx and strValue!=rootx")).isEmpty();
         assertThat(filter("strValue==*tx and strValue==rootx")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
         assertThat(filter("strValue==*tx or strValue==rooty")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
         assertThat(filter("strValue==*tx or strValue!=rootx")).hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
-        if (getRsqlToSpecBuilder() != LEGACY_G1) {
-            assertThat(filter("strValue==*tx or strValue=is=null")).hasSize(3).containsExactlyInAnyOrder(root1, root2, root5);
-        }
+        assertThat(filter("strValue==*tx or strValue=is=null")).hasSize(3).containsExactlyInAnyOrder(root1, root2, root5);
     }
 
     @Test
@@ -166,33 +153,25 @@ class SpecificationBuilderTest {
         assertThat(filter("subEntity.strValue==*")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
         assertThat(filter("subEntity.strValue!=*")).hasSize(1).containsExactlyInAnyOrder(root5);
 
-        if (getRsqlToSpecBuilder() != LEGACY_G1) {
-            // null checks
-            assertThat(filter("subEntity.strValue=is=null")).hasSize(1).containsExactlyInAnyOrder(root5);
-            assertThat(filter("subEntity.strValue=not=null")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
-        }
+        // null checks
+        assertThat(filter("subEntity.strValue=is=null")).hasSize(1).containsExactlyInAnyOrder(root5);
+        assertThat(filter("subEntity.strValue=not=null")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
 
         assertThat(filter("subEntity.strValue==*bx and subEntity.strValue==suby")).isEmpty();
         assertThat(filter("subEntity.strValue==*bx and subEntity.strValue!=subx")).isEmpty();
         assertThat(filter("subEntity.strValue==*bx and subEntity.strValue==subx")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
         assertThat(filter("subEntity.strValue==*bx or subEntity.strValue==suby"))
                 .hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
-        if (getRsqlToSpecBuilder() != LEGACY_G1) {
-            // G1 doesn't get null entity in not, and doesn't support =is= and =not=
-            assertThat(filter("subEntity.strValue==*bx or subEntity.strValue!=subx"))
-                    .hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
-            assertThat(filter("subEntity.strValue==*bx or subEntity.strValue=is=null")).hasSize(3)
-                    .containsExactlyInAnyOrder(root1, root2, root5);
-        }
+        assertThat(filter("subEntity.strValue==*bx or subEntity.strValue!=subx"))
+                .hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
+        assertThat(filter("subEntity.strValue==*bx or subEntity.strValue=is=null")).hasSize(3)
+                .containsExactlyInAnyOrder(root1, root2, root5);
 
         // by sub entity int
         assertThat(filter("subEntity.intValue==0")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
         assertThat(filter("subEntity.intValue==2")).isEmpty();
-        if (getRsqlToSpecBuilder() != LEGACY_G1) {
-            // G1 doesn't get null entity in not
-            assertThat(filter("subEntity.intValue!=0")).hasSize(3).containsExactlyInAnyOrder(root3, root4, root5);
-            assertThat(filter("subEntity.intValue!=2")).hasSize(5);
-        }
+        assertThat(filter("subEntity.intValue!=0")).hasSize(3).containsExactlyInAnyOrder(root3, root4, root5);
+        assertThat(filter("subEntity.intValue!=2")).hasSize(5);
         assertThat(filter("subEntity.intValue<1")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
         assertThat(filter("subEntity.intValue<=1")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
         assertThat(filter("subEntity.intValue>0")).hasSize(2).containsExactlyInAnyOrder(root3, root4);
@@ -207,20 +186,14 @@ class SpecificationBuilderTest {
         assertThat(filter("subEntity.intValue==0 and subEntity.intValue!=1")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
         assertThat(filter("subEntity.intValue==0 and subEntity.intValue==0")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
         assertThat(filter("subEntity.intValue==0 or subEntity.intValue==1")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
-        if (getRsqlToSpecBuilder() != LEGACY_G1) {
-            // G1 doesn't get null entity in not
-            assertThat(filter("subEntity.intValue==0 or subEntity.intValue!=1")).hasSize(3).containsExactlyInAnyOrder(root1, root2, root5);
-        }
+        assertThat(filter("subEntity.intValue==0 or subEntity.intValue!=1")).hasSize(3).containsExactlyInAnyOrder(root1, root2, root5);
 
         assertThat(filter("subEntity.strValue==subx and subEntity.intValue==1")).isEmpty();
         assertThat(filter("subEntity.strValue==subx and subEntity.intValue!=1")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
         assertThat(filter("subEntity.strValue==subx and subEntity.intValue==0")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
         assertThat(filter("subEntity.strValue==subx or subEntity.intValue==1")).hasSize(4)
                 .containsExactlyInAnyOrder(root1, root2, root3, root4);
-        if (getRsqlToSpecBuilder() != LEGACY_G1) {
-            // G1 doesn't get null entity in not
-            assertThat(filter("subEntity.strValue==subx or subEntity.intValue!=1")).hasSize(3).containsExactlyInAnyOrder(root1, root2, root5);
-        }
+        assertThat(filter("subEntity.strValue==subx or subEntity.intValue!=1")).hasSize(3).containsExactlyInAnyOrder(root1, root2, root5);
     }
 
     @Test
@@ -257,34 +230,23 @@ class SpecificationBuilderTest {
         assertThat(filter("subSet.strValue==*")).hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
         assertThat(filter("subSet.strValue!=*")).hasSize(1).containsExactlyInAnyOrder(root6);
 
-        if (getRsqlToSpecBuilder() != LEGACY_G1) {
-            // G1 treats it like same element shall match - which doesn't match to "has" semantic for sets
-            assertThat(filter("subSet.strValue==*bx and subSet.strValue==suby")).hasSize(2).containsExactlyInAnyOrder(root4, root5);
-        }
+        assertThat(filter("subSet.strValue==*bx and subSet.strValue==suby")).hasSize(2).containsExactlyInAnyOrder(root4, root5);
         assertThat(filter("subSet.strValue==*bx and subSet.strValue!=subx")).isEmpty();
         assertThat(filter("subSet.strValue==*bx and subSet.strValue!=suby")).hasSize(1).containsExactlyInAnyOrder(root1);
         assertThat(filter("subSet.strValue==*bx or subSet.strValue==suby"))
                 .hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
-        if (getRsqlToSpecBuilder() != LEGACY_G1) {
-            // G1 doesn't get null - has which shall be included as doesn't have
-            assertThat(filter("subSet.strValue==*bx or subSet.strValue!=subx"))
-                    .hasSize(6).containsExactlyInAnyOrder(root1, root2, root3, root4, root5, root6);
-        }
+        assertThat(filter("subSet.strValue==*bx or subSet.strValue!=subx"))
+                .hasSize(6).containsExactlyInAnyOrder(root1, root2, root3, root4, root5, root6);
 
         // by sub entity int
         assertThat(filter("subSet.intValue==0")).hasSize(4).containsExactlyInAnyOrder(root1, root3, root4, root5);
         assertThat(filter("subSet.intValue==2")).isEmpty();
-        if (getRsqlToSpecBuilder() == G3) {
-            // the legacy builders has different (and wrong semantic)
-            // G1 - has element != x
-            // G2 - has element != x or has no elements
-            // accompanying G3 it is (as it should be) semantic of set != x - has no element with value x (including nhas no elements)
-            assertThat(filter("subSet.intValue!=0")).hasSize(2).containsExactlyInAnyOrder(root2, root6);
-        }
-        if (getRsqlToSpecBuilder() != LEGACY_G1) {
-            // G1 doesn't get null - has which shall be included as doesn't have
-            assertThat(filter("subSet.intValue!=2")).hasSize(6);
-        }
+        // the legacy builders has different (and wrong semantic)
+        // G1 - has element != x
+        // G2 - has element != x or has no elements
+        // accompanying G3 it is (as it should be) semantic of set != x - has no element with value x (including nhas no elements)
+        assertThat(filter("subSet.intValue!=0")).hasSize(2).containsExactlyInAnyOrder(root2, root6);
+        assertThat(filter("subSet.intValue!=2")).hasSize(6);
         assertThat(filter("subSet.intValue<1")).hasSize(4).containsExactlyInAnyOrder(root1, root3, root4, root5);
         assertThat(filter("subSet.intValue<=1")).hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
         assertThat(filter("subSet.intValue>0")).hasSize(2).containsExactlyInAnyOrder(root2, root4);
@@ -296,30 +258,19 @@ class SpecificationBuilderTest {
         assertThat(filter("subSet.intValue=out=(0, 1)")).hasSize(1).containsExactlyInAnyOrder(root6);
 
         assertThat(filter("subSet.intValue==0 and subSet.intValue==0")).hasSize(4).containsExactlyInAnyOrder(root1, root3, root4, root5);
-        if (getRsqlToSpecBuilder() == G3) {
-            assertThat(filter("subSet.intValue==0 and subSet.intValue!=1")).hasSize(3).containsExactlyInAnyOrder(root1, root3, root5);
-        }
+        assertThat(filter("subSet.intValue==0 and subSet.intValue!=1")).hasSize(3).containsExactlyInAnyOrder(root1, root3, root5);
         assertThat(filter("subSet.intValue==0 or subSet.intValue==1"))
                 .hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
-        if (getRsqlToSpecBuilder() != LEGACY_G1) {
-            // G1 doesn't get null - has which shall be included as doesn't have
-            assertThat(filter("subSet.intValue==0 or subSet.intValue!=1"))
-                    .hasSize(5).containsExactlyInAnyOrder(root1, root3, root4, root5, root6);
-        }
+        assertThat(filter("subSet.intValue==0 or subSet.intValue!=1"))
+                .hasSize(5).containsExactlyInAnyOrder(root1, root3, root4, root5, root6);
 
-        if (getRsqlToSpecBuilder() != LEGACY_G1) {
-            // G1 treats it like same element shall match - which doesn't match to "has" semantic for sets
-            assertThat(filter("subSet.intValue==0 and subSet.strValue==suby")).hasSize(3).containsExactlyInAnyOrder(root3, root4, root5);
-        }
+        assertThat(filter("subSet.intValue==0 and subSet.strValue==suby")).hasSize(3).containsExactlyInAnyOrder(root3, root4, root5);
         assertThat(filter("subSet.intValue==0 and subSet.strValue!=subx")).hasSize(1).containsExactlyInAnyOrder(root3);
         assertThat(filter("subSet.intValue==0 and subSet.strValue!=suby")).hasSize(1).containsExactlyInAnyOrder(root1);
         assertThat(filter("subSet.intValue==0 or subSet.strValue==suby"))
                 .hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
-        if (getRsqlToSpecBuilder() != LEGACY_G1) {
-            // G1 doesn't get null - has which shall be included as doesn't have
-            assertThat(filter("subSet.intValue==0 or subSet.strValue!=subx"))
-                    .hasSize(6).containsExactlyInAnyOrder(root1, root2, root3, root4, root5, root6);
-        }
+        assertThat(filter("subSet.intValue==0 or subSet.strValue!=subx"))
+                .hasSize(6).containsExactlyInAnyOrder(root1, root2, root3, root4, root5, root6);
     }
 
     @Test
@@ -353,11 +304,9 @@ class SpecificationBuilderTest {
         assertThat(filter("subMap.x==*")).hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
         assertThat(filter("subMap.x!=*")).isEmpty();
 
-        if (getRsqlToSpecBuilder() != LEGACY_G1) {
-            // null checks
-            assertThat(filter("subMap.x=is=null")).hasSize(1).containsExactlyInAnyOrder(root6);
-            assertThat(filter("subMap.x=not=null")).hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
-        }
+        // null checks
+        assertThat(filter("subMap.x=is=null")).hasSize(1).containsExactlyInAnyOrder(root6);
+        assertThat(filter("subMap.x=not=null")).hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
 
         assertThat(filter("subMap.x==*tx and subMap.y==rooty")).hasSize(1).containsExactlyInAnyOrder(root1);
         assertThat(filter("subMap.x==*tx and subMap.y!=rootx")).hasSize(1).containsExactlyInAnyOrder(root1);
@@ -402,13 +351,8 @@ class SpecificationBuilderTest {
         assertThat(filter("subEntity.subSub.strValue==*")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
         assertThat(filter("subEntity.subSub.strValue!=*")).hasSize(1).containsExactlyInAnyOrder(root5);
 
-        if (getRsqlToSpecBuilder() != LEGACY_G1) {
-            // null checks
-            if (getRsqlToSpecBuilder() != LEGACY_G2) {
-                assertThat(filter("subEntity.subSub.strValue=is=null")).hasSize(1).containsExactlyInAnyOrder(root5);
-            }
-            assertThat(filter("subEntity.subSub.strValue=not=null")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
-        }
+        assertThat(filter("subEntity.subSub.strValue=is=null")).hasSize(1).containsExactlyInAnyOrder(root5);
+        assertThat(filter("subEntity.subSub.strValue=not=null")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
 
         assertThat(filter("subEntity.subSub.strValue==*bx and subEntity.subSub.strValue==suby")).isEmpty();
         assertThat(filter("subEntity.subSub.strValue==*bx and subEntity.subSub.strValue!=subx")).isEmpty();
@@ -416,22 +360,16 @@ class SpecificationBuilderTest {
                 .hasSize(2).containsExactlyInAnyOrder(root1, root2);
         assertThat(filter("subEntity.subSub.strValue==*bx or subEntity.subSub.strValue==suby"))
                 .hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
-        if (getRsqlToSpecBuilder() != LEGACY_G1 && getRsqlToSpecBuilder() != LEGACY_G2) {
-            // G1 doesn't get null entity in not, and doesn't support =is= and =not=
-            assertThat(filter("subEntity.subSub.strValue==*bx or subEntity.subSub.strValue!=subx"))
-                    .hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
-            assertThat(filter("subEntity.subSub.strValue==*bx or subEntity.subSub.strValue=is=null"))
-                    .hasSize(3).containsExactlyInAnyOrder(root1, root2, root5);
-        }
+        assertThat(filter("subEntity.subSub.strValue==*bx or subEntity.subSub.strValue!=subx"))
+                .hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
+        assertThat(filter("subEntity.subSub.strValue==*bx or subEntity.subSub.strValue=is=null"))
+                .hasSize(3).containsExactlyInAnyOrder(root1, root2, root5);
 
         // by sub entity int
         assertThat(filter("subEntity.subSub.intValue==0")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
         assertThat(filter("subEntity.subSub.intValue==2")).isEmpty();
-        if (getRsqlToSpecBuilder() != LEGACY_G1 && getRsqlToSpecBuilder() != LEGACY_G2) {
-            // G1 doesn't get null entity in not
-            assertThat(filter("subEntity.subSub.intValue!=0")).hasSize(3).containsExactlyInAnyOrder(root3, root4, root5);
-            assertThat(filter("subEntity.subSub.intValue!=2")).hasSize(5);
-        }
+        assertThat(filter("subEntity.subSub.intValue!=0")).hasSize(3).containsExactlyInAnyOrder(root3, root4, root5);
+        assertThat(filter("subEntity.subSub.intValue!=2")).hasSize(5);
         assertThat(filter("subEntity.subSub.intValue<1")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
         assertThat(filter("subEntity.subSub.intValue<=1")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
         assertThat(filter("subEntity.subSub.intValue>0")).hasSize(2).containsExactlyInAnyOrder(root3, root4);
@@ -447,11 +385,8 @@ class SpecificationBuilderTest {
         assertThat(filter("subEntity.subSub.intValue==0 and subEntity.subSub.intValue==0")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
         assertThat(filter("subEntity.subSub.intValue==0 or subEntity.subSub.intValue==1")).hasSize(4)
                 .containsExactlyInAnyOrder(root1, root2, root3, root4);
-        if (getRsqlToSpecBuilder() != LEGACY_G1 && getRsqlToSpecBuilder() != LEGACY_G2) {
-            // G1 doesn't get null entity in not
-            assertThat(filter("subEntity.subSub.intValue==0 or subEntity.subSub.intValue!=1"))
-                    .hasSize(3).containsExactlyInAnyOrder(root1, root2, root5);
-        }
+        assertThat(filter("subEntity.subSub.intValue==0 or subEntity.subSub.intValue!=1"))
+                .hasSize(3).containsExactlyInAnyOrder(root1, root2, root5);
 
         assertThat(filter("subEntity.subSub.strValue==subx and subEntity.subSub.intValue==1")).isEmpty();
         assertThat(filter("subEntity.subSub.strValue==subx and subEntity.subSub.intValue!=1")).hasSize(2)
@@ -460,11 +395,8 @@ class SpecificationBuilderTest {
                 .hasSize(2).containsExactlyInAnyOrder(root1, root2);
         assertThat(filter("subEntity.subSub.strValue==subx or subEntity.subSub.intValue==1"))
                 .hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
-        if (getRsqlToSpecBuilder() != LEGACY_G1 && getRsqlToSpecBuilder() != LEGACY_G2) {
-            // G1 doesn't get null entity in not
-            assertThat(filter("subEntity.subSub.strValue==subx or subEntity.subSub.intValue!=1"))
-                    .hasSize(3).containsExactlyInAnyOrder(root1, root2, root5);
-        }
+        assertThat(filter("subEntity.subSub.strValue==subx or subEntity.subSub.intValue!=1"))
+                .hasSize(3).containsExactlyInAnyOrder(root1, root2, root5);
     }
 
     @Test
@@ -533,8 +465,10 @@ class SpecificationBuilderTest {
         assertThat(filter("subEntity.subSub.subSub.intValue=out=(0, 1)")).hasSize(1).containsExactlyInAnyOrder(root5);
 
         assertThat(filter("subEntity.subSub.subSub.intValue==0 and subEntity.subSub.intValue==1")).isEmpty();
-        assertThat(filter("subEntity.subSub.subSub.intValue==0 and subEntity.subSub.intValue!=1")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
-        assertThat(filter("subEntity.subSub.subSub.intValue==0 and subEntity.subSub.intValue==0")).hasSize(2).containsExactlyInAnyOrder(root1, root2);
+        assertThat(filter("subEntity.subSub.subSub.intValue==0 and subEntity.subSub.intValue!=1")).hasSize(2)
+                .containsExactlyInAnyOrder(root1, root2);
+        assertThat(filter("subEntity.subSub.subSub.intValue==0 and subEntity.subSub.intValue==0")).hasSize(2)
+                .containsExactlyInAnyOrder(root1, root2);
         assertThat(filter("subEntity.subSub.subSub.intValue==0 or subEntity.subSub.intValue==1")).hasSize(4)
                 .containsExactlyInAnyOrder(root1, root2, root3, root4);
         assertThat(filter("subEntity.subSub.subSub.intValue==0 or subEntity.subSub.subSub.intValue!=1"))
@@ -562,7 +496,7 @@ class SpecificationBuilderTest {
         } catch (final AssertionError e) {
             log.error(
                     "Fail to get expected result for RSQL: {} with SQL query: {}",
-                    rsql, new HawkbitQlToSql(entityManager).toSQL(Root.class, null, rsql, G3),
+                    rsql, new HawkbitQlToSql(entityManager).toSQL(Root.class, null, rsql),
                     e);
             throw e;
         }
@@ -571,10 +505,6 @@ class SpecificationBuilderTest {
 
     protected Specification<Root> getSpecification(final String rsql) {
         return builder.specification(RsqlParser.parse(rsql));
-    }
-
-    private static SpecBuilder getRsqlToSpecBuilder() {
-        return QLSupport.getInstance().getSpecBuilder();
     }
 
     @SpringBootConfiguration
