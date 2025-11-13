@@ -26,4 +26,4 @@ The root url http://localhost:8081 will redirect directly to the Swagger Managem
 
 # Clustering (Experimental!!!)
 ## Remote Events between micro-services
-[See more information](../../site/content/guides/clustering.md)
+[See more information](../../docs/content/guides/clustering.md)
