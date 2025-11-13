@@ -142,7 +142,7 @@ public class JpaDistributionSetManagement
                         DistributionSetFields.class));
             }
             if (completedComparison.get() != null) { // really a comparison
-                log.warn("Usage of 'complete' in RSQL is deprecated and will be removed in future: {}", node);
+                log.warn("Usage of 'complete' is limited and may be removed: {}", node);
                 final boolean completed = completeComparison(completedComparison);
                 return filter(JpaManagementHelper.findAllWithCountBySpec(jpaRepository, specList, pageable), completed);
             }

@@ -59,15 +59,6 @@ public class MgmtDistributionSetMapper {
             final String defaultDsKey, final Map<String, DistributionSetType> dsTypeKeyToDsType) {
         return sets.stream().<DistributionSetManagement.Create> map(dsRest -> {
             final Set<Long> modules = new HashSet<>();
-            if (dsRest.getOs() != null) {
-                modules.add(dsRest.getOs().getId());
-            }
-            if (dsRest.getApplication() != null) {
-                modules.add(dsRest.getApplication().getId());
-            }
-            if (dsRest.getRuntime() != null) {
-                modules.add(dsRest.getRuntime().getId());
-            }
             if (dsRest.getModules() != null) {
                 dsRest.getModules().forEach(module -> modules.add(module.getId()));
             }

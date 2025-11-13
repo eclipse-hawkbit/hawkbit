@@ -147,10 +147,6 @@ public final class SpPermission {
         allPermissions.add(APPROVE_ROLLOUT);
         allPermissions.add(HANDLE_ROLLOUT);
 
-        // coarse-grained - maybe to be deprecated
-        for (final String access_prefix : new String[] { CREATE_PREFIX, READ_PREFIX, UPDATE_PREFIX, DELETE_PREFIX }) {
-            allPermissions.add(access_prefix + "REPOSITORY");
-        }
         allPermissions.add(TENANT_CONFIGURATION);
 
         if (!tenant) {

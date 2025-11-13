@@ -119,7 +119,7 @@ public abstract class AbstractDsAssignmentStrategy {
     public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
         final JpaActionStatus actionStatus = new JpaActionStatus();
         actionStatus.setAction(action);
-        actionStatus.setOccurredAt(action.getCreatedAt());
+        actionStatus.setTimestamp(action.getCreatedAt());
 
         if (StringUtils.hasText(actionMessage)) {
             actionStatus.addMessage(actionMessage);

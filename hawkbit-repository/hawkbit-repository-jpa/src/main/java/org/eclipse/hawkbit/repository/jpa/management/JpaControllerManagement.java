@@ -209,7 +209,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Override
     protected void onActionStatusUpdate(final JpaActionStatus newActionStatus, final JpaAction action) {
         final Action.Status updatedActionStatus = newActionStatus.getStatus();
-        final long occurredAt = newActionStatus.getOccurredAt();
+        final long timestamp = newActionStatus.getTimestamp();
         switch (updatedActionStatus) {
             case ERROR: {
                 final JpaTarget target = action.getTarget();
@@ -218,7 +218,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 break;
             }
             case FINISHED: {
-                requestControllerAttributes(handleFinishedAndStoreInTargetStatus(occurredAt, action));
+                requestControllerAttributes(handleFinishedAndStoreInTargetStatus(timestamp, action));
                 break;
             }
             case DOWNLOADED: {
@@ -499,7 +499,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 ? RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT
                 : messageCount;
 
-        final PageRequest pageable = PageRequest.of(0, limit, Sort.by(Direction.DESC, "occurredAt"));
+        final PageRequest pageable = PageRequest.of(0, limit, Sort.by(Direction.DESC, "timestamp"));
         final Page<String> messages = actionStatusRepository.findMessagesByActionIdAndMessageNotLike(
                 actionId, RepositoryConstants.SERVER_MESSAGE_PREFIX + "%", pageable);
 
@@ -846,15 +846,15 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
      * @param action updated action
      * @return a present controllerId in case the attributes needs to be requested.
      */
-    private JpaTarget handleFinishedAndStoreInTargetStatus(final long occurredAt, final JpaAction action) {
+    private JpaTarget handleFinishedAndStoreInTargetStatus(final long timestamp, final JpaAction action) {
         final JpaTarget target = action.getTarget();
         action.setActive(false);
         action.setStatus(Status.FINISHED);
-        if (target.getInstallationDate() == null || target.getInstallationDate() < occurredAt) {
+        if (target.getInstallationDate() == null || target.getInstallationDate() < timestamp) {
             final JpaDistributionSet ds = entityManager.merge(action.getDistributionSet());
 
             target.setInstalledDistributionSet(ds);
-            target.setInstallationDate(occurredAt);
+            target.setInstallationDate(timestamp);
 
             // Target reported an installation of a DOWNLOAD_ONLY assignment, the assigned DS has to be adapted
             // because the currently assigned DS can be unequal to the currently installed DS (the downloadOnly DS)

@@ -22,7 +22,6 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryption;
 import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryptionSecretsStorage;
 import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryptionService;
-import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
@@ -42,7 +41,6 @@ import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
-import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoActionCleanup;
@@ -474,39 +472,6 @@ public class JpaRepositoryConfiguration {
             protected <T extends Enum<T> & QueryField> Object transformValueElement(
                     final Object value, final Comparison comparison, final Class<T> queryFieldType) {
                 return value instanceof String strValue ? resolver.replace(strValue) : value;
-            }
-        };
-    }
-
-    /**
-     * @deprecated since 0.10.0, will be removed in future releases. Use "active" for querying active status instead of "status".
-     */
-    @Deprecated(since = "0.10.0", forRemoval = true)
-    @Bean
-    public NodeTransformer actionStatusTransformer() {
-        return new NodeTransformer.Abstract() {
-
-            // just extension points for subclasses
-            @Override
-            protected <T extends Enum<T> & QueryField> Object transformValueElement(
-                    final Object value, final Comparison comparison, final Class<T> queryFieldType) {
-                return queryFieldType == (Class<?>) ActionFields.class && "active".equalsIgnoreCase(comparison.getKey())
-                        ? mapActionStatus(value)
-                        : value;
-            }
-
-            private static Object mapActionStatus(final Object value) {
-                final String strValue = String.valueOf(value);
-                if ("true".equalsIgnoreCase(strValue) || "false".equalsIgnoreCase(strValue)) {
-                    return value;
-                } else {
-                    // handle custom action fields status
-                    try {
-                        return ActionFields.convertStatusValue(strValue);
-                    } catch (final IllegalArgumentException e) {
-                        throw new RSQLParameterUnsupportedFieldException(e.getMessage());
-                    }
-                }
             }
         };
     }

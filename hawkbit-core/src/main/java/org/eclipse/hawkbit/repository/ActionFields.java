@@ -20,10 +20,8 @@ import lombok.Getter;
 public enum ActionFields implements QueryField {
 
     ID("id"),
-    @Deprecated(since = "0.10.0", forRemoval = true) // use ACTIVE
-    STATUS("active"), // true if status is "pending", false if "finished", after removal, will deprecate DETAILSTATUS too and replace with STATUS
-    ACTIVE("active"), // true if st
-    DETAILSTATUS("status"), // real status
+    ACTIVE("active"),
+    STATUS("status"),
     LASTSTATUSCODE("lastActionStatusCode"),
     CREATEDAT("createdAt"),
     CREATEDBY("createdBy"),
@@ -47,20 +45,5 @@ public enum ActionFields implements QueryField {
     ActionFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
         this.jpaEntityFieldName = jpaEntityFieldName;
         this.subEntityAttributes = List.of(subEntityAttributes);
-    }
-
-    /**
-     * @deprecated since 0.10.0 - use {@link #ACTIVE} instead of {@link #STATUS}
-     */
-    @Deprecated(since = "0.10.0", forRemoval = true) // remove together with STATUS (with active meaning)
-    public static Object convertStatusValue(final String value) {
-        final String trimmedValue = value.trim();
-        if (trimmedValue.equalsIgnoreCase("pending")) {
-            return true;
-        } else if (trimmedValue.equalsIgnoreCase("finished")) {
-            return false;
-        } else {
-            throw new IllegalArgumentException("field 'status' must be one of the following values {pending, finished}");
-        }
     }
 }

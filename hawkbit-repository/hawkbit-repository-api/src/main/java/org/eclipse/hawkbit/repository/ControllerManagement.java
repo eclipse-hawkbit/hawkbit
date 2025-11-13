@@ -284,7 +284,7 @@ public interface ControllerManagement {
      * allowed number of action status messages from history; messageCount equal zero, does not retrieve any message; and messageCount larger
      * than zero, retrieves the specified number of messages, limited by maximum allowed number. A controller sends the feedback for an
      * {@link ActionStatus} as a list of messages; while returning the messages, even though the messages from multiple {@link ActionStatus}
-     * are retrieved in descending order by the reported time ({@link ActionStatus#getOccurredAt()}), i.e. latest ActionStatus first, the
+     * are retrieved in descending order by the reported time ({@link ActionStatus#getTimestamp()}), i.e. latest ActionStatus first, the
      * sub-ordering of messages from within single {@link ActionStatus} is unspecified.
      *
      * @param actionId to be filtered on

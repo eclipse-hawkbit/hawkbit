@@ -568,7 +568,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             JpaActionStatus actionStatus = new JpaActionStatus();
             actionStatus.setAction(action);
             actionStatus.setStatus(status);
-            actionStatus.setOccurredAt(currentTimestamp);
+            actionStatus.setTimestamp(currentTimestamp);
             actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "A " + typeOfCancellation + " has been performed by server.");
             cancellingStatuses.add(actionStatus);
         });

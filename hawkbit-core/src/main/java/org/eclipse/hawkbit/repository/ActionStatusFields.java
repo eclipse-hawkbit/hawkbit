@@ -18,9 +18,11 @@ import lombok.Getter;
 public enum ActionStatusFields implements QueryField {
 
     ID("id"),
-    @Deprecated
-    REPORTEDAT("createdAt"),
-    CREATEDAT("createdAt"),
+    // search fields in sync with entity specifics (timestamp & report time)
+    TIMESTAMP("timestamp"),
+    REPORTEDAT("createdAt"), // same as CREATEDAT
+    // fields for db records as in other fields - created at / by
+    CREATEDAT("createdAt"), // same as REPORTEDAT
     CREATEDBY("createdBy");
 
     private final String jpaEntityFieldName;

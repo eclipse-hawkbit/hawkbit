@@ -239,11 +239,8 @@ public final class MgmtTargetMapper {
         action.getWeight().ifPresent(result::setWeight);
         result.setForceType(MgmtRestModelMapper.convertActionType(action.getActionType()));
 
-        result.setStatus(action.isActive() ? MgmtAction.ACTION_PENDING : MgmtAction.ACTION_FINISHED);
-
         result.setActive(action.isActive());
-        result.setDetailStatus(action.getStatus().toString().toLowerCase());
-
+        result.setStatus(action.getStatus().toString().toLowerCase());
         action.getLastActionStatusCode().ifPresent(result::setLastStatusCode);
 
         final Rollout rollout = action.getRollout();
@@ -365,7 +362,7 @@ public final class MgmtTargetMapper {
 
         result.setMessages(messages);
         result.setReportedAt(actionStatus.getCreatedAt());
-        result.setTimestamp(actionStatus.getOccurredAt());
+        result.setTimestamp(actionStatus.getTimestamp());
         result.setId(actionStatus.getId());
         result.setType(MgmtActionStatus.Type.forValue(actionStatus.getStatus().name()));
         actionStatus.getCode().ifPresent(result::setCode);

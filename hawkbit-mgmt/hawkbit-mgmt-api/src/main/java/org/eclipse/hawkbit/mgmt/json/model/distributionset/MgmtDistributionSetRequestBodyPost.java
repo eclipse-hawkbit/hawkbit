@@ -32,17 +32,6 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssi
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtDistributionSetRequestBodyPost extends MgmtDistributionSetRequestBodyPut {
 
-    // deprecated format from the times where os, application and runtime where statically defined
-    @Schema(hidden = true)
-    private MgmtSoftwareModuleAssignment os;
-
-    @Schema(hidden = true)
-    private MgmtSoftwareModuleAssignment runtime;
-
-    @Schema(hidden = true)
-    private MgmtSoftwareModuleAssignment application;
-    // deprecated format - END
-
     private List<MgmtSoftwareModuleAssignment> modules;
 
     @Schema(description = "The type of the distribution set", example = "test_default_ds_type")

@@ -332,18 +332,6 @@ public interface MgmtTargetTagRestApi {
             @RequestParam(value = "onNotFoundPolicy", required = false, defaultValue = "FAIL") OnNotFoundPolicy onNotFoundPolicy);
 
     /**
-     * @deprecated since 0.9.0, use {@link #assignTargets(Long, List, OnNotFoundPolicy)} (POST) instead.
-     */
-    @Deprecated(forRemoval = true, since = "0.9.0")
-    @PutMapping(
-            value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING,
-            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> assignTargetsPut(
-            @PathVariable("targetTagId") Long targetTagId,
-            @RequestBody List<String> controllerIds,
-            @RequestParam(value = "onNotFoundPolicy", required = false, defaultValue = "FAIL") OnNotFoundPolicy onNotFoundPolicy);
-
-    /**
      * Handles the DELETE request to unassign one target from the given tag id.
      *
      * @param targetTagId the ID of the target tag

@@ -336,6 +336,6 @@ public interface Action extends TenantAwareBaseEntity {
         private Integer code;
         private Collection<@ValidString String> messages;
 
-        private Long occurredAt;
+        private Long timestamp;
     }
 }
