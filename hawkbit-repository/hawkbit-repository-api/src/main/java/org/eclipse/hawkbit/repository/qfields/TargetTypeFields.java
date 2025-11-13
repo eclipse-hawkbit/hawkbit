@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2021 Bosch.IO GmbH and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,16 +7,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository;
+package org.eclipse.hawkbit.repository.qfields;
 
 import lombok.Getter;
 
 /**
- * Describing the fields of the DistributionSetType model which can be used in
- * the REST API e.g. for sorting etc.
+ * Describing the fields of the TargetType model which can be used in the REST API
  */
 @Getter
-public enum DistributionSetTypeFields implements QueryField {
+public enum TargetTypeFields implements QueryField {
 
     ID("id"),
     KEY("key"),
@@ -29,7 +28,7 @@ public enum DistributionSetTypeFields implements QueryField {
 
     private final String jpaEntityFieldName;
 
-    DistributionSetTypeFields(final String jpaEntityFieldName) {
+    TargetTypeFields(final String jpaEntityFieldName) {
         this.jpaEntityFieldName = jpaEntityFieldName;
     }
 }

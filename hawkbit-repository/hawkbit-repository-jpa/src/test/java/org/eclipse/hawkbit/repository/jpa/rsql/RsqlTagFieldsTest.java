@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
-import org.eclipse.hawkbit.repository.TagFields;
+import org.eclipse.hawkbit.repository.qfields.TagFields;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;

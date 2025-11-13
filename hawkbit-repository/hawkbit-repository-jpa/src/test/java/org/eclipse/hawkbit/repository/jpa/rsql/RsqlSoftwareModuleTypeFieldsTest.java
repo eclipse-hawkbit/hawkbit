@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.repository.Constants;
-import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
+import org.eclipse.hawkbit.repository.qfields.SoftwareModuleTypeFields;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.junit.jupiter.api.Test;

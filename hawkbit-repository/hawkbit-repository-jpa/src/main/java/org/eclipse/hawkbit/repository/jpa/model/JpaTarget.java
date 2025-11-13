@@ -60,8 +60,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
-import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
+import org.eclipse.hawkbit.repository.helper.SystemSecurityContextHolder;
+import org.eclipse.hawkbit.repository.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.util.ObjectUtils;
 

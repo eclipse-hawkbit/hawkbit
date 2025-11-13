@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>hawkbit-autoconfigure</artifactId>
-    <name>hawkBit :: Core :: Spring Boot Auto-configurations</name>
+    <name>hawkBit :: Auto-Configurations</name>
 
     <dependencies>
         <dependency>

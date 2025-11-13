@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 import jakarta.persistence.EntityManager;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.DistributionSetFields;
+import org.eclipse.hawkbit.repository.qfields.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;

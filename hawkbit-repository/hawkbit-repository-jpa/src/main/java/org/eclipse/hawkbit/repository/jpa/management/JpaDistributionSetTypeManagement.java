@@ -18,7 +18,7 @@ import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
 
-import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
+import org.eclipse.hawkbit.repository.qfields.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;

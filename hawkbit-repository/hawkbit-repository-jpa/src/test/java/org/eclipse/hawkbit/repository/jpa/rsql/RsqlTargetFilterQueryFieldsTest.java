@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
+import org.eclipse.hawkbit.repository.qfields.TargetFilterQueryFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;

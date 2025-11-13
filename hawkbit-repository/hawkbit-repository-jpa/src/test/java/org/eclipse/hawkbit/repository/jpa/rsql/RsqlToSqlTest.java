@@ -14,9 +14,9 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import org.eclipse.hawkbit.repository.QueryField;
-import org.eclipse.hawkbit.repository.SoftwareModuleFields;
-import org.eclipse.hawkbit.repository.TargetFields;
+import org.eclipse.hawkbit.repository.qfields.QueryField;
+import org.eclipse.hawkbit.repository.qfields.SoftwareModuleFields;
+import org.eclipse.hawkbit.repository.qfields.TargetFields;
 import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;

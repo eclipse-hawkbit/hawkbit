@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.eclipse.hawkbit.repository.RolloutFields;
+import org.eclipse.hawkbit.repository.qfields.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutManagement.Create;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;

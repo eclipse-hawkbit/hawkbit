@@ -7,21 +7,21 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository;
+package org.eclipse.hawkbit.repository.qfields;
 
 import lombok.Getter;
 
 /**
- * Describing the fields of the SoftwareModuleType model which can be used in the REST API e.g. for sorting etc.
+ * Describing the fields of the DistributionSetType model which can be used in
+ * the REST API e.g. for sorting etc.
  */
 @Getter
-public enum SoftwareModuleTypeFields implements QueryField {
+public enum DistributionSetTypeFields implements QueryField {
 
     ID("id"),
     KEY("key"),
     NAME("name"),
     DESCRIPTION("description"),
-    MAXASSIGNMENTS("maxAssignments"),
     CREATEDAT("createdAt"),
     CREATEDBY("createdBy"),
     LASTMODIFIEDAT("lastModifiedAt"),
@@ -29,7 +29,7 @@ public enum SoftwareModuleTypeFields implements QueryField {
 
     private final String jpaEntityFieldName;
 
-    SoftwareModuleTypeFields(final String jpaEntityFieldName) {
+    DistributionSetTypeFields(final String jpaEntityFieldName) {
         this.jpaEntityFieldName = jpaEntityFieldName;
     }
 }

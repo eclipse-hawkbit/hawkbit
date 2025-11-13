@@ -7,47 +7,44 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository;
+package org.eclipse.hawkbit.repository.qfields;
 
 import java.util.List;
 
 import lombok.Getter;
 
 /**
- * Describing the fields of the DistributionSet model which can be used in the
- * REST API e.g. for sorting etc.
+ * Describing the fields of the SoftwareModule model which can be used in the REST API e.g. for sorting etc.
  */
 @Getter
-public enum DistributionSetFields implements QueryField {
+public enum SoftwareModuleFields implements QueryField {
 
     ID("id"),
     TYPE("type",
-            DistributionSetTypeFields.ID.getJpaEntityFieldName(),
-            DistributionSetTypeFields.KEY.getJpaEntityFieldName(),
-            DistributionSetTypeFields.NAME.getJpaEntityFieldName()),
+            SoftwareModuleTypeFields.ID.getJpaEntityFieldName(),
+            SoftwareModuleTypeFields.KEY.getJpaEntityFieldName(),
+            SoftwareModuleTypeFields.NAME.getJpaEntityFieldName()),
     NAME("name"),
     DESCRIPTION("description"),
+    VERSION("version"),
+    METADATA("metadata"),
     CREATEDAT("createdAt"),
     CREATEDBY("createdBy"),
     LASTMODIFIEDAT("lastModifiedAt"),
-    LASTMODIFIEDBY("lastModifiedBy"),
-    VERSION("version"),
-    MODULE("modules", SoftwareModuleFields.ID.getJpaEntityFieldName(), SoftwareModuleFields.NAME.getJpaEntityFieldName()),
-    TAG("tags", "name"),
-    METADATA("metadata"),
-    VALID("valid");
+    LASTMODIFIEDBY("lastModifiedBy");
 
     private final String jpaEntityFieldName;
     private final List<String> subEntityAttributes;
 
-    DistributionSetFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
+    SoftwareModuleFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
         this.jpaEntityFieldName = jpaEntityFieldName;
         this.subEntityAttributes = List.of(subEntityAttributes);
     }
 
+
     @Override
     public String getDefaultSubEntityAttribute() {
-        return this == TYPE ? DistributionSetTypeFields.KEY.getJpaEntityFieldName() : QueryField.super.getDefaultSubEntityAttribute();
+        return this == TYPE ? SoftwareModuleTypeFields.KEY.getJpaEntityFieldName() : QueryField.super.getDefaultSubEntityAttribute();
     }
 
     @Override

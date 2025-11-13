@@ -14,7 +14,7 @@ import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
 
-import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
+import org.eclipse.hawkbit.repository.qfields.SoftwareModuleTypeFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;

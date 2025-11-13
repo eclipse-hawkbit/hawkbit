@@ -9,8 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
-import static org.eclipse.hawkbit.repository.QueryField.SUB_ATTRIBUTE_SEPARATOR;
-import static org.eclipse.hawkbit.repository.QueryField.SUB_ATTRIBUTE_SPLIT_REGEX;
+import static org.eclipse.hawkbit.repository.qfields.QueryField.SUB_ATTRIBUTE_SEPARATOR;
+import static org.eclipse.hawkbit.repository.qfields.QueryField.SUB_ATTRIBUTE_SPLIT_REGEX;
 import static org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison.Operator.EQ;
 import static org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison.Operator.GT;
 import static org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison.Operator.GTE;
@@ -39,7 +39,7 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.QueryField;
+import org.eclipse.hawkbit.repository.qfields.QueryField;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.ql.Node;

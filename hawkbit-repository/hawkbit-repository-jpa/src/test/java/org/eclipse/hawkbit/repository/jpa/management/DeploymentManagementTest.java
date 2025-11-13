@@ -32,7 +32,7 @@ import jakarta.validation.ConstraintViolationException;
 
 import lombok.Getter;
 import org.assertj.core.api.Assertions;
-import org.eclipse.hawkbit.repository.ActionStatusFields;
+import org.eclipse.hawkbit.repository.qfields.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.Identifiable;

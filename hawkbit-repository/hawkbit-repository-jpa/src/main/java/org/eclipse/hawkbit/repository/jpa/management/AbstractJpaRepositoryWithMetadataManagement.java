@@ -26,7 +26,7 @@ import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.MetadataSupport;
-import org.eclipse.hawkbit.repository.QueryField;
+import org.eclipse.hawkbit.repository.qfields.QueryField;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.WithMetadata;

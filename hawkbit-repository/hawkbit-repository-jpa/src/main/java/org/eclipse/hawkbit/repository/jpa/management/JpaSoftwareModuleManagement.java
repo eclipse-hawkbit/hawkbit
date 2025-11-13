@@ -26,7 +26,7 @@ import jakarta.persistence.EntityManager;
 import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
-import org.eclipse.hawkbit.repository.SoftwareModuleFields;
+import org.eclipse.hawkbit.repository.qfields.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.IncompleteSoftwareModuleException;

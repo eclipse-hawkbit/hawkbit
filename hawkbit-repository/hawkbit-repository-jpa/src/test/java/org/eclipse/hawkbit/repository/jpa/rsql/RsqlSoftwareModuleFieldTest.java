@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.eclipse.hawkbit.repository.SoftwareModuleFields;
+import org.eclipse.hawkbit.repository.qfields.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
