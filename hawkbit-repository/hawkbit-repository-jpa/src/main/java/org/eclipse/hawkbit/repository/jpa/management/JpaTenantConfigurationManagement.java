@@ -54,6 +54,7 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -182,12 +183,32 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         final List<JpaTenantConfiguration> configurationList = new ArrayList<>();
         configurations.forEach((keyName, value) -> {
             final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(keyName);
-            if (!configurationKey.getDataType().isAssignableFrom(value.getClass())) {
-                throw new TenantConfigurationValidatorException(String.format(
-                        "Cannot parse the value %s of type %s into the type %s defined by the configuration key.",
-                        value, value.getClass(), configurationKey.getDataType()));
+
+            Object convertedValue = value;
+            final Class<?> targetType = configurationKey.getDataType();
+            if (!targetType.isAssignableFrom(value.getClass())) {
+                try {
+                    // if not assignable and it is a number - try conversion
+                    // for example tries to assign Integer to Long
+                    if (value instanceof Number number && Number.class.isAssignableFrom(targetType)) {
+                        log.debug("Type {} not assignable from {} . Will try conversion.", targetType, value.getClass());
+                        convertedValue = CONVERSION_SERVICE.convert(number, targetType);
+                        if (convertedValue == null) {
+                            throw new IllegalArgumentException(
+                                    String.format("Failed to convert %s. Convertor returned null as a result", value));
+                        }
+                    } else {
+                        throw new IllegalArgumentException(
+                                String.format("Value %s is not a Number but %s and cannot perform conversion converted.", value, value.getClass()));
+                    }
+                } catch (final ConversionException | IllegalArgumentException ex) {
+                    throw new TenantConfigurationValidatorException(String.format(
+                            "Cannot convert the value %s of type %s to the type %s defined by the configuration key.",
+                            value, value.getClass(), targetType));
+                }
             }
-            configurationKey.validate(value, applicationContext);
+
+            configurationKey.validate(convertedValue, applicationContext);
             // additional validation for specific configuration keys
             if (POLLING_TIME.equals(configurationKey.getKeyName())) {
                 final PollingTime pollingTime = new PollingTime(value.toString());
@@ -201,9 +222,9 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
 
             JpaTenantConfiguration tenantConfiguration = tenantConfigurationRepository.findByKey(configurationKey.getKeyName());
             if (tenantConfiguration == null) {
-                tenantConfiguration = new JpaTenantConfiguration(configurationKey.getKeyName(), value.toString());
+                tenantConfiguration = new JpaTenantConfiguration(configurationKey.getKeyName(), convertedValue.toString());
             } else {
-                tenantConfiguration.setValue(value.toString());
+                tenantConfiguration.setValue(convertedValue.toString());
             }
 
             assertValueChangeIsAllowed(keyName, tenantConfiguration);
