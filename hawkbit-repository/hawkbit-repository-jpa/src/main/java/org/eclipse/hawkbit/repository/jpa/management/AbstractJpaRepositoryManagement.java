@@ -367,7 +367,7 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
     @SuppressWarnings("unchecked")
     private Class<A> fieldsClass0() {
         try {
-            return (Class<A>) Class.forName("org.eclipse.hawkbit.repository." + managementClass().getSimpleName() + "Fields");
+            return (Class<A>) Class.forName("org.eclipse.hawkbit.repository.qfields." + managementClass().getSimpleName() + "Fields");
         } catch (ClassNotFoundException e) {
             throw new IllegalStateException(e);
         }
