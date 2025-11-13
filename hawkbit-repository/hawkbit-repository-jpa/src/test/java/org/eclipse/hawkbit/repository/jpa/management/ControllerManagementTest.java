@@ -203,12 +203,12 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(testDs, testTarget));
 
         controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId)
-                .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis()).messages(List.of("proceeding message 1"))
+                .status(Action.Status.RUNNING).timestamp(System.currentTimeMillis()).messages(List.of("proceeding message 1"))
                 .build());
 
         waitNextMillis();
         controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId)
-                .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis()).messages(List.of("proceeding message 2"))
+                .status(Action.Status.RUNNING).timestamp(System.currentTimeMillis()).messages(List.of("proceeding message 2"))
                 .build());
 
         final List<String> messages = controllerManagement.getActionHistoryMessages(actionId, 2);
@@ -242,7 +242,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionId1).isNotNull();
         final ActionStatusCreateBuilder status = ActionStatusCreate.builder().actionId(actionId1).status(Status.WARNING);
         for (int i = 0; i < maxStatusEntries; i++) {
-            controllerManagement.addInformationalActionStatus(status.messages(List.of("Msg " + i)).occurredAt(System.currentTimeMillis()).build());
+            controllerManagement.addInformationalActionStatus(status.messages(List.of("Msg " + i)).timestamp(System.currentTimeMillis()).build());
         }
         final ActionStatusCreate actionStatusCreate = status.build();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
@@ -254,7 +254,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionId2).isNotEqualTo(actionId1);
         final ActionStatusCreateBuilder statusWarning = ActionStatusCreate.builder().actionId(actionId2).status(Status.WARNING);
         for (int i = 0; i < maxStatusEntries; i++) {
-            controllerManagement.addUpdateActionStatus(statusWarning.messages(List.of("Msg " + i)).occurredAt(System.currentTimeMillis()).build());
+            controllerManagement.addUpdateActionStatus(statusWarning.messages(List.of("Msg " + i)).timestamp(System.currentTimeMillis()).build());
         }
         final ActionStatusCreate actionStatusCreateQE = statusWarning.build();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)

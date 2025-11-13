@@ -67,7 +67,7 @@ public class JpaActionManagement {
     protected static JpaActionStatus buildJpaActionStatus(final ActionStatusCreate create) {
         final JpaActionStatus actionStatus = new JpaActionStatus(
                 create.getStatus(),
-                Optional.ofNullable(create.getOccurredAt()).orElseGet(System::currentTimeMillis));
+                Optional.ofNullable(create.getTimestamp()).orElseGet(System::currentTimeMillis));
         Optional.ofNullable(create.getMessages()).ifPresent(messages -> messages.forEach(actionStatus::addMessage));
         actionStatus.setCode(create.getCode());
         return actionStatus;

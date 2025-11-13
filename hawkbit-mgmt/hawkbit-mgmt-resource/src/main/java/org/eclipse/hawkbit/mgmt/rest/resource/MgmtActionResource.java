@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtActionMapper;
-import org.eclipse.hawkbit.mgmt.rest.resource.util.LogUtility;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -47,9 +46,6 @@ public class MgmtActionResource implements MgmtActionRestApi {
     public ResponseEntity<PagedList<MgmtAction>> getActions(
             final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam,
             final String representationModeParam) {
-        LogUtility.logDeprecated(rsqlParam != null && rsqlParam.contains("status")
-                ? "Usage of getActions with RSQL that is up to modification: rsql=" + rsqlParam
-                : "Usage of getActions:result that is up to modification.");
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeActionSortParam(sortParam));
 
         final Slice<Action> actions;
@@ -68,7 +64,6 @@ public class MgmtActionResource implements MgmtActionRestApi {
 
     @Override
     public ResponseEntity<MgmtAction> getAction(final Long actionId) {
-        LogUtility.logDeprecated("Usage of getActions:result that is up to modification.");
         final Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 

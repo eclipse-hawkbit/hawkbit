@@ -494,8 +494,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     private static ActionStatusCreate generateActionCancelStatus(
             final DdiActionFeedback feedback, final Target target, final Long actionId) {
-        final ActionStatusCreateBuilder actionStatusCreate = ActionStatusCreate.builder()
-                .actionId(actionId).occurredAt(feedback.getTimestamp());
+        final ActionStatusCreateBuilder actionStatusCreate = ActionStatusCreate.builder().actionId(actionId).timestamp(feedback.getTimestamp());
         final List<String> messages = new ArrayList<>();
         final Status status;
         switch (feedback.getStatus().getExecution()) {
@@ -601,7 +600,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     private ActionStatusCreate generateUpdateStatus(final DdiActionFeedback feedback, final String controllerId, final Long actionId) {
         final ActionStatusCreateBuilder actionStatusCreate = ActionStatusCreate.builder()
-                .actionId(actionId).occurredAt(feedback.getTimestamp());
+                .actionId(actionId).timestamp(feedback.getTimestamp());
         final List<String> messages = new ArrayList<>();
 
         if (!CollectionUtils.isEmpty(feedback.getStatus().getDetails())) {

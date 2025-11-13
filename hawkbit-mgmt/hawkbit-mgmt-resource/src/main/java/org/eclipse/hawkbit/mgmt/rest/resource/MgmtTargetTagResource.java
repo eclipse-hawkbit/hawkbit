@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTagMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetMapper;
-import org.eclipse.hawkbit.mgmt.rest.resource.util.LogUtility;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
@@ -156,13 +155,6 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
             }
         }
         return ResponseEntity.ok().build();
-    }
-
-    @Override
-    public ResponseEntity<Void> assignTargetsPut(
-            final Long targetTagId, final List<String> controllerIds, final OnNotFoundPolicy onNotFoundPolicy) {
-        LogUtility.logDeprecated("Deprecated usage of assignTargetsPut. Use assignTargetsPut (POST) instead.");
-        return assignTargets(targetTagId, controllerIds, onNotFoundPolicy);
     }
 
     @Override

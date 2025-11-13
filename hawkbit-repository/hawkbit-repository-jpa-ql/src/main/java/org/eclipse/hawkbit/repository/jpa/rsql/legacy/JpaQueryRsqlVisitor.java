@@ -42,7 +42,6 @@ import cz.jirutka.rsql.parser.ast.OrNode;
 import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
@@ -297,9 +296,6 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & QueryField, T> extends Abst
         final Class<?> javaType = fieldPath.getJavaType();
         if (javaType != null && javaType.isEnum()) {
             return transformEnumValue(node, value, javaType);
-        }
-        if (fieldName == ActionFields.STATUS) {
-            return ActionFields.convertStatusValue(value);
         }
 
         if (Boolean.TYPE.equals(javaType)) {

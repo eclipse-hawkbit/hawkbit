@@ -60,7 +60,7 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     @Setter
     @Getter
     @Column(name = "target_occurred_at", nullable = false, updatable = false)
-    private long occurredAt;
+    private long timestamp;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
@@ -97,12 +97,12 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
      *
      * @param action the action for this action status
      * @param status the status for this action status
-     * @param occurredAt the occurred timestamp
+     * @param timestamp the occurred timestamp
      */
-    public JpaActionStatus(final Action action, final Status status, final long occurredAt) {
+    public JpaActionStatus(final Action action, final Status status, final long timestamp) {
         this.action = (JpaAction) action;
         this.status = status;
-        this.occurredAt = occurredAt;
+        this.timestamp = timestamp;
     }
 
     /**
@@ -110,13 +110,13 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
      *
      * @param action the action for this action status
      * @param status the status for this action status
-     * @param occurredAt the occurred timestamp
+     * @param timestamp the occurred timestamp
      * @param message the message which should be added to this action status
      */
-    public JpaActionStatus(final JpaAction action, final Status status, final long occurredAt, final String message) {
+    public JpaActionStatus(final JpaAction action, final Status status, final long timestamp, final String message) {
         this.action = action;
         this.status = status;
-        this.occurredAt = occurredAt;
+        this.timestamp = timestamp;
         addMessage(message);
     }
 
@@ -124,11 +124,11 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
      * Creates a new {@link ActionStatus} object.
      *
      * @param status the status for this action status
-     * @param occurredAt the occurred timestamp
+     * @param timestamp the occurred timestamp
      */
-    public JpaActionStatus(final Status status, final long occurredAt) {
+    public JpaActionStatus(final Status status, final long timestamp) {
         this.status = status;
-        this.occurredAt = occurredAt;
+        this.timestamp = timestamp;
     }
 
     @Override

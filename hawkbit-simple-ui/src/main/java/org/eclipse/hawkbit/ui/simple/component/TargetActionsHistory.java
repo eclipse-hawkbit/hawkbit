@@ -132,7 +132,7 @@ public class TargetActionsHistory extends Grid<TargetActionsHistory.ActionStatus
                     icon = Utils.tooltip(VaadinIcon.ADJUST.create(), "Pending Update");
                     icon.setColor("orange");
                 }// todo getDetailStatus should return an enum from src/main/java/org/eclipse/hawkbit/repository/model/Action.java
-            } else if (action.getType().equals(MgmtAction.ACTION_UPDATE) && action.getDetailStatus().equals("finished")) {
+            } else if (action.getType().equals(MgmtAction.ACTION_UPDATE) && action.getStatus().equals("finished")) {
                 icon = Utils.tooltip(VaadinIcon.CHECK_CIRCLE.create(), "Updated");
                 icon.setColor("green");
             } else {

@@ -1048,7 +1048,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private void setSkipActionStatus(final JpaAction action) {
         final JpaActionStatus actionStatus = new JpaActionStatus();
         actionStatus.setAction(action);
-        actionStatus.setOccurredAt(action.getCreatedAt());
+        actionStatus.setTimestamp(action.getCreatedAt());
         actionStatus.setStatus(Status.RUNNING);
         actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Distribution Set is already assigned. Skipping this action.");
         actionStatusRepository.save(actionStatus);

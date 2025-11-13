@@ -118,7 +118,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<PagedList<MgmtDistributionSet>> getDistributionSets(
             final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
         if (rsqlParam != null && rsqlParam.toLowerCase().contains("complete")) {
-            LogUtility.logDeprecated("Usage of MgmtDistributionSetResource.getActions with 'complete': 'complete' distribution set search field may be removed.");
+            LogUtility.logDeprecated("Usage of MgmtDistributionSetResource.getActions with 'complete': 'complete' distribution set search field is limited and may be removed.");
         }
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
         final Page<? extends DistributionSet> findDsPage;

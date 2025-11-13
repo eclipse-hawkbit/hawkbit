@@ -66,6 +66,20 @@ class RsqlActionFieldsTest extends AbstractJpaIntegrationTest {
 
         assertRSQLQuery(ActionFields.ID.name() + "=in=(" + action.getId() + ",10000000)", 1);
         assertRSQLQuery(ActionFields.ID.name() + "=out=(" + action.getId() + ",10000000)", 10);
+    }/**
+     * Test action by status
+     */
+    @Test
+    void testFilterByParameterActive() {
+        assertRSQLQuery(ActionFields.ACTIVE.name() + "==" + true, 5);
+        assertRSQLQuery(ActionFields.ACTIVE.name() + "!=" + true, 6);
+        assertRSQLQuery(ActionFields.ACTIVE.name() + "=in=(" + true + ")", 5);
+        assertRSQLQuery(ActionFields.ACTIVE.name() + "=out=(" + true +")", 6);
+
+        final String rsql = ActionFields.ACTIVE.name() + "==true2";
+        assertThatExceptionOfType(QueryException.class)
+                .as("RSQLParameterUnsupportedFieldException because active cannot be compared with 'true2'")
+                .isThrownBy(() -> assertRSQLQuery(rsql, 5));
     }
 
     /**
@@ -73,14 +87,14 @@ class RsqlActionFieldsTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void testFilterByParameterStatus() {
-        assertRSQLQuery(ActionFields.STATUS.name() + "==pending", 5);
-        assertRSQLQuery(ActionFields.STATUS.name() + "!=pending", 6);
-        assertRSQLQuery(ActionFields.STATUS.name() + "=in=(pending)", 5);
-        assertRSQLQuery(ActionFields.STATUS.name() + "=out=(pending)", 6);
+        assertRSQLQuery(ActionFields.STATUS.name() + "==" + Status.RUNNING, 5);
+        assertRSQLQuery(ActionFields.STATUS.name() + "!=" + Status.RUNNING, 6);
+        assertRSQLQuery(ActionFields.STATUS.name() + "=in=(" + Status.RUNNING + ")", 5);
+        assertRSQLQuery(ActionFields.STATUS.name() + "=out=(" + Status.RUNNING +")", 6);
 
-        final String rsql = ActionFields.STATUS.name() + "==true2";
+        final String rsql = ActionFields.STATUS.name() + "==not_a_status";
         assertThatExceptionOfType(QueryException.class)
-                .as("RSQLParameterUnsupportedFieldException because status cannot be compared with 'true'")
+                .as("RSQLParameterUnsupportedFieldException because status cannot be compared with 'not_a_status'")
                 .isThrownBy(() -> assertRSQLQuery(rsql, 5));
     }
 
@@ -99,7 +113,7 @@ class RsqlActionFieldsTest extends AbstractJpaIntegrationTest {
         newAction.setActionType(ActionType.SOFT);
         newAction.setDistributionSet(dsA);
         newAction.setActive(active);
-        newAction.setStatus(Status.RUNNING);
+        newAction.setStatus(active ? Status.RUNNING : Status.FINISHED);
         newAction.setTarget(target);
         newAction.setWeight(45);
         newAction.setInitiatedBy(tenantAware.getCurrentUsername());
