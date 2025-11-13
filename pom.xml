@@ -81,7 +81,6 @@
         <!-- Maven Plugin versions - START -->
         <maven.enforcer.plugin.version>3.6.2</maven.enforcer.plugin.version>
         <flatten.maven.plugin.version>1.7.3</flatten.maven.plugin.version>
-        <maven.site.plugin.version>3.21.0</maven.site.plugin.version>
 
         <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
         <jacoco.maven.plugin.version>0.8.14</jacoco.maven.plugin.version>
@@ -476,16 +475,6 @@
                 </plugin>
 
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-site-plugin</artifactId>
-                    <version>${maven.site.plugin.version}</version>
-                    <configuration>
-                        <skip>true</skip>
-                        <skipDeploy>true</skipDeploy>
-                    </configuration>
-                </plugin>
-
-                <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco.maven.plugin.version}</version>
@@ -579,13 +568,10 @@
                                     <excludes>
                                         <exclude>docker/**</exclude>
                                         <exclude>licenses/LICENSE*</exclude>
-                                        <exclude>**/*.sql</exclude>
                                         <exclude>docs/**</exclude>
-                                        <exclude>/docs/rest-api/**</exclude>
-                                        <exclude>/docs/images/**</exclude>
-                                        <exclude>**/application-local.properties</exclude>
                                         <exclude>eclipse_codeformatter.xml</exclude>
                                         <exclude>intellij_codeformatter.xml</exclude>
+                                        <exclude>**/*.sql</exclude>
                                         <!-- hawkbit-simple-ui - start-->
                                         <exclude>**/banner.txt</exclude>
                                         <exclude>**/robots.txt</exclude>
@@ -596,11 +582,8 @@
                                         <exclude>**/vite.config.ts</exclude>
                                         <exclude>**/vite.generated.ts</exclude>
                                         <!-- hawkbit-simple-ui - end -->
-                                        <!-- site - start -->
-                                        <exclude>site/layouts/**</exclude>
-                                        <exclude>site/static/**</exclude>
-                                        <exclude>site/*.toml</exclude>
-                                        <!-- site - end -->
+                                        <!-- development files -->
+                                        <exclude>**/application-local.properties</exclude>
                                     </excludes>
                                 </licenseSet>
                             </licenseSets>
