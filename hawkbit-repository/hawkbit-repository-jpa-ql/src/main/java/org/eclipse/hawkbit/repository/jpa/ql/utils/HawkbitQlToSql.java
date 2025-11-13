@@ -17,7 +17,7 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 
-import org.eclipse.hawkbit.repository.QueryField;
+import org.eclipse.hawkbit.repository.qfields.QueryField;
 import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
 
 public class HawkbitQlToSql {

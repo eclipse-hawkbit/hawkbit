@@ -16,7 +16,7 @@ import java.util.function.ToLongFunction;
 import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
-import org.eclipse.hawkbit.repository.TargetTypeFields;
+import org.eclipse.hawkbit.repository.qfields.TargetTypeFields;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;

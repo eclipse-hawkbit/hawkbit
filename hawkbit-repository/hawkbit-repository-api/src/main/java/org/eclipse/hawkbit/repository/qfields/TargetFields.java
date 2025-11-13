@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository;
+package org.eclipse.hawkbit.repository.qfields;
 
 import java.util.List;
 

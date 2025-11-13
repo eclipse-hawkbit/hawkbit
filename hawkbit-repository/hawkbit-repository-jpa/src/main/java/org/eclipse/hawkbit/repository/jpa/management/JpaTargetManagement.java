@@ -35,7 +35,7 @@ import jakarta.persistence.metamodel.MapAttribute;
 import jakarta.validation.constraints.NotEmpty;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
-import org.eclipse.hawkbit.repository.TargetFields;
+import org.eclipse.hawkbit.repository.qfields.TargetFields;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;

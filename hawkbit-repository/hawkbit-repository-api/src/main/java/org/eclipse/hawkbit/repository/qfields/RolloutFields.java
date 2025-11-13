@@ -7,42 +7,36 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository;
+package org.eclipse.hawkbit.repository.qfields;
 
 import java.util.List;
 
 import lombok.Getter;
 
 /**
- * Sort and search fields for actions.
+ * Describing the fields of the Rollout model which can be used in the REST API e.g. for sorting etc.
  */
 @Getter
-public enum ActionFields implements QueryField {
+public enum RolloutFields implements QueryField {
 
     ID("id"),
-    ACTIVE("active"),
+    NAME("name"),
+    DESCRIPTION("description"),
     STATUS("status"),
-    LASTSTATUSCODE("lastActionStatusCode"),
     CREATEDAT("createdAt"),
     CREATEDBY("createdBy"),
     LASTMODIFIEDAT("lastModifiedAt"),
     LASTMODIFIEDBY("lastModifiedBy"),
-    WEIGHT("weight"),
-    TARGET("target",
-            TargetFields.ID.getJpaEntityFieldName(), TargetFields.NAME.getJpaEntityFieldName(),
-            TargetFields.UPDATESTATUS.getJpaEntityFieldName(), TargetFields.IPADDRESS.getJpaEntityFieldName()),
-    DISTRIBUTIONSET("distributionSet",
+    DISTRIBUTIONSET(
+            "distributionSet",
             DistributionSetFields.ID.getJpaEntityFieldName(),
             DistributionSetFields.NAME.getJpaEntityFieldName(), DistributionSetFields.VERSION.getJpaEntityFieldName(),
-            DistributionSetFields.TYPE.getJpaEntityFieldName()),
-    ROLLOUT("rollout", RolloutFields.ID.getJpaEntityFieldName(), RolloutFields.NAME.getJpaEntityFieldName()),
-    ROLLOUTGROUP("rolloutGroup", RolloutGroupFields.ID.getJpaEntityFieldName(), RolloutGroupFields.NAME.getJpaEntityFieldName()),
-    EXTERNALREF("externalRef");
+            DistributionSetFields.TYPE.getJpaEntityFieldName());
 
     private final String jpaEntityFieldName;
     private final List<String> subEntityAttributes;
 
-    ActionFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
+    RolloutFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
         this.jpaEntityFieldName = jpaEntityFieldName;
         this.subEntityAttributes = List.of(subEntityAttributes);
     }

@@ -22,10 +22,10 @@ import jakarta.persistence.criteria.ListJoin;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
-import org.eclipse.hawkbit.repository.RolloutGroupFields;
+import org.eclipse.hawkbit.repository.qfields.RolloutGroupFields;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
-import org.eclipse.hawkbit.repository.TargetFields;
+import org.eclipse.hawkbit.repository.qfields.TargetFields;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;

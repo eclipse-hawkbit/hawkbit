@@ -7,20 +7,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository;
+package org.eclipse.hawkbit.repository.qfields;
 
 import lombok.Getter;
 
 /**
- * Describing the fields of the Tag model which can be used in the REST API e.g. for sorting etc.
+ * Describing the fields of the RolloutGroup model which can be used in the REST API e.g. for sorting etc.
  */
 @Getter
-public enum TagFields implements QueryField {
+public enum RolloutGroupFields implements QueryField {
 
     ID("id"),
     NAME("name"),
     DESCRIPTION("description"),
-    COLOUR("colour"),
     CREATEDAT("createdAt"),
     CREATEDBY("createdBy"),
     LASTMODIFIEDAT("lastModifiedAt"),
@@ -28,7 +27,7 @@ public enum TagFields implements QueryField {
 
     private final String jpaEntityFieldName;
 
-    TagFields(final String jpaEntityFieldName) {
+    RolloutGroupFields(final String jpaEntityFieldName) {
         this.jpaEntityFieldName = jpaEntityFieldName;
     }
 }

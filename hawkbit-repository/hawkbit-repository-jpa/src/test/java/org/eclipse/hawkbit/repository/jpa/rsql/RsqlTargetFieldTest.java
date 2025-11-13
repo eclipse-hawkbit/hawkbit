@@ -15,10 +15,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.eclipse.hawkbit.repository.TargetFields;
+import org.eclipse.hawkbit.repository.qfields.TargetFields;
 import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
-import org.eclipse.hawkbit.repository.TargetTypeFields;
+import org.eclipse.hawkbit.repository.qfields.TargetTypeFields;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;

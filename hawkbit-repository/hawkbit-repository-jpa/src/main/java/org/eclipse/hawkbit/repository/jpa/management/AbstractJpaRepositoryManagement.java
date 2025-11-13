@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_DELAY;
 import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
-import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor.afterCommit;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -39,7 +38,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.Identifiable;
-import org.eclipse.hawkbit.repository.QueryField;
+import org.eclipse.hawkbit.repository.qfields.QueryField;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;

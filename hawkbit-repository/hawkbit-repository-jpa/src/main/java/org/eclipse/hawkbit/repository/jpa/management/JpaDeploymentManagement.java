@@ -38,7 +38,7 @@ import jakarta.persistence.criteria.Root;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
-import org.eclipse.hawkbit.repository.ActionFields;
+import org.eclipse.hawkbit.repository.qfields.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;

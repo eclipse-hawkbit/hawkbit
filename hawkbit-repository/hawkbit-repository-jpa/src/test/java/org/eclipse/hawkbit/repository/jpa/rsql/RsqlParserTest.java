@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.hawkbit.repository.jpa.rsql.RsqlParser.parse;
 
-import org.eclipse.hawkbit.repository.TargetFields;
+import org.eclipse.hawkbit.repository.qfields.TargetFields;
 import org.junit.jupiter.api.Test;
 
 class RsqlParserTest {

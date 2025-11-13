@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.text.StrLookup;
-import org.eclipse.hawkbit.repository.QueryField;
+import org.eclipse.hawkbit.repository.qfields.QueryField;
 import org.eclipse.hawkbit.repository.exception.QueryException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;

@@ -22,12 +22,12 @@ import jakarta.persistence.metamodel.EntityType;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.repository.DistributionSetFields;
-import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
-import org.eclipse.hawkbit.repository.SoftwareModuleFields;
-import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
-import org.eclipse.hawkbit.repository.TargetFields;
-import org.eclipse.hawkbit.repository.TargetTypeFields;
+import org.eclipse.hawkbit.repository.qfields.DistributionSetFields;
+import org.eclipse.hawkbit.repository.qfields.DistributionSetTypeFields;
+import org.eclipse.hawkbit.repository.qfields.SoftwareModuleFields;
+import org.eclipse.hawkbit.repository.qfields.SoftwareModuleTypeFields;
+import org.eclipse.hawkbit.repository.qfields.TargetFields;
+import org.eclipse.hawkbit.repository.qfields.TargetTypeFields;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;

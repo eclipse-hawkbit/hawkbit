@@ -37,7 +37,7 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
-import org.eclipse.hawkbit.repository.RolloutFields;
+import org.eclipse.hawkbit.repository.qfields.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutHelper;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;

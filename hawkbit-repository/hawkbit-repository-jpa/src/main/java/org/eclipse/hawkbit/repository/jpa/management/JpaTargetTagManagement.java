@@ -9,15 +9,12 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
-import java.util.Optional;
-
 import jakarta.persistence.EntityManager;
 
-import org.eclipse.hawkbit.repository.TargetTagFields;
+import org.eclipse.hawkbit.repository.qfields.TargetTagFields;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
-import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
