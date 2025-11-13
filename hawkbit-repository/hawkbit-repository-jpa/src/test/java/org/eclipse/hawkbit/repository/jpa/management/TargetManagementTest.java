@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
-import static org.eclipse.hawkbit.repository.jpa.ql.QLSupport.SpecBuilder.LEGACY_G1;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -62,7 +61,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
-import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -636,10 +634,6 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
      */
     @Test
     void findTargetsByRsqlWithTypeAndMetadata() {
-        if (QLSupport.getInstance().getSpecBuilder() == LEGACY_G1) {
-            // legacy visitor fail with that
-            return;
-        }
         final String controllerId1 = "target1";
         final String controllerId2 = "target2";
         createTargetWithMetadata(controllerId1, 2);

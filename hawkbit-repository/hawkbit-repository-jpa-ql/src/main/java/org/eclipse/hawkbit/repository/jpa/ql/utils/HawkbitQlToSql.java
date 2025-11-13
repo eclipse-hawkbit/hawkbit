@@ -19,7 +19,6 @@ import jakarta.persistence.criteria.CriteriaQuery;
 
 import org.eclipse.hawkbit.repository.QueryField;
 import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
-import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.SpecBuilder;
 
 public class HawkbitQlToSql {
 
@@ -31,9 +30,8 @@ public class HawkbitQlToSql {
         isEclipselink = entityManager.getProperties().keySet().stream().anyMatch(key -> key.startsWith("eclipselink."));
     }
 
-    public <T, A extends Enum<A> & QueryField> String toSQL(
-            final Class<T> domainClass, final Class<A> fieldsClass, final String rsql, final SpecBuilder rsqlToSpecBuilder) {
-        final CriteriaQuery<T> query = createQuery(domainClass, fieldsClass, rsql, rsqlToSpecBuilder);
+    public <T, A extends Enum<A> & QueryField> String toSQL(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql) {
+        final CriteriaQuery<T> query = createQuery(domainClass, fieldsClass, rsql);
         final TypedQuery<?> typedQuery = entityManager.createQuery(query);
         if (isEclipselink) {
             try {
@@ -55,20 +53,10 @@ public class HawkbitQlToSql {
     }
 
     private <T, A extends Enum<A> & QueryField> CriteriaQuery<T> createQuery(
-            final Class<T> domainClass, final Class<A> fieldsClass, final String rsql, final SpecBuilder rsqlToSpecBuilder) {
+            final Class<T> domainClass, final Class<A> fieldsClass, final String rsql) {
         final CriteriaQuery<T> query = entityManager.getCriteriaBuilder().createQuery(domainClass);
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        final SpecBuilder defaultRsqlToSpecBuilder = QLSupport.getInstance().getSpecBuilder();
-        if (defaultRsqlToSpecBuilder != rsqlToSpecBuilder) {
-            QLSupport.getInstance().setSpecBuilder(rsqlToSpecBuilder);
-        }
-        try {
-            return query.where(QLSupport.getInstance().<A, T> buildSpec(rsql, fieldsClass)
-                    .toPredicate(query.from(domainClass), cb.createQuery(domainClass), cb));
-        } finally {
-            if (defaultRsqlToSpecBuilder != rsqlToSpecBuilder) {
-                QLSupport.getInstance().setSpecBuilder(defaultRsqlToSpecBuilder);
-            }
-        }
+        return query.where(QLSupport.getInstance().<A, T> buildSpec(rsql, fieldsClass)
+                .toPredicate(query.from(domainClass), cb.createQuery(domainClass), cb));
     }
 }

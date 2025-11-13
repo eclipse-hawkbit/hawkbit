@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.eclipse.hawkbit.repository.jpa.ql.QLSupport.SpecBuilder.LEGACY_G2;
-import static org.eclipse.hawkbit.repository.jpa.ql.QLSupport.SpecBuilder.LEGACY_G1;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -178,11 +176,9 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null==null", 1); // "null" check
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.n/a==null", 0); // "null" check
 
-        if (QLSupport.getInstance().getSpecBuilder() != LEGACY_G1) {
-            assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.dot=is=value.dot", 1);
-            assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null=is=null", 5); // null check
-            assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.n/a=is=null", 1 + 5); // null check
-        }
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.dot=is=value.dot", 1);
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null=is=null", 5); // null check
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.n/a=is=null", 1 + 5); // null check
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.dot=eq=value.dot", 1);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null=eq=null", 5); // null check
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.n/a=eq=null", 1 + 5); // null check
@@ -192,24 +188,14 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null!=null2", 1); // value check
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.n/a!=null", 0); // "null" check
 
-        if (QLSupport.getInstance().getSpecBuilder() != LEGACY_G1) {
-            assertRSQLQuery(
-                    TargetFields.ATTRIBUTE.name() + ".test.dot=not=value.dot",
-                    QLSupport.getInstance().getSpecBuilder() == LEGACY_G2 ? 5 : 0);
-            assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null=not=null", 1); // null check
-            assertRSQLQuery(
-                    TargetFields.ATTRIBUTE.name() + ".test.null=not=null2",
-                    1 + (QLSupport.getInstance().getSpecBuilder() == LEGACY_G2 ? 5 : 0)); // value check
-            assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.n/a=not=null", 0); // null check
-            assertRSQLQuery(
-                    TargetFields.ATTRIBUTE.name() + ".test.dot=ne=value.dot",
-                    QLSupport.getInstance().getSpecBuilder() == LEGACY_G2 ? 5 : 0);
-            assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null=ne=null", 1); // null check
-            assertRSQLQuery(
-                    TargetFields.ATTRIBUTE.name() + ".test.null=ne=null2",
-                    1 + (QLSupport.getInstance().getSpecBuilder() == LEGACY_G2 ? 5 : 0)); // value check
-            assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.n/a=ne=null", 0); // null check
-        }
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.dot=not=value.dot", 0);
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null=not=null", 1); // null check
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null=not=null2", 1); // value check
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.n/a=not=null", 0); // null check
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.dot=ne=value.dot", 0);
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null=ne=null", 1); // null check
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null=ne=null2", 1); // value check
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.n/a=ne=null", 0); // null check
 
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision==1.1", 1);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision!=1.1", 1);
@@ -304,13 +290,11 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey==noExist*", 0);
         assertRSQLQuery(TargetFields.METADATA.name() + ".notExist==metaValue", 0);
 
-        if (QLSupport.getInstance().getSpecBuilder() != LEGACY_G1) {
-            assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=is=metaValue", 1);
-            assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=is=null", 4); // null check (1 of the initial five has)
-            assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=is=*v*", 2);
-            assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=is=noExist*", 0);
-            assertRSQLQuery(TargetFields.METADATA.name() + ".notExist=is=null", 1 + 5); // null check
-        }
+        assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=is=metaValue", 1);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=is=null", 4); // null check (1 of the initial five has)
+        assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=is=*v*", 2);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=is=noExist*", 0);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".notExist=is=null", 1 + 5); // null check
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=eq=metaValue", 1);
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=eq=null", 4); // null check (1 of the initial five has)
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=eq=*v*", 2);
@@ -322,28 +306,14 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.METADATA.name() + ".notExist!=metaValue", 0);
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey!=notExist", 2);
 
-        if (QLSupport.getInstance().getSpecBuilder() != LEGACY_G1) {
-            assertRSQLQuery(
-                    TargetFields.METADATA.name() + ".metaKey=not=metaValue",
-                    QLSupport.getInstance().getSpecBuilder() == LEGACY_G2 ? 1 + 4 : 1);
-            assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=not=null", 2); // null check (2 of the initial five)
-            assertRSQLQuery(
-                    TargetFields.METADATA.name() + ".notExist=not=metaValue",
-                    QLSupport.getInstance().getSpecBuilder() == LEGACY_G2 ? 1 + 5 : 0);
-            assertRSQLQuery(
-                    TargetFields.METADATA.name() + ".metaKey=not=notExist",
-                    QLSupport.getInstance().getSpecBuilder() == LEGACY_G2 ? 2 + 4 : 2);
-            assertRSQLQuery(
-                    TargetFields.METADATA.name() + ".metaKey=ne=metaValue",
-                    QLSupport.getInstance().getSpecBuilder() == LEGACY_G2 ? 1 + 4 : 1);
-            assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=ne=null", 2); // null check (2 of the initial five)
-            assertRSQLQuery(
-                    TargetFields.METADATA.name() + ".notExist=ne=metaValue",
-                    QLSupport.getInstance().getSpecBuilder() == LEGACY_G2 ? 1 + 5 : 0);
-            assertRSQLQuery(
-                    TargetFields.METADATA.name() + ".metaKey=ne=notExist",
-                    QLSupport.getInstance().getSpecBuilder() == LEGACY_G2 ? 2 + 4 : 2);
-        }
+        assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=not=metaValue", 1);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=not=null", 2); // null check (2 of the initial five)
+        assertRSQLQuery(TargetFields.METADATA.name() + ".notExist=not=metaValue", 0);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=not=notExist", 2);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=ne=metaValue", 1);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=ne=null", 2); // null check (2 of the initial five)
+        assertRSQLQuery(TargetFields.METADATA.name() + ".notExist=ne=metaValue", 0);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=ne=notExist", 2);
 
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=in=(metaValue,notexist)", 1);
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey=out=(metaValue,notexist)", 1);
@@ -365,9 +335,8 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
     @Test
     void testFilterByComplexQueries() {
         assertRSQLQuery(TargetFields.NAME.name() + "!=targetName123" + AND + TargetFields.METADATA.name() + ".metaKey!=value", 0);
-        assertRSQLQuery(
-                "(" + TargetFields.TAG.name() + "!=TAG1" + OR + TargetFields.TAG.name() + "!=TAG2)" +
-                        AND + TargetFields.CONTROLLERID.name() + "!=targetId1235", 4);
+        assertRSQLQuery("(" + TargetFields.TAG.name() + "!=TAG1" + OR + TargetFields.TAG.name() + "!=TAG2)" +
+                AND + TargetFields.CONTROLLERID.name() + "!=targetId1235", 4);
     }
 
     /**
