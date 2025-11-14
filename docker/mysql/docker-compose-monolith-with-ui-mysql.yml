@@ -10,7 +10,7 @@
 version: '3'
 
 include:
-  - docker-compose-monolith-postgres.yml
+  - docker-compose-monolith-mysql.yml
 
 services:
 

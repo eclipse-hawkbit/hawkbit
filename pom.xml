@@ -572,7 +572,7 @@
                                         <exclude>eclipse_codeformatter.xml</exclude>
                                         <exclude>intellij_codeformatter.xml</exclude>
                                         <exclude>**/*.sql</exclude>
-                                        <!-- hawkbit-simple-ui - start-->
+                                        <!-- hawkbit-ui - start-->
                                         <exclude>**/banner.txt</exclude>
                                         <exclude>**/robots.txt</exclude>
                                         <exclude>**/frontend/**</exclude>
@@ -581,7 +581,7 @@
                                         <exclude>**/types.d.ts</exclude>
                                         <exclude>**/vite.config.ts</exclude>
                                         <exclude>**/vite.generated.ts</exclude>
-                                        <!-- hawkbit-simple-ui - end -->
+                                        <!-- hawkbit-ui - end -->
                                         <!-- development files -->
                                         <exclude>**/application-local.properties</exclude>
                                     </excludes>
@@ -722,7 +722,7 @@
         <module>hawkbit-dmf</module>
         <module>hawkbit-monolith</module>
 
-        <module>hawkbit-simple-ui</module>
+        <module>hawkbit-ui</module>
         <module>hawkbit-sdk</module>
     </modules>
 </project>

@@ -30,7 +30,7 @@ jobs:
         run: |
           ALL_APPS=(
             # microservices
-            "hawkbit-ddi-server",  "hawkbit-dmf-server", "hawkbit-mgmt-server", "hawkbit-simple-ui", 
+            "hawkbit-ddi-server",  "hawkbit-dmf-server", "hawkbit-mgmt-server", "hawkbit-ui", 
             # monolith
             "hawkbit-update-server",
             # db init
