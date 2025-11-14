@@ -22,10 +22,15 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryption;
 import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryptionSecretsStorage;
 import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryptionService;
+import org.eclipse.hawkbit.ql.Node.Comparison;
+import org.eclipse.hawkbit.ql.QueryField;
+import org.eclipse.hawkbit.ql.jpa.QLSupport;
+import org.eclipse.hawkbit.ql.jpa.QLSupport.NodeTransformer;
+import org.eclipse.hawkbit.ql.jpa.QLSupport.QueryParser;
+import org.eclipse.hawkbit.ql.rsql.RsqlParser;
 import org.eclipse.hawkbit.repository.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
-import org.eclipse.hawkbit.repository.qfields.QueryField;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConfiguration;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -41,6 +46,8 @@ import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
+import org.eclipse.hawkbit.repository.helper.SystemSecurityContextHolder;
+import org.eclipse.hawkbit.repository.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoActionCleanup;
@@ -58,10 +65,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
-import org.eclipse.hawkbit.repository.jpa.ql.Node.Comparison;
-import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
-import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.NodeTransformer;
-import org.eclipse.hawkbit.repository.jpa.ql.QLSupport.QueryParser;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
@@ -71,7 +74,6 @@ import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
-import org.eclipse.hawkbit.repository.jpa.scheduler.RolloutScheduler;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.PauseRolloutGroupAction;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupActionEvaluator;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupConditionEvaluator;
@@ -79,15 +81,13 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupEvaluati
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupSuccessCondition;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParser;
 import org.eclipse.hawkbit.repository.jpa.scheduler.AutoAssignScheduler;
 import org.eclipse.hawkbit.repository.jpa.scheduler.JpaAutoAssignExecutor;
 import org.eclipse.hawkbit.repository.jpa.scheduler.JpaRolloutHandler;
+import org.eclipse.hawkbit.repository.jpa.scheduler.RolloutScheduler;
 import org.eclipse.hawkbit.repository.jpa.utils.ExceptionMapper;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.helper.SystemSecurityContextHolder;
-import org.eclipse.hawkbit.repository.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
@@ -143,7 +143,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @Import({
         RepositoryConfiguration.class,
         JpaConfiguration.class, LockProperties.class, SystemManagementCacheKeyGenerator.class,
-        DataSourceAutoConfiguration.class})
+        DataSourceAutoConfiguration.class })
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 public class JpaRepositoryConfiguration {
 
@@ -413,7 +413,8 @@ public class JpaRepositoryConfiguration {
      * @return a new {@link AutoActionCleanup} bean
      */
     @Bean
-    AutoCleanupScheduler.CleanupTask actionCleanup(final DeploymentManagement deploymentManagement, final TenantConfigurationManagement configManagement) {
+    AutoCleanupScheduler.CleanupTask actionCleanup(
+            final DeploymentManagement deploymentManagement, final TenantConfigurationManagement configManagement) {
         return new AutoActionCleanup(deploymentManagement, configManagement);
     }
 

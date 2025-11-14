@@ -1199,7 +1199,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void assignDistributionSetAndAddFinishedActionStatus() {
-        final PageRequest pageRequest = PageRequest.of(0, 100, Direction.ASC, ActionStatusFields.ID.getJpaEntityFieldName());
+        final PageRequest pageRequest = PageRequest.of(0, 100, Direction.ASC, ActionStatusFields.ID.getName());
 
         final DeploymentResult deployResWithDsA = prepareComplexRepo("undep-A-T", 2, "dep-A-T", 4, 1, "dsA");
         final DeploymentResult deployResWithDsB = prepareComplexRepo("undep-B-T", 3, "dep-B-T", 5, 1, "dsB");

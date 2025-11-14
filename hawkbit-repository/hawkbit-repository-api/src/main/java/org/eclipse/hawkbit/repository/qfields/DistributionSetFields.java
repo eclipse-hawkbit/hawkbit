@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.qfields;
 import java.util.List;
 
 import lombok.Getter;
+import org.eclipse.hawkbit.ql.QueryField;
 
 /**
  * Describing the fields of the DistributionSet model which can be used in the
@@ -22,9 +23,9 @@ public enum DistributionSetFields implements QueryField {
 
     ID("id"),
     TYPE("type",
-            DistributionSetTypeFields.ID.getJpaEntityFieldName(),
-            DistributionSetTypeFields.KEY.getJpaEntityFieldName(),
-            DistributionSetTypeFields.NAME.getJpaEntityFieldName()),
+            DistributionSetTypeFields.ID.getName(),
+            DistributionSetTypeFields.KEY.getName(),
+            DistributionSetTypeFields.NAME.getName()),
     NAME("name"),
     DESCRIPTION("description"),
     CREATEDAT("createdAt"),
@@ -32,22 +33,22 @@ public enum DistributionSetFields implements QueryField {
     LASTMODIFIEDAT("lastModifiedAt"),
     LASTMODIFIEDBY("lastModifiedBy"),
     VERSION("version"),
-    MODULE("modules", SoftwareModuleFields.ID.getJpaEntityFieldName(), SoftwareModuleFields.NAME.getJpaEntityFieldName()),
+    MODULE("modules", SoftwareModuleFields.ID.getName(), SoftwareModuleFields.NAME.getName()),
     TAG("tags", "name"),
     METADATA("metadata"),
     VALID("valid");
 
-    private final String jpaEntityFieldName;
+    private final String name;
     private final List<String> subEntityAttributes;
 
-    DistributionSetFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
-        this.jpaEntityFieldName = jpaEntityFieldName;
+    DistributionSetFields(final String name, final String... subEntityAttributes) {
+        this.name = name;
         this.subEntityAttributes = List.of(subEntityAttributes);
     }
 
     @Override
     public String getDefaultSubEntityAttribute() {
-        return this == TYPE ? DistributionSetTypeFields.KEY.getJpaEntityFieldName() : QueryField.super.getDefaultSubEntityAttribute();
+        return this == TYPE ? DistributionSetTypeFields.KEY.getName() : QueryField.super.getDefaultSubEntityAttribute();
     }
 
     @Override

@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.qfields;
 
 import lombok.Getter;
+import org.eclipse.hawkbit.ql.QueryField;
 
 /**
  * Sort and search fields for action status.
@@ -25,9 +26,9 @@ public enum ActionStatusFields implements QueryField {
     CREATEDAT("createdAt"), // same as REPORTEDAT
     CREATEDBY("createdBy");
 
-    private final String jpaEntityFieldName;
+    private final String name;
 
-    ActionStatusFields(final String jpaEntityFieldName) {
-        this.jpaEntityFieldName = jpaEntityFieldName;
+    ActionStatusFields(final String name) {
+        this.name = name;
     }
 }

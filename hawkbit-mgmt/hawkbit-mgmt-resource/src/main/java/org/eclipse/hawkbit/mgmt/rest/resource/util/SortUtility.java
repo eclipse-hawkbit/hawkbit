@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.rest.resource.exception.SortParameterSyntaxErrorException;
 import org.eclipse.hawkbit.mgmt.rest.resource.exception.SortParameterUnsupportedDirectionException;
 import org.eclipse.hawkbit.mgmt.rest.resource.exception.SortParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.qfields.QueryField;
+import org.eclipse.hawkbit.ql.QueryField;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 
@@ -79,7 +79,7 @@ public final class SortUtility {
                         throw new SortParameterUnsupportedDirectionException(e);
                     }
 
-                    orders.add(new Order(sortDirection, identifier.getJpaEntityFieldName()));
+                    orders.add(new Order(sortDirection, identifier.getName()));
                 } else {
                     throw new SortParameterSyntaxErrorException();
                 }

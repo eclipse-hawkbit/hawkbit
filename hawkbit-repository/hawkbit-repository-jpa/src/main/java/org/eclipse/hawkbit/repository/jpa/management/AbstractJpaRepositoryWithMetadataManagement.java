@@ -24,9 +24,9 @@ import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
 
+import org.eclipse.hawkbit.ql.QueryField;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.MetadataSupport;
-import org.eclipse.hawkbit.repository.qfields.QueryField;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.WithMetadata;
@@ -46,7 +46,7 @@ abstract class AbstractJpaRepositoryWithMetadataManagement<T extends AbstractJpa
 
     // java:S3011 - intentionally to provide option to forbid constructors
     // java:S1141 - better visible this way
-    @SuppressWarnings({"unchecked", "java:S3011", "java:S1141"})
+    @SuppressWarnings({ "unchecked", "java:S3011", "java:S1141" })
     protected AbstractJpaRepositoryWithMetadataManagement(final R repository, final EntityManager entityManager) {
         super(repository, entityManager);
         try {
@@ -153,7 +153,7 @@ abstract class AbstractJpaRepositoryWithMetadataManagement<T extends AbstractJpa
             if (Objects.equals(newValue, existingValue)) {
                 return false;
             } else {
-                metadataValueMap.put(key, (MVI)newValue);
+                metadataValueMap.put(key, (MVI) newValue);
                 return true;
             }
         }

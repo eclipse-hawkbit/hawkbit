@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.qfields;
 import java.util.List;
 
 import lombok.Getter;
+import org.eclipse.hawkbit.ql.QueryField;
 
 /**
  * Describing the fields of the Target model which can be used in the REST API
@@ -33,36 +34,36 @@ public enum TargetFields implements QueryField {
     ATTRIBUTE("controllerAttributes"),
     GROUP("group"),
     ASSIGNEDDS("assignedDistributionSet",
-            DistributionSetFields.NAME.getJpaEntityFieldName(), DistributionSetFields.VERSION.getJpaEntityFieldName()),
+            DistributionSetFields.NAME.getName(), DistributionSetFields.VERSION.getName()),
     INSTALLEDDS("installedDistributionSet",
-            DistributionSetFields.NAME.getJpaEntityFieldName(), DistributionSetFields.VERSION.getJpaEntityFieldName()),
-    TAG("tags", TagFields.NAME.getJpaEntityFieldName()),
+            DistributionSetFields.NAME.getName(), DistributionSetFields.VERSION.getName()),
+    TAG("tags", TagFields.NAME.getName()),
     LASTCONTROLLERREQUESTAT("lastTargetQuery"),
     METADATA("metadata"),
     TYPE("targetType",
-            TargetTypeFields.ID.getJpaEntityFieldName(),
-            TargetTypeFields.KEY.getJpaEntityFieldName(),
-            TargetTypeFields.NAME.getJpaEntityFieldName()),
+            TargetTypeFields.ID.getName(),
+            TargetTypeFields.KEY.getName(),
+            TargetTypeFields.NAME.getName()),
     // kept just for backward compatibility for backward compatibility
     // could be removed only if in the systems there are no active auto assignments or rollouts (dynamic or starting) with that condition
     // to be reconsidered if and when to be removed
     @Deprecated(forRemoval = true, since = "0.10.0")
     TARGETTYPE("targetType",
-            TargetTypeFields.ID.getJpaEntityFieldName(),
-            TargetTypeFields.KEY.getJpaEntityFieldName(),
-            TargetTypeFields.NAME.getJpaEntityFieldName());
+            TargetTypeFields.ID.getName(),
+            TargetTypeFields.KEY.getName(),
+            TargetTypeFields.NAME.getName());
 
-    private final String jpaEntityFieldName;
+    private final String name;
     private final List<String> subEntityAttributes;
 
-    TargetFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
-        this.jpaEntityFieldName = jpaEntityFieldName;
+    TargetFields(final String name, final String... subEntityAttributes) {
+        this.name = name;
         this.subEntityAttributes = List.of(subEntityAttributes);
     }
 
     @Override
     public String getDefaultSubEntityAttribute() {
-        return this == TYPE ? TargetTypeFields.KEY.getJpaEntityFieldName() : QueryField.super.getDefaultSubEntityAttribute();
+        return this == TYPE ? TargetTypeFields.KEY.getName() : QueryField.super.getDefaultSubEntityAttribute();
     }
 
     @Override

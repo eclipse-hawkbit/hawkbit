@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.qfields;
 
 import lombok.Getter;
+import org.eclipse.hawkbit.ql.QueryField;
 
 /**
  * Describing the fields of the Tag model which can be used in the REST API e.g. for sorting etc.
@@ -18,18 +19,18 @@ import lombok.Getter;
 @Getter
 public enum TargetTagFields implements QueryField {
 
-    ID(TagFields.ID.getJpaEntityFieldName()),
-    NAME(TagFields.NAME.getJpaEntityFieldName()),
-    DESCRIPTION(TagFields.DESCRIPTION.getJpaEntityFieldName()),
-    COLOUR(TagFields.COLOUR.getJpaEntityFieldName()),
+    ID(TagFields.ID.getName()),
+    NAME(TagFields.NAME.getName()),
+    DESCRIPTION(TagFields.DESCRIPTION.getName()),
+    COLOUR(TagFields.COLOUR.getName()),
     CREATEDAT("createdAt"),
     CREATEDBY("createdBy"),
     LASTMODIFIEDAT("lastModifiedAt"),
     LASTMODIFIEDBY("lastModifiedBy");
 
-    private final String jpaEntityFieldName;
+    private final String name;
 
-    TargetTagFields(final String jpaEntityFieldName) {
-        this.jpaEntityFieldName = jpaEntityFieldName;
+    TargetTagFields(final String name) {
+        this.name = name;
     }
 }
