@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
@@ -321,6 +322,33 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
         assertThatThrownBy(() -> tenantConfigurationManagement.addOrUpdateConfiguration(configKeyWhichDoesNotExists, "value"))
                 .as("Expected InvalidTenantConfigurationKeyException for tenant configuration key which is not declared")
                 .isInstanceOf(InvalidTenantConfigurationKeyException.class);
+    }
+
+    @Test
+    void storeTenantConfigNumberValue() {
+        final String configKey = TenantConfigurationKey.ACTION_CLEANUP_AUTO_EXPIRY;
+        // set auto cleanup for 1 day in Integer ms
+        tenantConfigurationManagement.addOrUpdateConfiguration(configKey, 86400000);
+
+        // expect long
+        Long autoCleanupDaysInMs = tenantConfigurationManagement.getConfigurationValue(configKey, Long.class).getValue();
+        Assertions.assertEquals(86400000, autoCleanupDaysInMs);
+        tenantConfigurationManagement.addOrUpdateConfiguration(configKey, 86400000);
+
+        // 30 days 2,592,000,000 ms as Long
+        tenantConfigurationManagement.addOrUpdateConfiguration(configKey, 2592000000L);
+        autoCleanupDaysInMs = tenantConfigurationManagement.getConfigurationValue(configKey, Long.class).getValue();
+        Assertions.assertEquals(2592000000L, autoCleanupDaysInMs);
+    }
+
+    @Test
+    void throwExceptionIfTryingToConvertOtherValueThanNumber() {
+        final String configKey = TenantConfigurationKey.ACTION_CLEANUP_AUTO_EXPIRY;
+        // set auto cleanup for 1 day in String ms
+        assertThatThrownBy(() ->
+                tenantConfigurationManagement.addOrUpdateConfiguration(configKey, "86400000"))
+                .as("Cannot convert the value 86400000 of type String to the type Long defined by the configuration key.")
+                .isInstanceOf(TenantConfigurationValidatorException.class);
     }
 
     private static Duration getDurationByTimeValues(final long hours, final long minutes, final long seconds) {
