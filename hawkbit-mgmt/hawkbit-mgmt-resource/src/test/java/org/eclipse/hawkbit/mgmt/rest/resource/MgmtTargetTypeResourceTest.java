@@ -349,7 +349,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         mvc.perform(post(TARGETTYPE_DSTYPES_ENDPOINT, testType.getId())
                         .content("[{\"id\":" + standardDsType.getId() + "}]").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         testType = targetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo(TEST_USER);
@@ -405,7 +405,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         mvc.perform(delete(TARGETTYPE_DSTYPE_SINGLE_ENDPOINT, testType.getId(), standardDsType.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         testType = targetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo(TEST_USER);
@@ -425,7 +425,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
         mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/" + standardDsType.getId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         testType = targetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo(TEST_USER);
@@ -447,7 +447,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
         mvc.perform(delete(TARGETTYPE_SINGLE_ENDPOINT, testType.getId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         assertThat(targetTypeManagement.count()).isZero();
     }
@@ -646,7 +646,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                         .content(toJson(dsTypeIds.subList(0, dsTypeIds.size() - 1).stream().map(MgmtId::new).toList()))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         mvc.perform(post(TARGETTYPE_DSTYPES_ENDPOINT, testType.getId())
                         .content("[{\"id\":" + dsTypeIds.get(dsTypeIds.size() - 1) + "}]")

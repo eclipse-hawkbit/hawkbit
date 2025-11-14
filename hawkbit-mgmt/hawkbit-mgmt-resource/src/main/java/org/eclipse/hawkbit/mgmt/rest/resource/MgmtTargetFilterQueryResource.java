@@ -119,7 +119,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     public ResponseEntity<Void> deleteFilter(final Long filterId) {
         filterManagement.delete(filterId);
         log.debug("{} target filter query deleted, return status {}", filterId, HttpStatus.OK);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override

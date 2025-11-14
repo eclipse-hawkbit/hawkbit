@@ -224,7 +224,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Delete a single distribution set tag",
             description = "Handles the DELETE request of deleting a single distribution set tag.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -321,7 +321,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Assign distribution set to the given tag id",
             description = "Handles the POST request of distribution assignment. Already assigned distribution will be ignored.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -359,7 +359,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Assign distribution sets to the given tag id",
             description = "Handles the POST request of distribution assignment. Already assigned distribution will be ignored.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -401,7 +401,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Unassign one distribution set from the given tag id",
             description = "Handles the DELETE request of unassign the given distribution.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully unassigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -436,7 +436,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Unassign multiple distribution sets from the given tag id",
             description = "Handles the DELETE request of unassign the given distribution.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully unassigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",

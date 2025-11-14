@@ -91,7 +91,7 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
         mvc.perform(put(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/newGroup/assigned")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(Arrays.asList("target1", "target2", "target3"))))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
 
         mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/newGroup/assigned")
@@ -122,7 +122,7 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(Arrays.asList("target1", "target2", "target3")))
                         .param("group", "Europe/East"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
@@ -151,7 +151,7 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
         mvc.perform(put(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/C")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("q", "controllerId==target*"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
@@ -171,7 +171,7 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
         mvc.perform(delete(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(Arrays.asList("target1", "target2"))))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
@@ -196,7 +196,7 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
         mvc.perform(delete(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING)
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("q", "controllerId==target*"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
@@ -219,7 +219,7 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("group", "Europe/East")
                         .param("q", "controllerId==target*"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
                         .param("group", "Europe/East")

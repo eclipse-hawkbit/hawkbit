@@ -223,7 +223,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
         mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + original.getId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         assertThat(targetTagManagement.find(original.getId())).isNotPresent();
     }
@@ -316,7 +316,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         mvc.perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
                         assigned.getControllerId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         final List<Target> updated = targetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(Target::getControllerId).toList()).containsOnly(assigned.getControllerId());
@@ -340,7 +340,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                         .content(toJson(List.of(assigned0.getControllerId(), assigned1.getControllerId())))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         final List<Target> updated = targetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(Target::getControllerId).toList())
@@ -462,7 +462,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                         .content(toJson(withMissing))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
         assertThat(targetManagement.findByTag(tag.getId(), PAGE).getContent().stream().map(Target::getControllerId).sorted().toList())
                 .isEqualTo(targets.stream().sorted().toList());
     }
@@ -486,7 +486,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
                         unassigned.getControllerId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         final List<Target> updated = targetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(Target::getControllerId).toList())
@@ -514,7 +514,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                         .content(toJson(Arrays.asList(unassigned0.getControllerId(), unassigned1.getControllerId())))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         final List<Target> updated = targetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(Target::getControllerId).toList())
@@ -643,7 +643,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                         .content(toJson(withMissing))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
         assertThat(targetManagement.findByTag(tag.getId(), PAGE).getContent()).isEmpty();
     }
 }

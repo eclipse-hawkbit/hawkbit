@@ -140,7 +140,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         mvc.perform(post(DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM")
                         .contentType(APPLICATION_JSON).content(smList.toString()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         // create targets and assign DisSet to target
         final String[] knownTargetIds = new String[] { "1", "2" };
@@ -184,7 +184,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         mvc.perform(post(DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM")
                         .contentType(APPLICATION_JSON).content(smList.toString()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         // create Targets
         final String[] knownTargetIds = new String[] { "1", "2" };
@@ -232,7 +232,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         mvc.perform(post(DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM")
                         .contentType(APPLICATION_JSON).content(toJson(smIDs.stream().map(MgmtId::new).toList())))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
         // Test if size is 3
         mvc.perform(get(DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM"))
                 .andDo(MockMvcResultPrinter.print())
@@ -251,7 +251,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         mvc.perform(post(DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM")
                         .contentType(APPLICATION_JSON).content(jsonIDs))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
         // test if size corresponds with quota
         mvc.perform(get(DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet.getId() + "/assignedSM?limit={limit}", maxSoftwareModules * 2))
                 .andDo(MockMvcResultPrinter.print())
@@ -299,7 +299,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         for (final SoftwareModule softwareModule : set.getModules()) {
             final Long smId = softwareModule.getId();
             mvc.perform(delete(DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + set.getId() + "/assignedSM/" + smId))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isNoContent());
             mvc.perform(get(DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + set.getId() + "/assignedSM"))
                     .andDo(MockMvcResultPrinter.print())
                     .andExpect(status().isOk())
@@ -976,7 +976,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         // perform request
         mvc.perform(delete("/rest/v1/distributionsets/{smId}", set.getId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         // check repository content
         assertThat(distributionSetManagement.findAll(PAGE)).isEmpty();
@@ -1014,7 +1014,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
         mvc.perform(delete("/rest/v1/distributionsets/{dsId}", set.getId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         mvc.perform(get("/rest/v1/distributionsets/{dsId}", set.getId()))
                 .andDo(MockMvcResultPrinter.print())
@@ -1214,7 +1214,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                         .contentType(APPLICATION_JSON)
                         .content(jsonObject.toString()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         assertThat(distributionSetManagement.getMetadata(testDS.getId()).get(knownKey)).isEqualTo(updateValue);
     }
@@ -1233,7 +1233,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
         mvc.perform(delete("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         // already deleted
         mvc.perform(delete("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey))
@@ -1693,7 +1693,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         mvc.perform(post("/rest/v1/distributionsets/{ds}/invalidate", distributionSet.getId())
                         .contentType(APPLICATION_JSON)
                         .content(jsonObject.toString()))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         assertThat(targetFilterQueryManagement.find(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
                 .isNull();
@@ -1728,7 +1728,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
         mvc.perform(post("/rest/v1/distributionsets/{ds}/invalidate", distributionSet.getId())
                         .content(jsonObject.toString()).contentType(APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         assertThat(targetFilterQueryManagement.find(targetFilterQuery.getId()).get().getAutoAssignDistributionSet()).isNull();
         final Long rolloutId = rollout.getId();
@@ -1761,7 +1761,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
         mvc.perform(post("/rest/v1/distributionsets/{ds}/invalidate", distributionSet.getId())
                         .content(jsonObject.toString()).contentType(APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         assertThat(rolloutManagement.get(rollout.getId()).getStatus()).isIn(RolloutStatus.RUNNING);
 

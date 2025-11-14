@@ -177,21 +177,21 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<Void> deleteTarget(final String targetId) {
         this.targetManagement.deleteByControllerId(targetId);
         log.debug("{} target deleted, return status {}", targetId, HttpStatus.OK);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     @AuditLog(entity = "Target", type = AuditLog.Type.UPDATE, description = "Unassign Target Type")
     public ResponseEntity<Void> unassignTargetType(final String targetId) {
         this.targetManagement.unassignType(targetId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     @AuditLog(entity = "Target", type = AuditLog.Type.UPDATE, description = "Assign Target")
     public ResponseEntity<Void> assignTargetType(final String targetId, final MgmtId targetTypeId) {
         this.targetManagement.assignType(targetId, targetTypeId.getId());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -244,7 +244,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             deploymentManagement.deleteOldestTargetActions(targetId, keepLast);
         }
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -326,7 +326,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                                 confirmationManagement.denyAction(actionId, actionConfirmation.getCode(), actionConfirmation.getDetails());
                                 break;
                         }
-                        return new ResponseEntity<>(HttpStatus.OK);
+                        return ResponseEntity.noContent().build();
                     } catch (final InvalidConfirmationFeedbackException e) {
                         if (e.getReason() == InvalidConfirmationFeedbackException.Reason.ACTION_CLOSED) {
                             log.warn("Updating action {} with confirmation {} not possible since action not active anymore.",
@@ -429,8 +429,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public void createMetadata(final String targetId, final List<MgmtMetadata> metadataRest) {
+    public ResponseEntity<Void> createMetadata(final String targetId, final List<MgmtMetadata> metadataRest) {
         targetManagement.createMetadata(targetId, MgmtTargetMapper.fromRequestMetadata(metadataRest));
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @Override
@@ -449,14 +450,16 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public void updateMetadata(final String targetId, final String metadataKey, final MgmtMetadataBodyPut metadata) {
+    public ResponseEntity<Void> updateMetadata(final String targetId, final String metadataKey, final MgmtMetadataBodyPut metadata) {
         targetManagement.createMetadata(targetId, metadataKey, metadata.getValue());
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     @AuditLog(entity = "Target", type = AuditLog.Type.DELETE, description = "Delete Target Metadata")
-    public void deleteMetadata(final String targetId, final String metadataKey) {
+    public ResponseEntity<Void> deleteMetadata(final String targetId, final String metadataKey) {
         targetManagement.deleteMetadata(targetId, metadataKey);
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -472,14 +475,14 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final String initiator = getNullIfEmpty(update, MgmtTargetAutoConfirmUpdate::getInitiator);
         final String remark = getNullIfEmpty(update, MgmtTargetAutoConfirmUpdate::getRemark);
         confirmationManagement.activateAutoConfirmation(targetId, initiator, remark);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     @AuditLog(entity = "Target", type = AuditLog.Type.UPDATE, description = "Deactivate Target Auto Confirmation")
     public ResponseEntity<Void> deactivateAutoConfirm(final String targetId) {
         confirmationManagement.deactivateAutoConfirmation(targetId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.noContent().build();
     }
 
     private <T, R> R getNullIfEmpty(final T object, final Function<T, R> extractMethod) {

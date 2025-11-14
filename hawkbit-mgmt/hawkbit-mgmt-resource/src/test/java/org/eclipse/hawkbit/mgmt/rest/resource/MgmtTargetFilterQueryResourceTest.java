@@ -142,7 +142,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final TargetFilterQuery filterQuery = createSingleTargetFilterQuery(filterName, "name==test_01");
 
         mvc.perform(delete(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId()))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         assertThat(targetFilterQueryManagement.find(filterQuery.getId())).isNotPresent();
     }

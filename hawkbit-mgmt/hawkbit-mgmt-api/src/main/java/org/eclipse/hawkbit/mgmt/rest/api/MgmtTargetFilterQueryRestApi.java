@@ -224,7 +224,7 @@ public interface MgmtTargetFilterQueryRestApi {
      */
     @Operation(summary = "Delete target filter by id", description = "Handles the DELETE request of deleting a target filter query. Required permission: DELETE_TARGET")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
@@ -328,7 +328,7 @@ public interface MgmtTargetFilterQueryRestApi {
             description = "Removes the auto assign distribution set from the target filter query. " +
                     "Required permission: UPDATE_TARGET")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",

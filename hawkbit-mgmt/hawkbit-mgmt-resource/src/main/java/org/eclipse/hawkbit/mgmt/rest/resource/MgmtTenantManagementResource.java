@@ -84,7 +84,7 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
         tenantConfigurationManagement.deleteConfiguration(keyName);
 
         log.debug("{} config value deleted, return status {}", keyName, HttpStatus.OK);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override

@@ -179,7 +179,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\":" + osType.getId() + "}"))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         testType = distributionSetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
@@ -205,7 +205,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\":" + osType.getId() + "}"))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         testType = distributionSetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
@@ -239,7 +239,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
             mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
                             .content("{\"id\":" + moduleTypeIds.get(i) + "}").contentType(MediaType.APPLICATION_JSON))
                     .andDo(MockMvcResultPrinter.print())
-                    .andExpect(status().isOk());
+                    .andExpect(status().isNoContent());
         }
 
         mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
@@ -261,7 +261,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
             mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType2.getId())
                             .content("{\"id\":" + moduleTypeIds.get(i) + "}").contentType(MediaType.APPLICATION_JSON))
                     .andDo(MockMvcResultPrinter.print())
-                    .andExpect(status().isOk());
+                    .andExpect(status().isNoContent());
         }
 
         mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType2.getId())
@@ -364,7 +364,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
         mvc.perform(delete("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes/{smtId}", testType.getId(),
                         osType.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         testType = distributionSetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
@@ -383,7 +383,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
         mvc.perform(delete("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes/{smtId}", testType.getId(),
                         appType.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         testType = distributionSetTypeManagement.find(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
@@ -440,7 +440,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
 
         mvc.perform(delete("/rest/v1/distributionsettypes/{dsId}", testType.getId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         assertThat(distributionSetTypeManagement.count()).isEqualTo(DEFAULT_DS_TYPES);
     }
@@ -480,7 +480,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
 
         mvc.perform(delete("/rest/v1/distributionsettypes/{dstId}", testType.getId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstId}", testType.getId()))
                 .andDo(MockMvcResultPrinter.print())

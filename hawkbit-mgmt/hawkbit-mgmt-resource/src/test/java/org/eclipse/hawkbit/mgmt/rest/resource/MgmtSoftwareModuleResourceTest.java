@@ -965,7 +965,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         // delete
         mvc.perform(delete("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", moduleId, artifact.getId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         // check that only one artifact is still alive and still assigned
         assertThat(softwareModuleManagement.findAll(PAGE)).as("After the sm should be marked as deleted").hasSize(1);
@@ -1353,7 +1353,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         mvc.perform(delete("/rest/v1/softwaremodules/{smId}", sm.getId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("After delete no softwarmodule should be available").isEmpty();
         assertThatExceptionOfType(EntityNotFoundException.class) // sm doesn't exists
@@ -1388,7 +1388,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         mvc.perform(delete("/rest/v1/softwaremodules/{smId}", appTypeSmId))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         mvc.perform(get("/rest/v1/softwaremodules/{smId}", appTypeSmId))
                 .andDo(MockMvcResultPrinter.print())
@@ -1463,7 +1463,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         mvc.perform(put("/rest/v1/softwaremodules/{swId}/metadata/{key}", sm.getId(), knownKey)
                         .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content(jsonObject.toString()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         final MetadataValue assertDS = softwareModuleManagement.getMetadata(sm.getId(), knownKey);
         assertThat(assertDS.getValue()).as("Metadata is wrong").isEqualTo(updateValue);
@@ -1484,7 +1484,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         mvc.perform(delete("/rest/v1/softwaremodules/{swId}/metadata/{key}", smId, knownKey))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         assertThatExceptionOfType(EntityNotFoundException.class)
                 .isThrownBy(() -> softwareModuleManagement.getMetadata(smId, knownKey));

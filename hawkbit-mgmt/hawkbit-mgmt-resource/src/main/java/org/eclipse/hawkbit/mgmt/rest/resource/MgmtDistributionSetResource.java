@@ -176,7 +176,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     @AuditLog(entity = "DistributionSet", type = AuditLog.Type.DELETE, description = "Delete Distribution Set")
     public ResponseEntity<Void> deleteDistributionSet(final Long distributionSetId) {
         distributionSetManagement.delete(distributionSetId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -267,8 +267,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public void createMetadata(final Long distributionSetId, final List<MgmtMetadata> metadataRest) {
+    public ResponseEntity<Void> createMetadata(final Long distributionSetId, final List<MgmtMetadata> metadataRest) {
         distributionSetManagement.createMetadata(distributionSetId, MgmtDistributionSetMapper.fromRequestDsMetadata(metadataRest));
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @Override
@@ -287,13 +288,15 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public void updateMetadata(final Long distributionSetId, final String metadataKey, final MgmtMetadataBodyPut metadata) {
+    public ResponseEntity<Void> updateMetadata(final Long distributionSetId, final String metadataKey, final MgmtMetadataBodyPut metadata) {
         distributionSetManagement.createMetadata(distributionSetId, metadataKey, metadata.getValue());
+        return ResponseEntity.noContent().build();
     }
 
     @Override
-    public void deleteMetadata(final Long distributionSetId, final String metadataKey) {
+    public ResponseEntity<Void> deleteMetadata(final Long distributionSetId, final String metadataKey) {
         distributionSetManagement.deleteMetadata(distributionSetId, metadataKey);
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -304,14 +307,14 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                 softwareModuleIDs.stream()
                         .map(MgmtSoftwareModuleAssignment::getId)
                         .toList());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     @AuditLog(entity = "DistributionSet", type = AuditLog.Type.DELETE, description = "Delete Assigned Distribution Set")
     public ResponseEntity<Void> deleteAssignSoftwareModules(final Long distributionSetId, final Long softwareModuleId) {
         distributionSetManagement.unassignSoftwareModule(distributionSetId, softwareModuleId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -365,6 +368,6 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         distributionSetInvalidationManagement.invalidateDistributionSet(new DistributionSetInvalidation(
                 List.of(distributionSetId),
                 MgmtRestModelMapper.convertCancelationType(invalidateRequestBody.getActionCancelationType())));
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

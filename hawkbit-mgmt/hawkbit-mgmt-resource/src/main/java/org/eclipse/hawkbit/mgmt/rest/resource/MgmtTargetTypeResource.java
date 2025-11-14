@@ -79,7 +79,7 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
     public ResponseEntity<Void> deleteTargetType(final Long targetTypeId) {
         log.debug("Delete {} target type", targetTypeId);
         targetTypeManagement.delete(targetTypeId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -109,7 +109,7 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
     @AuditLog(entity = "TargetType", type = AuditLog.Type.DELETE, description = "Remove Compatible Distribution Set From Target Type")
     public ResponseEntity<Void> removeCompatibleDistributionSet(final Long targetTypeId, final Long distributionSetTypeId) {
         targetTypeManagement.unassignDistributionSetType(targetTypeId, distributionSetTypeId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -118,7 +118,7 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
             final Long targetTypeId, final List<MgmtDistributionSetTypeAssignment> distributionSetTypeIds) {
         targetTypeManagement.assignCompatibleDistributionSetTypes(
                 targetTypeId, distributionSetTypeIds.stream().map(MgmtDistributionSetTypeAssignment::getId).toList());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     private TargetType findTargetTypeWithExceptionIfNotFound(final Long targetTypeId) {

@@ -160,7 +160,7 @@ public interface MgmtTargetGroupRestApi {
             description = "Handles the POST request of target assignment. Already assigned target will be ignored. " +
                     "For complex groups use analogical method with query parameters.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully assigned"),
+            @ApiResponse(responseCode = "204", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
@@ -196,7 +196,7 @@ public interface MgmtTargetGroupRestApi {
             description = "Handles the PUT request of assign target group." +
                     "Subgroups are allowed - e.g. Parent/Child")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully assigned"),
+            @ApiResponse(responseCode = "204", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
@@ -232,7 +232,7 @@ public interface MgmtTargetGroupRestApi {
             description = "Handles the PUT request of target group assignment." +
                     "Subgroups are NOT allowed here - e.g. Parent/Child")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully assigned"),
+            @ApiResponse(responseCode = "204", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
@@ -265,7 +265,7 @@ public interface MgmtTargetGroupRestApi {
     @Operation(summary = "Unassign targets from their target groups",
             description = "Handles the DELETE request to unassign the given target(s).")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully unassigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
@@ -292,7 +292,7 @@ public interface MgmtTargetGroupRestApi {
     @Operation(summary = "Unassign targets from their target groups",
             description = "Handles the DELETE request to unassign the given target(s).")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully unassigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
@@ -339,10 +339,10 @@ public interface MgmtTargetGroupRestApi {
      * @param rsqlParam - rsql filter based on Target fields
      */
     @Operation(summary = "Assign targets matching a rsql filter to provided target group",
-            description = "Handles the GET request of assigning targets matching a rsql filter to a provided target group" +
+            description = "Assign targets matching a rsql filter to a provided target group" +
                     "Subgroups are allowed - e.g. Parent/Child")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully assigned"),
+            @ApiResponse(responseCode = "204", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication."),

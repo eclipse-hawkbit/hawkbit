@@ -89,8 +89,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     @AuditLog(entity = "DistributionSetType", type = AuditLog.Type.DELETE, description = "Delete Distribution Set Type")
     public ResponseEntity<Void> deleteDistributionSetType(final Long distributionSetTypeId) {
         distributionSetTypeManagement.delete(distributionSetTypeId);
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -157,7 +156,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     @AuditLog(entity = "DistributionSetType", type = AuditLog.Type.UPDATE, description = "Remove Mandatory Module From Distribution Set Type")
     public ResponseEntity<Void> removeMandatoryModule(final Long distributionSetTypeId, final Long softwareModuleTypeId) {
         distributionSetTypeManagement.unassignSoftwareModuleType(distributionSetTypeId, softwareModuleTypeId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -169,14 +168,13 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     @AuditLog(entity = "DistributionSetType", type = AuditLog.Type.UPDATE, description = "Add Mandatory Module From Distribution Set Type")
     public ResponseEntity<Void> addMandatoryModule(final Long distributionSetTypeId, final MgmtId smtId) {
         distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(distributionSetTypeId, Collections.singletonList(smtId.getId()));
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     public ResponseEntity<Void> addOptionalModule(final Long distributionSetTypeId, final MgmtId smtId) {
         distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(distributionSetTypeId, Collections.singletonList(smtId.getId()));
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final Long distributionSetTypeId) {

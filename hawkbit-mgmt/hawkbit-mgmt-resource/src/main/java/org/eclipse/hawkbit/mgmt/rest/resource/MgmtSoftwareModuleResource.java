@@ -159,7 +159,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
         artifactManagement.delete(artifactId);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -234,12 +234,13 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
         softwareModuleManagement.delete(module.getId());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
-    public void createMetadata(final Long softwareModuleId, final List<MgmtSoftwareModuleMetadata> metadataRest) {
+    public ResponseEntity<Void> createMetadata(final Long softwareModuleId, final List<MgmtSoftwareModuleMetadata> metadataRest) {
         softwareModuleManagement.createMetadata(softwareModuleId, MgmtSoftwareModuleMapper.fromRequestSwMetadata(metadataRest));
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @Override
@@ -262,15 +263,17 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public void updateMetadata(final Long softwareModuleId, final String metadataKey, final MgmtSoftwareModuleMetadataBodyPut metadata) {
+    public ResponseEntity<Void> updateMetadata(final Long softwareModuleId, final String metadataKey, final MgmtSoftwareModuleMetadataBodyPut metadata) {
         softwareModuleManagement.createMetadata(
                 softwareModuleId, metadataKey, new MetadataValueCreate(metadata.getValue(), metadata.getTargetVisible()));
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     @AuditLog(entity = "SoftwareModule", type = AuditLog.Type.DELETE, description = "Delete Software Module Metadata")
-    public void deleteMetadata(final Long softwareModuleId, final String metadataKey) {
+    public ResponseEntity<Void> deleteMetadata(final Long softwareModuleId, final String metadataKey) {
         softwareModuleManagement.deleteMetadata(softwareModuleId, metadataKey);
+        return ResponseEntity.noContent().build();
     }
 
     private static MgmtRepresentationMode parseRepresentationMode(final String representationModeParam) {

@@ -137,7 +137,8 @@ public interface MgmtActionRestApi {
      * @return status OK if delete as successful.
      */
     @Operation(summary = "Delete a single action by id", description = "Handles the DELETE request for single action within Bosch IoT Rollouts. Required Permission: DELETE_REPOSITORY")
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
@@ -156,7 +157,8 @@ public interface MgmtActionRestApi {
      * @return status OK if delete as successful.
      */
     @Operation(summary = "Delete multiple actions by list OR rsql filter", description = "Handles the DELETE request for multiple actions within Bosch IoT Rollouts. Either action id list OR rsql filter SHOULD be provided. Required Permission: DELETE_REPOSITORY")
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
