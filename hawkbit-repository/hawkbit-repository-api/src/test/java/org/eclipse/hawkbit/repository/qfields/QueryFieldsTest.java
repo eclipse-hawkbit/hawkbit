@@ -16,6 +16,7 @@ import java.util.List;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
+import org.eclipse.hawkbit.ql.QueryField;
 import org.junit.jupiter.api.Test;
 
 class QueryFieldsTest {

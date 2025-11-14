@@ -18,8 +18,11 @@ import java.util.Map;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.exception.GenericSpServerException;
+import org.eclipse.hawkbit.ql.QueryException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
@@ -66,6 +69,9 @@ public class ExceptionMapper {
      * @param e the thrown and catch exception
      * @return the mapped exception
      */
+    // java:S3776 - complex but flat
+    // java:S3358 - easy to read
+    @SuppressWarnings({ "java:S3776", "java:S3358" })
     public static Exception map(final Exception e) {
         if (log.isTraceEnabled()) {
             log.trace("Handling exception {}", e.getClass().getName(), e);
@@ -86,7 +92,8 @@ public class ExceptionMapper {
             if (EXCEPTION_MAPPING.containsKey(mappedEx.getName())) {
                 try {
                     return (Exception) Class.forName(EXCEPTION_MAPPING.get(mappedEx.getName())).getConstructor(Throwable.class).newInstance(e);
-                } catch (final ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex) {
+                } catch (final ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |
+                        InvocationTargetException ex) {
                     log.error(ex.getMessage(), ex);
                     return e;
                 }
@@ -101,10 +108,19 @@ public class ExceptionMapper {
         if (mappingClass != null) {
             try {
                 return (Exception) Class.forName(mappingClass).getConstructor(Throwable.class).newInstance(e);
-            } catch (final ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex) {
+            } catch (final ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |
+                    InvocationTargetException ex) {
                 log.error(ex.getMessage(), ex);
                 return e;
             }
+        }
+
+        if (e instanceof QueryException qe) {
+            return qe.getErrorCode() == QueryException.ErrorCode.INVALID_SYNTAX
+                    ? new RSQLParameterSyntaxException(qe.getMessage(), qe.getCause())
+                    : (qe.getErrorCode() == QueryException.ErrorCode.UNSUPPORTED_FIELD
+                            ? new RSQLParameterUnsupportedFieldException(qe.getMessage(), qe.getCause())
+                            : new GenericSpServerException(qe));
         }
 
         return e;

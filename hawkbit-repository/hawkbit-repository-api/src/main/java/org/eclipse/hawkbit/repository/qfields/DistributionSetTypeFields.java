@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.qfields;
 
 import lombok.Getter;
+import org.eclipse.hawkbit.ql.QueryField;
 
 /**
  * Describing the fields of the DistributionSetType model which can be used in
@@ -27,9 +28,9 @@ public enum DistributionSetTypeFields implements QueryField {
     LASTMODIFIEDAT("lastModifiedAt"),
     LASTMODIFIEDBY("lastModifiedBy");
 
-    private final String jpaEntityFieldName;
+    private final String name;
 
-    DistributionSetTypeFields(final String jpaEntityFieldName) {
-        this.jpaEntityFieldName = jpaEntityFieldName;
+    DistributionSetTypeFields(final String name) {
+        this.name = name;
     }
 }

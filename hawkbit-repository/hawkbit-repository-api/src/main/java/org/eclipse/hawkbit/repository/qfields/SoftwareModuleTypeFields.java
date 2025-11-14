@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.qfields;
 
 import lombok.Getter;
+import org.eclipse.hawkbit.ql.QueryField;
 
 /**
  * Describing the fields of the SoftwareModuleType model which can be used in the REST API e.g. for sorting etc.
@@ -27,9 +28,9 @@ public enum SoftwareModuleTypeFields implements QueryField {
     LASTMODIFIEDAT("lastModifiedAt"),
     LASTMODIFIEDBY("lastModifiedBy");
 
-    private final String jpaEntityFieldName;
+    private final String name;
 
-    SoftwareModuleTypeFields(final String jpaEntityFieldName) {
-        this.jpaEntityFieldName = jpaEntityFieldName;
+    SoftwareModuleTypeFields(final String name) {
+        this.name = name;
     }
 }

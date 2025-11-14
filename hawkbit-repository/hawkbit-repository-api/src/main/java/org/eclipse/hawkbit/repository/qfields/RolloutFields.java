@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.qfields;
 import java.util.List;
 
 import lombok.Getter;
+import org.eclipse.hawkbit.ql.QueryField;
 
 /**
  * Describing the fields of the Rollout model which can be used in the REST API e.g. for sorting etc.
@@ -29,15 +30,15 @@ public enum RolloutFields implements QueryField {
     LASTMODIFIEDBY("lastModifiedBy"),
     DISTRIBUTIONSET(
             "distributionSet",
-            DistributionSetFields.ID.getJpaEntityFieldName(),
-            DistributionSetFields.NAME.getJpaEntityFieldName(), DistributionSetFields.VERSION.getJpaEntityFieldName(),
-            DistributionSetFields.TYPE.getJpaEntityFieldName());
+            DistributionSetFields.ID.getName(),
+            DistributionSetFields.NAME.getName(), DistributionSetFields.VERSION.getName(),
+            DistributionSetFields.TYPE.getName());
 
-    private final String jpaEntityFieldName;
+    private final String name;
     private final List<String> subEntityAttributes;
 
-    RolloutFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
-        this.jpaEntityFieldName = jpaEntityFieldName;
+    RolloutFields(final String name, final String... subEntityAttributes) {
+        this.name = name;
         this.subEntityAttributes = List.of(subEntityAttributes);
     }
 }

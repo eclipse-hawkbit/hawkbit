@@ -14,17 +14,17 @@ import java.util.Set;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.ql.jpa.QLSupport;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.qfields.DistributionSetFields;
 import org.eclipse.hawkbit.repository.qfields.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.qfields.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.qfields.SoftwareModuleTypeFields;
 import org.eclipse.hawkbit.repository.qfields.TargetFields;
 import org.eclipse.hawkbit.repository.qfields.TargetTagFields;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.ql.QLSupport;
 
 // utility class to validate authorities when ACM is enabled
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

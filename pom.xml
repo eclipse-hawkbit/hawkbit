@@ -709,6 +709,7 @@
     </profiles>
 
     <modules>
+        <module>hawkbit-ql-jpa</module>
         <module>hawkbit-core</module>
         <module>hawkbit-security-core</module>
         <module>hawkbit-artifact</module>

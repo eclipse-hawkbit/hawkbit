@@ -28,7 +28,6 @@
         <module>hawkbit-repository-jpa-api</module>
         <module>hawkbit-repository-jpa-eclipselink</module>
         <module>hawkbit-repository-jpa-hibernate</module>
-        <module>hawkbit-repository-jpa-ql</module>
         <module>hawkbit-repository-jpa</module>
         <module>hawkbit-repository-jpa-flyway</module>
 

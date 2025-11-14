@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.qfields;
 import java.util.List;
 
 import lombok.Getter;
+import org.eclipse.hawkbit.ql.QueryField;
 
 /**
  * Describing the fields of the SoftwareModule model which can be used in the REST API e.g. for sorting etc.
@@ -21,9 +22,9 @@ public enum SoftwareModuleFields implements QueryField {
 
     ID("id"),
     TYPE("type",
-            SoftwareModuleTypeFields.ID.getJpaEntityFieldName(),
-            SoftwareModuleTypeFields.KEY.getJpaEntityFieldName(),
-            SoftwareModuleTypeFields.NAME.getJpaEntityFieldName()),
+            SoftwareModuleTypeFields.ID.getName(),
+            SoftwareModuleTypeFields.KEY.getName(),
+            SoftwareModuleTypeFields.NAME.getName()),
     NAME("name"),
     DESCRIPTION("description"),
     VERSION("version"),
@@ -33,18 +34,18 @@ public enum SoftwareModuleFields implements QueryField {
     LASTMODIFIEDAT("lastModifiedAt"),
     LASTMODIFIEDBY("lastModifiedBy");
 
-    private final String jpaEntityFieldName;
+    private final String name;
     private final List<String> subEntityAttributes;
 
-    SoftwareModuleFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
-        this.jpaEntityFieldName = jpaEntityFieldName;
+    SoftwareModuleFields(final String name, final String... subEntityAttributes) {
+        this.name = name;
         this.subEntityAttributes = List.of(subEntityAttributes);
     }
 
 
     @Override
     public String getDefaultSubEntityAttribute() {
-        return this == TYPE ? SoftwareModuleTypeFields.KEY.getJpaEntityFieldName() : QueryField.super.getDefaultSubEntityAttribute();
+        return this == TYPE ? SoftwareModuleTypeFields.KEY.getName() : QueryField.super.getDefaultSubEntityAttribute();
     }
 
     @Override

@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 import lombok.Getter;
+import org.eclipse.hawkbit.ql.QueryField;
 
 /**
  * Describing the fields of the Target model which can be used in the REST API e.g. for sorting etc.
@@ -28,19 +29,19 @@ public enum TargetFilterQueryFields implements QueryField {
     LASTMODIFIEDBY("lastModifiedBy"),
     AUTOASSIGNDISTRIBUTIONSET("autoAssignDistributionSet", "name", "version");
 
-    private final String jpaEntityFieldName;
+    private final String name;
     private final List<String> subEntityAttributes;
 
-    TargetFilterQueryFields(final String jpaEntityFieldName) {
-        this(jpaEntityFieldName, Collections.emptyList());
+    TargetFilterQueryFields(final String name) {
+        this(name, Collections.emptyList());
     }
 
-    TargetFilterQueryFields(final String jpaEntityFieldName, final String... subEntityAttribues) {
-        this(jpaEntityFieldName, List.of(subEntityAttribues));
+    TargetFilterQueryFields(final String name, final String... subEntityAttribues) {
+        this(name, List.of(subEntityAttribues));
     }
 
-    TargetFilterQueryFields(final String jpaEntityFieldName, final List<String> subEntityAttribues) {
-        this.jpaEntityFieldName = jpaEntityFieldName;
+    TargetFilterQueryFields(final String name, final List<String> subEntityAttribues) {
+        this.name = name;
         this.subEntityAttributes = subEntityAttribues;
     }
 }

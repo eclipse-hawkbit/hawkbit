@@ -88,7 +88,7 @@ public final class MgmtTargetMapper {
                 .withRel(MgmtRestConstants.TARGET_V1_ATTRIBUTES).expand());
         response.add(linkTo(methodOn(MgmtTargetRestApi.class).getActionHistory(response.getControllerId(), null, 0,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
-                ActionFields.ID.getJpaEntityFieldName() + ":" + SortDirection.DESC))
+                ActionFields.ID.getName() + ":" + SortDirection.DESC))
                 .withRel(MgmtRestConstants.TARGET_V1_ACTIONS).expand());
         response.add(linkTo(methodOn(MgmtTargetRestApi.class).getMetadata(response.getControllerId()))
                 .withRel("metadata").expand());
@@ -289,7 +289,7 @@ public final class MgmtTargetMapper {
 
         result.add(linkTo(methodOn(MgmtTargetRestApi.class).getActionStatusList(controllerId, action.getId(), 0,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
-                ActionStatusFields.ID.getJpaEntityFieldName() + ":" + SortDirection.DESC))
+                ActionStatusFields.ID.getName() + ":" + SortDirection.DESC))
                 .withRel(MgmtRestConstants.TARGET_V1_ACTION_STATUS).expand());
 
         final Rollout rollout = action.getRollout();

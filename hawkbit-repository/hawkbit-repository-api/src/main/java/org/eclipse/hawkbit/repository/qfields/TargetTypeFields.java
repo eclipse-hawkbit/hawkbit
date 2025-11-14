@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.qfields;
 
 import lombok.Getter;
+import org.eclipse.hawkbit.ql.QueryField;
 
 /**
  * Describing the fields of the TargetType model which can be used in the REST API
@@ -26,9 +27,9 @@ public enum TargetTypeFields implements QueryField {
     LASTMODIFIEDAT("lastModifiedAt"),
     LASTMODIFIEDBY("lastModifiedBy");
 
-    private final String jpaEntityFieldName;
+    private final String name;
 
-    TargetTypeFields(final String jpaEntityFieldName) {
-        this.jpaEntityFieldName = jpaEntityFieldName;
+    TargetTypeFields(final String name) {
+        this.name = name;
     }
 }

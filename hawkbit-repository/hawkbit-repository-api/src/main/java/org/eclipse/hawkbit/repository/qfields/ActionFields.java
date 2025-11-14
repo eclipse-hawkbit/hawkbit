@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.qfields;
 import java.util.List;
 
 import lombok.Getter;
+import org.eclipse.hawkbit.ql.QueryField;
 
 /**
  * Sort and search fields for actions.
@@ -29,21 +30,21 @@ public enum ActionFields implements QueryField {
     LASTMODIFIEDBY("lastModifiedBy"),
     WEIGHT("weight"),
     TARGET("target",
-            TargetFields.ID.getJpaEntityFieldName(), TargetFields.NAME.getJpaEntityFieldName(),
-            TargetFields.UPDATESTATUS.getJpaEntityFieldName(), TargetFields.IPADDRESS.getJpaEntityFieldName()),
+            TargetFields.ID.getName(), TargetFields.NAME.getName(),
+            TargetFields.UPDATESTATUS.getName(), TargetFields.IPADDRESS.getName()),
     DISTRIBUTIONSET("distributionSet",
-            DistributionSetFields.ID.getJpaEntityFieldName(),
-            DistributionSetFields.NAME.getJpaEntityFieldName(), DistributionSetFields.VERSION.getJpaEntityFieldName(),
-            DistributionSetFields.TYPE.getJpaEntityFieldName()),
-    ROLLOUT("rollout", RolloutFields.ID.getJpaEntityFieldName(), RolloutFields.NAME.getJpaEntityFieldName()),
-    ROLLOUTGROUP("rolloutGroup", RolloutGroupFields.ID.getJpaEntityFieldName(), RolloutGroupFields.NAME.getJpaEntityFieldName()),
+            DistributionSetFields.ID.getName(),
+            DistributionSetFields.NAME.getName(), DistributionSetFields.VERSION.getName(),
+            DistributionSetFields.TYPE.getName()),
+    ROLLOUT("rollout", RolloutFields.ID.getName(), RolloutFields.NAME.getName()),
+    ROLLOUTGROUP("rolloutGroup", RolloutGroupFields.ID.getName(), RolloutGroupFields.NAME.getName()),
     EXTERNALREF("externalRef");
 
-    private final String jpaEntityFieldName;
+    private final String name;
     private final List<String> subEntityAttributes;
 
-    ActionFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
-        this.jpaEntityFieldName = jpaEntityFieldName;
+    ActionFields(final String name, final String... subEntityAttributes) {
+        this.name = name;
         this.subEntityAttributes = List.of(subEntityAttributes);
     }
 }
