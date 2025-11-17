@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.sdk.device.DdiController;
 import org.eclipse.hawkbit.sdk.device.DdiTenant;
 import org.eclipse.hawkbit.sdk.device.UpdateHandler;
 import org.eclipse.hawkbit.sdk.mgmt.AuthenticationSetupHelper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -66,11 +67,11 @@ public class DeviceApp {
         private final AuthenticationSetupHelper mgmtApi;
 
         @SuppressWarnings("java:S3358")
-        Shell(final DdiTenant ddiTenant, final AuthenticationSetupHelper mgmtApi, final Optional<UpdateHandler> updateHandler) {
+        Shell(final DdiTenant ddiTenant, final AuthenticationSetupHelper mgmtApi, final Optional<UpdateHandler> updateHandler,
+                @Value("${demo.controller.id:demo}") final String controllerId,
+                @Value("${demo.controller.securityToken:#{null}") final String securityToken) {
             this.ddiTenant = ddiTenant;
             this.mgmtApi = mgmtApi;
-            final String controllerId = System.getProperty("demo.controller.id");
-            final String securityToken = System.getProperty("demo.controller.securityToken");
 
             this.device = this.ddiTenant.createController(
                     Controller.builder()

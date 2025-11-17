@@ -101,7 +101,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <skip>false</skip>
-                    <finalName>hawkBit-UI</finalName>
+                    <finalName>hawkbit-ui</finalName>
                     <mainClass>org.eclipse.hawkbit.ui.HawkbitUiApp</mainClass>
                 </configuration>
             </plugin>
