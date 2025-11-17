@@ -70,6 +70,9 @@
                         </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <mainClass>org.eclipse.hawkbit.sdk.demo.device.DeviceApp</mainClass>
+                </configuration>
             </plugin>
         </plugins>
 

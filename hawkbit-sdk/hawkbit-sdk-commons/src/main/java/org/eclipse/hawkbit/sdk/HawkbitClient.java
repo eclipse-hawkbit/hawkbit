@@ -120,6 +120,7 @@ public class HawkbitClient {
             new DefaultHttpRequestRetryStrategy(
                     Integer.getInteger("hawkbit.sdk.http.maxRetry", 3),
                     TimeValue.ofSeconds(Integer.getInteger("hawkbit.sdk.http.defaultRetryIntervalSec", 10)));
+    private static final int BUFFER_SIZE = 8096;
 
     private final HawkbitServer hawkBitServer;
 
@@ -131,10 +132,8 @@ public class HawkbitClient {
     private final BiFunction<Tenant, Controller, RequestInterceptor> requestInterceptorFn;
 
     private final HttpRequestRetryStrategy httpRequestRetryStrategy;
-    private final int BUFFER_SIZE = 8096;
 
-    public HawkbitClient(
-            final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract) {
+    public HawkbitClient(final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract) {
         this(hawkBitServer, encoder, decoder, contract, null, null);
     }
 
@@ -226,6 +225,7 @@ public class HawkbitClient {
     }
 
     private static final Cleaner CLEANER = Cleaner.create();
+
     private <T> T service0(final Class<T> serviceType, final Tenant tenant, final Controller controller) {
         final String url = controller == null ? hawkBitServer.getMgmtUrl() : hawkBitServer.getDdiUrl();
         final HttpClientKey key = new HttpClientKey(
@@ -364,6 +364,7 @@ public class HawkbitClient {
     }
 
     private static final String CRLF = "\r\n";
+
     private void writeMultipartFile(
             final MultipartFile multipartFile, final OutputStream out, final String boundary, final Annotation[] parametersAnnotations)
             throws IOException {
@@ -382,6 +383,7 @@ public class HawkbitClient {
             out.write(CRLF.getBytes(StandardCharsets.UTF_8));
         }
     }
+
     private void writeSimpleFormData(
             final Object arg, final OutputStream out, final String boundary, final Annotation[] parameterAnnotations) throws IOException {
         if (arg != null) {
@@ -406,13 +408,16 @@ public class HawkbitClient {
     }
 
     private static final String KEYSTORE_PASSWORD;
+
     static {
         final Random random = new SecureRandom();
         final byte[] bytes = new byte[16];
         random.nextBytes(bytes);
         KEYSTORE_PASSWORD = Base64.getEncoder().encodeToString(bytes);
     }
+
     private static final Map<HttpClientKey, HttpClientWrapper> HTTP_CLIENTS = new HashMap<>();
+
     private static HttpClient httpClient(final HttpClientKey key) {
         synchronized (HTTP_CLIENTS) {
             final HttpClientWrapper httpClientWrapper = HTTP_CLIENTS.get(key);
