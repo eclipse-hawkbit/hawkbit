@@ -45,7 +45,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * Story: Auto assign checker
  */
 @ExtendWith(MockitoExtension.class)
-class JpaAutoAssignExecutorTest {
+class AutoAssignExecutorTest {
 
     @Mock
     private TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;

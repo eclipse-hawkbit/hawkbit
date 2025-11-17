@@ -9,6 +9,14 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import static org.eclipse.hawkbit.im.authentication.SpPermission.CREATE_ROLLOUT;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.DISTRIBUTION_SET;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.HANDLE_ROLLOUT;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.ROLLOUT;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_ROLLOUT;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_READ_REPOSITORY;
+import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_UPDATE_REPOSITORY;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
@@ -50,7 +58,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface DeploymentManagement extends PermissionSupport {
 
-    String HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET = SpringEvalExpressions.HAS_UPDATE_REPOSITORY + " and hasAuthority('READ_" + SpPermission.DISTRIBUTION_SET + "')";
+    String HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET = HAS_UPDATE_REPOSITORY + " and hasPermission(#root, 'READ_" + DISTRIBUTION_SET + "')";
+    String HAS_UPDATE_TARGET_OR_CREATE_UPDATE_ROLLOUT = HAS_UPDATE_REPOSITORY + " or hasPermission(#root, '" + CREATE_ROLLOUT + "')" + " or hasPermission(#root, '" + UPDATE_ROLLOUT + "')";
 
     @Override
     default String permissionGroup() {
@@ -63,12 +72,12 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param deploymentRequests information about all target-ds-assignments that shall be made
      * @return the list of assignment results
      * @throws IncompleteDistributionSetException if mandatory {@link SoftwareModuleType} are not assigned as
-     *             defined by the {@link DistributionSetType}.
+     *         defined by the {@link DistributionSetType}.
      * @throws EntityNotFoundException if either provided {@link DistributionSet} or {@link Target}s do not exist
      * @throws AssignmentQuotaExceededException if the maximum number of targets the distribution set can be
-     *             assigned to at once is exceeded
+     *         assigned to at once is exceeded
      * @throws MultiAssignmentIsNotEnabledException if the request results in multiple assignments to the same
-     *             target and multi-assignment is disabled
+     *         target and multi-assignment is disabled
      */
     @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
     List<DistributionSetAssignmentResult> assignDistributionSets(@Valid @NotEmpty List<DeploymentRequest> deploymentRequests);
@@ -81,12 +90,12 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param actionMessage an optional message for the action status
      * @return the list of assignment results
      * @throws IncompleteDistributionSetException if mandatory {@link SoftwareModuleType} are not assigned as
-     *             defined by the {@link DistributionSetType}.
+     *         defined by the {@link DistributionSetType}.
      * @throws EntityNotFoundException if either provided {@link DistributionSet} or {@link Target}s do not exist
      * @throws AssignmentQuotaExceededException if the maximum number of targets the distribution set can be
-     *             assigned to at once is exceeded
+     *         assigned to at once is exceeded
      * @throws MultiAssignmentIsNotEnabledException if the request results in multiple assignments to the same
-     *             target and multi-assignment is disabled
+     *         target and multi-assignment is disabled
      */
     @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
     List<DistributionSetAssignmentResult> assignDistributionSets(
@@ -108,11 +117,11 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param assignments target IDs with the respective distribution set ID which they are supposed to be assigned to
      * @return the assignment results
      * @throws IncompleteDistributionSetException if mandatory {@link SoftwareModuleType} are not assigned as
-     *             defined by the {@link DistributionSetType}.
+     *         defined by the {@link DistributionSetType}.
      * @throws EntityNotFoundException if either provided {@link DistributionSet} or {@link Target}s do not exist
      * @throws AssignmentQuotaExceededException if the maximum number of targets the distribution set can be assigned to at once is exceeded
      * @throws MultiAssignmentIsNotEnabledException if the request results in multiple assignments to the same
-     *             target and multi-assignment is disabled
+     *         target and multi-assignment is disabled
      */
     @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
     List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(String initiatedBy, Collection<Entry<String, Long>> assignments);
@@ -129,7 +138,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @throws CancelActionNotAllowedException in case the given action is not active or is already a cancel action
      * @throws EntityNotFoundException if action with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
     Action cancelAction(long actionId);
 
     /**
@@ -139,11 +148,11 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param controllerId the target associated to the actions to count
      * @return the count value of found actions associated to the target
      * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
-     *             given {@code fieldNameProvider}
+     *         given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      * @throws EntityNotFoundException if target with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     long countActionsByTarget(@NotNull String rsql, @NotEmpty String controllerId);
 
     /**
@@ -151,7 +160,7 @@ public interface DeploymentManagement extends PermissionSupport {
      *
      * @return the total amount of stored actions
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     long countActionsAll();
 
     /**
@@ -160,7 +169,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param rsql RSQL query.
      * @return the total number of actions matching the given RSQL query.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     long countActions(@NotNull String rsql);
 
     /**
@@ -170,7 +179,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @return the count value of found actions associated to the target
      * @throws EntityNotFoundException if target with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     long countActionsByTarget(@NotEmpty String controllerId);
 
     /**
@@ -179,7 +188,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param actionId to be id of the action
      * @return the corresponding {@link Action}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Optional<Action> findAction(long actionId);
 
     /**
@@ -188,7 +197,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param pageable pagination parameter
      * @return a paged list of {@link Action}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Slice<Action> findActionsAll(@NotNull Pageable pageable);
 
     /**
@@ -198,7 +207,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param pageable the page request parameter for paging and sorting the result
      * @return a paged list of {@link Action}s.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Slice<Action> findActions(@NotNull String rsql, @NotNull Pageable pageable);
 
     /**
@@ -209,10 +218,10 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param pageable the page request
      * @return a slice of actions assigned to the specific target and the specification
      * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
-     *             given {@code fieldNameProvider}
+     *         given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Slice<Action> findActionsByTarget(@NotNull String rsql, @NotEmpty String controllerId, @NotNull Pageable pageable);
 
     /**
@@ -222,7 +231,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param pageable the pageable request to limit, sort the actions
      * @return a slice of actions found for a specific target
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Slice<Action> findActionsByTarget(@NotEmpty String controllerId, @NotNull Pageable pageable);
 
     /**
@@ -233,7 +242,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @return the corresponding {@link Page} of {@link ActionStatus}
      * @throws EntityNotFoundException if action with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Page<ActionStatus> findActionStatusByAction(long actionId, @NotNull Pageable pageable);
 
     /**
@@ -243,7 +252,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param pageable the page request parameter for paging and sorting the result
      * @return a page of messages by a specific {@link ActionStatus} id
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Page<String> findMessagesByActionStatusId(long actionStatusId, @NotNull Pageable pageable);
 
     /**
@@ -252,7 +261,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param actionId to be id of the action
      * @return the corresponding {@link Action}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Optional<Action> findActionWithDetails(long actionId);
 
     /**
@@ -263,7 +272,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @return a list of actions associated with the given target
      * @throws EntityNotFoundException if target with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Page<Action> findActiveActionsByTarget(@NotEmpty String controllerId, @NotNull Pageable pageable);
 
     /**
@@ -273,7 +282,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param maxActionCount max size of returned list
      * @return the action
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     List<Action> findActiveActionsWithHighestWeight(@NotEmpty String controllerId, int maxActionCount);
 
     /**
@@ -285,7 +294,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @throws CancelActionNotAllowedException in case the given action is not active
      * @throws EntityNotFoundException if action with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
     Action forceQuitAction(long actionId);
 
     /**
@@ -295,11 +304,12 @@ public interface DeploymentManagement extends PermissionSupport {
      * @return the updated or the found {@link Action}
      * @throws EntityNotFoundException if action with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
     Action forceTargetAction(long actionId);
 
     /**
      * Deletes the current action by id.
+     *
      * @param actionId - action id
      */
     @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TARGET + "')")
@@ -307,6 +317,7 @@ public interface DeploymentManagement extends PermissionSupport {
 
     /**
      * Deletes actions matching the provided rsql filter
+     *
      * @param rsql - rsql filter for actions to be deleted
      */
     @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TARGET + "')")
@@ -314,6 +325,7 @@ public interface DeploymentManagement extends PermissionSupport {
 
     /**
      * Deletes actions present in provided list of ids
+     *
      * @param actionIds - list of action ids to be deleted
      */
     @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TARGET + "')")
@@ -342,7 +354,7 @@ public interface DeploymentManagement extends PermissionSupport {
      *
      * @param targetIds ids of the {@link Target}s the actions belong to
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_UPDATE_TARGET_OR_CREATE_UPDATE_ROLLOUT)
     void cancelInactiveScheduledActionsForTargets(List<Long> targetIds);
 
     /**
@@ -352,7 +364,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param distributionSetId to assign
      * @param rolloutGroupParentId the parent rollout group the actions should reference. null references the first group
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_UPDATE_TARGET_OR_CREATE_UPDATE_ROLLOUT)
     void startScheduledActionsByRolloutGroupParent(long rolloutId, long distributionSetId, Long rolloutGroupParentId);
 
     /**
@@ -360,7 +372,7 @@ public interface DeploymentManagement extends PermissionSupport {
      *
      * @param rolloutGroupActions rollouts group actions part of a same group
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_UPDATE_TARGET_OR_CREATE_UPDATE_ROLLOUT)
     void startScheduledActions(final List<Action> rolloutGroupActions);
 
     /**
@@ -370,7 +382,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @return assigned {@link DistributionSet}
      * @throws EntityNotFoundException if target with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Optional<DistributionSet> findAssignedDistributionSet(@NotEmpty String controllerId);
 
     /**
@@ -380,7 +392,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @return installed {@link DistributionSet}
      * @throws EntityNotFoundException if target with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     Optional<DistributionSet> findInstalledDistributionSet(@NotEmpty String controllerId);
 
     /**
@@ -400,7 +412,7 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param targetId of target
      * @return if actions in CANCELING state are present
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    @PreAuthorize(HAS_READ_REPOSITORY)
     boolean hasPendingCancellations(@NotNull Long targetId);
 
     /**
@@ -409,9 +421,9 @@ public interface DeploymentManagement extends PermissionSupport {
      * @param cancelationType defines if a force or soft cancel is executed
      * @param set the distribution set for that the actions should be canceled
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    @PreAuthorize(HAS_UPDATE_REPOSITORY)
     void cancelActionsForDistributionSet(final ActionCancellationType cancelationType, final DistributionSet set);
 
-    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY + " or " + SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(HAS_UPDATE_REPOSITORY + " or " + SpringEvalExpressions.IS_SYSTEM_CODE)
     void handleMaxAssignmentsExceeded(Long targetId, Long requested, AssignmentQuotaExceededException quotaExceededException);
 }

@@ -39,11 +39,12 @@ public final class SpringEvalExpressions {
     public static final String IS_SYSTEM_CODE = "hasAuthority('ROLE_SYSTEM_CODE')";
     public static final String HAS_AUTH_SYSTEM_ADMIN = "hasAuthority('SYSTEM_ADMIN')";
 
-    // evaluated to <permission>_<permissionGroup> (e.g. DISTRIBUTION_SET_CREATE)
-    public static final String HAS_CREATE_REPOSITORY = "hasPermission(#root, 'CREATE')";
-    public static final String HAS_READ_REPOSITORY = "hasPermission(#root, 'READ')";
-    public static final String HAS_UPDATE_REPOSITORY = "hasPermission(#root, 'UPDATE')";
-    public static final String HAS_DELETE_REPOSITORY = "hasPermission(#root, 'DELETE')";
+    public static final String PERMISSION_GROUP_PLACEHOLDER = "${permissionGroup}";
+    // evaluated to <permission>_<permissionGroup> (e.g. CREATE_DISTRIBUTION_SET)
+    public static final String HAS_CREATE_REPOSITORY = "hasPermission(#root, 'CREATE_${permissionGroup}')";
+    public static final String HAS_READ_REPOSITORY = "hasPermission(#root, 'READ_${permissionGroup}')";
+    public static final String HAS_UPDATE_REPOSITORY = "hasPermission(#root, 'UPDATE_${permissionGroup}')";
+    public static final String HAS_DELETE_REPOSITORY = "hasPermission(#root, 'DELETE_${permissionGroup}')";
 
     public static final String IS_CONTROLLER = "hasAnyRole('" + SpRole.CONTROLLER_ROLE_ANONYMOUS + "', '" + SpRole.CONTROLLER_ROLE + "')";
 }

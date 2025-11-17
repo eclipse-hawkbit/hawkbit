@@ -46,15 +46,12 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
-import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.qfields.TargetFields;
@@ -84,7 +81,6 @@ public class JpaTargetManagement
     private final JpaDistributionSetManagement distributionSetManagement;
     private final QuotaManagement quotaManagement;
     private final TargetTypeRepository targetTypeRepository;
-    private final RolloutGroupRepository rolloutGroupRepository;
     private final TargetTagRepository targetTagRepository;
 
     @SuppressWarnings("java:S107")
@@ -92,13 +88,11 @@ public class JpaTargetManagement
             final TargetRepository jpaRepository, final EntityManager entityManager,
             final JpaDistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final TargetTypeRepository targetTypeRepository,
-            final RolloutGroupRepository rolloutGroupRepository,
             final TargetTagRepository targetTagRepository) {
         super(jpaRepository, entityManager);
         this.distributionSetManagement = distributionSetManagement;
         this.quotaManagement = quotaManagement;
         this.targetTypeRepository = targetTypeRepository;
-        this.rolloutGroupRepository = rolloutGroupRepository;
         this.targetTagRepository = targetTagRepository;
     }
 
@@ -160,50 +154,6 @@ public class JpaTargetManagement
                                 TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId))),
                         pageable)
                 .map(Target.class::cast);
-    }
-
-    @Override
-    public Slice<Target> findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-            final Collection<Long> groups, final String rsql, final DistributionSetType dsType, final Pageable pageable) {
-        return jpaRepository
-                .findAllWithoutCount(AccessController.Operation.UPDATE,
-                        combineWithAnd(List.of(
-                                QLSupport.getInstance().buildSpec(rsql, TargetFields.class),
-                                TargetSpecifications.isNotInRolloutGroups(groups),
-                                TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()))),
-                        pageable)
-                .map(Target.class::cast);
-    }
-
-    @Override
-    public Slice<Target> findByFailedRolloutAndNotInRolloutGroups(String rolloutId, Collection<Long> groups, Pageable pageable) {
-        final List<Specification<JpaTarget>> specList = List.of(
-                TargetSpecifications.failedActionsForRollout(rolloutId),
-                TargetSpecifications.isNotInRolloutGroups(groups));
-        return JpaManagementHelper.findAllWithCountBySpec(jpaRepository, specList, pageable);
-    }
-
-    @Override
-    public Slice<Target> findByRsqlAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
-            final long rolloutId, final String rsql, final DistributionSetType distributionSetType, final Pageable pageable) {
-        return jpaRepository
-                .findAllWithoutCount(AccessController.Operation.UPDATE,
-                        combineWithAnd(List.of(
-                                QLSupport.getInstance().buildSpec(rsql, TargetFields.class),
-                                TargetSpecifications.hasNoOverridingActionsAndNotInRollout(rolloutId),
-                                TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetType.getId()))),
-                        pageable)
-                .map(Target.class::cast);
-    }
-
-    @Override
-    public Slice<Target> findByInRolloutGroupWithoutAction(final long group, final Pageable pageable) {
-        if (!rolloutGroupRepository.existsById(group)) {
-            throw new EntityNotFoundException(RolloutGroup.class, group);
-        }
-
-        return JpaManagementHelper.findAllWithoutCountBySpec(
-                jpaRepository, List.of(TargetSpecifications.hasNoActionInRolloutGroup(group)), pageable);
     }
 
     @Override
@@ -287,29 +237,6 @@ public class JpaTargetManagement
                         QLSupport.getInstance().buildSpec(rsql, TargetFields.class),
                         TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
                         TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId))));
-    }
-
-    @Override
-    public long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-            final String rsql, final Collection<Long> groups, final DistributionSetType dsType) {
-        return jpaRepository.count(AccessController.Operation.UPDATE,
-                combineWithAnd(List.of(
-                        QLSupport.getInstance().buildSpec(rsql, TargetFields.class),
-                        TargetSpecifications.isNotInRolloutGroups(groups),
-                        TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()))));
-    }
-
-    @Override
-    public long countByFailedRolloutAndNotInRolloutGroups(String rolloutId, Collection<Long> groups) {
-        final List<Specification<JpaTarget>> specList = List.of(
-                TargetSpecifications.failedActionsForRollout(rolloutId),
-                TargetSpecifications.isNotInRolloutGroups(groups));
-        return JpaManagementHelper.countBySpec(jpaRepository, specList);
-    }
-
-    @Override
-    public long countByActionsInRolloutGroup(final long rolloutGroupId) {
-        return jpaRepository.count(TargetSpecifications.isInActionRolloutGroup(rolloutGroupId));
     }
 
     @Override

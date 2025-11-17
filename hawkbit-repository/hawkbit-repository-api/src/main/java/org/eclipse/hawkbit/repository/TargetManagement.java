@@ -39,7 +39,6 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldExc
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
-import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -143,49 +142,6 @@ public interface TargetManagement<T extends Target>
     @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
     Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(
             long distributionSetId, @NotNull String rsql, @NotNull Pageable pageable);
-
-    /**
-     * Finds all targets for all the given parameter {@link TargetFilterQuery} and that are not assigned to one of the {@link RolloutGroup}s
-     * and are compatible with the passed {@link DistributionSetType}.
-     *
-     * @param groups the list of {@link RolloutGroup}s
-     * @param rsql filter definition in RSQL syntax
-     * @param distributionSetType type of the {@link DistributionSet} the targets must be compatible withs
-     * @param pageable the pageable to enhance the query for paging and sorting
-     * @return a page of the found {@link Target}s
-     */
-    @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_ROLLOUT)
-    Slice<Target> findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-            @NotEmpty Collection<Long> groups, @NotNull String rsql, @NotNull DistributionSetType distributionSetType,
-            @NotNull Pageable pageable);
-
-    /**
-     * Finds all targets with failed actions for specific Rollout and that are not assigned to one of the retried {@link RolloutGroup}s and
-     * are compatible with the passed {@link DistributionSetType}.
-     *
-     * @param rolloutId rolloutId of the rollout to be retried.
-     * @param groups the list of {@link RolloutGroup}s
-     * @param pageable the pageable to enhance the query for paging and sorting
-     * @return a page of the found {@link Target}s
-     */
-    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
-    Slice<Target> findByFailedRolloutAndNotInRolloutGroups(
-            @NotNull String rolloutId, @NotEmpty Collection<Long> groups, @NotNull Pageable pageable);
-
-    @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_ROLLOUT)
-    Slice<Target> findByRsqlAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
-            final long rolloutId, @NotNull String rsql, @NotNull DistributionSetType distributionSetType, @NotNull Pageable pageable);
-
-    /**
-     * Finds all targets of the provided {@link RolloutGroup} that have no Action for the RolloutGroup.
-     *
-     * @param group the {@link RolloutGroup}
-     * @param pageable the pageable to enhance the query for paging and sorting
-     * @return the found {@link Target}s
-     * @throws EntityNotFoundException if rollout group with given ID does not exist
-     */
-    @PreAuthorize(HAS_READ_REPOSITORY)
-    Slice<Target> findByInRolloutGroupWithoutAction(long group, @NotNull Pageable pageable);
 
     /**
      * Retrieves {@link Target}s by the assigned {@link DistributionSet}.
@@ -298,33 +254,6 @@ public interface TargetManagement<T extends Target>
      */
     @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
     long countByRsqlAndNonDsAndCompatibleAndUpdatable(long distributionSetId, @NotNull String rsql);
-
-    /**
-     * Counts all targets for all the given parameter {@link TargetFilterQuery} and that are not assigned to one of the {@link RolloutGroup}s
-     * and are compatible with the passed {@link DistributionSetType}.
-     *
-     * @param rsql filter definition in RSQL syntax
-     * @param groups the list of {@link RolloutGroup}s
-     * @param distributionSetType type of the {@link DistributionSet} the targets must be compatible with
-     * @return count of the found {@link Target}s
-     */
-    @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_ROLLOUT)
-    long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-            @NotNull String rsql, @NotEmpty Collection<Long> groups, @NotNull DistributionSetType distributionSetType);
-
-    /**
-     * Counts all targets with failed actions for specific Rollout and that are not assigned to one of the {@link RolloutGroup}s and are
-     * compatible with the passed {@link DistributionSetType}.
-     *
-     * @param rolloutId rolloutId of the rollout to be retried.
-     * @param groups the list of {@link RolloutGroup}s
-     * @return count of the found {@link Target}s
-     */
-    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
-    long countByFailedRolloutAndNotInRolloutGroups(@NotNull String rolloutId, @NotEmpty Collection<Long> groups);
-
-    @PreAuthorize(HAS_READ_TARGET_AND_READ_ROLLOUT)
-    long countByActionsInRolloutGroup(final long rolloutGroupId);
 
     /**
      * Deletes target with the given controller ID.

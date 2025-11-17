@@ -38,6 +38,7 @@ import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.PermissionSupport;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
@@ -257,7 +258,8 @@ class ManagementSecurityTest extends AbstractJpaIntegrationTest {
                     assertThat(spelNode.getChild(0) instanceof VariableReference varRef && varRef.toStringAST().equals("#root")).isTrue();
                     assertThat(spelNode.getChild(1)).isInstanceOf(StringLiteral.class);
                     final StringLiteral literal = (StringLiteral) spelNode.getChild(1);
-                    preAuthorizedPermissions.add(literal.getLiteralValue().getValue() + "_" + permissionGroup);
+                    preAuthorizedPermissions.add(String.valueOf(literal.getLiteralValue().getValue())
+                            .replace(SpringEvalExpressions.PERMISSION_GROUP_PLACEHOLDER, permissionGroup));
                 }
                 default -> throw new IllegalStateException("Unexpected MethodReference: " + method);
             }

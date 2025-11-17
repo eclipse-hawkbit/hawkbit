@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.scheduler;
 
+import static org.eclipse.hawkbit.repository.jpa.JpaManagementHelper.combineWithAnd;
 import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor.afterCommit;
 
 import java.lang.reflect.InvocationTargetException;
@@ -25,6 +26,7 @@ import jakarta.persistence.EntityManager;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ContextAware;
+import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -33,23 +35,28 @@ import org.eclipse.hawkbit.repository.RolloutExecutor;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutHelper;
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.RolloutStoppedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
+import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.management.JpaRolloutManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutTargetGroupRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.EvaluatorNotConfiguredException;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupEvaluationManager;
+import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -57,6 +64,7 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -64,12 +72,16 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondit
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.qfields.TargetFields;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
@@ -106,7 +118,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private final RolloutGroupRepository rolloutGroupRepository;
     private final RolloutTargetGroupRepository rolloutTargetGroupRepository;
     private final RolloutRepository rolloutRepository;
-    private final TargetManagement<? extends Target> targetManagement;
+    private final TargetRepository targetRepository;
     private final DeploymentManagement deploymentManagement;
     private final RolloutGroupManagement rolloutGroupManagement;
     private final RolloutManagement rolloutManagement;
@@ -117,6 +129,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private final PlatformTransactionManager txManager;
     private final TenantAware tenantAware;
     private final ContextAware contextAware;
+    private final SystemSecurityContext systemSecurityContext;
     private final RepositoryProperties repositoryProperties;
     private final Map<Long, AtomicLong> lastDynamicGroupFill = new ConcurrentHashMap<>();
 
@@ -124,17 +137,18 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     public JpaRolloutExecutor(
             final ActionRepository actionRepository, final RolloutGroupRepository rolloutGroupRepository,
             final RolloutTargetGroupRepository rolloutTargetGroupRepository,
-            final RolloutRepository rolloutRepository, final TargetManagement<? extends Target> targetManagement,
+            final RolloutRepository rolloutRepository, final TargetRepository targetRepository,
             final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
             final RolloutManagement rolloutManagement, final QuotaManagement quotaManagement,
             final RolloutGroupEvaluationManager evaluationManager, final RolloutApprovalStrategy rolloutApprovalStrategy,
             final EntityManager entityManager, final PlatformTransactionManager txManager,
-            final TenantAware tenantAware, final ContextAware contextAware, final RepositoryProperties repositoryProperties) {
+            final TenantAware tenantAware, final ContextAware contextAware, final SystemSecurityContext systemSecurityContext,
+            final RepositoryProperties repositoryProperties) {
         this.actionRepository = actionRepository;
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.rolloutTargetGroupRepository = rolloutTargetGroupRepository;
         this.rolloutRepository = rolloutRepository;
-        this.targetManagement = targetManagement;
+        this.targetRepository = targetRepository;
         this.deploymentManagement = deploymentManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.rolloutManagement = rolloutManagement;
@@ -145,6 +159,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         this.txManager = txManager;
         this.tenantAware = tenantAware;
         this.contextAware = contextAware;
+        this.systemSecurityContext = systemSecurityContext;
         this.repositoryProperties = repositoryProperties;
     }
 
@@ -492,7 +507,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
     private long countTargetsFrom(final JpaRolloutGroup rolloutGroup) {
         if (rolloutGroup.isDynamic()) {
-            return targetManagement.countByActionsInRolloutGroup(rolloutGroup.getId());
+            return countByActionsInRolloutGroup(rolloutGroup.getId());
         } else {
             return rolloutGroupManagement.countTargetsOfRolloutsGroup(rolloutGroup.getId());
         }
@@ -589,13 +604,13 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             targetsInGroupFilter = DeploymentHelper.runInNewTransaction(
                     txManager,
                     "countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable",
-                    count -> targetManagement.countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
+                    count -> countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
                             groupTargetFilter, readyGroups, rollout.getDistributionSet().getType()));
         } else { // if it is a rollout retry
             targetsInGroupFilter = DeploymentHelper.runInNewTransaction(
                     txManager,
                     "countByFailedRolloutAndNotInRolloutGroupsAndCompatible",
-                    count -> targetManagement.countByFailedRolloutAndNotInRolloutGroups(
+                    count -> countByFailedRolloutAndNotInRolloutGroups(
                             RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()), readyGroups));
         }
 
@@ -640,10 +655,10 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                     rollout.getRolloutGroups(), RolloutGroupStatus.READY, group);
             final Slice<Target> targets;
             if (!RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) {
-                targets = targetManagement.findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
+                targets = findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
                         readyGroups, targetFilter, rollout.getDistributionSet().getType(), pageRequest);
             } else {
-                targets = targetManagement.findByFailedRolloutAndNotInRolloutGroups(
+                targets = findByFailedRolloutAndNotInRolloutGroups(
                         RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()), readyGroups, pageRequest);
             }
 
@@ -681,7 +696,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                     // since it contains condition for device to be created before the rollout
                     rollout.getTargetFilterQuery(), group);
 
-            final Slice<Target> targets = targetManagement.findByRsqlAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
+            final Slice<Target> targets = findByRsqlAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
                     rollout.getId(), groupTargetFilter, rollout.getDistributionSet().getType(),
                     PageRequest.of(0, Math.toIntExact(Math.min(TRANSACTION_TARGETS, targetsLeftToAdd))));
             if (targets.getNumberOfElements() > 0) {
@@ -798,7 +813,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
     private Long createActionsForTargetsInNewTransaction(final Rollout rollout, final RolloutGroup group) {
         return DeploymentHelper.runInNewTransaction(txManager, "createActionsForTargets", status -> {
-            final Slice<Target> targets = targetManagement.findByInRolloutGroupWithoutAction(
+            final Slice<Target> targets = findByInRolloutGroupWithoutAction(
                     group.getId(), PageRequest.of(0, JpaRolloutExecutor.TRANSACTION_TARGETS));
 
             if (targets.getNumberOfElements() > 0) {
@@ -858,7 +873,80 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         try {
             QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class, actionRepository::countByTargetId);
         } catch (final AssignmentQuotaExceededException ex) {
-            deploymentManagement.handleMaxAssignmentsExceeded(target.getId(), requested, ex);
+            systemSecurityContext.runAsSystem(() -> deploymentManagement.handleMaxAssignmentsExceeded(target.getId(), requested, ex));
         }
+    }
+
+    // target repository access
+
+    // package-private just for testing
+    Slice<Target> findByRsqlAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
+            final long rolloutId, final String rsql, final DistributionSetType distributionSetType, final Pageable pageable) {
+        return targetRepository
+                .findAllWithoutCount(AccessController.Operation.UPDATE,
+                        combineWithAnd(List.of(
+                                QLSupport.getInstance().buildSpec(rsql, TargetFields.class),
+                                TargetSpecifications.hasNoOverridingActionsAndNotInRollout(rolloutId),
+                                TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetType.getId()))),
+                        pageable)
+                .map(Target.class::cast);
+    }
+
+    // Finds all targets for all the given parameter {@link TargetFilterQuery} and that are not assigned to one of the {@link RolloutGroup}s
+    // and are compatible with the passed {@link DistributionSetType}
+    private Slice<Target> findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
+            final Collection<Long> groups, final String rsql, final DistributionSetType dsType, final Pageable pageable) {
+        return targetRepository
+                .findAllWithoutCount(AccessController.Operation.UPDATE,
+                        combineWithAnd(List.of(
+                                QLSupport.getInstance().buildSpec(rsql, TargetFields.class),
+                                TargetSpecifications.isNotInRolloutGroups(groups),
+                                TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()))),
+                        pageable)
+                .map(Target.class::cast);
+    }
+
+    // Finds all targets with failed actions for specific Rollout and that are not assigned to one of the retried {@link RolloutGroup}s and
+    //  are compatible with the passed {@link DistributionSetType}.
+    private Slice<Target> findByFailedRolloutAndNotInRolloutGroups(
+            final String rolloutId, final Collection<Long> groups, final Pageable pageable) {
+        final List<Specification<JpaTarget>> specList = List.of(
+                TargetSpecifications.failedActionsForRollout(rolloutId),
+                TargetSpecifications.isNotInRolloutGroups(groups));
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageable);
+    }
+
+    // Finds all targets of the provided {@link RolloutGroup} that have no Action for the RolloutGroup
+    private Slice<Target> findByInRolloutGroupWithoutAction(final long group, final Pageable pageable) {
+        if (!rolloutGroupRepository.existsById(group)) {
+            throw new EntityNotFoundException(RolloutGroup.class, group);
+        }
+
+        return JpaManagementHelper.findAllWithoutCountBySpec(
+                targetRepository, List.of(TargetSpecifications.hasNoActionInRolloutGroup(group)), pageable);
+    }
+
+    private long countByActionsInRolloutGroup(final long rolloutGroupId) {
+        return targetRepository.count(TargetSpecifications.isInActionRolloutGroup(rolloutGroupId));
+    }
+
+    // Counts all targets for all the given parameter {@link TargetFilterQuery} and that are not assigned to one of the {@link RolloutGroup}s
+    // and are compatible with the passed {@link DistributionSetType}
+    private long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
+            final String rsql, final Collection<Long> groups, final DistributionSetType dsType) {
+        return targetRepository.count(AccessController.Operation.UPDATE,
+                combineWithAnd(List.of(
+                        QLSupport.getInstance().buildSpec(rsql, TargetFields.class),
+                        TargetSpecifications.isNotInRolloutGroups(groups),
+                        TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()))));
+    }
+
+    // Counts all targets with failed actions for specific Rollout and that are not assigned to one of the {@link RolloutGroup}s and are
+    // compatible with the passed {@link DistributionSetType}
+    private long countByFailedRolloutAndNotInRolloutGroups(final String rolloutId, final Collection<Long> groups) {
+        final List<Specification<JpaTarget>> specList = List.of(
+                TargetSpecifications.failedActionsForRollout(rolloutId),
+                TargetSpecifications.isNotInRolloutGroups(groups));
+        return JpaManagementHelper.countBySpec(targetRepository, specList);
     }
 }
