@@ -2,7 +2,8 @@
 ARG JAVA_VERSION=21.0.9_10
 # extracts spring layers from the app jar (to optimize boot)
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS build
-
+ARG APP_DIR=/app
+WORKDIR ${APP_DIR}
 ARG HAWKBIT_APP=hawkbit-update-server
 ARG HAWKBIT_VERSION=pass_as_buils_arg
 
@@ -15,18 +16,19 @@ COPY KEY .
 RUN set -x &&\
  apk add --no-cache --virtual build-dependencies gnupg unzip libressl wget &&\
  gpg --import KEY &&\
- wget -O ${APP}.jar --no-verbose https://repo1.maven.org/maven2/org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar &&\
- wget -O ${APP}.jar.asc --no-verbose https://repo1.maven.org/maven2/org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar.asc &&\
+ wget -O /${APP_DIR}/${APP}.jar --no-verbose https://repo1.maven.org/maven2/org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar &&\
+ wget -O /${APP_DIR}/${APP}.jar.asc --no-verbose https://repo1.maven.org/maven2/org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar.asc &&\
  gpg --batch --verify ${APP}.jar.asc ${APP}.jar &&\
- rm ${APP}.jar.asc KEY &&\
+ rm /${APP_DIR}/${APP}.jar.asc KEY &&\
  apk del build-dependencies &&\
  mkdir -p ${BUILD_DIR} &&\
  cd ${BUILD_DIR} &&\
- java -Djarmode=tools -jar /${APP}.jar extract --layers --launcher --destination . &&\
- rm /${APP}.jar
+ java -Djarmode=tools -jar /${APP_DIR}/${APP}.jar extract --layers --launcher --destination . &&\
+ rm /${APP_DIR}/${APP}.jar
 
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
-
+ARG APP_DIR=/app
+WORKDIR ${APP_DIR}
 RUN addgroup -S hawkbit_group && adduser -D hawkbit -G hawkbit_group
 RUN mkdir -p /artifactrepo && chown -R hawkbit /artifactrepo
 USER hawkbit
