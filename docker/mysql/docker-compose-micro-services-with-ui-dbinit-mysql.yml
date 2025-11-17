@@ -7,20 +7,20 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-version: '3'
+version: '3.7'
 
 include:
-  - docker-compose-monolith-postgres.yml
+  - docker-compose-micro-services-dbinit-mysql.yml
 
 services:
 
   # ---------------------
-  # HawkBit UI service
+  # HawkBit UI
   # ---------------------
   hawkbit-ui:
     image: "hawkbit/hawkbit-ui:latest"
     environment:
-      - 'SPRING_APPLICATION_JSON={"hawkbit.server.mgmtUrl": "http://hawkbit:8080"}'
+      - 'SPRING_APPLICATION_JSON={"hawkbit.server.mgmtUrl": "http://hawkbit-mgmt:8080"}'
     restart: always
     ports:
       - 8088:8088

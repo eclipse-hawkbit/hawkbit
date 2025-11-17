@@ -38,7 +38,7 @@ $ docker compose -f mysql/docker-compose-monolith-mysql.yml down
 
 You could, also start it in different flavours, with UI or in microservices mode (see Docker Compose files in [mysql](./mysql) and [postgres](./postgres) folders). For instance to start with PostgreSQL, with RabbitMQ, in microservices mode and with UI you could use:
 ```bash
-$ docker compose -f postgres/docker-compose-micro-services-with-simple-ui-postgres.yml up
+$ docker compose -f postgres/docker-compose-micro-services-with-ui-postgres.yml up
 ```
 
 ### Access

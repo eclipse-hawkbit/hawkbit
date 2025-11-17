@@ -45,12 +45,12 @@ $ cd hawkbit/docker
 $ docker-compose -f docker-compose-monolith-mysql.yml up -d
 ```
 
-If you want to start also the Simple UI, you can use, for PostgreSQL:
+If you want to start also the hawkBit UI, you can use, for PostgreSQL:
 
 ```bash
 $ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit/docker
-$ docker-compose -f docker-compose-monolith-with-simple-ui-postgres.yml up -d
+$ docker-compose -f docker-compose-monolith-with-ui-postgres.yml up -d
 ```
 
 or with MySQL:
@@ -58,7 +58,7 @@ or with MySQL:
 ```bash
 $ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit/docker
-$ docker-compose -f docker-compose-monolith-with-simple-ui-mysql.yml up -d
+$ docker-compose -f docker-compose-monolith-with-ui-mysql.yml up -d
 ```
 
 > **Note:** `-d` flag is used to run the containers in detached mode.  
@@ -84,12 +84,12 @@ $ cd hawkbit/docker
 $ docker-compose -f docker-compose-micro-services-mysql.yml up -d
 ```
 
-If you want to start also the Simple UI, you can use, for PostgreSQL:
+If you want to start also the hawkBit UI, you can use, for PostgreSQL:
 
 ```bash
 $ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit/docker
-$ docker-compose -f docker-compose-micro-services-with-simple-ui-postgres.yml up -d
+$ docker-compose -f docker-compose-micro-services-with-ui-postgres.yml up -d
 ```
 
 or with MySQL:
@@ -97,7 +97,7 @@ or with MySQL:
 ```bash
 $ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit/docker
-$ docker-compose -f docker-compose-micro-services-with-simple-ui-mysql.yml up -d
+$ docker-compose -f docker-compose-micro-services-with-ui-mysql.yml up -d
 ```
 
 > **Note:** `-d` flag is used to run the containers in detached mode.  
@@ -137,10 +137,10 @@ And (only if you want to use the DMF feature):
 $ java -jar ./hawkbit-monolith/hawkbit-update-server/target/hawkbit-update-server-0-SNAPSHOT.jar
 ```
 
-You could also start the **Simple UI** by:
+You could also start the **hawkBit UI** by:
 
 ```bash
-$ java -jar ./hawkbit-simple-ui/target/hawkbit-simple-ui-0-SNAPSHOT.jar
+$ java -jar ./hawkbit--ui/target/hawkbit-ui-0-SNAPSHOT.jar
 ```
 
 ---

@@ -57,7 +57,7 @@ if [ -z "$1" ]; then
     build "hawkbit-ddi-server"
     build "hawkbit-dmf-server"
     build "hawkbit-mgmt-server"
-    build "hawkbit-simple-ui"
+    build "hawkbit-ui"
     # monolith
     build "hawkbit-update-server"
     # db init
