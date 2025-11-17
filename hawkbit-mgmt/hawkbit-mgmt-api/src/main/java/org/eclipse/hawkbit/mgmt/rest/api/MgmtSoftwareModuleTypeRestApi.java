@@ -146,7 +146,7 @@ public interface MgmtSoftwareModuleTypeRestApi {
     @Operation(summary = "Delete Software Module Type by Id",
             description = "Handles the DELETE request for a single software module type. Required Permission: DELETE_REPOSITORY")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",

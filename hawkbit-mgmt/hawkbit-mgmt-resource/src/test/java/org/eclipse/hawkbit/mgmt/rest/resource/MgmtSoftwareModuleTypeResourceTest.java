@@ -266,7 +266,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
 
         mvc.perform(delete("/rest/v1/softwaremoduletypes/{smId}", testType.getId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         assertThat(softwareModuleTypeManagement.count()).isEqualTo(3);
     }
@@ -300,7 +300,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
 
         mvc.perform(delete("/rest/v1/softwaremoduletypes/{smtId}", testType.getId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         mvc.perform(get("/rest/v1/softwaremoduletypes/{smtId}", testType.getId()))
                 .andDo(MockMvcResultPrinter.print())

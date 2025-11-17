@@ -253,7 +253,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                         testTarget.getControllerId())
                         .content(objectMapper.writeValueAsString(body)).contentType(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     /**
@@ -267,7 +267,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         mvc.perform(post(TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + TARGET_V1_AUTO_CONFIRM + "/" + TARGET_V1_DEACTIVATE_AUTO_CONFIRM,
                         testTarget.getControllerId()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     /**
@@ -281,7 +281,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final Status expectedStatusAfterActionConfirmationCall = Status.RUNNING;
         final long actionId = doAssignmentAndTestConfirmation("targetId");
         testActionConfirmation("targetId", actionId, MgmtActionConfirmationRequestBodyPut.Confirmation.CONFIRMED, expectedStatusCode,
-                new String[] { expectedStatusMessage1, expectedStatusMessage2 }, HttpStatus.OK, expectedStatusAfterActionConfirmationCall);
+                new String[] { expectedStatusMessage1, expectedStatusMessage2 }, HttpStatus.NO_CONTENT, expectedStatusAfterActionConfirmationCall);
     }
 
     /**
@@ -295,7 +295,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final Status expectedStatusAfterActionConfirmationCall = Status.WAIT_FOR_CONFIRMATION;
         final long actionId = doAssignmentAndTestConfirmation("targetId");
         testActionConfirmation("targetId", actionId, MgmtActionConfirmationRequestBodyPut.Confirmation.DENIED, expectedStatusCode,
-                new String[] { expectedStatusMessage1, expectedStatusMessage2 }, HttpStatus.OK, expectedStatusAfterActionConfirmationCall);
+                new String[] { expectedStatusMessage1, expectedStatusMessage2 }, HttpStatus.NO_CONTENT, expectedStatusAfterActionConfirmationCall);
     }
 
     /**
@@ -355,7 +355,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final List<ActionStatus> actionStatuses = new ArrayList<>(jpaAction.getActionStatus());
 
         // confirmation call was successful, check if Action status ,status code and messages are updated appropriately
-        if (expectedHttpResponseStatus == HttpStatus.OK) {
+        if (expectedHttpResponseStatus == HttpStatus.NO_CONTENT) {
             assertThat(jpaAction.getStatus()).isEqualTo(expectedGeneratedStatus);
             assertThat(jpaAction.getLastActionStatusCode()).hasValue(payloadCode);
 
@@ -598,7 +598,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String knownControllerId = "knownControllerIdDelete";
         testdataFactory.createTarget(knownControllerId);
 
-        mvc.perform(delete(TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId)).andExpect(status().isOk());
+        mvc.perform(delete(TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId)).andExpect(status().isNoContent());
 
         assertThat(targetManagement.findByControllerId(knownControllerId)).isNotPresent();
     }
@@ -2061,8 +2061,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                         .accept(APPLICATION_JSON).contentType(APPLICATION_JSON)
                         .content(jsonObject.toString()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
-                .andExpect(content().string(""));
+                .andExpect(status().isNoContent());
 
         assertThat(targetManagement.getMetadata(knownControllerId).get(KNOWN_KEY)).isEqualTo(updateValue);
     }
@@ -2078,7 +2077,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         mvc.perform(delete("/rest/v1/targets/{targetId}/metadata/{key}", knownControllerId, KNOWN_KEY))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         // already deleted
         mvc.perform(delete("/rest/v1/targets/{targetId}/metadata/{key}", knownControllerId, KNOWN_KEY))
@@ -2503,7 +2502,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         mvc.perform(post(TARGET_V1_REQUEST_MAPPING + "/" + targetControllerId + "/targettype")
                         .content("{\"id\":" + targetType.getId() + "}").contentType(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         assertThat(targetManagement.getByControllerId(targetControllerId).getTargetType().getId()).isEqualTo(targetType.getId());
     }
@@ -2560,7 +2559,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // unassign target type over rest resource
         mvc.perform(delete(TARGET_V1_REQUEST_MAPPING + "/" + targetControllerId + "/targettype").contentType(APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         assertThat(targetManagement.getByControllerId(targetControllerId).getTargetType()).isNull();
     }
@@ -2748,7 +2747,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         mvc.perform(delete(TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions", testTarget.getControllerId()).param("keepLast", "5"))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         //the last 5 actions should be left
         List<Action> actions = deploymentManagement.findActionsByTarget(testTarget.getControllerId(), PAGE).getContent();
@@ -2794,7 +2793,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                         .content(toJson(evenActionIds))
                         .contentType(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         long remaining = actionRepository.countByTargetId(testTarget.getId());
         Assertions.assertEquals(10 - evenActionIds.size(), remaining);

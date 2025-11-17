@@ -162,7 +162,7 @@ public interface MgmtTargetTagRestApi {
      */
     @Operation(summary = "Update target tag by id", description = "Handles the PUT request of updating a target tag.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "200", description = "Successfully updated"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
@@ -195,7 +195,7 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Delete target tag by id",
             description = "Handles the DELETE request of deleting a single target tag.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
@@ -274,7 +274,7 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Assign target(s) to given tagId",
             description = "Handles the POST request of target assignment. Already assigned target will be ignored.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully assigned"),
+            @ApiResponse(responseCode = "204", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
@@ -305,7 +305,7 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Assign target(s) to given tagId",
             description = "Handles the POST request of target assignment. Already assigned target will be ignored.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully assigned"),
+            @ApiResponse(responseCode = "204", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
@@ -341,7 +341,7 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Unassign target from a given tagId",
             description = "Handles the DELETE request to unassign the given target.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully unassigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
@@ -370,7 +370,7 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Unassign targets from a given tagId",
             description = "Handles the DELETE request to unassign the given targets.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "Successfully unassigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication."),

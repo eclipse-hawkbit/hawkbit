@@ -83,7 +83,7 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
     @Override
     public ResponseEntity<Void> unassignTargetsFromGroup(final List<String> controllerIds) {
         targetManagement.assignTargetsWithGroup(null, controllerIds);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
@@ -104,11 +104,11 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
 
     private ResponseEntity<Void> assignTargets(final String group, final List<String> controllerIds) {
         targetManagement.assignTargetsWithGroup(group, controllerIds);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     private ResponseEntity<Void> assignTargetsToGroupWithRsql0(final String group, final String rsql) {
         targetManagement.assignTargetGroupWithRsql(group, rsql);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
