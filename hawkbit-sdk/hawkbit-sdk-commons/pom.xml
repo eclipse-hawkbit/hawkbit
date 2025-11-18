@@ -24,8 +24,18 @@
     <name>hawkBit :: SDK :: Commons</name>
     <description>SDK commons</description>
 
+    <properties>
+        <commons.fileupload.version>1.6.0</commons.fileupload.version>
+    </properties>
 
     <dependencies>
+        <!-- Override vulnerable feign-form-spring dependency on commons-fileupload -->
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>${commons.fileupload.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
