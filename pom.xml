@@ -41,15 +41,19 @@
     </scm>
 
     <properties>
+        <!-- Overrides START - to be reviewed regularly -->
+        <!-- Override vulnerable commons-fileupload used by feign-form-spring (via spring-cloud-starter-openfeign) -->
+        <commons-fileupload.version>1.6.0</commons-fileupload.version>
+        <!-- Override commons-lang3 version since 3.17 is vulnerable -->
+        <commons-lang-version>3.20.0</commons-lang-version>
+        <!-- Overrides END -->
+
         <revision>0-SNAPSHOT</revision>
 
         <java.version>17</java.version>
         <!-- java.version is used to build the hawkbit in general, however, some artifacts which could be used
         as libraries in other projects might be compiled with a different, lower, java version. -->
         <java.client.version>17</java.client.version>
-
-        <!-- Override vulnerable commons-fileupload used by feign-form-spring (via spring-cloud-starter-openfeign) -->
-        <commons-fileupload.version>1.6.0</commons-fileupload.version>
 
         <!-- must be the same as the parent version -->
         <spring.boot.version>3.5.7</spring.boot.version>
@@ -200,12 +204,18 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Override vulnerable commons-fileupload used by feign-form-spring (via spring-cloud-starter-openfeign) -->
+            <!-- Overrides START -->
             <dependency>
                 <groupId>commons-fileupload</groupId>
                 <artifactId>commons-fileupload</artifactId>
                 <version>${commons-fileupload.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang-version}</version>
+            </dependency>
+            <!-- Overrides END -->
 
             <!-- Misc -->
             <dependency>
