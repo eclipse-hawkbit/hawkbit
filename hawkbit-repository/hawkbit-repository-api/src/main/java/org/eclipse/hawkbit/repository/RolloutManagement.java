@@ -57,8 +57,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface RolloutManagement extends PermissionSupport {
 
-    String HAS_ROLLOUT_APPROVE = "hasPermission(#root, 'APPROVE')";
-    String HAS_ROLLOUT_HANDLE = "hasPermission(#root, 'HANDLE')";
+    String HAS_ROLLOUT_APPROVE = "hasPermission(#root, 'APPROVE_${permissionGroup}')";
+    String HAS_ROLLOUT_HANDLE = "hasPermission(#root, 'HANDLE_${permissionGroup}')";
 
     @Override
     default String permissionGroup() {

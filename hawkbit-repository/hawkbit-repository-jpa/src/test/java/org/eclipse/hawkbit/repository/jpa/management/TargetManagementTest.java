@@ -57,17 +57,14 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaNamedEntity_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
-import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -79,7 +76,6 @@ import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
@@ -730,60 +726,6 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
     }
 
     /**
-     * Tests action based aspects of the dynamic group assignment filters.
-     * Target matches filter no active action with ge weight.
-     */
-    @Test
-    void findByTargetFilterQueryAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable() {
-        final String targetPrefix = "dyn_action_filter_";
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
-        final List<Target> targets = testdataFactory.createTargets(targetPrefix, 10);
-        final Rollout rolloutOlder = testdataFactory.createRollout();
-        final Rollout rollout = testdataFactory.createRollout();
-        final Rollout rolloutNewer = testdataFactory.createRollout();
-
-        int target = 0;
-        final List<Integer> expected = new ArrayList<>();
-        // old ro with less weight - match
-        expected.add(target);
-        createAction(targets.get(target++), rolloutOlder, 0, Status.RUNNING, distributionSet);
-        // old ro with equal weight - match
-        expected.add(target);
-        createAction(targets.get(target++), rolloutOlder, 10, Status.RUNNING, distributionSet);
-        // old ro with bigger weight, scheduled - match
-        expected.add(target);
-        createAction(targets.get(target++), rolloutOlder, 11, Status.SCHEDULED, distributionSet);
-        // old ro with bigger weight, running - match
-        expected.add(target);
-        createAction(targets.get(target++), rolloutOlder, 11, Status.RUNNING, distributionSet);
-        // old ro with bigger weight, running - match
-        expected.add(target);
-        createAction(targets.get(target++), rolloutOlder, 11, Status.FINISHED, distributionSet);
-        // same ro - doesn't match
-        createAction(targets.get(target++), rollout, 10, Status.RUNNING, distributionSet);
-        // new ro with less weight - doesn't match
-        createAction(targets.get(target++), rolloutNewer, 0, Status.RUNNING, distributionSet);
-        // new ro with less weight - doesn't match
-        createAction(targets.get(target++), rolloutNewer, 5, Status.WARNING, distributionSet);
-        // NEW ro with EQUAL weight - doesn't match
-        createAction(targets.get(target++), rolloutNewer, 10, Status.RUNNING, distributionSet);
-        // new ro with BIGGER weight - doesn't match
-        createAction(targets.get(target), rolloutNewer, 20, Status.DOWNLOADED, distributionSet);
-
-        final Slice<Target> matching =
-                targetManagement.findByRsqlAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
-                        rollout.getId(), "controllerid==dyn_action_filter_*", distributionSet.getType(), PAGE);
-
-        assertThat(matching.getNumberOfElements()).isEqualTo(expected.size());
-        assertThat(matching.stream()
-                .map(Target::getControllerId)
-                .map(s -> s.substring(targetPrefix.length()))
-                .map(Integer::parseInt)
-                .sorted()
-                .toList()).isEqualTo(expected);
-    }
-
-    /**
      * Target matches filter for not existing DS.
      */
     @Test
@@ -834,7 +776,6 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
         verifyThrownExceptionBy(
                 () -> targetManagement.findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(NOT_EXIST_IDL, "name==*", PAGE),
                 "DistributionSet");
-        verifyThrownExceptionBy(() -> targetManagement.findByInRolloutGroupWithoutAction(NOT_EXIST_IDL, PAGE), "RolloutGroup");
         verifyThrownExceptionBy(() -> targetManagement.findByAssignedDistributionSet(NOT_EXIST_IDL, PAGE), "DistributionSet");
         verifyThrownExceptionBy(
                 () -> targetManagement.findByAssignedDistributionSetAndRsql(NOT_EXIST_IDL, "name==*", PAGE), "DistributionSet");
@@ -1122,24 +1063,6 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
         for (int index = 1; index <= count; index++) {
             insertMetadata("key" + index, controllerId + "-value" + index, target);
         }
-    }
-
-    private void createAction(final Target target, final Rollout rollout, final Integer weight, final Action.Status status,
-            final DistributionSet distributionSet) {
-        final JpaAction action = new JpaAction();
-        action.setActionType(Action.ActionType.FORCED);
-        action.setTarget(target);
-        action.setInitiatedBy("test");
-        if (rollout != null) {
-            action.setRollout(rollout);
-        }
-        if (weight != null) {
-            action.setWeight(weight);
-        }
-        action.setStatus(status);
-        action.setActive(status != Status.FINISHED && status != Status.ERROR && status != Status.CANCELED);
-        action.setDistributionSet(distributionSet);
-        actionRepository.save(action);
     }
 
     private void validateFoundTargetsByRsql(final String rsqlFilter, final String... controllerIds) {

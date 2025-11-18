@@ -13,6 +13,7 @@ import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.Hierarchy;
+import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
 import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,7 +47,8 @@ public class RepositoryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @SuppressWarnings("java:S3358") // java:S3358 better readable this way
+    @SuppressWarnings("java:S3358")
+        // java:S3358 better readable this way
     RoleHierarchy roleHierarchy(
             // if configured replaces the hierarchy completely
             @Value("${hawkbit.hierarchy:}") final String hierarchy,
@@ -66,15 +68,15 @@ public class RepositoryConfiguration {
             public boolean hasPermission(final Authentication authentication, final Object targetDomainObject, final Object permission) {
                 if (targetDomainObject instanceof MethodSecurityExpressionOperations root &&
                         root.getThis() instanceof PermissionSupport permissionSupport) {
-                    final String neededPermission = permission + "_" + permissionSupport.permissionGroup();
+                    final String neededPermission = String.valueOf(permission)
+                            .replace(SpringEvalExpressions.PERMISSION_GROUP_PLACEHOLDER, permissionSupport.permissionGroup());
 
                     // do permissions check
                     final boolean hasPermission = roleHierarchy.getReachableGrantedAuthorities(authentication.getAuthorities()).stream()
                             .map(GrantedAuthority::getAuthority)
                             .anyMatch(authority -> authority.equals(neededPermission));
                     if (!hasPermission) {
-                        log.debug(
-                                "User {} does not have permission {} for target {}",
+                        log.debug("User {} does not have permission {} for target {}",
                                 authentication.getName(), neededPermission, targetDomainObject);
                     }
 

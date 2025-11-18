@@ -41,7 +41,7 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
     }
 
     // Note - the exec could be called by JpaRolloutsExecutor and buy JpaRolloutsManagement#triggerNextGroup
-    // this means it cold be called by concurrently.
+    // this means it could be called by concurrently.
     @Override
     public void exec(final Rollout rollout, final RolloutGroup rolloutGroup) {
         systemSecurityContext.runAsSystem(() -> {

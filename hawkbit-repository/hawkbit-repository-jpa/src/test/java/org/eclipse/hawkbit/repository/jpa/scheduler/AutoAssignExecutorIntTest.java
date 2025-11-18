@@ -50,7 +50,7 @@ import org.springframework.data.domain.Slice;
  * Story: Auto assign checker
  */
 @SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
-class JpaAutoAssignExecutorIntTest extends AbstractJpaIntegrationTest {
+class AutoAssignExecutorIntTest extends AbstractJpaIntegrationTest {
 
     private static final String SPACE_AND_DESCRIPTION = " description";
 

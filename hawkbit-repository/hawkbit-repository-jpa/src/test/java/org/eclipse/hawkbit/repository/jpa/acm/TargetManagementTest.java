@@ -160,35 +160,18 @@ class TargetManagementTest extends AbstractAccessControllerManagementTest {
                 READ_TARGET, UPDATE_TARGET + "/type.id==" + targetType1.getId(),
                 READ_DISTRIBUTION_SET,
                 CREATE_ROLLOUT, READ_ROLLOUT, HANDLE_ROLLOUT), () -> {
-            assertThat(targetManagement.findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-                    List.of(1L), "id==*", ds2Type2.getType(), UNPAGED).stream().toList())
-                    .containsExactly(target1Type1);
-            assertThat(targetManagement.countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable("id==*", List.of(1L), ds2Type2.getType()))
-                    .isEqualTo(1);
 
             final Rollout rollout = testdataFactory.createRolloutByVariables("testRollout", "testDescription", 3, "id==*", ds2Type2, "50", "5");
             final List<Long> groups = rolloutGroupManagement.findByRollout(rollout.getId(), UNPAGED).getContent().stream().
                     map(Identifiable::getId).toList();
             assertThat(groups.stream().flatMap(
-                    group -> targetManagement.findByInRolloutGroupWithoutAction(group, UNPAGED).get()).toList())
-                    .containsExactly(target1Type1);
-            assertThat(groups.stream().flatMap(
                     group -> rolloutGroupManagement.findTargetsOfRolloutGroup(group, UNPAGED).get()).toList())
                     .containsExactly(target1Type1);
-
-            assertThat(targetManagement.findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(groups, "id==*", ds2Type2.getType(), UNPAGED))
-                    .isEmpty();
-            assertThat(targetManagement.countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable("id==*", groups, ds2Type2.getType()))
-                    .isZero();
 
             // as system in context - doesn't apply scopes
             final Rollout runAsSystem = systemSecurityContext.runAsSystem(
                     () -> testdataFactory.createRolloutByVariables(
                             "testRolloutAsSystem", "testDescriptionAsSystem", 3, "id==*", ds2Type2, "50", "5"));
-            assertThat(rolloutGroupManagement.findByRollout(runAsSystem.getId(), UNPAGED).getContent().stream()
-                    .flatMap(
-                            group -> targetManagement.findByInRolloutGroupWithoutAction(group.getId(), UNPAGED).getContent().stream()).toList())
-                    .hasSize(3);
         });
     }
 

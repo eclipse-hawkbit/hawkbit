@@ -473,11 +473,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final PageRequest pageRequest = PageRequest.of(0, ACTION_PAGE_LIMIT);
             final Page<Action> groupScheduledActions;
             if (rolloutGroupParentId == null) {
-                groupScheduledActions = actionRepository.findByRolloutIdAndRolloutGroupParentIsNullAndStatus(pageRequest, rolloutId,
-                        Action.Status.SCHEDULED);
+                groupScheduledActions = actionRepository.findByRolloutIdAndRolloutGroupParentIsNullAndStatus(
+                        pageRequest, rolloutId, Action.Status.SCHEDULED);
             } else {
-                groupScheduledActions = actionRepository.findByRolloutIdAndRolloutGroupParentIdAndStatus(pageRequest, rolloutId,
-                        rolloutGroupParentId, Action.Status.SCHEDULED);
+                groupScheduledActions = actionRepository.findByRolloutIdAndRolloutGroupParentIdAndStatus(
+                        pageRequest, rolloutId, rolloutGroupParentId, Action.Status.SCHEDULED);
             }
 
             if (groupScheduledActions.getContent().isEmpty()) {
@@ -493,8 +493,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Override
     public void startScheduledActions(final List<Action> rolloutGroupActions) {
         // Close actions already assigned and collect pending assignments
-        final List<JpaAction> pendingTargetAssignments = rolloutGroupActions.stream().map(JpaAction.class::cast)
-                .map(this::closeActionIfSetWasAlreadyAssigned).filter(Objects::nonNull).toList();
+        final List<JpaAction> pendingTargetAssignments = rolloutGroupActions.stream()
+                .map(JpaAction.class::cast).map(this::closeActionIfSetWasAlreadyAssigned).filter(Objects::nonNull).toList();
         if (pendingTargetAssignments.isEmpty()) {
             return;
         }
@@ -987,10 +987,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         final JpaTarget target = action.getTarget();
         if (target.getAssignedDistributionSet() != null && action.getDistributionSet().getId()
                 .equals(target.getAssignedDistributionSet().getId())) {
-            // the target has already the distribution set assigned, we don't
-            // need to start the scheduled action, just finish it.
-            log.debug("Target {} has distribution set {} assigned. Closing action...", target.getControllerId(),
-                    action.getDistributionSet().getName());
+            // the target has already the distribution set assigned, we don't need to start the scheduled action, just finish it.
+            log.debug("Target {} has distribution set {} assigned. Closing action...",
+                    target.getControllerId(), action.getDistributionSet().getName());
             action.setStatus(Status.FINISHED);
             action.setActive(false);
             setSkipActionStatus(action);
@@ -1023,8 +1022,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private List<JpaAction> activateActionsOfRolloutGroup(final List<JpaAction> actions) {
         actions.forEach(action -> {
             action.setActive(true);
-            final boolean confirmationRequired = action.getRolloutGroup().isConfirmationRequired() && action.getTarget()
-                    .getAutoConfirmationStatus() == null;
+            final boolean confirmationRequired = action.getRolloutGroup().isConfirmationRequired() &&
+                    action.getTarget().getAutoConfirmationStatus() == null;
             if (isConfirmationFlowEnabled() && confirmationRequired) {
                 action.setStatus(Status.WAIT_FOR_CONFIRMATION);
                 return;

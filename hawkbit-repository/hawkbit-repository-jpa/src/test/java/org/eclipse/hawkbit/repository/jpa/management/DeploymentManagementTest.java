@@ -672,8 +672,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final List<DeploymentRequest> deploymentRequests = createAssignmentRequests(distributionSets, targets, 34);
 
         enableMultiAssignments();
-        final List<DistributionSetAssignmentResult> results = deploymentManagement
-                .assignDistributionSets(deploymentRequests);
+        final List<DistributionSetAssignmentResult> results = deploymentManagement.assignDistributionSets(deploymentRequests);
 
         assertThat(getResultingActionCount(results)).isEqualTo(deploymentRequests.size());
         final List<Long> dsIds = distributionSets.stream().map(DistributionSet::getId).toList();
