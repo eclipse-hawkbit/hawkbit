@@ -6,6 +6,12 @@ on:
   schedule:
     - cron: "0 0 * * *"
 
+permissions:
+  contents: read
+  issues: write
+  # only needed if marking PRs as stale
+#  pull-requests: write
+
 jobs:
   stale:
     # only on original eclipse-hawkbit/hawkbit repo
@@ -16,6 +22,7 @@ jobs:
       - uses: actions/stale@v10
         with:
           repo-token: ${{ secrets.PAT_SECRET }}
+          # disables automatic marking of issues as stale
           days-before-stale: -1
           days-before-close: 15
           stale-issue-label: 'awaiting'
@@ -23,5 +30,3 @@ jobs:
             There has been no response from the original author so I closed this issue.
             Please reach out if you have or find the answers we need so that we can investigate further.
           only-labels: 'awaiting'
-          skip-stale-issue-message: 'true'
-          skip-stale-pr-message: 'true'

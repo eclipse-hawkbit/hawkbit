@@ -16,6 +16,9 @@ on:
         description: 'GitLab API token for Dash IP lab (needed only if open_tickets is true)'
         required: false
 
+permissions:
+  contents: write
+
 jobs:
   reusable_workflow_license-scan:
     runs-on: ubuntu-latest
