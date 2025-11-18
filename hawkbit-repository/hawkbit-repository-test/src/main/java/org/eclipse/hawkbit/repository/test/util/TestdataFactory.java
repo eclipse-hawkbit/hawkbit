@@ -20,13 +20,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -90,12 +90,14 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("java:S107")
 public class TestdataFactory {
 
+    @SuppressWarnings("java:S2245") // used for tests only, no need of secure random
+    public static final Random RND = new Random();
+
     public static final String VISIBLE_SM_MD_KEY = "visibleMetdataKey";
     public static final String VISIBLE_SM_MD_VALUE = "visibleMetdataValue";
     public static final String INVISIBLE_SM_MD_KEY = "invisibleMetdataKey";
     public static final String INVISIBLE_SM_MD_VALUE = "invisibleMetdataValue";
 
-    public static final RandomStringUtils RANDOM_STRING_UTILS = RandomStringUtils.secure();
     public static final AtomicLong COUNTER = new AtomicLong();
 
     /**
@@ -197,8 +199,13 @@ public class TestdataFactory {
         this.systemSecurityContext = systemSecurityContext;
     }
 
+    private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     public static String randomString(final int len) {
-        return RANDOM_STRING_UTILS.next(len, true, false);
+        final StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
+            sb.append(ALPHABET.charAt(RND.nextInt(ALPHABET.length())));
+        }
+        return sb.toString();
     }
 
     public static byte[] randomBytes(final int len) {

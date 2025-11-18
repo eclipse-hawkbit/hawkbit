@@ -125,8 +125,7 @@ public abstract class AbstractIntegrationTest {
 
     protected static final URI LOCALHOST = URI.create("http://127.0.0.1");
     protected static final int DEFAULT_TEST_WEIGHT = 500;
-    @SuppressWarnings("java:S1068") // used for tests only, no need of secure random
-    protected static final Random RND = new Random();
+    protected static final Random RND = TestdataFactory.RND;
 
     /**
      * Number of {@link DistributionSetType}s that exist in every test case. One
