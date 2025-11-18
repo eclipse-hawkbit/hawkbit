@@ -25,8 +25,8 @@ import lombok.experimental.Accessors;
 @ToString(callSuper = true)
 public abstract class MgmtNamedEntity extends MgmtBaseEntity {
 
-    @JsonProperty(required = true)
     @Schema(example = "Name of entity")
+    @JsonProperty(required = true)
     private String name;
 
     @Schema(example = "Description of entity")

@@ -74,8 +74,7 @@ public interface RolloutManagement extends PermissionSupport {
     long count();
 
     /**
-     * Counts all {@link Rollout}s for a specific {@link DistributionSet} that
-     * are stoppable
+     * Counts all {@link Rollout}s for a specific {@link DistributionSet} that are stoppable
      * <p/>
      * No access control applied
      *

@@ -14,6 +14,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -64,12 +65,14 @@ import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
 public class MgmtRolloutRestRequestBodyPost extends AbstractMgmtRolloutConditionsEntity {
 
     @Schema(description = "Target filter query language expression", example = "id==targets-*")
+    @JsonProperty(required = true)
     private String targetFilterQuery;
 
     @Schema(description = "The ID of distribution set of this rollout", example = "6")
+    @JsonProperty(required = true)
     private long distributionSetId;
 
-    @Schema(description = "The amount of groups the rollout should split targets into", example = "5")
+    @Schema(description = "The amount of groups the rollout should split targets into", example = "5", defaultValue = "1")
     private Integer amountGroups;
 
     @Schema(description = "Force time in milliseconds", example = "1691065781929")
