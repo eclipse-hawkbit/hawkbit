@@ -48,6 +48,9 @@
         as libraries in other projects might be compiled with a different, lower, java version. -->
         <java.client.version>17</java.client.version>
 
+        <!-- Override vulnerable commons-fileupload used by feign-form-spring (via spring-cloud-starter-openfeign) -->
+        <commons-fileupload.version>1.6.0</commons-fileupload.version>
+
         <!-- must be the same as the parent version -->
         <spring.boot.version>3.5.7</spring.boot.version>
         <spring.cloud.version>2025.0.0</spring.cloud.version>
@@ -198,6 +201,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Override vulnerable commons-fileupload used by feign-form-spring (via spring-cloud-starter-openfeign) -->
+            <dependency>
+                <groupId>commons-fileupload</groupId>
+                <artifactId>commons-fileupload</artifactId>
+                <version>${commons-fileupload.version}</version>
+            </dependency>
+
             <!-- Misc -->
             <dependency>
                 <groupId>com.rabbitmq</groupId>
