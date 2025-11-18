@@ -15,10 +15,10 @@ COPY KEY .
 RUN set -x &&\
  apk add --no-cache --virtual build-dependencies gnupg unzip libressl wget &&\
  gpg --import KEY &&\
- wget -O /${APP}.jar --no-verbose https://repo1.maven.org/maven2/org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar &&\
- wget -O /${APP}.jar.asc --no-verbose https://repo1.maven.org/maven2/org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar.asc &&\
+ wget -O ${APP}.jar --no-verbose https://repo1.maven.org/maven2/org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar &&\
+ wget -O ${APP}.jar.asc --no-verbose https://repo1.maven.org/maven2/org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar.asc &&\
  gpg --batch --verify ${APP}.jar.asc ${APP}.jar &&\
- rm /${APP_DIR}/${APP}.jar.asc KEY &&\
+ rm ${APP}.jar.asc KEY &&\
  apk del build-dependencies &&\
  mkdir -p ${BUILD_DIR} &&\
  cd ${BUILD_DIR} &&\
