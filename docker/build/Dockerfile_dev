@@ -2,8 +2,7 @@
 ARG JAVA_VERSION=21.0.9_10
 # extracts spring layers from the app jar (to optimize boot)
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS build
-ARG APP_DIR=/app
-WORKDIR ${APP_DIR}
+
 ARG HAWKBIT_APP=hawkbit-update-server
 ARG HAWKBIT_VERSION=0-SNAPSHOT
 
@@ -16,8 +15,8 @@ COPY org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar ${APP}-${VERSIO
 RUN set -x &&\
  mkdir -p ${BUILD_DIR} &&\
  cd ${BUILD_DIR} &&\
- java -Djarmode=tools -jar /${APP_DIR}/${APP}-${VERSION}.jar extract --layers --launcher --destination . &&\
- rm /${APP_DIR}/${APP}-${VERSION}.jar
+ java -Djarmode=tools -jar /${APP}-${VERSION}.jar extract --layers --launcher --destination . &&\
+ rm /${APP}-${VERSION}.jar
 
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
 ARG APP_DIR=/app
