@@ -14,12 +14,11 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 
 import java.time.Duration;
 
-import org.apache.commons.text.StringSubstitutor;
-import org.apache.commons.text.lookup.StringLookupFactory;
 import org.eclipse.hawkbit.repository.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
+import org.springframework.util.PropertyPlaceholderHelper;
 
 /**
  * Adds macro capabilities to RSQL expressions that are used to filter for targets.
@@ -41,12 +40,10 @@ import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
  */
 public class VirtualPropertyResolver {
 
-    private static final StringSubstitutor STRING_SUBSTITUTOR = new StringSubstitutor(
-            StringLookupFactory.builder().get().functionStringLookup(VirtualPropertyResolver::lookup),
-            StringSubstitutor.DEFAULT_PREFIX, StringSubstitutor.DEFAULT_SUFFIX, StringSubstitutor.DEFAULT_ESCAPE);
+    private static final PropertyPlaceholderHelper HELPER = new PropertyPlaceholderHelper("${", "}", null, '$', true);
 
     public String replace(final String input) {
-        return STRING_SUBSTITUTOR.replace(input);
+        return HELPER.replacePlaceholders(input, VirtualPropertyResolver::lookup);
     }
 
     private static String lookup(final String rhs) {
@@ -78,8 +75,8 @@ public class VirtualPropertyResolver {
     private static long calculateOverdueTimestamp(final PollingTime.PollingInterval pollingInterval, final Duration pollingOverdueTime) {
         return System.currentTimeMillis()
                 - (pollingInterval.getDeviationPercent() == 0
-                        ? pollingInterval.getInterval().toMillis()
-                        : pollingInterval.getInterval().toMillis() * (100 + pollingInterval.getDeviationPercent()) / 100)
+                ? pollingInterval.getInterval().toMillis()
+                : pollingInterval.getInterval().toMillis() * (100 + pollingInterval.getDeviationPercent()) / 100)
                 - pollingOverdueTime.toMillis();
     }
 

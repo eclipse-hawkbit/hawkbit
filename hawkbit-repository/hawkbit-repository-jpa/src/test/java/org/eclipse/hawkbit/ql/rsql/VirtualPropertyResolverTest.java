@@ -14,7 +14,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.concurrent.Callable;
 
-import org.apache.commons.text.StringSubstitutor;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.helper.TenantConfigurationManagementHolder;
@@ -33,11 +32,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ExtendWith(SpringExtension.class)
 /**
  * Feature: Unit Tests - Repository<br/>
  * Story: Placeholder resolution for virtual properties
  */
+@ExtendWith(SpringExtension.class)
 class VirtualPropertyResolverTest {
 
     private static final TenantConfigurationValue<String> TEST_POLLING_TIME_INTERVAL =
@@ -78,7 +77,7 @@ class VirtualPropertyResolverTest {
     @Test
     void handleEscapedPlaceholder() {
         final String placeholder = "${OVERDUE_TS}";
-        final String escapedPlaceholder = StringSubstitutor.DEFAULT_ESCAPE + placeholder;
+        final String escapedPlaceholder = "$" + placeholder;
         final String testString = "lhs=lt=" + escapedPlaceholder;
 
         final String resolvedPlaceholders = substitutor.replace(testString);

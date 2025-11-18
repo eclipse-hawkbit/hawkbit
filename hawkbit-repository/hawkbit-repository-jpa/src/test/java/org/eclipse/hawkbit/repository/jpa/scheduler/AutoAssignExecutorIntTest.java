@@ -144,8 +144,7 @@ class AutoAssignExecutorIntTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(10, 20), targetsCount);
 
         // Count the number of targets that will be assigned with setA
-        assertThat(targetManagement.countByRsqlAndNonDsAndCompatibleAndUpdatable(setA.getId(), targetFilterQuery.getQuery()))
-                .isEqualTo(15);
+        assertThat(targetManagement.countByRsqlAndNonDsAndCompatibleAndUpdatable(setA.getId(), targetFilterQuery.getQuery())).isEqualTo(15);
 
         // Run the check
         autoAssignChecker.checkAllTargets();
