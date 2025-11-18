@@ -51,13 +51,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Override vulnerable feign-form-spring dependency on commons-text -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-text</artifactId>
-            <version>${commons-text.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-sdk-commons</artifactId>
