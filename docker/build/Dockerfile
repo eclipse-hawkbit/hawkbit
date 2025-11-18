@@ -38,7 +38,7 @@ COPY --from=build ${BUILD_DIR}/spring-boot-loader/ ./
 COPY --from=build ${BUILD_DIR}/snapshot-dependencies/ ./
 COPY --from=build ${BUILD_DIR}/application/ ./
 
-VOLUME "/artifactrepo"
+VOLUME "/${APP_DIR}/artifactrepo"
 
 ARG CONTAINER_PORT=8080
 EXPOSE ${CONTAINER_PORT}
