@@ -97,7 +97,7 @@
         <!-- Hawkbit -->
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-repository-jpa-ql</artifactId>
+            <artifactId>hawkbit-ql-jpa</artifactId>
             <version>${project.version}</version>
         </dependency>
 
