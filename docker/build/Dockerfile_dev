@@ -22,7 +22,7 @@ FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
 ARG APP_DIR=/app
 WORKDIR ${APP_DIR}
 RUN addgroup -S hawkbit_group && adduser -D hawkbit -G hawkbit_group
-RUN mkdir -p /artifactrepo && chown -R hawkbit /artifactrepo
+RUN mkdir -p /${APP_DIR}/artifactrepo && chown -R hawkbit /${APP_DIR}/artifactrepo
 USER hawkbit
 
 ENV BUILD_DIR=/opt/hawkbit_build
