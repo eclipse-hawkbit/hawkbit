@@ -129,7 +129,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
                 throw new ValidationException("Dynamic rollouts are not supported with groups");
             }
             if (rolloutRequestBody.getAmountGroups() != null) {
-                throw new ValidationException("Either 'amountGroups' or 'groups' must be defined in the request");
+                throw new ValidationException("If 'group' is set the 'amountGroups' must not be set in the request");
             }
             final List<GroupCreate> rolloutGroups = rolloutRequestBody.getGroups().stream()
                     .map(mgmtRolloutGroup -> MgmtRolloutMapper.fromRequest(
@@ -137,14 +137,13 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
                             isConfirmationRequiredForGroup(mgmtRolloutGroup, rolloutRequestBody).orElse(confirmationFlowActive)))
                     .toList();
             rollout = rolloutManagement.create(create, rolloutGroups, rolloutGroupConditions);
-        } else if (rolloutRequestBody.getAmountGroups() != null) {
+        } else {
+            final int amountGroup = Optional.ofNullable(rolloutRequestBody.getAmountGroups()).orElse(1);
             final boolean confirmationRequired = rolloutRequestBody.getConfirmationRequired() == null
                     ? confirmationFlowActive
                     : rolloutRequestBody.getConfirmationRequired();
-            rollout = rolloutManagement.create(create, rolloutRequestBody.getAmountGroups(), confirmationRequired,
+            rollout = rolloutManagement.create(create, amountGroup, confirmationRequired,
                     rolloutGroupConditions, MgmtRolloutMapper.fromRequest(rolloutRequestBody.getDynamicGroupTemplate()));
-        } else {
-            throw new ValidationException("Either 'amountGroups' or 'groups' must be defined in the request");
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(MgmtRolloutMapper.toResponseRollout(rollout, true));
