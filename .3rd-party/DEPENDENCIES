@@ -301,7 +301,7 @@ maven/mavencentral/org.springframework.integration/spring-integration-amqp/6.5.3
 maven/mavencentral/org.springframework.integration/spring-integration-core/6.5.3, Apache-2.0, approved, #23444
 maven/mavencentral/org.springframework.integration/spring-integration-jdbc/6.5.3, Apache-2.0, approved, #21987
 maven/mavencentral/org.springframework.integration/spring-integration-jmx/6.5.3, Apache-2.0, approved, #23494
-maven/mavencentral/org.springframework.plugin/spring-plugin-core/3.0.0, Apache-2.0, approved, #7104
+maven/mavencentral/org.springframework.plugin/spring-plugin-core/4.0.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.retry/spring-retry/2.0.12, Apache-2.0, approved, #16889
 maven/mavencentral/org.springframework.security/spring-security-aspects/6.5.6, Apache-2.0, approved, #21979
 maven/mavencentral/org.springframework.security/spring-security-config/6.5.6, Apache-2.0, approved, #22177
