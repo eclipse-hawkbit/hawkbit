@@ -16,12 +16,12 @@ on:
         description: 'If to override the tag if already exists'
         default: false
 
+permissions:
+  contents: write
+
 jobs:
   tag:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
 
     steps:
       - uses: actions/checkout@v5

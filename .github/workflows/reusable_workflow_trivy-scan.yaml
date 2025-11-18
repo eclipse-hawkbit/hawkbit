@@ -12,14 +12,14 @@ on:
         type: boolean
         default: false
 
+permissions:
+  contents: read
+  # needed for trivy scans upload
+  security-events: write
+
 jobs:
   trivy-scan:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      # needed for trivy scans upload
-      security-events: write
 
     steps:
       - name: Checkout code

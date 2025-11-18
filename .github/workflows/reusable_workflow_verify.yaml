@@ -16,6 +16,9 @@ on:
         default: ''
         description: 'Properties to pass to Maven command line, e.g. -Djpa.vendor=hibernate'
 
+permissions:
+  contents: read
+
 jobs:
   reusable_workflow_verify:
     runs-on: ubuntu-latest
