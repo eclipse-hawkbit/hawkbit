@@ -20,7 +20,7 @@ RUN set -x &&\
  apk del build-dependencies
 
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
-
+WORKDIR /app
 RUN addgroup -S hawkbit_group && adduser -D hawkbit -G hawkbit_group
 USER hawkbit
 
@@ -30,7 +30,7 @@ ARG HAWKBIT_VERSION=pass_as_buils_arg
 ENV APP=${HAWKBIT_APP}
 ENV VERSION=${HAWKBIT_VERSION}
 
-COPY --from=build /${APP}-${VERSION}.jar ./
+COPY --from=build ${APP}-${VERSION}.jar ./
 
 ARG X_MS=256m
 ENV X_MS=${X_MS}
@@ -47,4 +47,4 @@ ENV GC=${GC}
 ARG AND_THEN="exit 0"
 ENV AND_THEN=${AND_THEN}
 
-ENTRYPOINT ["sh", "-c", "java -classpath /${APP}-${VERSION}.jar ${JAVA_OPTS} -Xms${X_MS} -Xmx${X_MX} -XX:MaxMetaspaceSize=${XX_MAX_METASPACE_SIZE} -XX:MetaspaceSize=${XX_METASPACE_SIZE} -Xss${XSS} -XX:+Use${GC}GC -XX:+UseStringDeduplication -XX:+UseCompressedOops -XX:+HeapDumpOnOutOfMemoryError org.eclipse.hawkbit.repository.jpa.init.HawkbitFlywayDbInit ${@} && ${AND_THEN}"]
+ENTRYPOINT ["sh", "-c", "java -classpath ${APP}-${VERSION}.jar ${JAVA_OPTS} -Xms${X_MS} -Xmx${X_MX} -XX:MaxMetaspaceSize=${XX_MAX_METASPACE_SIZE} -XX:MetaspaceSize=${XX_METASPACE_SIZE} -Xss${XSS} -XX:+Use${GC}GC -XX:+UseStringDeduplication -XX:+UseCompressedOops -XX:+HeapDumpOnOutOfMemoryError org.eclipse.hawkbit.repository.jpa.init.HawkbitFlywayDbInit ${@} && ${AND_THEN}"]

@@ -91,7 +91,7 @@ services:
       - 'SPRING_RABBITMQ_USERNAME=guest'
       - 'SPRING_RABBITMQ_PASSWORD=guest'
     volumes:
-      - artifactrepo:/artifactrepo
+      - artifactrepo:/app/artifactrepo
     restart: always
     ports:
       - "8080:8080"

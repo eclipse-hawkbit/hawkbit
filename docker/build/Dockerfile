@@ -26,9 +26,10 @@ RUN set -x &&\
  rm /${APP}.jar
 
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
-
+ARG APP_DIR=/app
+WORKDIR ${APP_DIR}
 RUN addgroup -S hawkbit_group && adduser -D hawkbit -G hawkbit_group
-RUN mkdir -p /artifactrepo && chown -R hawkbit /artifactrepo
+RUN mkdir -p artifactrepo && chown -R hawkbit artifactrepo
 USER hawkbit
 
 ENV BUILD_DIR=/opt/hawkbit_build
@@ -37,7 +38,7 @@ COPY --from=build ${BUILD_DIR}/spring-boot-loader/ ./
 COPY --from=build ${BUILD_DIR}/snapshot-dependencies/ ./
 COPY --from=build ${BUILD_DIR}/application/ ./
 
-VOLUME "/artifactrepo"
+VOLUME /${APP_DIR}/artifactrepo
 
 ARG CONTAINER_PORT=8080
 EXPOSE ${CONTAINER_PORT}
