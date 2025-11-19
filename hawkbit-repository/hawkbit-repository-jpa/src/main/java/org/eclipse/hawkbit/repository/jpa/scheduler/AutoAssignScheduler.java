@@ -17,7 +17,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,24 +31,14 @@ public class AutoAssignScheduler {
     private static final String PROP_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.scheduler.scheduler.fixedDelay:2000}";
 
     private final SystemManagement systemManagement;
-    private final SystemSecurityContext systemSecurityContext;
     private final AutoAssignExecutor autoAssignExecutor;
     private final LockRegistry lockRegistry;
     private final Optional<MeterRegistry> meterRegistry;
 
-    /**
-     * Instantiates a new AutoAssignScheduler
-     *
-     * @param systemManagement to find all tenants
-     * @param systemSecurityContext to run as system
-     * @param autoAssignExecutor to run a check as tenant
-     * @param lockRegistry to acquire a lock per tenant
-     */
-    public AutoAssignScheduler(final SystemManagement systemManagement,
-            final SystemSecurityContext systemSecurityContext, final AutoAssignExecutor autoAssignExecutor,
+    public AutoAssignScheduler(
+            final SystemManagement systemManagement, final AutoAssignExecutor autoAssignExecutor,
             final LockRegistry lockRegistry, final Optional<MeterRegistry> meterRegistry) {
         this.systemManagement = systemManagement;
-        this.systemSecurityContext = systemSecurityContext;
         this.autoAssignExecutor = autoAssignExecutor;
         this.lockRegistry = lockRegistry;
         this.meterRegistry = meterRegistry;
@@ -60,9 +50,8 @@ public class AutoAssignScheduler {
      */
     @Scheduled(initialDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void autoAssignScheduler() {
-        // run this code in system code privileged to have the necessary
-        // permission to query and create entities.
-        systemSecurityContext.runAsSystem(this::executeAutoAssign);
+        // run this code in system code privileged to have the necessary permission to query and create entities.
+        SystemSecurityContext.runAsSystem(this::executeAutoAssign);
     }
 
     @SuppressWarnings("squid:S3516")

@@ -47,8 +47,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.utils.TenantConfigHelper;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -66,19 +65,15 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     private final RolloutGroupManagement rolloutGroupManagement;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
-    private final TenantConfigHelper tenantConfigHelper;
 
     MgmtRolloutResource(
             final RolloutManagement rolloutManagement, final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
-            final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
-            final SystemSecurityContext systemSecurityContext,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
+            final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement) {
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.distributionSetManagement = distributionSetManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
-        this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
     }
 
     @Override
@@ -121,7 +116,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         final DistributionSet distributionSet = distributionSetManagement.getValidAndComplete(rolloutRequestBody.getDistributionSetId());
         final RolloutGroupConditions rolloutGroupConditions = MgmtRolloutMapper.fromRequest(rolloutRequestBody, true);
         final Create create = MgmtRolloutMapper.fromRequest(rolloutRequestBody, distributionSet);
-        final boolean confirmationFlowActive = tenantConfigHelper.isConfirmationFlowEnabled();
+        final boolean confirmationFlowActive = TenantConfigHelper.getInstance().isConfirmationFlowEnabled();
 
         final Rollout rollout;
         if (rolloutRequestBody.getGroups() != null) {
@@ -226,7 +221,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         }
 
         final List<MgmtRolloutGroupResponseBody> rest = MgmtRolloutMapper.toResponseRolloutGroup(
-                rolloutGroups.getContent(), tenantConfigHelper.isConfirmationFlowEnabled(), isFullMode);
+                rolloutGroups.getContent(), TenantConfigHelper.getInstance().isConfirmationFlowEnabled(), isFullMode);
         return ResponseEntity.ok(new PagedList<>(rest, rolloutGroups.getTotalElements()));
     }
 
@@ -240,7 +235,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         }
 
         return ResponseEntity.ok(MgmtRolloutMapper.toResponseRolloutGroup(
-                rolloutGroup, true, tenantConfigHelper.isConfirmationFlowEnabled()));
+                rolloutGroup, true, TenantConfigHelper.getInstance().isConfirmationFlowEnabled()));
     }
 
     @Override
@@ -255,7 +250,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         } else {
             rolloutGroupTargets = this.rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(groupId, rsqlParam, pageable);
         }
-        final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(rolloutGroupTargets.getContent(), tenantConfigHelper);
+        final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(rolloutGroupTargets.getContent());
         return ResponseEntity.ok(new PagedList<>(rest, rolloutGroupTargets.getTotalElements()));
     }
 

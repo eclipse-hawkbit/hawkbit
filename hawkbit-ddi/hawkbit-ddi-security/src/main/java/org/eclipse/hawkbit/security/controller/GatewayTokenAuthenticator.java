@@ -9,16 +9,14 @@
  */
 package org.eclipse.hawkbit.security.controller;
 
+import static org.eclipse.hawkbit.context.SystemSecurityContext.runAsSystemAsTenant;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY;
 
 import java.util.concurrent.Callable;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.slf4j.Logger;
 import org.springframework.security.core.Authentication;
 
@@ -37,17 +35,10 @@ public class GatewayTokenAuthenticator extends Authenticator.AbstractAuthenticat
 
     private final Callable<String> gatewaySecurityTokenKeyGetter;
 
-    public GatewayTokenAuthenticator(
-            final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
-            final SystemSecurityContext systemSecurityContext) {
-        super(tenantConfigurationManagement, tenantAware, systemSecurityContext);
+    public GatewayTokenAuthenticator() {
         gatewaySecurityTokenKeyGetter = () -> {
             log.trace("retrieving configuration value for configuration key {}", AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY);
-
-            return systemSecurityContext
-                    .runAsSystem(() -> tenantConfigurationManagement
-                            .getConfigurationValue(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, String.class)
-                            .getValue());
+            return TenantConfigHelper.getInstance().getConfigValue(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, String.class);
         };
     }
 
@@ -63,7 +54,7 @@ public class GatewayTokenAuthenticator extends Authenticator.AbstractAuthenticat
         }
 
         if (!isEnabled(controllerSecurityToken)) {
-            log.debug("The gateway token authentication is disabled");
+            log.debug("The gateway token auth is disabled");
             return null;
         }
 
@@ -71,8 +62,9 @@ public class GatewayTokenAuthenticator extends Authenticator.AbstractAuthenticat
         final String presentedToken = authHeader.substring(OFFSET_GATEWAY_TOKEN);
 
         // validate if the presented token is the same as the gateway token
-        return presentedToken.equals(tenantAware.runAsTenant(controllerSecurityToken.getTenant(), gatewaySecurityTokenKeyGetter))
-                ? authenticatedController(controllerSecurityToken.getTenant(), controllerSecurityToken.getControllerId()) : null;
+        return presentedToken.equals(runAsSystemAsTenant(controllerSecurityToken.getTenant(), gatewaySecurityTokenKeyGetter))
+                ? authenticatedController(controllerSecurityToken.getTenant(), controllerSecurityToken.getControllerId())
+                : null;
     }
 
     @Override

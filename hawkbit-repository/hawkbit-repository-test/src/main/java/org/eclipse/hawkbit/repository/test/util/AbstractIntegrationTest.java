@@ -10,9 +10,9 @@
 package org.eclipse.hawkbit.repository.test.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TENANT_CONFIGURATION;
-import static org.eclipse.hawkbit.im.authentication.SpRole.CONTROLLER_ROLE;
-import static org.eclipse.hawkbit.im.authentication.SpRole.SYSTEM_ROLE;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_TENANT_CONFIGURATION;
+import static org.eclipse.hawkbit.auth.SpRole.CONTROLLER_ROLE;
+import static org.eclipse.hawkbit.auth.SpRole.SYSTEM_ROLE;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,6 +59,7 @@ import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -77,8 +78,6 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -164,19 +163,13 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected ArtifactManagement artifactManagement;
     @Autowired
-    protected TenantAware tenantAware;
-    @Autowired
     protected SystemManagement systemManagement;
-    @Autowired
-    protected TenantConfigurationManagement tenantConfigurationManagement;
     @Autowired
     protected RolloutManagement rolloutManagement;
     @Autowired
     protected RolloutHandler rolloutHandler;
     @Autowired
     protected RolloutGroupManagement rolloutGroupManagement;
-    @Autowired
-    protected SystemSecurityContext systemSecurityContext;
     @Autowired
     protected ArtifactStorage artifactStorage;
     @Autowired
@@ -250,6 +243,10 @@ public abstract class AbstractIntegrationTest {
                 log.warn("Cannot cleanup file-directory", e);
             }
         }
+    }
+
+    protected static TenantConfigurationManagement tenantConfigurationManagement() {
+        return TenantConfigHelper.getInstance().getTenantConfigurationManagement();
     }
 
     /**
@@ -413,21 +410,21 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected void enableMultiAssignments() {
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, true);
+        tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, true);
     }
 
     protected void enableConfirmationFlow() {
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, true);
+        tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, true);
     }
 
     protected void disableConfirmationFlow() {
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, false);
+        tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, false);
     }
 
     protected boolean isConfirmationFlowActive() {
         return SecurityContextSwitch.getAs(
                 SecurityContextSwitch.withUser("as_system", READ_TENANT_CONFIGURATION),
-                () -> tenantConfigurationManagement
+                () -> tenantConfigurationManagement()
                         .getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, Boolean.class)
                         .getValue());
     }
@@ -469,16 +466,16 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected void enableBatchAssignments() {
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED, true);
+        tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED, true);
     }
 
     protected void disableBatchAssignments() {
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED, false);
+        tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED, false);
     }
 
     protected boolean isConfirmationFlowEnabled() {
-        return tenantConfigurationManagement
-                .getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, Boolean.class).getValue();
+        return tenantConfigurationManagement().getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, Boolean.class)
+                .getValue();
     }
 
     // ensure that next action will get current time millis AFTER got from the previous

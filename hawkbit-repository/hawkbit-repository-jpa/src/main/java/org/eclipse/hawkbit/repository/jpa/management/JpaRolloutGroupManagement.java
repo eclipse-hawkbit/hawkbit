@@ -71,18 +71,16 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     private final ActionRepository actionRepository;
     private final TargetRepository targetRepository;
     private final EntityManager entityManager;
-    private final RolloutStatusCache rolloutStatusCache;
 
     @SuppressWarnings("java:S107")
     protected JpaRolloutGroupManagement(final RolloutGroupRepository rolloutGroupRepository,
             final RolloutRepository rolloutRepository, final ActionRepository actionRepository,
-            final TargetRepository targetRepository, final EntityManager entityManager, final RolloutStatusCache rolloutStatusCache) {
+            final TargetRepository targetRepository, final EntityManager entityManager) {
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.rolloutRepository = rolloutRepository;
         this.actionRepository = actionRepository;
         this.targetRepository = targetRepository;
         this.entityManager = entityManager;
-        this.rolloutStatusCache = rolloutStatusCache;
     }
 
     @Override
@@ -118,10 +116,10 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         final JpaRolloutGroup jpaRolloutGroup = (JpaRolloutGroup) rolloutGroupRepository.findById(rolloutGroupId).map(RolloutGroup.class::cast)
                 .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutGroupId));
 
-        List<TotalTargetCountActionStatus> rolloutStatusCountItems = rolloutStatusCache.getRolloutGroupStatus(rolloutGroupId);
+        List<TotalTargetCountActionStatus> rolloutStatusCountItems = RolloutStatusCache.getRolloutGroupStatus(rolloutGroupId);
         if (CollectionUtils.isEmpty(rolloutStatusCountItems)) {
             rolloutStatusCountItems = actionRepository.getStatusCountByRolloutGroupId(rolloutGroupId);
-            rolloutStatusCache.putRolloutGroupStatus(rolloutGroupId, rolloutStatusCountItems);
+            RolloutStatusCache.putRolloutGroupStatus(rolloutGroupId, rolloutStatusCountItems);
         }
 
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
@@ -225,7 +223,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRolloutGroup(final List<Long> groupIds) {
-        final Map<Long, List<TotalTargetCountActionStatus>> fromCache = rolloutStatusCache
+        final Map<Long, List<TotalTargetCountActionStatus>> fromCache = RolloutStatusCache
                 .getRolloutGroupStatus(groupIds);
 
         final List<Long> rolloutGroupIds = groupIds.stream().filter(id -> !fromCache.containsKey(id)).toList();
@@ -235,7 +233,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
             final Map<Long, List<TotalTargetCountActionStatus>> fromDb = resultList.stream()
                     .collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
 
-            rolloutStatusCache.putRolloutGroupStatus(fromDb);
+            RolloutStatusCache.putRolloutGroupStatus(fromDb);
 
             fromCache.putAll(fromDb);
         }

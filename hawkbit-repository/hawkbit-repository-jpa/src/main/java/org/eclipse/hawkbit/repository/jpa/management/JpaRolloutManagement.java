@@ -29,9 +29,9 @@ import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.ContextAware;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.im.authentication.SpRole;
+import org.eclipse.hawkbit.auth.SpPermission;
+import org.eclipse.hawkbit.auth.SpRole;
+import org.eclipse.hawkbit.context.ContextAware;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -85,10 +85,9 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.qfields.RolloutFields;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.utils.ObjectCopyUtil;
-import org.eclipse.hawkbit.utils.TenantConfigHelper;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -129,17 +128,13 @@ public class JpaRolloutManagement implements RolloutManagement {
     private final RolloutGroupRepository rolloutGroupRepository;
     private final RolloutApprovalStrategy rolloutApprovalStrategy;
     private final StartNextGroupRolloutGroupSuccessAction startNextRolloutGroupAction;
-    private final RolloutStatusCache rolloutStatusCache;
     private final ActionRepository actionRepository;
     private final TargetManagement<? extends Target> targetManagement;
     private final ActionStatusRepository actionStatusRepository;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
-    private final TenantAware tenantAware;
-    private final TenantConfigurationManagement tenantConfigurationManagement;
     private final QuotaManagement quotaManagement;
-    private final SystemSecurityContext systemSecurityContext;
-    private final ContextAware contextAware;
     private final RepositoryProperties repositoryProperties;
+
     private final OnlineDsAssignmentStrategy onlineDsAssignmentStrategy;
 
     protected JpaRolloutManagement(
@@ -148,35 +143,26 @@ public class JpaRolloutManagement implements RolloutManagement {
             final RolloutGroupRepository rolloutGroupRepository,
             final RolloutApprovalStrategy rolloutApprovalStrategy,
             final StartNextGroupRolloutGroupSuccessAction startNextRolloutGroupAction,
-            final RolloutStatusCache rolloutStatusCache,
             final ActionRepository actionRepository,
             final ActionStatusRepository actionStatusRepository,
             final TargetRepository targetRepository,
             final TargetManagement<? extends Target> targetManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
-            final TenantAware tenantAware,
-            final TenantConfigurationManagement tenantConfigurationManagement,
             final QuotaManagement quotaManagement,
-            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware,
             final RepositoryProperties repositoryProperties) {
         this.entityManager = entityManager;
         this.rolloutRepository = rolloutRepository;
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.rolloutApprovalStrategy = rolloutApprovalStrategy;
         this.startNextRolloutGroupAction = startNextRolloutGroupAction;
-        this.rolloutStatusCache = rolloutStatusCache;
         this.actionRepository = actionRepository;
         this.actionStatusRepository = actionStatusRepository;
         this.targetManagement = targetManagement;
         this.distributionSetManagement = distributionSetManagement;
-        this.tenantAware = tenantAware;
-        this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.quotaManagement = quotaManagement;
-        this.systemSecurityContext = systemSecurityContext;
-        this.contextAware = contextAware;
         this.repositoryProperties = repositoryProperties;
 
-        this.onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository,
+        onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository,
                 quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties, null);
     }
 
@@ -223,20 +209,21 @@ public class JpaRolloutManagement implements RolloutManagement {
         } else {
             RolloutHelper.verifyRolloutGroupAmount(amountGroup, quotaManagement);
         }
-
-        final JpaRollout rolloutRequest = new JpaRollout();
-        ObjectCopyUtil.copy(rollout, rolloutRequest, false, UnaryOperator.identity());
-        rolloutRequest.setDynamic(rollout.isDynamic()); // TODO - copy compares isDynamic == false and don't set it to false - remain null
-        // scheduled rollout, the creator shall have permissions to start rollout
-        if (rolloutRequest.getStartAt() != null && rolloutRequest.getStartAt() != Long.MAX_VALUE && // if scheduled rollout
-                !systemSecurityContext.hasPermission(SpPermission.HANDLE_ROLLOUT) &&
-                !systemSecurityContext.hasPermission(SpRole.SYSTEM_ROLE)) {
-            throw new InsufficientPermissionException("You need permission to start rollouts to create a scheduled rollout");
-        }
-        if (dynamicRolloutGroupTemplate != null && !rolloutRequest.isDynamic()) {
+        if (dynamicRolloutGroupTemplate != null && !rollout.isDynamic()) {
             throw new ValidationException("Dynamic group template is only allowed for dynamic rollouts");
         }
 
+        // scheduled rollout, the creator shall have permissions to start rollout
+        if (rollout.getStartAt() != null && rollout.getStartAt() != Long.MAX_VALUE && // if scheduled rollout
+                !SpPermission.hasPermission(SpPermission.HANDLE_ROLLOUT) &&
+                !SpPermission.hasPermission(SpRole.SYSTEM_ROLE)) {
+            throw new InsufficientPermissionException("You need permission to start rollouts to create a scheduled rollout");
+        }
+
+        final JpaRollout rolloutRequest = new JpaRollout();
+        ObjectCopyUtil.copy(rollout, rolloutRequest, false, UnaryOperator.identity());
+        // TODO - copy compares isDynamic == false and don't set it to false - remain null
+        rolloutRequest.setDynamic(rollout.isDynamic());
         return createRolloutGroups(
                 amountGroup, conditions, createRollout(rolloutRequest, amountGroup == 0), confirmationRequired, dynamicRolloutGroupTemplate);
     }
@@ -318,11 +305,11 @@ public class JpaRolloutManagement implements RolloutManagement {
         final Rollout rollout = rolloutRepository.findById(rolloutId).map(Rollout.class::cast)
                 .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
 
-        List<TotalTargetCountActionStatus> rolloutStatusCountItems = rolloutStatusCache.getRolloutStatus(rolloutId);
+        List<TotalTargetCountActionStatus> rolloutStatusCountItems = RolloutStatusCache.getRolloutStatus(rolloutId);
 
         if (CollectionUtils.isEmpty(rolloutStatusCountItems)) {
             rolloutStatusCountItems = actionRepository.getStatusCountByRolloutId(rolloutId);
-            rolloutStatusCache.putRolloutStatus(rolloutId, rolloutStatusCountItems);
+            RolloutStatusCache.putRolloutStatus(rolloutId, rolloutStatusCountItems);
         }
 
         final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
@@ -520,8 +507,8 @@ public class JpaRolloutManagement implements RolloutManagement {
     private void softCancelActionsOfRollout(final Rollout rollout) {
         final List<JpaAction> actions = actionRepository.findAll(
                         ActionSpecifications
-                                .byRolloutIdAndActiveAndStatusIsNot(rollout.getId(),
-                                        List.of(Action.Status.CANCELING)), // avoid cancelling state here, because it is count as still active
+                                // avoid cancelling state here, because it is count as still active
+                                .byRolloutIdAndActiveAndStatusIsNot(rollout.getId(), List.of(Action.Status.CANCELING)),
                         Pageable.ofSize(maxActions))
                 .getContent();
         log.info("Found {} active actions for rollout {}, performing soft cancel.", actions.size(), rollout.getId());
@@ -529,7 +516,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         storeActionsAndStatuses(actions, Action.Status.CANCELING);
 
         // send cancellation messages to event publisher
-        onlineDsAssignmentStrategy.sendCancellationMessages(actions, tenantAware.getCurrentTenant());
+        onlineDsAssignmentStrategy.sendCancellationMessages(actions, TenantAware.getCurrentTenant());
     }
 
     private void forceQuitActionsOfRollout(final Rollout rollout) {
@@ -592,7 +579,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         Jpa.setNativeQueryInParameter(updateQuery, "tid", targetIds);
         final int updated = updateQuery.executeUpdate();
         log.info("{} of target assigned distribution values updated for tenant {}",
-                updated, tenantAware.getCurrentTenant());
+                updated, TenantAware.getCurrentTenant());
         return updated;
     }
 
@@ -607,7 +594,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         Jpa.setNativeQueryInParameter(updateQuery, "tid", targetIds);
         final int updated = updateQuery.executeUpdate();
         log.info("{} of target assigned distribution set to previously installed distribution value for tenant {}",
-                updated, tenantAware.getCurrentTenant());
+                updated, TenantAware.getCurrentTenant());
         return updated;
     }
 
@@ -693,7 +680,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private JpaRollout createRollout(final JpaRollout rollout, final boolean pureDynamic) {
-        WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(rollout);
+        WeightValidationHelper.validate(rollout);
 
         rollout.setCreatedAt(System.currentTimeMillis());
 
@@ -725,7 +712,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         if (rollout.getWeight().isEmpty()) {
             rollout.setWeight(repositoryProperties.getActionWeightIfAbsent());
         }
-        contextAware.getCurrentContext().ifPresent(rollout::setAccessControlContext);
+        ContextAware.getCurrentContext().ifPresent(rollout::setAccessControlContext);
         return rollout;
     }
 
@@ -747,8 +734,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         JpaRolloutGroup lastGroup = null;
         if (amountOfGroups == 0) {
             if (dynamicRolloutGroupTemplate == null) {
-                throw new ConstraintDeclarationException(
-                        "At least one static rollout group must be defined for a static rollout");
+                throw new ConstraintDeclarationException("At least one static rollout group must be defined for a static rollout");
             }
         } else {
             // we can enforce the 'max targets per group' quota right here because
@@ -890,7 +876,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             return Collections.emptyMap();
         }
 
-        final Map<Long, List<TotalTargetCountActionStatus>> fromCache = rolloutStatusCache.getRolloutStatus(rollouts);
+        final Map<Long, List<TotalTargetCountActionStatus>> fromCache = RolloutStatusCache.getRolloutStatus(rollouts);
 
         final List<Long> rolloutIds = rollouts.stream().filter(id -> !fromCache.containsKey(id)).toList();
         if (!rolloutIds.isEmpty()) {
@@ -898,7 +884,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             final Map<Long, List<TotalTargetCountActionStatus>> fromDb = resultList.stream()
                     .collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
 
-            rolloutStatusCache.putRolloutStatus(fromDb);
+            RolloutStatusCache.putRolloutStatus(fromDb);
 
             fromCache.putAll(fromDb);
         }
@@ -1012,11 +998,11 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private boolean isMultiAssignmentsEnabled() {
-        return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).isMultiAssignmentsEnabled();
+        return TenantConfigHelper.getInstance().isMultiAssignmentsEnabled();
     }
 
     private boolean isConfirmationFlowEnabled() {
-        return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).isConfirmationFlowEnabled();
+        return TenantConfigHelper.getInstance().isConfirmationFlowEnabled();
     }
 
     private record TargetCount(long total, String filter) {}

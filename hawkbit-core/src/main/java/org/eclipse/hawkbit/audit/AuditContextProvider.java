@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.audit;
 import java.util.Optional;
 
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.security.SecurityContextTenantAware;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.AuditorAware;
@@ -23,16 +23,10 @@ public class AuditContextProvider {
 
     private static final AuditContextProvider INSTANCE = new AuditContextProvider();
 
-    private TenantAware.TenantResolver resolver;
     private AuditorAware<String> auditorAware;
 
     public static AuditContextProvider getInstance() {
         return INSTANCE;
-    }
-
-    @Autowired
-    public void setTenantResolver(final TenantAware.TenantResolver resolver) {
-        this.resolver = resolver;
     }
 
     @Autowired
@@ -42,8 +36,8 @@ public class AuditContextProvider {
 
     public AuditContext getAuditContext() {
         return new AuditContext(
-                Optional.ofNullable(resolver.resolveTenant()).orElse("n/a"),
-                Optional.ofNullable(auditorAware).flatMap(AuditorAware::getCurrentAuditor).orElse(SecurityContextTenantAware.SYSTEM_USER));
+                Optional.ofNullable(TenantAware.getCurrentTenant()).orElse("n/a"),
+                Optional.ofNullable(auditorAware).flatMap(AuditorAware::getCurrentAuditor).orElse(SystemSecurityContext.SYSTEM_USER));
     }
 
     public record AuditContext(String tenant, String username) {}

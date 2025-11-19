@@ -12,6 +12,8 @@ package org.eclipse.hawkbit.autoconfigure.ddi;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.audit.MdcHandler;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -19,8 +21,6 @@ import org.eclipse.hawkbit.rest.SecurityManagedConfiguration;
 import org.eclipse.hawkbit.rest.security.DosFilter;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
-import org.eclipse.hawkbit.security.MdcHandler;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.security.controller.AuthenticationFilters;
 import org.eclipse.hawkbit.security.controller.GatewayTokenAuthenticator;
 import org.eclipse.hawkbit.security.controller.SecurityHeaderAuthenticator;
@@ -52,23 +52,16 @@ class ControllerSecurityConfiguration {
     private static final String[] DDI_ANT_MATCHERS = { DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/**" };
 
     private final ControllerManagement controllerManagement;
-    private final TenantConfigurationManagement tenantConfigurationManagement;
-    private final TenantAware tenantAware;
     private final DdiSecurityProperties ddiSecurityConfiguration;
     private final HawkbitSecurityProperties securityProperties;
-    private final SystemSecurityContext systemSecurityContext;
 
     @Autowired
-    ControllerSecurityConfiguration(final ControllerManagement controllerManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
-            final DdiSecurityProperties ddiSecurityConfiguration,
-            final HawkbitSecurityProperties securityProperties, final SystemSecurityContext systemSecurityContext) {
+    ControllerSecurityConfiguration(
+            final ControllerManagement controllerManagement, final DdiSecurityProperties ddiSecurityConfiguration,
+            final HawkbitSecurityProperties securityProperties) {
         this.controllerManagement = controllerManagement;
-        this.tenantConfigurationManagement = tenantConfigurationManagement;
-        this.tenantAware = tenantAware;
         this.ddiSecurityConfiguration = ddiSecurityConfiguration;
         this.securityProperties = securityProperties;
-        this.systemSecurityContext = systemSecurityContext;
     }
 
     /**
@@ -89,7 +82,6 @@ class ControllerSecurityConfiguration {
         return filterRegBean;
     }
 
-
     @Bean
     @Order(301)
     protected SecurityFilterChain filterChainDDI(
@@ -100,23 +92,22 @@ class ControllerSecurityConfiguration {
                 .authorizeHttpRequests(amrmRegistry -> amrmRegistry.anyRequest().authenticated())
                 .anonymous(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
-                .addFilterBefore(new AuthenticationFilters.SecurityHeaderAuthenticationFilter(
-                        new SecurityHeaderAuthenticator(
-                                tenantConfigurationManagement, tenantAware,
-                                systemSecurityContext, ddiSecurityConfiguration.getRp().getCnHeader(), ddiSecurityConfiguration.getRp().getSslIssuerHashHeader()
-                        ), ddiSecurityConfiguration), AuthorizationFilter.class)
-                .addFilterBefore(new AuthenticationFilters.SecurityTokenAuthenticationFilter(
-                        new SecurityTokenAuthenticator(
-                                tenantConfigurationManagement, tenantAware,
-                                systemSecurityContext, controllerManagement), ddiSecurityConfiguration), AuthorizationFilter.class)
-                .addFilterBefore(new AuthenticationFilters.GatewayTokenAuthenticationFilter(
-                        new GatewayTokenAuthenticator(
-                                tenantConfigurationManagement, tenantAware,
-                                systemSecurityContext), ddiSecurityConfiguration), AuthorizationFilter.class)
+                .addFilterBefore(
+                        new AuthenticationFilters.SecurityHeaderAuthenticationFilter(
+                                new SecurityHeaderAuthenticator(
+                                        ddiSecurityConfiguration.getRp().getCnHeader(),
+                                        ddiSecurityConfiguration.getRp().getSslIssuerHashHeader()), ddiSecurityConfiguration),
+                        AuthorizationFilter.class)
+                .addFilterBefore(
+                        new AuthenticationFilters.SecurityTokenAuthenticationFilter(
+                                new SecurityTokenAuthenticator(controllerManagement), ddiSecurityConfiguration),
+                        AuthorizationFilter.class)
+                .addFilterBefore(
+                        new AuthenticationFilters.GatewayTokenAuthenticationFilter(new GatewayTokenAuthenticator(), ddiSecurityConfiguration),
+                        AuthorizationFilter.class)
                 .exceptionHandling(configurer -> configurer.authenticationEntryPoint(
                         (request, response, authException) -> response.setStatus(HttpStatus.UNAUTHORIZED.value())))
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
 
         if (securityProperties.getCors().isEnabled() && !disableCorsForDdiApi) {
             http.cors(configurer -> configurer.configurationSource(securityProperties.getCors().toCorsConfigurationSource()));

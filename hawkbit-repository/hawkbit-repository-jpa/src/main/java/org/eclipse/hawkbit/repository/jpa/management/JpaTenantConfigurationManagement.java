@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_GATEWAY_SECURITY_TOKEN;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_GATEWAY_SECURITY_TOKEN;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
@@ -30,12 +30,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.auth.SpPermission;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValueChangeNotAllowedException;
-import org.eclipse.hawkbit.repository.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
@@ -45,7 +46,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.qfields.TargetFields;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
@@ -170,8 +170,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
 
     private void checkAccess(final String keyName) {
         if (AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY.equalsIgnoreCase(keyName)) {
-            final SystemSecurityContext systemSecurityContext = SystemSecurityContextHolder.getInstance().getSystemSecurityContext();
-            if (!SystemSecurityContext.isCurrentThreadSystemCode() && !systemSecurityContext.hasPermission(READ_GATEWAY_SECURITY_TOKEN)) {
+            if (!SystemSecurityContext.isCurrentThreadSystemCode() && !SpPermission.hasPermission(READ_GATEWAY_SECURITY_TOKEN)) {
                 throw new InsufficientPermissionException(
                         "Can't read gateway security token! " + READ_GATEWAY_SECURITY_TOKEN + " is required!");
             }
@@ -214,7 +213,8 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
                                 .build()));
     }
 
-    private <T extends Serializable> void validateConfigurationValue(final T value, final TenantConfigurationKey configurationKey, final Object convertedValue) {
+    private <T extends Serializable> void validateConfigurationValue(final T value, final TenantConfigurationKey configurationKey,
+            final Object convertedValue) {
         configurationKey.validate(convertedValue, applicationContext);
         // additional validation for specific configuration keys
         if (POLLING_TIME.equals(configurationKey.getKeyName())) {
@@ -253,7 +253,6 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         }
         return convertedValue;
     }
-
 
     @SuppressWarnings("unchecked")
     private <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue0(final String keyName, final Class<T> propertyType) {

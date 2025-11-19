@@ -46,8 +46,7 @@ import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
-import org.eclipse.hawkbit.repository.helper.SystemSecurityContextHolder;
-import org.eclipse.hawkbit.repository.helper.TenantConfigurationManagementHolder;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoActionCleanup;
@@ -64,7 +63,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
-import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
@@ -82,7 +80,6 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRollou
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.jpa.scheduler.AutoAssignScheduler;
-import org.eclipse.hawkbit.repository.jpa.scheduler.JpaAutoAssignExecutor;
 import org.eclipse.hawkbit.repository.jpa.scheduler.JpaRolloutHandler;
 import org.eclipse.hawkbit.repository.jpa.scheduler.RolloutScheduler;
 import org.eclipse.hawkbit.repository.jpa.utils.ExceptionMapper;
@@ -91,8 +88,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -222,17 +217,15 @@ public class JpaRepositoryConfiguration {
     @Bean
     @ConditionalOnMissingBean
     PauseRolloutGroupAction pauseRolloutGroupAction(
-            final RolloutManagement rolloutManagement, final RolloutGroupRepository rolloutGroupRepository,
-            final SystemSecurityContext systemSecurityContext) {
-        return new PauseRolloutGroupAction(rolloutManagement, rolloutGroupRepository, systemSecurityContext);
+            final RolloutManagement rolloutManagement, final RolloutGroupRepository rolloutGroupRepository) {
+        return new PauseRolloutGroupAction(rolloutManagement, rolloutGroupRepository);
     }
 
     @Bean
     @ConditionalOnMissingBean
     StartNextGroupRolloutGroupSuccessAction startNextRolloutGroupAction(
-            final RolloutGroupRepository rolloutGroupRepository, final DeploymentManagement deploymentManagement,
-            final SystemSecurityContext systemSecurityContext) {
-        return new StartNextGroupRolloutGroupSuccessAction(rolloutGroupRepository, deploymentManagement, systemSecurityContext);
+            final RolloutGroupRepository rolloutGroupRepository, final DeploymentManagement deploymentManagement) {
+        return new StartNextGroupRolloutGroupSuccessAction(rolloutGroupRepository, deploymentManagement);
     }
 
     @Bean
@@ -260,8 +253,8 @@ public class JpaRepositoryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    SystemManagementCacheKeyGenerator systemManagementCacheKeyGenerator(final TenantAware tenantAware) {
-        return new SystemManagementCacheKeyGenerator(tenantAware);
+    SystemManagementCacheKeyGenerator systemManagementCacheKeyGenerator() {
+        return new SystemManagementCacheKeyGenerator();
     }
 
     @Bean
@@ -270,10 +263,10 @@ public class JpaRepositoryConfiguration {
         return new PropertiesQuotaManagement(securityProperties);
     }
 
+    // register as bean in order to be registered event listeners
     @Bean
-    @ConditionalOnMissingBean
-    RolloutStatusCache rolloutStatusCache(final TenantAware tenantAware) {
-        return new RolloutStatusCache(tenantAware);
+    RolloutStatusCache rolloutStatusCache() {
+        return new RolloutStatusCache();
     }
 
     @Bean
@@ -283,33 +276,12 @@ public class JpaRepositoryConfiguration {
     }
 
     /**
-     * @return the {@link SystemSecurityContext} singleton bean which make it
-     *         accessible in beans which cannot access the service directly, e.g.
-     *         JPA entities.
-     */
-    @Bean
-    SystemSecurityContextHolder systemSecurityContextHolder() {
-        return SystemSecurityContextHolder.getInstance();
-    }
-
-    /**
      * @return the {@link TenantConfigurationManagement} singleton bean which make
-     *         it accessible in beans which cannot access the service directly, e.g.
-     *         JPA entities.
+     *         it accessible in beans which cannot access the service directly, e.g. JPA entities.
      */
     @Bean
-    TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
-        return TenantConfigurationManagementHolder.getInstance();
-    }
-
-    /**
-     * @return the {@link TenantAwareHolder} singleton bean which holds the current
-     *         {@link TenantAware} service and make it accessible in beans which
-     *         cannot access the service directly, e.g. JPA entities.
-     */
-    @Bean
-    TenantAwareHolder tenantAwareHolder() {
-        return TenantAwareHolder.getInstance();
+    TenantConfigHelper tenantConfigHelper() {
+        return TenantConfigHelper.getInstance();
     }
 
     /**
@@ -340,10 +312,10 @@ public class JpaRepositoryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    RolloutHandler rolloutHandler(final TenantAware tenantAware, final RolloutManagement rolloutManagement,
+    RolloutHandler rolloutHandler(final RolloutManagement rolloutManagement,
             final RolloutExecutor rolloutExecutor, final LockRegistry lockRegistry,
             final PlatformTransactionManager txManager, final Optional<MeterRegistry> meterRegistry) {
-        return new JpaRolloutHandler(tenantAware, rolloutManagement, rolloutExecutor, lockRegistry, txManager, meterRegistry);
+        return new JpaRolloutHandler(rolloutManagement, rolloutExecutor, lockRegistry, txManager, meterRegistry);
     }
 
     /**
@@ -353,9 +325,8 @@ public class JpaRepositoryConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    RolloutApprovalStrategy rolloutApprovalStrategy(
-            final TenantConfigurationManagement tenantConfigurationManagement, final SystemSecurityContext systemSecurityContext) {
-        return new DefaultRolloutApprovalStrategy(tenantConfigurationManagement, systemSecurityContext);
+    RolloutApprovalStrategy rolloutApprovalStrategy() {
+        return new DefaultRolloutApprovalStrategy();
     }
 
     /**
@@ -372,37 +343,29 @@ public class JpaRepositoryConfiguration {
     /**
      * {@link EventEntityManager} bean.
      *
-     * @param aware the tenant aware
      * @param entityManager the entity manager
      * @return a new {@link EventEntityManager}
      */
     @Bean
     @ConditionalOnMissingBean
-    EventEntityManager eventEntityManager(final TenantAware aware, final EntityManager entityManager) {
-        return new JpaEventEntityManager(aware, entityManager);
+    EventEntityManager eventEntityManager(final EntityManager entityManager) {
+        return new JpaEventEntityManager(entityManager);
     }
 
     /**
      * {@link AutoAssignScheduler} bean.
      * <p/>
-     * Note: does not activate in test profile, otherwise it is hard to test the
-     * auto assign functionality.
-     *
-     * @param systemManagement to find all tenants
-     * @param systemSecurityContext to run as system
-     * @param autoAssignExecutor to run a check as tenant
-     * @param lockRegistry to lock the tenant for auto assignment
-     * @return a new {@link JpaAutoAssignExecutor}
+     * Note: does not activate in test profile, otherwise it is hard to test the auto assign functionality.
      */
     @Bean
     @ConditionalOnMissingBean
     // don't active the auto assign scheduler in test, otherwise it is hard to test
     @Profile("!test")
     @ConditionalOnProperty(prefix = "hawkbit.autoassign.scheduler", name = "enabled", matchIfMissing = true)
-    AutoAssignScheduler autoAssignScheduler(final SystemManagement systemManagement,
-            final SystemSecurityContext systemSecurityContext, final AutoAssignExecutor autoAssignExecutor,
+    AutoAssignScheduler autoAssignScheduler(
+            final SystemManagement systemManagement, final AutoAssignExecutor autoAssignExecutor,
             final LockRegistry lockRegistry, final Optional<MeterRegistry> meterRegistry) {
-        return new AutoAssignScheduler(systemManagement, systemSecurityContext, autoAssignExecutor, lockRegistry, meterRegistry);
+        return new AutoAssignScheduler(systemManagement, autoAssignExecutor, lockRegistry, meterRegistry);
     }
 
     /**
@@ -418,44 +381,29 @@ public class JpaRepositoryConfiguration {
         return new AutoActionCleanup(deploymentManagement, configManagement);
     }
 
-    /**
-     * {@link AutoCleanupScheduler} bean.
-     *
-     * @param systemManagement to find all tenants
-     * @param systemSecurityContext to run as system
-     * @param lockRegistry to lock the tenant for auto assignment
-     * @param cleanupTasks a list of cleanup tasks
-     * @return a new {@link AutoCleanupScheduler} bean
-     */
     @Bean
     @ConditionalOnMissingBean
     @Profile("!test")
     @ConditionalOnProperty(prefix = "hawkbit.autocleanup.scheduler", name = "enabled", matchIfMissing = true)
     AutoCleanupScheduler autoCleanupScheduler(
             final List<AutoCleanupScheduler.CleanupTask> cleanupTasks,
-            final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext, final LockRegistry lockRegistry) {
-        return new AutoCleanupScheduler(cleanupTasks, systemManagement, systemSecurityContext, lockRegistry);
+            final SystemManagement systemManagement, final LockRegistry lockRegistry) {
+        return new AutoCleanupScheduler(cleanupTasks, systemManagement, lockRegistry);
     }
 
     /**
      * {@link RolloutScheduler} bean.
      * <p/>
-     * Note: does not activate in test profile, otherwise it is hard to test the
-     * rollout handling functionality.
-     *
-     * @param systemManagement to find all tenants
-     * @param rolloutHandler to run the rollout handler
-     * @param systemSecurityContext to run as system
-     * @return a new {@link RolloutScheduler} bean.
+     * Note: does not activate in test profile, otherwise it is hard to test the rollout handling functionality.
      */
     @Bean
     @ConditionalOnMissingBean
     @Profile("!test")
     @ConditionalOnProperty(prefix = "hawkbit.rollout.scheduler", name = "enabled", matchIfMissing = true)
     RolloutScheduler rolloutScheduler(
-            final SystemManagement systemManagement, final RolloutHandler rolloutHandler, final SystemSecurityContext systemSecurityContext,
+            final SystemManagement systemManagement, final RolloutHandler rolloutHandler,
             @Value("${hawkbit.rollout.executor.thread-pool.size:1}") final int threadPoolSize, final Optional<MeterRegistry> meterRegistry) {
-        return new RolloutScheduler(rolloutHandler, systemManagement, systemSecurityContext, threadPoolSize, meterRegistry);
+        return new RolloutScheduler(rolloutHandler, systemManagement, threadPoolSize, meterRegistry);
     }
 
     @Bean

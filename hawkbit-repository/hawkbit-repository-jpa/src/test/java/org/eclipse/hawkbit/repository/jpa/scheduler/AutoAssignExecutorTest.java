@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.eclipse.hawkbit.ContextAware;
+import org.eclipse.hawkbit.context.ContextAware;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,15 +56,13 @@ class AutoAssignExecutorTest {
     private DeploymentManagement deploymentManagement;
     @Mock
     private PlatformTransactionManager transactionManager;
-    @Mock
-    private ContextAware contextAware;
 
     private JpaAutoAssignExecutor autoAssignChecker;
 
     @BeforeEach
     void before() {
         autoAssignChecker = new JpaAutoAssignExecutor(
-                targetFilterQueryManagement, targetManagement, deploymentManagement, transactionManager, contextAware);
+                targetFilterQueryManagement, targetManagement, deploymentManagement, transactionManager);
     }
 
     /**
@@ -71,7 +70,6 @@ class AutoAssignExecutorTest {
      */
     @Test
     void checkForDevice() {
-        mockRunningAsNonSystem();
         final String target = getRandomString();
         final long ds = getRandomLong();
         final TargetFilterQuery matching = mockFilterQuery(ds);
@@ -112,13 +110,5 @@ class AutoAssignExecutorTest {
             final DeploymentRequest request = requests.get(0);
             return requests.size() == 1 && request.getDistributionSetId() == ds && request.getControllerId() == target;
         };
-    }
-
-    private void mockRunningAsNonSystem() {
-        when(contextAware.getCurrentTenant()).thenReturn(getRandomString());
-        doAnswer(i -> {
-            ((Runnable) i.getArgument(2)).run();
-            return null;
-        }).when(contextAware).runAsTenantAsUser(any(String.class), any(String.class), any(Runnable.class));
     }
 }

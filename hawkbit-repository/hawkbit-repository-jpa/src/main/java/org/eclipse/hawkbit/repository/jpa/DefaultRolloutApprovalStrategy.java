@@ -11,11 +11,14 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Collection;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,18 +29,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
  * as the roles of the user who created the Rollout. Provides a no-operation implementation of
  * {@link RolloutApprovalStrategy#onApprovalRequired(Rollout)}.
  */
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
 public class DefaultRolloutApprovalStrategy implements RolloutApprovalStrategy {
-
-    private final TenantConfigurationManagement tenantConfigurationManagement;
-
-    private final SystemSecurityContext systemSecurityContext;
-
-    DefaultRolloutApprovalStrategy(
-            final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext) {
-        this.tenantConfigurationManagement = tenantConfigurationManagement;
-        this.systemSecurityContext = systemSecurityContext;
-    }
 
     /**
      * Returns true, if rollout approval is enabled and rollout creator doesn't have approval role. It have to be called in the user context
@@ -73,7 +66,6 @@ public class DefaultRolloutApprovalStrategy implements RolloutApprovalStrategy {
     }
 
     private boolean isApprovalEnabled() {
-        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
-                .getConfigurationValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue());
+        return TenantConfigHelper.getInstance().getConfigValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class);
     }
 }

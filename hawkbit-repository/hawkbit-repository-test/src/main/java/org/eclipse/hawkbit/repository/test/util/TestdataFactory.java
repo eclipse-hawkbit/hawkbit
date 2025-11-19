@@ -74,7 +74,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.PageRequest;
@@ -160,8 +160,6 @@ public class TestdataFactory {
     private final RolloutManagement rolloutManagement;
     private final RolloutHandler rolloutHandler;
     private final QuotaManagement quotaManagement;
-    private final TenantAware tenantAware;
-    private final SystemSecurityContext systemSecurityContext;
 
     public TestdataFactory(
             final ControllerManagement controllerManagement, final ArtifactManagement artifactManagement,
@@ -177,8 +175,7 @@ public class TestdataFactory {
             final TargetTagManagement<? extends TargetTag> targetTagManagement,
             final DeploymentManagement deploymentManagement,
             final RolloutManagement rolloutManagement, final RolloutHandler rolloutHandler,
-            final QuotaManagement quotaManagement,
-            final TenantAware tenantAware, final SystemSecurityContext systemSecurityContext) {
+            final QuotaManagement quotaManagement) {
         this.controllerManagement = controllerManagement;
         this.softwareModuleManagement = softwareModuleManagement;
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
@@ -195,8 +192,6 @@ public class TestdataFactory {
         this.rolloutManagement = rolloutManagement;
         this.rolloutHandler = rolloutHandler;
         this.quotaManagement = quotaManagement;
-        this.tenantAware = tenantAware;
-        this.systemSecurityContext = systemSecurityContext;
     }
 
     private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -1289,11 +1284,11 @@ public class TestdataFactory {
     }
 
     private void rolloutHandleAll() {
-        final String tenant = tenantAware.getCurrentTenant();
+        final String tenant = TenantAware.getCurrentTenant();
         if (tenant == null) {
             throw new IllegalStateException("Tenant is null");
         }
-        systemSecurityContext.runAsSystem(rolloutHandler::handleAll);
+        SystemSecurityContext.runAsSystem(rolloutHandler::handleAll);
     }
 
     private Rollout reloadRollout(final Rollout rollout) {

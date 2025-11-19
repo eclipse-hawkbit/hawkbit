@@ -10,19 +10,19 @@
 package org.eclipse.hawkbit.repository.jpa.acm;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.CREATE_PREFIX;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.DELETE_PREFIX;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.DELETE_TARGET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.DISTRIBUTION_SET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.DISTRIBUTION_SET_TYPE;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_DISTRIBUTION_SET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_PREFIX;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TARGET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SOFTWARE_MODULE;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SOFTWARE_MODULE_TYPE;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.TARGET_TYPE;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_PREFIX;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_TARGET;
+import static org.eclipse.hawkbit.auth.SpPermission.CREATE_PREFIX;
+import static org.eclipse.hawkbit.auth.SpPermission.DELETE_PREFIX;
+import static org.eclipse.hawkbit.auth.SpPermission.DELETE_TARGET;
+import static org.eclipse.hawkbit.auth.SpPermission.DISTRIBUTION_SET;
+import static org.eclipse.hawkbit.auth.SpPermission.DISTRIBUTION_SET_TYPE;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_DISTRIBUTION_SET;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_PREFIX;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_TARGET;
+import static org.eclipse.hawkbit.auth.SpPermission.SOFTWARE_MODULE;
+import static org.eclipse.hawkbit.auth.SpPermission.SOFTWARE_MODULE_TYPE;
+import static org.eclipse.hawkbit.auth.SpPermission.TARGET_TYPE;
+import static org.eclipse.hawkbit.auth.SpPermission.UPDATE_PREFIX;
+import static org.eclipse.hawkbit.auth.SpPermission.UPDATE_TARGET;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -32,6 +32,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController.Operation;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -111,7 +112,7 @@ class SystemExecutionTest extends AbstractAccessControllerManagementTest {
 
         final Specification mockAsSystem = mock(Specification.class);
         for (Operation operation : Operation.values()) {
-            systemSecurityContext.runAsSystem(() -> accessController.appendAccessRules(operation, mockAsSystem));
+            SystemSecurityContext.runAsSystem(() -> accessController.appendAccessRules(operation, mockAsSystem));
         }
         verifyNoInteractions(mockAsSystem);
     }

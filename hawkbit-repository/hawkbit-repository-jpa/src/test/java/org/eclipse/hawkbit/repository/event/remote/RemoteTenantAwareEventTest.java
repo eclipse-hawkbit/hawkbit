@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -93,7 +94,7 @@ class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         generateAction.setTarget(testdataFactory.createTarget("Test"));
         generateAction.setDistributionSet(dsA);
         generateAction.setStatus(Status.RUNNING);
-        generateAction.setInitiatedBy(tenantAware.getCurrentUsername());
+        generateAction.setInitiatedBy(TenantAware.getCurrentUsername());
         generateAction.setWeight(1000);
 
         final Action action = actionRepository.save(generateAction);
@@ -120,7 +121,7 @@ class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         generateAction.setTarget(testdataFactory.createTarget("Test"));
         generateAction.setDistributionSet(dsA);
         generateAction.setStatus(Status.RUNNING);
-        generateAction.setInitiatedBy(tenantAware.getCurrentUsername());
+        generateAction.setInitiatedBy(TenantAware.getCurrentUsername());
         generateAction.setWeight(1000);
 
         final Action action = actionRepository.save(generateAction);

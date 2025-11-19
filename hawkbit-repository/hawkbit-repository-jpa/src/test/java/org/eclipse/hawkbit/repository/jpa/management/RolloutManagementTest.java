@@ -27,8 +27,8 @@ import jakarta.validation.ValidationException;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.im.authentication.SpRole;
+import org.eclipse.hawkbit.auth.SpPermission;
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.RolloutManagement.Create;
@@ -243,8 +243,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void rolloutAssignsNewDistributionSetAndAutoCloseActiveActions() {
-        tenantConfigurationManagement
-                .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
+        tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
 
         try {
             // manually assign distribution set to target
@@ -277,8 +276,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
                     .filter(action -> !action.getId().equals(manuallyAssignedActionId)).findAny().get();
             assertThat(rolloutCreatedAction.getStatus()).isEqualTo(Status.RUNNING);
         } finally {
-            tenantConfigurationManagement
-                    .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, false);
+            tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, false);
         }
 
     }

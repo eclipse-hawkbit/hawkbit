@@ -12,14 +12,14 @@ package org.eclipse.hawkbit.repository.jpa.acm;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.CREATE_ROLLOUT;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.CREATE_TARGET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.DELETE_TARGET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.HANDLE_ROLLOUT;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_DISTRIBUTION_SET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_ROLLOUT;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TARGET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_TARGET;
+import static org.eclipse.hawkbit.auth.SpPermission.CREATE_ROLLOUT;
+import static org.eclipse.hawkbit.auth.SpPermission.CREATE_TARGET;
+import static org.eclipse.hawkbit.auth.SpPermission.DELETE_TARGET;
+import static org.eclipse.hawkbit.auth.SpPermission.HANDLE_ROLLOUT;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_DISTRIBUTION_SET;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_ROLLOUT;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_TARGET;
+import static org.eclipse.hawkbit.auth.SpPermission.UPDATE_TARGET;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
 
 import java.util.Arrays;
@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.assertj.core.api.Assertions;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement.Update;
@@ -169,7 +170,7 @@ class TargetManagementTest extends AbstractAccessControllerManagementTest {
                     .containsExactly(target1Type1);
 
             // as system in context - doesn't apply scopes
-            final Rollout runAsSystem = systemSecurityContext.runAsSystem(
+            SystemSecurityContext.runAsSystem(
                     () -> testdataFactory.createRolloutByVariables(
                             "testRolloutAsSystem", "testDescriptionAsSystem", 3, "id==*", ds2Type2, "50", "5"));
         });

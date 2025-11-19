@@ -106,7 +106,7 @@ public class HawkbitClient {
                             template.header(AUTHORIZATION, "GatewayToken " + tenant.getGatewayToken());
                         } else if (!ObjectUtils.isEmpty(controller.getSecurityToken())) {
                             template.header(AUTHORIZATION, "TargetToken " + controller.getSecurityToken());
-                        } // else do not send authentication, no auth or certificate based
+                        } // else do not send auth, no auth or certificate based
                     };
     // @formatter:on
     private static final ErrorDecoder DEFAULT_ERROR_DECODER_0 = new ErrorDecoder.Default();
@@ -279,7 +279,7 @@ public class HawkbitClient {
                 (controller == null ? hawkBitServer.getMgmtUrl() : hawkBitServer.getDdiUrl()) + path).openConnection();
         conn.setRequestMethod("POST");
 
-        // deal with authentication - only from headers1
+        // deal with auth - only from headers1
         final RequestTemplate requestTemplate = new RequestTemplate();
         requestInterceptorFn.apply(tenant, controller).apply(requestTemplate);
         requestTemplate.headers().forEach((k, v) -> v.forEach(e -> conn.setRequestProperty(k, e)));

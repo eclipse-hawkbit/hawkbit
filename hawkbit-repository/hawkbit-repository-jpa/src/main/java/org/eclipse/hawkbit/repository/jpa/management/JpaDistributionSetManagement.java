@@ -56,8 +56,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Statistic;
 import org.eclipse.hawkbit.repository.qfields.DistributionSetFields;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.utils.TenantConfigHelper;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -83,7 +82,6 @@ public class JpaDistributionSetManagement
     private final DistributionSetTagRepository distributionSetTagRepository;
     private final TargetFilterQueryRepository targetFilterQueryRepository;
     private final QuotaManagement quotaManagement;
-    private final TenantConfigHelper tenantConfigHelper;
     private final RepositoryProperties repositoryProperties;
 
     @SuppressWarnings("java:S107")
@@ -95,8 +93,6 @@ public class JpaDistributionSetManagement
             final DistributionSetTagRepository distributionSetTagRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
             final QuotaManagement quotaManagement,
-            final SystemSecurityContext systemSecurityContext,
-            final TenantConfigurationManagement tenantConfigurationManagement,
             final RepositoryProperties repositoryProperties) {
         super(jpaRepository, entityManager);
         this.distributionSetTagManagement = distributionSetTagManagement;
@@ -104,7 +100,6 @@ public class JpaDistributionSetManagement
         this.distributionSetTagRepository = distributionSetTagRepository;
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.quotaManagement = quotaManagement;
-        this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
         this.repositoryProperties = repositoryProperties;
     }
 
@@ -209,7 +204,7 @@ public class JpaDistributionSetManagement
             return false;
         }
 
-        if (Boolean.FALSE.equals(tenantConfigHelper.getConfigValue(IMPLICIT_LOCK_ENABLED, Boolean.class))) {
+        if (Boolean.FALSE.equals(TenantConfigHelper.getInstance().getConfigValue(IMPLICIT_LOCK_ENABLED, Boolean.class))) {
             // implicit lock disabled
             return false;
         }

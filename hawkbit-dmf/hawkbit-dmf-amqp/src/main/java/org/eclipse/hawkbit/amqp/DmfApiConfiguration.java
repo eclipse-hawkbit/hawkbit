@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -32,7 +33,6 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.FanoutExchange;
@@ -150,7 +150,7 @@ public class DmfApiConfiguration {
     }
 
     /**
-     * Create the DMF API receiver queue for authentication requests called by 3rd
+     * Create the DMF API receiver queue for auth requests called by 3rd
      * party artifact storages for download authorization by devices.
      *
      * @return the receiver queue
@@ -227,12 +227,10 @@ public class DmfApiConfiguration {
     public AmqpMessageHandlerService amqpMessageHandlerService(
             final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
-            final ControllerManagement controllerManagement, final SystemSecurityContext systemSecurityContext,
-            final TenantConfigurationManagement tenantConfigurationManagement,
+            final ControllerManagement controllerManagement,
             final ConfirmationManagement confirmationManagement) {
         return new AmqpMessageHandlerService(
-                rabbitTemplate, amqpMessageDispatcherService, controllerManagement,
-                systemSecurityContext, tenantConfigurationManagement, confirmationManagement);
+                rabbitTemplate, amqpMessageDispatcherService, controllerManagement, confirmationManagement);
     }
 
     /**
@@ -266,14 +264,14 @@ public class DmfApiConfiguration {
     AmqpMessageDispatcherService amqpMessageDispatcherService(
             final RabbitTemplate rabbitTemplate,
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlResolver artifactUrlHandler,
-            final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
+            final SystemManagement systemManagement,
             final TargetManagement<? extends Target> targetManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement, final DeploymentManagement deploymentManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement, final RepositoryProperties repositoryProperties) {
+            final RepositoryProperties repositoryProperties) {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
-                systemSecurityContext, systemManagement, targetManagement, softwareModuleManagement, distributionSetManagement,
-                deploymentManagement, tenantConfigurationManagement, repositoryProperties);
+                systemManagement, targetManagement, softwareModuleManagement, distributionSetManagement,
+                deploymentManagement, repositoryProperties);
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {

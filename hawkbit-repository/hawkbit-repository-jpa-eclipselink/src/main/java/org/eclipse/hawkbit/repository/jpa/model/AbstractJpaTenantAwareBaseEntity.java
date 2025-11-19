@@ -23,8 +23,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
-import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.annotations.Multitenant;
 import org.eclipse.persistence.annotations.MultitenantType;
 import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
@@ -86,13 +86,13 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
      */
     @PrePersist
     void prePersist() {
-        // before persisting the entity check the current ID of the tenant by using the TenantAware service
-        final String currentTenant = TenantAwareHolder.getInstance().getTenantAware().getCurrentTenant();
+        // before persisting the entity check the current ID of the tenant by using the TenantAware
+        final String currentTenant = TenantAware.getCurrentTenant();
         if (currentTenant == null) {
             throw new TenantNotExistException(
                     String.format(
                             "Tenant %s does not exists, cannot create entity %s with id %d",
-                            TenantAwareHolder.getInstance().getTenantAware().getCurrentTenant(), getClass(), getId()));
+                            TenantAware.getCurrentTenant(), getClass(), getId()));
         }
         setTenant(currentTenant.toUpperCase());
     }

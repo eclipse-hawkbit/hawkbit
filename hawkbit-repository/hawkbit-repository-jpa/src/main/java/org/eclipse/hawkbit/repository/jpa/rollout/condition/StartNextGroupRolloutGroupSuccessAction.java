@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 
 /**
  * Success action which starts the next following {@link RolloutGroup}.
@@ -25,14 +25,11 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
 
     private final RolloutGroupRepository rolloutGroupRepository;
     private final DeploymentManagement deploymentManagement;
-    private final SystemSecurityContext systemSecurityContext;
 
     public StartNextGroupRolloutGroupSuccessAction(
-            final RolloutGroupRepository rolloutGroupRepository, final DeploymentManagement deploymentManagement,
-            final SystemSecurityContext systemSecurityContext) {
+            final RolloutGroupRepository rolloutGroupRepository, final DeploymentManagement deploymentManagement) {
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.deploymentManagement = deploymentManagement;
-        this.systemSecurityContext = systemSecurityContext;
     }
 
     @Override
@@ -44,7 +41,7 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
     // this means it could be called by concurrently.
     @Override
     public void exec(final Rollout rollout, final RolloutGroup rolloutGroup) {
-        systemSecurityContext.runAsSystem(() -> {
+        SystemSecurityContext.runAsSystem(() -> {
             // retrieve all actions according to the parent group of the finished rolloutGroup,
             // so retrieve all child-group actions which need to be started.
             deploymentManagement.startScheduledActionsByRolloutGroupParent(

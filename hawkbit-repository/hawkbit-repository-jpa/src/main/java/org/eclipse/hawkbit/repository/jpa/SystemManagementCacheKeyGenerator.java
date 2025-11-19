@@ -15,6 +15,7 @@ import java.util.Optional;
 
 import jakarta.validation.constraints.NotNull;
 
+import lombok.NonNull;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
@@ -26,11 +27,6 @@ import org.springframework.context.annotation.Bean;
 public class SystemManagementCacheKeyGenerator implements CurrentTenantCacheKeyGenerator {
 
     private final ThreadLocal<String> createInitialTenant = new ThreadLocal<>();
-    private final TenantAware tenantAware;
-
-    public SystemManagementCacheKeyGenerator(final TenantAware tenantAware) {
-        this.tenantAware = tenantAware;
-    }
 
     @Override
     @Bean
@@ -77,8 +73,11 @@ public class SystemManagementCacheKeyGenerator implements CurrentTenantCacheKeyG
     public class CurrentTenantKeyGenerator implements KeyGenerator {
 
         @Override
-        public Object generate(final Object target, final Method method, final Object... params) {
-            String tenant = getTenantInCreation().orElseGet(tenantAware::getCurrentTenant).toUpperCase();
+        public Object generate(@NonNull final Object target, @NonNull final Method method, @NonNull final Object... params) {
+            final String tenant = Objects.requireNonNull(
+                            getTenantInCreation().orElseGet(TenantAware::getCurrentTenant),
+                            "CurrentTenantKeyGenerator.generate called not in tenant context")
+                    .toUpperCase();
             return SimpleKeyGenerator.generateKey(tenant, tenant);
         }
     }

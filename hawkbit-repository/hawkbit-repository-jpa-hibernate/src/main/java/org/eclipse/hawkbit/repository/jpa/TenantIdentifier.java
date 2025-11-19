@@ -21,16 +21,10 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomi
  */
 class TenantIdentifier implements CurrentTenantIdentifierResolver<String> {
 
-    private final TenantAware.TenantResolver tenantResolver;
-
-    TenantIdentifier(final TenantAware.TenantResolver tenantResolver) {
-        this.tenantResolver = tenantResolver;
-    }
-
     @Override
     public String resolveCurrentTenantIdentifier() {
         // on bootstrapping hibernate requests tenant and want to be non-null
-        return Optional.ofNullable(tenantResolver.resolveTenant()).map(String::toUpperCase).orElse("");
+        return Optional.ofNullable(TenantAware.getCurrentTenant()).map(String::toUpperCase).orElse("");
     }
 
     @Override

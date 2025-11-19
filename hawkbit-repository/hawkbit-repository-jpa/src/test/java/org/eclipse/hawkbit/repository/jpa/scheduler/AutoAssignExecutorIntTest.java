@@ -64,9 +64,7 @@ class AutoAssignExecutorIntTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void autoAssignDistributionSetAndAutoCloseOldActions() {
-
-        tenantConfigurationManagement
-                .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
+        tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
 
         try {
             final String knownControllerId = "controller12345";
@@ -100,8 +98,7 @@ class AutoAssignExecutorIntTest extends AbstractJpaIntegrationTest {
             assertThat(rolloutCreatedAction.getStatus()).isEqualTo(Status.RUNNING);
             assertThat(rolloutCreatedAction.getActionType()).isEqualTo(ActionType.FORCED);
         } finally {
-            tenantConfigurationManagement
-                    .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, false);
+            tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, false);
         }
     }
 

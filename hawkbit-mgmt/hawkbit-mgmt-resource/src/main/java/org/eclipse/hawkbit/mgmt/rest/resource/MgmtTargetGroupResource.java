@@ -18,8 +18,7 @@ import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.utils.TenantConfigHelper;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -34,13 +33,10 @@ import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitize
 public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
 
     private final TargetManagement<? extends Target> targetManagement;
-    private final TenantConfigHelper tenantConfigHelper;
 
     public MgmtTargetGroupResource(
-            final TargetManagement <? extends Target>targetManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement, final SystemSecurityContext systemSecurityContext) {
+            final TargetManagement <? extends Target>targetManagement) {
         this.targetManagement = targetManagement;
-        this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
     }
 
     @Override
@@ -50,7 +46,7 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
 
         final Page<Target> targets = targetManagement.findTargetsByGroup(group, false, pageable);
 
-        final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(targets.getContent(), tenantConfigHelper);
+        final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(targets.getContent());
         return ResponseEntity.ok(new PagedList<>(rest, targets.getTotalElements()));
     }
 
@@ -61,7 +57,7 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
 
         final Page<Target> targets = targetManagement.findTargetsByGroup(groupFilter, subgroups, pageable);
 
-        final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(targets.getContent(), tenantConfigHelper);
+        final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(targets.getContent());
         return ResponseEntity.ok(new PagedList<>(rest, targets.getTotalElements()));
     }
 

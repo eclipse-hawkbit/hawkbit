@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.audit;
 
 import java.util.Optional;
 
@@ -20,9 +20,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 /**
- * Auditor class that allows BaseEntity-s to insert current logged in user for repository changes.
+ * Auditor class that allows BaseEntity-s to insert current logged-in user for repository changes.
  */
-public class SpringSecurityAuditorAware implements AuditorAware<String> {
+public class HawkbitAuditorAware implements AuditorAware<String> {
 
     // Sometimes 'system' need to override the auditor when do create/modify actions in context of a tenant and user.
     // Though this could be made using runAsTenantAsUser sometimes (as in transaction) this override is needed
@@ -57,6 +57,15 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
         }
 
         return Optional.ofNullable(resolveAuditor(authentication));
+    }
+
+    public static void runAsAuditor(final String auditor, final Runnable runnable) {
+        try {
+            setAuditorOverride(auditor);
+            runnable.run();
+        } finally {
+            clearAuditorOverride();
+        }
     }
 
     public static String resolveAuditor(final Authentication authentication) {

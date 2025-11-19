@@ -83,6 +83,7 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -526,7 +527,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionRepository.count()).isEqualTo(20);
         assertThat(findActionsByDistributionSet(PAGE, ds.getId())).as("Offline actions are not active")
                 .allMatch(action -> !action.isActive()).as("Actions should be initiated by current user")
-                .allMatch(a -> a.getInitiatedBy().equals(tenantAware.getCurrentUsername()));
+                .allMatch(a -> a.getInitiatedBy().equals(TenantAware.getCurrentUsername()));
 
         assertThat(targetManagement.findByInstalledDistributionSet(ds.getId(), PAGE).getContent())
                 .usingElementComparator(controllerIdComparator()).containsAll(targets).hasSize(10)
@@ -568,7 +569,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                         // don't use peek since it is by documentation mainly for debugging and could be skipped in some cases
                         assertThat(a.getInitiatedBy())
                                 .as("Actions should be initiated by current user")
-                                .isEqualTo(tenantAware.getCurrentUsername());
+                                .isEqualTo(TenantAware.getCurrentUsername());
                         return a;
                     })
                     .map(action -> action.getDistributionSet().getId()).toList();
@@ -593,7 +594,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1),
             @Expect(type = TenantConfigurationUpdatedEvent.class, count = 1) })
     void assignDistributionSetAndAutoCloseActiveActions() {
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
+        tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
 
         try {
             final List<Target> targets = testdataFactory.createTargets(10);
@@ -615,7 +616,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                     .as("InstallationDate not set").allMatch(target -> (target.getInstallationDate() == null));
 
         } finally {
-            tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, false);
+            tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, false);
         }
     }
 
@@ -682,7 +683,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                     .map(a -> {
                         // don't use peek since it is by documentation mainly for debugging and could be skipped in some cases
                         assertThat(a.getInitiatedBy()).as("Initiated by current user")
-                                .isEqualTo(tenantAware.getCurrentUsername());
+                                .isEqualTo(TenantAware.getCurrentUsername());
                         return a;
                     })
                     .map(action -> action.getDistributionSet().getId()).toList();
@@ -721,7 +722,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).forEach(action -> {
                     assertThat(action.getDistributionSet().getId()).isIn(dsIds);
                     assertThat(action.getInitiatedBy())
-                            .as("Should be Initiated by current user").isEqualTo(tenantAware.getCurrentUsername());
+                            .as("Should be Initiated by current user").isEqualTo(TenantAware.getCurrentUsername());
                     deploymentManagement.cancelAction(action.getId());
                 }));
     }
@@ -793,7 +794,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 deploymentManagement.findActionsByTarget(controllerId, PAGE).forEach(action -> {
                     assertThat(action.getDistributionSet().getId()).isIn(distributionSet.getId());
                     assertThat(action.getInitiatedBy())
-                            .as("Should be Initiated by current user").isEqualTo(tenantAware.getCurrentUsername());
+                            .as("Should be Initiated by current user").isEqualTo(TenantAware.getCurrentUsername());
                     if (confirmationRequired) {
                         assertThat(action.getStatus()).isEqualTo(Status.WAIT_FOR_CONFIRMATION);
                     } else {
@@ -906,7 +907,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 deploymentManagement.findActionsByTarget(controllerId, PAGE).forEach(action -> {
                     assertThat(action.getDistributionSet().getId()).isIn(distributionSet.getId());
                     assertThat(action.getInitiatedBy())
-                            .as("Should be Initiated by current user").isEqualTo(tenantAware.getCurrentUsername());
+                            .as("Should be Initiated by current user").isEqualTo(TenantAware.getCurrentUsername());
                     assertThat(action.getStatus()).isEqualTo(RUNNING);
                 }));
     }
@@ -1062,7 +1063,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Page<JpaAction> actions = actionRepository.findAll(PAGE);
         assertThat(actions.getNumberOfElements()).as("wrong size of actions").isEqualTo(20);
         assertThat(actions).as("Actions should be initiated by current user")
-                .allMatch(a -> a.getInitiatedBy().equals(tenantAware.getCurrentUsername()));
+                .allMatch(a -> a.getInitiatedBy().equals(TenantAware.getCurrentUsername()));
 
         final Iterable<? extends Target> allFoundTargets = targetManagement.findAll(PAGE).getContent();
 
@@ -1161,7 +1162,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // retrieving all Actions created by the assignDistributionSet call
         final Page<JpaAction> page = actionRepository.findAll(PAGE);
         assertThat(page).as("Actions should be initiated by current user")
-                .allMatch(a -> a.getInitiatedBy().equals(tenantAware.getCurrentUsername()));
+                .allMatch(a -> a.getInitiatedBy().equals(TenantAware.getCurrentUsername()));
         // and verify the number
         assertThat(page.getTotalElements()).as("wrong size of actions")
                 .isEqualTo(noOfDeployedTargets * noOfDistributionSets);
@@ -1648,7 +1649,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 () -> assignDistributionSet(exceededQuotaDsAssign.getId(), target.getControllerId()));
 
         // set purge config to 25 %
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.ACTION_CLEANUP_ON_QUOTA_HIT_PERCENTAGE, 25);
+        tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.ACTION_CLEANUP_ON_QUOTA_HIT_PERCENTAGE, 25);
 
         // assign again
         assignDistributionSet(exceededQuotaDsAssign.getId(), target.getControllerId());
@@ -1687,7 +1688,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertEquals(20, deploymentManagement.countActionsByTarget(target.getControllerId()));
 
         // set purge config to 25 %
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.ACTION_CLEANUP_ON_QUOTA_HIT_PERCENTAGE, 25);
+        tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.ACTION_CLEANUP_ON_QUOTA_HIT_PERCENTAGE, 25);
         rolloutHandler.handleAll();
         assertEquals(16, deploymentManagement.countActionsByTarget(target.getControllerId()));
 
@@ -1708,7 +1709,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             rolloutHandler.handleAll();
         }
 
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.ACTION_CLEANUP_ON_QUOTA_HIT_PERCENTAGE, 25);
+        tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.ACTION_CLEANUP_ON_QUOTA_HIT_PERCENTAGE, 25);
         deploymentManagement.handleMaxAssignmentsExceeded(target.getId(), 5L, new AssignmentQuotaExceededException());
         // only 3 actions should be deleted in such case :
         assertEquals(15, deploymentManagement.countActionsByTarget(target.getControllerId()));
@@ -1753,7 +1754,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     private void assertDsExclusivelyAssignedToTargets(final List<Target> targets, final long dsId, final boolean active, final Status status) {
         final List<Action> assignment = findActionsByDistributionSet(PAGE, dsId).getContent();
-        final String currentUsername = tenantAware.getCurrentUsername();
+        final String currentUsername = TenantAware.getCurrentUsername();
 
         assertThat(assignment).hasSize(10).allMatch(action -> action.isActive() == active)
                 .as("Is assigned to DS " + dsId).allMatch(action -> action.getDistributionSet().getId().equals(dsId))

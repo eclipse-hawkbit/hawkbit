@@ -32,7 +32,7 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.util.CollectionUtils;
 
 /**
- * All configurations related to HawkBit's authentication and authorization layer.
+ * All configurations related to HawkBit's auth and authorization layer.
  */
 @Slf4j
 @Configuration

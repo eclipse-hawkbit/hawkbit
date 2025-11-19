@@ -10,19 +10,19 @@
 package org.eclipse.hawkbit.repository.jpa.acm;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.CREATE_TARGET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.DELETE_TARGET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_DISTRIBUTION_SET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TARGET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_TARGET;
+import static org.eclipse.hawkbit.auth.SpPermission.CREATE_TARGET;
+import static org.eclipse.hawkbit.auth.SpPermission.DELETE_TARGET;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_DISTRIBUTION_SET;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_TARGET;
+import static org.eclipse.hawkbit.auth.SpPermission.UPDATE_TARGET;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.callAs;
 
 import java.util.Optional;
 
+import org.eclipse.hawkbit.repository.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDistributionSetUpdate;
-import org.eclipse.hawkbit.repository.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.jpa.scheduler.AutoAssignScheduler;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.junit.jupiter.api.Test;
@@ -41,8 +41,7 @@ class AutoAssignTest extends AbstractAccessControllerManagementTest {
     void verifyOnlyUpdatableTargetsArePartOfAutoAssignmentByScheduler() throws Exception {
         // auto assign scheduler apply stored access control context and the context is correctly applied
         verifyOnlyUpdatableTargetsArePartOfAutoAssignment(
-                () -> new AutoAssignScheduler(systemManagement, systemSecurityContext, autoAssignExecutor, lockRegistry, Optional.empty())
-                        .autoAssignScheduler());
+                () -> new AutoAssignScheduler(systemManagement, autoAssignExecutor, lockRegistry, Optional.empty()).autoAssignScheduler());
     }
 
     @Test

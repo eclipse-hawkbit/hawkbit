@@ -74,7 +74,6 @@ public class JpaArtifactManagement implements ArtifactManagement {
     private final SoftwareModuleRepository softwareModuleRepository;
     private final EntityManager entityManager;
     private final PlatformTransactionManager txManager;
-    private final TenantAware tenantAware;
     private final QuotaManagement quotaManagement;
 
     protected JpaArtifactManagement(
@@ -83,15 +82,13 @@ public class JpaArtifactManagement implements ArtifactManagement {
             final SoftwareModuleRepository softwareModuleRepository,
             final EntityManager entityManager,
             final PlatformTransactionManager txManager,
-            final QuotaManagement quotaManagement,
-            final TenantAware tenantAware) {
+            final QuotaManagement quotaManagement) {
         this.artifactRepository = artifactRepository;
         this.artifactStorage = artifactStorage.orElse(null);
         this.softwareModuleRepository = softwareModuleRepository;
         this.entityManager = entityManager;
         this.txManager = txManager;
         this.quotaManagement = quotaManagement;
-        this.tenantAware = tenantAware;
     }
 
     @Override
@@ -135,7 +132,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         try {
             return storeArtifactMetadata(softwareModule, filename, artifact.getHashes(), artifact.getSize(), existing);
         } catch (final Exception e) {
-            artifactStorage.deleteBySha1(tenantAware.getCurrentTenant(), artifact.getHashes().sha1());
+            artifactStorage.deleteBySha1(TenantAware.getCurrentTenant(), artifact.getHashes().sha1());
             throw e;
         }
     }
@@ -147,7 +144,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
             throw new UnsupportedOperationException();
         }
 
-        final String tenant = tenantAware.getCurrentTenant();
+        final String tenant = TenantAware.getCurrentTenant();
         // check access to the software module and if artifact belongs to it
         for (final Artifact artifact : softwareModuleRepository.getById(softwareModuleId).getArtifacts()) {
             if (artifact.getSha1Hash().equals(sha1Hash)) {
@@ -203,13 +200,13 @@ public class JpaArtifactManagement implements ArtifactManagement {
     void clearArtifactBinary(final String sha1Hash) {
         DeploymentHelper.runInNewTransaction(txManager, "clearArtifactBinary", status -> {
             // countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse will skip ACM checks and will return total count as it should be
-            if (artifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(sha1Hash, tenantAware.getCurrentTenant()) <= 0) {
+            if (artifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(sha1Hash, TenantAware.getCurrentTenant()) <= 0) {
                 // removes the real artifact ONLY AFTER the delete of artifact or software module
                 // in local history has passed successfully (caller has permission and no errors)
                 afterCommit(() -> {
                     try {
                         log.debug("deleting artifact from repository {}", sha1Hash);
-                        artifactStorage.deleteBySha1(tenantAware.getCurrentTenant(), sha1Hash);
+                        artifactStorage.deleteBySha1(TenantAware.getCurrentTenant(), sha1Hash);
                     } catch (final ArtifactStoreException e) {
                         throw new ArtifactDeleteFailedException(e);
                     }
@@ -224,7 +221,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         try (final InputStream wrappedStream = wrapInQuotaStream(
                 isSmEncrypted ? ArtifactEncryptionService.getInstance().encryptArtifact(artifactUpload.moduleId(), stream) : stream)) {
             return artifactStorage.store(
-                    tenantAware.getCurrentTenant(),
+                    TenantAware.getCurrentTenant(),
                     wrappedStream, artifactUpload.filename(),
                     artifactUpload.contentType(), artifactUpload.hash());
         } catch (final ArtifactStoreException | IOException e) {

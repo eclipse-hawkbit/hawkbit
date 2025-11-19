@@ -7,10 +7,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.im.authentication;
+package org.eclipse.hawkbit.auth;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Hierarchy {
@@ -23,4 +24,14 @@ public class Hierarchy {
             SpPermission.TENANT_CONFIGURATION_HIERARCHY +
             SpRole.DEFAULT_ROLE_HIERARCHY;
     // @formatter:on
+
+    private static RoleHierarchy roleHierarchy;
+
+    public static RoleHierarchy getRoleHierarchy() {
+        return roleHierarchy;
+    }
+
+    public static void setRoleHierarchy(final RoleHierarchy roleHierarchy) {
+        Hierarchy.roleHierarchy = roleHierarchy;
+    }
 }

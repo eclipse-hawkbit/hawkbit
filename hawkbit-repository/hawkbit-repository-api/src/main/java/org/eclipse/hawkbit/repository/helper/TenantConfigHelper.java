@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.utils;
+package org.eclipse.hawkbit.repository.helper;
 
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.USER_CONFIRMATION_ENABLED;
@@ -15,41 +15,36 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import java.io.Serializable;
 import java.util.function.Function;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A collection of static helper methods for the tenant configuration
  */
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public final class TenantConfigHelper {
 
-    private final TenantConfigurationManagement tenantConfigurationManagement;
-    private final SystemSecurityContext systemSecurityContext;
+    private static final TenantConfigHelper SINGLETON = new TenantConfigHelper();
 
-    private TenantConfigHelper(
-            final SystemSecurityContext systemSecurityContext,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
-        this.systemSecurityContext = systemSecurityContext;
+    @Getter
+    private TenantConfigurationManagement tenantConfigurationManagement;
+
+    @Autowired
+    public void setTenantConfigurationManagement(final TenantConfigurationManagement tenantConfigurationManagement) {
         this.tenantConfigurationManagement = tenantConfigurationManagement;
     }
 
-    /**
-     * Setting the context of the tenant.
-     *
-     * @param systemSecurityContext Security context used to get the tenant and for execution
-     * @param tenantConfigurationManagement to get the value from
-     * @return is active
-     */
-    public static TenantConfigHelper usingContext(
-            final SystemSecurityContext systemSecurityContext,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
-        return new TenantConfigHelper(systemSecurityContext, tenantConfigurationManagement);
+    public static TenantConfigHelper getInstance() {
+        return SINGLETON;
     }
 
     public <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType) {
-        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
+        return SystemSecurityContext.runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
     }
 
     /**

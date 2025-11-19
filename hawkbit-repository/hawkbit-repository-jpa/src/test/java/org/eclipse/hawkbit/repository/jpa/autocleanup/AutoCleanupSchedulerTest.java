@@ -47,7 +47,7 @@ class AutoCleanupSchedulerTest extends AbstractJpaIntegrationTest {
     void executeHandlerChain() {
         new AutoCleanupScheduler(
                 List.of(new SuccessfulCleanup(), new SuccessfulCleanup(), new FailingCleanup(), new SuccessfulCleanup()),
-                systemManagement, systemSecurityContext, lockRegistry).run();
+                systemManagement, lockRegistry).run();
         assertThat(counter.get()).isEqualTo(4);
     }
 

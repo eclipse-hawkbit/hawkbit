@@ -31,8 +31,9 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.SetJoin;
 import jakarta.validation.ConstraintViolationException;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.im.authentication.SpRole;
+import org.eclipse.hawkbit.auth.SpPermission;
+import org.eclipse.hawkbit.auth.SpRole;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.MetadataSupport;
 import org.eclipse.hawkbit.repository.TargetManagement.Create;
@@ -145,7 +146,7 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
                 createdTarget::getSecurityToken);
 
         // retrieve security token as system code execution
-        final String securityTokenAsSystemCode = systemSecurityContext.runAsSystem(createdTarget::getSecurityToken);
+        final String securityTokenAsSystemCode = SystemSecurityContext.runAsSystem(createdTarget::getSecurityToken);
 
         // retrieve security token without any permissions
         final String securityTokenWithoutPermission = SecurityContextSwitch

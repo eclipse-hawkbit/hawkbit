@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.context;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -28,7 +28,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.security.SpringSecurityAuditorAware.AuditorAwarePrincipal;
+import org.eclipse.hawkbit.audit.HawkbitAuditorAware;
+import org.eclipse.hawkbit.audit.HawkbitAuditorAware.AuditorAwarePrincipal;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.springframework.security.core.Authentication;
@@ -39,6 +40,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 // serializer for security contexts used for background tasks (processing auto assignments and rollouts)
 // the user context is serialized on task creation and then is deserialized and applied when task is executed later
+// it have to be se to {@link ContextAware#setSecurityContextSerializer(SecurityContextSerializer)}
 public interface SecurityContextSerializer {
 
     /**
@@ -117,7 +119,7 @@ public interface SecurityContextSerializer {
         }
 
         // simplified info for the security context keeping just the basic info needed for background execution of
-        // controller authentication is not supported - always is false
+        // controller auth is not supported - always is false
         // only authenticated user is supported
         @NoArgsConstructor
         @Data
@@ -127,7 +129,7 @@ public interface SecurityContextSerializer {
             private static final long serialVersionUID = 1L;
 
             private String tenant;
-            // auditor / username (authentication principal name)
+            // auditor / username (auth principal name)
             private String auditor = "n/a"; // default value "n/a" is used only on deserialization if field is missing
             @JsonProperty(required = true)
             private String[] authorities;
@@ -139,7 +141,7 @@ public interface SecurityContextSerializer {
                 }
                 if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails) {
                     if (tenantAwareDetails.controller()) {
-                        throw new IllegalStateException("Controller authentication context is not supported");
+                        throw new IllegalStateException("Controller auth context is not supported");
                     }
                     tenant = tenantAwareDetails.tenant();
                 } else if (authentication.getPrincipal() instanceof TenantAwareUser tenantAwareUser) {
@@ -147,9 +149,9 @@ public interface SecurityContextSerializer {
                 }
 
                 // keep the auditor, ofr audit purposes,
-                // sets principal to the resolved auditor and then deserialized authentication will return it as principal
+                // sets principal to the resolved auditor and then deserialized auth will return it as principal
                 // since the class is not known to auditor aware - it shall used default - principal as auditor
-                auditor = SpringSecurityAuditorAware.resolveAuditor(authentication);
+                auditor = HawkbitAuditorAware.resolveAuditor(authentication);
                 authorities = authentication.getAuthorities().stream().map(Object::toString).toArray(String[]::new);
             }
 

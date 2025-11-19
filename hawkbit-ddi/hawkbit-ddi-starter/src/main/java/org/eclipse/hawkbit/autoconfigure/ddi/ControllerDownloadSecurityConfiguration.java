@@ -19,8 +19,8 @@ import org.eclipse.hawkbit.rest.SecurityManagedConfiguration;
 import org.eclipse.hawkbit.rest.security.DosFilter;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
-import org.eclipse.hawkbit.security.MdcHandler;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.audit.MdcHandler;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.security.controller.AuthenticationFilters;
 import org.eclipse.hawkbit.security.controller.GatewayTokenAuthenticator;
 import org.eclipse.hawkbit.security.controller.SecurityHeaderAuthenticator;
@@ -50,23 +50,15 @@ class ControllerDownloadSecurityConfiguration {
             DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/*";
 
     private final ControllerManagement controllerManagement;
-    private final TenantConfigurationManagement tenantConfigurationManagement;
-    private final TenantAware tenantAware;
     private final DdiSecurityProperties ddiSecurityConfiguration;
     private final HawkbitSecurityProperties securityProperties;
-    private final SystemSecurityContext systemSecurityContext;
 
     ControllerDownloadSecurityConfiguration(
             final ControllerManagement controllerManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
-            final DdiSecurityProperties ddiSecurityConfiguration,
-            final HawkbitSecurityProperties securityProperties, final SystemSecurityContext systemSecurityContext) {
+            final DdiSecurityProperties ddiSecurityConfiguration, final HawkbitSecurityProperties securityProperties) {
         this.controllerManagement = controllerManagement;
-        this.tenantConfigurationManagement = tenantConfigurationManagement;
-        this.tenantAware = tenantAware;
         this.ddiSecurityConfiguration = ddiSecurityConfiguration;
         this.securityProperties = securityProperties;
-        this.systemSecurityContext = systemSecurityContext;
     }
 
     /**
@@ -95,17 +87,13 @@ class ControllerDownloadSecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(new AuthenticationFilters.SecurityHeaderAuthenticationFilter(
                         new SecurityHeaderAuthenticator(
-                                tenantConfigurationManagement, tenantAware, systemSecurityContext,
                                 ddiSecurityConfiguration.getRp().getCnHeader(), ddiSecurityConfiguration.getRp().getSslIssuerHashHeader()),
                         ddiSecurityConfiguration), AuthorizationFilter.class)
                 .addFilterBefore(new AuthenticationFilters.SecurityTokenAuthenticationFilter(
-                        new SecurityTokenAuthenticator(
-                                tenantConfigurationManagement, tenantAware, systemSecurityContext,
-                                controllerManagement),
+                        new SecurityTokenAuthenticator(controllerManagement),
                         ddiSecurityConfiguration), AuthorizationFilter.class)
                 .addFilterBefore(new AuthenticationFilters.GatewayTokenAuthenticationFilter(
-                        new GatewayTokenAuthenticator(
-                                tenantConfigurationManagement, tenantAware, systemSecurityContext),
+                        new GatewayTokenAuthenticator(),
                         ddiSecurityConfiguration), AuthorizationFilter.class)
                 .exceptionHandling(configurer -> configurer.authenticationEntryPoint(
                         (request, response, authException) -> response.setStatus(HttpStatus.UNAUTHORIZED.value())))

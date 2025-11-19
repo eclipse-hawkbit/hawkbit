@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.audit;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,12 @@ public class MdcHandler {
 
     @Value("${hawkbit.logging.mdchandler.enabled:true}")
     private boolean mdcEnabled;
-    private SpringSecurityAuditorAware springSecurityAuditorAware = new SpringSecurityAuditorAware();
+
+    private HawkbitAuditorAware springSecurityAuditorAware = new HawkbitAuditorAware();
+
+    private HawkbitAuditorAware getSpringSecurityAuditorAware() {
+        return springSecurityAuditorAware;
+    }
 
     /**
      * @return The holder singleton instance.
@@ -53,12 +59,12 @@ public class MdcHandler {
     }
 
     @Autowired(required = false) // spring setter injection
-    public void setSpringSecurityAuditorAware(final SpringSecurityAuditorAware springSecurityAuditorAware) {
+    public void setSpringSecurityAuditorAware(final HawkbitAuditorAware springSecurityAuditorAware) {
         this.springSecurityAuditorAware = springSecurityAuditorAware;
     }
 
     /**
-     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or user from the authentication in the MDC context.
+     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or user from the auth in the MDC context.
      *
      * @param <T> the return type
      * @param callable the callable to execute
@@ -84,14 +90,14 @@ public class MdcHandler {
 
         final String user = springSecurityAuditorAware
                 .getCurrentAuditor()
-                .filter(username -> !username.equals(SecurityContextTenantAware.SYSTEM_USER)) // null and system are the same - system user
+                .filter(username -> !username.equals(SystemSecurityContext.SYSTEM_USER)) // null and system are the same - system user
                 .orElse(null);
 
         return callWithTenantAndUser0(callable, tenant, user);
     }
 
     /**
-     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or user from the authentication in the MDC context.
+     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or user from the auth in the MDC context.
      * Calls the {@link #callWithAuth(Callable)} method and wraps any catchable exception into a {@link RuntimeException}.
      *
      * @param <T> the return type
@@ -126,7 +132,7 @@ public class MdcHandler {
     }
 
     /**
-     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or user from the authentication in the MDC context.
+     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or user from the auth in the MDC context.
      * Calls the {@link #callWithTenantAndUser(Callable, String, String)} method and wraps any catchable exception into a {@link RuntimeException}.
      *
      * @param <T> the return type

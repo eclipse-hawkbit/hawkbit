@@ -60,7 +60,7 @@ public interface MgmtTargetGroupRestApi {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+            @ApiResponse(responseCode = "401", description = "The request requires user auth."),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
                     "changed (i.e. read-only) or data volume restriction applies."),
             @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
@@ -113,7 +113,7 @@ public interface MgmtTargetGroupRestApi {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+            @ApiResponse(responseCode = "401", description = "The request requires user auth."),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
                     "changed (i.e. read-only) or data volume restriction applies."),
             @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
@@ -163,7 +163,7 @@ public interface MgmtTargetGroupRestApi {
             @ApiResponse(responseCode = "204", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+            @ApiResponse(responseCode = "401", description = "The request requires user auth."),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
                     "changed (i.e. read-only) or data volume restriction applies."),
             @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
@@ -199,7 +199,7 @@ public interface MgmtTargetGroupRestApi {
             @ApiResponse(responseCode = "204", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+            @ApiResponse(responseCode = "401", description = "The request requires user auth."),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
                     "changed (i.e. read-only) or data volume restriction applies."),
             @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
@@ -235,7 +235,7 @@ public interface MgmtTargetGroupRestApi {
             @ApiResponse(responseCode = "204", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+            @ApiResponse(responseCode = "401", description = "The request requires user auth."),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
                     "changed (i.e. read-only) or data volume restriction applies."),
             @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
@@ -268,7 +268,7 @@ public interface MgmtTargetGroupRestApi {
             @ApiResponse(responseCode = "204", description = "Successfully unassigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+            @ApiResponse(responseCode = "401", description = "The request requires user auth."),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
                     "changed (i.e. read-only) or data volume restriction applies."),
             @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
@@ -295,7 +295,7 @@ public interface MgmtTargetGroupRestApi {
             @ApiResponse(responseCode = "204", description = "Successfully unassigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+            @ApiResponse(responseCode = "401", description = "The request requires user auth."),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
                     "changed (i.e. read-only) or data volume restriction applies."),
             @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
@@ -320,7 +320,7 @@ public interface MgmtTargetGroupRestApi {
             description = "Handles the GET request of retrieving a list of all target groups.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+            @ApiResponse(responseCode = "401", description = "The request requires user auth."),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
                     "changed (i.e. read-only) or data volume restriction applies."),
             @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
@@ -345,7 +345,7 @@ public interface MgmtTargetGroupRestApi {
             @ApiResponse(responseCode = "204", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+            @ApiResponse(responseCode = "401", description = "The request requires user auth."),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
                     "changed (i.e. read-only) or data volume restriction applies."),
             @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),

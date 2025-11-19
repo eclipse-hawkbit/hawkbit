@@ -11,46 +11,25 @@ package org.eclipse.hawkbit.repository.jpa.utils;
 
 import java.util.List;
 
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.NoWeightProvidedInMultiAssignmentModeException;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.utils.TenantConfigHelper;
 
 /**
- * Utility class to handle weight validation in Rollout, Auto Assignments, and
- * Online Assignment.
+ * Utility class to handle weight validation in Rollout, Auto Assignments, and Online Assignment.
  */
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public final class WeightValidationHelper {
-
-    private final TenantConfigurationManagement tenantConfigurationManagement;
-    private final SystemSecurityContext systemSecurityContext;
-
-    private WeightValidationHelper(
-            final SystemSecurityContext systemSecurityContext, final TenantConfigurationManagement tenantConfigurationManagement) {
-        this.systemSecurityContext = systemSecurityContext;
-        this.tenantConfigurationManagement = tenantConfigurationManagement;
-    }
-
-    /**
-     * Setting the context of the tenant
-     *
-     * @param systemSecurityContext security context used to get the tenant and for execution
-     * @param tenantConfigurationManagement to get the value from
-     */
-    public static WeightValidationHelper usingContext(
-            final SystemSecurityContext systemSecurityContext, final TenantConfigurationManagement tenantConfigurationManagement) {
-        return new WeightValidationHelper(systemSecurityContext, tenantConfigurationManagement);
-    }
 
     /**
      * Validating weights associated with all the {@link DeploymentRequest}s
      *
      * @param deploymentRequests the {@linkplain List} of {@link DeploymentRequest}s
      */
-    public void validate(final List<DeploymentRequest> deploymentRequests) {
+    public static void validate(final List<DeploymentRequest> deploymentRequests) {
         final long assignmentsWithWeight = deploymentRequests.stream()
                 .filter(request -> request.getTargetWithActionType().getWeight() != null).count();
         final boolean containsAssignmentWithWeight = assignmentsWithWeight > 0;
@@ -64,7 +43,7 @@ public final class WeightValidationHelper {
      *
      * @param rollout the {@linkplain Rollout}
      */
-    public void validate(final Rollout rollout) {
+    public static void validate(final Rollout rollout) {
         validateWeight(rollout.getWeight().orElse(null));
     }
 
@@ -73,7 +52,7 @@ public final class WeightValidationHelper {
      *
      * @param targetFilterQueryCreate the target filter query
      */
-    public void validate(final TargetFilterQueryManagement.Create targetFilterQueryCreate) {
+    public static void validate(final TargetFilterQueryManagement.Create targetFilterQueryCreate) {
         validateWeight(targetFilterQueryCreate.getAutoAssignWeight());
     }
 
@@ -82,7 +61,7 @@ public final class WeightValidationHelper {
      *
      * @param autoAssignDistributionSetUpdate the auto assignment distribution set update
      */
-    public void validate(final TargetFilterQueryManagement.AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate) {
+    public static void validate(final TargetFilterQueryManagement.AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate) {
         validateWeight(autoAssignDistributionSetUpdate.weight());
     }
 
@@ -91,7 +70,7 @@ public final class WeightValidationHelper {
      *
      * @param weight weight tied to the rollout, auto assignment, or online assignment.
      */
-    public void validateWeight(final Integer weight) {
+    public static void validateWeight(final Integer weight) {
         final boolean hasWeight = weight != null;
         validateWeight(hasWeight, !hasWeight);
     }
@@ -102,15 +81,11 @@ public final class WeightValidationHelper {
      * @param hasWeight indicator of the weight if it has numerical value
      * @param hasNoWeight indicator of the weight if it doesn't have a numerical value
      */
-    public void validateWeight(final boolean hasWeight, final boolean hasNoWeight) {
+    public static void validateWeight(final boolean hasWeight, final boolean hasNoWeight) {
         // remove bypassing the weight enforcement as soon as weight can be set via UI
         final boolean bypassWeightEnforcement = true;
-        final boolean multiAssignmentsEnabled = TenantConfigHelper
-                .usingContext(systemSecurityContext, tenantConfigurationManagement)
-                .isMultiAssignmentsEnabled();
-        if (bypassWeightEnforcement) {
-            return;
-        } else if (multiAssignmentsEnabled && hasNoWeight) {
+        final boolean multiAssignmentsEnabled = TenantConfigHelper.getInstance().isMultiAssignmentsEnabled();
+        if (!bypassWeightEnforcement && multiAssignmentsEnabled && hasNoWeight) {
             throw new NoWeightProvidedInMultiAssignmentModeException();
         }
     }

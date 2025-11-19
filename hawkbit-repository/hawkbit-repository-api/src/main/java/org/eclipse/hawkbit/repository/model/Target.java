@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.repository.Identifiable;
 
 /**
@@ -61,7 +62,7 @@ public interface Target extends NamedEntity, Identifiable<Long> {
 
     /**
      * @return the securityToken if the current security context contains the necessary permission
-     *         {@link org.eclipse.hawkbit.im.authentication.SpPermission#READ_TARGET_SECURITY_TOKEN}
+     *         {@link SpPermission#READ_TARGET_SECURITY_TOKEN}
      *         or the current context is executed as system code, otherwise {@code null}.
      */
     String getSecurityToken();

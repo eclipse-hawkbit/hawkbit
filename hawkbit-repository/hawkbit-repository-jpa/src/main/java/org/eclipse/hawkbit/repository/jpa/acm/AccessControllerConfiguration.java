@@ -21,7 +21,8 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.metamodel.EntityType;
 
 import org.aopalliance.intercept.MethodInvocation;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.auth.SpPermission;
+import org.eclipse.hawkbit.context.ContextAware;
 import org.eclipse.hawkbit.repository.qfields.DistributionSetFields;
 import org.eclipse.hawkbit.repository.qfields.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.qfields.SoftwareModuleFields;
@@ -37,7 +38,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
-import org.eclipse.hawkbit.security.SecurityContextSerializer;
+import org.eclipse.hawkbit.context.SecurityContextSerializer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
@@ -63,7 +64,9 @@ public class AccessControllerConfiguration {
     @Bean
     @ConditionalOnMissingBean
     SecurityContextSerializer securityContextSerializer() {
-        return SecurityContextSerializer.JSON_SERIALIZATION;
+        final SecurityContextSerializer serializer = SecurityContextSerializer.JSON_SERIALIZATION;
+        ContextAware.setSecurityContextSerializer(serializer);
+        return serializer;
     }
 
     @Bean

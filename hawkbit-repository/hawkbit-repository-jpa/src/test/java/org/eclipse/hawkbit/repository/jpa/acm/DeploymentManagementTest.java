@@ -13,14 +13,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_DISTRIBUTION_SET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TARGET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_TARGET;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_DISTRIBUTION_SET;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_TARGET;
+import static org.eclipse.hawkbit.auth.SpPermission.UPDATE_TARGET;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
 
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -191,7 +192,7 @@ class DeploymentManagementTest extends AbstractAccessControllerManagementTest {
     }
 
     private void verify(final Consumer<Long> noRead, final Consumer<Long> readNoUpdate, final Consumer<Long> readAndUpdate) {
-        final Long actionId = systemSecurityContext.runAsSystem(() -> {
+        final Long actionId = SystemSecurityContext.runAsSystem(() -> {
             final List<Action> actions = assignDistributionSet(ds1Type1.getId(), target1Type1.getControllerId()).getAssignedEntity();
             assertThat(actions).hasSize(1).allMatch(action -> action.getTarget().getId().equals(target1Type1.getId()));
             return actions.get(0);

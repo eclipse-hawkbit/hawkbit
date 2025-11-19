@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.jpa.rollout.BlockWhenFullPolicy;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -34,16 +34,14 @@ public class RolloutScheduler {
 
     private final SystemManagement systemManagement;
     private final RolloutHandler rolloutHandler;
-    private final SystemSecurityContext systemSecurityContext;
     private final Optional<MeterRegistry> meterRegistry;
     private final ThreadPoolTaskExecutor rolloutTaskExecutor;
 
     public RolloutScheduler(
-            final RolloutHandler rolloutHandler, final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext,
+            final RolloutHandler rolloutHandler, final SystemManagement systemManagement,
             final int threadPoolSize, final Optional<MeterRegistry> meterRegistry) {
         this.systemManagement = systemManagement;
         this.rolloutHandler = rolloutHandler;
-        this.systemSecurityContext = systemSecurityContext;
         this.meterRegistry = meterRegistry;
         rolloutTaskExecutor = threadPoolTaskExecutor(threadPoolSize);
 
@@ -58,9 +56,8 @@ public class RolloutScheduler {
         log.debug("rollout schedule checker has been triggered.");
         final long startNano = System.nanoTime();
 
-        // run this code in system code privileged to have the necessary
-        // permission to query and create entities.
-        systemSecurityContext.runAsSystem(() -> {
+        // run this code in system code privileged to have the necessary permission to query and create entities.
+        SystemSecurityContext.runAsSystem(() -> {
             // workaround eclipselink that is currently not possible to
             // execute a query without multi-tenancy if MultiTenant
             // annotation is used.
@@ -99,10 +96,10 @@ public class RolloutScheduler {
     }
 
     private void handleAllAsync(final String tenant) {
-        rolloutTaskExecutor.submit(() -> systemSecurityContext.runAsSystemAsTenant(() -> {
+        rolloutTaskExecutor.submit(() -> SystemSecurityContext.runAsSystemAsTenant(tenant, () -> {
             handleAll(tenant);
             return null;
-        }, tenant));
+        }));
     }
 
     private ThreadPoolTaskExecutor threadPoolTaskExecutor(final int threadPoolSize) {

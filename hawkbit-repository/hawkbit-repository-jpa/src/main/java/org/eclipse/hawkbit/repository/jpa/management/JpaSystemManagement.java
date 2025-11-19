@@ -45,7 +45,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.repository.model.report.SystemUsageReport;
 import org.eclipse.hawkbit.repository.model.report.SystemUsageReportWithTenants;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager.CacheEvictEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,9 +78,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     private static final int MAX_TENANTS_QUERY = 1000;
 
-    private final String countArtifactQuery;
-    private final String countSoftwareModulesQuery;
-
     private final TargetRepository targetRepository;
     private final TargetTypeRepository targetTypeRepository;
     private final TargetTagRepository targetTagRepository;
@@ -93,10 +90,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     private final RolloutRepository rolloutRepository;
     private final TenantConfigurationRepository tenantConfigurationRepository;
     private final TenantMetaDataRepository tenantMetaDataRepository;
-    private final TenantStatsManagement systemStatsManagement;
     private final SystemManagementCacheKeyGenerator currentTenantCacheKeyGenerator;
-    private final SystemSecurityContext systemSecurityContext;
-    private final TenantAware tenantAware;
     private final PlatformTransactionManager txManager;
     private final EntityManager entityManager;
     private final RepositoryProperties repositoryProperties;
@@ -112,8 +106,8 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
             final DistributionSetRepository distributionSetRepository, final DistributionSetTypeRepository distributionSetTypeRepository,
             final DistributionSetTagRepository distributionSetTagRepository, final RolloutRepository rolloutRepository,
             final TenantConfigurationRepository tenantConfigurationRepository, final TenantMetaDataRepository tenantMetaDataRepository,
-            final TenantStatsManagement systemStatsManagement, final SystemManagementCacheKeyGenerator currentTenantCacheKeyGenerator,
-            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final PlatformTransactionManager txManager,
+            final SystemManagementCacheKeyGenerator currentTenantCacheKeyGenerator,
+            final PlatformTransactionManager txManager,
             final EntityManager entityManager, final RepositoryProperties repositoryProperties,
             final JpaProperties properties) {
         this.targetRepository = targetRepository;
@@ -128,17 +122,10 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         this.rolloutRepository = rolloutRepository;
         this.tenantConfigurationRepository = tenantConfigurationRepository;
         this.tenantMetaDataRepository = tenantMetaDataRepository;
-        this.systemStatsManagement = systemStatsManagement;
         this.currentTenantCacheKeyGenerator = currentTenantCacheKeyGenerator;
-        this.systemSecurityContext = systemSecurityContext;
-        this.tenantAware = tenantAware;
         this.txManager = txManager;
         this.entityManager = entityManager;
         this.repositoryProperties = repositoryProperties;
-
-        final String isDeleted = isPostgreSql(properties) ? "false" : "0";
-        countArtifactQuery = "SELECT COUNT(a.id) FROM sp_artifact a INNER JOIN sp_software_module sm ON a.software_module = sm.id WHERE sm.deleted = " + isDeleted;
-        countSoftwareModulesQuery = "select SUM(file_size) from sp_artifact a INNER JOIN sp_software_module sm ON a.software_module = sm.id WHERE sm.deleted = " + isDeleted;
     }
 
     @Autowired(required = false) // it's not required on dmf/ddi only instances
@@ -153,34 +140,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void deleteTenant(final String t) {
-        if (artifactStorage == null) {
-            throw new IllegalStateException("Artifact repository is not available. Can't delete tenant.");
-        }
-
-        final String tenant = t.toUpperCase();
-        tenantAware.runAsTenant(tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "deleteTenant", status -> {
-            tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
-            tenantConfigurationRepository.deleteByTenant(tenant);
-            targetRepository.deleteByTenant(tenant);
-            targetFilterQueryRepository.deleteByTenant(tenant);
-            rolloutRepository.deleteByTenant(tenant);
-            targetTypeRepository.deleteByTenant(tenant);
-            targetTagRepository.deleteByTenant(tenant);
-            distributionSetTagRepository.deleteByTenant(tenant);
-            distributionSetRepository.deleteByTenant(tenant);
-            distributionSetTypeRepository.deleteByTenant(tenant);
-            softwareModuleRepository.deleteByTenant(tenant);
-            artifactStorage.deleteByTenant(tenant);
-            softwareModuleTypeRepository.deleteByTenant(tenant);
-            return null;
-        }));
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new CacheEvictEvent.Default(tenant, null, null));
-    }
-
-    @Override
     public Page<String> findTenants(final Pageable pageable) {
         return tenantMetaDataRepository.findTenants(pageable);
     }
@@ -190,15 +149,11 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     // Exception squid:S2229 - calling findTenants without transaction is intended in this case
     @SuppressWarnings("squid:S2229")
     public void forEachTenant(final Consumer<String> consumer) {
-        forEachTenant0(consumer);
-    }
-
-    private void forEachTenant0(final Consumer<String> consumer) {
         Page<String> tenants;
         Pageable query = PageRequest.of(0, MAX_TENANTS_QUERY);
         do {
-            tenants = findTenants(query);
-            tenants.forEach(tenant -> tenantAware.runAsTenant(tenant, () -> {
+            tenants = findTenants(query); // its with IS_SYSTEM_CODE so we could find all tenants
+            tenants.forEach(tenant -> SystemSecurityContext.runAsSystemAsTenant(tenant, () -> {
                 try {
                     consumer.accept(tenant);
                 } catch (final RuntimeException ex) {
@@ -210,29 +165,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
                 return null;
             }));
         } while ((query = tenants.nextPageable()) != Pageable.unpaged());
-    }
-
-    @Override
-    public SystemUsageReportWithTenants getSystemUsageStatisticsWithTenants() {
-        final SystemUsageReportWithTenants result = (SystemUsageReportWithTenants) getSystemUsageStatistics();
-        usageStatsPerTenant(result);
-        return result;
-    }
-
-    @Override
-    public SystemUsageReport getSystemUsageStatistics() {
-        final Number count = (Number) entityManager.createNativeQuery(countSoftwareModulesQuery).getSingleResult();
-
-        long sumOfArtifacts = 0;
-        if (count != null) {
-            sumOfArtifacts = count.longValue();
-        }
-
-        // we use native queries to punch through the tenant boundaries. This has to be used with care!
-        final long targets = ((Number) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_target").getSingleResult()).longValue();
-        final long artifacts = ((Number) entityManager.createNativeQuery(countArtifactQuery).getSingleResult()).longValue();
-        final long actions = ((Number) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_action").getSingleResult()).longValue();
-        return new SystemUsageReportWithTenants(targets, artifacts, actions, sumOfArtifacts, tenantMetaDataRepository.count());
     }
 
     @Override
@@ -265,20 +197,43 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         return tenantMetaDataRepository.save(data);
     }
 
-    private static boolean isPostgreSql(final JpaProperties properties) {
-        return Database.POSTGRESQL == properties.getDatabase();
+    @Override
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void deleteTenant(final String t) {
+        if (artifactStorage == null) {
+            throw new IllegalStateException("Artifact repository is not available. Can't delete tenant.");
+        }
+
+        final String tenant = t.toUpperCase();
+        SystemSecurityContext.runAsSystemAsTenant(tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "deleteTenant", status -> {
+            tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
+            tenantConfigurationRepository.deleteByTenant(tenant);
+            targetRepository.deleteByTenant(tenant);
+            targetFilterQueryRepository.deleteByTenant(tenant);
+            rolloutRepository.deleteByTenant(tenant);
+            targetTypeRepository.deleteByTenant(tenant);
+            targetTagRepository.deleteByTenant(tenant);
+            distributionSetTagRepository.deleteByTenant(tenant);
+            distributionSetRepository.deleteByTenant(tenant);
+            distributionSetTypeRepository.deleteByTenant(tenant);
+            softwareModuleRepository.deleteByTenant(tenant);
+            artifactStorage.deleteByTenant(tenant);
+            softwareModuleTypeRepository.deleteByTenant(tenant);
+            return null;
+        }));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new CacheEvictEvent.Default(tenant, null, null));
     }
 
     private TenantMetaData getTenantMetadata0(final boolean withDetails) {
-        final String tenant = tenantAware.getCurrentTenant();
+        final String tenant = TenantAware.getCurrentTenant();
         if (tenant == null) {
             throw new IllegalStateException("Tenant not set");
         }
 
-        final TenantMetaData metaData =
-                withDetails ?
-                        tenantMetaDataRepository.findWitDetailsByTenantIgnoreCase(tenant) :
-                        tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
+        final TenantMetaData metaData = withDetails
+                ? tenantMetaDataRepository.findWitDetailsByTenantIgnoreCase(tenant)
+                : tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
         if (metaData == null) {
             if (repositoryProperties.isImplicitTenantCreateAllowed()) {
                 log.info("Tenant {} doesn't exist create metadata", tenant, new Exception("Thread dump"));
@@ -289,10 +244,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         } else {
             return metaData;
         }
-    }
-
-    private void usageStatsPerTenant(final SystemUsageReportWithTenants report) {
-        forEachTenant0(tenant -> report.addTenantData(systemStatsManagement.getStatsOfTenant()));
     }
 
     private DistributionSetType createStandardSoftwareDataSetup() {
@@ -338,23 +289,20 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     /**
-     * Creating the initial tenant meta-data in a new transaction. Due to the
-     * {@link org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager} is using the current tenant to
-     * set the necessary tenant discriminator to the query. This is not working
-     * if we don't have a current tenant set. Due to the
-     * {@link #createTenantMetadata(String)} is maybe called without having a
-     * current tenant we need to re-open a new transaction so the
-     * {@link org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager} is called again and set the
+     * Creating the initial tenant meta-data in a new transaction. Due to the tenant support it is using the current tenant to
+     * set the necessary tenant discriminator to the query. This is not working if we don't have a current tenant set.
+     * Due to the {@link #createTenantMetadata(String)} is maybe called without having a
+     * current tenant we need to re-open a new transaction so the tenant support is called again and set the
      * tenant for this transaction.
      *
      * @param tenant the tenant to be created
      * @return the initial created {@link TenantMetaData}
      */
     private TenantMetaData createInitialTenantMetaData(final String tenant) {
-        return systemSecurityContext.runAsSystemAsTenant(
-                () -> DeploymentHelper.runInNewTransaction(txManager, "initial-tenant-creation", status -> {
+        return SystemSecurityContext.runAsSystemAsTenant(
+                tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "initial-tenant-creation", status -> {
                     final DistributionSetType defaultDsType = createStandardSoftwareDataSetup();
                     return tenantMetaDataRepository.save(new JpaTenantMetaData(defaultDsType, tenant));
-                }), tenant);
+                }));
     }
 }

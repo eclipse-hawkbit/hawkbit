@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.scheduler;
 
+import static org.eclipse.hawkbit.audit.HawkbitAuditorAware.runAsAuditor;
+import static org.eclipse.hawkbit.context.ContextAware.runInContext;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -16,12 +19,12 @@ import java.util.function.Consumer;
 import jakarta.persistence.PersistenceException;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.ContextAware;
+import org.eclipse.hawkbit.context.ContextAware;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
+import org.eclipse.hawkbit.repository.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -62,17 +65,15 @@ public class JpaAutoAssignExecutor implements AutoAssignExecutor {
     private final TargetManagement<? extends Target> targetManagement;
     private final DeploymentManagement deploymentManagement;
     private final PlatformTransactionManager transactionManager;
-    private final ContextAware contextAware;
 
     public JpaAutoAssignExecutor(
             final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
             final TargetManagement<? extends Target> targetManagement, final DeploymentManagement deploymentManagement,
-            final PlatformTransactionManager transactionManager, final ContextAware contextAware) {
+            final PlatformTransactionManager transactionManager) {
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
         this.transactionManager = transactionManager;
-        this.contextAware = contextAware;
     }
 
     @Override
@@ -84,7 +85,7 @@ public class JpaAutoAssignExecutor implements AutoAssignExecutor {
     }
 
     @Override
-    public void checkSingleTarget(String controllerId) {
+    public void checkSingleTarget(final String controllerId) {
         log.debug("Auto assign check call for device {} started", controllerId);
         forEachFilterWithAutoAssignDS(filter -> checkForDevice(controllerId, filter));
         log.debug("Auto assign check call for device {} finished", controllerId);
@@ -127,7 +128,7 @@ public class JpaAutoAssignExecutor implements AutoAssignExecutor {
 
     // run in the context the auto assignment is made in, i.e. if there is access control context it runs in it
     // otherwise in the tenant & user context built by createdBy
-    // Note: It must be called in a tenant context, i.e. contextAware.getCurrentTenant() returns the tenant
+    // Note: It must be called in a tenant context, i.e. ContextAware.getCurrentTenant() returns the tenant
     private void forEachFilterWithAutoAssignDS(final Consumer<TargetFilterQuery> consumer) {
         Slice<TargetFilterQuery> filterQueries;
         Pageable query = PageRequest.of(0, PAGE_SIZE);
@@ -138,13 +139,9 @@ public class JpaAutoAssignExecutor implements AutoAssignExecutor {
                 try {
                     filterQuery.getAccessControlContext().ifPresentOrElse(
                             context -> // has stored context - executes it with it
-                                    contextAware.runInContext(
-                                            context,
-                                            () -> consumer.accept(filterQuery)),
+                                    runInContext(context, () -> consumer.accept(filterQuery)),
                             () -> // has no stored context - executes it in the tenant & user scope
-                                    contextAware.runAsTenantAsUser(
-                                            contextAware.getCurrentTenant(),
-                                            getAutoAssignmentInitiatedBy(filterQuery), () -> consumer.accept(filterQuery))
+                                    runAsAuditor(getAutoAssignmentInitiatedBy(filterQuery), () -> consumer.accept(filterQuery))
                     );
                 } catch (final RuntimeException ex) {
                     if (log.isDebugEnabled()) {

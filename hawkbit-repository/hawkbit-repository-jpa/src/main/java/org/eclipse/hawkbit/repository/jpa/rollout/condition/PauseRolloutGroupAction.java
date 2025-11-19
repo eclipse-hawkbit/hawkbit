@@ -10,13 +10,12 @@
 package org.eclipse.hawkbit.repository.jpa.rollout.condition;
 
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 
 /**
  * Error action evaluator which pauses the whole {@link Rollout} and sets the
@@ -25,16 +24,12 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator<RolloutGroup.RolloutGroupErrorAction> {
 
     private final RolloutManagement rolloutManagement;
-
     private final RolloutGroupRepository rolloutGroupRepository;
 
-    private final SystemSecurityContext systemSecurityContext;
-
     public PauseRolloutGroupAction(final RolloutManagement rolloutManagement,
-            final RolloutGroupRepository rolloutGroupRepository, final SystemSecurityContext systemSecurityContext) {
+            final RolloutGroupRepository rolloutGroupRepository) {
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupRepository = rolloutGroupRepository;
-        this.systemSecurityContext = systemSecurityContext;
     }
 
     @Override
@@ -47,7 +42,7 @@ public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator<Roll
 
         final JpaRolloutGroup rolloutGroup = (JpaRolloutGroup) rolloutG;
 
-        systemSecurityContext.runAsSystem(() -> {
+        SystemSecurityContext.runAsSystem(() -> {
             rolloutGroup.setStatus(RolloutGroupStatus.ERROR);
             rolloutGroupRepository.save(rolloutGroup);
             /*

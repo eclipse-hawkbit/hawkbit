@@ -64,6 +64,7 @@ import org.eclipse.hawkbit.repository.event.remote.service.MultiActionCancelServ
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistributionSetServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -71,7 +72,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
@@ -94,43 +95,36 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private final ArtifactUrlResolver artifactUrlHandler;
     private final AmqpMessageSenderService amqpSenderService;
-    private final SystemSecurityContext systemSecurityContext;
     private final SystemManagement systemManagement;
     private final TargetManagement<? extends Target> targetManagement;
     private final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final DeploymentManagement deploymentManagement;
-    private final TenantConfigurationManagement tenantConfigurationManagement;
     private final RepositoryProperties repositoryProperties;
 
     @SuppressWarnings("java:S107")
     protected AmqpMessageDispatcherService(
             final RabbitTemplate rabbitTemplate,
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlResolver artifactUrlHandler,
-            final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
+            final SystemManagement systemManagement,
             final TargetManagement<? extends Target> targetManagement,
             final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final DeploymentManagement deploymentManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement,
             final RepositoryProperties repositoryProperties) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
-        this.systemSecurityContext = systemSecurityContext;
         this.systemManagement = systemManagement;
         this.targetManagement = targetManagement;
         this.softwareModuleManagement = softwareModuleManagement;
         this.distributionSetManagement = distributionSetManagement;
         this.deploymentManagement = deploymentManagement;
-        this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.repositoryProperties = repositoryProperties;
     }
 
     public boolean isBatchAssignmentsEnabled() {
-        return systemSecurityContext.runAsSystem(() ->
-                tenantConfigurationManagement
-                        .getConfigurationValue(BATCH_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
+        return TenantConfigHelper.getInstance().getConfigValue(BATCH_ASSIGNMENTS_ENABLED, Boolean.class);
     }
 
     /**
@@ -185,7 +179,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final Target target, final Long actionId, final Map<SoftwareModule, Map<String, String>> softwareModules) {
         return new DmfDownloadAndUpdateRequest(
                 actionId,
-                systemSecurityContext.runAsSystem(target::getSecurityToken),
+                SystemSecurityContext.runAsSystem(target::getSecurityToken),
                 convertToAmqpSoftwareModules(target, softwareModules));
     }
 
@@ -252,14 +246,14 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     protected DmfTarget convertToDmfTarget(final Target target, final Long actionId) {
-        return new DmfTarget(actionId, target.getControllerId(), systemSecurityContext.runAsSystem(target::getSecurityToken));
+        return new DmfTarget(actionId, target.getControllerId(), SystemSecurityContext.runAsSystem(target::getSecurityToken));
     }
 
     protected DmfConfirmRequest createConfirmRequest(
             final Target target, final Long actionId, final Map<SoftwareModule, Map<String, String>> softwareModules) {
         return new DmfConfirmRequest(
                 actionId,
-                systemSecurityContext.runAsSystem(target::getSecurityToken),
+                SystemSecurityContext.runAsSystem(target::getSecurityToken),
                 convertToAmqpSoftwareModules(target, softwareModules));
     }
 

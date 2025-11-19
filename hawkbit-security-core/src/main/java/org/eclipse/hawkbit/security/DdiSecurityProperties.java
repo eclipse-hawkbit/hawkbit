@@ -56,7 +56,7 @@ public class DdiSecurityProperties {
         private String sslIssuerHashHeader = "X-Ssl-Issuer-Hash-%d";
         /**
          * List of trusted (reverse proxy) IP addresses for performing DDI
-         * client certificate authentication.
+         * client certificate auth.
          */
         private List<String> trustedIPs;
     }
@@ -71,25 +71,25 @@ public class DdiSecurityProperties {
         private final Gatewaytoken gatewaytoken = new Gatewaytoken();
 
         /**
-         * Target token authentication. Tokens are defined per target.
+         * Target token auth. Tokens are defined per target.
          */
         @Data
         public static class Targettoken {
 
             /**
-             * Set to true to enable target token authentication.
+             * Set to true to enable target token auth.
              */
             private boolean enabled = false;
         }
 
         /**
-         * Gateway token authentication. Tokens are defined per tenant. Use with care!
+         * Gateway token auth. Tokens are defined per tenant. Use with care!
          */
         @Data
         public static class Gatewaytoken {
 
             /**
-             * Gateway token based authentication enabled.
+             * Gateway token based auth enabled.
              */
             private boolean enabled = false;
 

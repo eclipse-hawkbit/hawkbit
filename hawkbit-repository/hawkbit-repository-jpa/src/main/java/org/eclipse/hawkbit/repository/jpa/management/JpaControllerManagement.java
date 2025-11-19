@@ -46,6 +46,7 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -57,7 +58,6 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
@@ -68,6 +68,7 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.exception.SoftwareModuleNotAssignedToTargetException;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -101,7 +102,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.qfields.TargetFields;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
@@ -137,8 +137,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     private static final Pattern PATTERN = Pattern.compile("[a-zA-Z0-9_\\-!@#$%^&*()+=\\[\\]{}|;:'\",.<>/\\\\?\\s]*");
 
-    private final BlockingDeque<TargetPoll> queue;
-
     // TODO - make it final
     private TargetRepository targetRepository;
     private final TargetTypeRepository targetTypeRepository;
@@ -147,14 +145,13 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private final SoftwareModuleRepository softwareModuleRepository;
     private final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
-    private final TenantConfigurationManagement tenantConfigurationManagement;
     private final ControllerPollProperties controllerPollProperties;
-    private final Duration minPollingTime;
-    private final Duration maxPollingTime;
     private final PlatformTransactionManager txManager;
     private final EntityManager entityManager;
-    private final SystemSecurityContext systemSecurityContext;
-    private final TenantAware tenantAware;
+
+    private final Duration minPollingTime;
+    private final Duration maxPollingTime;
+    private final BlockingDeque<TargetPoll> queue;
 
     @SuppressWarnings("squid:S00107")
     protected JpaControllerManagement(
@@ -165,9 +162,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             final SoftwareModuleRepository softwareModuleRepository,
             final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement, final ControllerPollProperties controllerPollProperties,
+            final ControllerPollProperties controllerPollProperties,
             final PlatformTransactionManager txManager, final EntityManager entityManager,
-            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
             final ScheduledExecutorService executorService) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
 
@@ -178,19 +174,16 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         this.softwareModuleRepository = softwareModuleRepository;
         this.softwareModuleManagement = softwareModuleManagement;
         this.distributionSetManagement = distributionSetManagement;
-        this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.controllerPollProperties = controllerPollProperties;
+        this.txManager = txManager;
+        this.entityManager = entityManager;
+
         minPollingTime = controllerPollProperties.getMinPollingTime() == null
                 ? Duration.of(0, ChronoUnit.SECONDS)
                 : DurationHelper.fromString(controllerPollProperties.getMinPollingTime());
         maxPollingTime = controllerPollProperties.getMaxPollingTime() == null
                 ? Duration.of(100, ChronoUnit.YEARS)
                 : DurationHelper.fromString(controllerPollProperties.getMaxPollingTime());
-        this.txManager = txManager;
-        this.entityManager = entityManager;
-        this.systemSecurityContext = systemSecurityContext;
-        this.tenantAware = tenantAware;
-
         if (!repositoryProperties.isEagerPollPersistence()) {
             executorService.scheduleWithFixedDelay(this::flushUpdateQueue,
                     repositoryProperties.getPollPersistenceFlushTime(),
@@ -277,7 +270,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     public Map<Long, Map<String, String>> findTargetVisibleMetaDataBySoftwareModuleId(final Collection<Long> moduleId) {
-        return systemSecurityContext.runAsSystem(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(moduleId));
+        return SystemSecurityContext.runAsSystem(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(moduleId));
     }
 
     @Override
@@ -383,9 +376,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     public String getPollingTime(final Target target) {
-        return systemSecurityContext.runAsSystem(() -> {
+        return SystemSecurityContext.runAsSystem(() -> {
             final PollingTime pollingTime = new PollingTime(
-                    tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.POLLING_TIME, String.class).getValue());
+                    TenantConfigHelper.getInstance().getTenantConfigurationManagement()
+                            .getConfigurationValue(TenantConfigurationKey.POLLING_TIME, String.class).getValue());
             if (!ObjectUtils.isEmpty(pollingTime.getOverrides()) && target instanceof JpaTarget jpaTarget) {
                 for (final PollingTime.Override override : pollingTime.getOverrides()) {
                     try {
@@ -409,9 +403,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             return pollingTime;
         } else {
             // the count to be used for reducing polling interval -> the configured value of {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}
-            final int maintenanceWindowPollCount = systemSecurityContext.runAsSystem(
-                    () -> tenantConfigurationManagement.getConfigurationValue(
-                            TenantConfigurationKey.MAINTENANCE_WINDOW_POLL_COUNT, Integer.class).getValue());
+            final int maintenanceWindowPollCount = TenantConfigHelper.getInstance().getConfigValue(
+                    TenantConfigurationKey.MAINTENANCE_WINDOW_POLL_COUNT, Integer.class);
             return new EventTimer(pollingTime, controllerPollProperties.getMinPollingTime(), ChronoUnit.SECONDS)
                     .timeToNextEvent(maintenanceWindowPollCount, action.getMaintenanceWindowStartTime().orElse(null));
         }
@@ -572,7 +565,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Override
     public boolean updateOfflineAssignedVersion(@NotEmpty final String controllerId, final String distributionName, final String version) {
         List<DistributionSetAssignmentResult> distributionSetAssignmentResults =
-                systemSecurityContext.runAsSystem(() -> deploymentManagement.offlineAssignedDistributionSets(
+                SystemSecurityContext.runAsSystem(() -> deploymentManagement.offlineAssignedDistributionSets(
                         controllerId,
                         List.of(Map.entry(controllerId, distributionSetManagement.findByNameAndVersion(distributionName, version).getId()))));
 
@@ -701,7 +694,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         try {
             events.stream().collect(Collectors.groupingBy(TargetPoll::getTenant)).forEach((tenant, polls) -> {
                 final TransactionCallback<Void> createTransaction = status -> updateLastTargetQueries(tenant, polls);
-                tenantAware.runAsTenant(tenant,
+                SystemSecurityContext.runAsSystemAsTenant(
+                        tenant,
                         () -> DeploymentHelper.runInNewTransaction(txManager, "flushUpdateQueue", createTransaction));
             });
         } catch (final RuntimeException ex) {
@@ -827,7 +821,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         target.setRequestControllerAttributes(true);
 
         EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new TargetAttributesRequestedEvent(tenantAware.getCurrentTenant(), target.getId(),
+                .publishEvent(new TargetAttributesRequestedEvent(TenantAware.getCurrentTenant(), target.getId(),
                         JpaTarget.class, target.getControllerId(), target.getAddress() != null ? target.getAddress() : null));
     }
 

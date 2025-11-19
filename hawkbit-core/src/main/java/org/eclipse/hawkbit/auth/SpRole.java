@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.im.authentication;
+package org.eclipse.hawkbit.auth;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

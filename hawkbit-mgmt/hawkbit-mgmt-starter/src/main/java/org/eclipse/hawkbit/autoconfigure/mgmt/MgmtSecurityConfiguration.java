@@ -19,7 +19,7 @@ import java.util.Optional;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.oidc.OidcProperties;
 import org.eclipse.hawkbit.oidc.OidcProperties.Oauth2.ResourceServer.Jwt.Claim;
@@ -27,8 +27,8 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.rest.SecurityManagedConfiguration;
 import org.eclipse.hawkbit.rest.security.DosFilter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
-import org.eclipse.hawkbit.security.MdcHandler;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.audit.MdcHandler;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,11 +105,10 @@ public class MgmtSecurityConfiguration {
             final HttpSecurity http,
             @Autowired(required = false) @Qualifier("hawkbitOAuth2ResourceServerCustomizer") final Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> oauth2ResourceServerCustomizer,
             // called just before build of the SecurityFilterChain.
-            // could be used for instance to set authentication provider
+            // could be used for instance to set auth provider
             // Note: implementation of the customizer shall always take in account what is the already set by the hawkBit
             @Autowired(required = false) @Qualifier("hawkbitHttpSecurityCustomizer") final Customizer<HttpSecurity> httpSecurityCustomizer,
-            final SystemManagement systemManagement,
-            final SystemSecurityContext systemSecurityContext) throws Exception {
+            final SystemManagement systemManagement) throws Exception {
         http
                 .securityMatcher(MgmtRestConstants.BASE_REST_MAPPING + "/**", MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
                 .authorizeHttpRequests(amrmRegistry -> amrmRegistry
@@ -120,11 +119,11 @@ public class MgmtSecurityConfiguration {
                 .anonymous(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterAfter(
-                        // Servlet filter to create metadata after successful authentication over RESTful.
+                        // Servlet filter to create metadata after successful auth over RESTful.
                         (request, response, chain) -> {
                             final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                             if (authentication != null && authentication.isAuthenticated()) {
-                                systemSecurityContext.runAsSystem(systemManagement::getTenantMetadataWithoutDetails);
+                                SystemSecurityContext.runAsSystem(systemManagement::getTenantMetadataWithoutDetails);
                             }
                             chain.doFilter(request, response);
                         },

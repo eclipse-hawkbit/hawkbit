@@ -14,13 +14,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 
-import org.eclipse.hawkbit.im.authentication.SpRole;
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.report.TenantUsage;
 import org.eclipse.hawkbit.repository.test.util.DisposableSqlTestDatabaseExtension;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.junit.jupiter.api.Test;
@@ -43,89 +42,6 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
         createTestTenantsForSystemStatistics(2, 0, 0, 0);
 
         assertThat(systemManagement.findTenants(PAGE).getContent()).hasSize(3);
-    }
-
-    /**
-     * Ensures that getSystemUsageStatisticsWithTenants returns the usage of all tenants and not only the first 1000 (max page size).
-     */
-    @Test
-    void systemUsageReportCollectsStatisticsOfManyTenants() {
-        // Prepare tenants
-        createTestTenantsForSystemStatistics(1050, 0, 0, 0);
-
-        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
-        assertThat(tenants).hasSize(1051); // +1 from the setup
-    }
-
-    /**
-     * Checks that the system report calculates correctly the artifact size of all tenants in the system. It ignores deleted software modules with their artifacts.
-     */
-    @Test
-    void systemUsageReportCollectsArtifactsOfAllTenants() {
-        // Prepare tenants
-        createTestTenantsForSystemStatistics(2, 1234, 0, 0);
-
-        // overall data
-        assertThat(systemManagement.getSystemUsageStatistics().getOverallArtifacts()).isEqualTo(2);
-        assertThat(systemManagement.getSystemUsageStatistics().getOverallArtifactVolumeInBytes()).isEqualTo(1234 * 2);
-
-        // per tenant data
-        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
-        assertThat(tenants).hasSize(3);
-        final TenantUsage tenantUsage0 = new TenantUsage("TENANT0");
-        tenantUsage0.setArtifacts(1);
-        tenantUsage0.setOverallArtifactVolumeInBytes(1234);
-        final TenantUsage tenantUsage1 = new TenantUsage("TENANT1");
-        tenantUsage1.setArtifacts(1);
-        tenantUsage1.setOverallArtifactVolumeInBytes(1234);
-        assertThat(tenants).containsOnly(new TenantUsage("DEFAULT"),
-                tenantUsage0,
-                tenantUsage1);
-    }
-
-    /**
-     * Checks that the system report calculates correctly the targets size of all tenants in the system
-     */
-    @Test
-    void systemUsageReportCollectsTargetsOfAllTenants() {
-        // Prepare tenants
-        createTestTenantsForSystemStatistics(2, 0, 100, 0);
-
-        // overall data
-        assertThat(systemManagement.getSystemUsageStatistics().getOverallTargets()).isEqualTo(200);
-        assertThat(systemManagement.getSystemUsageStatistics().getOverallActions()).isZero();
-
-        // per tenant data
-        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
-        assertThat(tenants).hasSize(3);
-        final TenantUsage tenantUsage0 = new TenantUsage("TENANT0");
-        tenantUsage0.setTargets(100);
-        final TenantUsage tenantUsage1 = new TenantUsage("TENANT1");
-        tenantUsage1.setTargets(100);
-        assertThat(tenants).containsOnly(new TenantUsage("DEFAULT"), tenantUsage0, tenantUsage1);
-    }
-
-    /**
-     * Checks that the system report calculates correctly the actions size of all tenants in the system
-     */
-    @Test
-    void systemUsageReportCollectsActionsOfAllTenants() {
-        // Prepare tenants
-        createTestTenantsForSystemStatistics(2, 0, 20, 2);
-
-        // 2 tenants, 100 targets each, 2 deployments per target => 400
-        assertThat(systemManagement.getSystemUsageStatistics().getOverallActions()).isEqualTo(80);
-
-        // per tenant data
-        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
-        assertThat(tenants).hasSize(3);
-        final TenantUsage tenantUsage0 = new TenantUsage("TENANT0");
-        tenantUsage0.setTargets(20);
-        tenantUsage0.setActions(40);
-        final TenantUsage tenantUsage1 = new TenantUsage("TENANT1");
-        tenantUsage1.setTargets(20);
-        tenantUsage1.setActions(40);
-        assertThat(tenants).containsOnly(new TenantUsage("DEFAULT"), tenantUsage0, tenantUsage1);
     }
 
     private void createTestTenantsForSystemStatistics(final int tenants, final int artifactSize, final int targets, final int updates) {

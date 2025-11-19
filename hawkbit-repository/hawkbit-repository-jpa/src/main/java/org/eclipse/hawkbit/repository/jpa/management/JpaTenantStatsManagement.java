@@ -32,21 +32,18 @@ public class JpaTenantStatsManagement implements TenantStatsManagement {
     private final TargetRepository targetRepository;
     private final ArtifactRepository artifactRepository;
     private final ActionRepository actionRepository;
-    private final TenantAware tenantAware;
 
     protected JpaTenantStatsManagement(
-            final TargetRepository targetRepository, final ArtifactRepository artifactRepository, final ActionRepository actionRepository,
-            final TenantAware tenantAware) {
+            final TargetRepository targetRepository, final ArtifactRepository artifactRepository, final ActionRepository actionRepository) {
         this.targetRepository = targetRepository;
         this.artifactRepository = artifactRepository;
         this.actionRepository = actionRepository;
-        this.tenantAware = tenantAware;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public TenantUsage getStatsOfTenant() {
-        final String tenant = tenantAware.getCurrentTenant();
+        final String tenant = TenantAware.getCurrentTenant();
 
         final TenantUsage result = new TenantUsage(tenant);
 

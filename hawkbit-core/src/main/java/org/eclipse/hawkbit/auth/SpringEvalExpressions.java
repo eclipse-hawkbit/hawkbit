@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.im.authentication;
+package org.eclipse.hawkbit.auth;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -23,7 +23,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * hasRole([role])   Returns true if the current principal has the specified role.
  * hasAnyRole([role1,role2])  Returns true if the current principal has any of the supplied roles (given as a comma-separated list of strings)
  * principal   Allows direct access to the principal object representing the current user
- * authentication Allows direct access to the current Authentication object obtained from the SecurityContext
+ * auth Allows direct access to the current Authentication object obtained from the SecurityContext
  * permitAll   Always evaluates to true
  * denyAll  Always evaluates to false
  * isAnonymous()  Returns true if the current principal is an anonymous user

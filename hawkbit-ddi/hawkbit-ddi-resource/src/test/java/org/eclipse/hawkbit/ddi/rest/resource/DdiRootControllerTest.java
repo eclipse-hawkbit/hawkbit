@@ -10,8 +10,8 @@
 package org.eclipse.hawkbit.ddi.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.TENANT_CONFIGURATION;
-import static org.eclipse.hawkbit.im.authentication.SpRole.CONTROLLER_ROLE_ANONYMOUS;
+import static org.eclipse.hawkbit.auth.SpPermission.TENANT_CONFIGURATION;
+import static org.eclipse.hawkbit.auth.SpRole.CONTROLLER_ROLE_ANONYMOUS;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.callAs;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.getAs;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withController;
@@ -40,7 +40,7 @@ import java.util.concurrent.Callable;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
@@ -64,6 +64,7 @@ import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.jupiter.api.Test;
@@ -93,7 +94,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
      */
     @Test
     void rootPollResourceCbor() throws Exception {
-        mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), 4711).accept(DdiRestConstants.MEDIA_TYPE_CBOR))
+        mvc.perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), 4711).accept(DdiRestConstants.MEDIA_TYPE_CBOR))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(content().contentType(DdiRestConstants.MEDIA_TYPE_CBOR))
                 .andExpect(status().isOk());
@@ -104,7 +105,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
      */
     @Test
     void apiReturnsJSONByDefault() throws Exception {
-        final MvcResult result = mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), 4711))
+        final MvcResult result = mvc.perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), 4711))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
@@ -132,7 +133,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         // make a poll, audit information should not be changed, run as controller principal!
         callAs(withController("controller", CONTROLLER_ROLE_ANONYMOUS),
                 () -> {
-                    mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), knownTargetControllerId))
+                    mvc.perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), knownTargetControllerId))
                             .andDo(MockMvcResultPrinter.print())
                             .andExpect(status().isOk());
                     return null;
@@ -205,7 +206,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         withPollingTime("00:02:00", () -> callAs(
                 withUser("controller", CONTROLLER_ROLE_ANONYMOUS),
                 () -> {
-                    mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), 4711))
+                    mvc.perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), 4711))
                             .andDo(MockMvcResultPrinter.print())
                             .andExpect(status().isOk())
                             .andExpect(content().contentType(MediaTypes.HAL_JSON))
@@ -235,13 +236,13 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         withPollingTime("00:02:00, controllerid == 4711 -> 00:01:00, group == 'Europe' -> 00:05:05", () -> callAs(
                 withUser("controller", CONTROLLER_ROLE_ANONYMOUS),
                 () -> {
-                    mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), 4711))
+                    mvc.perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), 4711))
                             .andDo(MockMvcResultPrinter.print())
                             .andExpect(status().isOk())
                             .andExpect(content().contentType(MediaTypes.HAL_JSON))
                             .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")));
 
-                    mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), "not4711"))
+                    mvc.perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), "not4711"))
                             .andDo(MockMvcResultPrinter.print())
                             .andExpect(status().isOk())
                             .andExpect(content().contentType(MediaTypes.HAL_JSON))
@@ -268,7 +269,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1) })
     void rootRsNotModified() throws Exception {
         final String controllerId = "4711";
-        final String etag = mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId))
+        final String etag = mvc.perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), controllerId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
@@ -276,7 +277,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andReturn().getResponse()
                 .getHeader("ETag");
-        mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId).header("If-None-Match", etag))
+        mvc.perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), controllerId).header("If-None-Match", etag))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotModified());
 
@@ -286,7 +287,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
         final Action updateAction = deploymentManagement.findActiveActionsByTarget(target.getControllerId(), PAGE).getContent().get(0);
         final String etagWithFirstUpdate = mvc
-                .perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId)
+                .perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), controllerId)
                         .header("If-None-Match", etag)
                         .accept(MediaType.APPLICATION_JSON)
                         .with(new RequestOnHawkbitDefaultPortPostProcessor()))
@@ -299,7 +300,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                         startsWith(deploymentBaseLink("4711", updateAction.getId().toString()))))
                 .andReturn().getResponse().getHeader("ETag");
         assertThat(etagWithFirstUpdate).isNotNull();
-        mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId).header("If-None-Match",
+        mvc.perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), controllerId).header("If-None-Match",
                         etagWithFirstUpdate).with(new RequestOnHawkbitDefaultPortPostProcessor()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotModified());
@@ -311,7 +312,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         // as the update was installed, and we always receive the installed action, the
         // original state cannot be restored
         final String etagAfterInstallation = mvc
-                .perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId)
+                .perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), controllerId)
                         .header("If-None-Match", etag).accept(MediaType.APPLICATION_JSON)
                         .with(new RequestOnHawkbitDefaultPortPostProcessor()))
                 .andDo(MockMvcResultPrinter.print())
@@ -327,7 +328,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
         assignDistributionSet(ds2.getId(), controllerId);
         final Action updateAction2 = deploymentManagement.findActiveActionsByTarget(target.getControllerId(), PAGE).getContent().get(0);
-        mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId)
+        mvc.perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), controllerId)
                         .header("If-None-Match", etagAfterInstallation).accept(MediaType.APPLICATION_JSON)
                         .with(new RequestOnHawkbitDefaultPortPostProcessor()))
                 .andDo(MockMvcResultPrinter.print())
@@ -355,7 +356,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         testdataFactory.createTarget(controllerId);
         assertThat(targetManagement.getByControllerId(controllerId).getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
         final long current = System.currentTimeMillis();
-        mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId))
+        mvc.perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), controllerId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
@@ -382,7 +383,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         // make a poll, audit information should be set on plug and play
         callAs(withController("controller", CONTROLLER_ROLE_ANONYMOUS),
                 () -> {
-                    mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), knownControllerId1))
+                    mvc.perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), knownControllerId1))
                             .andDo(MockMvcResultPrinter.print())
                             .andExpect(status().isOk());
                     return null;
@@ -408,7 +409,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         securityProperties.getClients().setTrackRemoteIp(false);
         // test
         final String knownControllerId1 = "0815";
-        mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), knownControllerId1))
+        mvc.perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), knownControllerId1))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
         // verify
@@ -468,7 +469,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final Target savedTarget = testdataFactory.createTarget("922");
         final Map<String, String> attributes = Collections.singletonMap("AttributeKey", "AttributeValue");
         assertThatAttributesUpdateIsRequested(savedTarget.getControllerId());
-        mvc.perform(put(CONTROLLER_BASE + "/configData", tenantAware.getCurrentTenant(), savedTarget.getControllerId())
+        mvc.perform(put(CONTROLLER_BASE + "/configData", TenantAware.getCurrentTenant(), savedTarget.getControllerId())
                         .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         assertThatAttributesUpdateIsNotRequested(savedTarget.getControllerId());
@@ -505,7 +506,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         sendDeploymentActionFeedback(savedTarget, savedAction, "closed", "success", TARGET_COMPLETED_INSTALLATION_MSG)
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
-        mvc.perform(get(DEPLOYMENT_BASE + "?actionHistory=2", tenantAware.getCurrentTenant(), 911, savedAction.getId())
+        mvc.perform(get(DEPLOYMENT_BASE + "?actionHistory=2", TenantAware.getCurrentTenant(), 911, savedAction.getId())
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -543,12 +544,12 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         sendDeploymentActionFeedback(savedTarget, savedAction, "closed", "success", TARGET_COMPLETED_INSTALLATION_MSG)
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
-        mvc.perform(get(DEPLOYMENT_BASE + "?actionHistory=0", tenantAware.getCurrentTenant(), 911, savedAction.getId())
+        mvc.perform(get(DEPLOYMENT_BASE + "?actionHistory=0", TenantAware.getCurrentTenant(), 911, savedAction.getId())
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.actionHistory.messages").doesNotExist());
-        mvc.perform(get(DEPLOYMENT_BASE + "?actionHistory", tenantAware.getCurrentTenant(), 911, savedAction.getId())
+        mvc.perform(get(DEPLOYMENT_BASE + "?actionHistory", TenantAware.getCurrentTenant(), 911, savedAction.getId())
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -584,7 +585,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         sendDeploymentActionFeedback(savedTarget, savedAction, "closed", "success", TARGET_COMPLETED_INSTALLATION_MSG)
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
-        mvc.perform(get(DEPLOYMENT_BASE + "?actionHistory=-1", tenantAware.getCurrentTenant(), 911, savedAction.getId())
+        mvc.perform(get(DEPLOYMENT_BASE + "?actionHistory=-1", TenantAware.getCurrentTenant(), 911, savedAction.getId())
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -602,7 +603,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
         getAs(withUser("tenantadmin", TENANT_CONFIGURATION),
                 () -> {
-                    tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME, "00:05:00");
+                    tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME, "00:05:00");
                     return null;
                 });
 
@@ -657,7 +658,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(get(CONTROLLER_BASE, "default-tenant", "1911")).andExpect(status().isOk());
 
         final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
-        mvc.perform(get(DEPLOYMENT_BASE, tenantAware.getCurrentTenant(), "1911", action.getId()).accept(MediaType.APPLICATION_JSON))
+        mvc.perform(get(DEPLOYMENT_BASE, TenantAware.getCurrentTenant(), "1911", action.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
@@ -678,7 +679,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(get(CONTROLLER_BASE, "default-tenant", "1911")).andExpect(status().isOk());
 
         final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
-        mvc.perform(get(DEPLOYMENT_BASE, tenantAware.getCurrentTenant(), "1911", action.getId()).accept(MediaType.APPLICATION_JSON))
+        mvc.perform(get(DEPLOYMENT_BASE, TenantAware.getCurrentTenant(), "1911", action.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.deployment.download", equalTo("forced")))
@@ -709,7 +710,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Test
     void rootRsWithInvalidControllerId() throws Exception {
         final String invalidControllerId = randomString(Target.CONTROLLER_ID_MAX_SIZE + 1);
-        mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), invalidControllerId)).andExpect(status().isBadRequest());
+        mvc.perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), invalidControllerId)).andExpect(status().isBadRequest());
     }
 
     private void assertAttributesUpdateNotRequestedAfterFailedDeployment(Target target, final DistributionSet ds) throws Exception {
@@ -727,13 +728,13 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     }
 
     private void assertThatAttributesUpdateIsRequested(final String targetControllerId) throws Exception {
-        mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), targetControllerId).accept(MediaType.APPLICATION_JSON))
+        mvc.perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), targetControllerId).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._links.configData.href").isNotEmpty());
     }
 
     private void assertThatAttributesUpdateIsNotRequested(final String targetControllerId) throws Exception {
-        mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), targetControllerId).accept(MediaType.APPLICATION_JSON))
+        mvc.perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), targetControllerId).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._links.configData").doesNotExist());
     }
@@ -749,7 +750,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
         final String feedback = getJsonActionFeedback(DdiStatus.ExecutionStatus.valueOf(execution.toUpperCase()),
                 DdiResult.FinalResult.valueOf(finished.toUpperCase()), Collections.singletonList(message));
-        return mvc.perform(post(DEPLOYMENT_FEEDBACK, tenantAware.getCurrentTenant(), target.getControllerId(), action.getId())
+        return mvc.perform(post(DEPLOYMENT_FEEDBACK, TenantAware.getCurrentTenant(), target.getControllerId(), action.getId())
                 .content(feedback).contentType(MediaType.APPLICATION_JSON));
     }
 
@@ -761,8 +762,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     private void assertDeploymentActionIsExposedToTarget(final String controllerId, final long expectedActionId) throws Exception {
         final String expectedDeploymentBaseLink = String.format(
                 "/%s/controller/v1/%s/deploymentBase/%d",
-                tenantAware.getCurrentTenant(), controllerId, expectedActionId);
-        mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId).accept(MediaType.APPLICATION_JSON))
+                TenantAware.getCurrentTenant(), controllerId, expectedActionId);
+        mvc.perform(get(CONTROLLER_BASE, TenantAware.getCurrentTenant(), controllerId).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._links.deploymentBase.href", containsString(expectedDeploymentBaseLink)));
@@ -771,7 +772,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     private void withPollingTime(final String pollingTime, final Callable<Void> runnable) throws Exception {
         getAs(withUser("tenantadmin", TENANT_CONFIGURATION),
                 () -> {
-                    tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME, pollingTime);
+                    tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME, pollingTime);
                     return null;
                 });
         try {
@@ -779,7 +780,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         } finally {
             getAs(withUser("tenantadmin", TENANT_CONFIGURATION),
                     () -> {
-                        tenantConfigurationManagement.deleteConfiguration(TenantConfigurationKey.POLLING_TIME);
+                        tenantConfigurationManagement().deleteConfiguration(TenantConfigurationKey.POLLING_TIME);
                         return null;
                     });
         }

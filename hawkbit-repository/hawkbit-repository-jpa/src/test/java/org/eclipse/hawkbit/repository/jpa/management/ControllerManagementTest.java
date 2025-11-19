@@ -12,8 +12,8 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.eclipse.hawkbit.im.authentication.SpRole.CONTROLLER_ROLE;
-import static org.eclipse.hawkbit.im.authentication.SpRole.CONTROLLER_ROLE_ANONYMOUS;
+import static org.eclipse.hawkbit.auth.SpRole.CONTROLLER_ROLE;
+import static org.eclipse.hawkbit.auth.SpRole.CONTROLLER_ROLE_ANONYMOUS;
 import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
@@ -36,7 +36,8 @@ import java.util.stream.IntStream;
 import jakarta.validation.ConstraintViolationException;
 
 import org.assertj.core.api.Assertions;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.auth.SpPermission;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
@@ -1798,7 +1799,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void createTargetType(String targetTypeName) {
-        systemSecurityContext.runAsSystem(
+        SystemSecurityContext.runAsSystem(
                 () -> targetTypeManagement.create(TargetTypeManagement.Create.builder().name(targetTypeName).build()));
     }
 

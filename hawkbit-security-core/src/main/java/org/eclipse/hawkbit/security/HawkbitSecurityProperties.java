@@ -43,11 +43,11 @@ public class HawkbitSecurityProperties {
      */
     private List<String> httpFirewallIgnoredPaths;
     /**
-     * Basic authentication realm, see https://tools.ietf.org/html/rfc2617#page-3 .
+     * Basic auth realm, see https://tools.ietf.org/html/rfc2617#page-3 .
      */
     private String basicRealm = "hawkBit";
     /**
-     * If to allow http authentication when there is OAuth2 authentication enabled.
+     * If to allow http auth when there is OAuth2 auth enabled.
      */
     private boolean allowHttpBasicOnOAuthEnabled = false;
 

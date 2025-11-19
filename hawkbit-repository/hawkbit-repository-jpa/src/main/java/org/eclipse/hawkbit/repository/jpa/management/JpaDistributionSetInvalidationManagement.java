@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.integration.support.locks.LockRegistry;
@@ -47,9 +47,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     private final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
     private final PlatformTransactionManager txManager;
     private final RepositoryProperties repositoryProperties;
-    private final TenantAware tenantAware;
     private final LockRegistry lockRegistry;
-    private final SystemSecurityContext systemSecurityContext;
 
     @SuppressWarnings("java:S107")
     protected JpaDistributionSetInvalidationManagement(
@@ -57,23 +55,20 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
             final RolloutManagement rolloutManagement, final DeploymentManagement deploymentManagement,
             final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
             final PlatformTransactionManager txManager, final RepositoryProperties repositoryProperties,
-            final TenantAware tenantAware, final LockRegistry lockRegistry,
-            final SystemSecurityContext systemSecurityContext) {
+            final LockRegistry lockRegistry) {
         this.distributionSetManagement = distributionSetManagement;
         this.rolloutManagement = rolloutManagement;
         this.deploymentManagement = deploymentManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.txManager = txManager;
         this.repositoryProperties = repositoryProperties;
-        this.tenantAware = tenantAware;
         this.lockRegistry = lockRegistry;
-        this.systemSecurityContext = systemSecurityContext;
     }
 
     @Override
     public void invalidateDistributionSet(final DistributionSetInvalidation distributionSetInvalidation) {
         log.debug("Invalidate distribution sets {}", distributionSetInvalidation.getDistributionSetIds());
-        final String tenant = tenantAware.getCurrentTenant();
+        final String tenant = TenantAware.getCurrentTenant();
         if (shouldRolloutsBeCanceled(distributionSetInvalidation.getActionCancellationType())) {
             final String handlerId = JpaRolloutManagement.createRolloutLockKey(tenant);
             final Lock lock = lockRegistry.obtain(handlerId);
@@ -131,7 +126,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
         }
 
         // Do run as system to ensure all actions (even invisible) are canceled due to invalidation.
-        systemSecurityContext.runAsSystem(() -> {
+        SystemSecurityContext.runAsSystem(() -> {
             log.debug("Cancel auto assignments after ds invalidation. ID: {}", setId);
             targetFilterQueryManagement.cancelAutoAssignmentForDistributionSet(setId);
         });

@@ -9,23 +9,23 @@
  */
 package org.eclipse.hawkbit.repository.test;
 
-import java.util.Collections;
 import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.artifact.ArtifactStorage;
 import org.eclipse.hawkbit.artifact.fs.FileArtifactProperties;
 import org.eclipse.hawkbit.artifact.fs.FileArtifactStorage;
 import org.eclipse.hawkbit.artifact.urlresolver.PropertyBasedArtifactUrlResolver;
 import org.eclipse.hawkbit.artifact.urlresolver.PropertyBasedArtifactUrlResolverProperties;
-import org.eclipse.hawkbit.im.authentication.Hierarchy;
+import org.eclipse.hawkbit.audit.HawkbitAuditorAware;
+import org.eclipse.hawkbit.auth.Hierarchy;
+import org.eclipse.hawkbit.auth.SpPermission;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.repository.RepositoryConfiguration;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
-import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
@@ -33,20 +33,11 @@ import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
-import org.eclipse.hawkbit.security.SecurityContextSerializer;
-import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
-import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.tenancy.TenantAware.DefaultTenantResolver;
-import org.eclipse.hawkbit.tenancy.TenantAware.TenantResolver;
-import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationEvent;
@@ -82,6 +73,10 @@ public class TestConfiguration implements AsyncConfigurer {
     @Import(RepositoryConfiguration.class)
     static class OverridePropertiesSourceFromRepositoryConfiguration {}
 
+    static {
+        Hierarchy.setRoleHierarchy(RoleHierarchyImpl.fromHierarchy(Hierarchy.DEFAULT));
+    }
+
     @Override
     public Executor getAsyncExecutor() {
         return asyncExecutor();
@@ -103,14 +98,6 @@ public class TestConfiguration implements AsyncConfigurer {
                 }));
     }
 
-    /**
-     * Disables caching during test to avoid concurrency failures during test.
-     */
-    @Bean
-    RolloutStatusCache rolloutStatusCache(final TenantAware tenantAware) {
-        return new RolloutStatusCache(tenantAware);
-    }
-
     @Bean
     LockRegistry lockRegistry() {
         return new DefaultLockRegistry();
@@ -119,11 +106,6 @@ public class TestConfiguration implements AsyncConfigurer {
     @Bean
     SecurityTokenGenerator securityTokenGenerator() {
         return new SecurityTokenGenerator();
-    }
-
-    @Bean
-    SystemSecurityContext systemSecurityContext(final TenantAware tenantAware) {
-        return new SystemSecurityContext(tenantAware, RoleHierarchyImpl.fromHierarchy(Hierarchy.DEFAULT));
     }
 
     @Bean
@@ -141,25 +123,6 @@ public class TestConfiguration implements AsyncConfigurer {
     PropertyBasedArtifactUrlResolver testPropertyBasedArtifactUrlHandler(
             final PropertyBasedArtifactUrlResolverProperties urlHandlerProperties) {
         return new PropertyBasedArtifactUrlResolver(urlHandlerProperties, "");
-    }
-
-    @Bean
-    UserAuthoritiesResolver authoritiesResolver() {
-        return username -> Collections.emptyList();
-    }
-
-    @Bean
-    TenantResolver tenantResolver() {
-        return new DefaultTenantResolver();
-    }
-
-    @Bean
-    ContextAware contextAware(
-            final UserAuthoritiesResolver authoritiesResolver,
-            @Autowired(required = false) final SecurityContextSerializer securityContextSerializer,
-            final TenantResolver tenantResolver) {
-        // allow spying the security context
-        return org.mockito.Mockito.spy(new SecurityContextTenantAware(authoritiesResolver, securityContextSerializer, tenantResolver));
     }
 
     @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
@@ -182,7 +145,7 @@ public class TestConfiguration implements AsyncConfigurer {
 
     @Bean
     AuditorAware<String> auditorAware() {
-        return new SpringSecurityAuditorAware();
+        return new HawkbitAuditorAware();
     }
 
     @Bean

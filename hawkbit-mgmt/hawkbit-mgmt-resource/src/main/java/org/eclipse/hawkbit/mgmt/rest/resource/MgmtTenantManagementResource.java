@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.http.HttpStatus;
@@ -38,15 +39,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi {
 
-    private final TenantConfigurationManagement tenantConfigurationManagement;
     private final TenantConfigurationProperties tenantConfigurationProperties;
     private final SystemManagement systemManagement;
 
     MgmtTenantManagementResource(
-            final TenantConfigurationManagement tenantConfigurationManagement,
             final TenantConfigurationProperties tenantConfigurationProperties,
             final SystemManagement systemManagement) {
-        this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.tenantConfigurationProperties = tenantConfigurationProperties;
         this.systemManagement = systemManagement;
     }
@@ -81,7 +79,7 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
             return ResponseEntity.badRequest().build();
         }
 
-        tenantConfigurationManagement.deleteConfiguration(keyName);
+        TenantConfigHelper.getInstance().getTenantConfigurationManagement().deleteConfiguration(keyName);
 
         log.debug("{} config value deleted, return status {}", keyName, HttpStatus.OK);
         return ResponseEntity.noContent().build();
@@ -101,7 +99,8 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
         if (isDefaultDistributionSetTypeKey(keyName)) {
             responseUpdatedValue = updateDefaultDsType(configurationValue);
         } else {
-            final TenantConfigurationValue<? extends Serializable> updatedTenantConfigurationValue = tenantConfigurationManagement
+            final TenantConfigurationValue<? extends Serializable> updatedTenantConfigurationValue = TenantConfigHelper.getInstance()
+                    .getTenantConfigurationManagement()
                     .addOrUpdateConfiguration(keyName, configurationValueRest.getValue());
             responseUpdatedValue = MgmtTenantManagementMapper.toResponseTenantConfigurationValue(keyName, updatedTenantConfigurationValue);
         }
@@ -130,7 +129,7 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
         //try update TenantConfiguration, in case of Error -> rollback TenantMetadata
         final Map<String, TenantConfigurationValue<Serializable>> tenantConfigurationValues;
         try {
-            tenantConfigurationValues = tenantConfigurationManagement.addOrUpdateConfiguration(configurationValueMap);
+            tenantConfigurationValues = TenantConfigHelper.getInstance().getTenantConfigurationManagement().addOrUpdateConfiguration(configurationValueMap);
         } catch (Exception ex) {
             //if DefaultDsType was updated, rollback it in case of TenantConfiguration update.
             if (updatedDefaultDsType != null) {
@@ -161,7 +160,7 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
             response = MgmtTenantManagementMapper.toResponseDefaultDsType(systemManagement.getTenantMetadata().getDefaultDsType().getId());
         } else {
             response = MgmtTenantManagementMapper.toResponseTenantConfigurationValue(
-                    keyName, tenantConfigurationManagement.getConfigurationValue(keyName));
+                    keyName, TenantConfigHelper.getInstance().getTenantConfigurationManagement().getConfigurationValue(keyName));
         }
         return response;
     }

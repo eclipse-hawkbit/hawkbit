@@ -18,7 +18,7 @@ import org.springframework.web.util.UriUtils;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UrlUtils {
 
-    public static String decodeUriValue(String value) {
+    public static String decodeUriValue(final String value) {
         return UriUtils.decode(value, StandardCharsets.UTF_8);
     }
 }

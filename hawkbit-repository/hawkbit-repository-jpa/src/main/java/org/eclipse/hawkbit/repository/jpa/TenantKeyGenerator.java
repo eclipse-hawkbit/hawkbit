@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.cache.interceptor.KeyGenerator;
@@ -21,14 +22,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class TenantKeyGenerator implements KeyGenerator {
 
-    private final TenantAware tenantAware;
-
-    public TenantKeyGenerator(final TenantAware tenantAware) {
-        this.tenantAware = tenantAware;
-    }
-
     @Override
     public Object generate(final Object target, final Method method, final Object... params) {
-        return tenantAware.getCurrentTenant().toUpperCase();
+        return Objects.requireNonNull(
+                        TenantAware.getCurrentTenant(),
+                        "TenantKeyGenerator.generate called not in tenant context")
+                .toUpperCase();
     }
 }

@@ -15,10 +15,8 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import static org.mockito.Mockito.when;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
-import org.eclipse.hawkbit.security.SecurityContextTenantAware;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,20 +55,16 @@ class SecurityHeaderAuthenticatorTest {
 
     @Mock
     private TenantConfigurationManagement tenantConfigurationManagementMock;
-    @Mock
-    private UserAuthoritiesResolver authoritiesResolver;
+
 
     @BeforeEach
     void before() {
-        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver);
-        authenticator = new SecurityHeaderAuthenticator(
-                tenantConfigurationManagementMock, tenantAware,
-                new SystemSecurityContext(tenantAware), CA_COMMON_NAME, "X-Ssl-Issuer-Hash-%d"
-        );
+        TenantConfigHelper.getInstance().setTenantConfigurationManagement(tenantConfigurationManagementMock);
+        authenticator = new SecurityHeaderAuthenticator(CA_COMMON_NAME, "X-Ssl-Issuer-Hash-%d");
     }
 
     /**
-     * Tests successful authentication with multiple a single hashes
+     * Tests successful auth with multiple a single hashes
      */
     @Test
     void testWithSingleKnownHash() {
@@ -86,7 +80,7 @@ class SecurityHeaderAuthenticatorTest {
     }
 
     /**
-     * Tests successful authentication with multiple hashes
+     * Tests successful auth with multiple hashes
      */
     @Test
     void testWithMultipleKnownHashes() {
@@ -107,7 +101,7 @@ class SecurityHeaderAuthenticatorTest {
     }
 
     /**
-     * Tests that if the hash is unknown, the authentication fails
+     * Tests that if the hash is unknown, the auth fails
      */
     @Test
     void testWithUnknownHash() {
@@ -121,7 +115,7 @@ class SecurityHeaderAuthenticatorTest {
     }
 
     /**
-     * Tests that if CN doesn't match the CN in the security token, the authentication fails
+     * Tests that if CN doesn't match the CN in the security token, the auth fails
      */
     @Test
     void testWithNonMatchingCN() {
@@ -133,7 +127,7 @@ class SecurityHeaderAuthenticatorTest {
     }
 
     /**
-     * Tests that if the hash miss, the authentication fails
+     * Tests that if the hash miss, the auth fails
      */
     @Test
     void testWithoutHash() {
@@ -141,7 +135,7 @@ class SecurityHeaderAuthenticatorTest {
     }
 
     /**
-     * Tests that if disabled, the authentication fails
+     * Tests that if disabled, the auth fails
      */
     @Test
     void testWithSingleKnownHashButDisabled() {

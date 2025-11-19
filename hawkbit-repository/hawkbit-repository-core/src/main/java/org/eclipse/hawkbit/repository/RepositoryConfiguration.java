@@ -12,8 +12,8 @@ package org.eclipse.hawkbit.repository;
 import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.im.authentication.Hierarchy;
-import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
+import org.eclipse.hawkbit.auth.Hierarchy;
+import org.eclipse.hawkbit.auth.SpringEvalExpressions;
 import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,21 +47,22 @@ public class RepositoryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @SuppressWarnings("java:S3358")
-        // java:S3358 better readable this way
+    @SuppressWarnings("java:S3358") // java:S3358 better readable this way
     RoleHierarchy roleHierarchy(
             // if configured replaces the hierarchy completely
             @Value("${hawkbit.hierarchy:}") final String hierarchy,
             // if the "hierarchy" property is empty, and this property is configured it is appended to the default hierarchy
             @Value("${hawkbit.hierarchy.ext:}") final String hierarchyExt) {
-        return RoleHierarchyImpl.fromHierarchy(
+        final RoleHierarchy roleHierarchy = RoleHierarchyImpl.fromHierarchy(
                 ObjectUtils.isEmpty(hierarchy)
                         ? (ObjectUtils.isEmpty(hierarchyExt) ? Hierarchy.DEFAULT : Hierarchy.DEFAULT + hierarchyExt)
                         : hierarchy);
+        Hierarchy.setRoleHierarchy(roleHierarchy);
+        return roleHierarchy;
     }
 
     @Bean
-    PermissionEvaluator permissionEvaluator(final RoleHierarchy roleHierarchy) {
+    PermissionEvaluator permissionEvaluator() {
         return new DenyAllPermissionEvaluator() {
 
             @Override
@@ -72,7 +73,8 @@ public class RepositoryConfiguration {
                             .replace(SpringEvalExpressions.PERMISSION_GROUP_PLACEHOLDER, permissionSupport.permissionGroup());
 
                     // do permissions check
-                    final boolean hasPermission = roleHierarchy.getReachableGrantedAuthorities(authentication.getAuthorities()).stream()
+                    final boolean hasPermission = Hierarchy.getRoleHierarchy()
+                            .getReachableGrantedAuthorities(authentication.getAuthorities()).stream()
                             .map(GrantedAuthority::getAuthority)
                             .anyMatch(authority -> authority.equals(neededPermission));
                     if (!hasPermission) {

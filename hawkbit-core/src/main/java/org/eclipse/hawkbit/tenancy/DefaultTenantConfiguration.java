@@ -46,12 +46,6 @@ public class DefaultTenantConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    TenantAware.TenantResolver tenantResolver() {
-        return new TenantAware.DefaultTenantResolver();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
     TenantAwareCacheManager cacheManager() {
         return TenantAwareCacheManager.getInstance();
     }
@@ -62,12 +56,12 @@ public class DefaultTenantConfiguration {
     @ConditionalOnProperty(name = "hawkbit.metrics.tenancy.web.enabled", havingValue = "true", matchIfMissing = true)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     @ConditionalOnClass(name = { "org.springframework.web.servlet.DispatcherServlet", "io.micrometer.observation.Observation" })
-    @ConditionalOnBean({ ObservationRegistry.class, TenantAware.TenantResolver.class })
+    @ConditionalOnBean(ObservationRegistry.class)
     public static class WebConfig {
 
         @Bean
         @Primary
-        public DefaultServerRequestObservationConvention serverRequestObservationConvention(final TenantAware.TenantResolver tenantResolver) {
+        public DefaultServerRequestObservationConvention serverRequestObservationConvention() {
             return new DefaultServerRequestObservationConvention() {
 
                 @NonNull
@@ -78,7 +72,7 @@ public class DefaultTenantConfiguration {
                 }
 
                 private KeyValue tenant() {
-                    return KeyValue.of(TENANT_TAG, Optional.ofNullable(tenantResolver.resolveTenant()).orElse("n/a"));
+                    return KeyValue.of(TENANT_TAG, Optional.ofNullable(TenantAware.getCurrentTenant()).orElse("n/a"));
                 }
             };
         }
@@ -104,17 +98,16 @@ public class DefaultTenantConfiguration {
     @ConditionalOnClass(name = {
             "io.micrometer.core.instrument.Tag",
             "org.springframework.data.repository.core.support.RepositoryMethodInvocationListener" })
-    @ConditionalOnBean(TenantAware.TenantResolver.class)
     public static class RepositoryConfig {
 
         @Bean
-        public RepositoryTagsProvider repositoryTagsProvider(final TenantAware.TenantResolver tenantResolver) {
+        public RepositoryTagsProvider repositoryTagsProvider() {
             return new DefaultRepositoryTagsProvider() {
 
                 @Override
                 public Iterable<Tag> repositoryTags(final RepositoryMethodInvocationListener.RepositoryMethodInvocation invocation) {
                     final Iterable<Tag> defaultTags = super.repositoryTags(invocation);
-                    final String tenant = Optional.ofNullable(tenantResolver.resolveTenant()).orElse("n/a");
+                    final String tenant = Optional.ofNullable(TenantAware.getCurrentTenant()).orElse("n/a");
                     return () -> {
                         final Iterator<Tag> defaultTagsIterator = defaultTags.iterator();
                         return new Iterator<>() {

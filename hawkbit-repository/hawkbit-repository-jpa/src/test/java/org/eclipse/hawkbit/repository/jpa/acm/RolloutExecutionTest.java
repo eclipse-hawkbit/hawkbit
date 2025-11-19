@@ -10,17 +10,18 @@
 package org.eclipse.hawkbit.repository.jpa.acm;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.CREATE_ROLLOUT;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.HANDLE_ROLLOUT;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_DISTRIBUTION_SET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_ROLLOUT;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TARGET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_TARGET;
+import static org.eclipse.hawkbit.auth.SpPermission.CREATE_ROLLOUT;
+import static org.eclipse.hawkbit.auth.SpPermission.HANDLE_ROLLOUT;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_DISTRIBUTION_SET;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_ROLLOUT;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_TARGET;
+import static org.eclipse.hawkbit.auth.SpPermission.UPDATE_TARGET;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
 
 import java.util.Arrays;
 import java.util.Optional;
 
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.jpa.scheduler.RolloutScheduler;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -31,12 +32,12 @@ class RolloutExecutionTest extends AbstractAccessControllerManagementTest {
 
     @Test
     void verifyOnlyUpdatableTargetsArePartOfRolloutExecutedByScheduler() {
-        verify(new RolloutScheduler(rolloutHandler, systemManagement, systemSecurityContext, 1, Optional.empty())::runningRolloutScheduler);
+        verify(new RolloutScheduler(rolloutHandler, systemManagement, 1, Optional.empty())::runningRolloutScheduler);
     }
 
     @Test
     void verifyOnlyUpdatableTargetsArePartOfRollout() {
-        verify(() -> systemSecurityContext.runAsSystem(rolloutHandler::handleAll));
+        verify(() -> SystemSecurityContext.runAsSystem(rolloutHandler::handleAll));
     }
 
     private void verify(final Runnable run) {

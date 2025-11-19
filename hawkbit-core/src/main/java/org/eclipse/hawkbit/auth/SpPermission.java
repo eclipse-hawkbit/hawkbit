@@ -7,8 +7,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.im.authentication;
+package org.eclipse.hawkbit.auth;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,7 +17,12 @@ import java.util.Set;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.function.SingletonSupplier;
 
 /**
@@ -163,5 +169,28 @@ public final class SpPermission {
 
     public static Set<String> getAllTenantAuthorities() {
         return ALL_TENANT_AUTHORITIES.get();
+    }
+
+    @SuppressWarnings("java:S3776") // java:S3776 - better in one place for better readability
+    public static boolean hasPermission(final String permission) {
+        final SecurityContext context = SecurityContextHolder.getContext();
+        if (context != null) {
+            final Authentication authentication = context.getAuthentication();
+            if (authentication != null) {
+                Collection<? extends GrantedAuthority> grantedAuthorities = authentication.getAuthorities();
+                final RoleHierarchy roleHierarchy = Hierarchy.getRoleHierarchy();
+                if (!ObjectUtils.isEmpty(grantedAuthorities)) {
+                    if (roleHierarchy != null) {
+                        grantedAuthorities = roleHierarchy.getReachableGrantedAuthorities(grantedAuthorities);
+                    }
+                    for (final GrantedAuthority authority : grantedAuthorities) {
+                        if (authority.getAuthority().equals(permission)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

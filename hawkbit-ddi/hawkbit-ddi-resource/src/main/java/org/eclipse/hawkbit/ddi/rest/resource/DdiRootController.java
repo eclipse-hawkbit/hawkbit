@@ -102,7 +102,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private final SystemManagement systemManagement;
     private final ApplicationEventPublisher eventPublisher;
     private final HawkbitSecurityProperties securityProperties;
-    private final TenantAware tenantAware;
 
     @SuppressWarnings("java:S107")
     public DdiRootController(
@@ -110,7 +109,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             final ArtifactManagement artifactManagement, final ArtifactUrlResolver artifactUrlHandler,
             final SystemManagement systemManagement,
             final ApplicationEventPublisher eventPublisher,
-            final HawkbitSecurityProperties securityProperties, final TenantAware tenantAware) {
+            final HawkbitSecurityProperties securityProperties) {
         this.controllerManagement = controllerManagement;
         this.confirmationManagement = confirmationManagement;
         this.artifactManagement = artifactManagement;
@@ -118,7 +117,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
         this.systemManagement = systemManagement;
         this.eventPublisher = eventPublisher;
         this.securityProperties = securityProperties;
-        this.tenantAware = tenantAware;
     }
 
     @Override
@@ -155,7 +153,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                 installedAction, activeAction,
                 activeAction == null
                         ? controllerManagement.getPollingTime(target)
-                        : controllerManagement.getPollingTimeForAction(target, activeAction), tenantAware),
+                        : controllerManagement.getPollingTimeForAction(target, activeAction)),
                 HttpStatus.OK);
     }
 
@@ -190,7 +188,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                         (length, shippedSinceLastEvent, total) -> {
                             if (actionStatus != null) {
                                 eventPublisher.publishEvent(new DownloadProgressEvent(
-                                        tenantAware.getCurrentTenant(), actionStatus.getId(), shippedSinceLastEvent));
+                                        TenantAware.getCurrentTenant(), actionStatus.getId(), shippedSinceLastEvent));
                             }
                         });
             }
@@ -358,8 +356,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         final DdiAutoConfirmationState autoConfirmationState = getAutoConfirmationState(controllerId);
 
-        final DdiConfirmationBase confirmationBase = DataConversionHelper.createConfirmationBase(
-                target, activeAction, autoConfirmationState, tenantAware);
+        final DdiConfirmationBase confirmationBase = DataConversionHelper.createConfirmationBase(target, activeAction, autoConfirmationState);
         return new ResponseEntity<>(confirmationBase, HttpStatus.OK);
     }
 

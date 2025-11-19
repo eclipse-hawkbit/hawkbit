@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.qfields.ActionFields;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Slice;
@@ -117,7 +118,7 @@ class RsqlActionFieldsTest extends AbstractJpaIntegrationTest {
         newAction.setStatus(active ? Status.RUNNING : Status.FINISHED);
         newAction.setTarget(target);
         newAction.setWeight(45);
-        newAction.setInitiatedBy(tenantAware.getCurrentUsername());
+        newAction.setInitiatedBy(TenantAware.getCurrentUsername());
         if (extRef != null) {
             newAction.setExternalRef(extRef);
         }

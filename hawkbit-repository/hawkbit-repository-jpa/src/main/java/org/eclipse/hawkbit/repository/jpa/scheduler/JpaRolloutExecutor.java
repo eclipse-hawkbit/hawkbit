@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.scheduler;
 
+import static org.eclipse.hawkbit.audit.HawkbitAuditorAware.runAsAuditor;
+import static org.eclipse.hawkbit.context.ContextAware.runInContext;
 import static org.eclipse.hawkbit.repository.jpa.JpaManagementHelper.combineWithAnd;
 import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor.afterCommit;
 
@@ -25,7 +27,8 @@ import java.util.stream.StreamSupport;
 import jakarta.persistence.EntityManager;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.ContextAware;
+import org.eclipse.hawkbit.context.ContextAware;
+import org.eclipse.hawkbit.audit.HawkbitAuditorAware;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -73,8 +76,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.qfields.TargetFields;
-import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -127,9 +129,6 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private final RolloutApprovalStrategy rolloutApprovalStrategy;
     private final EntityManager entityManager;
     private final PlatformTransactionManager txManager;
-    private final TenantAware tenantAware;
-    private final ContextAware contextAware;
-    private final SystemSecurityContext systemSecurityContext;
     private final RepositoryProperties repositoryProperties;
     private final Map<Long, AtomicLong> lastDynamicGroupFill = new ConcurrentHashMap<>();
 
@@ -142,7 +141,6 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final RolloutManagement rolloutManagement, final QuotaManagement quotaManagement,
             final RolloutGroupEvaluationManager evaluationManager, final RolloutApprovalStrategy rolloutApprovalStrategy,
             final EntityManager entityManager, final PlatformTransactionManager txManager,
-            final TenantAware tenantAware, final ContextAware contextAware, final SystemSecurityContext systemSecurityContext,
             final RepositoryProperties repositoryProperties) {
         this.actionRepository = actionRepository;
         this.rolloutGroupRepository = rolloutGroupRepository;
@@ -157,9 +155,6 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         this.rolloutApprovalStrategy = rolloutApprovalStrategy;
         this.entityManager = entityManager;
         this.txManager = txManager;
-        this.tenantAware = tenantAware;
-        this.contextAware = contextAware;
-        this.systemSecurityContext = systemSecurityContext;
         this.repositoryProperties = repositoryProperties;
     }
 
@@ -167,9 +162,9 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     public void execute(final Rollout rollout) {
         rollout.getAccessControlContext().ifPresentOrElse(
                 context -> // has stored context - executes it with it
-                        contextAware.runInContext(context, () -> execute0(rollout)),
+                        runInContext(context, () -> execute0(rollout)),
                 () -> // has no stored context - executes it in the tenant & user scope
-                        contextAware.runAsTenantAsUser(contextAware.getCurrentTenant(), rollout.getCreatedBy(), () -> execute0(rollout)));
+                        runAsAuditor(rollout.getCreatedBy(), () -> execute0(rollout)));
     }
 
     private void execute0(final Rollout rollout) {
@@ -184,12 +179,12 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 break;
             case STARTING:
                 // the lastModifiedBy user is probably the user that has actually called the rollout start (unless overridden) - not the creator
-                SpringSecurityAuditorAware.setAuditorOverride(rollout.getLastModifiedBy());
+                HawkbitAuditorAware.setAuditorOverride(rollout.getLastModifiedBy());
                 try {
                     handleStartingRollout((JpaRollout) rollout);
                 } finally {
                     // clear, ALWAYS, the set auditor override
-                    SpringSecurityAuditorAware.clearAuditorOverride();
+                    HawkbitAuditorAware.clearAuditorOverride();
                 }
                 break;
             case RUNNING:
@@ -197,22 +192,22 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 break;
             case STOPPING:
                 // the lastModifiedBy user is probably the user that has actually called the rollout stop (unless overridden) - not the creator
-                SpringSecurityAuditorAware.setAuditorOverride(rollout.getLastModifiedBy());
+                HawkbitAuditorAware.setAuditorOverride(rollout.getLastModifiedBy());
                 try {
                     handleStopRollout((JpaRollout) rollout);
                 } finally {
                     // clear, ALWAYS, the set auditor override
-                    SpringSecurityAuditorAware.clearAuditorOverride();
+                    HawkbitAuditorAware.clearAuditorOverride();
                 }
                 break;
             case DELETING:
                 // the lastModifiedBy user is probably the user that has actually called the rollout delete (unless overridden) - not the creator
-                SpringSecurityAuditorAware.setAuditorOverride(rollout.getLastModifiedBy());
+                HawkbitAuditorAware.setAuditorOverride(rollout.getLastModifiedBy());
                 try {
                     handleDeleteRollout((JpaRollout) rollout);
                 } finally {
                     // clear, ALWAYS, the set auditor override
-                    SpringSecurityAuditorAware.clearAuditorOverride();
+                    HawkbitAuditorAware.clearAuditorOverride();
                 }
                 break;
             default:
@@ -343,7 +338,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
             final List<Long> groupIds = rollout.getRolloutGroups().stream().map(RolloutGroup::getId).toList();
             afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
-                    new RolloutStoppedEvent(tenantAware.getCurrentTenant(), rollout.getId(), groupIds)));
+                    new RolloutStoppedEvent(TenantAware.getCurrentTenant(), rollout.getId(), groupIds)));
         }
     }
 
@@ -873,7 +868,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         try {
             QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class, actionRepository::countByTargetId);
         } catch (final AssignmentQuotaExceededException ex) {
-            systemSecurityContext.runAsSystem(() -> deploymentManagement.handleMaxAssignmentsExceeded(target.getId(), requested, ex));
+            SystemSecurityContext.runAsSystem(() -> deploymentManagement.handleMaxAssignmentsExceeded(target.getId(), requested, ex));
         }
     }
 

@@ -16,10 +16,8 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import static org.mockito.Mockito.when;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
-import org.eclipse.hawkbit.security.SecurityContextTenantAware;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Feature: Unit Tests - Security<br/>
- * Story: Gateway token authentication
+ * Story: Gateway token auth
  */
 @ExtendWith(MockitoExtension.class)
 class GatewayTokenAuthenticatorTest {
@@ -48,17 +46,15 @@ class GatewayTokenAuthenticatorTest {
 
     @Mock
     private TenantConfigurationManagement tenantConfigurationManagementMock;
-    @Mock
-    private UserAuthoritiesResolver authoritiesResolver;
 
     @BeforeEach
     void before() {
-        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver);
-        authenticator = new GatewayTokenAuthenticator(tenantConfigurationManagementMock, tenantAware, new SystemSecurityContext(tenantAware));
+        TenantConfigHelper.getInstance().setTenantConfigurationManagement(tenantConfigurationManagementMock);
+        authenticator = new GatewayTokenAuthenticator();
     }
 
     /**
-     * Tests successful authentication with gateway token
+     * Tests successful auth with gateway token
      */
     @Test
     void testWithGwToken() {
@@ -74,7 +70,7 @@ class GatewayTokenAuthenticatorTest {
     }
 
     /**
-     * Tests that if gateway token doesn't match, the authentication fails
+     * Tests that if gateway token doesn't match, the auth fails
      */
     @Test
     void testWithBadGwToken() {
@@ -88,7 +84,7 @@ class GatewayTokenAuthenticatorTest {
     }
 
     /**
-     * Tests that if gateway token miss, the authentication fails
+     * Tests that if gateway token miss, the auth fails
      */
     @Test
     void testWithoutGwToken() {
@@ -96,7 +92,7 @@ class GatewayTokenAuthenticatorTest {
     }
 
     /**
-     * Tests that if disabled, the authentication fails
+     * Tests that if disabled, the auth fails
      */
     @Test
     void testWithGwTokenButDisabled() {

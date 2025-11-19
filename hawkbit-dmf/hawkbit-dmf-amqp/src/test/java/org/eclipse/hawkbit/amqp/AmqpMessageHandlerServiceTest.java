@@ -37,19 +37,17 @@ import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
-import org.eclipse.hawkbit.repository.SecurityTokenGeneratorHolder;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
-import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -93,8 +91,6 @@ class AmqpMessageHandlerServiceTest {
     private TenantConfigurationManagement tenantConfigurationManagement;
     @Mock
     private RabbitTemplate rabbitTemplate;
-    @Mock
-    private UserAuthoritiesResolver authoritiesResolver;
 
     @Captor
     private ArgumentCaptor<Map<String, String>> attributesCaptor;
@@ -116,6 +112,7 @@ class AmqpMessageHandlerServiceTest {
     @BeforeEach
     @SuppressWarnings({ "rawtypes", "unchecked" })
     void before() {
+        TenantConfigHelper.getInstance().setTenantConfigurationManagement(tenantConfigurationManagement);
         messageConverter = new Jackson2JsonMessageConverter();
         lenient().when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
         final TenantConfigurationValue multiAssignmentConfig = TenantConfigurationValue.builder().value(Boolean.FALSE)
@@ -123,12 +120,8 @@ class AmqpMessageHandlerServiceTest {
         lenient().when(tenantConfigurationManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class))
                 .thenReturn(multiAssignmentConfig);
 
-        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver);
-        final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);
-
-        amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
-                controllerManagementMock, systemSecurityContext, tenantConfigurationManagement,
-                confirmationManagementMock);
+        amqpMessageHandlerService = new AmqpMessageHandlerService(
+                rabbitTemplate, amqpMessageDispatcherServiceMock, controllerManagementMock, confirmationManagementMock);
     }
 
     /**

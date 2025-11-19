@@ -25,18 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MgmtBasicAuthResource implements MgmtBasicAuthRestApi {
 
-    private final TenantAware tenantAware;
-
-    public MgmtBasicAuthResource(final TenantAware tenantAware) {
-        this.tenantAware = tenantAware;
-    }
-
     @Override
     @AuditLog(entity = "BasicAuth", type = AuditLog.Type.READ, description = "Validate Basic Auth")
     public ResponseEntity<MgmtUserInfo> validateBasicAuth() {
         final MgmtUserInfo userInfo = new MgmtUserInfo();
-        userInfo.setTenant(tenantAware.getCurrentTenant());
-        userInfo.setUsername(tenantAware.getCurrentUsername());
+        userInfo.setTenant(TenantAware.getCurrentTenant());
+        userInfo.setUsername(TenantAware.getCurrentUsername());
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             userInfo.setPermissions(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toArray(String[]::new));

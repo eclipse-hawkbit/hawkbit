@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import lombok.SneakyThrows;
+import org.eclipse.hawkbit.context.ContextAware;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -27,7 +28,8 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
-import org.eclipse.hawkbit.security.SecurityContextSerializer;
+import org.eclipse.hawkbit.context.SecurityContextSerializer;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Bean;
@@ -45,13 +47,9 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = { "hawkbit.server.repository.dynamicRolloutsMinInvolvePeriodMS=-1" })
 class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
 
-    @Configuration
-    static class Config {
-
-        @Bean
-        SecurityContextSerializer securityContextSerializer() {
-            return SecurityContextSerializer.JSON_SERIALIZATION;
-        }
+    @BeforeAll
+    static void setup() {
+        ContextAware.setSecurityContextSerializer(SecurityContextSerializer.JSON_SERIALIZATION);
     }
 
     @BeforeEach

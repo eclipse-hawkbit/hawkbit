@@ -45,8 +45,6 @@ class TransactionManager extends JpaTransactionManager {
     
     private static final Class<?> JPA_TARGET;
 
-    private transient TenantAware.TenantResolver tenantResolver;
-
     static {
         try {
             JPA_TARGET = Class.forName("org.eclipse.hawkbit.repository.jpa.model.JpaTarget");
@@ -55,10 +53,6 @@ class TransactionManager extends JpaTransactionManager {
         } catch (final Exception e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    TransactionManager(final TenantAware.TenantResolver tenantResolver) {
-        this.tenantResolver = tenantResolver;
     }
 
     private static final EntityPropertyChangeListener ENTITY_PROPERTY_CHANGE_LISTENER = new EntityPropertyChangeListener();
@@ -83,7 +77,7 @@ class TransactionManager extends JpaTransactionManager {
             }
         }
 
-        final String currentTenant = tenantResolver.resolveTenant();
+        final String currentTenant = TenantAware.getCurrentTenant();
         if (currentTenant == null) {
             cleanupTenant(em);
         } else {

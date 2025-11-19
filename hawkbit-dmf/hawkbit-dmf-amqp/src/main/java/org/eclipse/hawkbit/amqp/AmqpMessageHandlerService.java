@@ -37,7 +37,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfAutoConfirmation;
 import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
-import org.eclipse.hawkbit.im.authentication.SpRole;
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -45,6 +45,7 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate.ActionStatusCreateBuilder;
@@ -53,7 +54,7 @@ import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -82,30 +83,16 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     private final AmqpMessageDispatcherService amqpMessageDispatcherService;
     private final ConfirmationManagement confirmationManagement;
-    private final TenantConfigurationManagement tenantConfigurationManagement;
-    private final SystemSecurityContext systemSecurityContext;
     private ControllerManagement controllerManagement;
 
-    /**
-     * Constructor.
-     *
-     * @param rabbitTemplate for converting messages
-     * @param amqpMessageDispatcherService to sending events to DMF client
-     * @param controllerManagement for target repo access
-     * @param systemSecurityContext the system Security Context
-     * @param tenantConfigurationManagement the tenant configuration Management
-     * @param confirmationManagement the confirmation management
-     */
     public AmqpMessageHandlerService(
             final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
-            final ControllerManagement controllerManagement, final SystemSecurityContext systemSecurityContext,
-            final TenantConfigurationManagement tenantConfigurationManagement, final ConfirmationManagement confirmationManagement) {
+            final ControllerManagement controllerManagement,
+            final ConfirmationManagement confirmationManagement) {
         super(rabbitTemplate);
         this.amqpMessageDispatcherService = amqpMessageDispatcherService;
         this.controllerManagement = controllerManagement;
-        this.systemSecurityContext = systemSecurityContext;
-        this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.confirmationManagement = confirmationManagement;
     }
 
@@ -493,10 +480,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private boolean isMultiAssignmentsEnabled() {
-        return getConfigValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class);
-    }
-
-    private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType) {
-        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
+        return TenantConfigHelper.getInstance().getConfigValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class);
     }
 }
