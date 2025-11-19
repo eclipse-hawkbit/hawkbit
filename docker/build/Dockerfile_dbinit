@@ -21,7 +21,7 @@ RUN set -x &&\
 
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
 ARG APP_DIR=/app
-WORKDIR /app
+WORKDIR ${APP_DIR}
 RUN addgroup -S hawkbit_group && adduser -D hawkbit -G hawkbit_group
 USER hawkbit
 
@@ -31,7 +31,7 @@ ARG HAWKBIT_VERSION=pass_as_buils_arg
 ENV APP=${HAWKBIT_APP}
 ENV VERSION=${HAWKBIT_VERSION}
 
-COPY --from=build /${APP}-${VERSION}.jar ./
+COPY --from=build /${APP_DIR}/${APP}-${VERSION}.jar ./
 
 ARG X_MS=256m
 ENV X_MS=${X_MS}
