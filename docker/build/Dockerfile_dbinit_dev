@@ -10,7 +10,7 @@ ENV APP=${HAWKBIT_APP}
 ENV VERSION=${HAWKBIT_VERSION}
 
 RUN addgroup -S hawkbit_group && adduser -D hawkbit -G hawkbit_group
-RUN mkdir -p /artifactrepo && chown -R hawkbit /artifactrepo
+RUN mkdir -p artifactrepo && chown -R hawkbit artifactrepo
 USER hawkbit
 
 COPY org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar /${APP_DIR}/${APP}-${VERSION}.jar
