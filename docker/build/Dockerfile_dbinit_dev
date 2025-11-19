@@ -1,8 +1,7 @@
 # set Java
 ARG JAVA_VERSION=21.0.9_10
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS build
-ARG APP_DIR=/app
-WORKDIR ${APP_DIR}
+WORKDIR /app
 ARG HAWKBIT_APP=hawkbit-repository-jpa-init
 ARG HAWKBIT_VERSION=0-SNAPSHOT
 
@@ -13,7 +12,7 @@ RUN addgroup -S hawkbit_group && adduser -D hawkbit -G hawkbit_group
 RUN mkdir -p artifactrepo && chown -R hawkbit artifactrepo
 USER hawkbit
 
-COPY org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar /${APP_DIR}/${APP}-${VERSION}.jar
+COPY org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar ${APP}-${VERSION}.jar
 
 ARG X_MS=256m
 ENV X_MS=${X_MS}
