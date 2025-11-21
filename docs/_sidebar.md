@@ -6,7 +6,8 @@
   - [Architecture](architecture.md)
 
 - Guides
-  - [Run hawkBit](run-hawkbit.md)
+  - [Base Setup](base-setup.md)
+  - [SDK](hawkbit-sdk.md)
   - [Feign Client](feign-client.md)
   - [Clustering](clustering.md)
   
