@@ -15,15 +15,13 @@ concepts and how to setup your own cluster. You can find additional information 
 ### Events
 
 Event communication between nodes is based on [Spring Cloud Stream](http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/).  
-There are different [binder implementations](https://docs.spring.io/spring-cloud-stream/docs/current/reference/html/#_binders) available. The hawkbit Update Server uses RabbitMQ binder. 
+There are different [binder implementations](https://docs.spring.io/spring-cloud-stream/docs/current/reference/html/#_binders) available. The hawkbit Update Server uses **RabbitMQ binder**. 
 Every node gets its own queue to receive cluster events, the default payload is JSON.
 
 
 <p align="center">
   <img src="images/eventing-within-cluster.png" alt="Clustering Diagram" width="1100"/>
 </p>
-
----
 
 #### Event Channel Types in Spring Cloud Stream
 
@@ -69,6 +67,8 @@ Add to your `pom.xml` :
     <artifactId>protostuff-runtime</artifactId>
 </dependency>
 ```
+
+---
 
 ### Caching
 
