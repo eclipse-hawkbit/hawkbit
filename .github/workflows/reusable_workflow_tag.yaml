@@ -24,12 +24,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-      # should work with actions/checkout@v5 with fetch-tags: true, BUT it doesn't work as expected!
+      # should work with actions/checkout@v6 with fetch-tags: true, BUT it doesn't work as expected!
       # See https://github.com/actions/checkout/issues/1471.
       # So we do workaround by manually fetching tags.
-      - name: Workaround of actions/checkout@v5 fetch-tags true doesn't work
+      - name: Workaround of actions/checkout@v6 fetch-tags true doesn't work
         run: git fetch --tags
 
       - name: Create Tag ${{ inputs.tag_name }}

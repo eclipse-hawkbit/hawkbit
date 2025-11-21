@@ -92,7 +92,7 @@ jobs:
           - 5672:5672
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.revision == '0-SNAPSHOT' && github.ref || inputs.revision }}
 

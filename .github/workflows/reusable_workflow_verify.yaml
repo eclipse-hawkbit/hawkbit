@@ -41,7 +41,7 @@ jobs:
           echo "Ref: ${{ inputs.ref }},"
           echo "Maven Properties: ${{ inputs.maven_properties }}"
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           repository: ${{ inputs.repository }}
           ref: ${{ inputs.ref }}
