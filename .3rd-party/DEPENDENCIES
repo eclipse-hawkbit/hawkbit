@@ -7,10 +7,10 @@ maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.19.2, Apache-2.
 maven/mavencentral/com.fasterxml.jackson.dataformat/jackson-dataformat-cbor/2.19.2, Apache-2.0, approved, #22139
 maven/mavencentral/com.fasterxml.jackson.dataformat/jackson-dataformat-toml/2.19.2, Apache-2.0, approved, #20928
 maven/mavencentral/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.19.2, Apache-2.0, approved, #21912
-maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jdk8/2.19.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jdk8/2.19.2, Apache-2.0, approved, #24939
 maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-joda/2.19.2, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.19.2, Apache-2.0, approved, #23299
-maven/mavencentral/com.fasterxml.jackson.module/jackson-module-parameter-names/2.19.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.fasterxml.jackson.module/jackson-module-parameter-names/2.19.2, Apache-2.0, approved, #24938
 maven/mavencentral/com.fasterxml/classmate/1.7.1, Apache-2.0, approved, #24482
 maven/mavencentral/com.github.ben-manes.caffeine/caffeine/3.2.2, Apache-2.0 AND (Apache-2.0 AND CC0-1.0), approved, #18889
 maven/mavencentral/com.github.javaparser/javaparser-core/3.26.4, (Apache-2.0 AND LGPL-2.1-or-later AND LGPL-3.0 AND LGPL-3.0-only) OR (Apache-2.0 AND LGPL-2.1-or-later AND LGPL-3.0-only), approved, clearlydefined
@@ -118,7 +118,7 @@ maven/mavencentral/com.vaadin/vaadin-upload-flow/24.9.5, Apache-2.0, approved, #
 maven/mavencentral/com.vaadin/vaadin-virtual-list-flow/24.9.5, Apache-2.0, approved, #23462
 maven/mavencentral/com.zaxxer/HikariCP/6.3.3, Apache-2.0, approved, #23029
 maven/mavencentral/commons-codec/commons-codec/1.18.0, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #19214
-maven/mavencentral/commons-fileupload/commons-fileupload/1.5, Apache-2.0, approved, #7109
+maven/mavencentral/commons-fileupload/commons-fileupload/1.6.0, Apache-2.0, approved, #21847
 maven/mavencentral/commons-io/commons-io/2.21.0, Apache-2.0, approved, #24652
 maven/mavencentral/commons-logging/commons-logging/1.2, Apache-2.0, approved, CQ10162
 maven/mavencentral/cz.jirutka.rsql/rsql-parser/2.1.0, MIT, approved, CQ12964
@@ -196,8 +196,8 @@ maven/mavencentral/org.apache.commons/commons-compress/1.27.1, Apache-2.0 AND (A
 maven/mavencentral/org.apache.commons/commons-configuration2/2.12.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.apache.commons/commons-fileupload2-core/2.0.0-M4, Apache-2.0, approved, #15738
 maven/mavencentral/org.apache.commons/commons-fileupload2-jakarta-servlet6/2.0.0-M4, Apache-2.0, approved, #21710
-maven/mavencentral/org.apache.commons/commons-lang3/3.17.0, Apache-2.0, approved, #16044
-maven/mavencentral/org.apache.commons/commons-text/1.14.0, Apache-2.0, approved, #22632
+maven/mavencentral/org.apache.commons/commons-lang3/3.20.0, Apache-2.0, approved, #24711
+maven/mavencentral/org.apache.commons/commons-text/1.13.0, Apache-2.0, approved, #17931
 maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.5.1, Apache-2.0 AND MPL-2.0, approved, #24483
 maven/mavencentral/org.apache.httpcomponents.core5/httpcore5-h2/5.3.6, Apache-2.0, approved, #16867
 maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.3.6, Apache-2.0, approved, #16866
@@ -301,7 +301,7 @@ maven/mavencentral/org.springframework.integration/spring-integration-amqp/6.5.3
 maven/mavencentral/org.springframework.integration/spring-integration-core/6.5.3, Apache-2.0, approved, #23444
 maven/mavencentral/org.springframework.integration/spring-integration-jdbc/6.5.3, Apache-2.0, approved, #21987
 maven/mavencentral/org.springframework.integration/spring-integration-jmx/6.5.3, Apache-2.0, approved, #23494
-maven/mavencentral/org.springframework.plugin/spring-plugin-core/4.0.0, , restricted, clearlydefined
+maven/mavencentral/org.springframework.plugin/spring-plugin-core/4.0.0, Apache-2.0, approved, #24785
 maven/mavencentral/org.springframework.retry/spring-retry/2.0.12, Apache-2.0, approved, #16889
 maven/mavencentral/org.springframework.security/spring-security-aspects/6.5.6, Apache-2.0, approved, #21979
 maven/mavencentral/org.springframework.security/spring-security-config/6.5.6, Apache-2.0, approved, #22177
