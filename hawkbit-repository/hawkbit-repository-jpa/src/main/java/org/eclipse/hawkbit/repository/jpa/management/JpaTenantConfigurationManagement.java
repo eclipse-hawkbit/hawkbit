@@ -184,41 +184,9 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         configurations.forEach((keyName, value) -> {
             final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(keyName);
 
-            Object convertedValue = value;
             final Class<?> targetType = configurationKey.getDataType();
-            if (!targetType.isAssignableFrom(value.getClass())) {
-                try {
-                    // if not assignable and it is a number - try conversion
-                    // for example tries to assign Integer to Long
-                    if (value instanceof Number number && Number.class.isAssignableFrom(targetType)) {
-                        log.debug("Type {} not assignable from {} . Will try conversion.", targetType, value.getClass());
-                        convertedValue = CONVERSION_SERVICE.convert(number, targetType);
-                        if (convertedValue == null) {
-                            throw new IllegalArgumentException(
-                                    String.format("Failed to convert %s. Convertor returned null as a result", value));
-                        }
-                    } else {
-                        throw new IllegalArgumentException(
-                                String.format("Value %s is not a Number but %s and cannot perform conversion converted.", value, value.getClass()));
-                    }
-                } catch (final ConversionException | IllegalArgumentException ex) {
-                    throw new TenantConfigurationValidatorException(String.format(
-                            "Cannot convert the value %s of type %s to the type %s defined by the configuration key.",
-                            value, value.getClass(), targetType));
-                }
-            }
-
-            configurationKey.validate(convertedValue, applicationContext);
-            // additional validation for specific configuration keys
-            if (POLLING_TIME.equals(configurationKey.getKeyName())) {
-                final PollingTime pollingTime = new PollingTime(value.toString());
-                if (!ObjectUtils.isEmpty(pollingTime.getOverrides())) {
-                    // validate that the QL strings are valid RSQL queries,
-                    // nevertheless always when parse them we shall be prepared to catch exceptions if the parsers
-                    // has been changed in not backward compatible way
-                    pollingTime.getOverrides().forEach(override -> QLSupport.getInstance().entityMatcher(override.qlStr(), TargetFields.class));
-                }
-            }
+            Object convertedValue = getConvertedValue(value, targetType);
+            validateConfigurationValue(value, configurationKey, convertedValue);
 
             JpaTenantConfiguration tenantConfiguration = tenantConfigurationRepository.findByKey(configurationKey.getKeyName());
             if (tenantConfiguration == null) {
@@ -245,6 +213,47 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
                                         (Class<T>) configurations.get(updatedTenantConfiguration.getKey()).getClass()))
                                 .build()));
     }
+
+    private <T extends Serializable> void validateConfigurationValue(final T value, final TenantConfigurationKey configurationKey, final Object convertedValue) {
+        configurationKey.validate(convertedValue, applicationContext);
+        // additional validation for specific configuration keys
+        if (POLLING_TIME.equals(configurationKey.getKeyName())) {
+            final PollingTime pollingTime = new PollingTime(value.toString());
+            if (!ObjectUtils.isEmpty(pollingTime.getOverrides())) {
+                // validate that the QL strings are valid RSQL queries,
+                // nevertheless always when parse them we shall be prepared to catch exceptions if the parsers
+                // has been changed in not backward compatible way
+                pollingTime.getOverrides().forEach(override -> QLSupport.getInstance().entityMatcher(override.qlStr(), TargetFields.class));
+            }
+        }
+    }
+
+    private static <T extends Serializable> Object getConvertedValue(final T value, final Class<?> targetType) {
+        Object convertedValue = value;
+        if (!targetType.isAssignableFrom(value.getClass())) {
+            try {
+                // if not assignable and it is a number - try conversion
+                // for example tries to assign Integer to Long
+                if (value instanceof Number number && Number.class.isAssignableFrom(targetType)) {
+                    log.debug("Type {} not assignable from {} . Will try conversion.", targetType, value.getClass());
+                    convertedValue = CONVERSION_SERVICE.convert(number, targetType);
+                    if (convertedValue == null) {
+                        throw new IllegalArgumentException(
+                                String.format("Failed to convert %s. Convertor returned null as a result", value));
+                    }
+                } else {
+                    throw new IllegalArgumentException(
+                            String.format("Value %s is not a Number but %s and cannot perform conversion converted.", value, value.getClass()));
+                }
+            } catch (final ConversionException | IllegalArgumentException ex) {
+                throw new TenantConfigurationValidatorException(String.format(
+                        "Cannot convert the value %s of type %s to the type %s defined by the configuration key.",
+                        value, value.getClass(), targetType));
+            }
+        }
+        return convertedValue;
+    }
+
 
     @SuppressWarnings("unchecked")
     private <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue0(final String keyName, final Class<T> propertyType) {
