@@ -158,7 +158,7 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(put(TARGET1_CONFIG_DATA_PATH, tenantAware.getCurrentTenant())
                         .content(JsonBuilder.configData(Map.of("on too many", "sdsds")).toString())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden())
+                .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
     }

@@ -652,7 +652,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                         .content("[{\"id\":" + dsTypeIds.get(dsTypeIds.size() - 1) + "}]")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden())
+                .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
     }

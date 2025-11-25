@@ -510,7 +510,7 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                         + cancelAction.getId() + "/feedback", tenantAware.getCurrentTenant()).content(feedback)
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isTooManyRequests());
     }
 
     /**
