@@ -39,12 +39,11 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.SortDirection;
-import org.eclipse.hawkbit.repository.qfields.ActionFields;
-import org.eclipse.hawkbit.repository.qfields.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -54,9 +53,10 @@ import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.repository.qfields.ActionFields;
+import org.eclipse.hawkbit.repository.qfields.ActionStatusFields;
 import org.eclipse.hawkbit.rest.json.model.ResponseList;
 import org.eclipse.hawkbit.util.IpUtil;
-import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -124,7 +124,7 @@ public final class MgmtTargetMapper {
             return Collections.emptyList();
         }
 
-        final Function<Target, PollStatus> pollStatusResolver = TenantConfigHelper.getInstance().pollStatusResolver();
+        final Function<Target, PollStatus> pollStatusResolver = TenantConfigHelper.pollStatusResolver();
         return new ResponseList<>(targets.stream().map(target -> toResponse(target, pollStatusResolver)).toList());
     }
 
@@ -176,14 +176,13 @@ public final class MgmtTargetMapper {
             targetRest.setTargetTypeName(target.getTargetType().getName());
         }
 
-        final TenantConfigHelper configHelper = TenantConfigHelper.getInstance();
-        if (configHelper.isConfirmationFlowEnabled()) {
+        if (TenantConfigHelper.isConfirmationFlowEnabled()) {
             targetRest.setAutoConfirmActive(target.getAutoConfirmationStatus() != null);
         }
 
         targetRest.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withSelfRel().expand());
 
-        addPollStatus(target, targetRest, pollStatusResolver == null ? configHelper.pollStatusResolver() : pollStatusResolver);
+        addPollStatus(target, targetRest, pollStatusResolver == null ? TenantConfigHelper.pollStatusResolver() : pollStatusResolver);
 
         return targetRest;
     }

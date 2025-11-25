@@ -9,6 +9,10 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.api;
 
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.TARGET_GROUP_ORDER;
+
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.extensions.Extension;
 import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
@@ -30,10 +34,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
-
-import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.TARGET_GROUP_ORDER;
 
 @Tag(
         name = "Target Groups", description = "REST API for Target Groups operations.",

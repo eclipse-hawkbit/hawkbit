@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository;
 
 import org.eclipse.hawkbit.auth.SpringEvalExpressions;
-
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;

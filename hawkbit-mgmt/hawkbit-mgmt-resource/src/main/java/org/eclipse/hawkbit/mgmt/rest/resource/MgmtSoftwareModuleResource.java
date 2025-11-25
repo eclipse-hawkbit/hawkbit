@@ -22,6 +22,8 @@ import java.util.Optional;
 import jakarta.validation.ValidationException;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.artifact.model.ArtifactHashes;
+import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
 import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
@@ -38,8 +40,6 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.artifact.model.ArtifactHashes;
-import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;

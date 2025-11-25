@@ -13,15 +13,14 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.USER_CONFIRMATION_ENABLED;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.function.Function;
 
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
+import org.eclipse.hawkbit.context.System;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A collection of static helper methods for the tenant configuration
@@ -29,43 +28,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public final class TenantConfigHelper {
 
-    private static final TenantConfigHelper SINGLETON = new TenantConfigHelper();
+    private static TenantConfigurationManagement tenantConfigurationManagement;
 
-    @Getter
-    private TenantConfigurationManagement tenantConfigurationManagement;
-
-    @Autowired
-    public void setTenantConfigurationManagement(final TenantConfigurationManagement tenantConfigurationManagement) {
-        this.tenantConfigurationManagement = tenantConfigurationManagement;
+    // method to be initialized by the TenantConfigurationManagement or TenantConfigurationManagement creator
+    // it will be accessed directly and used so shall be fully initialized instance, i.e. a bean in order to onore things
+    // like @PreAuthorize, @Transactional etc.
+    public static void setTenantConfigurationManagement(final TenantConfigurationManagement tenantConfigurationManagement) {
+        TenantConfigHelper.tenantConfigurationManagement = tenantConfigurationManagement;
     }
 
-    public static TenantConfigHelper getInstance() {
-        return SINGLETON;
+    public static TenantConfigurationManagement getTenantConfigurationManagement() {
+        return Objects.requireNonNull(tenantConfigurationManagement, "TenantConfigurationManagement has not been initialized");
     }
 
-    public <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType) {
-        return SystemSecurityContext.runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
+    public static <T extends Serializable> T getAsSystem(final String key, final Class<T> valueType) {
+        return System.asSystem(() -> getTenantConfigurationManagement().getConfigurationValue(key, valueType).getValue());
     }
 
-    /**
-     * Is multi-assignments enabled for the current tenant
-     *
-     * @return is active
-     */
-    public boolean isMultiAssignmentsEnabled() {
-        return getConfigValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class);
+    public static boolean isMultiAssignmentsEnabled() {
+        return getAsSystem(MULTI_ASSIGNMENTS_ENABLED, Boolean.class);
     }
 
-    /**
-     * Is confirmation flow enabled for the current tenant
-     *
-     * @return is enabled
-     */
-    public boolean isConfirmationFlowEnabled() {
-        return getConfigValue(USER_CONFIRMATION_ENABLED, Boolean.class);
+    public static boolean isConfirmationFlowEnabled() {
+        return getAsSystem(USER_CONFIRMATION_ENABLED, Boolean.class);
     }
 
-    public Function<Target, PollStatus> pollStatusResolver() {
-        return tenantConfigurationManagement.pollStatusResolver();
+    public static Function<Target, PollStatus> pollStatusResolver() {
+        return getTenantConfigurationManagement().pollStatusResolver();
     }
 }

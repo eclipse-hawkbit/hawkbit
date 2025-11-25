@@ -80,6 +80,6 @@ public class VirtualPropertyResolver {
     }
 
     private static String getRawStringForKey(final String key) {
-        return TenantConfigHelper.getInstance().getConfigValue(key, String.class);
+        return TenantConfigHelper.getAsSystem(key, String.class);
     }
 }

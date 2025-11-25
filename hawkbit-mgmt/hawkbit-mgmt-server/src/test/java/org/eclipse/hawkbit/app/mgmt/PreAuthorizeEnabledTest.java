@@ -87,7 +87,7 @@ class PreAuthorizeEnabledTest extends AbstractSecurityTest {
     }
 
     /**
-     * Tests whether read tenant config request fail if a tenant config (or read read) is not granted for the user
+     * Tests whether read tenant config request fail if a tenant config (or read) is not granted for the user
      */
     @Test
     @WithUser(authorities = { SpPermission.READ_TARGET }, autoCreateTenant = false)

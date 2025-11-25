@@ -27,6 +27,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.hawkbit.context.System;
+import org.eclipse.hawkbit.context.Tenant;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -74,8 +76,6 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -1284,11 +1284,11 @@ public class TestdataFactory {
     }
 
     private void rolloutHandleAll() {
-        final String tenant = TenantAware.getCurrentTenant();
+        final String tenant = Tenant.currentTenant();
         if (tenant == null) {
             throw new IllegalStateException("Tenant is null");
         }
-        SystemSecurityContext.runAsSystem(rolloutHandler::handleAll);
+        System.asSystem(rolloutHandler::handleAll);
     }
 
     private Rollout reloadRollout(final Rollout rollout) {

@@ -14,10 +14,10 @@ import java.util.concurrent.TimeUnit;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.context.System;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.jpa.rollout.BlockWhenFullPolicy;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -49,15 +49,15 @@ public class RolloutScheduler {
 
     /**
      * Scheduler method called by the spring-async mechanism. Retrieves all tenants from the {@link SystemManagement#findTenants} and
-     * runs for each tenant the {@link RolloutHandler#handleAll()} in the {@link SystemSecurityContext}.
+     * runs for each tenant the {@link RolloutHandler#handleAll()} in the {@link System}.
      */
     @Scheduled(initialDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void runningRolloutScheduler() {
         log.debug("rollout schedule checker has been triggered.");
-        final long startNano = System.nanoTime();
+        final long startNano = java.lang.System.nanoTime();
 
         // run this code in system code privileged to have the necessary permission to query and create entities.
-        SystemSecurityContext.runAsSystem(() -> {
+        System.asSystem(() -> {
             // workaround eclipselink that is currently not possible to
             // execute a query without multi-tenancy if MultiTenant
             // annotation is used.
@@ -75,12 +75,12 @@ public class RolloutScheduler {
 
         meterRegistry
                 .map(mReg -> mReg.timer("hawkbit.rollout.scheduler.all"))
-                .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
+                .ifPresent(timer -> timer.record(java.lang.System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
     }
 
     private void handleAll(final String tenant) {
         log.trace("Handling rollout for tenant: {}", tenant);
-        final long startNano = System.nanoTime();
+        final long startNano = java.lang.System.nanoTime();
 
         try {
             rolloutHandler.handleAll();
@@ -92,11 +92,11 @@ public class RolloutScheduler {
                 .map(mReg -> mReg.timer(
                         "hawkbit.rollout.scheduler",
                         DefaultTenantConfiguration.TENANT_TAG, tenant))
-                .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
+                .ifPresent(timer -> timer.record(java.lang.System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
     }
 
     private void handleAllAsync(final String tenant) {
-        rolloutTaskExecutor.submit(() -> SystemSecurityContext.runAsSystemAsTenant(tenant, () -> {
+        rolloutTaskExecutor.submit(() -> org.eclipse.hawkbit.context.System.asSystemAsTenant(tenant, () -> {
             handleAll(tenant);
             return null;
         }));

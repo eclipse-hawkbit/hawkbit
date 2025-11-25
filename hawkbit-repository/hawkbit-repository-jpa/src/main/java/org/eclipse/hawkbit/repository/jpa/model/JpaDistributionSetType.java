@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serial;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,7 +32,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeCre
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
 /**

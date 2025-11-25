@@ -33,7 +33,6 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.MgmtDownloadArtifactResource;
 import org.eclipse.hawkbit.mgmt.rest.resource.MgmtSoftwareModuleResource;
-import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement.Create;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;

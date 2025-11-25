@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Collection;
-import java.util.List;
 
 import jakarta.persistence.Query;
 

@@ -20,7 +20,8 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
+import org.eclipse.hawkbit.context.System;
+import org.eclipse.hawkbit.context.Tenant;
 import org.eclipse.hawkbit.repository.RolloutManagement.Create;
 import org.eclipse.hawkbit.repository.exception.StopRolloutException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
@@ -35,7 +36,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondit
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -61,11 +61,11 @@ class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTe
     void verifyInvalidateDistributionSetWithLargeRolloutThrowsException() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final Rollout rollout = createRollout(distributionSet);
-        final String tenant = TenantAware.getCurrentTenant();
+        final String tenant = Tenant.currentTenant();
 
         // run in new Thread so that the invalidation can be executed in
         // parallel
-        new Thread(() -> SystemSecurityContext.runAsSystemAsTenant(tenant, () -> {
+        new Thread(() -> System.asSystemAsTenant(tenant, () -> {
             rolloutHandler.handleAll();
             return 0;
         })).start();
@@ -74,9 +74,9 @@ class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTe
         Awaitility.await()
                 .pollInterval(Duration.ofMillis(100))
                 .atMost(Duration.ofSeconds(5))
-                .until(() -> SystemSecurityContext.runAsSystemAsTenant(
+                .until(() -> System.asSystemAsTenant(
                         tenant,
-                        () -> SystemSecurityContext.runAsSystem(
+                        () -> System.asSystem(
                                 () -> rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getSize() > 0)));
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(

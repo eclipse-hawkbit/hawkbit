@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.auth.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -40,7 +39,7 @@ public interface ConfirmationManagement extends PermissionSupport {
      * Activate auto confirmation for a given controller ID. In case auto confirmation is active already, this method will fail with an exception.
      *
      * @param controllerId to activate the feature for
-     * @param initiator who initiated this operation. If 'null' we will take the current user from {@link TenantAware#getCurrentUsername()}
+     * @param initiator who initiated this operation.
      * @param remark optional field to set a remark
      * @return the persisted {@link AutoConfirmationStatus}
      */

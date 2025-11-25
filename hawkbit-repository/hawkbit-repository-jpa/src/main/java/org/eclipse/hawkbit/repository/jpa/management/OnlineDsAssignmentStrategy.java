@@ -19,6 +19,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections4.ListUtils;
+import org.eclipse.hawkbit.context.Auditor;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
@@ -74,9 +75,9 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    public JpaAction createTargetAction(final String initiatedBy, final TargetWithActionType targetWithActionType,
+    public JpaAction createTargetAction(final TargetWithActionType targetWithActionType,
             final List<JpaTarget> targets, final JpaDistributionSet set) {
-        final JpaAction result = super.createTargetAction(initiatedBy, targetWithActionType, targets, set);
+        final JpaAction result = super.createTargetAction(targetWithActionType, targets, set);
         if (result != null) {
             final boolean confirmationRequired = targetWithActionType.isConfirmationRequired()
                     && result.getTarget().getAutoConfirmationStatus() == null;
@@ -125,15 +126,15 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    public void setAssignedDistributionSetAndTargetStatus(
-            final JpaDistributionSet set, final List<List<Long>> targetIds, final String currentUser) {
+    public void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds) {
         final long now = System.currentTimeMillis();
         targetIds.forEach(targetIdsChunk -> {
             if (targetRepository.count(AccessController.Operation.UPDATE,
                     targetRepository.byIdsSpec(targetIdsChunk)) != targetIdsChunk.size()) {
                 throw new InsufficientPermissionException("No update access to all targets!");
             }
-            targetRepository.setAssignedDistributionSetAndUpdateStatus(set, now, currentUser, TargetUpdateStatus.PENDING, targetIdsChunk);
+            targetRepository.setAssignedDistributionSetAndUpdateStatus(
+                    set, now, Auditor.currentAuditor(), TargetUpdateStatus.PENDING, targetIdsChunk);
             // TODO AC - current problem with this approach is that the caller detach the targets and seems doesn't save them
 //            targetRepository.saveAll(
 //                targetRepository

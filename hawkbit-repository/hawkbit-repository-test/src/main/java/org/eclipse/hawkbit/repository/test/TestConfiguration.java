@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.test;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -20,10 +21,8 @@ import org.eclipse.hawkbit.artifact.fs.FileArtifactProperties;
 import org.eclipse.hawkbit.artifact.fs.FileArtifactStorage;
 import org.eclipse.hawkbit.artifact.urlresolver.PropertyBasedArtifactUrlResolver;
 import org.eclipse.hawkbit.artifact.urlresolver.PropertyBasedArtifactUrlResolverProperties;
-import org.eclipse.hawkbit.audit.HawkbitAuditorAware;
 import org.eclipse.hawkbit.auth.Hierarchy;
-import org.eclipse.hawkbit.auth.SpPermission;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
+import org.eclipse.hawkbit.context.Auditor;
 import org.eclipse.hawkbit.repository.RepositoryConfiguration;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
@@ -145,7 +144,7 @@ public class TestConfiguration implements AsyncConfigurer {
 
     @Bean
     AuditorAware<String> auditorAware() {
-        return new HawkbitAuditorAware();
+        return () -> Optional.ofNullable(Auditor.currentAuditor());
     }
 
     @Bean

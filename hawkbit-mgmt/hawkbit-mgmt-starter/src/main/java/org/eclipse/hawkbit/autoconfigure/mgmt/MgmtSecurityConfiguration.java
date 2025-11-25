@@ -10,9 +10,9 @@
 package org.eclipse.hawkbit.autoconfigure.mgmt;
 
 import java.io.Serial;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
@@ -20,6 +20,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.auth.SpPermission;
+import org.eclipse.hawkbit.context.Mdc;
+import org.eclipse.hawkbit.context.System;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.oidc.OidcProperties;
 import org.eclipse.hawkbit.oidc.OidcProperties.Oauth2.ResourceServer.Jwt.Claim;
@@ -27,8 +29,6 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.rest.SecurityManagedConfiguration;
 import org.eclipse.hawkbit.rest.security.DosFilter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
-import org.eclipse.hawkbit.audit.MdcHandler;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,7 +123,7 @@ public class MgmtSecurityConfiguration {
                         (request, response, chain) -> {
                             final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                             if (authentication != null && authentication.isAuthenticated()) {
-                                SystemSecurityContext.runAsSystem(systemManagement::getTenantMetadataWithoutDetails);
+                                System.asSystem(systemManagement::getTenantMetadataWithoutDetails);
                             }
                             chain.doFilter(request, response);
                         },
@@ -155,7 +155,7 @@ public class MgmtSecurityConfiguration {
             httpSecurityCustomizer.customize(http);
         }
 
-        MdcHandler.Filter.addMdcFilter(http);
+        Mdc.Filter.addMdcFilter(http);
 
         return http.build();
     }

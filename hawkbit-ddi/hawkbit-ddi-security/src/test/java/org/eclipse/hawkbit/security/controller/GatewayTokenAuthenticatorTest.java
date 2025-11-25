@@ -49,7 +49,7 @@ class GatewayTokenAuthenticatorTest {
 
     @BeforeEach
     void before() {
-        TenantConfigHelper.getInstance().setTenantConfigurationManagement(tenantConfigurationManagementMock);
+        TenantConfigHelper.setTenantConfigurationManagement(tenantConfigurationManagementMock);
         authenticator = new GatewayTokenAuthenticator();
     }
 

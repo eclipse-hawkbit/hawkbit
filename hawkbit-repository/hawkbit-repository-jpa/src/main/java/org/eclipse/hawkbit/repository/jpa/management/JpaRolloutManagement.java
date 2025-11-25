@@ -31,7 +31,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.auth.SpRole;
-import org.eclipse.hawkbit.context.ContextAware;
+import org.eclipse.hawkbit.context.Security;
+import org.eclipse.hawkbit.context.Tenant;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -42,7 +43,6 @@ import org.eclipse.hawkbit.repository.RolloutHelper;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -51,6 +51,7 @@ import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetExcepti
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -85,9 +86,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.qfields.RolloutFields;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.utils.ObjectCopyUtil;
-import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -516,7 +515,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         storeActionsAndStatuses(actions, Action.Status.CANCELING);
 
         // send cancellation messages to event publisher
-        onlineDsAssignmentStrategy.sendCancellationMessages(actions, TenantAware.getCurrentTenant());
+        onlineDsAssignmentStrategy.sendCancellationMessages(actions, Tenant.currentTenant());
     }
 
     private void forceQuitActionsOfRollout(final Rollout rollout) {
@@ -579,7 +578,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         Jpa.setNativeQueryInParameter(updateQuery, "tid", targetIds);
         final int updated = updateQuery.executeUpdate();
         log.info("{} of target assigned distribution values updated for tenant {}",
-                updated, TenantAware.getCurrentTenant());
+                updated, Tenant.currentTenant());
         return updated;
     }
 
@@ -594,7 +593,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         Jpa.setNativeQueryInParameter(updateQuery, "tid", targetIds);
         final int updated = updateQuery.executeUpdate();
         log.info("{} of target assigned distribution set to previously installed distribution value for tenant {}",
-                updated, TenantAware.getCurrentTenant());
+                updated, Tenant.currentTenant());
         return updated;
     }
 
@@ -712,7 +711,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         if (rollout.getWeight().isEmpty()) {
             rollout.setWeight(repositoryProperties.getActionWeightIfAbsent());
         }
-        ContextAware.getCurrentContext().ifPresent(rollout::setAccessControlContext);
+        Security.currentSecurityContext().ifPresent(rollout::setAccessControlContext);
         return rollout;
     }
 
@@ -998,11 +997,11 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private boolean isMultiAssignmentsEnabled() {
-        return TenantConfigHelper.getInstance().isMultiAssignmentsEnabled();
+        return TenantConfigHelper.isMultiAssignmentsEnabled();
     }
 
     private boolean isConfirmationFlowEnabled() {
-        return TenantConfigHelper.getInstance().isConfirmationFlowEnabled();
+        return TenantConfigHelper.isConfirmationFlowEnabled();
     }
 
     private record TargetCount(long total, String filter) {}

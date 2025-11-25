@@ -82,8 +82,10 @@ public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
         return new FixedInMemoryTenantAwareUserDetailsService(userPrincipals);
     }
 
+    public static final Pattern HAS_SCHEMA = Pattern.compile("^\\{[^{]+}.+$");
+
     private static String password(final String password) {
-        return !Pattern.compile("^\\{.+}.*$").matcher(password).matches() ? "{noop}" + password : password;
+        return !HAS_SCHEMA.matcher(password).matches() ? "{noop}" + password : password;
     }
 
     private static List<GrantedAuthority> createAuthorities(

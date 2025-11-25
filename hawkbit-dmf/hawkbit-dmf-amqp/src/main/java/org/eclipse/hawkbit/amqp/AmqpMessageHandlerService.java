@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.amqp;
 import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 
-import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +27,7 @@ import jakarta.validation.constraints.NotNull;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.audit.AuditLog;
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -37,11 +37,9 @@ import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfAutoConfirmation;
 import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
-import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -54,7 +52,6 @@ import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -480,6 +477,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private boolean isMultiAssignmentsEnabled() {
-        return TenantConfigHelper.getInstance().getConfigValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class);
+        return TenantConfigHelper.getAsSystem(MULTI_ASSIGNMENTS_ENABLED, Boolean.class);
     }
 }

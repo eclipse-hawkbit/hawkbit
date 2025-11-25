@@ -11,10 +11,10 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import jakarta.persistence.EntityManager;
 
-import org.eclipse.hawkbit.repository.qfields.DistributionSetTagFields;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
+import org.eclipse.hawkbit.repository.qfields.DistributionSetTagFields;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 

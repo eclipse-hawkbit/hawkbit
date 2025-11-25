@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import static org.eclipse.hawkbit.context.SystemSecurityContext.runAsSystemAsTenant;
+import static org.eclipse.hawkbit.context.System.asSystemAsTenant;
 
 import java.util.Collections;
 import java.util.List;
@@ -122,34 +122,34 @@ public class RolloutStatusCache {
     @EventListener(classes = AbstractActionEvent.class)
     public void invalidateCachedTotalTargetCountActionStatus(final AbstractActionEvent event) {
         if (event.getRolloutId() != null) {
-            final Cache cache = runAsSystemAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_RO_NAME));
+            final Cache cache = asSystemAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_RO_NAME));
             cache.evict(event.getRolloutId());
         }
 
         if (event.getRolloutGroupId() != null) {
-            final Cache cache = runAsSystemAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_GR_NAME));
+            final Cache cache = asSystemAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_GR_NAME));
             cache.evict(event.getRolloutGroupId());
         }
     }
 
     @EventListener(classes = RolloutDeletedEvent.class)
     public void invalidateCachedTotalTargetCountOnRolloutDelete(final RolloutDeletedEvent event) {
-        final Cache cache = runAsSystemAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_RO_NAME));
+        final Cache cache = asSystemAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_RO_NAME));
         cache.evict(event.getEntityId());
     }
 
     @EventListener(classes = RolloutGroupDeletedEvent.class)
     public void invalidateCachedTotalTargetCountOnRolloutGroupDelete(final RolloutGroupDeletedEvent event) {
-        final Cache cache = runAsSystemAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_GR_NAME));
+        final Cache cache = asSystemAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_GR_NAME));
         cache.evict(event.getEntityId());
     }
 
     @EventListener(classes = RolloutStoppedEvent.class)
     public void invalidateCachedTotalTargetCountOnRolloutStopped(final RolloutStoppedEvent event) {
-        final Cache cache = runAsSystemAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_RO_NAME));
+        final Cache cache = asSystemAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_RO_NAME));
         cache.evict(event.getRolloutId());
         event.getRolloutGroupIds().forEach(
-                groupId -> runAsSystemAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_GR_NAME)).evict(groupId));
+                groupId -> asSystemAsTenant(event.getTenant(), () -> CACHE_MANAGER.getCache(CACHE_GR_NAME)).evict(groupId));
     }
 
     private static @NotNull Map<Long, List<TotalTargetCountActionStatus>> retrieveFromCache(final List<Long> ids, @NotNull final Cache cache) {

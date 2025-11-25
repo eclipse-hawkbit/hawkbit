@@ -56,10 +56,9 @@ class SecurityHeaderAuthenticatorTest {
     @Mock
     private TenantConfigurationManagement tenantConfigurationManagementMock;
 
-
     @BeforeEach
     void before() {
-        TenantConfigHelper.getInstance().setTenantConfigurationManagement(tenantConfigurationManagementMock);
+        TenantConfigHelper.setTenantConfigurationManagement(tenantConfigurationManagementMock);
         authenticator = new SecurityHeaderAuthenticator(CA_COMMON_NAME, "X-Ssl-Issuer-Hash-%d");
     }
 

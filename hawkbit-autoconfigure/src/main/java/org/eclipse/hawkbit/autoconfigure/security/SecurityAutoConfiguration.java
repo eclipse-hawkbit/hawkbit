@@ -9,10 +9,11 @@
  */
 package org.eclipse.hawkbit.autoconfigure.security;
 
+import java.util.Optional;
+
 import org.eclipse.hawkbit.audit.AuditContextProvider;
 import org.eclipse.hawkbit.audit.AuditLoggingAspect;
-import org.eclipse.hawkbit.audit.HawkbitAuditorAware;
-import org.eclipse.hawkbit.audit.MdcHandler;
+import org.eclipse.hawkbit.context.Auditor;
 import org.eclipse.hawkbit.repository.RepositoryConfiguration;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
@@ -48,7 +49,7 @@ public class SecurityAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public AuditorAware<String> auditorAware() {
-        return new HawkbitAuditorAware();
+        return () -> Optional.ofNullable(Auditor.currentAuditor());
     }
 
     @Bean
@@ -61,12 +62,6 @@ public class SecurityAutoConfiguration {
     @ConditionalOnMissingBean
     public AuditLoggingAspect auditLoggingAspect() {
         return new AuditLoggingAspect();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public MdcHandler mdcHandler() {
-        return MdcHandler.getInstance();
     }
 
     @Bean

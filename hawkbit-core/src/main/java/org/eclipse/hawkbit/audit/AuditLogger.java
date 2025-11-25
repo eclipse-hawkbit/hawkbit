@@ -44,8 +44,8 @@ public class AuditLogger {
     }
 
     private static void logMessage(final String entity, final String message, final AuditLog.Level level) {
-        logMessage(AUDIT_CONTEXT_PROVIDER.getAuditContext().tenant(), AUDIT_CONTEXT_PROVIDER.getAuditContext().username(), entity, message,
-                level);
+        logMessage(AUDIT_CONTEXT_PROVIDER.getAuditContext().tenant(), AUDIT_CONTEXT_PROVIDER.getAuditContext().username(),
+                entity, message, level);
     }
 
     private static void logMessage(

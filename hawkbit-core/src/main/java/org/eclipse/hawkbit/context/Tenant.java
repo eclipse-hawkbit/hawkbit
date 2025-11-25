@@ -7,27 +7,27 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.tenancy;
+package org.eclipse.hawkbit.context;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
+import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 /**
  * Utility class for actions that are aware of the application's current tenant.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class TenantAware {
+public class Tenant {
 
     /**
      * Implementation might retrieve the current tenant from a session or thread-local.
      *
      * @return the current tenant
      */
-    public static String getCurrentTenant() {
+    public static String currentTenant() {
         final SecurityContext context = SecurityContextHolder.getContext();
         if (context.getAuthentication() != null) {
             final Object principal = context.getAuthentication().getPrincipal();
@@ -35,23 +35,6 @@ public class TenantAware {
                 return tenantAwareAuthenticationDetails.tenant();
             } else if (principal instanceof TenantAwareUser tenantAwareUser) {
                 return tenantAwareUser.getTenant();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * @return the username of the currently logged-in user
-     */
-    public static String getCurrentUsername() {
-        final SecurityContext context = SecurityContextHolder.getContext();
-        if (context.getAuthentication() != null) {
-            final Object principal = context.getAuthentication().getPrincipal();
-            if (principal instanceof OidcUser oidcUser) {
-                return oidcUser.getPreferredUsername();
-            }
-            if (principal instanceof User user) {
-                return user.getUsername();
             }
         }
         return null;

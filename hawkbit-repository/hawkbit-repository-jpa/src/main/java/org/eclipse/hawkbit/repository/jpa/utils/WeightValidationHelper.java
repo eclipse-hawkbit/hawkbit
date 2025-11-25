@@ -84,7 +84,7 @@ public final class WeightValidationHelper {
     public static void validateWeight(final boolean hasWeight, final boolean hasNoWeight) {
         // remove bypassing the weight enforcement as soon as weight can be set via UI
         final boolean bypassWeightEnforcement = true;
-        final boolean multiAssignmentsEnabled = TenantConfigHelper.getInstance().isMultiAssignmentsEnabled();
+        final boolean multiAssignmentsEnabled = TenantConfigHelper.isMultiAssignmentsEnabled();
         if (!bypassWeightEnforcement && multiAssignmentsEnabled && hasNoWeight) {
             throw new NoWeightProvidedInMultiAssignmentModeException();
         }

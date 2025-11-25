@@ -18,10 +18,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.context.System;
 import org.eclipse.hawkbit.ql.QueryField;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -48,7 +48,7 @@ public class DefaultAccessController<A extends Enum<A> & QueryField, T> implemen
 
     @Override
     public Optional<Specification<T>> getAccessRules(final Operation operation) {
-        if (SystemSecurityContext.isCurrentThreadSystemCode()) {
+        if (System.isCurrentThreadSystemCode()) {
             // system code - no restrictions. this runs with SYSTEM_ROLE, so no restrictions apply anyway - not scopes, but this way should be faster
             return Optional.empty();
         }
@@ -63,7 +63,7 @@ public class DefaultAccessController<A extends Enum<A> & QueryField, T> implemen
 
     @Override
     public void assertOperationAllowed(final Operation operation, final T entity) throws InsufficientPermissionException {
-        if (SystemSecurityContext.isCurrentThreadSystemCode()) {
+        if (System.isCurrentThreadSystemCode()) {
             // system code - no restrictions. this runs with SYSTEM_ROLE, so no restrictions apply anyway - not scopes, but this way should be faster
             return;
         }

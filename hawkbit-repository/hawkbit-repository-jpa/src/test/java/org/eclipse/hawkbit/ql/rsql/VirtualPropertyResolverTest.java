@@ -22,8 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -40,16 +38,17 @@ class VirtualPropertyResolverTest {
             TenantConfigurationValue.<String> builder().value("00:07:37").build();
 
     @MockitoBean
-    private TenantConfigurationManagement confMgmt;
+    private TenantConfigurationManagement tenantConfigurationManagement;
 
     private final VirtualPropertyResolver substitutor = new VirtualPropertyResolver();
 
     @BeforeEach
     void before() {
-        when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_TIME, String.class))
+        when(tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.POLLING_TIME, String.class))
                 .thenReturn(TEST_POLLING_TIME_INTERVAL);
-        when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME, String.class))
+        when(tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME, String.class))
                 .thenReturn(TEST_POLLING_OVERDUE_TIME_INTERVAL);
+        TenantConfigHelper.setTenantConfigurationManagement(tenantConfigurationManagement);
     }
 
     /**
@@ -87,14 +86,5 @@ class VirtualPropertyResolverTest {
 
         final String resolvedPlaceholders = substitutor.replace(testString);
         assertThat(resolvedPlaceholders).as("'%s' placeholder was not replaced", placeholder).doesNotContain(placeholder);
-    }
-
-    @Configuration
-    static class Config {
-
-        @Bean
-        TenantConfigHelper tenantConfigHelper() {
-            return TenantConfigHelper.getInstance();
-        }
     }
 }

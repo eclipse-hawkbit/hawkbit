@@ -32,7 +32,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.context.SystemSecurityContext;
+import org.eclipse.hawkbit.context.System;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController.Operation;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -112,7 +112,7 @@ class SystemExecutionTest extends AbstractAccessControllerManagementTest {
 
         final Specification mockAsSystem = mock(Specification.class);
         for (Operation operation : Operation.values()) {
-            SystemSecurityContext.runAsSystem(() -> accessController.appendAccessRules(operation, mockAsSystem));
+            System.asSystem(() -> accessController.appendAccessRules(operation, mockAsSystem));
         }
         verifyNoInteractions(mockAsSystem);
     }

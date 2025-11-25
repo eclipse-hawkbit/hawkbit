@@ -9,13 +9,13 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rollout.condition;
 
+import org.eclipse.hawkbit.context.System;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
 
 /**
  * Error action evaluator which pauses the whole {@link Rollout} and sets the
@@ -42,7 +42,7 @@ public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator<Roll
 
         final JpaRolloutGroup rolloutGroup = (JpaRolloutGroup) rolloutG;
 
-        SystemSecurityContext.runAsSystem(() -> {
+        System.asSystem(() -> {
             rolloutGroup.setStatus(RolloutGroupStatus.ERROR);
             rolloutGroupRepository.save(rolloutGroup);
             /*

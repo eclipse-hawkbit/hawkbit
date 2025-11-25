@@ -31,12 +31,13 @@ import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.auth.SpPermission;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
+import org.eclipse.hawkbit.context.System;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValueChangeNotAllowedException;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
@@ -54,6 +55,8 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -73,7 +76,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "tenant-configuration-management" }, matchIfMissing = true)
-public class JpaTenantConfigurationManagement implements TenantConfigurationManagement {
+public class JpaTenantConfigurationManagement implements TenantConfigurationManagement, ApplicationListener<ContextRefreshedEvent> {
 
     private static final String CACHE_TENANT_CONFIGURATION_NAME = JpaTenantConfiguration.class.getSimpleName();
     private static final ConfigurableConversionService CONVERSION_SERVICE = new DefaultConversionService();
@@ -89,6 +92,12 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         this.tenantConfigurationRepository = tenantConfigurationRepository;
         this.tenantConfigurationProperties = tenantConfigurationProperties;
         this.applicationContext = applicationContext;
+    }
+
+    @Override
+    public void onApplicationEvent(final ContextRefreshedEvent event) {
+        // Sets the proxy / bean from the context in order to be used via proxy and onore things like @PreAuthorize and @Transactional
+        TenantConfigHelper.setTenantConfigurationManagement(applicationContext.getBean(JpaTenantConfigurationManagement.class));
     }
 
     @Override
@@ -170,7 +179,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
 
     private void checkAccess(final String keyName) {
         if (AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY.equalsIgnoreCase(keyName)) {
-            if (!SystemSecurityContext.isCurrentThreadSystemCode() && !SpPermission.hasPermission(READ_GATEWAY_SECURITY_TOKEN)) {
+            if (!System.isCurrentThreadSystemCode() && !SpPermission.hasPermission(READ_GATEWAY_SECURITY_TOKEN)) {
                 throw new InsufficientPermissionException(
                         "Can't read gateway security token! " + READ_GATEWAY_SECURITY_TOKEN + " is required!");
             }

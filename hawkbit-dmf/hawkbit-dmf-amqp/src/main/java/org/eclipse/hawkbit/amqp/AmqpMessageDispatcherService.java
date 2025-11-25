@@ -51,7 +51,6 @@ import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
@@ -72,7 +71,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
@@ -124,7 +122,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     public boolean isBatchAssignmentsEnabled() {
-        return TenantConfigHelper.getInstance().getConfigValue(BATCH_ASSIGNMENTS_ENABLED, Boolean.class);
+        return TenantConfigHelper.getAsSystem(BATCH_ASSIGNMENTS_ENABLED, Boolean.class);
     }
 
     /**
@@ -179,7 +177,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final Target target, final Long actionId, final Map<SoftwareModule, Map<String, String>> softwareModules) {
         return new DmfDownloadAndUpdateRequest(
                 actionId,
-                SystemSecurityContext.runAsSystem(target::getSecurityToken),
+                org.eclipse.hawkbit.context.System.asSystem(target::getSecurityToken),
                 convertToAmqpSoftwareModules(target, softwareModules));
     }
 
@@ -221,7 +219,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     protected void sendPingResponseToDmfReceiver(final Message ping, final String tenant, final String virtualHost) {
         final Message message = MessageBuilder
-                .withBody(String.valueOf(System.currentTimeMillis()).getBytes())
+                .withBody(String.valueOf(java.lang.System.currentTimeMillis()).getBytes())
                 .setContentType(MessageProperties.CONTENT_TYPE_TEXT_PLAIN)
                 .setCorrelationId(ping.getMessageProperties().getCorrelationId())
                 .setHeader(MessageHeaderKey.TYPE, MessageType.PING_RESPONSE)
@@ -246,14 +244,14 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     protected DmfTarget convertToDmfTarget(final Target target, final Long actionId) {
-        return new DmfTarget(actionId, target.getControllerId(), SystemSecurityContext.runAsSystem(target::getSecurityToken));
+        return new DmfTarget(actionId, target.getControllerId(), org.eclipse.hawkbit.context.System.asSystem(target::getSecurityToken));
     }
 
     protected DmfConfirmRequest createConfirmRequest(
             final Target target, final Long actionId, final Map<SoftwareModule, Map<String, String>> softwareModules) {
         return new DmfConfirmRequest(
                 actionId,
-                SystemSecurityContext.runAsSystem(target::getSecurityToken),
+                org.eclipse.hawkbit.context.System.asSystem(target::getSecurityToken),
                 convertToAmqpSoftwareModules(target, softwareModules));
     }
 
@@ -580,7 +578,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         // due to the fact that all targets in a batch use the same set of software modules we don't generate target-specific urls
         final Target firstTarget = targets.get(0);
         final DmfBatchDownloadAndUpdateRequest batchRequest = new DmfBatchDownloadAndUpdateRequest(
-                System.currentTimeMillis(),
+                java.lang.System.currentTimeMillis(),
                 dmfTargets,
                 Optional.ofNullable(modules)
                         .map(Map::entrySet)

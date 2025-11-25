@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.assertj.core.api.Assertions;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
+import org.eclipse.hawkbit.context.System;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement.Update;
@@ -170,7 +170,7 @@ class TargetManagementTest extends AbstractAccessControllerManagementTest {
                     .containsExactly(target1Type1);
 
             // as system in context - doesn't apply scopes
-            SystemSecurityContext.runAsSystem(
+            System.asSystem(
                     () -> testdataFactory.createRolloutByVariables(
                             "testRolloutAsSystem", "testDescriptionAsSystem", 3, "id==*", ds2Type2, "50", "5"));
         });

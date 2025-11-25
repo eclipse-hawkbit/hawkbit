@@ -7,16 +7,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.context;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.context.SecurityContextSerializer.JSON_SERIALIZATION;
+import static org.eclipse.hawkbit.context.Security.SecurityContextSerializer.JSON_SERIALIZATION;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.audit.HawkbitAuditorAware;
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.junit.jupiter.api.Test;
@@ -43,8 +42,9 @@ class SecurityContextSerializerTest {
         final String serialized = JSON_SERIALIZATION.serialize(securityContext);
         final SecurityContext deserialized = JSON_SERIALIZATION.deserialize(serialized);
         final Authentication authentication = deserialized.getAuthentication();
-        assertThat(HawkbitAuditorAware.resolveAuditor(authentication)).hasToString("user");
-        assertThat(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet())).isEqualTo(AUTHORITIES);
+        assertThat(Auditor.resolve(authentication)).hasToString("user");
+        assertThat(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet()))
+                .isEqualTo(AUTHORITIES);
         assertThat(authentication.isAuthenticated()).isTrue();
         assertThat(authentication.getDetails()).isEqualTo(details);
     }
@@ -54,7 +54,7 @@ class SecurityContextSerializerTest {
         final SecurityContext securityContext = SecurityContextHolder.getContext();
         final UsernamePasswordAuthenticationToken userPassAuthentication = new UsernamePasswordAuthenticationToken(
                 "FirstName.FamilyName@domain1.domain0.com",
-                Map.of("should not be in" + bigString(10_000),"the output" + bigString(15_000)),
+                Map.of("should not be in" + bigString(10_000), "the output" + bigString(15_000)),
                 AUTHORITIES.stream().map(SimpleGrantedAuthority::new).toList());
         final TenantAwareAuthenticationDetails details = new TenantAwareAuthenticationDetails("my_test_enant", false);
         userPassAuthentication.setDetails(details);
@@ -76,8 +76,9 @@ class SecurityContextSerializerTest {
         final String serialized = JSON_SERIALIZATION.serialize(securityContext).replace("auditor", "username");
         final SecurityContext deserialized = JSON_SERIALIZATION.deserialize(serialized);
         final Authentication authentication = deserialized.getAuthentication();
-        assertThat(HawkbitAuditorAware.resolveAuditor(authentication)).hasToString("user");
-        assertThat(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet())).isEqualTo(AUTHORITIES);
+        assertThat(Auditor.resolve(authentication)).hasToString("user");
+        assertThat(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet()))
+                .isEqualTo(AUTHORITIES);
         assertThat(authentication.isAuthenticated()).isTrue();
         assertThat(authentication.getDetails()).isEqualTo(details);
     }

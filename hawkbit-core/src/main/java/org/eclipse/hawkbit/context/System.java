@@ -18,7 +18,6 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.auth.SpRole;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.springframework.security.core.Authentication;
@@ -28,28 +27,26 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
- * A Service which provide to run system code.
+ * An utility class that could be used to run code as system, i.e. system code.
  */
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class SystemSecurityContext {
+public class System {
 
     // Note! There shall be no regular 'system'!
     public static final String SYSTEM_USER = "system";
-
-    private static final Collection<? extends GrantedAuthority> SYSTEM_AUTHORITIES = List.of(new SimpleGrantedAuthority(SpRole.SYSTEM_ROLE));
 
     /**
      * Runs a given {@link Runnable} within a system security context, which is permitted to call secured system code. Often the system needs
      * to call secured methods by its own without relying on the current security context e.g. if the current security context does not contain
      * the necessary permission it's necessary to execute code as system code to execute necessary methods and functionality. <br/>
      * The security context will be switched to the system code and back after the callable is called. <br/>
-     * The system code is executed for a current tenant by using the {@link TenantAware#getCurrentTenant()}.
+     * The system code is executed for a current tenant by using the {@link Tenant#currentTenant()}.
      *
      * @param runnable the runnable to call within the system security context
      */
-    public static void runAsSystem(final Runnable runnable) {
-        runAsSystemAsTenant(TenantAware.getCurrentTenant(), () -> {
+    public static void asSystem(final Runnable runnable) {
+        asSystemAsTenant(Tenant.currentTenant(), () -> {
             runnable.run();
             return null;
         });
@@ -60,13 +57,13 @@ public class SystemSecurityContext {
      * to call secured methods by its own without relying on the current security context e.g. if the current security context does not contain
      * the necessary permission it's necessary to execute code as system code to execute necessary methods and functionality. <br/>
      * The security context will be switched to the system code and back after the callable is called. <br/>
-     * The system code is executed for a current tenant by using the {@link TenantAware#getCurrentTenant()}.
+     * The system code is executed for a current tenant by using the {@link Tenant#currentTenant()}.
      *
      * @param callable the callable to call within the system security context
      * @return the return value of the {@link Callable#call()} method.
      */
-    public static <T> T runAsSystem(final Callable<T> callable) {
-        return runAsSystemAsTenant(TenantAware.getCurrentTenant(), callable);
+    public static <T> T asSystem(final Callable<T> callable) {
+        return asSystemAsTenant(Tenant.currentTenant(), callable);
     }
 
     /**
@@ -74,7 +71,7 @@ public class SystemSecurityContext {
      * to call secured methods by its own without relying on the current security context e.g. if the current security context does not contain
      * the necessary permission it's necessary to execute code as system code to execute necessary methods and functionality.<br/>
      * The security context will be switched to the system code and back after the callable is called.<br/>
-     * The system code is executed for a specific given tenant by using the {@link TenantAware}.
+     * The system code is executed for a specific given tenant by using the {@link Tenant}.
      *
      * @param tenant the tenant to act as system code
      * @param callable the callable to call within the system security context
@@ -82,13 +79,13 @@ public class SystemSecurityContext {
      */
     // The callable API throws a Exception and not a specific one
     @SuppressWarnings({ "squid:S2221", "squid:S112" })
-    public static <T> T runAsSystemAsTenant(final String tenant, final Callable<T> callable) {
+    public static <T> T asSystemAsTenant(final String tenant, final Callable<T> callable) {
         final SecurityContext currentContext = SecurityContextHolder.getContext();
         try {
             log.debug("Entering system code execution");
             final SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
             securityContext.setAuthentication(new SystemCodeAuthentication(tenant));
-            return ContextAware.runInContext(securityContext, () -> {
+            return Security.withSecurityContext(securityContext, () -> {
                 try {
                     return callable.call();
                 } catch (final RuntimeException e) {
@@ -115,8 +112,7 @@ public class SystemSecurityContext {
      * wraps the original auth object. The wrapped object contains the necessary {@link SpRole#SYSTEM_ROLE}
      * which is allowed to execute all secured methods.
      */
-    @SuppressWarnings("java:S4275") // java:S4275 - intentionally returns the "hold" objects
-    public static final class SystemCodeAuthentication implements Authentication {
+    static final class SystemCodeAuthentication implements Authentication {
 
         @Serial
         private static final long serialVersionUID = 1L;

@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 import jakarta.persistence.criteria.JoinType;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.context.Auditor;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -87,7 +88,7 @@ public abstract class AbstractDsAssignmentStrategy {
     }
 
     public JpaAction createTargetAction(
-            final String initiatedBy, final TargetWithActionType targetWithActionType,
+            final TargetWithActionType targetWithActionType,
             final List<JpaTarget> targets, final JpaDistributionSet set) {
         final Optional<JpaTarget> optTarget = targets.stream()
                 .filter(t -> t.getControllerId().equals(targetWithActionType.getControllerId())).findFirst();
@@ -108,7 +109,7 @@ public abstract class AbstractDsAssignmentStrategy {
             actionForTarget.setMaintenanceWindowSchedule(targetWithActionType.getMaintenanceSchedule());
             actionForTarget.setMaintenanceWindowDuration(targetWithActionType.getMaintenanceWindowDuration());
             actionForTarget.setMaintenanceWindowTimeZone(targetWithActionType.getMaintenanceWindowTimeZone());
-            actionForTarget.setInitiatedBy(initiatedBy);
+            actionForTarget.setInitiatedBy(Auditor.currentAuditor());
             return actionForTarget;
         }).orElseGet(() -> {
             log.warn("Cannot find target for targetWithActionType '{}'.", targetWithActionType.getControllerId());
@@ -234,10 +235,8 @@ public abstract class AbstractDsAssignmentStrategy {
      *
      * @param distributionSet to set
      * @param targetIds to change
-     * @param currentUser for auditing
      */
-    abstract void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet distributionSet,
-            final List<List<Long>> targetIds, final String currentUser);
+    abstract void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet distributionSet, final List<List<Long>> targetIds);
 
     /**
      * Cancels actions that can be canceled (i.e.
@@ -265,8 +264,7 @@ public abstract class AbstractDsAssignmentStrategy {
         final RolloutGroup rolloutGroup = action.getRolloutGroup();
         if (rolloutGroup != null) {
             final Rollout rollout = rolloutGroup.getRollout();
-            return String.format("Initiated by Rollout Group '%s' [Rollout %s:%s]", rolloutGroup.getName(),
-                    rollout.getName(), rollout.getId());
+            return String.format("Initiated by Rollout Group '%s' [Rollout %s:%s]", rolloutGroup.getName(), rollout.getName(), rollout.getId());
         }
         return String.format("Assignment initiated by user '%s'", action.getInitiatedBy());
     }

@@ -22,7 +22,6 @@ import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
-import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.exception.AutoConfirmationAlreadyActiveException;
 import org.eclipse.hawkbit.repository.exception.InvalidConfirmationFeedbackException;

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
+import org.eclipse.hawkbit.context.System;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
@@ -55,7 +55,7 @@ public class SecurityHeaderAuthenticator extends Authenticator.AbstractAuthentic
             final String caCommonNameHeader, final String caAuthorityNameHeader) {
         this.caCommonNameHeader = caCommonNameHeader;
         this.sslIssuerHashBasicHeader = caAuthorityNameHeader;
-        sslIssuerNameConfigGetter = () -> TenantConfigHelper.getInstance().getConfigValue(AUTHENTICATION_HEADER_AUTHORITY_NAME, String.class);
+        sslIssuerNameConfigGetter = () -> TenantConfigHelper.getAsSystem(AUTHENTICATION_HEADER_AUTHORITY_NAME, String.class);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class SecurityHeaderAuthenticator extends Authenticator.AbstractAuthentic
 
         final String sslIssuerHashValue = getIssuerHashHeader(
                 controllerSecurityToken,
-                SystemSecurityContext.runAsSystemAsTenant(controllerSecurityToken.getTenant(), sslIssuerNameConfigGetter));
+                System.asSystemAsTenant(controllerSecurityToken.getTenant(), sslIssuerNameConfigGetter));
         if (sslIssuerHashValue == null) {
             log.debug("The request contains the 'common name' header but trusted hash is not found");
             return null;

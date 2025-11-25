@@ -32,7 +32,6 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;

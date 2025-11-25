@@ -10,8 +10,6 @@
 package org.eclipse.hawkbit.repository.jpa.scheduler;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -22,7 +20,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.eclipse.hawkbit.context.ContextAware;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -30,7 +27,6 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -81,8 +77,7 @@ class AutoAssignExecutorTest {
 
         autoAssignChecker.checkSingleTarget(target);
 
-        verify(deploymentManagement).assignDistributionSets(
-                eq(matching.getAutoAssignInitiatedBy()), Mockito.argThat(deployReqMatcher(target, ds)), any());
+        verify(deploymentManagement).assignDistributionSets(Mockito.argThat(deployReqMatcher(target, ds)), any());
         Mockito.verifyNoMoreInteractions(deploymentManagement);
     }
 

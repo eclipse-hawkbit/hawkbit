@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.eclipse.hawkbit.context.Tenant;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
@@ -50,7 +51,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -91,11 +91,11 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
         // get installed base
         performGet(INSTALLED_BASE, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR), status().isOk(),
-                TenantAware.getCurrentTenant(), target.getControllerId(), actionId.toString());
+                Tenant.currentTenant(), target.getControllerId(), actionId.toString());
 
         // get artifacts
         performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR),
-                status().isOk(), TenantAware.getCurrentTenant(), target.getControllerId(),
+                status().isOk(), Tenant.currentTenant(), target.getControllerId(),
                 String.valueOf(softwareModuleId));
     }
 
@@ -154,7 +154,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         // Run test with 1st action
         final Long actionId1 = getFirstAssignedActionId(
                 assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.SOFT));
-        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), TenantAware.getCurrentTenant(), CONTROLLER_ID)
+        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), Tenant.currentTenant(), CONTROLLER_ID)
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.installedBase.href").doesNotExist())
                 .andExpect(jsonPath("$._links.deploymentBase.href",
@@ -173,7 +173,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         // Run test with 2nd action
         final Long actionId2 = getFirstAssignedActionId(
                 assignDistributionSet(ds2.getId(), target.getControllerId(), Action.ActionType.FORCED));
-        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), TenantAware.getCurrentTenant(), CONTROLLER_ID)
+        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), Tenant.currentTenant(), CONTROLLER_ID)
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.installedBase.href",
                         startsWith(installedBaseLink(CONTROLLER_ID, actionId1.toString()))))
@@ -190,7 +190,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds2, artifact2, artifactSignature2,
                 actionId2, findFirstModuleByType(ds2, osType).orElseThrow().getId(), Action.ActionType.FORCED);
 
-        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), TenantAware.getCurrentTenant(), CONTROLLER_ID)
+        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), Tenant.currentTenant(), CONTROLLER_ID)
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.installedBase.href",
                         startsWith(installedBaseLink(CONTROLLER_ID, actionId2.toString()))))
@@ -239,7 +239,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 status().isOk());
 
         // Test: latest succeeded action is returned in installedBase
-        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), TenantAware.getCurrentTenant(), CONTROLLER_ID)
+        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), Tenant.currentTenant(), CONTROLLER_ID)
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.installedBase.href",
                         startsWith(installedBaseLink(CONTROLLER_ID, actionId3.toString()))))
@@ -249,11 +249,11 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 actionId3, findFirstModuleByType(ds1, osType).orElseThrow().getId(), Action.ActionType.SOFT);
 
         // cancelled action are not accessible
-        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, TenantAware.getCurrentTenant(), target.getControllerId(),
+        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, Tenant.currentTenant(), target.getControllerId(),
                         actionId1.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
-        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, TenantAware.getCurrentTenant(), target.getControllerId(),
+        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, Tenant.currentTenant(), target.getControllerId(),
                         actionId2.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
@@ -298,7 +298,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Test: the succeeded action is returned in installedBase instead of the latest
         // cancelled action
-        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), TenantAware.getCurrentTenant(), CONTROLLER_ID)
+        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), Tenant.currentTenant(), CONTROLLER_ID)
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.installedBase.href",
                         startsWith(installedBaseLink(CONTROLLER_ID, actionId1.toString()))))
@@ -308,11 +308,11 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 actionId1, findFirstModuleByType(ds1, osType).orElseThrow().getId(), Action.ActionType.SOFT);
 
         // cancelled action are not accessible
-        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, TenantAware.getCurrentTenant(), target.getControllerId(),
+        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, Tenant.currentTenant(), target.getControllerId(),
                         actionId2.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
-        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, TenantAware.getCurrentTenant(), target.getControllerId(),
+        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, Tenant.currentTenant(), target.getControllerId(),
                         actionId3.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
@@ -352,7 +352,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 status().isOk());
 
         // Test: the succeeded action is returned in installedBase instead of the latest cancelled action
-        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), TenantAware.getCurrentTenant(), CONTROLLER_ID)
+        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), Tenant.currentTenant(), CONTROLLER_ID)
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.installedBase.href",
                         startsWith(installedBaseLink(CONTROLLER_ID, actionId1.toString()))))
@@ -363,11 +363,11 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 actionId1, findFirstModuleByType(ds1, osType).orElseThrow().getId(), Action.ActionType.SOFT);
 
         // cancelled action are not accessible
-        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, TenantAware.getCurrentTenant(), target.getControllerId(),
+        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, Tenant.currentTenant(), target.getControllerId(),
                         actionId2.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
-        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, TenantAware.getCurrentTenant(), target.getControllerId(),
+        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, Tenant.currentTenant(), target.getControllerId(),
                         actionId3.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
@@ -383,16 +383,16 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(ds, target));
 
-        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), TenantAware.getCurrentTenant(), CONTROLLER_ID)
+        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), Tenant.currentTenant(), CONTROLLER_ID)
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.installedBase.href").doesNotExist())
                 .andExpect(jsonPath("$._links.deploymentBase.href",
                         startsWith(deploymentBaseLink(CONTROLLER_ID, actionId.toString()))));
 
-        performGet(DEPLOYMENT_BASE, MediaType.APPLICATION_JSON, status().isOk(), TenantAware.getCurrentTenant(),
+        performGet(DEPLOYMENT_BASE, MediaType.APPLICATION_JSON, status().isOk(), Tenant.currentTenant(),
                 target.getControllerId(), actionId.toString());
 
-        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, TenantAware.getCurrentTenant(), target.getControllerId(),
+        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, Tenant.currentTenant(), target.getControllerId(),
                         actionId.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
@@ -414,7 +414,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         postDeploymentFeedback(target.getControllerId(), actionId, getJsonClosedDeploymentActionFeedback(), status().isOk());
 
         performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.APPLICATION_JSON, status().isOk(),
-                TenantAware.getCurrentTenant(), target.getControllerId(), softwareModuleId.toString())
+                Tenant.currentTenant(), target.getControllerId(), softwareModuleId.toString())
                 .andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$.[?(@.filename=='filename0')]", hasSize(1)))
                 .andExpect(jsonPath("$.[?(@.filename=='filename1')]", hasSize(1)))
@@ -455,13 +455,13 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Run test
         final ResultActions resultActions = performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(),
-                TenantAware.getCurrentTenant(), target.getControllerId());
+                Tenant.currentTenant(), target.getControllerId());
         resultActions.andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist())
                 .andExpect(jsonPath("$._links.installedBase.href", containsString(String.format(
                         "/%s/controller/v1/%s/installedBase/%d",
-                        TenantAware.getCurrentTenant(), target.getControllerId(), actionId))));
+                        Tenant.currentTenant(), target.getControllerId(), actionId))));
 
         getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, artifact, artifactSignature,
                 actionId, findFirstModuleByType(ds, osType).orElseThrow().getId(), actionType);
@@ -500,7 +500,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final Long actionId = getFirstAssignedActionId(
                 assignDistributionSet(ds.getId(), target.getControllerId(), Action.ActionType.DOWNLOAD_ONLY));
 
-        performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), TenantAware.getCurrentTenant(),
+        performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), Tenant.currentTenant(),
                 target.getControllerId())
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -511,7 +511,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         postDeploymentFeedback(target.getControllerId(), actionId, getJsonDownloadedDeploymentActionFeedback(), status().isOk());
 
         // Test
-        performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), TenantAware.getCurrentTenant(),
+        performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), Tenant.currentTenant(),
                 target.getControllerId())
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -531,7 +531,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final Long actionId = getFirstAssignedActionId(
                 assignDistributionSet(ds.getId(), target.getControllerId(), actionType));
 
-        performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), TenantAware.getCurrentTenant(),
+        performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), Tenant.currentTenant(),
                 target.getControllerId())
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -547,7 +547,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 status().isOk());
 
         // Test
-        performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), TenantAware.getCurrentTenant(),
+        performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), Tenant.currentTenant(),
                 target.getControllerId())
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -582,14 +582,14 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Test
         // for zero input no action history is returned
-        mvc.perform(get(INSTALLED_BASE + "?actionHistory", TenantAware.getCurrentTenant(), 911, savedAction.getId())
+        mvc.perform(get(INSTALLED_BASE + "?actionHistory", Tenant.currentTenant(), 911, savedAction.getId())
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.actionHistory.messages").doesNotExist());
 
         // depending on given query parameter value, only the latest messages are returned
-        mvc.perform(get(INSTALLED_BASE + "?actionHistory=2", TenantAware.getCurrentTenant(), 911, savedAction.getId())
+        mvc.perform(get(INSTALLED_BASE + "?actionHistory=2", Tenant.currentTenant(), 911, savedAction.getId())
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -599,7 +599,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                         jsonPath("$.actionHistory.messages", not(hasItem(containsString("Installation scheduled")))));
 
         // for negative input the entire action history is returned
-        mvc.perform(get(INSTALLED_BASE + "?actionHistory=-3", TenantAware.getCurrentTenant(), 911, savedAction.getId())
+        mvc.perform(get(INSTALLED_BASE + "?actionHistory=-3", Tenant.currentTenant(), 911, savedAction.getId())
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -616,25 +616,25 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final Target target = testdataFactory.createTarget(CONTROLLER_ID);
 
         // not allowed methods
-        mvc.perform(post(INSTALLED_BASE, TenantAware.getCurrentTenant(), CONTROLLER_ID, "1"))
+        mvc.perform(post(INSTALLED_BASE, Tenant.currentTenant(), CONTROLLER_ID, "1"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
-        mvc.perform(put(INSTALLED_BASE, TenantAware.getCurrentTenant(), CONTROLLER_ID, "1"))
+        mvc.perform(put(INSTALLED_BASE, Tenant.currentTenant(), CONTROLLER_ID, "1"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
-        mvc.perform(delete(INSTALLED_BASE, TenantAware.getCurrentTenant(), CONTROLLER_ID, "1"))
+        mvc.perform(delete(INSTALLED_BASE, Tenant.currentTenant(), CONTROLLER_ID, "1"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
         // non existing target
-        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, TenantAware.getCurrentTenant(), "not-existing", "1"))
+        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, Tenant.currentTenant(), "not-existing", "1"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
         // no deployment
-        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, TenantAware.getCurrentTenant(), CONTROLLER_ID, "1"))
+        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, Tenant.currentTenant(), CONTROLLER_ID, "1"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
@@ -644,10 +644,10 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(savedSet, toAssign));
         postDeploymentFeedback(CONTROLLER_ID, actionId, getJsonClosedCancelActionFeedback(), status().isOk());
-        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, TenantAware.getCurrentTenant(), CONTROLLER_ID, actionId))
+        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, Tenant.currentTenant(), CONTROLLER_ID, actionId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
-        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, TenantAware.getCurrentTenant(), CONTROLLER_ID, actionId)
+        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, Tenant.currentTenant(), CONTROLLER_ID, actionId)
                         .accept(MediaType.APPLICATION_ATOM_XML))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotAcceptable());

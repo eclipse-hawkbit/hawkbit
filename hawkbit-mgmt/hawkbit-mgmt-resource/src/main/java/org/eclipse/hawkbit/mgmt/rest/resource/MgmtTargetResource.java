@@ -56,9 +56,9 @@ import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidConfirmationFeedbackException;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
@@ -66,7 +66,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
-import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -395,14 +394,13 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         final List<DeploymentRequest> deploymentRequests = dsAssignments.stream().map(dsAssignment -> {
             final boolean isConfirmationRequired = dsAssignment.getConfirmationRequired() == null
-                    ? TenantConfigHelper.getInstance().isConfirmationFlowEnabled()
+                    ? TenantConfigHelper.isConfirmationFlowEnabled()
                     : dsAssignment.getConfirmationRequired();
             return MgmtDeploymentRequestMapper.createAssignmentRequestBuilder(dsAssignment, targetId)
                     .confirmationRequired(isConfirmationRequired).build();
         }).toList();
 
-        final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement
-                .assignDistributionSets(deploymentRequests);
+        final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement.assignDistributionSets(deploymentRequests, null);
         return ResponseEntity.ok(mgmtDistributionSetMapper.toResponse(assignmentResults));
     }
 
@@ -482,6 +480,6 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     private <T, R> R getNullIfEmpty(final T object, final Function<T, R> extractMethod) {
-        return object == null ? null : extractMethod.apply(object);
+        return ObjectUtils.isEmpty(object) ? null : extractMethod.apply(object);
     }
 }

@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitizeActionSortParam;
 
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
@@ -28,8 +30,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @Slf4j
 @RestController

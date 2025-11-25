@@ -13,6 +13,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.context.System;
+import org.eclipse.hawkbit.context.Tenant;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -26,8 +28,6 @@ import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.stereotype.Service;
@@ -68,7 +68,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     @Override
     public void invalidateDistributionSet(final DistributionSetInvalidation distributionSetInvalidation) {
         log.debug("Invalidate distribution sets {}", distributionSetInvalidation.getDistributionSetIds());
-        final String tenant = TenantAware.getCurrentTenant();
+        final String tenant = Tenant.currentTenant();
         if (shouldRolloutsBeCanceled(distributionSetInvalidation.getActionCancellationType())) {
             final String handlerId = JpaRolloutManagement.createRolloutLockKey(tenant);
             final Lock lock = lockRegistry.obtain(handlerId);
@@ -126,7 +126,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
         }
 
         // Do run as system to ensure all actions (even invisible) are canceled due to invalidation.
-        SystemSecurityContext.runAsSystem(() -> {
+        System.asSystem(() -> {
             log.debug("Cancel auto assignments after ds invalidation. ID: {}", setId);
             targetFilterQueryManagement.cancelAutoAssignmentForDistributionSet(setId);
         });

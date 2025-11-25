@@ -11,15 +11,16 @@ package org.eclipse.hawkbit.event;
 
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+
 import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.Schema;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.context.System;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
 import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.AbstractServiceRemoteEvent;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -91,7 +92,7 @@ public class EventPublisherConfiguration {
             }
 
             if (event instanceof final RemoteTenantAwareEvent remoteEvent) {
-                SystemSecurityContext.runAsSystemAsTenant(remoteEvent.getTenant(), () -> {
+                System.asSystemAsTenant(remoteEvent.getTenant(), () -> {
                     super.multicastEvent(event, eventType);
                     return null;
                 });
@@ -100,7 +101,7 @@ public class EventPublisherConfiguration {
 
             if (event instanceof final AbstractServiceRemoteEvent<?> serviceRemoteEvent
                     && serviceRemoteEvent.getRemoteEvent() instanceof RemoteTenantAwareEvent tenantAwareEvent) {
-                SystemSecurityContext.runAsSystemAsTenant(tenantAwareEvent.getTenant(), () -> {
+                System.asSystemAsTenant(tenantAwareEvent.getTenant(), () -> {
                     super.multicastEvent(event, eventType);
                     return null;
                 });

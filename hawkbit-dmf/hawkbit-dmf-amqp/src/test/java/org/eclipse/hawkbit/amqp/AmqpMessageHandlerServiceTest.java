@@ -112,7 +112,7 @@ class AmqpMessageHandlerServiceTest {
     @BeforeEach
     @SuppressWarnings({ "rawtypes", "unchecked" })
     void before() {
-        TenantConfigHelper.getInstance().setTenantConfigurationManagement(tenantConfigurationManagement);
+        TenantConfigHelper.setTenantConfigurationManagement(tenantConfigurationManagement);
         messageConverter = new Jackson2JsonMessageConverter();
         lenient().when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
         final TenantConfigurationValue multiAssignmentConfig = TenantConfigurationValue.builder().value(Boolean.FALSE)

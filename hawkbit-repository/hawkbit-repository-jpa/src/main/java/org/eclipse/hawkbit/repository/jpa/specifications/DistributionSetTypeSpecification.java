@@ -11,10 +11,8 @@ package org.eclipse.hawkbit.repository.jpa.specifications;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaNamedEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTypeEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.springframework.data.jpa.domain.Specification;

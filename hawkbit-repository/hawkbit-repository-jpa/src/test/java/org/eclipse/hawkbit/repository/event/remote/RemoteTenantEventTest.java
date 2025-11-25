@@ -13,20 +13,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.context.Auditor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.jupiter.api.Test;
 
 /**
  * Feature: Component Tests - Repository<br/>
  * Story: RemoteTenantAwareEvent Tests
  */
-class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
+class RemoteTenantEventTest extends AbstractRemoteEventTest {
 
     private static final String TENANT_DEFAULT = "DEFAULT";
 
@@ -94,7 +94,7 @@ class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         generateAction.setTarget(testdataFactory.createTarget("Test"));
         generateAction.setDistributionSet(dsA);
         generateAction.setStatus(Status.RUNNING);
-        generateAction.setInitiatedBy(TenantAware.getCurrentUsername());
+        generateAction.setInitiatedBy(Auditor.currentAuditor());
         generateAction.setWeight(1000);
 
         final Action action = actionRepository.save(generateAction);
@@ -121,7 +121,7 @@ class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         generateAction.setTarget(testdataFactory.createTarget("Test"));
         generateAction.setDistributionSet(dsA);
         generateAction.setStatus(Status.RUNNING);
-        generateAction.setInitiatedBy(TenantAware.getCurrentUsername());
+        generateAction.setInitiatedBy(Auditor.currentAuditor());
         generateAction.setWeight(1000);
 
         final Action action = actionRepository.save(generateAction);

@@ -10,12 +10,10 @@
 package org.eclipse.hawkbit.repository.jpa.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
-import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.jpa.repository.Modifying;

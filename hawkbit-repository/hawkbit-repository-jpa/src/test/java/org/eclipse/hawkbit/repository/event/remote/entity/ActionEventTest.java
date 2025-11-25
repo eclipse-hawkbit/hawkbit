@@ -11,13 +11,13 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.eclipse.hawkbit.context.Auditor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -87,7 +87,7 @@ class ActionEventTest extends AbstractRemoteEntityEventTest<Action> {
         generateAction.setTarget(target);
         generateAction.setDistributionSet(distributionSet);
         generateAction.setStatus(Status.RUNNING);
-        generateAction.setInitiatedBy(TenantAware.getCurrentUsername());
+        generateAction.setInitiatedBy(Auditor.currentAuditor());
         generateAction.setWeight(1000);
         return actionRepository.save(generateAction);
     }

@@ -15,7 +15,6 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import lombok.Data;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;

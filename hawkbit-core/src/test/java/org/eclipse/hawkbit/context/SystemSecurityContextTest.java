@@ -7,20 +7,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.context;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.auth.SpRole;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -62,7 +55,7 @@ class SystemSecurityContextTest {
         final SecurityContext sc = SecurityContextHolder.createEmptyContext();
         sc.setAuthentication(auth);
         SecurityContextHolder.setContext(sc);
-        SystemSecurityContext.runAsSystemAsTenant("tenant", () -> {
+        System.asSystemAsTenant("tenant", () -> {
             final Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
             Assertions.assertThat(currentAuth.getClass().getSimpleName()).isEqualTo("SystemCodeAuthentication");
             Assertions.assertThat(currentAuth.getCredentials()).isNull();

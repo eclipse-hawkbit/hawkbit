@@ -9,6 +9,10 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitizeTargetSortParam;
+
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
@@ -16,17 +20,11 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetGroupRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-
-import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitizeTargetSortParam;
 
 @Slf4j
 @RestController

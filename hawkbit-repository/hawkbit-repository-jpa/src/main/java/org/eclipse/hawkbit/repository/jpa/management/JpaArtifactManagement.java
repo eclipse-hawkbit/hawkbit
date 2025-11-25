@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.artifact.exception.HashNotMatchException;
 import org.eclipse.hawkbit.artifact.model.ArtifactHashes;
 import org.eclipse.hawkbit.artifact.model.ArtifactStream;
 import org.eclipse.hawkbit.artifact.model.StoredArtifactInfo;
+import org.eclipse.hawkbit.context.Tenant;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -49,7 +50,6 @@ import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.retry.annotation.Backoff;
@@ -132,7 +132,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         try {
             return storeArtifactMetadata(softwareModule, filename, artifact.getHashes(), artifact.getSize(), existing);
         } catch (final Exception e) {
-            artifactStorage.deleteBySha1(TenantAware.getCurrentTenant(), artifact.getHashes().sha1());
+            artifactStorage.deleteBySha1(Tenant.currentTenant(), artifact.getHashes().sha1());
             throw e;
         }
     }
@@ -144,7 +144,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
             throw new UnsupportedOperationException();
         }
 
-        final String tenant = TenantAware.getCurrentTenant();
+        final String tenant = Tenant.currentTenant();
         // check access to the software module and if artifact belongs to it
         for (final Artifact artifact : softwareModuleRepository.getById(softwareModuleId).getArtifacts()) {
             if (artifact.getSha1Hash().equals(sha1Hash)) {
@@ -200,13 +200,13 @@ public class JpaArtifactManagement implements ArtifactManagement {
     void clearArtifactBinary(final String sha1Hash) {
         DeploymentHelper.runInNewTransaction(txManager, "clearArtifactBinary", status -> {
             // countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse will skip ACM checks and will return total count as it should be
-            if (artifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(sha1Hash, TenantAware.getCurrentTenant()) <= 0) {
+            if (artifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(sha1Hash, Tenant.currentTenant()) <= 0) {
                 // removes the real artifact ONLY AFTER the delete of artifact or software module
                 // in local history has passed successfully (caller has permission and no errors)
                 afterCommit(() -> {
                     try {
                         log.debug("deleting artifact from repository {}", sha1Hash);
-                        artifactStorage.deleteBySha1(TenantAware.getCurrentTenant(), sha1Hash);
+                        artifactStorage.deleteBySha1(Tenant.currentTenant(), sha1Hash);
                     } catch (final ArtifactStoreException e) {
                         throw new ArtifactDeleteFailedException(e);
                     }
@@ -221,7 +221,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         try (final InputStream wrappedStream = wrapInQuotaStream(
                 isSmEncrypted ? ArtifactEncryptionService.getInstance().encryptArtifact(artifactUpload.moduleId(), stream) : stream)) {
             return artifactStorage.store(
-                    TenantAware.getCurrentTenant(),
+                    Tenant.currentTenant(),
                     wrappedStream, artifactUpload.filename(),
                     artifactUpload.contentType(), artifactUpload.hash());
         } catch (final ArtifactStoreException | IOException e) {

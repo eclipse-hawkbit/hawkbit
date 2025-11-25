@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
+import java.util.List;
+
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.ListJoin;
 import jakarta.persistence.criteria.SetJoin;
@@ -28,8 +30,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.springframework.data.jpa.domain.Specification;
-
-import java.util.List;
 
 /**
  * Utility class for {@link Action}s {@link Specification}s. The class provides Spring Data JPQL Specifications.

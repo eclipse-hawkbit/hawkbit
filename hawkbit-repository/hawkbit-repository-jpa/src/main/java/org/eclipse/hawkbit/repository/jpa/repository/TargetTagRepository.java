@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
-import java.util.Optional;
-
 import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;

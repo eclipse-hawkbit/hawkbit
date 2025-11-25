@@ -70,8 +70,8 @@ public class AuditLoggingAspect {
      * Logs both the request details and the response.
      */
     private void logAudit(
-            final JoinPoint joinPoint, final AuditLog auditLog, final String resultMessage, final String paramsToLog,
-            final AuditLog.Level logLevel) {
+            final JoinPoint joinPoint,
+            final AuditLog auditLog, final String resultMessage, final String paramsToLog, final AuditLog.Level logLevel) {
         final String methodName = joinPoint.getSignature().getName();
 
         final String logMessage = String.format(

@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.entity.EntityDeletedEvent;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
 import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager.CacheEvictEvent;
 
 /**

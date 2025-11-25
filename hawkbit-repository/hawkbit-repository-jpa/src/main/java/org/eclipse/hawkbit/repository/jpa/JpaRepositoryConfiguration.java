@@ -46,7 +46,6 @@ import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
-import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoActionCleanup;
@@ -273,15 +272,6 @@ public class JpaRepositoryConfiguration {
     @ConditionalOnMissingBean
     ApplicationEventFilter applicationEventFilter(final RepositoryProperties repositoryProperties) {
         return e -> e instanceof TargetPollEvent && !repositoryProperties.isPublishTargetPollEvent();
-    }
-
-    /**
-     * @return the {@link TenantConfigurationManagement} singleton bean which make
-     *         it accessible in beans which cannot access the service directly, e.g. JPA entities.
-     */
-    @Bean
-    TenantConfigHelper tenantConfigHelper() {
-        return TenantConfigHelper.getInstance();
     }
 
     /**

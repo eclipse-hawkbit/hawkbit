@@ -7,13 +7,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.audit;
+package org.eclipse.hawkbit.context;
 
-import java.util.Optional;
+import java.util.function.Supplier;
 
-import lombok.NonNull;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
-import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,7 +22,8 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 /**
  * Auditor class that allows BaseEntity-s to insert current logged-in user for repository changes.
  */
-public class HawkbitAuditorAware implements AuditorAware<String> {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class Auditor {
 
     // Sometimes 'system' need to override the auditor when do create/modify actions in context of a tenant and user.
     // Though this could be made using runAsTenantAsUser sometimes (as in transaction) this override is needed
@@ -30,45 +31,46 @@ public class HawkbitAuditorAware implements AuditorAware<String> {
     // So this thread local variable provides option to override explicitly the auditor.
     private static final ThreadLocal<String> AUDITOR_OVERRIDE = new ThreadLocal<>();
 
-    // Always shall be followed by {@link #clearAuditorOverride}
-    public static void setAuditorOverride(final String auditor) {
-        if (auditor == null) {
-            AUDITOR_OVERRIDE.remove();
-        } else {
-            AUDITOR_OVERRIDE.set(auditor);
-        }
-    }
-
-    public static void clearAuditorOverride() {
-        AUDITOR_OVERRIDE.remove();
-    }
-
-    @NonNull
-    @Override
-    public Optional<String> getCurrentAuditor() {
+    public static String currentAuditor() {
         if (AUDITOR_OVERRIDE.get() != null) {
-            return Optional.of(AUDITOR_OVERRIDE.get());
+            return AUDITOR_OVERRIDE.get();
+        } else {
+            final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (isAuthenticationInvalid(authentication)) {
+                return null;
+            } else {
+                return resolve(authentication);
+            }
         }
-
-        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (isAuthenticationInvalid(authentication)) {
-            return Optional.empty();
-        }
-
-        return Optional.ofNullable(resolveAuditor(authentication));
     }
 
-    public static void runAsAuditor(final String auditor, final Runnable runnable) {
-        try {
-            setAuditorOverride(auditor);
+
+    public static void asAuditor(final String auditor, final Runnable runnable) {
+        asAuditor(auditor, () -> {
             runnable.run();
+            return null;
+        });
+    }
+
+    public static <T> T asAuditor(final String auditor, final Supplier<T> supplier) {
+        final String currentAuditor = AUDITOR_OVERRIDE.get();
+        try {
+            if (auditor == null) {
+                AUDITOR_OVERRIDE.remove();
+            } else {
+                AUDITOR_OVERRIDE.set(auditor);
+            }
+            return supplier.get();
         } finally {
-            clearAuditorOverride();
+            if (currentAuditor == null) {
+                AUDITOR_OVERRIDE.remove();
+            } else {
+                AUDITOR_OVERRIDE.set(currentAuditor);
+            }
         }
     }
 
-    public static String resolveAuditor(final Authentication authentication) {
+    static String resolve(final Authentication authentication) {
         if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails && tenantAwareDetails.controller()) {
             return "CONTROLLER_PLUG_AND_PLAY";
         }

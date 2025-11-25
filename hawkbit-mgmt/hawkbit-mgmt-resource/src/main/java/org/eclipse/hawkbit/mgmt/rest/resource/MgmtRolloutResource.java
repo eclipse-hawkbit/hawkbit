@@ -37,9 +37,9 @@ import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement.Create;
 import org.eclipse.hawkbit.repository.RolloutManagement.GroupCreate;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -47,7 +47,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -116,7 +115,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         final DistributionSet distributionSet = distributionSetManagement.getValidAndComplete(rolloutRequestBody.getDistributionSetId());
         final RolloutGroupConditions rolloutGroupConditions = MgmtRolloutMapper.fromRequest(rolloutRequestBody, true);
         final Create create = MgmtRolloutMapper.fromRequest(rolloutRequestBody, distributionSet);
-        final boolean confirmationFlowActive = TenantConfigHelper.getInstance().isConfirmationFlowEnabled();
+        final boolean confirmationFlowActive = TenantConfigHelper.isConfirmationFlowEnabled();
 
         final Rollout rollout;
         if (rolloutRequestBody.getGroups() != null) {
@@ -221,7 +220,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         }
 
         final List<MgmtRolloutGroupResponseBody> rest = MgmtRolloutMapper.toResponseRolloutGroup(
-                rolloutGroups.getContent(), TenantConfigHelper.getInstance().isConfirmationFlowEnabled(), isFullMode);
+                rolloutGroups.getContent(), TenantConfigHelper.isConfirmationFlowEnabled(), isFullMode);
         return ResponseEntity.ok(new PagedList<>(rest, rolloutGroups.getTotalElements()));
     }
 
@@ -235,7 +234,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         }
 
         return ResponseEntity.ok(MgmtRolloutMapper.toResponseRolloutGroup(
-                rolloutGroup, true, TenantConfigHelper.getInstance().isConfirmationFlowEnabled()));
+                rolloutGroup, true, TenantConfigHelper.isConfirmationFlowEnabled()));
     }
 
     @Override

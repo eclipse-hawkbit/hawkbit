@@ -15,11 +15,11 @@ import jakarta.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.auth.SpringEvalExpressions;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
+import org.eclipse.hawkbit.context.System;
+import org.eclipse.hawkbit.context.Tenant;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,7 +38,7 @@ public interface SystemManagement {
 
     /**
      * Runs consumer for each tenant as
-     * {@link SystemSecurityContext#runAsSystemAsTenant(String, java.util.concurrent.Callable)}
+     * {@link System#asSystemAsTenant(String, java.util.concurrent.Callable)}
      * silently (i.e. exceptions will be logged but operations will continue for further tenants).
      *
      * @param consumer to run as tenant
@@ -47,13 +47,13 @@ public interface SystemManagement {
     void forEachTenant(Consumer<String> consumer);
 
     /**
-     * @return {@link TenantMetaData} of {@link TenantAware#getCurrentTenant()}
+     * @return {@link TenantMetaData} of {@link Tenant#currentTenant()}
      */
     @PreAuthorize("hasAuthority('" + SpPermission.READ_DISTRIBUTION_SET + "')" + " or " + "hasAuthority('READ_" + SpPermission.TARGET + "')" + " or " + "hasAuthority('READ_" + SpPermission.TENANT_CONFIGURATION + "')" + " or " + SpringEvalExpressions.IS_CONTROLLER)
     TenantMetaData getTenantMetadata();
 
     /**
-     * @return {@link TenantMetaData} of {@link TenantAware#getCurrentTenant()} without details ({@link TenantMetaData#getDefaultDsType()})
+     * @return {@link TenantMetaData} of {@link Tenant#currentTenant()} without details ({@link TenantMetaData#getDefaultDsType()})
      */
     @PreAuthorize("hasAuthority('" + SpPermission.READ_DISTRIBUTION_SET + "')" + " or " + "hasAuthority('READ_" + SpPermission.TARGET + "')" + " or " + "hasAuthority('READ_" + SpPermission.TENANT_CONFIGURATION + "')" + " or " + SpringEvalExpressions.IS_CONTROLLER)
     TenantMetaData getTenantMetadataWithoutDetails();

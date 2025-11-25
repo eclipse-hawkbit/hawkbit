@@ -10,7 +10,7 @@
 package org.eclipse.hawkbit.security.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
+import org.eclipse.hawkbit.context.System;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
@@ -53,13 +53,13 @@ public class SecurityTokenAuthenticator extends Authenticator.AbstractAuthentica
         log.debug("Found 'authorization' header starting with '{}'", TARGET_SECURITY_TOKEN_AUTH_SCHEME);
         final String presentedToken = authHeader.substring(OFFSET_TARGET_TOKEN);
 
-        return SystemSecurityContext.runAsSystemAsTenant(controllerSecurityToken.getTenant(), () -> controllerSecurityToken.getTargetId() != null
+        return System.asSystemAsTenant(controllerSecurityToken.getTenant(), () -> controllerSecurityToken.getTargetId() != null
                                 ? controllerManagement.find(controllerSecurityToken.getTargetId())
                                 : controllerManagement.findByControllerId(controllerSecurityToken.getControllerId())
                 )
                 // validate if the presented token is the same as the one set for the target
                 .filter(target -> presentedToken.equals(
-                        SystemSecurityContext.runAsSystemAsTenant(controllerSecurityToken.getTenant(), target::getSecurityToken)))
+                        System.asSystemAsTenant(controllerSecurityToken.getTenant(), target::getSecurityToken)))
                 .map(target -> authenticatedController(controllerSecurityToken.getTenant(), target.getControllerId()))
                 .orElse(null);
     }

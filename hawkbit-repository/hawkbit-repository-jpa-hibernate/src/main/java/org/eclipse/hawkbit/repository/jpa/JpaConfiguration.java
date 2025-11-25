@@ -13,12 +13,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import lombok.Data;
 import org.eclipse.hawkbit.repository.jpa.model.EntityPropertyChangeListener;
-
 import org.eclipse.hawkbit.repository.jpa.utils.ExceptionMapper;
 import org.eclipse.hawkbit.repository.jpa.utils.JpaExceptionTranslator;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.spi.BootstrapContext;
 import org.hibernate.cfg.MultiTenancySettings;
@@ -41,12 +41,9 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.security.core.parameters.P;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
-
-import javax.sql.DataSource;
 
 /**
  * General Hibernate configuration for hawkBit's Repository.

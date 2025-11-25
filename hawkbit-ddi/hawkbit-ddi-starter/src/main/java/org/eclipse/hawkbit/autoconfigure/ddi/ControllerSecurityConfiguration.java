@@ -12,11 +12,9 @@ package org.eclipse.hawkbit.autoconfigure.ddi;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.audit.MdcHandler;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
+import org.eclipse.hawkbit.context.Mdc;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.rest.SecurityManagedConfiguration;
 import org.eclipse.hawkbit.rest.security.DosFilter;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
@@ -25,7 +23,6 @@ import org.eclipse.hawkbit.security.controller.AuthenticationFilters;
 import org.eclipse.hawkbit.security.controller.GatewayTokenAuthenticator;
 import org.eclipse.hawkbit.security.controller.SecurityHeaderAuthenticator;
 import org.eclipse.hawkbit.security.controller.SecurityTokenAuthenticator;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -117,7 +114,7 @@ class ControllerSecurityConfiguration {
             http.requiresChannel(crmRegistry -> crmRegistry.anyRequest().requiresSecure());
         }
 
-        MdcHandler.Filter.addMdcFilter(http);
+        Mdc.Filter.addMdcFilter(http);
 
         return http.build();
     }

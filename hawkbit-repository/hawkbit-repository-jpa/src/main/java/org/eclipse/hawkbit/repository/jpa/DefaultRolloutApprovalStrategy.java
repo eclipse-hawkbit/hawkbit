@@ -15,10 +15,8 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -66,6 +64,6 @@ public class DefaultRolloutApprovalStrategy implements RolloutApprovalStrategy {
     }
 
     private boolean isApprovalEnabled() {
-        return TenantConfigHelper.getInstance().getConfigValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class);
+        return TenantConfigHelper.getAsSystem(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class);
     }
 }

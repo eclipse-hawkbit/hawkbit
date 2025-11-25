@@ -55,8 +55,8 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
@@ -65,7 +65,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -237,7 +236,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
         return ResponseEntity.ok(new PagedList<>(
                 MgmtTargetFilterQueryMapper.toResponse(
-                        targetFilterQueries.getContent(), TenantConfigHelper.getInstance().isConfirmationFlowEnabled(), false),
+                        targetFilterQueries.getContent(), TenantConfigHelper.isConfirmationFlowEnabled(), false),
                 targetFilterQueries.getTotalElements()));
     }
 
@@ -254,13 +253,13 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
         final List<DeploymentRequest> deploymentRequests = assignments.stream().map(dsAssignment -> {
             final boolean isConfirmationRequired = dsAssignment.getConfirmationRequired() == null
-                    ? TenantConfigHelper.getInstance().isConfirmationFlowEnabled()
+                    ? TenantConfigHelper.isConfirmationFlowEnabled()
                     : dsAssignment.getConfirmationRequired();
             return MgmtDeploymentRequestMapper.createAssignmentRequestBuilder(dsAssignment, distributionSetId)
                     .confirmationRequired(isConfirmationRequired).build();
         }).toList();
 
-        final List<DistributionSetAssignmentResult> assignmentResults = deployManagement.assignDistributionSets(deploymentRequests);
+        final List<DistributionSetAssignmentResult> assignmentResults = deployManagement.assignDistributionSets(deploymentRequests, null);
         return ResponseEntity.ok(mgmtDistributionSetMapper.toResponse(assignmentResults));
     }
 

@@ -21,7 +21,7 @@ import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.run
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.eclipse.hawkbit.context.SystemSecurityContext;
+import org.eclipse.hawkbit.context.System;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -40,7 +40,7 @@ class DeploymentManagementTest extends AbstractAccessControllerManagementTest {
                         READ_DISTRIBUTION_SET),
                 () -> assertThat(deploymentManagement.assignDistributionSets(List.of(new DeploymentRequest(
                                 target1Type1.getControllerId(), ds1Type1.getId(), Action.ActionType.FORCED, 0,
-                                null, null, null, null, false)))
+                                null, null, null, null, false)), null)
                         .get(0).getAssignedEntity().stream().map(Action::getTarget)
                         .map(Target::getId))
                         .hasSize(1)
@@ -52,7 +52,7 @@ class DeploymentManagementTest extends AbstractAccessControllerManagementTest {
                         READ_DISTRIBUTION_SET),
                 () -> assertThat(deploymentManagement.assignDistributionSets(List.of(new DeploymentRequest(
                         target1Type1.getControllerId(), ds1Type1.getId(), Action.ActionType.FORCED, 0,
-                        null, null, null, null, false)))).isEmpty());
+                        null, null, null, null, false)), null)).isEmpty());
     }
 
     @Test
@@ -192,7 +192,7 @@ class DeploymentManagementTest extends AbstractAccessControllerManagementTest {
     }
 
     private void verify(final Consumer<Long> noRead, final Consumer<Long> readNoUpdate, final Consumer<Long> readAndUpdate) {
-        final Long actionId = SystemSecurityContext.runAsSystem(() -> {
+        final Long actionId = System.asSystem(() -> {
             final List<Action> actions = assignDistributionSet(ds1Type1.getId(), target1Type1.getControllerId()).getAssignedEntity();
             assertThat(actions).hasSize(1).allMatch(action -> action.getTarget().getId().equals(target1Type1.getId()));
             return actions.get(0);

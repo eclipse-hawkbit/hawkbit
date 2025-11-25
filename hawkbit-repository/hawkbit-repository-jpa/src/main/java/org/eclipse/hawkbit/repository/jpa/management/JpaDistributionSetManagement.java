@@ -34,12 +34,12 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.DeletedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
@@ -56,7 +56,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Statistic;
 import org.eclipse.hawkbit.repository.qfields.DistributionSetFields;
-import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -204,7 +203,7 @@ public class JpaDistributionSetManagement
             return false;
         }
 
-        if (Boolean.FALSE.equals(TenantConfigHelper.getInstance().getConfigValue(IMPLICIT_LOCK_ENABLED, Boolean.class))) {
+        if (Boolean.FALSE.equals(TenantConfigHelper.getAsSystem(IMPLICIT_LOCK_ENABLED, Boolean.class))) {
             // implicit lock disabled
             return false;
         }

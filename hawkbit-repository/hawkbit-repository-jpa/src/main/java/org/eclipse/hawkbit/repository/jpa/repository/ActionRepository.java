@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 

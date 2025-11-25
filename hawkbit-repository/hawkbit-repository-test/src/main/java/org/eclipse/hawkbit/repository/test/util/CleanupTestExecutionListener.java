@@ -14,9 +14,9 @@ import java.util.List;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.context.System;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager.CacheEvictEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.PageRequest;
@@ -44,10 +44,10 @@ public class CleanupTestExecutionListener extends AbstractTestExecutionListener 
     }
 
     private void clearTestRepository(final SystemManagement systemManagement) {
-        final List<String> tenants = SystemSecurityContext.runAsSystem(() -> systemManagement.findTenants(PAGE).getContent());
+        final List<String> tenants = System.asSystem(() -> systemManagement.findTenants(PAGE).getContent());
         tenants.forEach(tenant -> {
             try {
-                SystemSecurityContext.runAsSystem(() -> systemManagement.deleteTenant(tenant));
+                System.asSystem(() -> systemManagement.deleteTenant(tenant));
             } catch (final Exception e) {
                 log.error("Error while delete tenant", e);
             }

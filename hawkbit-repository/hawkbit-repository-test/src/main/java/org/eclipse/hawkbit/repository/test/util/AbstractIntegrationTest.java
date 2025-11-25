@@ -246,7 +246,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected static TenantConfigurationManagement tenantConfigurationManagement() {
-        return TenantConfigHelper.getInstance().getTenantConfigurationManagement();
+        return TenantConfigHelper.getTenantConfigurationManagement();
     }
 
     /**
@@ -347,13 +347,14 @@ public abstract class AbstractIntegrationTest {
                         .actionType(actionType).forceTime(forcedTime).weight(weight).confirmationRequired(confirmationFlowActive)
                         .build())
                 .toList();
-        final List<DistributionSetAssignmentResult> results = deploymentManagement.assignDistributionSets(deploymentRequests);
+        final List<DistributionSetAssignmentResult> results = deploymentManagement.assignDistributionSets(deploymentRequests, null);
         assertThat(results).hasSize(1);
         return results.get(0);
     }
 
     protected List<DistributionSetAssignmentResult> assignDistributionSets(final List<DeploymentRequest> requests) {
-        final List<DistributionSetAssignmentResult> distributionSetAssignmentResults = deploymentManagement.assignDistributionSets(requests);
+        final List<DistributionSetAssignmentResult> distributionSetAssignmentResults =
+                deploymentManagement.assignDistributionSets(requests, null);
         assertThat(distributionSetAssignmentResults).hasSize(requests.size());
         return distributionSetAssignmentResults;
     }
@@ -367,7 +368,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected DistributionSetAssignmentResult makeAssignment(final DeploymentRequest request) {
-        final List<DistributionSetAssignmentResult> results = deploymentManagement.assignDistributionSets(Collections.singletonList(request));
+        final List<DistributionSetAssignmentResult> results = deploymentManagement.assignDistributionSets(List.of(request), null);
         assertThat(results).hasSize(1);
         return results.get(0);
     }

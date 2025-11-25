@@ -16,9 +16,10 @@ import jakarta.persistence.EntityManager;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.ArtifactStorage;
+import org.eclipse.hawkbit.context.System;
+import org.eclipse.hawkbit.context.Tenant;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.CurrentTenantCacheKeyGenerator;
@@ -43,10 +44,6 @@ import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
-import org.eclipse.hawkbit.repository.model.report.SystemUsageReport;
-import org.eclipse.hawkbit.repository.model.report.SystemUsageReportWithTenants;
-import org.eclipse.hawkbit.context.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager.CacheEvictEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
@@ -57,7 +54,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -153,7 +149,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         Pageable query = PageRequest.of(0, MAX_TENANTS_QUERY);
         do {
             tenants = findTenants(query); // its with IS_SYSTEM_CODE so we could find all tenants
-            tenants.forEach(tenant -> SystemSecurityContext.runAsSystemAsTenant(tenant, () -> {
+            tenants.forEach(tenant -> System.asSystemAsTenant(tenant, () -> {
                 try {
                     consumer.accept(tenant);
                 } catch (final RuntimeException ex) {
@@ -206,7 +202,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         }
 
         final String tenant = t.toUpperCase();
-        SystemSecurityContext.runAsSystemAsTenant(tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "deleteTenant", status -> {
+        System.asSystemAsTenant(tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "deleteTenant", status -> {
             tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
             tenantConfigurationRepository.deleteByTenant(tenant);
             targetRepository.deleteByTenant(tenant);
@@ -226,7 +222,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     private TenantMetaData getTenantMetadata0(final boolean withDetails) {
-        final String tenant = TenantAware.getCurrentTenant();
+        final String tenant = Tenant.currentTenant();
         if (tenant == null) {
             throw new IllegalStateException("Tenant not set");
         }
@@ -299,7 +295,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
      * @return the initial created {@link TenantMetaData}
      */
     private TenantMetaData createInitialTenantMetaData(final String tenant) {
-        return SystemSecurityContext.runAsSystemAsTenant(
+        return System.asSystemAsTenant(
                 tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "initial-tenant-creation", status -> {
                     final DistributionSetType defaultDsType = createStandardSoftwareDataSetup();
                     return tenantMetaDataRepository.save(new JpaTenantMetaData(defaultDsType, tenant));
