@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.util;
+package org.eclipse.hawkbit.utils;
 
 import java.lang.annotation.Target;
 import java.net.URI;

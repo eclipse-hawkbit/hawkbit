@@ -9,9 +9,10 @@
  */
 package org.eclipse.hawkbit.repository.jpa.event;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
+
 import jakarta.persistence.EntityManager;
 
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,6 @@ public class JpaEventEntityManager implements EventEntityManager {
 
     @Override
     public <E extends TenantAwareBaseEntity> E findEntity(final String tenant, final Long id, final Class<E> entityType) {
-        return AccessContext.asSystemAsTenant(tenant, () -> entityManager.find(entityType, id));
+        return asSystemAsTenant(tenant, () -> entityManager.find(entityType, id));
     }
 }

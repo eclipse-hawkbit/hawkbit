@@ -29,14 +29,12 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-repository-jpa</artifactId>
-            <version>${project.version}</version>
-            <optional>true</optional>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-security-core</artifactId>
+            <artifactId>hawkbit-repository-jpa</artifactId>
             <version>${project.version}</version>
             <optional>true</optional>
         </dependency>

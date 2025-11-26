@@ -21,7 +21,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
@@ -37,7 +36,6 @@ import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
-import org.eclipse.hawkbit.repository.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
@@ -47,7 +45,6 @@ import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
-import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -435,7 +432,7 @@ class AmqpMessageHandlerServiceTest {
      * Test next update is provided on finished action
      */
     @Test
-    void lookupNextUpdateActionAfterFinished() throws IllegalAccessException {
+    void lookupNextUpdateActionAfterFinished() {
 
         // Mock
         final Action action = createActionWithTarget(22L);
@@ -648,10 +645,7 @@ class AmqpMessageHandlerServiceTest {
         return messageProperties;
     }
 
-    private Action createActionWithTarget(final Long targetId) throws IllegalAccessException {
-        // is needed for the creation of targets
-        initializeSecurityTokenGenerator();
-
+    private Action createActionWithTarget(final Long targetId) {
         // Mock
         final Action actionMock = mock(Action.class);
         final Target targetMock = mock(Target.class);
@@ -664,17 +658,6 @@ class AmqpMessageHandlerServiceTest {
         when(actionMock.getActionType()).thenReturn(Action.ActionType.SOFT);
         when(targetMock.getControllerId()).thenReturn("target1");
         return actionMock;
-    }
-
-    private void initializeSecurityTokenGenerator() throws IllegalAccessException {
-        final SecurityTokenGeneratorHolder instance = SecurityTokenGeneratorHolder.getInstance();
-        final Field[] fields = instance.getClass().getDeclaredFields();
-        for (final Field field : fields) {
-            if (field.getType().isAssignableFrom(SecurityTokenGenerator.class)) {
-                field.setAccessible(true);
-                field.set(instance, new SecurityTokenGenerator());
-            }
-        }
     }
 
     private MessageProperties getThingCreatedMessageProperties(final String thingId) {

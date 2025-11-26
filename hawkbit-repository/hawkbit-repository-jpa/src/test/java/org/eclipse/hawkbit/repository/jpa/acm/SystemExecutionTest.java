@@ -23,6 +23,7 @@ import static org.eclipse.hawkbit.auth.SpPermission.SOFTWARE_MODULE_TYPE;
 import static org.eclipse.hawkbit.auth.SpPermission.TARGET_TYPE;
 import static org.eclipse.hawkbit.auth.SpPermission.UPDATE_PREFIX;
 import static org.eclipse.hawkbit.auth.SpPermission.UPDATE_TARGET;
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -32,7 +33,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController.Operation;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -102,6 +102,7 @@ class SystemExecutionTest extends AbstractAccessControllerManagementTest {
     private void verifyAccessController(final AccessController<?> accessController) {
         verifyAccessController(accessController, 1);
     }
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private void verifyAccessController(final AccessController<?> accessController, final int times) {
         final Specification mock = mock(Specification.class);
@@ -111,8 +112,8 @@ class SystemExecutionTest extends AbstractAccessControllerManagementTest {
         verify(mock, times(times)).and(any()); // once for every access controller is scoped only
 
         final Specification mockAsSystem = mock(Specification.class);
-        for (Operation operation : Operation.values()) {
-            AccessContext.asSystem(() -> accessController.appendAccessRules(operation, mockAsSystem));
+        for (final Operation operation : Operation.values()) {
+            asSystem(() -> accessController.appendAccessRules(operation, mockAsSystem));
         }
         verifyNoInteractions(mockAsSystem);
     }

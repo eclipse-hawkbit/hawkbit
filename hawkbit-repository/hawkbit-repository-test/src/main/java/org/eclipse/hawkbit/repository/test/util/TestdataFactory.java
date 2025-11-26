@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.test.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -1287,7 +1288,7 @@ public class TestdataFactory {
         if (tenant == null) {
             throw new IllegalStateException("AccessContext is null");
         }
-        AccessContext.asSystem(rolloutHandler::handleAll);
+        asSystem(rolloutHandler::handleAll);
     }
 
     private Rollout reloadRollout(final Rollout rollout) {

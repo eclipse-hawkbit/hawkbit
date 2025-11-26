@@ -127,7 +127,7 @@ public class TenantConfigurationProperties {
         /**
          * Switch to enable/disable the user-confirmation flow
          */
-        public static final String USER_CONFIRMATION_ENABLED = "user.confirmation.flow.enabled";
+        public static final String USER_CONFIRMATION_FLOW_ENABLED = "user.confirmation.flow.enabled";
         /**
          * Switch to enable/disable the implicit locking
          */

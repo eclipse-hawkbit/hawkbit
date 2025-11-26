@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.eclipse.hawkbit.context.AccessContext.asActor;
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
+import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
 import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor.afterCommit;
 import static org.eclipse.hawkbit.repository.model.Action.Status.DOWNLOADED;
 import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
@@ -56,7 +59,7 @@ import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
-import org.eclipse.hawkbit.repository.SecurityTokenGeneratorHolder;
+import org.eclipse.hawkbit.repository.SecurityTokenGenerator;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
@@ -106,7 +109,7 @@ import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.eclipse.hawkbit.util.IpUtil;
+import org.eclipse.hawkbit.utils.IpUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -269,7 +272,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     public Map<Long, Map<String, String>> findTargetVisibleMetaDataBySoftwareModuleId(final Collection<Long> moduleId) {
-        return AccessContext.asSystem(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(moduleId));
+        return asSystem(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(moduleId));
     }
 
     @Override
@@ -375,7 +378,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     public String getPollingTime(final Target target) {
-        return AccessContext.asSystem(() -> {
+        // as system so to be able to read tenant configuration (READ_TENANT_CONFIGURATION)
+        return asSystem(() -> {
             final PollingTime pollingTime = new PollingTime(
                     TenantConfigHelper.getTenantConfigurationManagement()
                             .getConfigurationValue(TenantConfigurationKey.POLLING_TIME, String.class).getValue());
@@ -564,7 +568,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Override
     public boolean updateOfflineAssignedVersion(@NotEmpty final String controllerId, final String distributionName, final String version) {
         List<DistributionSetAssignmentResult> distributionSetAssignmentResults =
-                AccessContext.asSystem(() -> AccessContext.asActor(controllerId, () -> deploymentManagement.offlineAssignedDistributionSets(
+                asSystem(() -> asActor(controllerId, () -> deploymentManagement.offlineAssignedDistributionSets(
                         List.of(Map.entry(controllerId, distributionSetManagement.findByNameAndVersion(distributionName, version).getId())))));
 
         return distributionSetAssignmentResults.stream()
@@ -647,7 +651,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         jpaTarget.setControllerId(controllerId);
         jpaTarget.setDescription("Plug and Play target: " + controllerId);
         jpaTarget.setName((StringUtils.hasText(name) ? name : controllerId));
-        jpaTarget.setSecurityToken(SecurityTokenGeneratorHolder.getInstance().generateToken());
+        jpaTarget.setSecurityToken(SecurityTokenGenerator.generateToken());
         jpaTarget.setUpdateStatus(TargetUpdateStatus.REGISTERED);
         jpaTarget.setLastTargetQuery(java.lang.System.currentTimeMillis());
         jpaTarget.setAddress(Optional.ofNullable(address).map(URI::toString).orElse(null));
@@ -692,9 +696,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         try {
             events.stream().collect(Collectors.groupingBy(TargetPoll::getTenant)).forEach((tenant, polls) -> {
                 final TransactionCallback<Void> createTransaction = status -> updateLastTargetQueries(tenant, polls);
-                AccessContext.asSystemAsTenant(
-                        tenant,
-                        () -> DeploymentHelper.runInNewTransaction(txManager, "flushUpdateQueue", createTransaction));
+                asSystemAsTenant(
+                        tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "flushUpdateQueue", createTransaction));
             });
         } catch (final RuntimeException ex) {
             log.error("Failed to persist UpdateQueue content.", ex);

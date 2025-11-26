@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.scheduler;
 
+import static org.eclipse.hawkbit.context.AccessContext.asActor;
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
+import static org.eclipse.hawkbit.context.AccessContext.withSecurityContext;
 import static org.eclipse.hawkbit.repository.jpa.JpaManagementHelper.combineWithAnd;
 import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor.afterCommit;
 
@@ -156,10 +159,10 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     @Override
     public void execute(final Rollout rollout) {
         rollout.getAccessControlContext().ifPresentOrElse(
-                context -> // has stored context - executes it with it
-                        AccessContext.withSecurityContext(context, () -> execute0(rollout)),
-                () -> // has no stored context - executes it in the tenant & user scope
-                        AccessContext.asActor(rollout.getCreatedBy(), () -> execute0(rollout)));
+                // has stored context - executes it with it
+                context -> withSecurityContext(context, () -> execute0(rollout)),
+                // has no stored context - executes it in the tenant & user scope
+                () -> asActor(rollout.getCreatedBy(), () -> execute0(rollout)));
     }
 
     private void execute0(final Rollout rollout) {
@@ -174,18 +177,18 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 break;
             case STARTING:
                 // the lastModifiedBy user is probably the user that has actually called the rollout start (unless overridden) - not the creator
-                AccessContext.asActor(rollout.getLastModifiedBy(), () -> handleStartingRollout((JpaRollout) rollout));
+                asActor(rollout.getLastModifiedBy(), () -> handleStartingRollout((JpaRollout) rollout));
                 break;
             case RUNNING:
                 handleRunningRollout((JpaRollout) rollout);
                 break;
             case STOPPING:
                 // the lastModifiedBy user is probably the user that has actually called the rollout stop (unless overridden) - not the creator
-                AccessContext.asActor(rollout.getLastModifiedBy(), () -> handleStopRollout((JpaRollout) rollout));
+                asActor(rollout.getLastModifiedBy(), () -> handleStopRollout((JpaRollout) rollout));
                 break;
             case DELETING:
                 // the lastModifiedBy user is probably the user that has actually called the rollout delete (unless overridden) - not the creator
-                AccessContext.asActor(rollout.getLastModifiedBy(), () -> handleDeleteRollout((JpaRollout) rollout));
+                asActor(rollout.getLastModifiedBy(), () -> handleDeleteRollout((JpaRollout) rollout));
                 break;
             default:
                 log.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
@@ -845,7 +848,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         try {
             QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class, actionRepository::countByTargetId);
         } catch (final AssignmentQuotaExceededException ex) {
-            AccessContext.asSystem(() -> deploymentManagement.handleMaxAssignmentsExceeded(target.getId(), requested, ex));
+            asSystem(() -> deploymentManagement.handleMaxAssignmentsExceeded(target.getId(), requested, ex));
         }
     }
 

@@ -9,15 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.helper;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.USER_CONFIRMATION_ENABLED;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.USER_CONFIRMATION_FLOW_ENABLED;
 
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Function;
 
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -42,15 +42,15 @@ public final class TenantConfigHelper {
     }
 
     public static <T extends Serializable> T getAsSystem(final String key, final Class<T> valueType) {
-        return AccessContext.asSystem(() -> getTenantConfigurationManagement().getConfigurationValue(key, valueType).getValue());
+        return asSystem(() -> getTenantConfigurationManagement().getConfigurationValue(key, valueType).getValue());
     }
 
     public static boolean isMultiAssignmentsEnabled() {
         return getAsSystem(MULTI_ASSIGNMENTS_ENABLED, Boolean.class);
     }
 
-    public static boolean isConfirmationFlowEnabled() {
-        return getAsSystem(USER_CONFIRMATION_ENABLED, Boolean.class);
+    public static boolean isUserConfirmationFlowEnabled() {
+        return getAsSystem(USER_CONFIRMATION_FLOW_ENABLED, Boolean.class);
     }
 
     public static Function<Target, PollStatus> pollStatusResolver() {

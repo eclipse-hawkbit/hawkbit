@@ -69,7 +69,7 @@ import org.eclipse.hawkbit.rest.util.FileStreamingUtil;
 import org.eclipse.hawkbit.rest.util.HttpUtil;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
-import org.eclipse.hawkbit.util.IpUtil;
+import org.eclipse.hawkbit.utils.IpUtil;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpHeaders;
@@ -350,8 +350,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
     @Override
     public ResponseEntity<DdiConfirmationBase> getConfirmationBase(final String tenant, final String controllerId) {
         log.debug("getConfirmationBase is called [controllerId={}].", controllerId);
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, IpUtil
-                .getClientIpFromRequest(RequestResponseContextHolder.getHttpServletRequest(), securityProperties));
+        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(
+                controllerId, IpUtil.getClientIpFromRequest(RequestResponseContextHolder.getHttpServletRequest(), securityProperties));
         final Action activeAction = controllerManagement.findActiveActionWithHighestWeight(controllerId).orElse(null);
 
         final DdiAutoConfirmationState autoConfirmationState = getAutoConfirmationState(controllerId);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Bosch.IO GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,18 +7,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.util;
-
-import java.nio.charset.StandardCharsets;
+package org.eclipse.hawkbit.audit;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.springframework.web.util.UriUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Constants related to security.
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class UrlUtils {
+public final class SecurityLogger {
 
-    public static String decodeUriValue(final String value) {
-        return UriUtils.decode(value, StandardCharsets.UTF_8);
-    }
+    public static final Logger LOGGER = LoggerFactory.getLogger("SERVER.SECURITY");
 }

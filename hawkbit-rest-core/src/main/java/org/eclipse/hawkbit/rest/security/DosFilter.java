@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.rest.security;
 
+import static org.eclipse.hawkbit.audit.SecurityLogger.LOGGER;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
@@ -23,32 +25,23 @@ import jakarta.servlet.http.HttpServletResponse;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.security.SecurityConstants;
-import org.eclipse.hawkbit.util.IpUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.hawkbit.utils.IpUtil;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Filter for protection against denial of service attacks. It reduces the
- * maximum number of request per seconds which can be separately configured for
- * read (GET) and write (PUT/POST/DELETE) requests.
+ * Filter for protection against Denial-of-Service (DoS) attacks. It reduces the maximum number of request per seconds which can be separately
+ * configured for read (GET) and write (PUT/POST/DELETE) requests.
  */
 @Slf4j
 public class DosFilter extends OncePerRequestFilter {
 
-    private static final Logger LOG_DOS =
-            LoggerFactory.getLogger(SecurityConstants.SECURITY_LOG_PREFIX + ".dos");
-    private static final Logger LOG_BLACKLIST =
-            LoggerFactory.getLogger(SecurityConstants.SECURITY_LOG_PREFIX + ".blacklist");
-
     private final AntPathMatcher antMatcher = new AntPathMatcher();
     private final Collection<String> includeAntPaths;
 
-    private final Pattern ipAdressBlacklist;
+    private final Pattern ipAddressBlacklist;
 
     private final Cache<String, AtomicInteger> readCountCache = Caffeine.newBuilder()
             .expireAfterWrite(1, TimeUnit.SECONDS).build();
@@ -67,17 +60,14 @@ public class DosFilter extends OncePerRequestFilter {
      * Filter constructor including configuration.
      *
      * @param includeAntPaths paths where filter should hit
-     * @param maxRead Maximum number of allowed REST read/GET requests per second
-     *         per client
-     * @param maxWrite Maximum number of allowed REST write/(PUT/POST/etc.) requests
-     *         per second per client
-     * @param ipDosWhiteListPattern {@link Pattern} with with white list of peer IP addresses for
-     *         DOS filter
+     * @param maxRead Maximum number of allowed REST read/GET requests per second per client
+     * @param maxWrite Maximum number of allowed REST write/(PUT/POST/etc.) requests per second per client
+     * @param ipDosWhiteListPattern {@link Pattern} with with white list of peer IP addresses for DOS filter
      * @param ipBlackListPattern {@link Pattern} with black listed IP addresses
-     * @param forwardHeader the header containing the forwarded IP address e.g.
-     *         {@code x-forwarded-for}
+     * @param forwardHeader the header containing the forwarded IP address e.g. {@code x-forwarded-for}
      */
-    public DosFilter(final Collection<String> includeAntPaths, final int maxRead, final int maxWrite,
+    public DosFilter(
+            final Collection<String> includeAntPaths, final int maxRead, final int maxWrite,
             final String ipDosWhiteListPattern, final String ipBlackListPattern, final String forwardHeader) {
         this.includeAntPaths = includeAntPaths;
         this.maxRead = maxRead;
@@ -85,9 +75,9 @@ public class DosFilter extends OncePerRequestFilter {
         this.forwardHeader = forwardHeader;
 
         if (ipBlackListPattern != null && !ipBlackListPattern.isEmpty()) {
-            ipAdressBlacklist = Pattern.compile(ipBlackListPattern);
+            ipAddressBlacklist = Pattern.compile(ipBlackListPattern);
         } else {
-            ipAdressBlacklist = null;
+            ipAddressBlacklist = null;
         }
 
         if (ipDosWhiteListPattern != null && !ipDosWhiteListPattern.isEmpty()) {
@@ -98,9 +88,8 @@ public class DosFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response,
-            final FilterChain filterChain) throws ServletException, IOException {
-
+    protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain)
+            throws ServletException, IOException {
         if (!shouldInclude(request)) {
             filterChain.doFilter(request, response);
             return;
@@ -156,8 +145,8 @@ public class DosFilter extends OncePerRequestFilter {
      *         processing of the request if forbidden
      */
     private boolean checkAgainstBlacklist(final HttpServletResponse response, final String ip) {
-        if (ipAdressBlacklist != null && ipAdressBlacklist.matcher(ip).find()) {
-            LOG_BLACKLIST.info("Blacklisted client ({}) tries to access the server!", ip);
+        if (ipAddressBlacklist != null && ipAddressBlacklist.matcher(ip).find()) {
+            LOGGER.info("[BLACKLIST] Blacklisted client ({}) tries to access the server!", ip);
             response.setStatus(HttpStatus.FORBIDDEN.value());
             return false;
         }
@@ -171,8 +160,7 @@ public class DosFilter extends OncePerRequestFilter {
         if (count == null) {
             writeCountCache.put(ip, new AtomicInteger());
         } else if (count.getAndIncrement() > maxWrite) {
-            LOG_DOS.info("Registered DOS attack! Client {} is above configured WRITE request threshold ({})!", ip,
-                    maxWrite);
+            LOGGER.info("[DOS] Registered DOS attack! Client {} is above configured WRITE request threshold ({})!", ip, maxWrite);
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             processChain = false;
         }
@@ -187,8 +175,7 @@ public class DosFilter extends OncePerRequestFilter {
         if (count == null) {
             readCountCache.put(ip, new AtomicInteger());
         } else if (count.getAndIncrement() > maxRead) {
-            LOG_DOS.info("Registered DOS attack! Client {} is above configured READ request threshold ({})!", ip,
-                    maxRead);
+            LOGGER.info("[DOS] Registered DOS attack! Client {} is above configured READ request threshold ({})!", ip, maxRead);
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             processChain = false;
         }

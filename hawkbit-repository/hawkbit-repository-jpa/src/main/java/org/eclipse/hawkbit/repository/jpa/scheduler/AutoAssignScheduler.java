@@ -9,13 +9,14 @@
  */
 package org.eclipse.hawkbit.repository.jpa.scheduler;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
+
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration;
@@ -51,7 +52,7 @@ public class AutoAssignScheduler {
     @Scheduled(initialDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void autoAssignScheduler() {
         // run this code in system code privileged to have the necessary permission to query and create entities.
-        AccessContext.asSystem(this::executeAutoAssign);
+        asSystem(this::executeAutoAssign);
     }
 
     @SuppressWarnings("squid:S3516")

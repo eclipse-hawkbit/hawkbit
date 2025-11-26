@@ -414,18 +414,18 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected void enableConfirmationFlow() {
-        tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, true);
+        tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.USER_CONFIRMATION_FLOW_ENABLED, true);
     }
 
     protected void disableConfirmationFlow() {
-        tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, false);
+        tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.USER_CONFIRMATION_FLOW_ENABLED, false);
     }
 
     protected boolean isConfirmationFlowActive() {
         return SecurityContextSwitch.getAs(
                 SecurityContextSwitch.withUser("as_system", READ_TENANT_CONFIGURATION),
                 () -> tenantConfigurationManagement()
-                        .getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, Boolean.class)
+                        .getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_FLOW_ENABLED, Boolean.class)
                         .getValue());
     }
 
@@ -474,7 +474,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected boolean isConfirmationFlowEnabled() {
-        return tenantConfigurationManagement().getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, Boolean.class)
+        return tenantConfigurationManagement().getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_FLOW_ENABLED, Boolean.class)
                 .getValue();
     }
 

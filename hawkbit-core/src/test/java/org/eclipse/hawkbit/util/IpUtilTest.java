@@ -21,17 +21,18 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties.Clients;
+import org.eclipse.hawkbit.utils.IpUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
 /**
  * Feature: Unit Tests - Security<br/>
  * Story: IP Util Test
  */
+@ExtendWith(MockitoExtension.class)
 class IpUtilTest {
 
     private static final String X_FORWARDED_FOR = HawkbitSecurityProperties.Clients.X_FORWARDED_FOR;

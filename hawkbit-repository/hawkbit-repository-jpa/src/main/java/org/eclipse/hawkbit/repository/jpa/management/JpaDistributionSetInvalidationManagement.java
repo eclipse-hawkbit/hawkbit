@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
+
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
@@ -125,7 +127,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
         }
 
         // Do run as system to ensure all actions (even invisible) are canceled due to invalidation.
-        AccessContext.asSystem(() -> {
+        asSystem(() -> {
             log.debug("Cancel auto assignments after ds invalidation. ID: {}", setId);
             targetFilterQueryManagement.cancelAutoAssignmentForDistributionSet(setId);
         });

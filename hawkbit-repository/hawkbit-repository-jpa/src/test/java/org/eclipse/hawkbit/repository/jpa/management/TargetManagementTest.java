@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -33,7 +34,6 @@ import jakarta.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.auth.SpRole;
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.MetadataSupport;
 import org.eclipse.hawkbit.repository.TargetManagement.Create;
@@ -146,7 +146,7 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
                 createdTarget::getSecurityToken);
 
         // retrieve security token as system code execution
-        final String securityTokenAsSystemCode = AccessContext.asSystem(createdTarget::getSecurityToken);
+        final String securityToken = asSystem(createdTarget::getSecurityToken);
 
         // retrieve security token without any permissions
         final String securityTokenWithoutPermission = SecurityContextSwitch
@@ -156,7 +156,7 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
         assertThat(securityTokenWithReadPermission).isNotNull();
         assertThat(securityTokenWithTargetAdminPermission).isNotNull();
         assertThat(securityTokenWithTenantAdminPermission).isNotNull();
-        assertThat(securityTokenAsSystemCode).isNotNull();
+        assertThat(securityToken).isNotNull();
         assertThat(securityTokenWithoutPermission).isNull();
     }
 

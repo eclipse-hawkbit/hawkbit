@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.eclipse.hawkbit.auth.SpRole.CONTROLLER_ROLE;
 import static org.eclipse.hawkbit.auth.SpRole.CONTROLLER_ROLE_ANONYMOUS;
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
@@ -37,7 +38,6 @@ import jakarta.validation.ConstraintViolationException;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.auth.SpPermission;
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
@@ -1798,8 +1798,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void createTargetType(String targetTypeName) {
-        AccessContext.asSystem(
-                () -> targetTypeManagement.create(TargetTypeManagement.Create.builder().name(targetTypeName).build()));
+        asSystem(() -> targetTypeManagement.create(TargetTypeManagement.Create.builder().name(targetTypeName).build()));
     }
 
     private void addAttributeAndVerify(final String controllerId) {
@@ -1807,8 +1806,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testData.put("test1", "testdata1");
         controllerManagement.updateControllerAttributes(controllerId, testData, null);
 
-        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
-                .isEqualTo(testData);
+        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong").isEqualTo(testData);
     }
 
     private void addSecondAttributeAndVerify(final String controllerId) {

@@ -11,12 +11,10 @@ package org.eclipse.hawkbit.autoconfigure.security;
 
 import java.util.Optional;
 
-import org.eclipse.hawkbit.audit.AuditContextProvider;
 import org.eclipse.hawkbit.audit.AuditLoggingAspect;
 import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RepositoryConfiguration;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
-import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.TenantAwareUserProperties;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -54,20 +52,8 @@ public class SecurityAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public AuditContextProvider auditContextProvider() {
-        return AuditContextProvider.getInstance();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
     public AuditLoggingAspect auditLoggingAspect() {
         return new AuditLoggingAspect();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public SecurityTokenGenerator securityTokenGenerator() {
-        return new SecurityTokenGenerator();
     }
 
     @Bean

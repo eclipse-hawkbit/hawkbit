@@ -103,7 +103,7 @@ public class HawkbitSecurityProperties {
 
         public static final String X_FORWARDED_FOR = "X-Forwarded-For";
         /**
-         * Blacklisted client (IP addresses) for for DDI and Management API.
+         * Blacklisted client (IP addresses) for DDI and Management API.
          */
         private String blacklist = "";
         /**
@@ -117,7 +117,7 @@ public class HawkbitSecurityProperties {
     }
 
     /**
-     * Denial of service protection related properties.
+     * Denial-of-service (DoS) protection related properties.
      */
     @Data
     public static class Dos {

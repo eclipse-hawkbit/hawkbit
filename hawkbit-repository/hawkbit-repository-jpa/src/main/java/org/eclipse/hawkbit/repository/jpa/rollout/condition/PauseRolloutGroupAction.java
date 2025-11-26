@@ -9,7 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rollout.condition;
 
-import org.eclipse.hawkbit.context.AccessContext;
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
+
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
@@ -39,23 +40,19 @@ public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator<Roll
 
     @Override
     public void exec(final Rollout rollout, final RolloutGroup rolloutG) {
-
         final JpaRolloutGroup rolloutGroup = (JpaRolloutGroup) rolloutG;
 
-        AccessContext.asSystem(() -> {
-            rolloutGroup.setStatus(RolloutGroupStatus.ERROR);
-            rolloutGroupRepository.save(rolloutGroup);
-            /*
-                Refresh latest rollout state in order to escape cases when
-                previous group have matched error condition and paused the rollout
-                and this one tries to pause the rollout too but throws an exception
-                and rollbacks rollout processing transaction
-            */
-            final Rollout refreshedRollout = rolloutManagement.get(rollout.getId());
-            if (Rollout.RolloutStatus.PAUSED != refreshedRollout.getStatus()) {
-                // if only the latest state is != paused then pause
-                rolloutManagement.pauseRollout(rollout.getId());
-            }
-        });
+        rolloutGroup.setStatus(RolloutGroupStatus.ERROR);
+        rolloutGroupRepository.save(rolloutGroup);
+        // Refresh latest rollout state in order to avoid cases when
+        // previous group have matched error condition and paused the rollout
+        // and this one tries to pause the rollout too but throws an exception
+        // and rollbacks rollout processing transaction
+        final Rollout refreshedRollout = rolloutManagement.get(rollout.getId());
+        if (Rollout.RolloutStatus.PAUSED != refreshedRollout.getStatus()) {
+            // if only the latest state is != paused then pause
+            // execute as system if rollout creator has CREATE_ROLLOUT right but no HANDLE_ROLLOUT
+            asSystem(() -> rolloutManagement.pauseRollout(rollout.getId()));
+        }
     }
 }

@@ -13,30 +13,15 @@ import java.util.Optional;
 
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.context.AccessContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.AuditorAware;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 @SuppressWarnings("java:S6548") // java:S6548 - singleton holder ensures static access to spring resources in some places
 public class AuditContextProvider {
 
-    private static final AuditContextProvider INSTANCE = new AuditContextProvider();
-
-    private AuditorAware<String> auditorAware;
-
-    public static AuditContextProvider getInstance() {
-        return INSTANCE;
-    }
-
-    @Autowired
-    public void setAuditorAware(final AuditorAware<String> auditorAware) {
-        this.auditorAware = auditorAware;
-    }
-
-    public AuditContext getAuditContext() {
+    public static AuditContext getAuditContext() {
         return new AuditContext(
                 Optional.ofNullable(AccessContext.tenant()).orElse("n/a"),
-                Optional.ofNullable(auditorAware).flatMap(AuditorAware::getCurrentAuditor).orElse(AccessContext.SYSTEM_ACTOR));
+                Optional.ofNullable(AccessContext.actor()).orElse(AccessContext.SYSTEM_ACTOR));
     }
 
     public record AuditContext(String tenant, String username) {}

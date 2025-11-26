@@ -30,9 +30,7 @@ import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
-import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
-import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
@@ -61,7 +59,7 @@ import org.springframework.security.concurrent.DelegatingSecurityContextSchedule
  */
 @Configuration
 @EnableConfigurationProperties({
-        DdiSecurityProperties.class, PropertyBasedArtifactUrlResolverProperties.class, FileArtifactProperties.class,
+        PropertyBasedArtifactUrlResolverProperties.class, FileArtifactProperties.class,
         HawkbitSecurityProperties.class, ControllerPollProperties.class, TenantConfigurationProperties.class })
 @Profile("test")
 @EnableAutoConfiguration
@@ -100,11 +98,6 @@ public class TestConfiguration implements AsyncConfigurer {
     @Bean
     LockRegistry lockRegistry() {
         return new DefaultLockRegistry();
-    }
-
-    @Bean
-    SecurityTokenGenerator securityTokenGenerator() {
-        return new SecurityTokenGenerator();
     }
 
     @Bean

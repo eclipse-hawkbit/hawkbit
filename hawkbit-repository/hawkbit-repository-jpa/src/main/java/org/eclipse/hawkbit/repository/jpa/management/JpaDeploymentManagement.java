@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED;
 
 import java.util.ArrayList;
@@ -851,7 +852,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private void checkMaxAssignmentQuota(final String controllerId, final long requested) {
         final int quota = quotaManagement.getMaxActionsPerTarget();
         try {
-            AccessContext.asSystem(() -> QuotaHelper.assertAssignmentQuota(
+            asSystem(() -> QuotaHelper.assertAssignmentQuota(
                     controllerId, requested, quota, Action.class, Target.class, actionRepository::countByTargetControllerId));
         } catch (final AssignmentQuotaExceededException ex) {
             targetRepository.findByControllerId(controllerId).ifPresentOrElse(
@@ -1021,7 +1022,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private boolean isConfirmationFlowEnabled() {
-        return TenantConfigHelper.isConfirmationFlowEnabled();
+        return TenantConfigHelper.isUserConfirmationFlowEnabled();
     }
 
     private void assertTargetReadAllowed(final Long targetId) {

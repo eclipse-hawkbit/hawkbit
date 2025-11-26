@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.context;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.context.AccessContext.withSecurityContext;
 
 import java.util.Map;
 import java.util.Set;
@@ -72,16 +73,16 @@ class SecurityContextSerializerTest {
     }
 
     private static String serialize(final SecurityContext securityContext) {
-        return AccessContext.withSecurityContext(securityContext, () -> AccessContext.securityContext().orElseThrow());
+        return withSecurityContext(securityContext, () -> AccessContext.securityContext().orElseThrow());
     }
 
     private static SecurityContext deserialize(final String serialized) {
-        return AccessContext.withSecurityContext(serialized, SecurityContextHolder::getContext);
+        return withSecurityContext(serialized, SecurityContextHolder::getContext);
     }
 
     private static String resolve(final Authentication authentication) {
         final SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(authentication);
-        return AccessContext.withSecurityContext(securityContext, AccessContext::actor);
+        return withSecurityContext(securityContext, AccessContext::actor);
     }
 }

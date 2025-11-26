@@ -9,12 +9,14 @@
  */
 package org.eclipse.hawkbit.repository.jpa.scheduler;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
+import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
+
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.jpa.rollout.BlockWhenFullPolicy;
@@ -48,27 +50,26 @@ public class RolloutScheduler {
     }
 
     /**
-     * Scheduler method called by the spring-async mechanism. Retrieves all tenants from the {@link SystemManagement#findTenants} and
-     * runs for each tenant the {@link RolloutHandler#handleAll()} in the {@link System}.
+     * Scheduler method called by the spring-async mechanism. For all tenants, using {@link SystemManagement#forEachTenant},
+     * runs the {@link RolloutHandler#handleAll()} scoped to permission of access control context or unscoped (with {@link System}) if null
      */
     @Scheduled(initialDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void runningRolloutScheduler() {
         log.debug("rollout schedule checker has been triggered.");
         final long startNano = java.lang.System.nanoTime();
 
-        // run this code in system code privileged to have the necessary permission to query and create entities.
-        AccessContext.asSystem(() -> {
-            // workaround eclipselink that is currently not possible to execute a query without multi-tenancy if MultiTenant
-            // annotation is used. https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
-            // iterate through all tenants and execute the rollout check for each tenant separately.
-            systemManagement.forEachTenant(tenant -> {
-                if (rolloutTaskExecutor == null) {
-                    handleAll(tenant);
-                } else {
-                    handleAllAsync(tenant);
-                }
-            });
-        });
+        // run this code in system code privileged to have the necessary system code permission execute forEachTenant
+        asSystem(() ->
+                // workaround eclipselink that is currently not possible to execute a query without multi-tenancy if MultiTenant
+                // annotation is used. https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
+                // iterate through all tenants and execute the rollout check for each tenant separately.
+                systemManagement.forEachTenant(tenant -> {
+                    if (rolloutTaskExecutor == null) {
+                        handleAll(tenant);
+                    } else {
+                        handleAllAsync(tenant);
+                    }
+                }));
 
         meterRegistry
                 .map(mReg -> mReg.timer("hawkbit.rollout.scheduler.all"))
@@ -81,22 +82,17 @@ public class RolloutScheduler {
 
         try {
             rolloutHandler.handleAll();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error processing rollout for tenant {}", tenant, e);
         }
 
         meterRegistry
-                .map(mReg -> mReg.timer(
-                        "hawkbit.rollout.scheduler",
-                        DefaultTenantConfiguration.TENANT_TAG, tenant))
+                .map(mReg -> mReg.timer("hawkbit.rollout.scheduler", DefaultTenantConfiguration.TENANT_TAG, tenant))
                 .ifPresent(timer -> timer.record(java.lang.System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
     }
 
     private void handleAllAsync(final String tenant) {
-        rolloutTaskExecutor.submit(() -> AccessContext.asSystemAsTenant(tenant, () -> {
-            handleAll(tenant);
-            return null;
-        }));
+        rolloutTaskExecutor.submit(() -> asSystemAsTenant(tenant, () -> handleAll(tenant)));
     }
 
     private ThreadPoolTaskExecutor threadPoolTaskExecutor(final int threadPoolSize) {

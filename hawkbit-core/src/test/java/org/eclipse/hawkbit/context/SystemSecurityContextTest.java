@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.context;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
+
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
@@ -55,13 +57,12 @@ class SystemSecurityContextTest {
         final SecurityContext sc = SecurityContextHolder.createEmptyContext();
         sc.setAuthentication(auth);
         SecurityContextHolder.setContext(sc);
-        AccessContext.asSystemAsTenant("tenant", () -> {
+        asSystemAsTenant("tenant", () -> {
             final Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
             Assertions.assertThat(currentAuth.getClass().getSimpleName()).isEqualTo("SystemCodeAuthentication");
             Assertions.assertThat(currentAuth.getCredentials()).isNull();
             Assertions.assertThat(currentAuth.getAuthorities()).isEqualTo(List.of(new SimpleGrantedAuthority(SpRole.SYSTEM_ROLE)));
             Assertions.assertThat(currentAuth.getDetails()).isEqualTo(new TenantAwareAuthenticationDetails("tenant", false));
-            return null;
         });
         SecurityContextHolder.clearContext();
     }

@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.security.controller;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -21,14 +22,13 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.security.DdiSecurityProperties;
-import org.eclipse.hawkbit.util.UrlUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.UriUtils;
 
 /**
  * An abstraction for all controller based security to parse the e.g. the tenant name from the URL and the controller ID from the URL to do
@@ -119,8 +119,9 @@ public class AuthenticationFilters {
                 authenticator.log().debug("retrieving principal from URI request {}", requestURI);
                 final Map<String, String> extractUriTemplateVariables = pathExtractor
                         .extractUriTemplateVariables(request.getContextPath() + CONTROLLER_REQUEST_ANT_PATTERN, requestURI);
-                final String controllerId = UrlUtils.decodeUriValue(extractUriTemplateVariables.get(CONTROLLER_ID_PLACE_HOLDER));
-                final String tenant = UrlUtils.decodeUriValue(extractUriTemplateVariables.get(TENANT_PLACE_HOLDER));
+                final String controllerId = UriUtils.decode(extractUriTemplateVariables.get(CONTROLLER_ID_PLACE_HOLDER),
+                        StandardCharsets.UTF_8);
+                final String tenant = UriUtils.decode(extractUriTemplateVariables.get(TENANT_PLACE_HOLDER), StandardCharsets.UTF_8);
                 authenticator.log().trace("Parsed tenant {} and controllerId {} from path request {}", tenant, controllerId, requestURI);
                 return createTenantSecurityTokenVariables(request, tenant, controllerId);
             } else {
@@ -147,8 +148,8 @@ public class AuthenticationFilters {
                 // source ip matches the given pattern -> authenticated
                 return true;
             } else {
-                authenticator.log().debug(
-                        "The remote source IP address {} is not in the list of trusted IP addresses {}", remoteAddress, authorizedSourceIps);
+                authenticator.log().debug("The remote source IP address {} is not in the list of trusted IP addresses {}",
+                        remoteAddress, authorizedSourceIps);
                 return false;
             }
         }

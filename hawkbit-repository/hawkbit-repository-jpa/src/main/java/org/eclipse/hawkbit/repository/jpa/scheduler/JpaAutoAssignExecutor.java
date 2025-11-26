@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.scheduler;
 
+import static org.eclipse.hawkbit.context.AccessContext.asActor;
+import static org.eclipse.hawkbit.context.AccessContext.withSecurityContext;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -16,7 +19,6 @@ import java.util.function.Consumer;
 import jakarta.persistence.PersistenceException;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -135,11 +137,10 @@ public class JpaAutoAssignExecutor implements AutoAssignExecutor {
             filterQueries.forEach(filterQuery -> {
                 try {
                     filterQuery.getAccessControlContext().ifPresentOrElse(
-                            context -> // has stored context - executes it with it
-                                    AccessContext.withSecurityContext(context, () -> consumer.accept(filterQuery)),
-                            () -> // has no stored context - executes it in the tenant & user scope
-                                    AccessContext.asActor(
-                                            getAutoAssignmentInitiatedBy(filterQuery), () -> consumer.accept(filterQuery))
+                            // has stored context - executes it with it
+                            context -> withSecurityContext(context, () -> consumer.accept(filterQuery)),
+                            // has no stored context - executes it in the tenant & user scope
+                            () -> asActor(getAutoAssignmentInitiatedBy(filterQuery), () -> consumer.accept(filterQuery))
                     );
                 } catch (final RuntimeException ex) {
                     if (log.isDebugEnabled()) {
@@ -168,7 +169,7 @@ public class JpaAutoAssignExecutor implements AutoAssignExecutor {
             final List<DeploymentRequest> deploymentRequests = mapToDeploymentRequests(controllerIds, targetFilterQuery);
             final int count = deploymentRequests.size();
             if (count > 0) {
-                AccessContext.asActor(
+                asActor(
                         getAutoAssignmentInitiatedBy(targetFilterQuery),
                         () -> deploymentManagement.assignDistributionSets(deploymentRequests, actionMessage));
             }

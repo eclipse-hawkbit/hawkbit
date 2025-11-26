@@ -9,14 +9,13 @@
  */
 package org.eclipse.hawkbit.security.controller;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_HEADER_AUTHORITY_NAME;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
@@ -49,13 +48,9 @@ public class SecurityHeaderAuthenticator extends Authenticator.AbstractAuthentic
     // header exists multiple times in the request for all trusted chains.
     private final String sslIssuerHashBasicHeader;
 
-    private final Callable<String> sslIssuerNameConfigGetter;
-
-    public SecurityHeaderAuthenticator(
-            final String caCommonNameHeader, final String caAuthorityNameHeader) {
+    public SecurityHeaderAuthenticator(final String caCommonNameHeader, final String caAuthorityNameHeader) {
         this.caCommonNameHeader = caCommonNameHeader;
         this.sslIssuerHashBasicHeader = caAuthorityNameHeader;
-        sslIssuerNameConfigGetter = () -> TenantConfigHelper.getAsSystem(AUTHENTICATION_HEADER_AUTHORITY_NAME, String.class);
     }
 
     @Override
@@ -78,7 +73,9 @@ public class SecurityHeaderAuthenticator extends Authenticator.AbstractAuthentic
 
         final String sslIssuerHashValue = getIssuerHashHeader(
                 controllerSecurityToken,
-                AccessContext.asSystemAsTenant(controllerSecurityToken.getTenant(), sslIssuerNameConfigGetter));
+                asSystemAsTenant(
+                        controllerSecurityToken.getTenant(),
+                        () -> TenantConfigHelper.getAsSystem(AUTHENTICATION_HEADER_AUTHORITY_NAME, String.class)));
         if (sslIssuerHashValue == null) {
             log.debug("The request contains the 'common name' header but trusted hash is not found");
             return null;

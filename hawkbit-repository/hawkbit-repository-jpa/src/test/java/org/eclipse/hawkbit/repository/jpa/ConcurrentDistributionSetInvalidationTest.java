@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
 import static org.mockito.AdditionalAnswers.delegatesTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -64,19 +65,13 @@ class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTe
 
         // run in new Thread so that the invalidation can be executed in
         // parallel
-        new Thread(() -> AccessContext.asSystemAsTenant(tenant, () -> {
-            rolloutHandler.handleAll();
-            return 0;
-        })).start();
+        new Thread(() -> asSystemAsTenant(tenant, rolloutHandler::handleAll)).start();
 
         // wait until at least one RolloutGroup is created, as this means that the thread has started and has acquired the lock
         Awaitility.await()
                 .pollInterval(Duration.ofMillis(100))
                 .atMost(Duration.ofSeconds(5))
-                .until(() -> AccessContext.asSystemAsTenant(
-                        tenant,
-                        () -> AccessContext.asSystem(
-                                () -> rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getSize() > 0)));
+                .until(() -> asSystemAsTenant(tenant, () -> rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getSize() > 0));
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
                 Collections.singletonList(distributionSet.getId()), ActionCancellationType.SOFT);

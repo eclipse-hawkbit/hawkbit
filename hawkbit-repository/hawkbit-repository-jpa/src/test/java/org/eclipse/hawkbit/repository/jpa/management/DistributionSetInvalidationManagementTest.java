@@ -11,13 +11,13 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
@@ -186,11 +186,9 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     @Test
     @WithUser(authorities = { "READ_DISTRIBUTION_SET", "UPDATE_DISTRIBUTION_SET" })
     void verifyInvalidateWithReadAndUpdateRepoAuthority() {
-        final InvalidationTestData invalidationTestData = AccessContext
-                .asSystem(() -> createInvalidationTestData("verifyInvalidateWithUpdateRepoAuthority"));
-
+        final InvalidationTestData invalidationTestData = asSystem(() -> createInvalidationTestData("verifyInvalidateWithUpdateRepoAuthority"));
         distributionSetInvalidationManagement.invalidateDistributionSet(new DistributionSetInvalidation(
-                Collections.singletonList(invalidationTestData.distributionSet().getId()), ActionCancellationType.NONE));
+                List.of(invalidationTestData.distributionSet().getId()), ActionCancellationType.NONE));
         assertThat(distributionSetRepository.findById(invalidationTestData.distributionSet().getId()).orElseThrow().isValid()).isFalse();
     }
 
@@ -200,7 +198,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     @Test
     @WithUser(authorities = { "READ_DISTRIBUTION_SET", "UPDATE_DISTRIBUTION_SET", "UPDATE_TARGET" })
     void verifyInvalidateWithReadAndUpdateRepoAndUpdateTargetAuthority() {
-        final InvalidationTestData invalidationTestData = AccessContext.asSystem(
+        final InvalidationTestData invalidationTestData = asSystem(
                 () -> createInvalidationTestData("verifyInvalidateWithUpdateRepoAndUpdateTargetAuthority"));
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
@@ -220,7 +218,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     @Test
     @WithUser(authorities = { "READ_DISTRIBUTION_SET", "UPDATE_DISTRIBUTION_SET", "UPDATE_TARGET", "UPDATE_ROLLOUT" })
     void verifyInvalidateWithReadAndUpdateRepoAndUpdateTargetAndUpdateRolloutAuthority() {
-        final InvalidationTestData invalidationTestData = AccessContext.asSystem(
+        final InvalidationTestData invalidationTestData = asSystem(
                 () -> createInvalidationTestData("verifyInvalidateWithUpdateRepoAndUpdateTargetAuthority"));
 
         distributionSetInvalidationManagement.invalidateDistributionSet(new DistributionSetInvalidation(
@@ -242,7 +240,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         // if implicitly locked - the old distribution set becomes stale
         distributionSet = assignDistributionSet(distributionSet, targets).getDistributionSet();
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(TargetFilterQueryManagement.Create.builder()
-                        .name(testName).query("name==*").autoAssignDistributionSet(distributionSet).build());
+                .name(testName).query("name==*").autoAssignDistributionSet(distributionSet).build());
         final Rollout rollout = testdataFactory.createRolloutByVariables(testName, "desc", 2, "name==*", distributionSet, "50", "80");
 
         return new InvalidationTestData(distributionSet, targets, targetFilterQuery, rollout);
@@ -261,9 +259,11 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     }
 
     private DistributionSetInvalidationCount countEntitiesForInvalidation(final DistributionSetInvalidation distributionSetInvalidation) {
-        return AccessContext.asSystem(() -> {
+        return asSystem(() -> {
             final Collection<Long> setIds = distributionSetInvalidation.getDistributionSetIds();
-            final long rolloutsCount = distributionSetInvalidation.getActionCancellationType() != ActionCancellationType.NONE ? countRolloutsForInvalidation(setIds) : 0;
+            final long rolloutsCount = distributionSetInvalidation.getActionCancellationType() != ActionCancellationType.NONE
+                    ? countRolloutsForInvalidation(setIds)
+                    : 0;
             final long autoAssignmentsCount = countAutoAssignmentsForInvalidation(setIds);
             final long actionsCount = countActionsForInvalidation(setIds, distributionSetInvalidation.getActionCancellationType());
 

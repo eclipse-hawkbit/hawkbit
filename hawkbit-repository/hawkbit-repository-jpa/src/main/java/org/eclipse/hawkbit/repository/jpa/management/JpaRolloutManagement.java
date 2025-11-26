@@ -1000,7 +1000,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private boolean isConfirmationFlowEnabled() {
-        return TenantConfigHelper.isConfirmationFlowEnabled();
+        return TenantConfigHelper.isUserConfirmationFlowEnabled();
     }
 
     private record TargetCount(long total, String filter) {}

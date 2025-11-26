@@ -13,8 +13,6 @@ import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY;
 
-import java.util.concurrent.Callable;
-
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.slf4j.Logger;
@@ -32,15 +30,6 @@ public class GatewayTokenAuthenticator extends Authenticator.AbstractAuthenticat
 
     public static final String GATEWAY_SECURITY_TOKEN_AUTH_SCHEME = "GatewayToken ";
     private static final int OFFSET_GATEWAY_TOKEN = GATEWAY_SECURITY_TOKEN_AUTH_SCHEME.length();
-
-    private final Callable<String> gatewaySecurityTokenKeyGetter;
-
-    public GatewayTokenAuthenticator() {
-        gatewaySecurityTokenKeyGetter = () -> {
-            log.trace("retrieving configuration value for configuration key {}", AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY);
-            return TenantConfigHelper.getAsSystem(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, String.class);
-        };
-    }
 
     @Override
     public Authentication authenticate(final ControllerSecurityToken controllerSecurityToken) {
@@ -62,7 +51,12 @@ public class GatewayTokenAuthenticator extends Authenticator.AbstractAuthenticat
         final String presentedToken = authHeader.substring(OFFSET_GATEWAY_TOKEN);
 
         // validate if the presented token is the same as the gateway token
-        return presentedToken.equals(asSystemAsTenant(controllerSecurityToken.getTenant(), gatewaySecurityTokenKeyGetter))
+        return presentedToken.equals(asSystemAsTenant(
+                controllerSecurityToken.getTenant(),
+                () -> {
+                    log.trace("retrieving configuration value for configuration key {}", AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY);
+                    return TenantConfigHelper.getAsSystem(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, String.class);
+                }))
                 ? authenticatedController(controllerSecurityToken.getTenant(), controllerSecurityToken.getControllerId())
                 : null;
     }

@@ -9,12 +9,11 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
-import java.util.List;
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 
 import jakarta.validation.constraints.NotNull;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager.CacheEvictEvent;
@@ -44,14 +43,13 @@ public class CleanupTestExecutionListener extends AbstractTestExecutionListener 
     }
 
     private void clearTestRepository(final SystemManagement systemManagement) {
-        final List<String> tenants = AccessContext.asSystem(() -> systemManagement.findTenants(PAGE).getContent());
-        tenants.forEach(tenant -> {
+        asSystem(() -> systemManagement.forEachTenant(tenant -> {
             try {
-                AccessContext.asSystem(() -> systemManagement.deleteTenant(tenant));
+                asSystem(() -> systemManagement.deleteTenant(tenant));
             } catch (final Exception e) {
                 log.error("Error while delete tenant", e);
             }
-        });
+        }));
         // evict global cache
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new CacheEvictEvent.Default(null, null, null));
     }

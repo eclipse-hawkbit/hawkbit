@@ -9,13 +9,14 @@
  */
 package org.eclipse.hawkbit.event;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
+
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.Schema;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
@@ -92,19 +93,13 @@ public class EventPublisherConfiguration {
             }
 
             if (event instanceof final RemoteTenantAwareEvent remoteEvent) {
-                AccessContext.asSystemAsTenant(remoteEvent.getTenant(), () -> {
-                    super.multicastEvent(event, eventType);
-                    return null;
-                });
+                asSystemAsTenant(remoteEvent.getTenant(), () -> super.multicastEvent(event, eventType));
                 return;
             }
 
             if (event instanceof final AbstractServiceRemoteEvent<?> serviceRemoteEvent
                     && serviceRemoteEvent.getRemoteEvent() instanceof RemoteTenantAwareEvent tenantAwareEvent) {
-                AccessContext.asSystemAsTenant(tenantAwareEvent.getTenant(), () -> {
-                    super.multicastEvent(event, eventType);
-                    return null;
-                });
+                asSystemAsTenant(tenantAwareEvent.getTenant(), () -> super.multicastEvent(event, eventType));
                 return;
             }
 

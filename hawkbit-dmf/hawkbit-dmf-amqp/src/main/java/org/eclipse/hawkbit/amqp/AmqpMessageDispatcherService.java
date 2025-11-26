@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED;
 
@@ -32,7 +33,6 @@ import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrl;
 import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
 import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver.DownloadDescriptor;
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -72,7 +72,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
-import org.eclipse.hawkbit.util.IpUtil;
+import org.eclipse.hawkbit.utils.IpUtil;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageProperties;
@@ -177,7 +177,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     protected DmfDownloadAndUpdateRequest createDownloadAndUpdateRequest(
             final Target target, final Long actionId, final Map<SoftwareModule, Map<String, String>> softwareModules) {
         return new DmfDownloadAndUpdateRequest(
-                actionId, AccessContext.asSystem(target::getSecurityToken), convertToAmqpSoftwareModules(target, softwareModules));
+                actionId, asSystem(target::getSecurityToken), convertToAmqpSoftwareModules(target, softwareModules));
     }
 
     /**
@@ -242,16 +242,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         amqpSenderService.sendMessage(message, address);
     }
 
-    protected DmfTarget convertToDmfTarget(final Target target, final Long actionId) {
-        return new DmfTarget(actionId, target.getControllerId(), AccessContext.asSystem(target::getSecurityToken));
-    }
-
     protected DmfConfirmRequest createConfirmRequest(
             final Target target, final Long actionId, final Map<SoftwareModule, Map<String, String>> softwareModules) {
-        return new DmfConfirmRequest(
-                actionId,
-                AccessContext.asSystem(target::getSecurityToken),
-                convertToAmqpSoftwareModules(target, softwareModules));
+        return new DmfConfirmRequest(actionId, asSystem(target::getSecurityToken), convertToAmqpSoftwareModules(target, softwareModules));
     }
 
     void sendMultiActionRequestToTarget(
@@ -571,7 +564,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final Map<SoftwareModule, Map<String, String>> modules) {
         final List<DmfTarget> dmfTargets = targets.stream()
                 .filter(target -> IpUtil.isAmqpUri(IpUtil.addressToUri(target.getAddress())))
-                .map(t -> convertToDmfTarget(t, actions.get(t.getControllerId()).getId()))
+                // as system - the security token is sent to DMF receiver
+                .map(t -> new DmfTarget(actions.get(t.getControllerId()).getId(), t.getControllerId(), asSystem(t::getSecurityToken)))
                 .toList();
 
         // due to the fact that all targets in a batch use the same set of software modules we don't generate target-specific urls

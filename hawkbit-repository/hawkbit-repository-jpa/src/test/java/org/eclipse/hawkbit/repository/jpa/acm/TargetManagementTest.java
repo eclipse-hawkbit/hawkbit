@@ -20,6 +20,7 @@ import static org.eclipse.hawkbit.auth.SpPermission.READ_DISTRIBUTION_SET;
 import static org.eclipse.hawkbit.auth.SpPermission.READ_ROLLOUT;
 import static org.eclipse.hawkbit.auth.SpPermission.READ_TARGET;
 import static org.eclipse.hawkbit.auth.SpPermission.UPDATE_TARGET;
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
 
 import java.util.Arrays;
@@ -27,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.assertj.core.api.Assertions;
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement.Update;
@@ -170,9 +170,8 @@ class TargetManagementTest extends AbstractAccessControllerManagementTest {
                     .containsExactly(target1Type1);
 
             // as system in context - doesn't apply scopes
-            AccessContext.asSystem(
-                    () -> testdataFactory.createRolloutByVariables(
-                            "testRolloutAsSystem", "testDescriptionAsSystem", 3, "id==*", ds2Type2, "50", "5"));
+            asSystem(() -> testdataFactory.createRolloutByVariables(
+                    "testRolloutAsSystem", "testDescriptionAsSystem", 3, "id==*", ds2Type2, "50", "5"));
         });
     }
 

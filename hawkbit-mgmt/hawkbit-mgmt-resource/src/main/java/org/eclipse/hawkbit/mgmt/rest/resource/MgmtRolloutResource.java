@@ -115,7 +115,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         final DistributionSet distributionSet = distributionSetManagement.getValidAndComplete(rolloutRequestBody.getDistributionSetId());
         final RolloutGroupConditions rolloutGroupConditions = MgmtRolloutMapper.fromRequest(rolloutRequestBody, true);
         final Create create = MgmtRolloutMapper.fromRequest(rolloutRequestBody, distributionSet);
-        final boolean confirmationFlowActive = TenantConfigHelper.isConfirmationFlowEnabled();
+        final boolean confirmationFlowActive = TenantConfigHelper.isUserConfirmationFlowEnabled();
 
         final Rollout rollout;
         if (rolloutRequestBody.getGroups() != null) {
@@ -220,7 +220,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         }
 
         final List<MgmtRolloutGroupResponseBody> rest = MgmtRolloutMapper.toResponseRolloutGroup(
-                rolloutGroups.getContent(), TenantConfigHelper.isConfirmationFlowEnabled(), isFullMode);
+                rolloutGroups.getContent(), TenantConfigHelper.isUserConfirmationFlowEnabled(), isFullMode);
         return ResponseEntity.ok(new PagedList<>(rest, rolloutGroups.getTotalElements()));
     }
 
@@ -234,7 +234,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         }
 
         return ResponseEntity.ok(MgmtRolloutMapper.toResponseRolloutGroup(
-                rolloutGroup, true, TenantConfigHelper.isConfirmationFlowEnabled()));
+                rolloutGroup, true, TenantConfigHelper.isUserConfirmationFlowEnabled()));
     }
 
     @Override

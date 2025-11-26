@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -103,7 +102,7 @@ public class AccessContext {
      * Wrap a specific execution in a known and pre-serialized context.
      *
      * @param serializedContext created by {@link #securityContext()}. Must be non-<code>null</code>.
-     * @param runnable runnable to call in the reconstructed context. Must be non-<code>null</code>.
+     * @param runnable runnable to run in the reconstructed context. Must be non-<code>null</code>.
      */
     public static void withSecurityContext(final String serializedContext, final Runnable runnable) {
         Objects.requireNonNull(runnable);
@@ -114,7 +113,7 @@ public class AccessContext {
     }
 
     /**
-     * Wrap a specific execution in a known and pre-serialized context.
+     * Wrap a specific execution / call in a known and pre-serialized context.
      *
      * @param <T> the type of the output of the supplier
      * @param serializedContext created by {@link #securityContext()}. Must be non-<code>null</code>.
@@ -165,10 +164,10 @@ public class AccessContext {
      * Runs a given {@link Runnable} within a system security context, which is permitted to call secured system code. Often the system needs
      * to call secured methods by its own without relying on the current security context e.g. if the current security context does not contain
      * the necessary permission it's necessary to execute code as system code to execute necessary methods and functionality. <br/>
-     * The security context will be switched to the system code and back after the callable is called. <br/>
+     * The security context will be switched to the system code and back after the supplier is called. <br/>
      * The system code is executed for a current tenant by using the {@link AccessContext#tenant()}.
      *
-     * @param runnable the runnable to call within the system security context
+     * @param runnable the runnable to run within the system security context
      */
     public static void asSystem(final Runnable runnable) {
         asSystemAsTenant(tenant(), () -> {
@@ -178,37 +177,54 @@ public class AccessContext {
     }
 
     /**
-     * Runs a given {@link Callable} within a system security context, which is permitted to call secured system code. Often the system needs
+     * Runs a given {@link Supplier} within a system security context, which is permitted to call secured system code. Often the system needs
      * to call secured methods by its own without relying on the current security context e.g. if the current security context does not contain
      * the necessary permission it's necessary to execute code as system code to execute necessary methods and functionality. <br/>
-     * The security context will be switched to the system code and back after the callable is called. <br/>
+     * The security context will be switched to the system code and back after the supplier is called. <br/>
      * The system code is executed for a current tenant by using the {@link AccessContext#tenant()}.
      *
-     * @param callable the callable to call within the system security context
-     * @return the return value of the {@link Callable#call()} method.
+     * @param supplier the supplier to call within the system security context
+     * @return the return value of the {@link Supplier#get()} method.
      */
-    public static <T> T asSystem(final Callable<T> callable) {
-        return asSystemAsTenant(tenant(), callable);
+    public static <T> T asSystem(final Supplier<T> supplier) {
+        return asSystemAsTenant(tenant(), supplier);
     }
 
     /**
-     * Runs a given {@link Callable} within a system security context, which is permitted to call secured system code. Often the system needs
+     * Runs a given {@link Runnable} within a system security context, which is permitted to call secured system code. Often the system needs
      * to call secured methods by its own without relying on the current security context e.g. if the current security context does not contain
      * the necessary permission it's necessary to execute code as system code to execute necessary methods and functionality.<br/>
-     * The security context will be switched to the system code and back after the callable is called.<br/>
+     * The security context will be switched to the system code and back after the runnable is run.<br/>
      * The system code is executed for a specific given tenant by using the {@link AccessContext}.
      *
      * @param tenant the tenant to act as system code
-     * @param callable the callable to call within the system security context
-     * @return the return value of the {@link Callable#call()} method.
+     * @param runnable the runnable to run within the system security context
      */
-    public static <T> T asSystemAsTenant(final String tenant, final Callable<T> callable) {
+    public static void asSystemAsTenant(final String tenant, final Runnable runnable) {
+        asSystemAsTenant(tenant, () -> {
+            runnable.run();
+            return null;
+        });
+    }
+
+    /**
+     * Runs a given {@link Supplier} within a system security context, which is permitted to call secured system code. Often the system needs
+     * to call secured methods by its own without relying on the current security context e.g. if the current security context does not contain
+     * the necessary permission it's necessary to execute code as system code to execute necessary methods and functionality.<br/>
+     * The security context will be switched to the system code and back after the supplier is run.<br/>
+     * The system code is executed for a specific given tenant by using the {@link AccessContext}.
+     *
+     * @param tenant the tenant to act as system code
+     * @param supplier the supplier to call within the system security context
+     * @return the return value of the {@link Supplier#get()} method.
+     */
+    public static <T> T asSystemAsTenant(final String tenant, final Supplier<T> supplier) {
         final SecurityContext currentContext = SecurityContextHolder.getContext();
         try {
             log.debug("Entering system code execution");
             final SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
             securityContext.setAuthentication(new SystemCodeAuthentication(tenant));
-            return withSecurityContext(securityContext, () -> callRe(callable));
+            return withSecurityContext(securityContext, supplier);
         } finally {
             SecurityContextHolder.setContext(currentContext);
             log.debug("Leaving system code execution");
@@ -220,18 +236,6 @@ public class AccessContext {
             ACTOR_OVERRIDE.remove();
         } else {
             ACTOR_OVERRIDE.set(currentAuditor);
-        }
-    }
-
-    // The callable API throws an Exception and not a specific one
-    @SuppressWarnings("java:S112")
-    private static <T> T callRe(final Callable<T> callable) {
-        try {
-            return callable.call();
-        } catch (final RuntimeException e) {
-            throw e;
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
         }
     }
 

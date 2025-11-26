@@ -160,13 +160,12 @@ class JpaTargetFilterQueryManagement
 
             targetFilterQuery.setAutoAssignDistributionSet(distributionSet);
             AccessContext.securityContext().ifPresent(targetFilterQuery::setAccessControlContext);
-            targetFilterQuery.setAutoAssignInitiatedBy(
-                    Optional.ofNullable(AccessContext.actor()).orElse(targetFilterQuery.getCreatedBy()));
+            targetFilterQuery.setAutoAssignInitiatedBy(Optional.ofNullable(AccessContext.actor()).orElse(targetFilterQuery.getCreatedBy()));
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.actionType()));
             targetFilterQuery.setAutoAssignWeight(update.weight() == null ? repositoryProperties.getActionWeightIfAbsent() : update.weight());
             final boolean confirmationRequired = update.confirmationRequired() == null
-                    ? TenantConfigHelper.isConfirmationFlowEnabled() :
-                    update.confirmationRequired();
+                    ? TenantConfigHelper.isUserConfirmationFlowEnabled()
+                    : update.confirmationRequired();
             targetFilterQuery.setConfirmationRequired(confirmationRequired);
         }
         return jpaRepository.save(targetFilterQuery);

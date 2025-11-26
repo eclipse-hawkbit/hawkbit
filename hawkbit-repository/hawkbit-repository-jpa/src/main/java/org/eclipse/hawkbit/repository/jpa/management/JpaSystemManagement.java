@@ -149,17 +149,14 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         Page<String> tenants;
         Pageable query = PageRequest.of(0, MAX_TENANTS_QUERY);
         do {
-            tenants = findTenants(query); // its with IS_SYSTEM_CODE so we could find all tenants
+            tenants = findTenants(query); // with IS_SYSTEM_CODE so we could find all tenants
             tenants.forEach(tenant -> asSystemAsTenant(tenant, () -> {
                 try {
                     consumer.accept(tenant);
                 } catch (final RuntimeException ex) {
-                    log.debug("Exception on forEachTenant execution for tenant {}. Continue with next tenant.",
-                            tenant, ex);
-                    log.error("Exception on forEachTenant execution for tenant {} with error message [{}]. "
-                            + "Continue with next tenant.", tenant, ex.getMessage());
+                    log.error("Exception on forEachTenant execution for tenant {} with error message [{}]. Continue with next tenant.",
+                            tenant, ex.getMessage());
                 }
-                return null;
             }));
         } while ((query = tenants.nextPageable()) != Pageable.unpaged());
     }

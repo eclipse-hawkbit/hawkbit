@@ -466,7 +466,7 @@ public interface TargetManagement<T extends Target>
                     : controllerId
                     : builder.name;
             securityToken = ObjectUtils.isEmpty(builder.securityToken)
-                    ? SecurityTokenGeneratorHolder.getInstance().generateToken()
+                    ? SecurityTokenGenerator.generateToken()
                     : builder.securityToken;
         }
     }

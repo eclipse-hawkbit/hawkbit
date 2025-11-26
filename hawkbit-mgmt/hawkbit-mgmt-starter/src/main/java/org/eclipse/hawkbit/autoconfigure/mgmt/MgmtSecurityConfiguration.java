@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.autoconfigure.mgmt;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
+
 import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,7 +22,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.auth.SpPermission;
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.context.Mdc;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.oidc.OidcProperties;
@@ -123,7 +124,7 @@ public class MgmtSecurityConfiguration {
                         (request, response, chain) -> {
                             final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                             if (authentication != null && authentication.isAuthenticated()) {
-                                AccessContext.asSystem(systemManagement::getTenantMetadataWithoutDetails);
+                                asSystem(systemManagement::getTenantMetadataWithoutDetails);
                             }
                             chain.doFilter(request, response);
                         },

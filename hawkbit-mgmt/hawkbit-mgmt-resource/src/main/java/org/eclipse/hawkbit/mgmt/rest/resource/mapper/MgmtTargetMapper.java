@@ -56,7 +56,7 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.qfields.ActionFields;
 import org.eclipse.hawkbit.repository.qfields.ActionStatusFields;
 import org.eclipse.hawkbit.rest.json.model.ResponseList;
-import org.eclipse.hawkbit.util.IpUtil;
+import org.eclipse.hawkbit.utils.IpUtil;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -176,7 +176,7 @@ public final class MgmtTargetMapper {
             targetRest.setTargetTypeName(target.getTargetType().getName());
         }
 
-        if (TenantConfigHelper.isConfirmationFlowEnabled()) {
+        if (TenantConfigHelper.isUserConfirmationFlowEnabled()) {
             targetRest.setAutoConfirmActive(target.getAutoConfirmationStatus() != null);
         }
 

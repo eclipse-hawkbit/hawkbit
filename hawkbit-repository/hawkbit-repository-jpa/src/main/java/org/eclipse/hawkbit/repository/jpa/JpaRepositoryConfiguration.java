@@ -39,7 +39,6 @@ import org.eclipse.hawkbit.repository.RolloutExecutor;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
-import org.eclipse.hawkbit.repository.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
@@ -86,7 +85,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
-import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -272,16 +270,6 @@ public class JpaRepositoryConfiguration {
     @ConditionalOnMissingBean
     ApplicationEventFilter applicationEventFilter(final RepositoryProperties repositoryProperties) {
         return e -> e instanceof TargetPollEvent && !repositoryProperties.isPublishTargetPollEvent();
-    }
-
-    /**
-     * @return the {@link SecurityTokenGeneratorHolder} singleton bean which holds
-     *         the current {@link SecurityTokenGenerator} service and make it
-     *         accessible in beans which cannot access the service via injection
-     */
-    @Bean
-    SecurityTokenGeneratorHolder securityTokenGeneratorHolder() {
-        return SecurityTokenGeneratorHolder.getInstance();
     }
 
     /**

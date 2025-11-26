@@ -16,12 +16,12 @@ import static org.eclipse.hawkbit.auth.SpPermission.READ_DISTRIBUTION_SET;
 import static org.eclipse.hawkbit.auth.SpPermission.READ_ROLLOUT;
 import static org.eclipse.hawkbit.auth.SpPermission.READ_TARGET;
 import static org.eclipse.hawkbit.auth.SpPermission.UPDATE_TARGET;
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
 
 import java.util.Arrays;
 import java.util.Optional;
 
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.jpa.scheduler.RolloutScheduler;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -37,7 +37,7 @@ class RolloutExecutionTest extends AbstractAccessControllerManagementTest {
 
     @Test
     void verifyOnlyUpdatableTargetsArePartOfRollout() {
-        verify(() -> AccessContext.asSystem(rolloutHandler::handleAll));
+        verify(() -> asSystem(rolloutHandler::handleAll));
     }
 
     private void verify(final Runnable run) {

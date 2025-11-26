@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.amqp;
 
 import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -53,7 +52,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.util.IpUtil;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
+import org.eclipse.hawkbit.utils.IpUtil;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -315,7 +315,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void sendUpdateCommandToTarget(final Target target) {
-        if (isMultiAssignmentsEnabled()) {
+        if (TenantConfigHelper.getAsSystem(TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class)) {
             sendCurrentActionsAsMultiActionToTarget(target);
         } else {
             sendOldestActionToTarget(target);
@@ -440,8 +440,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         } else if (actionUpdateStatus.getActionStatus() == DmfActionStatus.DENIED) {
             updatedAction = confirmationManagement.denyAction(action.getId(), actionUpdateStatus.getCode(), messages);
         } else {
-            final ActionStatusCreateBuilder actionStatus = ActionStatusCreate.builder().actionId(action.getId())
-                    .status(status);
+            final ActionStatusCreateBuilder actionStatus = ActionStatusCreate.builder().actionId(action.getId()).status(status);
             Optional.ofNullable(actionUpdateStatus.getCode()).ifPresentOrElse(
                     code -> {
                         actionStatus.code(code);
@@ -474,9 +473,5 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
 
         return findActionWithDetails.get();
-    }
-
-    private boolean isMultiAssignmentsEnabled() {
-        return TenantConfigHelper.getAsSystem(MULTI_ASSIGNMENTS_ENABLED, Boolean.class);
     }
 }
