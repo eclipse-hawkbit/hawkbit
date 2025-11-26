@@ -38,32 +38,3 @@ public class CreateStartedRolloutExample {
     }
 }
 ```
-
-Example projects:  
-- [hawkbit-example-mgmt-feign-client](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-example-mgmt-feign-client)  
-- [hawkbit-example-ddi-feign-client](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-example-ddi-feign-client)  
-- [hawkbit-example-mgmt-simulator](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator)  
-
----
-
-### Feign Client Configuration
-
-At [`hawkbit-example-core-feign-client`](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-example-core-feign-client) there is a Spring configuration to auto configure some beans, which can be reused for your own Feign client:
-
-```java
-@Configuration
-@ConditionalOnClass(Feign.class)
-@Import(FeignClientsConfiguration.class)
-public class FeignClientConfiguration {
-
-    @Bean
-    public ApplicationJsonRequestHeaderInterceptor jsonHeaderInterceptor() {
-        return new ApplicationJsonRequestHeaderInterceptor();
-    }
-
-    @Bean
-    public Contract feignContract() {
-        return new IgnoreMultipleConsumersProducersSpringMvcContract();
-    }
-}
-``` 

@@ -7,25 +7,65 @@ concepts and how to setup your own cluster. You can find additional information 
 
 ### Big picture
 <p align="center">
-  <img src="images/overall_cluster.png" alt="Clustering Diagram" width="1100"/>
+  <img src="images/clustering_overview.png" alt="Clustering Diagram" width="1100"/>
 </p>
 
 ---
 
 ### Events
 
-Event communication between nodes is based on [Spring Cloud Bus](https://cloud.spring.io/spring-cloud-bus/) and [Spring Cloud Stream](http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/).  
-There are different binder implementations available. The hawkBit Update Server uses the **RabbitMQ binder**.  
-Every node gets its own queue to receive cluster events, the default payload is JSON. If an event is thrown locally at one node, it will be automatically delivered to all other available nodes via the Spring Cloud Bus’s topic exchange.
+Event communication between nodes is based on [Spring Cloud Stream](http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/).  
+There are different [binder implementations](https://docs.spring.io/spring-cloud-stream/docs/current/reference/html/#_binders) available. The hawkbit Update Server uses **RabbitMQ binder**. 
+Every node gets its own queue to receive cluster events, the default payload is JSON.
 
 
 <p align="center">
   <img src="images/eventing-within-cluster.png" alt="Clustering Diagram" width="1100"/>
 </p>
-Via the `ServiceMatcher` you can check whether an event happened locally at one node or on a different node:
 
-```java
-serviceMatcher.isFromSelf(event)
+#### Event Channel Types in Spring Cloud Stream
+
+Remote events in hawkBit are distributed through two distinct types of channels:
+
+##### Fanout Event Channel
+   - Every service instance listening to fanoutEventChannel receives a copy of every message, regardless of instance count. 
+   - Common for events that should be processed by each consumer independently
+     - In-memory cache updates
+     - Internal state propagation
+     - Logging or auditing
+   - Not recommended for scenarios where only one consumer should process an event (see serviceEventChannel for that).
+
+**Note**: Every instance bound to this channel will get its own copy of the message.
+
+##### Service Event Channel
+The `serviceEventChannel` is used to ensure exclusive consumption of events across service instances. Only one instance per consumer group receives and processes each message, which is critical for non-idempotent or resource-sensitive operations. 
+   - Only one instance in a consumer group receives each message. 
+   - Ideal for external integrations, third-party API calls, or any task that must not be duplicated. 
+   - Load-balanced across instances within the same group.
+
+##### Optional Protostuff for Spring cloud stream
+
+The micro-service instances are configured to communicate via Spring Cloud Stream. Optionally, you could use [Protostuff](https://github.com/protostuff/protostuff) based message payload serialization for improved performance.
+
+**Note:** If Protostuff is enabled it shall be enabled on all microservices!
+
+Add/Uncomment to/in your `application.properties` :
+
+```properties
+spring.cloud.stream.default.content-type=application/binary+protostuff
+```
+
+Add to your `pom.xml` :
+
+```xml
+<dependency>
+    <groupId>io.protostuff</groupId>
+    <artifactId>protostuff-core</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.protostuff</groupId>
+    <artifactId>protostuff-runtime</artifactId>
+</dependency>
 ```
 
 ---
