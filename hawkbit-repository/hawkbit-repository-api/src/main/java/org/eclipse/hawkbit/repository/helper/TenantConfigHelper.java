@@ -17,7 +17,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.context.System;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -42,7 +42,7 @@ public final class TenantConfigHelper {
     }
 
     public static <T extends Serializable> T getAsSystem(final String key, final Class<T> valueType) {
-        return System.asSystem(() -> getTenantConfigurationManagement().getConfigurationValue(key, valueType).getValue());
+        return AccessContext.asSystem(() -> getTenantConfigurationManagement().getConfigurationValue(key, valueType).getValue());
     }
 
     public static boolean isMultiAssignmentsEnabled() {

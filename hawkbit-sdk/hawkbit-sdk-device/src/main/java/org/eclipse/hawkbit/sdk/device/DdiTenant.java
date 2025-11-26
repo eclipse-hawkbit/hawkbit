@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.Tenant;
 
 /**
- * An in-memory simulated DDI Tenant to hold the controller twins in
+ * An in-memory simulated DDI AccessContext to hold the controller twins in
  * memory and be able to retrieve them again.
  */
 public class DdiTenant {

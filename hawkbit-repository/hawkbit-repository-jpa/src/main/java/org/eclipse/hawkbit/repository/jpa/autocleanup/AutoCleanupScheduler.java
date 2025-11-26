@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.System;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -55,7 +55,7 @@ public class AutoCleanupScheduler {
         log.debug("Auto cleanup scheduler has been triggered.");
         // run this code in system code privileged to have the necessary permission to query and create entities
         if (!cleanupTasks.isEmpty()) {
-            System.asSystem(this::executeAutoCleanup);
+            AccessContext.asSystem(this::executeAutoCleanup);
         }
     }
 

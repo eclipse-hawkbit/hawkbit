@@ -21,7 +21,7 @@ import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.run
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.eclipse.hawkbit.context.System;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -192,7 +192,7 @@ class DeploymentManagementTest extends AbstractAccessControllerManagementTest {
     }
 
     private void verify(final Consumer<Long> noRead, final Consumer<Long> readNoUpdate, final Consumer<Long> readAndUpdate) {
-        final Long actionId = System.asSystem(() -> {
+        final Long actionId = AccessContext.asSystem(() -> {
             final List<Action> actions = assignDistributionSet(ds1Type1.getId(), target1Type1.getControllerId()).getAssignedEntity();
             assertThat(actions).hasSize(1).allMatch(action -> action.getTarget().getId().equals(target1Type1.getId()));
             return actions.get(0);

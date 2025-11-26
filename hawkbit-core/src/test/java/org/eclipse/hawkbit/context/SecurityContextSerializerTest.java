@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.context;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.context.Security.SecurityContextSerializer.JSON_SERIALIZATION;
 
 import java.util.Map;
 import java.util.Set;
@@ -39,10 +38,10 @@ class SecurityContextSerializerTest {
         userPassAuthentication.setDetails(details);
         securityContext.setAuthentication(userPassAuthentication);
 
-        final String serialized = JSON_SERIALIZATION.serialize(securityContext);
-        final SecurityContext deserialized = JSON_SERIALIZATION.deserialize(serialized);
+        final String serialized = serialize(securityContext);
+        final SecurityContext deserialized = deserialize(serialized);
         final Authentication authentication = deserialized.getAuthentication();
-        assertThat(Auditor.resolve(authentication)).hasToString("user");
+        assertThat(resolve(authentication)).hasToString("user");
         assertThat(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet()))
                 .isEqualTo(AUTHORITIES);
         assertThat(authentication.isAuthenticated()).isTrue();
@@ -60,27 +59,8 @@ class SecurityContextSerializerTest {
         userPassAuthentication.setDetails(details);
         securityContext.setAuthentication(userPassAuthentication);
 
-        final String serialized = JSON_SERIALIZATION.serialize(securityContext);
+        final String serialized = serialize(securityContext);
         assertThat(serialized).hasSizeLessThan(4096); // ensure that it is not too big
-    }
-
-    @Test
-    void testUsername() {
-        final SecurityContext securityContext = SecurityContextHolder.getContext();
-        final UsernamePasswordAuthenticationToken userPassAuthentication = new UsernamePasswordAuthenticationToken(
-                "user", null, AUTHORITIES.stream().map(SimpleGrantedAuthority::new).toList());
-        final TenantAwareAuthenticationDetails details = new TenantAwareAuthenticationDetails("my_tenant", false);
-        userPassAuthentication.setDetails(details);
-        securityContext.setAuthentication(userPassAuthentication);
-
-        final String serialized = JSON_SERIALIZATION.serialize(securityContext).replace("auditor", "username");
-        final SecurityContext deserialized = JSON_SERIALIZATION.deserialize(serialized);
-        final Authentication authentication = deserialized.getAuthentication();
-        assertThat(Auditor.resolve(authentication)).hasToString("user");
-        assertThat(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet()))
-                .isEqualTo(AUTHORITIES);
-        assertThat(authentication.isAuthenticated()).isTrue();
-        assertThat(authentication.getDetails()).isEqualTo(details);
     }
 
     private static String bigString(final int length) {
@@ -89,5 +69,19 @@ class SecurityContextSerializerTest {
             sb.append((char) ('a' + i % 26));
         }
         return sb.toString();
+    }
+
+    private static String serialize(final SecurityContext securityContext) {
+        return AccessContext.withSecurityContext(securityContext, () -> AccessContext.securityContext().orElseThrow());
+    }
+
+    private static SecurityContext deserialize(final String serialized) {
+        return AccessContext.withSecurityContext(serialized, SecurityContextHolder::getContext);
+    }
+
+    private static String resolve(final Authentication authentication) {
+        final SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(authentication);
+        return AccessContext.withSecurityContext(securityContext, AccessContext::actor);
     }
 }

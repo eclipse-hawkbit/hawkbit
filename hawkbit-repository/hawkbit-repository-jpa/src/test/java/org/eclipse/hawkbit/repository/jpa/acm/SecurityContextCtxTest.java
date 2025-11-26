@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository.jpa.acm;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.context.Security.SecurityContextSerializer.JSON_SERIALIZATION;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockStatic;
@@ -21,8 +20,7 @@ import java.util.function.Supplier;
 
 import lombok.SneakyThrows;
 import org.eclipse.hawkbit.auth.SpPermission;
-import org.eclipse.hawkbit.context.Auditor;
-import org.eclipse.hawkbit.context.Security;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -59,7 +57,7 @@ class SecurityContextCtxTest extends AbstractJpaIntegrationTest {
 
         final Rollout exampleRollout = withSecurityContext(userContext, testdataFactory::createRollout);
         assertThat(exampleRollout.getAccessControlContext())
-                .hasValueSatisfying(ctx -> assertEssentialEquals(JSON_SERIALIZATION.deserialize(ctx), userContext));
+                .hasValueSatisfying(ctx -> assertEssentialEquals(deserialize(ctx), userContext));
     }
 
     /**
@@ -72,7 +70,7 @@ class SecurityContextCtxTest extends AbstractJpaIntegrationTest {
         final TargetFilterQuery targetFilterQuery =
                 withSecurityContext(userContext, testdataFactory::createTargetFilterWithTargetsAndActiveAutoAssignment);
         assertThat(targetFilterQuery.getAccessControlContext())
-                .hasValueSatisfying(ctx -> assertEssentialEquals(JSON_SERIALIZATION.deserialize(ctx), userContext));
+                .hasValueSatisfying(ctx -> assertEssentialEquals(deserialize(ctx), userContext));
     }
 
     /**
@@ -81,10 +79,11 @@ class SecurityContextCtxTest extends AbstractJpaIntegrationTest {
     @Test
     void verifyContextIsUsedWhenHandlingRollout() {
         final SecurityContext userContext = createUserContext(1);
-        try (final MockedStatic<Security> mocked = mockStatic(Security.class, Mockito.CALLS_REAL_METHODS)) {
+        final String serialized = serialize(userContext);
+        try (final MockedStatic<AccessContext> mocked = mockStatic(AccessContext.class, Mockito.CALLS_REAL_METHODS)) {
             // testdataFactory#createRollout will trigger a rollout handling
             withSecurityContext(userContext, testdataFactory::createRollout);
-            mocked.verify(() -> Security.withSecurityContext(eq(JSON_SERIALIZATION.serialize(userContext)), any(Runnable.class)));
+            mocked.verify(() -> AccessContext.withSecurityContext(eq(serialized), any(Runnable.class)));
         }
     }
 
@@ -94,14 +93,15 @@ class SecurityContextCtxTest extends AbstractJpaIntegrationTest {
     @Test
     void verifyContextIsUsedWhenCheckingForAutoAssignmentAllTargets() {
         final SecurityContext userContext = createUserContext(3);
-        try (final MockedStatic<Security> mocked = mockStatic(Security.class, Mockito.CALLS_REAL_METHODS)) {
+        final String serialized = serialize(userContext);
+        try (final MockedStatic<AccessContext> mocked = mockStatic(AccessContext.class, Mockito.CALLS_REAL_METHODS)) {
             withSecurityContext(userContext, testdataFactory::createTargetFilterWithTargetsAndActiveAutoAssignment);
             withSecurityContext(userContext, () -> {
                 autoAssignExecutor.checkAllTargets();
                 return null;
             });
 
-            mocked.verify(() -> Security.withSecurityContext(eq(JSON_SERIALIZATION.serialize(userContext)), any(Runnable.class)));
+            mocked.verify(() -> AccessContext.withSecurityContext(eq(serialized), any(Runnable.class)));
         }
     }
 
@@ -111,8 +111,9 @@ class SecurityContextCtxTest extends AbstractJpaIntegrationTest {
     @Test
     void verifyContextIsUsedWhenCheckingForAutoAssignmentSingleTarget() {
         final SecurityContext userContext = createUserContext(4);
-        try (final MockedStatic<Security> mocked = mockStatic(Security.class, Mockito.CALLS_REAL_METHODS)) {
-            mocked.when(() -> Security.withSecurityContext(any(SecurityContext.class), (Supplier<?>) any(Supplier.class)))
+        final String serialized = serialize(userContext);
+        try (final MockedStatic<AccessContext> mocked = mockStatic(AccessContext.class, Mockito.CALLS_REAL_METHODS)) {
+            mocked.when(() -> AccessContext.withSecurityContext(any(SecurityContext.class), (Supplier<?>) any(Supplier.class)))
                     .thenCallRealMethod();
 
             withSecurityContext(userContext, testdataFactory::createTargetFilterWithTargetsAndActiveAutoAssignment);
@@ -121,7 +122,7 @@ class SecurityContextCtxTest extends AbstractJpaIntegrationTest {
                 return null;
             });
 
-            mocked.verify(() -> Security.withSecurityContext(eq(JSON_SERIALIZATION.serialize(userContext)), any(Runnable.class)));
+            mocked.verify(() -> AccessContext.withSecurityContext(eq(serialized), any(Runnable.class)));
         }
     }
 
@@ -158,9 +159,17 @@ class SecurityContextCtxTest extends AbstractJpaIntegrationTest {
     private String auditor(final SecurityContext securityContext) {
         SecurityContextHolder.setContext(securityContext);
         try {
-            return Auditor.currentAuditor();
+            return AccessContext.actor();
         } finally {
             SecurityContextHolder.clearContext();
         }
+    }
+
+    private static String serialize(final SecurityContext securityContext) {
+        return AccessContext.withSecurityContext(securityContext, () -> AccessContext.securityContext().orElseThrow());
+    }
+
+    private static SecurityContext deserialize(final String serialized) {
+        return AccessContext.withSecurityContext(serialized, SecurityContextHolder::getContext);
     }
 }

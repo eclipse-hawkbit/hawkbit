@@ -25,7 +25,7 @@ import java.util.Set;
 import jakarta.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.artifact.exception.ArtifactBinaryNotFoundException;
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement.Create;
@@ -482,13 +482,13 @@ class SoftwareModuleManagementTest
         assertThat(artifactRepository.findAll()).hasSize(results.length);
         for (final Artifact result : results) {
             assertThat(result.getId()).isNotNull();
-            assertThat(artifactStorage.getBySha1(Tenant.currentTenant(), result.getSha1Hash())).isNotNull();
+            assertThat(artifactStorage.getBySha1(AccessContext.tenant(), result.getSha1Hash())).isNotNull();
         }
     }
 
     private void assertArtifactDoesntExist(final Artifact... results) {
         for (final Artifact result : results) {
-            final String currentTenant = Tenant.currentTenant();
+            final String currentTenant = AccessContext.tenant();
             final String sha1Hash = result.getSha1Hash();
             assertThatExceptionOfType(ArtifactBinaryNotFoundException.class)
                     .isThrownBy(() -> artifactStorage.getBySha1(currentTenant, sha1Hash));

@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
+
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -16,8 +18,7 @@ import jakarta.persistence.EntityManager;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.ArtifactStorage;
-import org.eclipse.hawkbit.context.System;
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
@@ -149,7 +150,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         Pageable query = PageRequest.of(0, MAX_TENANTS_QUERY);
         do {
             tenants = findTenants(query); // its with IS_SYSTEM_CODE so we could find all tenants
-            tenants.forEach(tenant -> System.asSystemAsTenant(tenant, () -> {
+            tenants.forEach(tenant -> asSystemAsTenant(tenant, () -> {
                 try {
                     consumer.accept(tenant);
                 } catch (final RuntimeException ex) {
@@ -202,7 +203,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         }
 
         final String tenant = t.toUpperCase();
-        System.asSystemAsTenant(tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "deleteTenant", status -> {
+        asSystemAsTenant(tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "deleteTenant", status -> {
             tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
             tenantConfigurationRepository.deleteByTenant(tenant);
             targetRepository.deleteByTenant(tenant);
@@ -222,9 +223,9 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     private TenantMetaData getTenantMetadata0(final boolean withDetails) {
-        final String tenant = Tenant.currentTenant();
+        final String tenant = AccessContext.tenant();
         if (tenant == null) {
-            throw new IllegalStateException("Tenant not set");
+            throw new IllegalStateException("AccessContext not set");
         }
 
         final TenantMetaData metaData = withDetails
@@ -232,7 +233,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
                 : tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
         if (metaData == null) {
             if (repositoryProperties.isImplicitTenantCreateAllowed()) {
-                log.info("Tenant {} doesn't exist create metadata", tenant, new Exception("Thread dump"));
+                log.info("AccessContext {} doesn't exist create metadata", tenant, new Exception("Thread dump"));
                 return createTenantMetadata0(tenant);
             } else {
                 throw new EntityNotFoundException(TenantMetaData.class, tenant);
@@ -295,7 +296,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
      * @return the initial created {@link TenantMetaData}
      */
     private TenantMetaData createInitialTenantMetaData(final String tenant) {
-        return System.asSystemAsTenant(
+        return asSystemAsTenant(
                 tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "initial-tenant-creation", status -> {
                     final DistributionSetType defaultDsType = createStandardSoftwareDataSetup();
                     return tenantMetaDataRepository.save(new JpaTenantMetaData(defaultDsType, tenant));

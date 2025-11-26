@@ -1231,7 +1231,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     private void assertAction(final Long actionId, final int messages, final Status... expectedActionStates) {
         await().untilAsserted(() -> {
             try {
-                SecurityContextSwitch.callAsPrivileged(() -> {
+                SecurityContextSwitch.asPrivileged(() -> {
                     final List<ActionStatus> actionStatusList = deploymentManagement.findActionStatusByAction(actionId, PAGE).getContent();
 
                     // Check correlation ID
@@ -1265,7 +1265,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
             final Status... expectedActionStates) {
         await().untilAsserted(() -> {
             try {
-                SecurityContextSwitch.callAsPrivileged(() -> {
+                SecurityContextSwitch.asPrivileged(() -> {
                     final List<ActionStatus> actionStatusList = deploymentManagement
                             .findActionStatusByAction(actionId, PAGE).getContent();
                     assertThat(actionStatusList).hasSize(statusListCount);

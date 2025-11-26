@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.auth.SpPermission;
-import org.eclipse.hawkbit.context.System;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
@@ -179,7 +179,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
 
     private void checkAccess(final String keyName) {
         if (AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY.equalsIgnoreCase(keyName)) {
-            if (!System.isCurrentThreadSystemCode() && !SpPermission.hasPermission(READ_GATEWAY_SECURITY_TOKEN)) {
+            if (!AccessContext.isCurrentThreadSystemCode() && !SpPermission.hasPermission(READ_GATEWAY_SECURITY_TOKEN)) {
                 throw new InsufficientPermissionException(
                         "Can't read gateway security token! " + READ_GATEWAY_SECURITY_TOKEN + " is required!");
             }

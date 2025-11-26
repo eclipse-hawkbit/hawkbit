@@ -47,22 +47,24 @@ public class RepositoryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @SuppressWarnings("java:S3358") // java:S3358 better readable this way
+    @SuppressWarnings("java:S3358")
+        // java:S3358 better readable this way
     RoleHierarchy roleHierarchy(
             // if configured replaces the hierarchy completely
             @Value("${hawkbit.hierarchy:}") final String hierarchy,
             // if the "hierarchy" property is empty, and this property is configured it is appended to the default hierarchy
             @Value("${hawkbit.hierarchy.ext:}") final String hierarchyExt) {
-        final RoleHierarchy roleHierarchy = RoleHierarchyImpl.fromHierarchy(
+        return RoleHierarchyImpl.fromHierarchy(
                 ObjectUtils.isEmpty(hierarchy)
                         ? (ObjectUtils.isEmpty(hierarchyExt) ? Hierarchy.DEFAULT : Hierarchy.DEFAULT + hierarchyExt)
                         : hierarchy);
-        Hierarchy.setRoleHierarchy(roleHierarchy);
-        return roleHierarchy;
     }
 
     @Bean
-    PermissionEvaluator permissionEvaluator() {
+    PermissionEvaluator permissionEvaluator(final RoleHierarchy roleHierarchy) {
+        // sets up global access to the role hierarchy
+        Hierarchy.setRoleHierarchy(roleHierarchy);
+        // and returns a custom permission evaluator
         return new DenyAllPermissionEvaluator() {
 
             @Override

@@ -37,8 +37,7 @@ import jakarta.persistence.criteria.Root;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
-import org.eclipse.hawkbit.context.System;
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -501,7 +500,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 String.format(getQueryForDeleteActionsByStatusAndLastModifiedBeforeString(database),
                         Jpa.formatNativeQueryInClause("status", statusList)));
 
-        deleteQuery.setParameter("tenant", Tenant.currentTenant().toUpperCase());
+        deleteQuery.setParameter("tenant", AccessContext.tenant().toUpperCase());
         Jpa.setNativeQueryInParameter(deleteQuery, "status", statusList);
         deleteQuery.setParameter("last_modified_at", lastModified);
 
@@ -852,7 +851,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private void checkMaxAssignmentQuota(final String controllerId, final long requested) {
         final int quota = quotaManagement.getMaxActionsPerTarget();
         try {
-            System.asSystem(() -> QuotaHelper.assertAssignmentQuota(
+            AccessContext.asSystem(() -> QuotaHelper.assertAssignmentQuota(
                     controllerId, requested, quota, Action.class, Target.class, actionRepository::countByTargetControllerId));
         } catch (final AssignmentQuotaExceededException ex) {
             targetRepository.findByControllerId(controllerId).ifPresentOrElse(

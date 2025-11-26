@@ -157,7 +157,7 @@ class DistributionSetManagementTest extends AbstractAccessControllerManagementTe
             assertThat(ds1Type1).matches(updated -> updated.getModules().stream()
                     .map(Identifiable::getId).anyMatch(sm1Type1.getId()::equals));
             try {
-                SecurityContextSwitch.callAsPrivileged(() -> distributionSetManagement.unlock(ds2Type2));
+                SecurityContextSwitch.asPrivileged(() -> distributionSetManagement.unlock(ds2Type2));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

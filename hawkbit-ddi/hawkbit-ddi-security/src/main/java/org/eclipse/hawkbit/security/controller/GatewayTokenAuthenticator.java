@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.security.controller;
 
-import static org.eclipse.hawkbit.context.System.asSystemAsTenant;
+import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY;
 

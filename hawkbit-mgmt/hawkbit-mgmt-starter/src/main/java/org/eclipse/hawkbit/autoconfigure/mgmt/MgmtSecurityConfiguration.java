@@ -20,8 +20,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.auth.SpPermission;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.context.Mdc;
-import org.eclipse.hawkbit.context.System;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.oidc.OidcProperties;
 import org.eclipse.hawkbit.oidc.OidcProperties.Oauth2.ResourceServer.Jwt.Claim;
@@ -123,7 +123,7 @@ public class MgmtSecurityConfiguration {
                         (request, response, chain) -> {
                             final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                             if (authentication != null && authentication.isAuthenticated()) {
-                                System.asSystem(systemManagement::getTenantMetadataWithoutDetails);
+                                AccessContext.asSystem(systemManagement::getTenantMetadataWithoutDetails);
                             }
                             chain.doFilter(request, response);
                         },

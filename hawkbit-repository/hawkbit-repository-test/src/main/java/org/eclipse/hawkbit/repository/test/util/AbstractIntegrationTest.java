@@ -208,21 +208,21 @@ public abstract class AbstractIntegrationTest {
         final String description = "Updated description.";
 
         osType = SecurityContextSwitch
-                .callAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
-        osType = SecurityContextSwitch.callAsPrivileged(() -> softwareModuleTypeManagement
+                .asPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
+        osType = SecurityContextSwitch.asPrivileged(() -> softwareModuleTypeManagement
                 .update(SoftwareModuleTypeManagement.Update.builder().id(osType.getId()).description(description).build()));
 
-        appType = SecurityContextSwitch.callAsPrivileged(
+        appType = SecurityContextSwitch.asPrivileged(
                 () -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_APP, Integer.MAX_VALUE));
-        appType = SecurityContextSwitch.callAsPrivileged(() -> softwareModuleTypeManagement
+        appType = SecurityContextSwitch.asPrivileged(() -> softwareModuleTypeManagement
                 .update(SoftwareModuleTypeManagement.Update.builder().id(appType.getId()).description(description).build()));
 
         runtimeType = SecurityContextSwitch
-                .callAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_RT));
-        runtimeType = SecurityContextSwitch.callAsPrivileged(() -> softwareModuleTypeManagement
+                .asPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_RT));
+        runtimeType = SecurityContextSwitch.asPrivileged(() -> softwareModuleTypeManagement
                 .update(SoftwareModuleTypeManagement.Update.builder().id(runtimeType.getId()).description(description).build()));
 
-        standardDsType = SecurityContextSwitch.callAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
+        standardDsType = SecurityContextSwitch.asPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
 
         // publish the reset counter market event to reset the counters after
         // setup. The setup is transparent by the test and its @ExpectedEvent
@@ -231,7 +231,6 @@ public abstract class AbstractIntegrationTest {
         // ApplicationEventMultiCaster which the TestConfiguration is doing so
         // the order of the events keep the same.
         EventVerifier.publishResetMarkerEvent(eventPublisher);
-
     }
 
     @AfterEach

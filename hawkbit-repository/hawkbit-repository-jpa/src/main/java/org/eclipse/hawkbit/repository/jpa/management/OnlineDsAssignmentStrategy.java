@@ -19,7 +19,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections4.ListUtils;
-import org.eclipse.hawkbit.context.Auditor;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
@@ -134,7 +134,7 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
                 throw new InsufficientPermissionException("No update access to all targets!");
             }
             targetRepository.setAssignedDistributionSetAndUpdateStatus(
-                    set, now, Auditor.currentAuditor(), TargetUpdateStatus.PENDING, targetIdsChunk);
+                    set, now, AccessContext.actor(), TargetUpdateStatus.PENDING, targetIdsChunk);
             // TODO AC - current problem with this approach is that the caller detach the targets and seems doesn't save them
 //            targetRepository.saveAll(
 //                targetRepository

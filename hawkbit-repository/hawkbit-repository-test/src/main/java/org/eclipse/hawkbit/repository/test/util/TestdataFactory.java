@@ -27,8 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.hawkbit.context.System;
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -1284,11 +1283,11 @@ public class TestdataFactory {
     }
 
     private void rolloutHandleAll() {
-        final String tenant = Tenant.currentTenant();
+        final String tenant = AccessContext.tenant();
         if (tenant == null) {
-            throw new IllegalStateException("Tenant is null");
+            throw new IllegalStateException("AccessContext is null");
         }
-        System.asSystem(rolloutHandler::handleAll);
+        AccessContext.asSystem(rolloutHandler::handleAll);
     }
 
     private Rollout reloadRollout(final Rollout rollout) {

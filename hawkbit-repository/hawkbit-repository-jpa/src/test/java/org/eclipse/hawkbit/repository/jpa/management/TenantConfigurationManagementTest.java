@@ -31,7 +31,7 @@ import org.springframework.core.env.Environment;
 
 /**
  * Feature: Component Tests - Repository<br/>
- * Story: Tenant Configuration Management
+ * Story: AccessContext Configuration Management
  */
 class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest implements EnvironmentAware {
 
@@ -314,7 +314,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
     }
 
     /**
-     * Tenant configuration which is not declared throws exception
+     * AccessContext configuration which is not declared throws exception
      */
     @Test
     void storeTenantConfigurationWhichIsNotDeclaredThrowsException() {

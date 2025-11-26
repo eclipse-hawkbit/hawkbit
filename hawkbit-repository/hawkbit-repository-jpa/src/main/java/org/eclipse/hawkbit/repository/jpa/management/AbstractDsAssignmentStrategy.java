@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 import jakarta.persistence.criteria.JoinType;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.Auditor;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -109,7 +109,7 @@ public abstract class AbstractDsAssignmentStrategy {
             actionForTarget.setMaintenanceWindowSchedule(targetWithActionType.getMaintenanceSchedule());
             actionForTarget.setMaintenanceWindowDuration(targetWithActionType.getMaintenanceWindowDuration());
             actionForTarget.setMaintenanceWindowTimeZone(targetWithActionType.getMaintenanceWindowTimeZone());
-            actionForTarget.setInitiatedBy(Auditor.currentAuditor());
+            actionForTarget.setInitiatedBy(AccessContext.actor());
             return actionForTarget;
         }).orElseGet(() -> {
             log.warn("Cannot find target for targetWithActionType '{}'.", targetWithActionType.getControllerId());

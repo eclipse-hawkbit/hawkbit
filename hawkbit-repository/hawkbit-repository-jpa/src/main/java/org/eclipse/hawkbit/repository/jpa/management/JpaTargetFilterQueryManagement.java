@@ -18,8 +18,7 @@ import jakarta.persistence.EntityManager;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.Auditor;
-import org.eclipse.hawkbit.context.Security;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -160,9 +159,9 @@ class JpaTargetFilterQueryManagement
             }
 
             targetFilterQuery.setAutoAssignDistributionSet(distributionSet);
-            Security.currentSecurityContext().ifPresent(targetFilterQuery::setAccessControlContext);
+            AccessContext.securityContext().ifPresent(targetFilterQuery::setAccessControlContext);
             targetFilterQuery.setAutoAssignInitiatedBy(
-                    Optional.ofNullable(Auditor.currentAuditor()).orElse(targetFilterQuery.getCreatedBy()));
+                    Optional.ofNullable(AccessContext.actor()).orElse(targetFilterQuery.getCreatedBy()));
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.actionType()));
             targetFilterQuery.setAutoAssignWeight(update.weight() == null ? repositoryProperties.getActionWeightIfAbsent() : update.weight());
             final boolean confirmationRequired = update.confirmationRequired() == null

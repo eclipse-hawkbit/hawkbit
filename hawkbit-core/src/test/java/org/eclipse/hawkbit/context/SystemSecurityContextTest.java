@@ -55,7 +55,7 @@ class SystemSecurityContextTest {
         final SecurityContext sc = SecurityContextHolder.createEmptyContext();
         sc.setAuthentication(auth);
         SecurityContextHolder.setContext(sc);
-        System.asSystemAsTenant("tenant", () -> {
+        AccessContext.asSystemAsTenant("tenant", () -> {
             final Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
             Assertions.assertThat(currentAuth.getClass().getSimpleName()).isEqualTo("SystemCodeAuthentication");
             Assertions.assertThat(currentAuth.getCredentials()).isNull();

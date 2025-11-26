@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.System;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.jpa.rollout.BlockWhenFullPolicy;
@@ -57,13 +57,10 @@ public class RolloutScheduler {
         final long startNano = java.lang.System.nanoTime();
 
         // run this code in system code privileged to have the necessary permission to query and create entities.
-        System.asSystem(() -> {
-            // workaround eclipselink that is currently not possible to
-            // execute a query without multi-tenancy if MultiTenant
-            // annotation is used.
-            // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
-            // iterate through all tenants and execute the rollout check for
-            // each tenant separately.
+        AccessContext.asSystem(() -> {
+            // workaround eclipselink that is currently not possible to execute a query without multi-tenancy if MultiTenant
+            // annotation is used. https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
+            // iterate through all tenants and execute the rollout check for each tenant separately.
             systemManagement.forEachTenant(tenant -> {
                 if (rolloutTaskExecutor == null) {
                     handleAll(tenant);
@@ -96,7 +93,7 @@ public class RolloutScheduler {
     }
 
     private void handleAllAsync(final String tenant) {
-        rolloutTaskExecutor.submit(() -> org.eclipse.hawkbit.context.System.asSystemAsTenant(tenant, () -> {
+        rolloutTaskExecutor.submit(() -> AccessContext.asSystemAsTenant(tenant, () -> {
             handleAll(tenant);
             return null;
         }));

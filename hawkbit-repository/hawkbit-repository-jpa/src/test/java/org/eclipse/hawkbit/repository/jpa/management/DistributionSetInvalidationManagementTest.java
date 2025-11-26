@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.System;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
@@ -186,7 +186,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     @Test
     @WithUser(authorities = { "READ_DISTRIBUTION_SET", "UPDATE_DISTRIBUTION_SET" })
     void verifyInvalidateWithReadAndUpdateRepoAuthority() {
-        final InvalidationTestData invalidationTestData = System
+        final InvalidationTestData invalidationTestData = AccessContext
                 .asSystem(() -> createInvalidationTestData("verifyInvalidateWithUpdateRepoAuthority"));
 
         distributionSetInvalidationManagement.invalidateDistributionSet(new DistributionSetInvalidation(
@@ -200,7 +200,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     @Test
     @WithUser(authorities = { "READ_DISTRIBUTION_SET", "UPDATE_DISTRIBUTION_SET", "UPDATE_TARGET" })
     void verifyInvalidateWithReadAndUpdateRepoAndUpdateTargetAuthority() {
-        final InvalidationTestData invalidationTestData = System.asSystem(
+        final InvalidationTestData invalidationTestData = AccessContext.asSystem(
                 () -> createInvalidationTestData("verifyInvalidateWithUpdateRepoAndUpdateTargetAuthority"));
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
@@ -220,7 +220,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     @Test
     @WithUser(authorities = { "READ_DISTRIBUTION_SET", "UPDATE_DISTRIBUTION_SET", "UPDATE_TARGET", "UPDATE_ROLLOUT" })
     void verifyInvalidateWithReadAndUpdateRepoAndUpdateTargetAndUpdateRolloutAuthority() {
-        final InvalidationTestData invalidationTestData = System.asSystem(
+        final InvalidationTestData invalidationTestData = AccessContext.asSystem(
                 () -> createInvalidationTestData("verifyInvalidateWithUpdateRepoAndUpdateTargetAuthority"));
 
         distributionSetInvalidationManagement.invalidateDistributionSet(new DistributionSetInvalidation(
@@ -261,7 +261,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     }
 
     private DistributionSetInvalidationCount countEntitiesForInvalidation(final DistributionSetInvalidation distributionSetInvalidation) {
-        return System.asSystem(() -> {
+        return AccessContext.asSystem(() -> {
             final Collection<Long> setIds = distributionSetInvalidation.getDistributionSetIds();
             final long rolloutsCount = distributionSetInvalidation.getActionCancellationType() != ActionCancellationType.NONE ? countRolloutsForInvalidation(setIds) : 0;
             final long autoAssignmentsCount = countAutoAssignmentsForInvalidation(setIds);

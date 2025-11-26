@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +25,7 @@ public class TenantKeyGenerator implements KeyGenerator {
     @Override
     public Object generate(final Object target, final Method method, final Object... params) {
         return Objects.requireNonNull(
-                        Tenant.currentTenant(),
+                        AccessContext.tenant(),
                         "TenantKeyGenerator.generate called not in tenant context")
                 .toUpperCase();
     }

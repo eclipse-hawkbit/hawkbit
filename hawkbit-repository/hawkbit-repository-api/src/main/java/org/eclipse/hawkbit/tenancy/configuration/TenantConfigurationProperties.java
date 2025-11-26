@@ -58,7 +58,7 @@ public class TenantConfigurationProperties {
     }
 
     /**
-     * Tenant specific configurations which can be configured for each tenant separately by means of override of the system defaults.
+     * AccessContext specific configurations which can be configured for each tenant separately by means of override of the system defaults.
      */
     @Data
     @ToString

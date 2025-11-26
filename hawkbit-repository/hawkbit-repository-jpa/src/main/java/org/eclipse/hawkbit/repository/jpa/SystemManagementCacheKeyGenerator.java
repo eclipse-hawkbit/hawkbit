@@ -16,7 +16,7 @@ import java.util.Optional;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.NonNull;
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.context.annotation.Bean;
@@ -66,16 +66,16 @@ public class SystemManagementCacheKeyGenerator implements CurrentTenantCacheKeyG
     /**
      * An implementation of the {@link KeyGenerator} to generate a key based on
      * either the {@code createInitialTenant} thread local and the
-     * {@link Tenant}, but in case we are in a tenant creation with its default
+     * {@link AccessContext}, but in case we are in a tenant creation with its default
      * types we need to use as the tenant the current tenant which is currently
-     * created and not the one currently in the {@link Tenant}.
+     * created and not the one currently in the {@link AccessContext}.
      */
     public class CurrentTenantKeyGenerator implements KeyGenerator {
 
         @Override
         public Object generate(@NonNull final Object target, @NonNull final Method method, @NonNull final Object... params) {
             final String tenant = Objects.requireNonNull(
-                            getTenantInCreation().orElseGet(Tenant::currentTenant),
+                            getTenantInCreation().orElseGet(AccessContext::tenant),
                             "CurrentTenantKeyGenerator.generate called not in tenant context")
                     .toUpperCase();
             return SimpleKeyGenerator.generateKey(tenant, tenant);

@@ -16,8 +16,7 @@ import java.util.function.Consumer;
 import jakarta.persistence.PersistenceException;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.Auditor;
-import org.eclipse.hawkbit.context.Security;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -137,9 +136,9 @@ public class JpaAutoAssignExecutor implements AutoAssignExecutor {
                 try {
                     filterQuery.getAccessControlContext().ifPresentOrElse(
                             context -> // has stored context - executes it with it
-                                    Security.withSecurityContext(context, () -> consumer.accept(filterQuery)),
+                                    AccessContext.withSecurityContext(context, () -> consumer.accept(filterQuery)),
                             () -> // has no stored context - executes it in the tenant & user scope
-                                    Auditor.asAuditor(
+                                    AccessContext.asActor(
                                             getAutoAssignmentInitiatedBy(filterQuery), () -> consumer.accept(filterQuery))
                     );
                 } catch (final RuntimeException ex) {
@@ -169,7 +168,7 @@ public class JpaAutoAssignExecutor implements AutoAssignExecutor {
             final List<DeploymentRequest> deploymentRequests = mapToDeploymentRequests(controllerIds, targetFilterQuery);
             final int count = deploymentRequests.size();
             if (count > 0) {
-                Auditor.asAuditor(
+                AccessContext.asActor(
                         getAutoAssignmentInitiatedBy(targetFilterQuery),
                         () -> deploymentManagement.assignDistributionSets(deploymentRequests, actionMessage));
             }

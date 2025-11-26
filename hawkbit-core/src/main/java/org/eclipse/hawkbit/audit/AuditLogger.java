@@ -50,7 +50,7 @@ public class AuditLogger {
 
     private static void logMessage(
             final String tenant, final String username, final String entity, final String message, final AuditLog.Level level) {
-        final String logMessage = String.format("[%s] User: %s, Tenant: %s - %s", entity, username, tenant, message);
+        final String logMessage = String.format("[%s] User: %s, AccessContext: %s - %s", entity, username, tenant, message);
         final Logger auditLogger = LoggerFactory.getLogger("AUDIT" + (entity != null ? ("." + entity.toUpperCase()) : ""));
         switch (level) {
             case INFO:

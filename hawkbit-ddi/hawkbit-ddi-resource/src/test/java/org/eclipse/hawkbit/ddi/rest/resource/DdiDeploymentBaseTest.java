@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.jayway.jsonpath.JsonPath;
 import org.assertj.core.api.Condition;
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
@@ -97,11 +97,11 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // get deployment base
         performGet(DEPLOYMENT_BASE, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR), status().isOk(),
-                Tenant.currentTenant(), target.getControllerId(), action.getId().toString());
+                AccessContext.tenant(), target.getControllerId(), action.getId().toString());
 
         // get artifacts
         performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR),
-                status().isOk(), Tenant.currentTenant(), target.getControllerId(),
+                status().isOk(), AccessContext.tenant(), target.getControllerId(),
                 String.valueOf(softwareModuleId));
 
         final byte[] feedback = jsonToCbor(getJsonProceedingDeploymentActionFeedback());
@@ -116,7 +116,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     @Test
     void artifactsNotFound() throws Exception {
         final Target target = testdataFactory.createTarget();
-        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.APPLICATION_JSON, status().isNotFound(), Tenant.currentTenant(),
+        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.APPLICATION_JSON, status().isNotFound(), AccessContext.tenant(),
                 target.getControllerId(), "1");
     }
 
@@ -133,7 +133,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         assignDistributionSet(distributionSet.getId(), target.getName());
 
-        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.APPLICATION_JSON, status().isOk(), Tenant.currentTenant(),
+        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.APPLICATION_JSON, status().isOk(), AccessContext.tenant(),
                 target.getControllerId(), softwareModuleId.toString())
                 .andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$.[?(@.filename=='filename0')]", hasSize(1)))
@@ -175,7 +175,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Run test
         final long current = System.currentTimeMillis();
-        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), Tenant.currentTenant(),
+        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), AccessContext.tenant(),
                 DEFAULT_CONTROLLER_ID)
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath(
@@ -210,14 +210,14 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 ActionType.TIMEFORCED, System.currentTimeMillis() + 2_000));
 
         MvcResult mvcResult = performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(),
-                Tenant.currentTenant(), DEFAULT_CONTROLLER_ID)
+                AccessContext.tenant(), DEFAULT_CONTROLLER_ID)
                 .andReturn();
 
         final String urlBeforeSwitch = JsonPath.compile("_links.deploymentBase.href")
                 .read(mvcResult.getResponse().getContentAsString()).toString();
 
         // Time is not yet over, so we should see the same URL
-        mvcResult = performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), Tenant.currentTenant(),
+        mvcResult = performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), AccessContext.tenant(),
                 DEFAULT_CONTROLLER_ID)
                 .andReturn();
         assertThat(JsonPath.compile("_links.deploymentBase.href").read(mvcResult.getResponse().getContentAsString())
@@ -227,7 +227,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         // After the time is over we should see a new etag
         TimeUnit.MILLISECONDS.sleep(2_000);
 
-        mvcResult = performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), Tenant.currentTenant(),
+        mvcResult = performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), AccessContext.tenant(),
                 DEFAULT_CONTROLLER_ID)
                 .andReturn();
 
@@ -273,7 +273,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Run test
         final long current = System.currentTimeMillis();
-        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), Tenant.currentTenant(),
+        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), AccessContext.tenant(),
                 DEFAULT_CONTROLLER_ID)
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.deploymentBase.href",
@@ -327,7 +327,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Run test
         final long current = System.currentTimeMillis();
-        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), Tenant.currentTenant(),
+        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), AccessContext.tenant(),
                 DEFAULT_CONTROLLER_ID)
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.deploymentBase.href",
@@ -389,7 +389,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         // Run test
 
         final long current = System.currentTimeMillis();
-        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), Tenant.currentTenant(), DEFAULT_CONTROLLER_ID)
+        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), AccessContext.tenant(), DEFAULT_CONTROLLER_ID)
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.deploymentBase.href",
                         startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, uaction.getId().toString()))));
@@ -417,25 +417,25 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Target target = testdataFactory.createTarget(DEFAULT_CONTROLLER_ID);
 
         // not allowed methods
-        mvc.perform(post(DEPLOYMENT_BASE, Tenant.currentTenant(), DEFAULT_CONTROLLER_ID, "1"))
+        mvc.perform(post(DEPLOYMENT_BASE, AccessContext.tenant(), DEFAULT_CONTROLLER_ID, "1"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
-        mvc.perform(put(DEPLOYMENT_BASE, Tenant.currentTenant(), DEFAULT_CONTROLLER_ID, "1"))
+        mvc.perform(put(DEPLOYMENT_BASE, AccessContext.tenant(), DEFAULT_CONTROLLER_ID, "1"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
-        mvc.perform(delete(DEPLOYMENT_BASE, Tenant.currentTenant(), DEFAULT_CONTROLLER_ID, "1"))
+        mvc.perform(delete(DEPLOYMENT_BASE, AccessContext.tenant(), DEFAULT_CONTROLLER_ID, "1"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
         // non existing target
-        mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_BASE, Tenant.currentTenant(), "not-existing", "1"))
+        mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_BASE, AccessContext.tenant(), "not-existing", "1"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
         // no deployment
-        mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_BASE, Tenant.currentTenant(), DEFAULT_CONTROLLER_ID, "1"))
+        mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_BASE, AccessContext.tenant(), DEFAULT_CONTROLLER_ID, "1"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
@@ -444,12 +444,12 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet savedSet = testdataFactory.createDistributionSet("");
 
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(savedSet, toAssign));
-        mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_BASE, Tenant.currentTenant(), DEFAULT_CONTROLLER_ID,
+        mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_BASE, AccessContext.tenant(), DEFAULT_CONTROLLER_ID,
                         actionId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
         mvc.perform(MockMvcRequestBuilders
-                        .get(DEPLOYMENT_BASE, Tenant.currentTenant(), DEFAULT_CONTROLLER_ID, actionId)
+                        .get(DEPLOYMENT_BASE, AccessContext.tenant(), DEFAULT_CONTROLLER_ID, actionId)
                         .accept(MediaType.APPLICATION_ATOM_XML))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotAcceptable());
@@ -644,16 +644,16 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 DdiResult.FinalResult.NONE, Collections.singletonList("")), status().isNotFound());
 
         // not allowed methods
-        mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_FEEDBACK, Tenant.currentTenant(),
+        mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_FEEDBACK, AccessContext.tenant(),
                         DEFAULT_CONTROLLER_ID, "2"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
-        mvc.perform(put(DEPLOYMENT_FEEDBACK, Tenant.currentTenant(), DEFAULT_CONTROLLER_ID, "2"))
+        mvc.perform(put(DEPLOYMENT_FEEDBACK, AccessContext.tenant(), DEFAULT_CONTROLLER_ID, "2"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
-        mvc.perform(delete(DEPLOYMENT_FEEDBACK, Tenant.currentTenant(), DEFAULT_CONTROLLER_ID, "2"))
+        mvc.perform(delete(DEPLOYMENT_FEEDBACK, AccessContext.tenant(), DEFAULT_CONTROLLER_ID, "2"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
     }

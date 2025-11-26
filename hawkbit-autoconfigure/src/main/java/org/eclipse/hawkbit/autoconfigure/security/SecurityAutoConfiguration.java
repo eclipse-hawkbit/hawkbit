@@ -13,7 +13,7 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.audit.AuditContextProvider;
 import org.eclipse.hawkbit.audit.AuditLoggingAspect;
-import org.eclipse.hawkbit.context.Auditor;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RepositoryConfiguration;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
@@ -49,7 +49,7 @@ public class SecurityAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public AuditorAware<String> auditorAware() {
-        return () -> Optional.ofNullable(Auditor.currentAuditor());
+        return () -> Optional.ofNullable(AccessContext.actor());
     }
 
     @Bean

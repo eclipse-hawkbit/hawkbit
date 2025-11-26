@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -34,7 +34,7 @@ import org.springframework.lang.Nullable;
 /**
  * A spring Cache Manager that handles the multi tenancy.
  * <ul>
- *     <li>If a tenant is resolved by the {@link Tenant}, a dedicated cache manager for that tenant is used/created.</li>
+ *     <li>If a tenant is resolved by the {@link AccessContext}, a dedicated cache manager for that tenant is used/created.</li>
  *     <li>If no tenant is resolved, a global cache manager is used.</li>
  * </ul>
  */
@@ -69,7 +69,7 @@ public class TenantAwareCacheManager implements CacheManager {
     @NonNull
     @Override
     public Cache getCache(@NonNull final String name) {
-        final Cache cache = Optional.ofNullable(Tenant.currentTenant())
+        final Cache cache = Optional.ofNullable(AccessContext.tenant())
                 .map(currentTenant -> tenant2CacheManager.computeIfAbsent(currentTenant, TenantCacheManager::new))
                 .orElse(globalCacheManager)
                 .getCache(name);
@@ -79,7 +79,7 @@ public class TenantAwareCacheManager implements CacheManager {
     @NonNull
     @Override
     public Collection<String> getCacheNames() {
-        final String currentTenant = Tenant.currentTenant();
+        final String currentTenant = AccessContext.tenant();
         if (currentTenant == null) {
             return globalCacheManager.getCacheNames();
         } else {

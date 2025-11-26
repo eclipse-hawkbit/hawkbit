@@ -56,7 +56,7 @@ public class SecurityContextSwitch {
         SecurityContextSwitch.systemManagement = systemManagement;
     }
 
-    public static <T> T callAsPrivileged(final Callable<T> callable) throws Exception {
+    public static <T> T asPrivileged(final Callable<T> callable) throws Exception {
         createTenant(DEFAULT_TENANT);
         return callAs(PRIVILEGED_USER, callable);
     }

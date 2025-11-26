@@ -49,7 +49,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.auth.SpPermission;
-import org.eclipse.hawkbit.context.System;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
@@ -214,7 +214,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
 
     @Override
     public String getSecurityToken() {
-        if (System.isCurrentThreadSystemCode() || SpPermission.hasPermission(SpPermission.READ_TARGET_SECURITY_TOKEN)) {
+        if (AccessContext.isCurrentThreadSystemCode() || SpPermission.hasPermission(SpPermission.READ_TARGET_SECURITY_TOKEN)) {
             return securityToken;
         }
         return null;

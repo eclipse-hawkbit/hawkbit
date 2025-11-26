@@ -46,9 +46,7 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
-import org.eclipse.hawkbit.context.Auditor;
-import org.eclipse.hawkbit.context.System;
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -271,7 +269,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     public Map<Long, Map<String, String>> findTargetVisibleMetaDataBySoftwareModuleId(final Collection<Long> moduleId) {
-        return System.asSystem(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(moduleId));
+        return AccessContext.asSystem(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(moduleId));
     }
 
     @Override
@@ -377,7 +375,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     public String getPollingTime(final Target target) {
-        return System.asSystem(() -> {
+        return AccessContext.asSystem(() -> {
             final PollingTime pollingTime = new PollingTime(
                     TenantConfigHelper.getTenantConfigurationManagement()
                             .getConfigurationValue(TenantConfigurationKey.POLLING_TIME, String.class).getValue());
@@ -566,7 +564,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Override
     public boolean updateOfflineAssignedVersion(@NotEmpty final String controllerId, final String distributionName, final String version) {
         List<DistributionSetAssignmentResult> distributionSetAssignmentResults =
-                System.asSystem(() -> Auditor.asAuditor(controllerId, () -> deploymentManagement.offlineAssignedDistributionSets(
+                AccessContext.asSystem(() -> AccessContext.asActor(controllerId, () -> deploymentManagement.offlineAssignedDistributionSets(
                         List.of(Map.entry(controllerId, distributionSetManagement.findByNameAndVersion(distributionName, version).getId())))));
 
         return distributionSetAssignmentResults.stream()
@@ -694,7 +692,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         try {
             events.stream().collect(Collectors.groupingBy(TargetPoll::getTenant)).forEach((tenant, polls) -> {
                 final TransactionCallback<Void> createTransaction = status -> updateLastTargetQueries(tenant, polls);
-                org.eclipse.hawkbit.context.System.asSystemAsTenant(
+                AccessContext.asSystemAsTenant(
                         tenant,
                         () -> DeploymentHelper.runInNewTransaction(txManager, "flushUpdateQueue", createTransaction));
             });
@@ -821,7 +819,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         target.setRequestControllerAttributes(true);
 
         EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new TargetAttributesRequestedEvent(Tenant.currentTenant(), target.getId(),
+                .publishEvent(new TargetAttributesRequestedEvent(AccessContext.tenant(), target.getId(),
                         JpaTarget.class, target.getControllerId(), target.getAddress() != null ? target.getAddress() : null));
     }
 

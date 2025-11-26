@@ -31,8 +31,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.auth.SpRole;
-import org.eclipse.hawkbit.context.Security;
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -515,7 +514,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         storeActionsAndStatuses(actions, Action.Status.CANCELING);
 
         // send cancellation messages to event publisher
-        onlineDsAssignmentStrategy.sendCancellationMessages(actions, Tenant.currentTenant());
+        onlineDsAssignmentStrategy.sendCancellationMessages(actions, AccessContext.tenant());
     }
 
     private void forceQuitActionsOfRollout(final Rollout rollout) {
@@ -578,7 +577,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         Jpa.setNativeQueryInParameter(updateQuery, "tid", targetIds);
         final int updated = updateQuery.executeUpdate();
         log.info("{} of target assigned distribution values updated for tenant {}",
-                updated, Tenant.currentTenant());
+                updated, AccessContext.tenant());
         return updated;
     }
 
@@ -593,7 +592,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         Jpa.setNativeQueryInParameter(updateQuery, "tid", targetIds);
         final int updated = updateQuery.executeUpdate();
         log.info("{} of target assigned distribution set to previously installed distribution value for tenant {}",
-                updated, Tenant.currentTenant());
+                updated, AccessContext.tenant());
         return updated;
     }
 
@@ -711,7 +710,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         if (rollout.getWeight().isEmpty()) {
             rollout.setWeight(repositoryProperties.getActionWeightIfAbsent());
         }
-        Security.currentSecurityContext().ifPresent(rollout::setAccessControlContext);
+        AccessContext.securityContext().ifPresent(rollout::setAccessControlContext);
         return rollout;
     }
 

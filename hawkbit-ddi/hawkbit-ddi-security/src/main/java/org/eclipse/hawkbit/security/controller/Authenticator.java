@@ -16,7 +16,7 @@ import java.util.concurrent.Callable;
 
 import lombok.EqualsAndHashCode;
 import org.eclipse.hawkbit.auth.SpRole;
-import org.eclipse.hawkbit.context.System;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.slf4j.Logger;
@@ -53,7 +53,7 @@ public interface Authenticator {
         }
 
         protected boolean isEnabled(final ControllerSecurityToken securityToken) {
-            return System.asSystemAsTenant(securityToken.getTenant(), isEnabledGetter);
+            return AccessContext.asSystemAsTenant(securityToken.getTenant(), isEnabledGetter);
         }
 
         protected abstract String getTenantConfigurationKey();

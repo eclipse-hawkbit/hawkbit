@@ -33,7 +33,7 @@ import org.eclipse.hawkbit.artifact.model.ArtifactHashes;
 import org.eclipse.hawkbit.artifact.model.ArtifactStream;
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.auth.SpRole;
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
@@ -253,7 +253,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             assertThat(artifact2.getId()).isNotNull();
             assertThat(artifact1.getSha1Hash()).isNotEqualTo(artifact2.getSha1Hash());
 
-            final String currentTenant = Tenant.currentTenant();
+            final String currentTenant = AccessContext.tenant();
             assertThat(artifactStorage.getBySha1(currentTenant, artifact1.getSha1Hash())).isNotNull();
             assertThat(artifactStorage.getBySha1(currentTenant, artifact2.getSha1Hash())).isNotNull();
 
@@ -297,7 +297,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             assertThat(artifact2.getId()).isNotNull();
             assertThat((artifact1).getSha1Hash()).isEqualTo(artifact2.getSha1Hash());
             assertThat(artifactRepository.findAll()).hasSize(2);
-            final String currentTenant = Tenant.currentTenant();
+            final String currentTenant = AccessContext.tenant();
             assertThat(artifactStorage.getBySha1(currentTenant, artifact1.getSha1Hash())).isNotNull();
 
             artifactManagement.delete(artifact1.getId());

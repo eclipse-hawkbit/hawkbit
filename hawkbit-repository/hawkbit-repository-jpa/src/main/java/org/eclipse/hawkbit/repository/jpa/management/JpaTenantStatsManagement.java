@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ArtifactRepository;
@@ -43,7 +43,7 @@ public class JpaTenantStatsManagement implements TenantStatsManagement {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public TenantUsage getStatsOfTenant() {
-        final String tenant = Tenant.currentTenant();
+        final String tenant = AccessContext.tenant();
 
         final TenantUsage result = new TenantUsage(tenant);
 

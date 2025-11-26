@@ -362,7 +362,7 @@ public class JpaRepositoryConfiguration {
      * {@link AutoActionCleanup} bean.
      *
      * @param deploymentManagement Deployment management service
-     * @param configManagement Tenant configuration service
+     * @param configManagement AccessContext configuration service
      * @return a new {@link AutoActionCleanup} bean
      */
     @Bean

@@ -15,7 +15,7 @@ import java.util.Objects;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transaction;
 
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.jpa.model.EntityPropertyChangeListener;
 import org.eclipse.hawkbit.repository.jpa.utils.ExceptionMapper;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
@@ -29,7 +29,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * {@link org.springframework.orm.jpa.JpaTransactionManager} that sets the {@link Tenant#currentTenant()} in the eclipselink session. This has
+ * {@link org.springframework.orm.jpa.JpaTransactionManager} that sets the {@link AccessContext#tenant()} in the eclipselink session. This has
  * to be done in eclipselink after a {@link Transaction} has been started.
  * <p/>
  * The class also handles setting:
@@ -77,7 +77,7 @@ class TransactionManager extends JpaTransactionManager {
             }
         }
 
-        final String currentTenant = Tenant.currentTenant();
+        final String currentTenant = AccessContext.tenant();
         if (currentTenant == null) {
             cleanupTenant(em);
         } else {

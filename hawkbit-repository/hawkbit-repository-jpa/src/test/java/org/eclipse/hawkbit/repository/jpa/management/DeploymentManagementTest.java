@@ -32,7 +32,7 @@ import jakarta.validation.ConstraintViolationException;
 
 import lombok.Getter;
 import org.assertj.core.api.Assertions;
-import org.eclipse.hawkbit.context.Auditor;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.Identifiable;
@@ -527,7 +527,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionRepository.count()).isEqualTo(20);
         assertThat(findActionsByDistributionSet(PAGE, ds.getId())).as("Offline actions are not active")
                 .allMatch(action -> !action.isActive()).as("Actions should be initiated by current user")
-                .allMatch(a -> a.getInitiatedBy().equals(Auditor.currentAuditor()));
+                .allMatch(a -> a.getInitiatedBy().equals(AccessContext.actor()));
 
         assertThat(targetManagement.findByInstalledDistributionSet(ds.getId(), PAGE).getContent())
                 .usingElementComparator(controllerIdComparator()).containsAll(targets).hasSize(10)
@@ -569,7 +569,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                         // don't use peek since it is by documentation mainly for debugging and could be skipped in some cases
                         assertThat(a.getInitiatedBy())
                                 .as("Actions should be initiated by current user")
-                                .isEqualTo(Auditor.currentAuditor());
+                                .isEqualTo(AccessContext.actor());
                         return a;
                     })
                     .map(action -> action.getDistributionSet().getId()).toList();
@@ -683,7 +683,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                     .map(a -> {
                         // don't use peek since it is by documentation mainly for debugging and could be skipped in some cases
                         assertThat(a.getInitiatedBy()).as("Initiated by current user")
-                                .isEqualTo(Auditor.currentAuditor());
+                                .isEqualTo(AccessContext.actor());
                         return a;
                     })
                     .map(action -> action.getDistributionSet().getId()).toList();
@@ -722,7 +722,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).forEach(action -> {
                     assertThat(action.getDistributionSet().getId()).isIn(dsIds);
                     assertThat(action.getInitiatedBy())
-                            .as("Should be Initiated by current user").isEqualTo(Auditor.currentAuditor());
+                            .as("Should be Initiated by current user").isEqualTo(AccessContext.actor());
                     deploymentManagement.cancelAction(action.getId());
                 }));
     }
@@ -794,7 +794,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 deploymentManagement.findActionsByTarget(controllerId, PAGE).forEach(action -> {
                     assertThat(action.getDistributionSet().getId()).isIn(distributionSet.getId());
                     assertThat(action.getInitiatedBy())
-                            .as("Should be Initiated by current user").isEqualTo(Auditor.currentAuditor());
+                            .as("Should be Initiated by current user").isEqualTo(AccessContext.actor());
                     if (confirmationRequired) {
                         assertThat(action.getStatus()).isEqualTo(Status.WAIT_FOR_CONFIRMATION);
                     } else {
@@ -907,7 +907,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 deploymentManagement.findActionsByTarget(controllerId, PAGE).forEach(action -> {
                     assertThat(action.getDistributionSet().getId()).isIn(distributionSet.getId());
                     assertThat(action.getInitiatedBy())
-                            .as("Should be Initiated by current user").isEqualTo(Auditor.currentAuditor());
+                            .as("Should be Initiated by current user").isEqualTo(AccessContext.actor());
                     assertThat(action.getStatus()).isEqualTo(RUNNING);
                 }));
     }
@@ -1063,7 +1063,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Page<JpaAction> actions = actionRepository.findAll(PAGE);
         assertThat(actions.getNumberOfElements()).as("wrong size of actions").isEqualTo(20);
         assertThat(actions).as("Actions should be initiated by current user")
-                .allMatch(a -> a.getInitiatedBy().equals(Auditor.currentAuditor()));
+                .allMatch(a -> a.getInitiatedBy().equals(AccessContext.actor()));
 
         final Iterable<? extends Target> allFoundTargets = targetManagement.findAll(PAGE).getContent();
 
@@ -1162,7 +1162,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // retrieving all Actions created by the assignDistributionSet call
         final Page<JpaAction> page = actionRepository.findAll(PAGE);
         assertThat(page).as("Actions should be initiated by current user")
-                .allMatch(a -> a.getInitiatedBy().equals(Auditor.currentAuditor()));
+                .allMatch(a -> a.getInitiatedBy().equals(AccessContext.actor()));
         // and verify the number
         assertThat(page.getTotalElements()).as("wrong size of actions")
                 .isEqualTo(noOfDeployedTargets * noOfDistributionSets);
@@ -1754,7 +1754,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     private void assertDsExclusivelyAssignedToTargets(final List<Target> targets, final long dsId, final boolean active, final Status status) {
         final List<Action> assignment = findActionsByDistributionSet(PAGE, dsId).getContent();
-        final String currentUsername = Auditor.currentAuditor();
+        final String currentUsername = AccessContext.actor();
 
         assertThat(assignment).hasSize(10).allMatch(action -> action.isActive() == active)
                 .as("Is assigned to DS " + dsId).allMatch(action -> action.getDistributionSet().getId().equals(dsId))

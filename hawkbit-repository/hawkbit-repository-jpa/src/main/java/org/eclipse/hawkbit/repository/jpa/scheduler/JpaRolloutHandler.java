@@ -16,7 +16,7 @@ import java.util.concurrent.locks.Lock;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RolloutExecutor;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -62,7 +62,7 @@ public class JpaRolloutHandler implements RolloutHandler {
             return;
         }
 
-        final String handlerId = createRolloutLockKey(Tenant.currentTenant());
+        final String handlerId = createRolloutLockKey(AccessContext.tenant());
         final Lock lock = lockRegistry.obtain(handlerId);
         if (!lock.tryLock()) {
             if (log.isTraceEnabled()) {
@@ -83,7 +83,7 @@ public class JpaRolloutHandler implements RolloutHandler {
                 }
             });
             meterRegistry
-                    .map(mReg -> mReg.timer("hawkbit.rollout.handler.all", DefaultTenantConfiguration.TENANT_TAG, Tenant.currentTenant()))
+                    .map(mReg -> mReg.timer("hawkbit.rollout.handler.all", DefaultTenantConfiguration.TENANT_TAG, AccessContext.tenant()))
                     .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
 
             log.debug("Finished handling of the rollouts.");
@@ -113,7 +113,7 @@ public class JpaRolloutHandler implements RolloutHandler {
         meterRegistry
                 .map(mReg -> mReg.timer(
                         "hawkbit.rollout.handler",
-                        DefaultTenantConfiguration.TENANT_TAG, Tenant.currentTenant(),
+                        DefaultTenantConfiguration.TENANT_TAG, AccessContext.tenant(),
                         "rollout", String.valueOf(rolloutId)))
                 .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
     }

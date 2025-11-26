@@ -41,7 +41,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
  * Spring MVC Tests against the MgmtTenantManagementResource.
  * <p/>
  * Feature: Component Tests - Management API<br/>
- * Story: Tenant Management Resource
+ * Story: AccessContext Management Resource
  */
 public class MgmtTenantManagementResourceTest extends AbstractManagementApiIntegrationTest {
 

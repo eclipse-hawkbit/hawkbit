@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import static org.eclipse.hawkbit.context.System.asSystemAsTenant;
+import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
 
 import java.util.Collections;
 import java.util.List;

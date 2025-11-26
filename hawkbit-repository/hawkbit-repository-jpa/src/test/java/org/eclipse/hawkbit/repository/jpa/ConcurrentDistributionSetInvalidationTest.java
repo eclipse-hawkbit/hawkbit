@@ -20,8 +20,7 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
-import org.eclipse.hawkbit.context.System;
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RolloutManagement.Create;
 import org.eclipse.hawkbit.repository.exception.StopRolloutException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
@@ -61,11 +60,11 @@ class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTe
     void verifyInvalidateDistributionSetWithLargeRolloutThrowsException() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final Rollout rollout = createRollout(distributionSet);
-        final String tenant = Tenant.currentTenant();
+        final String tenant = AccessContext.tenant();
 
         // run in new Thread so that the invalidation can be executed in
         // parallel
-        new Thread(() -> System.asSystemAsTenant(tenant, () -> {
+        new Thread(() -> AccessContext.asSystemAsTenant(tenant, () -> {
             rolloutHandler.handleAll();
             return 0;
         })).start();
@@ -74,9 +73,9 @@ class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTe
         Awaitility.await()
                 .pollInterval(Duration.ofMillis(100))
                 .atMost(Duration.ofSeconds(5))
-                .until(() -> System.asSystemAsTenant(
+                .until(() -> AccessContext.asSystemAsTenant(
                         tenant,
-                        () -> System.asSystem(
+                        () -> AccessContext.asSystem(
                                 () -> rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getSize() > 0)));
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(

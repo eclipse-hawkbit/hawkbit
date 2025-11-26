@@ -21,7 +21,7 @@ import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.run
 import java.util.Arrays;
 import java.util.Optional;
 
-import org.eclipse.hawkbit.context.System;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.jpa.scheduler.RolloutScheduler;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -37,7 +37,7 @@ class RolloutExecutionTest extends AbstractAccessControllerManagementTest {
 
     @Test
     void verifyOnlyUpdatableTargetsArePartOfRollout() {
-        verify(() -> System.asSystem(rolloutHandler::handleAll));
+        verify(() -> AccessContext.asSystem(rolloutHandler::handleAll));
     }
 
     private void verify(final Runnable run) {

@@ -793,7 +793,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
     }
 
     private void waitUntil(final Callable<Boolean> callable) {
-        await().until(() -> SecurityContextSwitch.callAsPrivileged(callable));
+        await().until(() -> SecurityContextSwitch.asPrivileged(callable));
     }
 
     private void assertLatestMultiActionMessageContainsInstallMessages(final String controllerId,

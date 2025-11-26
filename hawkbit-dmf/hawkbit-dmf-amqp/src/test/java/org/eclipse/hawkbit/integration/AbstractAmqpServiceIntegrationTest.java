@@ -93,9 +93,9 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
     }
 
     protected <T> T waitUntilIsPresent(final Callable<Optional<T>> callable) {
-        await().until(() -> SecurityContextSwitch.callAsPrivileged(() -> callable.call().isPresent()));
+        await().until(() -> SecurityContextSwitch.asPrivileged(() -> callable.call().isPresent()));
         try {
-            return SecurityContextSwitch.callAsPrivileged(() -> callable.call().get());
+            return SecurityContextSwitch.asPrivileged(() -> callable.call().get());
         } catch (final Exception e) {
             return null;
         }
@@ -368,7 +368,7 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
         waitUntilIsPresent(() -> controllerManagement.findByControllerId(controllerId));
         await().untilAsserted(() -> {
             try {
-                final Map<String, String> controllerAttributes = SecurityContextSwitch.callAsPrivileged(
+                final Map<String, String> controllerAttributes = SecurityContextSwitch.asPrivileged(
                         () -> targetManagement.getControllerAttributes(controllerId));
                 assertThat(controllerAttributes).hasSameSizeAs(attributes);
                 assertThat(controllerAttributes).containsAllEntriesOf(attributes);

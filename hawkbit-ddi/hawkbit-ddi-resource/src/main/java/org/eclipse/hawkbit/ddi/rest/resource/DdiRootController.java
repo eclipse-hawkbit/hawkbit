@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.model.ArtifactStream;
 import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
 import org.eclipse.hawkbit.audit.AuditLog;
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionHistory;
 import org.eclipse.hawkbit.ddi.json.model.DdiActivateAutoConfirmation;
@@ -188,7 +188,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                         (length, shippedSinceLastEvent, total) -> {
                             if (actionStatus != null) {
                                 eventPublisher.publishEvent(new DownloadProgressEvent(
-                                        Tenant.currentTenant(), actionStatus.getId(), shippedSinceLastEvent));
+                                        AccessContext.tenant(), actionStatus.getId(), shippedSinceLastEvent));
                             }
                         });
             }

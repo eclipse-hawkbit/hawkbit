@@ -18,7 +18,7 @@ import io.micrometer.common.KeyValues;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.observation.ObservationRegistry;
 import lombok.NonNull;
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
 import org.springframework.boot.actuate.autoconfigure.observation.web.servlet.WebMvcObservationAutoConfiguration;
@@ -73,7 +73,7 @@ public class DefaultTenantConfiguration {
                 }
 
                 private KeyValue tenant() {
-                    return KeyValue.of(TENANT_TAG, Optional.ofNullable(Tenant.currentTenant()).orElse("n/a"));
+                    return KeyValue.of(TENANT_TAG, Optional.ofNullable(AccessContext.tenant()).orElse("n/a"));
                 }
             };
         }
@@ -108,7 +108,7 @@ public class DefaultTenantConfiguration {
                 @Override
                 public Iterable<Tag> repositoryTags(final RepositoryMethodInvocationListener.RepositoryMethodInvocation invocation) {
                     final Iterable<Tag> defaultTags = super.repositoryTags(invocation);
-                    final String tenant = Optional.ofNullable(Tenant.currentTenant()).orElse("n/a");
+                    final String tenant = Optional.ofNullable(AccessContext.tenant()).orElse("n/a");
                     return () -> {
                         final Iterator<Tag> defaultTagsIterator = defaultTags.iterator();
                         return new Iterator<>() {

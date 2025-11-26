@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.context.Auditor;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -94,7 +94,7 @@ class RemoteTenantEventTest extends AbstractRemoteEventTest {
         generateAction.setTarget(testdataFactory.createTarget("Test"));
         generateAction.setDistributionSet(dsA);
         generateAction.setStatus(Status.RUNNING);
-        generateAction.setInitiatedBy(Auditor.currentAuditor());
+        generateAction.setInitiatedBy(AccessContext.actor());
         generateAction.setWeight(1000);
 
         final Action action = actionRepository.save(generateAction);
@@ -121,7 +121,7 @@ class RemoteTenantEventTest extends AbstractRemoteEventTest {
         generateAction.setTarget(testdataFactory.createTarget("Test"));
         generateAction.setDistributionSet(dsA);
         generateAction.setStatus(Status.RUNNING);
-        generateAction.setInitiatedBy(Auditor.currentAuditor());
+        generateAction.setInitiatedBy(AccessContext.actor());
         generateAction.setWeight(1000);
 
         final Action action = actionRepository.save(generateAction);

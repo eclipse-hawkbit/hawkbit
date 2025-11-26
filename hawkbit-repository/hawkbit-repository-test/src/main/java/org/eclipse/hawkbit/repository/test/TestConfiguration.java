@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.artifact.fs.FileArtifactStorage;
 import org.eclipse.hawkbit.artifact.urlresolver.PropertyBasedArtifactUrlResolver;
 import org.eclipse.hawkbit.artifact.urlresolver.PropertyBasedArtifactUrlResolverProperties;
 import org.eclipse.hawkbit.auth.Hierarchy;
-import org.eclipse.hawkbit.context.Auditor;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RepositoryConfiguration;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
@@ -144,7 +144,7 @@ public class TestConfiguration implements AsyncConfigurer {
 
     @Bean
     AuditorAware<String> auditorAware() {
-        return () -> Optional.ofNullable(Auditor.currentAuditor());
+        return () -> Optional.ofNullable(AccessContext.actor());
     }
 
     @Bean

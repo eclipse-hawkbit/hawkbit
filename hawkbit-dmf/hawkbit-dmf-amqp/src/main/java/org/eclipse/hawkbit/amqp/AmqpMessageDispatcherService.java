@@ -32,6 +32,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrl;
 import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
 import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver.DownloadDescriptor;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -176,9 +177,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     protected DmfDownloadAndUpdateRequest createDownloadAndUpdateRequest(
             final Target target, final Long actionId, final Map<SoftwareModule, Map<String, String>> softwareModules) {
         return new DmfDownloadAndUpdateRequest(
-                actionId,
-                org.eclipse.hawkbit.context.System.asSystem(target::getSecurityToken),
-                convertToAmqpSoftwareModules(target, softwareModules));
+                actionId, AccessContext.asSystem(target::getSecurityToken), convertToAmqpSoftwareModules(target, softwareModules));
     }
 
     /**
@@ -244,14 +243,14 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     protected DmfTarget convertToDmfTarget(final Target target, final Long actionId) {
-        return new DmfTarget(actionId, target.getControllerId(), org.eclipse.hawkbit.context.System.asSystem(target::getSecurityToken));
+        return new DmfTarget(actionId, target.getControllerId(), AccessContext.asSystem(target::getSecurityToken));
     }
 
     protected DmfConfirmRequest createConfirmRequest(
             final Target target, final Long actionId, final Map<SoftwareModule, Map<String, String>> softwareModules) {
         return new DmfConfirmRequest(
                 actionId,
-                org.eclipse.hawkbit.context.System.asSystem(target::getSecurityToken),
+                AccessContext.asSystem(target::getSecurityToken),
                 convertToAmqpSoftwareModules(target, softwareModules));
     }
 
@@ -586,7 +585,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                         .map(stream -> stream.map(entry -> convertToAmqpSoftwareModule(firstTarget, entry)).toList())
                         .orElse(null));
 
-        // we use only the first action when constructing message as Tenant and action type are the same
+        // we use only the first action when constructing message as AccessContext and action type are the same
         // since all actions have the same trigger
         final ActionProperties firstAction = actions.values().iterator().next();
         final Message message = getMessageConverter().toMessage(

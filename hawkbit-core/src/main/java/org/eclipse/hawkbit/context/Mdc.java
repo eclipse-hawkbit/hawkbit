@@ -35,7 +35,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class Mdc {
 
     public static final String MDC_KEY_TENANT = "tenant";
-    public static final String MDC_KEY_USER = "user";
+    // in the MDC the default actor key is "user"
+    public static final String MDC_KEY_ACTOR = System.getProperty(
+            "hawkbit.mdc.actor.key", // first by priority: system property
+            Optional.ofNullable(System.getenv("HAWKBIT_MDC_ACTOR_KEY")) // second by priority: environment variable
+                    .orElse("user")); // default if not set
 
     private static boolean enabled = true;
 
@@ -45,7 +49,7 @@ public class Mdc {
     }
 
     /**
-     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or user from the auth in the MDC context.
+     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or actor from the auth in the MDC context.
      *
      * @param <T> the return type
      * @param callable the callable to execute
@@ -69,15 +73,15 @@ public class Mdc {
             tenant = null;
         }
 
-        final String user = Optional.ofNullable(Auditor.currentAuditor())
-                .filter(username -> !username.equals(System.SYSTEM_USER)) // null and system are the same - system user
+        final String actor = Optional.ofNullable(AccessContext.actor())
+                .filter(ctxActor -> !ctxActor.equals(AccessContext.SYSTEM_ACTOR)) // null and system are the same - system actor
                 .orElse(null);
 
-        return asTenantAsUser0(tenant, user, callable);
+        return asTenantAsActor0(tenant, actor, callable);
     }
 
     /**
-     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or user from the auth in the MDC context.
+     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or actor from the auth in the MDC context.
      * Calls the {@link #withAuth(Callable)} method and wraps any catchable exception into a {@link RuntimeException}.
      *
      * @param <T> the return type
@@ -95,35 +99,35 @@ public class Mdc {
     }
 
     /**
-     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or user in the MDC context.
+     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or actor in the MDC context.
      *
      * @param <T> the return type
      * @param tenant the tenant to set in the MDC context
-     * @param user the user to set in the MDC context
+     * @param actor the actor to set in the MDC context
      * @param callable the callable to execute
      * @return the result
      */
-    public static <T> T asTenantAsUser(final String tenant, final String user, final Callable<T> callable) throws Exception {
+    public static <T> T asTenantAsActor(final String tenant, final String actor, final Callable<T> callable) throws Exception {
         if (!enabled) {
             return callable.call();
         }
 
-        return asTenantAsUser0(tenant, user, callable);
+        return asTenantAsActor0(tenant, actor, callable);
     }
 
     /**
-     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or user from the auth in the MDC context.
-     * Calls the {@link #asTenantAsUser(String, String, Callable)} method and wraps any catchable exception into a {@link RuntimeException}.
+     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or actor from the auth in the MDC context.
+     * Calls the {@link #asTenantAsActor(String, String, Callable)} method and wraps any catchable exception into a {@link RuntimeException}.
      *
      * @param <T> the return type
      * @param tenant the tenant to set in the MDC context
-     * @param user the user to set in the MDC context
+     * @param actor the actor to set in the MDC context
      * @param callable the callable to execute
      * @return the result
      */
-    public static <T> T asTenantAsUserRe(final String tenant, final String user, final Callable<T> callable) {
+    public static <T> T asTenantAsActorRe(final String tenant, final String actor, final Callable<T> callable) {
         try {
-            return asTenantAsUser(tenant, user, callable);
+            return asTenantAsActor(tenant, actor, callable);
         } catch (final RuntimeException re) {
             throw re;
         } catch (final Exception e) {
@@ -131,30 +135,30 @@ public class Mdc {
         }
     }
 
-    private static <T> T asTenantAsUser0(final String tenant, final String user, final Callable<T> callable) throws Exception {
+    private static <T> T asTenantAsActor0(final String tenant, final String actor, final Callable<T> callable) throws Exception {
         final String currentTenant = MDC.get(MDC_KEY_TENANT);
         if (Objects.equals(currentTenant, tenant)) {
-            return asUser(callable, user);
+            return asActor(callable, actor);
         } else {
             put(MDC_KEY_TENANT, tenant);
             try {
-                return asUser(callable, user);
+                return asActor(callable, actor);
             } finally {
                 put(MDC_KEY_TENANT, currentTenant);
             }
         }
     }
 
-    private static <T> T asUser(final Callable<T> callable, final String user) throws Exception {
-        final String currentUser = MDC.get(MDC_KEY_USER);
-        if (Objects.equals(currentUser, user)) {
+    private static <T> T asActor(final Callable<T> callable, final String actor) throws Exception {
+        final String currentActor = MDC.get(MDC_KEY_ACTOR);
+        if (Objects.equals(currentActor, actor)) {
             return callable.call();
         } else {
-            put(MDC_KEY_USER, user);
+            put(MDC_KEY_ACTOR, actor);
             try {
                 return callable.call();
             } finally {
-                put(MDC_KEY_USER, currentUser);
+                put(MDC_KEY_ACTOR, currentActor);
             }
         }
     }

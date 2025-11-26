@@ -16,7 +16,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
 import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver.DownloadDescriptor;
-import org.eclipse.hawkbit.context.Tenant;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifactHash;
 import org.eclipse.hawkbit.ddi.json.model.DdiAutoConfirmationState;
@@ -52,19 +52,19 @@ public final class DataConversionHelper {
         final DdiConfirmationBase confirmationBase = new DdiConfirmationBase(autoConfirmationState);
         if (autoConfirmationState.isActive()) {
             confirmationBase.add(WebMvcLinkBuilder
-                    .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, Tenant.currentTenant())
-                            .deactivateAutoConfirmation(Tenant.currentTenant(), controllerId))
+                    .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, AccessContext.tenant())
+                            .deactivateAutoConfirmation(AccessContext.tenant(), controllerId))
                     .withRel(DdiRestConstants.AUTO_CONFIRM_DEACTIVATE).expand());
         } else {
             confirmationBase.add(WebMvcLinkBuilder
-                    .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, Tenant.currentTenant())
-                            .activateAutoConfirmation(Tenant.currentTenant(), controllerId, null))
+                    .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, AccessContext.tenant())
+                            .activateAutoConfirmation(AccessContext.tenant(), controllerId, null))
                     .withRel(DdiRestConstants.AUTO_CONFIRM_ACTIVATE).expand());
         }
         if (activeAction != null && activeAction.isWaitingConfirmation()) {
             confirmationBase.add(WebMvcLinkBuilder
-                    .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, Tenant.currentTenant())
-                            .getConfirmationBaseAction(Tenant.currentTenant(), controllerId,
+                    .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, AccessContext.tenant())
+                            .getConfirmationBaseAction(AccessContext.tenant(), controllerId,
                                     activeAction.getId(), calculateEtag(activeAction), null))
                     .withRel(DdiRestConstants.CONFIRMATION_BASE).expand());
         }
@@ -81,15 +81,15 @@ public final class DataConversionHelper {
         if (activeAction != null) {
             if (activeAction.isWaitingConfirmation()) {
                 result.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder
-                                .methodOn(DdiRootController.class, Tenant.currentTenant())
-                                .getConfirmationBaseAction(Tenant.currentTenant(), target.getControllerId(),
+                                .methodOn(DdiRootController.class, AccessContext.tenant())
+                                .getConfirmationBaseAction(AccessContext.tenant(), target.getControllerId(),
                                         activeAction.getId(), calculateEtag(activeAction), null))
                         .withRel(DdiRestConstants.CONFIRMATION_BASE).expand());
 
             } else if (activeAction.isCancelingOrCanceled()) {
                 result.add(WebMvcLinkBuilder
-                        .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, Tenant.currentTenant())
-                                .getControllerCancelAction(Tenant.currentTenant(), target.getControllerId(),
+                        .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, AccessContext.tenant())
+                                .getControllerCancelAction(AccessContext.tenant(), target.getControllerId(),
                                         activeAction.getId()))
                         .withRel(DdiRestConstants.CANCEL_ACTION).expand());
             } else {
@@ -97,9 +97,9 @@ public final class DataConversionHelper {
                 // have changed from 'soft' to 'forced' type, and we need to change the payload of the
                 // response because of eTags.
                 result.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder
-                                .methodOn(DdiRootController.class, Tenant.currentTenant())
+                                .methodOn(DdiRootController.class, AccessContext.tenant())
                                 .getControllerDeploymentBaseAction(
-                                        Tenant.currentTenant(), target.getControllerId(),
+                                        AccessContext.tenant(), target.getControllerId(),
                                         activeAction.getId(), calculateEtag(activeAction), null))
                         .withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION).expand());
             }
@@ -108,8 +108,8 @@ public final class DataConversionHelper {
         if (installedAction != null && !installedAction.isActive()) {
             result.add(
                     WebMvcLinkBuilder
-                            .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, Tenant.currentTenant())
-                                    .getControllerInstalledAction(Tenant.currentTenant(),
+                            .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, AccessContext.tenant())
+                                    .getControllerInstalledAction(AccessContext.tenant(),
                                             target.getControllerId(), installedAction.getId(), null))
                             .withRel(DdiRestConstants.INSTALLED_BASE_ACTION).expand());
         }
@@ -117,9 +117,9 @@ public final class DataConversionHelper {
         if (target.isRequestControllerAttributes()) {
             result.add(WebMvcLinkBuilder
                     .linkTo(WebMvcLinkBuilder
-                            .methodOn(DdiRootController.class, Tenant.currentTenant())
+                            .methodOn(DdiRootController.class, AccessContext.tenant())
                             // doesn't really call the putConfigData with null, just create the link
-                            .putConfigData(null, Tenant.currentTenant(), target.getControllerId()))
+                            .putConfigData(null, AccessContext.tenant(), target.getControllerId()))
                     .withRel(DdiRestConstants.CONFIG_DATA_ACTION).expand());
         }
 

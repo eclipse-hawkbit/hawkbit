@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rollout.condition;
 
-import org.eclipse.hawkbit.context.System;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
@@ -42,7 +42,7 @@ public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator<Roll
 
         final JpaRolloutGroup rolloutGroup = (JpaRolloutGroup) rolloutG;
 
-        System.asSystem(() -> {
+        AccessContext.asSystem(() -> {
             rolloutGroup.setStatus(RolloutGroupStatus.ERROR);
             rolloutGroupRepository.save(rolloutGroup);
             /*
