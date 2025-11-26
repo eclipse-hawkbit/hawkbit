@@ -20,12 +20,9 @@ import java.util.Set;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
-import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -34,7 +31,6 @@ import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.Getter;
@@ -63,11 +59,7 @@ import org.springframework.core.annotation.Order;
 @Getter
 @ToString(callSuper = true)
 @Entity
-@Table(name = "sp_distribution_set",
-        uniqueConstraints = { @UniqueConstraint(columnNames = { "name", "version", "tenant" }, name = "uk_distribution_set") },
-        indexes = {
-                @Index(name = "sp_idx_distribution_set_01", columnList = "tenant,deleted"),
-                @Index(name = "sp_idx_distribution_set_prim", columnList = "tenant,id") })
+@Table(name = "sp_distribution_set")
 @NamedEntityGraph(name = "DistributionSet.detail",
         attributeNodes = { @NamedAttributeNode("modules"), @NamedAttributeNode("tags"), @NamedAttributeNode("type") })
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
@@ -80,36 +72,25 @@ public class JpaDistributionSet
     private static final long serialVersionUID = 1L;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false, targetEntity = JpaDistributionSetType.class)
-    @JoinColumn(
-            name = "ds_type", nullable = false, updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_distribution_set_ds_type"))
+    @JoinColumn(name = "ds_type", nullable = false, updatable = false)
     @NotNull
     private DistributionSetType type;
 
     @ManyToMany(targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY)
     @JoinTable(
             name = "sp_ds_sm",
-            joinColumns = {
-                    @JoinColumn(
-                            name = "ds_id", nullable = false,
-                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_sm_ds_id")) },
-            inverseJoinColumns = {
-                    @JoinColumn(
-                            name = "sm_id", nullable = false,
-                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_sm_sm_id")) })
+            joinColumns = { @JoinColumn(name = "ds_id", nullable = false) },
+            inverseJoinColumns = { @JoinColumn(name = "sm_id", nullable = false) })
     private Set<SoftwareModule> modules = new HashSet<>();
 
     @ManyToMany(targetEntity = JpaDistributionSetTag.class)
     @JoinTable(
             name = "sp_ds_tag",
             joinColumns = {
-                    @JoinColumn(
-                            name = "ds", nullable = false,
-                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_tag_ds")) },
+                    @JoinColumn(name = "ds", nullable = false) },
             inverseJoinColumns = {
                     @JoinColumn(
-                            name = "tag", nullable = false,
-                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_tag_tag")) })
+                            name = "tag", nullable = false) })
     private Set<DistributionSetTag> tags = new HashSet<>();
 
     // no cascade option on an ElementCollection, the target objects are always persisted, merged, removed with their parent
@@ -117,8 +98,7 @@ public class JpaDistributionSet
     @ElementCollection
     @CollectionTable(
             name = "sp_ds_metadata",
-            joinColumns = { @JoinColumn(name = "ds", nullable = false) },
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_metadata_ds"))
+            joinColumns = { @JoinColumn(name = "ds", nullable = false) })
     @MapKeyColumn(name = "meta_key", length = DistributionSet.METADATA_MAX_KEY_SIZE)
     @Column(name = "meta_value", length = DistributionSet.METADATA_MAX_VALUE_SIZE)
     private Map<String, String> metadata = new HashMap<>();

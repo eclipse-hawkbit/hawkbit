@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serial;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,10 +18,8 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,7 +30,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeCre
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
 /**
@@ -41,11 +37,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
  */
 @NoArgsConstructor // Default constructor needed for JPA entities.
 @Entity
-@Table(name = "sp_distribution_set_type", indexes = {
-        @Index(name = "sp_idx_distribution_set_type_01", columnList = "tenant,deleted"),
-        @Index(name = "sp_idx_distribution_set_type_prim", columnList = "tenant,id") }, uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "tenant", "type_key" }, name = "uk_sp_distribution_set_type_type_key"),
-        @UniqueConstraint(columnNames = { "tenant", "name" }, name = "uk_sp_distribution_set_type_name") })
+@Table(name = "sp_distribution_set_type")
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaDistributionSetType extends AbstractJpaTypeEntity implements DistributionSetType, EventAwareEntity {

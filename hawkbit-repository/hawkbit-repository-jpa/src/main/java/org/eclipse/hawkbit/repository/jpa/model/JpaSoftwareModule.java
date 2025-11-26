@@ -20,13 +20,10 @@ import java.util.Optional;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
-import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
@@ -35,7 +32,6 @@ import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -63,12 +59,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 @Getter
 @ToString(callSuper = true)
 @Entity
-@Table(name = "sp_software_module",
-        uniqueConstraints = @UniqueConstraint(columnNames = { "sm_type", "name", "version", "tenant" }, name = "uk_software_module"),
-        indexes = {
-                @Index(name = "sp_idx_software_module_01", columnList = "tenant,deleted,name,version"),
-                @Index(name = "sp_idx_software_module_02", columnList = "tenant,deleted,sm_type"),
-                @Index(name = "sp_idx_software_module_prim", columnList = "tenant,id") })
+@Table(name = "sp_software_module")
 @NamedEntityGraph(name = "SoftwareModule.artifacts", attributeNodes = { @NamedAttributeNode("artifacts") })
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
@@ -80,8 +71,7 @@ public class JpaSoftwareModule
     private static final long serialVersionUID = 1L;
 
     @ManyToOne
-    @JoinColumn(name = "sm_type", nullable = false, updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_software_module_sm_type"))
+    @JoinColumn(name = "sm_type", nullable = false, updatable = false)
     @NotNull
     private JpaSoftwareModuleType type;
 
@@ -101,8 +91,7 @@ public class JpaSoftwareModule
     @ElementCollection
     @CollectionTable(
             name = "sp_sm_metadata",
-            joinColumns = { @JoinColumn(name = "sm", nullable = false) },
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_sm_metadata_sm"))
+            joinColumns = { @JoinColumn(name = "sm", nullable = false) })
     @MapKeyColumn(name = "meta_key", length = SoftwareModule.METADATA_KEY_MAX_SIZE)
     private Map<String, JpaMetadataValue> metadata;
 

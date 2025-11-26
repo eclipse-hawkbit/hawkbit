@@ -12,18 +12,14 @@ package org.eclipse.hawkbit.repository.jpa.model;
 import java.io.Serial;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
-import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -44,10 +40,7 @@ import org.eclipse.hawkbit.repository.model.TenantMetaData;
 @NoArgsConstructor // Default constructor for JPA
 @Setter
 @Getter
-@Table(
-        name = "sp_tenant",
-        indexes = { @Index(name = "sp_idx_tenant_prim", columnList = "tenant,id") },
-        uniqueConstraints = { @UniqueConstraint(columnNames = { "tenant" }, name = "uk_tenant") })
+@Table(name = "sp_tenant")
 @NamedEntityGraph(name = "TenantMetaData.withDetails", attributeNodes = { @NamedAttributeNode("defaultDsType") })
 @Entity
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
@@ -63,9 +56,7 @@ public class JpaTenantMetaData extends AbstractJpaBaseEntity implements TenantMe
     private String tenant;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "default_ds_type", nullable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_sp_tenant_default_ds_type"))
+    @JoinColumn(name = "default_ds_type", nullable = false)
     private JpaDistributionSetType defaultDsType;
 
     public JpaTenantMetaData(final DistributionSetType defaultDsType, final String tenant) {

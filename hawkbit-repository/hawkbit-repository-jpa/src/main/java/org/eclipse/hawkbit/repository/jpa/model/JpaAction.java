@@ -29,7 +29,6 @@ import jakarta.persistence.Converter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
-import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedAttributeNode;
@@ -59,13 +58,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 /**
  * JPA implementation of {@link Action}.
  */
-@Table(
-        name = "sp_action",
-        indexes = {
-                @Index(name = "sp_idx_action_01", columnList = "tenant,distribution_set"),
-                @Index(name = "sp_idx_action_02", columnList = "tenant,target,active"),
-                @Index(name = "sp_idx_action_prim", columnList = "tenant,id")
-        })
+@Table(name = "sp_action")
 @NamedEntityGraphs({
         @NamedEntityGraph(name = "Action.all", attributeNodes = {
                 @NamedAttributeNode(value = "target", subgraph = "target.ds"),
@@ -87,16 +80,14 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Getter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
-            name = "distribution_set", nullable = false, updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_distribution_set"))
+            name = "distribution_set", nullable = false, updatable = false)
     @NotNull
     private JpaDistributionSet distributionSet;
 
     @Getter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
-            name = "target", updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_target"))
+            name = "target", updatable = false)
     @NotNull
     private JpaTarget target;
 
