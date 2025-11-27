@@ -433,7 +433,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                                 new RolloutGroupConditionBuilder().withDefaults().build()))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden())
+                .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
@@ -454,7 +454,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                                 new RolloutGroupConditionBuilder().withDefaults().build()))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden())
+                .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 

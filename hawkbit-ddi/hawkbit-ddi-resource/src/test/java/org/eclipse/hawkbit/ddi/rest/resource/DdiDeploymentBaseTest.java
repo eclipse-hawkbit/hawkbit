@@ -472,7 +472,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
             postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action.getId(), feedback, status().isOk());
         }
 
-        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action.getId(), feedback, status().isForbidden());
+        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action.getId(), feedback, status().isTooManyRequests());
     }
 
     /**
@@ -493,7 +493,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         }
 
         final String feedback = getJsonActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.NONE, null, messages);
-        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action.getId(), feedback, status().isForbidden());
+        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action.getId(), feedback, status().isTooManyRequests());
     }
 
     /**

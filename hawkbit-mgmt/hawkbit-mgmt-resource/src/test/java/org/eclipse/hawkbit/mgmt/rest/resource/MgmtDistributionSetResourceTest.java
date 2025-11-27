@@ -263,7 +263,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                         .contentType(APPLICATION_JSON)
                         .content(toJson(Stream.of(moduleIDs.get(moduleIDs.size() - 1)).map(MgmtId::new).toList())))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden())
+                .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
@@ -272,7 +272,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         mvc.perform(post(DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + disSet2.getId() + "/assignedSM")
                         .contentType(APPLICATION_JSON).content(toJson(moduleIDs.stream().map(MgmtId::new).toList())))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden())
+                .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
@@ -415,7 +415,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
         mvc.perform(post(DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + ds.getId() + "/assignedTargets")
                         .contentType(APPLICATION_JSON).content(payload.toString()))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isTooManyRequests());
 
         assertThat(targetManagement.findByAssignedDistributionSet(ds.getId(), PAGE).getContent()).isEmpty();
     }
@@ -444,7 +444,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         final String json = new JSONArray().put(new JSONObject().put("id", testTarget.getControllerId())).toString();
         mvc.perform(post(DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + ds3.getId() + "/assignedTargets")
                         .contentType(APPLICATION_JSON).content(json))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isTooManyRequests());
     }
 
     /**
@@ -1190,7 +1190,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                         .contentType(APPLICATION_JSON)
                         .content(metaData2.toString()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isTooManyRequests());
 
         // verify that the number of meta-data entries has not changed (we cannot use the PAGE constant here as it tries to sort by ID)
         assertThat(distributionSetManagement.getMetadata(testDS.getId())).hasSize(metaData1.length());

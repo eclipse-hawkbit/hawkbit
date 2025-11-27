@@ -427,7 +427,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         mvc.perform(multipart("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden())
+                .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(FileSizeQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_FILE_SIZE_QUOTA_EXCEEDED.getKey())));
     }
@@ -620,7 +620,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         mvc.perform(multipart("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden())
+                .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
@@ -670,7 +670,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         mvc.perform(multipart("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden())
+                .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(StorageQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_STORAGE_QUOTA_EXCEEDED.getKey())));
 
@@ -1437,7 +1437,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         mvc.perform(post("/rest/v1/softwaremodules/{swId}/metadata", sm.getId()).accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON).content(metaData2.toString()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isTooManyRequests());
 
         // verify that the number of meta data entries has not changed (we cannot use the PAGE constant here as it tries to sort by ID)
         assertThat(softwareModuleManagement.getMetadata(sm.getId()).size()).isEqualTo(metaData1.length());

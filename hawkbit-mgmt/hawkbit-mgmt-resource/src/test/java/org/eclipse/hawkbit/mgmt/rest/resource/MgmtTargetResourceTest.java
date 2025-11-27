@@ -2039,7 +2039,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                         .accept(APPLICATION_JSON)
                         .contentType(APPLICATION_JSON).content(metaData2.toString()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isTooManyRequests());
 
         // verify that the number of meta-data entries has not changed (we cannot use the PAGE constant here as it tries to sort by ID)
         assertThat(targetManagement.getMetadata(knownControllerId)).hasSize(metaData1.length());
