@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAwareUser;
@@ -56,7 +56,7 @@ public class SecurityContextSwitch {
         SecurityContextSwitch.systemManagement = systemManagement;
     }
 
-    public static <T> T callAsPrivileged(final Callable<T> callable) throws Exception {
+    public static <T> T asPrivileged(final Callable<T> callable) throws Exception {
         createTenant(DEFAULT_TENANT);
         return callAs(PRIVILEGED_USER, callable);
     }

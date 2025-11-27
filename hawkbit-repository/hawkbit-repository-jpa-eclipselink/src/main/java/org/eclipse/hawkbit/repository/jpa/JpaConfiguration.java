@@ -15,7 +15,6 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import lombok.Data;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
@@ -45,7 +44,6 @@ public class JpaConfiguration extends JpaBaseConfiguration {
         private final Map<String, String> eclipselink = new HashMap<>();
     }
 
-    private final TenantAware.TenantResolver tenantResolver;
     // only for testing purposes ddl generation may be enabled
     private final Map<String, String> eclipselinkProperties;
 
@@ -53,10 +51,8 @@ public class JpaConfiguration extends JpaBaseConfiguration {
     protected JpaConfiguration(
             final DataSource dataSource, final JpaProperties properties,
             final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider,
-            final TenantAware.TenantResolver tenantResolver,
             final Properties eclipselinkProperties) {
         super(dataSource, properties, jtaTransactionManagerProvider);
-        this.tenantResolver = tenantResolver;
         this.eclipselinkProperties = eclipselinkProperties.getEclipselink();
     }
 
@@ -67,7 +63,7 @@ public class JpaConfiguration extends JpaBaseConfiguration {
     @Override
     @Bean
     public PlatformTransactionManager transactionManager(final ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
-        return new TransactionManager(tenantResolver);
+        return new TransactionManager();
     }
 
     @Override

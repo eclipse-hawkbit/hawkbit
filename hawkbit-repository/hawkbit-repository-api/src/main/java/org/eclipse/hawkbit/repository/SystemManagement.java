@@ -13,14 +13,12 @@ import java.util.function.Consumer;
 
 import jakarta.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
+import org.eclipse.hawkbit.auth.SpPermission;
+import org.eclipse.hawkbit.auth.SpringEvalExpressions;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
-import org.eclipse.hawkbit.repository.model.report.SystemUsageReport;
-import org.eclipse.hawkbit.repository.model.report.SystemUsageReportWithTenants;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,14 +29,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface SystemManagement {
 
     /**
-     * Deletes all data related to a given tenant.
-     *
-     * @param tenant to delete
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
-    void deleteTenant(@NotNull String tenant);
-
-    /**
      * @param pageable for paging information
      * @return list of all tenant names in the system.
      */
@@ -47,7 +37,7 @@ public interface SystemManagement {
 
     /**
      * Runs consumer for each tenant as
-     * {@link TenantAware#runAsTenant(String, java.util.concurrent.Callable)}
+     * {@link AccessContext#asSystemAsTenant(String, java.util.concurrent.Callable)}
      * silently (i.e. exceptions will be logged but operations will continue for further tenants).
      *
      * @param consumer to run as tenant
@@ -56,37 +46,15 @@ public interface SystemManagement {
     void forEachTenant(Consumer<String> consumer);
 
     /**
-     * Calculated system usage statistics, both overall for the entire system and per tenant;
-     *
-     * @return SystemUsageReport of the current system
+     * @return {@link TenantMetaData} of {@link AccessContext#tenant()}
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
-    SystemUsageReportWithTenants getSystemUsageStatisticsWithTenants();
-
-    /**
-     * Calculated overall system usage statistics
-     *
-     * @return SystemUsageReport of the current system
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
-    SystemUsageReport getSystemUsageStatistics();
-
-    /**
-     * @return {@link TenantMetaData} of {@link TenantAware#getCurrentTenant()}
-     */
-    @PreAuthorize("hasAuthority('" + SpPermission.READ_DISTRIBUTION_SET + "')" + " or "
-            + "hasAuthority('READ_" + SpPermission.TARGET + "')" + " or "
-            + "hasAuthority('READ_" + SpPermission.TENANT_CONFIGURATION + "')" + " or "
-            + SpringEvalExpressions.IS_CONTROLLER)
+    @PreAuthorize("hasAuthority('" + SpPermission.READ_DISTRIBUTION_SET + "')" + " or " + "hasAuthority('READ_" + SpPermission.TARGET + "')" + " or " + "hasAuthority('READ_" + SpPermission.TENANT_CONFIGURATION + "')" + " or " + SpringEvalExpressions.IS_CONTROLLER)
     TenantMetaData getTenantMetadata();
 
     /**
-     * @return {@link TenantMetaData} of {@link TenantAware#getCurrentTenant()} without details ({@link TenantMetaData#getDefaultDsType()})
+     * @return {@link TenantMetaData} of {@link AccessContext#tenant()} without details ({@link TenantMetaData#getDefaultDsType()})
      */
-    @PreAuthorize("hasAuthority('" + SpPermission.READ_DISTRIBUTION_SET + "')" + " or "
-            + "hasAuthority('READ_" + SpPermission.TARGET + "')" + " or "
-            + "hasAuthority('READ_" + SpPermission.TENANT_CONFIGURATION + "')" + " or "
-            + SpringEvalExpressions.IS_CONTROLLER)
+    @PreAuthorize("hasAuthority('" + SpPermission.READ_DISTRIBUTION_SET + "')" + " or " + "hasAuthority('READ_" + SpPermission.TARGET + "')" + " or " + "hasAuthority('READ_" + SpPermission.TENANT_CONFIGURATION + "')" + " or " + SpringEvalExpressions.IS_CONTROLLER)
     TenantMetaData getTenantMetadataWithoutDetails();
 
     /**
@@ -113,4 +81,12 @@ public interface SystemManagement {
      */
     @PreAuthorize("hasAuthority('UPDATE_" + SpPermission.TENANT_CONFIGURATION + "')")
     TenantMetaData updateTenantMetadata(long defaultDsType);
+
+    /**
+     * Deletes all data related to a given tenant.
+     *
+     * @param tenant to delete
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
+    void deleteTenant(@NotNull String tenant);
 }

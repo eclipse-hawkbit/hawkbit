@@ -18,19 +18,19 @@ import jakarta.persistence.EntityManager;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.ContextAware;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
@@ -44,10 +44,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.qfields.TargetFields;
 import org.eclipse.hawkbit.repository.qfields.TargetFilterQueryFields;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
-import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -66,34 +63,26 @@ import org.springframework.validation.annotation.Validated;
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "target-filter-management" }, matchIfMissing = true)
 class JpaTargetFilterQueryManagement
-        extends AbstractJpaRepositoryManagement<JpaTargetFilterQuery, TargetFilterQueryManagement.Create, TargetFilterQueryManagement.Update, TargetFilterQueryRepository, TargetFilterQueryFields>
+        extends
+        AbstractJpaRepositoryManagement<JpaTargetFilterQuery, TargetFilterQueryManagement.Create, TargetFilterQueryManagement.Update, TargetFilterQueryRepository, TargetFilterQueryFields>
         implements TargetFilterQueryManagement<JpaTargetFilterQuery> {
 
     private final TargetManagement<? extends Target> targetManagement;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final QuotaManagement quotaManagement;
-    private final TenantConfigurationManagement tenantConfigurationManagement;
     private final RepositoryProperties repositoryProperties;
-    private final SystemSecurityContext systemSecurityContext;
-    private final ContextAware contextAware;
-    private final AuditorAware<String> auditorAware;
 
     protected JpaTargetFilterQueryManagement(
             final TargetFilterQueryRepository targetFilterQueryRepository, final EntityManager entityManager,
             final TargetManagement<? extends Target> targetManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
-            final QuotaManagement quotaManagement, final TenantConfigurationManagement tenantConfigurationManagement,
-            final RepositoryProperties repositoryProperties,
-            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final AuditorAware<String> auditorAware) {
+            final QuotaManagement quotaManagement,
+            final RepositoryProperties repositoryProperties) {
         super(targetFilterQueryRepository, entityManager);
         this.targetManagement = targetManagement;
         this.distributionSetManagement = distributionSetManagement;
         this.quotaManagement = quotaManagement;
-        this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.repositoryProperties = repositoryProperties;
-        this.systemSecurityContext = systemSecurityContext;
-        this.contextAware = contextAware;
-        this.auditorAware = auditorAware;
     }
 
     @Override
@@ -161,7 +150,7 @@ class JpaTargetFilterQueryManagement
             targetFilterQuery.setAutoAssignInitiatedBy(null);
             targetFilterQuery.setConfirmationRequired(false);
         } else {
-            WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(update);
+            WeightValidationHelper.validate(update);
             assertMaxTargetsQuota(targetFilterQuery.getQuery(), targetFilterQuery.getName(), update.dsId());
 
             DistributionSet distributionSet = distributionSetManagement.getValidAndComplete(update.dsId());
@@ -170,12 +159,13 @@ class JpaTargetFilterQueryManagement
             }
 
             targetFilterQuery.setAutoAssignDistributionSet(distributionSet);
-            contextAware.getCurrentContext().ifPresent(targetFilterQuery::setAccessControlContext);
-            targetFilterQuery.setAutoAssignInitiatedBy(auditorAware.getCurrentAuditor().orElse(targetFilterQuery.getCreatedBy()));
+            AccessContext.securityContext().ifPresent(targetFilterQuery::setAccessControlContext);
+            targetFilterQuery.setAutoAssignInitiatedBy(Optional.ofNullable(AccessContext.actor()).orElse(targetFilterQuery.getCreatedBy()));
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.actionType()));
             targetFilterQuery.setAutoAssignWeight(update.weight() == null ? repositoryProperties.getActionWeightIfAbsent() : update.weight());
-            final boolean confirmationRequired =
-                    update.confirmationRequired() == null ? isConfirmationFlowEnabled() : update.confirmationRequired();
+            final boolean confirmationRequired = update.confirmationRequired() == null
+                    ? TenantConfigHelper.isUserConfirmationFlowEnabled()
+                    : update.confirmationRequired();
             targetFilterQuery.setConfirmationRequired(confirmationRequired);
         }
         return jpaRepository.save(targetFilterQuery);
@@ -198,10 +188,6 @@ class JpaTargetFilterQueryManagement
         }
 
         return actionType;
-    }
-
-    private boolean isConfirmationFlowEnabled() {
-        return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).isConfirmationFlowEnabled();
     }
 
     private void assertMaxTargetsQuota(final String query, final String filterName, final long dsId) {
@@ -230,7 +216,7 @@ class JpaTargetFilterQueryManagement
 
             // enforce the 'max targets per auto assign' quota right here even if the result of the filter query can vary over time
             Optional.ofNullable(create.getAutoAssignDistributionSet()).ifPresent(dsId -> {
-                WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(create);
+                WeightValidationHelper.validate(create);
                 assertMaxTargetsQuota(query, create.getName(), dsId.getId());
             });
         });

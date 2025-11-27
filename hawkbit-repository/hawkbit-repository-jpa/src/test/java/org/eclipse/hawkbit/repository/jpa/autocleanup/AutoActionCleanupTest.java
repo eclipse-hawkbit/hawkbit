@@ -206,9 +206,8 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
     }
 
     private void setupCleanupConfiguration(final long expiry, final Status... status) {
-        tenantConfigurationManagement.addOrUpdateConfiguration(ACTION_CLEANUP_AUTO_EXPIRY, expiry);
-        tenantConfigurationManagement.addOrUpdateConfiguration(
-                ACTION_CLEANUP_AUTO_STATUS,
-                Arrays.stream(status).map(Status::toString).collect(Collectors.joining(",")));
+        tenantConfigurationManagement().addOrUpdateConfiguration(ACTION_CLEANUP_AUTO_EXPIRY, expiry);
+        tenantConfigurationManagement().addOrUpdateConfiguration(
+                ACTION_CLEANUP_AUTO_STATUS, Arrays.stream(status).map(Status::toString).collect(Collectors.joining(",")));
     }
 }

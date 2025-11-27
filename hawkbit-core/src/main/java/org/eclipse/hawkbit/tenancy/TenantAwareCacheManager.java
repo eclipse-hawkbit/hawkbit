@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.tenancy.TenantAware.TenantResolver;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -34,7 +34,7 @@ import org.springframework.lang.Nullable;
 /**
  * A spring Cache Manager that handles the multi tenancy.
  * <ul>
- *     <li>If a tenant is resolved by the {@link TenantResolver}, a dedicated cache manager for that tenant is used/created.</li>
+ *     <li>If a tenant is resolved by the {@link AccessContext}, a dedicated cache manager for that tenant is used/created.</li>
  *     <li>If no tenant is resolved, a global cache manager is used.</li>
  * </ul>
  */
@@ -50,7 +50,6 @@ public class TenantAwareCacheManager implements CacheManager {
     private CacheManager globalCacheManager;
     private final Map<String, CacheManager> tenant2CacheManager = new ConcurrentHashMap<>();
 
-    private TenantResolver resolver;
     private Environment env;
 
     // default caffeine cache spec - see com.github.benmanes.caffeine.cache.CaffeineSpec javadoc for format details
@@ -61,8 +60,7 @@ public class TenantAwareCacheManager implements CacheManager {
     }
 
     @Autowired
-    public void init(final TenantResolver resolver, final Environment env) {
-        this.resolver = resolver;
+    public void init(final Environment env) {
         this.env = env;
         defaultSpec = env.resolvePlaceholders("${" + CONFIG_PREFIX + CONFIG_SPEC + ":expireAfterWrite=${hawkbit.cache.ttl:10s}}");
         globalCacheManager = new TenantCacheManager(null);
@@ -71,7 +69,7 @@ public class TenantAwareCacheManager implements CacheManager {
     @NonNull
     @Override
     public Cache getCache(@NonNull final String name) {
-        final Cache cache = Optional.ofNullable(resolver.resolveTenant())
+        final Cache cache = Optional.ofNullable(AccessContext.tenant())
                 .map(currentTenant -> tenant2CacheManager.computeIfAbsent(currentTenant, TenantCacheManager::new))
                 .orElse(globalCacheManager)
                 .getCache(name);
@@ -81,7 +79,7 @@ public class TenantAwareCacheManager implements CacheManager {
     @NonNull
     @Override
     public Collection<String> getCacheNames() {
-        final String currentTenant = resolver.resolveTenant();
+        final String currentTenant = AccessContext.tenant();
         if (currentTenant == null) {
             return globalCacheManager.getCacheNames();
         } else {

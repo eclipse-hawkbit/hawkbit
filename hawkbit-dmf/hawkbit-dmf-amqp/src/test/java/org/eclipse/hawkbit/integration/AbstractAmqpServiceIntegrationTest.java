@@ -51,7 +51,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
-import org.eclipse.hawkbit.util.IpUtil;
+import org.eclipse.hawkbit.utils.IpUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
@@ -93,9 +93,9 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
     }
 
     protected <T> T waitUntilIsPresent(final Callable<Optional<T>> callable) {
-        await().until(() -> SecurityContextSwitch.callAsPrivileged(() -> callable.call().isPresent()));
+        await().until(() -> SecurityContextSwitch.asPrivileged(() -> callable.call().isPresent()));
         try {
-            return SecurityContextSwitch.callAsPrivileged(() -> callable.call().get());
+            return SecurityContextSwitch.asPrivileged(() -> callable.call().get());
         } catch (final Exception e) {
             return null;
         }
@@ -368,7 +368,7 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
         waitUntilIsPresent(() -> controllerManagement.findByControllerId(controllerId));
         await().untilAsserted(() -> {
             try {
-                final Map<String, String> controllerAttributes = SecurityContextSwitch.callAsPrivileged(
+                final Map<String, String> controllerAttributes = SecurityContextSwitch.asPrivileged(
                         () -> targetManagement.getControllerAttributes(controllerId));
                 assertThat(controllerAttributes).hasSameSizeAs(attributes);
                 assertThat(controllerAttributes).containsAllEntriesOf(attributes);

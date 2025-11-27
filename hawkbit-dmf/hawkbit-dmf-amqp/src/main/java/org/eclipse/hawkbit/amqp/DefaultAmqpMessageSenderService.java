@@ -13,7 +13,7 @@ import java.net.URI;
 import java.util.UUID;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.util.IpUtil;
+import org.eclipse.hawkbit.utils.IpUtil;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

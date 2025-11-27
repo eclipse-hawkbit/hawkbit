@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.ql.rsql;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
@@ -117,7 +118,7 @@ class RsqlActionFieldsTest extends AbstractJpaIntegrationTest {
         newAction.setStatus(active ? Status.RUNNING : Status.FINISHED);
         newAction.setTarget(target);
         newAction.setWeight(45);
-        newAction.setInitiatedBy(tenantAware.getCurrentUsername());
+        newAction.setInitiatedBy(AccessContext.actor());
         if (extRef != null) {
             newAction.setExternalRef(extRef);
         }

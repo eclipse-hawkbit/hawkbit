@@ -12,23 +12,16 @@ package org.eclipse.hawkbit.ql.rsql;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import java.util.concurrent.Callable;
-
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.helper.SystemSecurityContextHolder;
-import org.eclipse.hawkbit.repository.helper.TenantConfigurationManagementHolder;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mockito;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -45,18 +38,17 @@ class VirtualPropertyResolverTest {
             TenantConfigurationValue.<String> builder().value("00:07:37").build();
 
     @MockitoBean
-    private TenantConfigurationManagement confMgmt;
-    @MockitoBean
-    private SystemSecurityContext securityContext;
+    private TenantConfigurationManagement tenantConfigurationManagement;
 
     private final VirtualPropertyResolver substitutor = new VirtualPropertyResolver();
 
     @BeforeEach
     void before() {
-        when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_TIME, String.class))
+        when(tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.POLLING_TIME, String.class))
                 .thenReturn(TEST_POLLING_TIME_INTERVAL);
-        when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME, String.class))
+        when(tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME, String.class))
                 .thenReturn(TEST_POLLING_OVERDUE_TIME_INTERVAL);
+        TenantConfigHelper.setTenantConfigurationManagement(tenantConfigurationManagement);
     }
 
     /**
@@ -90,24 +82,9 @@ class VirtualPropertyResolverTest {
     @ParameterizedTest
     @ValueSource(strings = { "${NOW_TS}", "${OVERDUE_TS}", "${overdue_ts}" })
     void resolveNowTimestampPlaceholder(final String placeholder) {
-        when(securityContext.runAsSystem(Mockito.any(Callable.class))).thenAnswer(a -> ((Callable<?>) a.getArgument(0)).call());
         final String testString = "lhs=lt=" + placeholder;
 
         final String resolvedPlaceholders = substitutor.replace(testString);
         assertThat(resolvedPlaceholders).as("'%s' placeholder was not replaced", placeholder).doesNotContain(placeholder);
-    }
-
-    @Configuration
-    static class Config {
-
-        @Bean
-        TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
-            return TenantConfigurationManagementHolder.getInstance();
-        }
-
-        @Bean
-        SystemSecurityContextHolder systemSecurityContextHolder() {
-            return SystemSecurityContextHolder.getInstance();
-        }
     }
 }

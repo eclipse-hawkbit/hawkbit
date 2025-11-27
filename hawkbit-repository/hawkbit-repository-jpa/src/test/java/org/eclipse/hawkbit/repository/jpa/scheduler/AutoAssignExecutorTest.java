@@ -10,8 +10,6 @@
 package org.eclipse.hawkbit.repository.jpa.scheduler;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -22,7 +20,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -55,15 +52,13 @@ class AutoAssignExecutorTest {
     private DeploymentManagement deploymentManagement;
     @Mock
     private PlatformTransactionManager transactionManager;
-    @Mock
-    private ContextAware contextAware;
 
     private JpaAutoAssignExecutor autoAssignChecker;
 
     @BeforeEach
     void before() {
         autoAssignChecker = new JpaAutoAssignExecutor(
-                targetFilterQueryManagement, targetManagement, deploymentManagement, transactionManager, contextAware);
+                targetFilterQueryManagement, targetManagement, deploymentManagement, transactionManager);
     }
 
     /**
@@ -71,7 +66,6 @@ class AutoAssignExecutorTest {
      */
     @Test
     void checkForDevice() {
-        mockRunningAsNonSystem();
         final String target = getRandomString();
         final long ds = getRandomLong();
         final TargetFilterQuery matching = mockFilterQuery(ds);
@@ -83,8 +77,7 @@ class AutoAssignExecutorTest {
 
         autoAssignChecker.checkSingleTarget(target);
 
-        verify(deploymentManagement).assignDistributionSets(
-                eq(matching.getAutoAssignInitiatedBy()), Mockito.argThat(deployReqMatcher(target, ds)), any());
+        verify(deploymentManagement).assignDistributionSets(Mockito.argThat(deployReqMatcher(target, ds)), any());
         Mockito.verifyNoMoreInteractions(deploymentManagement);
     }
 
@@ -112,13 +105,5 @@ class AutoAssignExecutorTest {
             final DeploymentRequest request = requests.get(0);
             return requests.size() == 1 && request.getDistributionSetId() == ds && request.getControllerId() == target;
         };
-    }
-
-    private void mockRunningAsNonSystem() {
-        when(contextAware.getCurrentTenant()).thenReturn(getRandomString());
-        doAnswer(i -> {
-            ((Runnable) i.getArgument(2)).run();
-            return null;
-        }).when(contextAware).runAsTenantAsUser(any(String.class), any(String.class), any(Runnable.class));
     }
 }

@@ -9,12 +9,13 @@
  */
 package org.eclipse.hawkbit.repository.jpa.autocleanup;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
+
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -29,7 +30,6 @@ public class AutoCleanupScheduler {
     private static final String PROP_AUTO_CLEANUP_INTERVAL = "${hawkbit.autocleanup.scheduler.fixedDelay:86400000}";
 
     private final SystemManagement systemManagement;
-    private final SystemSecurityContext systemSecurityContext;
     private final LockRegistry lockRegistry;
     private final List<CleanupTask> cleanupTasks;
 
@@ -38,14 +38,12 @@ public class AutoCleanupScheduler {
      *
      * @param cleanupTasks A list of cleanup tasks.
      * @param systemManagement Management APIs to invoke actions in a certain tenant context.
-     * @param systemSecurityContext The system security context.
      * @param lockRegistry A registry for shared locks.
      */
     public AutoCleanupScheduler(
             final List<CleanupTask> cleanupTasks,
-            final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext, final LockRegistry lockRegistry) {
+            final SystemManagement systemManagement, final LockRegistry lockRegistry) {
         this.systemManagement = systemManagement;
-        this.systemSecurityContext = systemSecurityContext;
         this.lockRegistry = lockRegistry;
         this.cleanupTasks = cleanupTasks;
     }
@@ -58,7 +56,7 @@ public class AutoCleanupScheduler {
         log.debug("Auto cleanup scheduler has been triggered.");
         // run this code in system code privileged to have the necessary permission to query and create entities
         if (!cleanupTasks.isEmpty()) {
-            systemSecurityContext.runAsSystem(this::executeAutoCleanup);
+            asSystem(this::executeAutoCleanup);
         }
     }
 

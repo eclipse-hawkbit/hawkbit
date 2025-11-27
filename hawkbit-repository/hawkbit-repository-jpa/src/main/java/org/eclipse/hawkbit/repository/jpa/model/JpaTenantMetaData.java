@@ -35,7 +35,7 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 
 /**
- * Tenant entity with meta data that is configured globally for the entire
+ * AccessContext entity with meta data that is configured globally for the entire
  * tenant. This entity is not tenant aware to allow the system to access it
  * through the {@link EntityManager} even before the actual tenant exists.
  *

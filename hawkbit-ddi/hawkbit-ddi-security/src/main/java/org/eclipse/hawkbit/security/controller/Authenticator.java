@@ -9,16 +9,15 @@
  */
 package org.eclipse.hawkbit.security.controller;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Callable;
 
 import lombok.EqualsAndHashCode;
-import org.eclipse.hawkbit.im.authentication.SpRole;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.auth.SpRole;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.slf4j.Logger;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -32,10 +31,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 public interface Authenticator {
 
     /**
-     * If the authentication mechanism is not enabled for the tenant - it just returns null.
-     * If the authentication mechanism is supported, the filter extracts from the security token the related credentials,
+     * If the auth mechanism is not enabled for the tenant - it just returns null.
+     * If the auth mechanism is supported, the filter extracts from the security token the related credentials,
      * validate them (do authenticate the caller).
-     * If validation / authentication is successful returns an authenticated authentication object. Otherwise,
+     * If validation / auth is successful returns an authenticated auth object. Otherwise,
      * throws BadCredentialsException.
      *
      * @param controllerSecurityToken the securityToken
@@ -47,23 +46,10 @@ public interface Authenticator {
 
     abstract class AbstractAuthenticator implements Authenticator {
 
-        protected final TenantConfigurationManagement tenantConfigurationManagement;
-        protected final TenantAware tenantAware;
-        protected final SystemSecurityContext systemSecurityContext;
-        private final Callable<Boolean> isEnabledGetter;
-
-        protected AbstractAuthenticator(
-                final TenantConfigurationManagement tenantConfigurationManagement,
-                final TenantAware tenantAware, final SystemSecurityContext systemSecurityContext) {
-            this.tenantConfigurationManagement = tenantConfigurationManagement;
-            this.tenantAware = tenantAware;
-            this.systemSecurityContext = systemSecurityContext;
-            isEnabledGetter = () -> systemSecurityContext.runAsSystem(
-                    () -> tenantConfigurationManagement.getConfigurationValue(getTenantConfigurationKey(), Boolean.class).getValue());
-        }
-
         protected boolean isEnabled(final ControllerSecurityToken securityToken) {
-            return tenantAware.runAsTenant(securityToken.getTenant(), isEnabledGetter);
+            return asSystemAsTenant(
+                    securityToken.getTenant(),
+                    () -> TenantConfigHelper.getAsSystem(getTenantConfigurationKey(), Boolean.class));
         }
 
         protected abstract String getTenantConfigurationKey();

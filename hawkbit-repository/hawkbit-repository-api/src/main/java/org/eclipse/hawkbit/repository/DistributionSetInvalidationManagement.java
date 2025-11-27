@@ -9,8 +9,8 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
+import org.eclipse.hawkbit.auth.SpPermission;
+import org.eclipse.hawkbit.auth.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.springframework.security.access.prepost.PreAuthorize;

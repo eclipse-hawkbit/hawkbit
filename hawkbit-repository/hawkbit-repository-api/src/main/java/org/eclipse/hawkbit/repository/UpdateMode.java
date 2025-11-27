@@ -9,9 +9,6 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.util.Arrays;
-import java.util.Optional;
-
 /**
  * Enumerates the supported update modes. Each mode represents an attribute update strategy.
  *

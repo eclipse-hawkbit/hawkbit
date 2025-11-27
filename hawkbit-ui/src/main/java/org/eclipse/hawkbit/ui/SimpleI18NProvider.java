@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.ui;
 
 import java.util.Arrays;
 import java.util.Locale;
+
 import com.vaadin.flow.i18n.DefaultI18NProvider;
 import org.springframework.stereotype.Component;
 

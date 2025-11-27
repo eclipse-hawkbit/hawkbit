@@ -21,13 +21,7 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.metamodel.EntityType;
 
 import org.aopalliance.intercept.MethodInvocation;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.repository.qfields.DistributionSetFields;
-import org.eclipse.hawkbit.repository.qfields.DistributionSetTypeFields;
-import org.eclipse.hawkbit.repository.qfields.SoftwareModuleFields;
-import org.eclipse.hawkbit.repository.qfields.SoftwareModuleTypeFields;
-import org.eclipse.hawkbit.repository.qfields.TargetFields;
-import org.eclipse.hawkbit.repository.qfields.TargetTypeFields;
+import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
@@ -37,8 +31,12 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
-import org.eclipse.hawkbit.security.SecurityContextSerializer;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.eclipse.hawkbit.repository.qfields.DistributionSetFields;
+import org.eclipse.hawkbit.repository.qfields.DistributionSetTypeFields;
+import org.eclipse.hawkbit.repository.qfields.SoftwareModuleFields;
+import org.eclipse.hawkbit.repository.qfields.SoftwareModuleTypeFields;
+import org.eclipse.hawkbit.repository.qfields.TargetFields;
+import org.eclipse.hawkbit.repository.qfields.TargetTypeFields;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -59,12 +57,6 @@ import org.springframework.util.function.SingletonSupplier;
 @Configuration
 @ConditionalOnProperty(name = "hawkbit.acm.access-controller.enabled", havingValue = "true")
 public class AccessControllerConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean
-    SecurityContextSerializer securityContextSerializer() {
-        return SecurityContextSerializer.JSON_SERIALIZATION;
-    }
 
     @Bean
     @ConditionalOnProperty(name = "hawkbit.acm.access-controller.target.enabled", havingValue = "true", matchIfMissing = true)

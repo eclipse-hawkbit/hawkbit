@@ -14,8 +14,7 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 
 import java.time.Duration;
 
-import org.eclipse.hawkbit.repository.helper.SystemSecurityContextHolder;
-import org.eclipse.hawkbit.repository.helper.TenantConfigurationManagementHolder;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.PollingTime;
 import org.springframework.util.PropertyPlaceholderHelper;
@@ -81,8 +80,6 @@ public class VirtualPropertyResolver {
     }
 
     private static String getRawStringForKey(final String key) {
-        return SystemSecurityContextHolder.getInstance().getSystemSecurityContext().runAsSystem(
-                () -> TenantConfigurationManagementHolder.getInstance().getTenantConfigurationManagement()
-                        .getConfigurationValue(key, String.class).getValue());
+        return TenantConfigHelper.getAsSystem(key, String.class);
     }
 }

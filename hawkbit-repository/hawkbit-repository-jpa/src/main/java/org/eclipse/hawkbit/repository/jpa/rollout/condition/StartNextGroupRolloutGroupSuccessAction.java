@@ -9,13 +9,14 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rollout.condition;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
+
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 
 /**
  * Success action which starts the next following {@link RolloutGroup}.
@@ -25,14 +26,11 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
 
     private final RolloutGroupRepository rolloutGroupRepository;
     private final DeploymentManagement deploymentManagement;
-    private final SystemSecurityContext systemSecurityContext;
 
     public StartNextGroupRolloutGroupSuccessAction(
-            final RolloutGroupRepository rolloutGroupRepository, final DeploymentManagement deploymentManagement,
-            final SystemSecurityContext systemSecurityContext) {
+            final RolloutGroupRepository rolloutGroupRepository, final DeploymentManagement deploymentManagement) {
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.deploymentManagement = deploymentManagement;
-        this.systemSecurityContext = systemSecurityContext;
     }
 
     @Override
@@ -40,11 +38,12 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
         return RolloutGroup.RolloutGroupSuccessAction.NEXTGROUP;
     }
 
-    // Note - the exec could be called by JpaRolloutsExecutor and buy JpaRolloutsManagement#triggerNextGroup
+    // Note - the exec could be called by JpaRolloutsExecutor and by JpaRolloutsManagement#triggerNextGroup
     // this means it could be called by concurrently.
     @Override
     public void exec(final Rollout rollout, final RolloutGroup rolloutGroup) {
-        systemSecurityContext.runAsSystem(() -> {
+        // as system so to assume needed permissions. When called the permission to start next group are assumed anyway
+        asSystem(() -> {
             // retrieve all actions according to the parent group of the finished rolloutGroup,
             // so retrieve all child-group actions which need to be started.
             deploymentManagement.startScheduledActionsByRolloutGroupParent(

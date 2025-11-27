@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
 import static org.mockito.AdditionalAnswers.delegatesTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -20,6 +21,7 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RolloutManagement.Create;
 import org.eclipse.hawkbit.repository.exception.StopRolloutException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
@@ -59,23 +61,17 @@ class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTe
     void verifyInvalidateDistributionSetWithLargeRolloutThrowsException() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final Rollout rollout = createRollout(distributionSet);
-        final String tenant = tenantAware.getCurrentTenant();
+        final String tenant = AccessContext.tenant();
 
         // run in new Thread so that the invalidation can be executed in
         // parallel
-        new Thread(() -> systemSecurityContext.runAsSystemAsTenant(() -> {
-            rolloutHandler.handleAll();
-            return 0;
-        }, tenant)).start();
+        new Thread(() -> asSystemAsTenant(tenant, rolloutHandler::handleAll)).start();
 
         // wait until at least one RolloutGroup is created, as this means that the thread has started and has acquired the lock
         Awaitility.await()
                 .pollInterval(Duration.ofMillis(100))
                 .atMost(Duration.ofSeconds(5))
-                .until(() -> tenantAware.runAsTenant(
-                        tenant,
-                        () -> systemSecurityContext.runAsSystem(
-                                () -> rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getSize() > 0)));
+                .until(() -> asSystemAsTenant(tenant, () -> rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getSize() > 0));
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
                 Collections.singletonList(distributionSet.getId()), ActionCancellationType.SOFT);

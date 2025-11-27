@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.stream.IntStream;
 
 import jakarta.persistence.Query;

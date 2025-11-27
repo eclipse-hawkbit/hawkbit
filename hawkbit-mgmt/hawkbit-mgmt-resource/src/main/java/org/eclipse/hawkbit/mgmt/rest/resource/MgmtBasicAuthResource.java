@@ -10,9 +10,9 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import org.eclipse.hawkbit.audit.AuditLog;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.mgmt.json.model.auth.MgmtUserInfo;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtBasicAuthRestApi;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,18 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MgmtBasicAuthResource implements MgmtBasicAuthRestApi {
 
-    private final TenantAware tenantAware;
-
-    public MgmtBasicAuthResource(final TenantAware tenantAware) {
-        this.tenantAware = tenantAware;
-    }
-
     @Override
     @AuditLog(entity = "BasicAuth", type = AuditLog.Type.READ, description = "Validate Basic Auth")
     public ResponseEntity<MgmtUserInfo> validateBasicAuth() {
         final MgmtUserInfo userInfo = new MgmtUserInfo();
-        userInfo.setTenant(tenantAware.getCurrentTenant());
-        userInfo.setUsername(tenantAware.getCurrentUsername());
+        userInfo.setTenant(AccessContext.tenant());
+        userInfo.setUsername(AccessContext.actor());
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             userInfo.setPermissions(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toArray(String[]::new));

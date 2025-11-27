@@ -9,6 +9,14 @@
  */
 package org.eclipse.hawkbit.ui;
 
+import static feign.Util.ISO_8859_1;
+
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Objects;
+
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
@@ -35,14 +43,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.Objects;
-
-import static feign.Util.ISO_8859_1;
 
 @Slf4j
 @Theme("hawkbit")

@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -53,20 +54,20 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
      */
     @Test
     void blackListedClientIsForbidden() throws Exception {
-        mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
+        mvc.perform(get("/{tenant}/controller/v1/4711", AccessContext.tenant())
                         .header(X_FORWARDED_FOR, "192.168.0.4 , 10.0.0.1 "))
                 .andExpect(status().isForbidden());
     }
 
     /**
-     * Ensures that a READ DoS attempt is blocked 
+     * Ensures that a READ DoS attempt is blocked
      */
     @Test
     void getFloodingAttackThatIsPrevented() throws Exception {
         int requests = 0;
         MvcResult result;
         do {
-            result = mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
+            result = mvc.perform(get("/{tenant}/controller/v1/4711", AccessContext.tenant())
                             .header(X_FORWARDED_FOR, "10.0.0.1"))
                     .andReturn();
             requests++;
@@ -85,7 +86,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     @Test
     void unacceptableGetLoadButOnWhitelistIPv4() throws Exception {
         for (int i = 0; i < 100; i++) {
-            mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
+            mvc.perform(get("/{tenant}/controller/v1/4711", AccessContext.tenant())
                             .header(X_FORWARDED_FOR, "127.0.0.1"))
                     .andExpect(status().isOk());
         }
@@ -97,7 +98,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     @Test
     void unacceptableGetLoadButOnWhitelistIPv6() throws Exception {
         for (int i = 0; i < 100; i++) {
-            mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
+            mvc.perform(get("/{tenant}/controller/v1/4711", AccessContext.tenant())
                             .header(X_FORWARDED_FOR, "0:0:0:0:0:0:0:1"))
                     .andExpect(status().isOk());
         }
@@ -114,7 +115,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
             // sleep for one second
             Thread.sleep(1100);
             for (int i = 0; i < 9; i++) {
-                mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
+                mvc.perform(get("/{tenant}/controller/v1/4711", AccessContext.tenant())
                                 .header(X_FORWARDED_FOR, "10.0.0.1"))
                         .andExpect(status().isOk());
             }
@@ -122,7 +123,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     }
 
     /**
-     * Ensures that a WRITE DoS attempt is blocked 
+     * Ensures that a WRITE DoS attempt is blocked
      */
     @Test
     void putPostFloddingAttackThatisPrevented() throws Exception {
@@ -133,7 +134,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
         MvcResult result;
         do {
             result = mvc.perform(post("/{tenant}/controller/v1/4711/deploymentBase/" + actionId + "/feedback",
-                            tenantAware.getCurrentTenant()).header(X_FORWARDED_FOR, "10.0.0.1").content(feedback)
+                            AccessContext.tenant()).header(X_FORWARDED_FOR, "10.0.0.1").content(feedback)
                             .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                     .andReturn();
             requests++;
@@ -162,7 +163,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
             for (int i = 0; i < 9; i++) {
                 mvc.perform(post("/{tenant}/controller/v1/4711/deploymentBase/" + actionId + "/feedback",
-                                tenantAware.getCurrentTenant()).header(X_FORWARDED_FOR, "10.0.0.1")
+                                AccessContext.tenant()).header(X_FORWARDED_FOR, "10.0.0.1")
                                 .content(feedback).contentType(MediaType.APPLICATION_JSON)
                                 .accept(MediaType.APPLICATION_JSON))
                         .andExpect(status().isOk());

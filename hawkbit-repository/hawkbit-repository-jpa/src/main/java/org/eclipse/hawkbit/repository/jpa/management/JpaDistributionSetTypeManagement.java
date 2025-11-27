@@ -18,7 +18,6 @@ import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
 
-import org.eclipse.hawkbit.repository.qfields.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
@@ -36,6 +35,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTypeSpec
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.qfields.DistributionSetTypeFields;
 import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.cache.Cache;

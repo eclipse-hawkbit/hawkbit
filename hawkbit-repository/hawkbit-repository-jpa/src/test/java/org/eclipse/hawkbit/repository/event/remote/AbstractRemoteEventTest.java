@@ -8,7 +8,9 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.eclipse.hawkbit.repository.event.remote;
+
 import java.util.Map;
+
 import org.eclipse.hawkbit.event.EventJacksonMessageConverter;
 import org.eclipse.hawkbit.event.EventProtoStuffMessageConverter;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;

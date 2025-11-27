@@ -43,7 +43,6 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
 import org.eclipse.hawkbit.rest.OpenApi;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -53,7 +52,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * API for handling target operations.
@@ -76,7 +74,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -112,7 +110,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -163,7 +161,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "201", description = "Successfully created"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -202,7 +200,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -242,7 +240,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -272,7 +270,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "204", description = "Successfully unassigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -299,7 +297,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "204", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -326,7 +324,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -362,7 +360,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -418,7 +416,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "204", description = "Successfully deleted."),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -453,7 +451,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -487,7 +485,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "204", description = "Success"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -521,7 +519,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "200", description = "Successfully updated"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -564,7 +562,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "204", description = "Successfully updated confirmation status of the action"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
                     "changed (i.e. read-only) or data volume restriction applies.",
@@ -612,7 +610,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -647,7 +645,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -680,7 +678,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "200", description = "Successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -726,7 +724,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -753,7 +751,7 @@ public interface MgmtTargetRestApi {
     @Operation(summary = "Return tags for specific target", description = "Get a paged list of tags for a target. Required permission: READ_REPOSITORY")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -783,7 +781,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "201", description = "Successfully created"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -819,7 +817,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -850,7 +848,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -883,7 +881,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "204", description = "Successfully updated"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
@@ -921,7 +919,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "204", description = "Successfully deleted"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -950,7 +948,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
@@ -980,7 +978,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "204", description = "Successfully activated auto-confirm"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
@@ -1017,7 +1015,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "204", description = "Successfully deactivated auto-confirm"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +

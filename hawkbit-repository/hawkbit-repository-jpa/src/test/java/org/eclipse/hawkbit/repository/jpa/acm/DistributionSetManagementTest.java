@@ -12,10 +12,10 @@ package org.eclipse.hawkbit.repository.jpa.acm;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.CREATE_PREFIX;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.DISTRIBUTION_SET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_DISTRIBUTION_SET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_DISTRIBUTION_SET;
+import static org.eclipse.hawkbit.auth.SpPermission.CREATE_PREFIX;
+import static org.eclipse.hawkbit.auth.SpPermission.DISTRIBUTION_SET;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_DISTRIBUTION_SET;
+import static org.eclipse.hawkbit.auth.SpPermission.UPDATE_DISTRIBUTION_SET;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
 
 import java.util.List;
@@ -157,7 +157,7 @@ class DistributionSetManagementTest extends AbstractAccessControllerManagementTe
             assertThat(ds1Type1).matches(updated -> updated.getModules().stream()
                     .map(Identifiable::getId).anyMatch(sm1Type1.getId()::equals));
             try {
-                SecurityContextSwitch.callAsPrivileged(() -> distributionSetManagement.unlock(ds2Type2));
+                SecurityContextSwitch.asPrivileged(() -> distributionSetManagement.unlock(ds2Type2));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

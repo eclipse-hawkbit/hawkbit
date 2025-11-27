@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.scheduler;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
+import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
+
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -17,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.jpa.rollout.BlockWhenFullPolicy;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -34,75 +36,63 @@ public class RolloutScheduler {
 
     private final SystemManagement systemManagement;
     private final RolloutHandler rolloutHandler;
-    private final SystemSecurityContext systemSecurityContext;
     private final Optional<MeterRegistry> meterRegistry;
     private final ThreadPoolTaskExecutor rolloutTaskExecutor;
 
     public RolloutScheduler(
-            final RolloutHandler rolloutHandler, final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext,
+            final RolloutHandler rolloutHandler, final SystemManagement systemManagement,
             final int threadPoolSize, final Optional<MeterRegistry> meterRegistry) {
         this.systemManagement = systemManagement;
         this.rolloutHandler = rolloutHandler;
-        this.systemSecurityContext = systemSecurityContext;
         this.meterRegistry = meterRegistry;
         rolloutTaskExecutor = threadPoolTaskExecutor(threadPoolSize);
 
     }
 
     /**
-     * Scheduler method called by the spring-async mechanism. Retrieves all tenants from the {@link SystemManagement#findTenants} and
-     * runs for each tenant the {@link RolloutHandler#handleAll()} in the {@link SystemSecurityContext}.
+     * Scheduler method called by the spring-async mechanism. For all tenants, using {@link SystemManagement#forEachTenant},
+     * runs the {@link RolloutHandler#handleAll()} scoped to permission of access control context or unscoped (with {@link System}) if null
      */
     @Scheduled(initialDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void runningRolloutScheduler() {
         log.debug("rollout schedule checker has been triggered.");
-        final long startNano = System.nanoTime();
+        final long startNano = java.lang.System.nanoTime();
 
-        // run this code in system code privileged to have the necessary
-        // permission to query and create entities.
-        systemSecurityContext.runAsSystem(() -> {
-            // workaround eclipselink that is currently not possible to
-            // execute a query without multi-tenancy if MultiTenant
-            // annotation is used.
-            // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
-            // iterate through all tenants and execute the rollout check for
-            // each tenant separately.
-            systemManagement.forEachTenant(tenant -> {
-                if (rolloutTaskExecutor == null) {
-                    handleAll(tenant);
-                } else {
-                    handleAllAsync(tenant);
-                }
-            });
-        });
+        // run this code in system code privileged to have the necessary system code permission execute forEachTenant
+        asSystem(() ->
+                // workaround eclipselink that is currently not possible to execute a query without multi-tenancy if MultiTenant
+                // annotation is used. https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
+                // iterate through all tenants and execute the rollout check for each tenant separately.
+                systemManagement.forEachTenant(tenant -> {
+                    if (rolloutTaskExecutor == null) {
+                        handleAll(tenant);
+                    } else {
+                        handleAllAsync(tenant);
+                    }
+                }));
 
         meterRegistry
                 .map(mReg -> mReg.timer("hawkbit.rollout.scheduler.all"))
-                .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
+                .ifPresent(timer -> timer.record(java.lang.System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
     }
 
     private void handleAll(final String tenant) {
         log.trace("Handling rollout for tenant: {}", tenant);
-        final long startNano = System.nanoTime();
+        final long startNano = java.lang.System.nanoTime();
 
         try {
             rolloutHandler.handleAll();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error processing rollout for tenant {}", tenant, e);
         }
 
         meterRegistry
-                .map(mReg -> mReg.timer(
-                        "hawkbit.rollout.scheduler",
-                        DefaultTenantConfiguration.TENANT_TAG, tenant))
-                .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
+                .map(mReg -> mReg.timer("hawkbit.rollout.scheduler", DefaultTenantConfiguration.TENANT_TAG, tenant))
+                .ifPresent(timer -> timer.record(java.lang.System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
     }
 
     private void handleAllAsync(final String tenant) {
-        rolloutTaskExecutor.submit(() -> systemSecurityContext.runAsSystemAsTenant(() -> {
-            handleAll(tenant);
-            return null;
-        }, tenant));
+        rolloutTaskExecutor.submit(() -> asSystemAsTenant(tenant, () -> handleAll(tenant)));
     }
 
     private ThreadPoolTaskExecutor threadPoolTaskExecutor(final int threadPoolSize) {

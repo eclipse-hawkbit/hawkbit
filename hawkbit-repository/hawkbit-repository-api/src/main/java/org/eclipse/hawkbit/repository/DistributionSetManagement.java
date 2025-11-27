@@ -9,13 +9,12 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_READ_REPOSITORY;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_UPDATE_REPOSITORY;
+import static org.eclipse.hawkbit.auth.SpringEvalExpressions.HAS_READ_REPOSITORY;
+import static org.eclipse.hawkbit.auth.SpringEvalExpressions.HAS_UPDATE_REPOSITORY;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -27,7 +26,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;

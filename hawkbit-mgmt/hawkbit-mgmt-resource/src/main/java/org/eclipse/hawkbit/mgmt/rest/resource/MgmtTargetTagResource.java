@@ -27,12 +27,9 @@ import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -48,14 +45,11 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
     private final TargetTagManagement<? extends TargetTag> tagManagement;
     private final TargetManagement<? extends Target> targetManagement;
-    private final TenantConfigHelper tenantConfigHelper;
 
     MgmtTargetTagResource(
-            final TargetTagManagement<? extends TargetTag> tagManagement, final TargetManagement<? extends Target> targetManagement,
-            final SystemSecurityContext securityContext, final TenantConfigurationManagement configurationManagement) {
+            final TargetTagManagement<? extends TargetTag> tagManagement, final TargetManagement<? extends Target> targetManagement) {
         this.tagManagement = tagManagement;
         this.targetManagement = targetManagement;
-        tenantConfigHelper = TenantConfigHelper.usingContext(securityContext, configurationManagement);
     }
 
     @Override
@@ -129,7 +123,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
             findTargetsAll = targetManagement.findByRsqlAndTag(rsqlParam, targetTagId, pageable);
         }
 
-        final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent(), tenantConfigHelper);
+        final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent());
         return ResponseEntity.ok(new PagedList<>(rest, findTargetsAll.getTotalElements()));
     }
 

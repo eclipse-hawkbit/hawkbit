@@ -9,9 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,12 +38,12 @@ import jakarta.persistence.criteria.Root;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
@@ -53,6 +53,7 @@ import org.eclipse.hawkbit.repository.exception.IncompatibleTargetTypeException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
@@ -86,14 +87,10 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.qfields.ActionFields;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -132,34 +129,30 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 "DELETE FROM sp_action " + "WHERE id IN (SELECT id FROM sp_action " + "WHERE tenant=" + Jpa.nativeQueryParamPrefix() + "tenant" + " AND status IN (%s)" + " AND last_modified_at<" + Jpa.nativeQueryParamPrefix() + "last_modified_at LIMIT " + ACTION_PAGE_LIMIT + ")");
     }
 
-    private final EntityManager entityManager;
     private final JpaDistributionSetManagement distributionSetManagement;
     private final TargetRepository targetRepository;
-    private final AuditorAware<String> auditorProvider;
+    private final EntityManager entityManager;
     private final PlatformTransactionManager txManager;
+    private final Database database;
+
+    private final RetryTemplate retryTemplate;
     private final OnlineDsAssignmentStrategy onlineDsAssignmentStrategy;
     private final OfflineDsAssignmentStrategy offlineDsAssignmentStrategy;
-    private final TenantConfigurationManagement tenantConfigurationManagement;
-    private final SystemSecurityContext systemSecurityContext;
-    private final TenantAware tenantAware;
-    private final AuditorAware<String> auditorAware;
-    private final Database database;
-    private final RetryTemplate retryTemplate;
 
     @SuppressWarnings("java:S107")
-    protected JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
+    protected JpaDeploymentManagement(
+            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+            final QuotaManagement quotaManagement, final RepositoryProperties repositoryProperties,
             final JpaDistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
-            final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
-            final PlatformTransactionManager txManager,
-            final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
-            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final AuditorAware<String> auditorAware,
-            final JpaProperties jpaProperties, final RepositoryProperties repositoryProperties) {
+            final EntityManager entityManager, final PlatformTransactionManager txManager, final JpaProperties jpaProperties) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
-        this.entityManager = entityManager;
         this.distributionSetManagement = distributionSetManagement;
         this.targetRepository = targetRepository;
-        this.auditorProvider = auditorProvider;
+        this.entityManager = entityManager;
         this.txManager = txManager;
+        this.database = jpaProperties.getDatabase();
+
+        retryTemplate = createRetryTemplate();
         final Consumer<MaxAssignmentsExceededInfo> maxAssignmentsExceededHandler = maxAssignmentsExceededInfo ->
                 handleMaxAssignmentsExceeded(
                         maxAssignmentsExceededInfo.targetId,
@@ -171,51 +164,26 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository,
                 quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties,
                 maxAssignmentsExceededHandler);
-        this.tenantConfigurationManagement = tenantConfigurationManagement;
-        this.systemSecurityContext = systemSecurityContext;
-        this.tenantAware = tenantAware;
-        this.auditorAware = auditorAware;
-        this.database = jpaProperties.getDatabase();
-        this.retryTemplate = createRetryTemplate();
-    }
-
-    @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<DistributionSetAssignmentResult> assignDistributionSets(final List<DeploymentRequest> deploymentRequests) {
-        return assignDistributionSets0(tenantAware.getCurrentUsername(), deploymentRequests, null);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> assignDistributionSets(
-            final String initiatedBy, final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
-        return assignDistributionSets0(initiatedBy, deploymentRequests, actionMessage);
-    }
-
-    private List<DistributionSetAssignmentResult> assignDistributionSets0(
-            final String initiatedBy, final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
-        WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(deploymentRequests);
-        return assignDistributionSets(initiatedBy, deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
+            final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
+        WeightValidationHelper.validate(deploymentRequests);
+        return assignDistributionSets(deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
     }
 
     @Override
-    public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(
-            final String initiatedBy, final Collection<Entry<String, Long>> assignments) {
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(final Collection<Entry<String, Long>> assignments) {
         final Collection<Entry<String, Long>> distinctAssignments = assignments.stream().distinct().toList();
         enforceMaxAssignmentsPerRequest(distinctAssignments.size());
 
         final List<DeploymentRequest> deploymentRequests = distinctAssignments.stream()
                 .map(entry -> DeploymentRequest.builder(entry.getKey(), entry.getValue()).build()).toList();
 
-        return assignDistributionSets(
-                auditorAware.getCurrentAuditor().orElse(tenantAware.getCurrentUsername()), deploymentRequests, null,
-                offlineDsAssignmentStrategy);
-    }
-
-    @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(final Collection<Entry<String, Long>> assignments) {
-        return offlineAssignedDistributionSets(tenantAware.getCurrentUsername(), assignments);
+        return assignDistributionSets(deploymentRequests, null, offlineDsAssignmentStrategy);
     }
 
     @Override
@@ -242,7 +210,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             action.setStatus(Status.CANCELING);
 
             // document that the status has been retrieved
-            actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
+            actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, java.lang.System.currentTimeMillis(),
                     RepositoryConstants.SERVER_MESSAGE_PREFIX + "manual cancelation requested"));
             final Action saveAction = actionRepository.save(action);
 
@@ -384,7 +352,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         log.warn("action ({}) was still active and has been force quite.", action);
 
         // document that the status has been retrieved
-        actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
+        actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELED, java.lang.System.currentTimeMillis(),
                 RepositoryConstants.SERVER_MESSAGE_PREFIX + "A force quit has been performed."));
 
         DeploymentHelper.successCancellation(action, actionRepository, targetRepository);
@@ -533,7 +501,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 String.format(getQueryForDeleteActionsByStatusAndLastModifiedBeforeString(database),
                         Jpa.formatNativeQueryInClause("status", statusList)));
 
-        deleteQuery.setParameter("tenant", tenantAware.getCurrentTenant().toUpperCase());
+        deleteQuery.setParameter("tenant", AccessContext.tenant().toUpperCase());
         Jpa.setNativeQueryInParameter(deleteQuery, "status", statusList);
         deleteQuery.setParameter("last_modified_at", lastModified);
 
@@ -603,8 +571,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         }
     }
 
-    ;
-
     /**
      * Deletes the first n target actions of a target
      *
@@ -628,11 +594,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private int getActionsPurgePercentage() {
-        return getConfigValue(TenantConfigurationKey.ACTION_CLEANUP_ON_QUOTA_HIT_PERCENTAGE, Integer.class);
+        return TenantConfigHelper.getAsSystem(TenantConfigurationKey.ACTION_CLEANUP_ON_QUOTA_HIT_PERCENTAGE, Integer.class);
     }
 
     protected boolean isActionsAutocloseEnabled() {
-        return getConfigValue(REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class);
+        return TenantConfigHelper.getAsSystem(REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class);
     }
 
     private static Map<Long, List<TargetWithActionType>> convertRequest(final Collection<DeploymentRequest> deploymentRequests) {
@@ -667,21 +633,20 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         backOffPolicy.setBackOffPeriod(Constants.TX_RT_DELAY);
         template.setBackOffPolicy(backOffPolicy);
 
-        final SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(Constants.TX_RT_MAX,
-                Collections.singletonMap(ConcurrencyFailureException.class, true));
+        final SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(
+                Constants.TX_RT_MAX, Collections.singletonMap(ConcurrencyFailureException.class, true));
         template.setRetryPolicy(retryPolicy);
 
         return template;
     }
 
     private List<DistributionSetAssignmentResult> assignDistributionSets(
-            final String initiatedBy, final List<DeploymentRequest> deploymentRequests, final String actionMessage,
-            final AbstractDsAssignmentStrategy strategy) {
+            final List<DeploymentRequest> deploymentRequests, final String actionMessage, final AbstractDsAssignmentStrategy strategy) {
         final List<DeploymentRequest> validatedRequests = validateAndFilterRequestForAssignments(deploymentRequests);
         final Map<Long, List<TargetWithActionType>> assignmentsByDsIds = convertRequest(validatedRequests);
 
         final List<DistributionSetAssignmentResult> results = assignmentsByDsIds.entrySet().stream()
-                .map(entry -> assignDistributionSetToTargetsWithRetry(initiatedBy, entry.getKey(), entry.getValue(), actionMessage, strategy))
+                .map(entry -> assignDistributionSetToTargetsWithRetry(entry.getKey(), entry.getValue(), actionMessage, strategy))
                 .toList();
         strategy.sendDeploymentEvents(results);
         return results;
@@ -774,10 +739,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private DistributionSetAssignmentResult assignDistributionSetToTargetsWithRetry(
-            final String initiatedBy, final Long dsId, final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
+            final Long dsId, final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy) {
         return retryTemplate.execute(retryContext ->
-                assignDistributionSetToTargets(initiatedBy, dsId, targetsWithActionType, actionMessage, assignmentStrategy));
+                assignDistributionSetToTargets(dsId, targetsWithActionType, actionMessage, assignmentStrategy));
     }
 
     /**
@@ -793,7 +758,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      * to {@link TargetUpdateStatus#IN_SYNC} <br/>
      * D. does not send a {@link TargetAssignDistributionSetEvent}.<br/>
      *
-     * @param initiatedBy the username of the user who initiated the assignment
      * @param dsId the ID of the distribution set to assign
      * @param targetsWithActionType a list of all targets and their action type
      * @param actionMessage an optional message to be written into the action status
@@ -803,7 +767,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      *         {@link DistributionSetType}.
      */
     private DistributionSetAssignmentResult assignDistributionSetToTargets(
-            final String initiatedBy, final Long dsId, final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
+            final Long dsId, final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy) {
         final JpaDistributionSet dsValidAndComplete = distributionSetManagement.getValidAndComplete(dsId);
         final JpaDistributionSet distributionSet;
@@ -837,7 +801,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 .filter(target -> existingTargetIds.contains(target.getControllerId())).toList();
 
         final List<JpaAction> assignedActions = doAssignDistributionSetToTargets(
-                initiatedBy, existingTargetsWithActionType, actionMessage, assignmentStrategy, distributionSet, targetEntities);
+                existingTargetsWithActionType, actionMessage, assignmentStrategy, distributionSet, targetEntities);
         return buildAssignmentResult(distributionSet, assignedActions, existingTargetsWithActionType.size());
     }
 
@@ -849,7 +813,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         return new DistributionSetAssignmentResult(distributionSetEntity, alreadyAssignedCount, Collections.emptyList());
     }
 
-    private List<JpaAction> doAssignDistributionSetToTargets(final String initiatedBy,
+    private List<JpaAction> doAssignDistributionSetToTargets(
             final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy, final JpaDistributionSet distributionSetEntity,
             final List<JpaTarget> targetEntities) {
@@ -863,7 +827,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         targetEntitiesIdsChunks.forEach(this::cancelInactiveScheduledActionsForTargets);
         setAssignedDistributionSetAndTargetUpdateStatus(assignmentStrategy, distributionSetEntity, targetEntitiesIdsChunks);
         final Map<TargetWithActionType, JpaAction> assignedActions =
-                createActions(targetsWithActionType, targetEntities, distributionSetEntity, assignmentStrategy, initiatedBy);
+                createActions(targetsWithActionType, targetEntities, distributionSetEntity, assignmentStrategy);
         // create initial action status when action is created, so we remember
         // the initial running status because we will change the status
         // of the action itself and with this action status we have a nicer action history.
@@ -888,7 +852,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private void checkMaxAssignmentQuota(final String controllerId, final long requested) {
         final int quota = quotaManagement.getMaxActionsPerTarget();
         try {
-            systemSecurityContext.runAsSystem(() -> QuotaHelper.assertAssignmentQuota(
+            asSystem(() -> QuotaHelper.assertAssignmentQuota(
                     controllerId, requested, quota, Action.class, Target.class, actionRepository::countByTargetControllerId));
         } catch (final AssignmentQuotaExceededException ex) {
             targetRepository.findByControllerId(controllerId).ifPresentOrElse(
@@ -908,18 +872,18 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         }
     }
 
-    private void setAssignedDistributionSetAndTargetUpdateStatus(final AbstractDsAssignmentStrategy assignmentStrategy,
+    private void setAssignedDistributionSetAndTargetUpdateStatus(
+            final AbstractDsAssignmentStrategy assignmentStrategy,
             final JpaDistributionSet set, final List<List<Long>> targetIdsChunks) {
-        final String currentUser = auditorProvider.getCurrentAuditor().orElse(null);
-        assignmentStrategy.setAssignedDistributionSetAndTargetStatus(set, targetIdsChunks, currentUser);
+        assignmentStrategy.setAssignedDistributionSetAndTargetStatus(set, targetIdsChunks);
     }
 
-    private Map<TargetWithActionType, JpaAction> createActions(final Collection<TargetWithActionType> targetsWithActionType,
-            final List<JpaTarget> targets, final JpaDistributionSet set, final AbstractDsAssignmentStrategy assignmentStrategy,
-            final String initiatedBy) {
+    private Map<TargetWithActionType, JpaAction> createActions(
+            final Collection<TargetWithActionType> targetsWithActionType,
+            final List<JpaTarget> targets, final JpaDistributionSet set, final AbstractDsAssignmentStrategy assignmentStrategy) {
         final Map<TargetWithActionType, JpaAction> persistedActions = new LinkedHashMap<>();
         for (final TargetWithActionType twt : targetsWithActionType) {
-            final JpaAction targetAction = assignmentStrategy.createTargetAction(initiatedBy, twt, targets, set);
+            final JpaAction targetAction = assignmentStrategy.createTargetAction(twt, targets, set);
             if (targetAction != null) {
                 persistedActions.put(twt, actionRepository.save(targetAction));
             }
@@ -1054,15 +1018,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private boolean isMultiAssignmentsEnabled() {
-        return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).isMultiAssignmentsEnabled();
+        return TenantConfigHelper.isMultiAssignmentsEnabled();
     }
 
     private boolean isConfirmationFlowEnabled() {
-        return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).isConfirmationFlowEnabled();
-    }
-
-    private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType) {
-        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
+        return TenantConfigHelper.isUserConfirmationFlowEnabled();
     }
 
     private void assertTargetReadAllowed(final Long targetId) {

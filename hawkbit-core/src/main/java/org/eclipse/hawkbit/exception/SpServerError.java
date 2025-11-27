@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.exception;
 import lombok.Getter;
 
 /**
- * Define the Error codes for Error handling
+ * Define the error codes for error handling
  */
 @Getter
 public enum SpServerError {
@@ -182,9 +182,6 @@ public enum SpServerError {
     private final String key;
     private final String message;
 
-    /**
-     * Repository side Error codes
-     */
     SpServerError(final String key, final String message) {
         this.key = key;
         this.message = message;

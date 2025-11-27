@@ -16,7 +16,6 @@ import java.util.function.ToLongFunction;
 import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
-import org.eclipse.hawkbit.repository.qfields.TargetTypeFields;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -31,6 +30,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.repository.qfields.TargetTypeFields;
 import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.cache.Cache;

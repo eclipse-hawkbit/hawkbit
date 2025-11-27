@@ -10,7 +10,7 @@
 package org.eclipse.hawkbit.autoconfigure.ddi;
 
 import org.eclipse.hawkbit.ddi.rest.resource.DdiApiConfiguration;
-import org.eclipse.hawkbit.security.DdiSecurityProperties;
+import org.eclipse.hawkbit.security.controller.DdiSecurityProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

@@ -80,7 +80,7 @@ public class MgmtOpenApiConfiguration {
 
     private static ServerVariable tenantSeverVariable() {
         final ServerVariable tenantServerVariable = new ServerVariable();
-        tenantServerVariable.setDescription("Tenant identifier");
+        tenantServerVariable.setDescription("AccessContext identifier");
         tenantServerVariable.setDefault("DEFAULT");
         return tenantServerVariable;
     }

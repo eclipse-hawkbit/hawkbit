@@ -11,26 +11,20 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Optional;
 
-import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
 
 /**
  * {@link CurrentTenantIdentifierResolver} and {@link HibernatePropertiesCustomizer} that resolves the
- * {@link TenantAware#getCurrentTenant()} for hibernate.
+ * {@link AccessContext#tenant()} for hibernate.
  */
 class TenantIdentifier implements CurrentTenantIdentifierResolver<String> {
-
-    private final TenantAware.TenantResolver tenantResolver;
-
-    TenantIdentifier(final TenantAware.TenantResolver tenantResolver) {
-        this.tenantResolver = tenantResolver;
-    }
 
     @Override
     public String resolveCurrentTenantIdentifier() {
         // on bootstrapping hibernate requests tenant and want to be non-null
-        return Optional.ofNullable(tenantResolver.resolveTenant()).map(String::toUpperCase).orElse("");
+        return Optional.ofNullable(AccessContext.tenant()).map(String::toUpperCase).orElse("");
     }
 
     @Override

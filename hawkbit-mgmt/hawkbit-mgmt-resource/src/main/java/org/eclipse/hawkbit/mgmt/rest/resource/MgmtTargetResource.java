@@ -56,9 +56,9 @@ import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidConfirmationFeedbackException;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
@@ -66,8 +66,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -91,27 +89,24 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     private final DeploymentManagement deploymentManagement;
     private final MgmtTargetMapper mgmtTargetMapper;
     private final MgmtDistributionSetMapper mgmtDistributionSetMapper;
-    private final TenantConfigHelper tenantConfigHelper;
 
     MgmtTargetResource(
             final TargetManagement<? extends Target> targetManagement, final TargetTypeManagement<? extends TargetType> targetTypeManagement,
             final DeploymentManagement deploymentManagement, final ConfirmationManagement confirmationManagement,
-            final MgmtTargetMapper mgmtTargetMapper, final MgmtDistributionSetMapper mgmtDistributionSetMapper,
-            final SystemSecurityContext systemSecurityContext, final TenantConfigurationManagement tenantConfigurationManagement) {
+            final MgmtTargetMapper mgmtTargetMapper, final MgmtDistributionSetMapper mgmtDistributionSetMapper) {
         this.targetManagement = targetManagement;
         this.targetTypeManagement = targetTypeManagement;
         this.deploymentManagement = deploymentManagement;
         this.confirmationManagement = confirmationManagement;
         this.mgmtTargetMapper = mgmtTargetMapper;
         this.mgmtDistributionSetMapper = mgmtDistributionSetMapper;
-        this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
     }
 
     @Override
     public ResponseEntity<MgmtTarget> getTarget(final String targetId) {
         final Target findTarget = targetManagement.getByControllerId(targetId);
         // to single response include poll status
-        final MgmtTarget response = MgmtTargetMapper.toResponse(findTarget, tenantConfigHelper, null);
+        final MgmtTarget response = MgmtTargetMapper.toResponse(findTarget, null);
         MgmtTargetMapper.addTargetLinks(response);
 
         return ResponseEntity.ok(response);
@@ -128,7 +123,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             findTargetsAll = targetManagement.findAll(pageable);
         }
 
-        final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent(), tenantConfigHelper);
+        final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent());
         return ResponseEntity.ok(new PagedList<>(rest, findTargetsAll.getTotalElements()));
     }
 
@@ -137,7 +132,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         log.debug("creating {} targets", targets.size());
         final Collection<? extends Target> createdTargets = this.targetManagement.create(mgmtTargetMapper.fromRequest(targets));
         log.debug("{} targets created, return status {}", targets.size(), HttpStatus.CREATED);
-        return new ResponseEntity<>(MgmtTargetMapper.toResponse(createdTargets, tenantConfigHelper), HttpStatus.CREATED);
+        return new ResponseEntity<>(MgmtTargetMapper.toResponse(createdTargets), HttpStatus.CREATED);
     }
 
     @Override
@@ -166,7 +161,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .requestControllerAttributes(targetRest.getRequestAttributes())
                 .build());
 
-        final MgmtTarget response = MgmtTargetMapper.toResponse(updateTarget, tenantConfigHelper, null);
+        final MgmtTarget response = MgmtTargetMapper.toResponse(updateTarget, null);
         MgmtTargetMapper.addTargetLinks(response);
 
         return ResponseEntity.ok(response);
@@ -399,14 +394,13 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         final List<DeploymentRequest> deploymentRequests = dsAssignments.stream().map(dsAssignment -> {
             final boolean isConfirmationRequired = dsAssignment.getConfirmationRequired() == null
-                    ? tenantConfigHelper.isConfirmationFlowEnabled()
+                    ? TenantConfigHelper.isUserConfirmationFlowEnabled()
                     : dsAssignment.getConfirmationRequired();
             return MgmtDeploymentRequestMapper.createAssignmentRequestBuilder(dsAssignment, targetId)
                     .confirmationRequired(isConfirmationRequired).build();
         }).toList();
 
-        final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement
-                .assignDistributionSets(deploymentRequests);
+        final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement.assignDistributionSets(deploymentRequests, null);
         return ResponseEntity.ok(mgmtDistributionSetMapper.toResponse(assignmentResults));
     }
 
@@ -486,6 +480,6 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     private <T, R> R getNullIfEmpty(final T object, final Function<T, R> extractMethod) {
-        return object == null ? null : extractMethod.apply(object);
+        return ObjectUtils.isEmpty(object) ? null : extractMethod.apply(object);
     }
 }

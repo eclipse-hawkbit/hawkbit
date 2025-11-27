@@ -10,8 +10,8 @@
 package org.eclipse.hawkbit.repository.jpa.acm;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_ROLLOUT;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_TARGET;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_ROLLOUT;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_TARGET;
 import static org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status.NOTSTARTED;
 import static org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status.RUNNING;
 import static org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status.SCHEDULED;

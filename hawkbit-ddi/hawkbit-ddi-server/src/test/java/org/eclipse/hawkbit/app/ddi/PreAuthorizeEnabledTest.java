@@ -12,8 +12,8 @@ package org.eclipse.hawkbit.app.ddi;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.im.authentication.SpRole;
+import org.eclipse.hawkbit.auth.SpPermission;
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;

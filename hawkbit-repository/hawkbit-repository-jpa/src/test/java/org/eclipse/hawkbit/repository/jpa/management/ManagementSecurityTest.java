@@ -38,8 +38,9 @@ import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
+import org.eclipse.hawkbit.auth.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.PermissionSupport;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -74,6 +75,8 @@ class ManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     protected TenantStatsManagement tenantStatsManagement;
+    @Autowired
+    protected TenantConfigurationManagement tenantConfigurationManagement;
 
     @Override
     @BeforeEach
@@ -86,19 +89,21 @@ class ManagementSecurityTest extends AbstractJpaIntegrationTest {
     void testMethod(final Class<?> managementInterface, final Method managementInterfaceMethod) {
         final Object managementObject = TenantStatsManagement.class == managementInterface
                 ? tenantStatsManagement // it's not a field of AbstractIntegrationTest, so we need to use the autowired instance
-                : Stream
-                        .of(AbstractIntegrationTest.class.getDeclaredFields())
-                        .filter(field -> managementInterface.isAssignableFrom(field.getType()))
-                        .findFirst()
-                        .map(field -> {
-                            field.setAccessible(true);
-                            try {
-                                return field.get(this);
-                            } catch (final IllegalAccessException e) {
-                                throw new AssertionError("Could not access field " + field.getName(), e);
-                            }
-                        })
-                        .orElseThrow(() -> new AssertionError("No management implementation found for " + managementInterface));
+                : TenantConfigurationManagement.class == managementInterface
+                        ? tenantConfigurationManagement // it's not a field of AbstractIntegrationTest, so we need to use the autowired instance
+                        : Stream
+                                .of(AbstractIntegrationTest.class.getDeclaredFields())
+                                .filter(field -> managementInterface.isAssignableFrom(field.getType()))
+                                .findFirst()
+                                .map(field -> {
+                                    field.setAccessible(true);
+                                    try {
+                                        return field.get(this);
+                                    } catch (final IllegalAccessException e) {
+                                        throw new AssertionError("Could not access field " + field.getName(), e);
+                                    }
+                                })
+                                .orElseThrow(() -> new AssertionError("No management implementation found for " + managementInterface));
         final Class<?> managedClass = ClassUtils.getUserClass(managementObject); // managed class is a proxy
         final Method implementationMethod = findImplementationMethod(managedClass, managementInterfaceMethod);
         if (implementationMethod == null) {

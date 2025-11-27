@@ -48,11 +48,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.auth.SpPermission;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.MapAttributeConverter;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.PollStatus;
@@ -60,9 +62,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.helper.SystemSecurityContextHolder;
-import org.eclipse.hawkbit.repository.helper.TenantConfigurationManagementHolder;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -215,8 +214,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
 
     @Override
     public String getSecurityToken() {
-        final SystemSecurityContext systemSecurityContext = SystemSecurityContextHolder.getInstance().getSystemSecurityContext();
-        if (SystemSecurityContext.isCurrentThreadSystemCode() || systemSecurityContext.hasPermission(SpPermission.READ_TARGET_SECURITY_TOKEN)) {
+        if (AccessContext.isCurrentThreadSystemCode() || SpPermission.hasPermission(SpPermission.READ_TARGET_SECURITY_TOKEN)) {
             return securityToken;
         }
         return null;
@@ -232,7 +230,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         if (lastTargetQuery == null) {
             return null;
         }
-        return TenantConfigurationManagementHolder.getInstance().getTenantConfigurationManagement()
+        return TenantConfigHelper.getTenantConfigurationManagement()
                 .pollStatusResolver()
                 .apply(this);
     }

@@ -12,8 +12,9 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.eclipse.hawkbit.im.authentication.SpRole.CONTROLLER_ROLE;
-import static org.eclipse.hawkbit.im.authentication.SpRole.CONTROLLER_ROLE_ANONYMOUS;
+import static org.eclipse.hawkbit.auth.SpRole.CONTROLLER_ROLE;
+import static org.eclipse.hawkbit.auth.SpRole.CONTROLLER_ROLE_ANONYMOUS;
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
@@ -36,7 +37,7 @@ import java.util.stream.IntStream;
 import jakarta.validation.ConstraintViolationException;
 
 import org.assertj.core.api.Assertions;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
@@ -203,12 +204,12 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(testDs, testTarget));
 
         controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId)
-                .status(Action.Status.RUNNING).timestamp(System.currentTimeMillis()).messages(List.of("proceeding message 1"))
+                .status(Action.Status.RUNNING).timestamp(java.lang.System.currentTimeMillis()).messages(List.of("proceeding message 1"))
                 .build());
 
         waitNextMillis();
         controllerManagement.addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionId)
-                .status(Action.Status.RUNNING).timestamp(System.currentTimeMillis()).messages(List.of("proceeding message 2"))
+                .status(Action.Status.RUNNING).timestamp(java.lang.System.currentTimeMillis()).messages(List.of("proceeding message 2"))
                 .build());
 
         final List<String> messages = controllerManagement.getActionHistoryMessages(actionId, 2);
@@ -242,7 +243,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionId1).isNotNull();
         final ActionStatusCreateBuilder status = ActionStatusCreate.builder().actionId(actionId1).status(Status.WARNING);
         for (int i = 0; i < maxStatusEntries; i++) {
-            controllerManagement.addInformationalActionStatus(status.messages(List.of("Msg " + i)).timestamp(System.currentTimeMillis()).build());
+            controllerManagement.addInformationalActionStatus(status.messages(List.of("Msg " + i)).timestamp(java.lang.System.currentTimeMillis()).build());
         }
         final ActionStatusCreate actionStatusCreate = status.build();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
@@ -254,7 +255,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionId2).isNotEqualTo(actionId1);
         final ActionStatusCreateBuilder statusWarning = ActionStatusCreate.builder().actionId(actionId2).status(Status.WARNING);
         for (int i = 0; i < maxStatusEntries; i++) {
-            controllerManagement.addUpdateActionStatus(statusWarning.messages(List.of("Msg " + i)).timestamp(System.currentTimeMillis()).build());
+            controllerManagement.addUpdateActionStatus(statusWarning.messages(List.of("Msg " + i)).timestamp(java.lang.System.currentTimeMillis()).build());
         }
         final ActionStatusCreate actionStatusCreateQE = statusWarning.build();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
@@ -1461,7 +1462,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3) }
     )
     void assignVersionToTarget() {
-
         final DistributionSet knownDistributionSet = testdataFactory.createDistributionSet();
 
         // GIVEN
@@ -1798,8 +1798,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void createTargetType(String targetTypeName) {
-        systemSecurityContext.runAsSystem(
-                () -> targetTypeManagement.create(TargetTypeManagement.Create.builder().name(targetTypeName).build()));
+        asSystem(() -> targetTypeManagement.create(TargetTypeManagement.Create.builder().name(targetTypeName).build()));
     }
 
     private void addAttributeAndVerify(final String controllerId) {
@@ -1807,8 +1806,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testData.put("test1", "testdata1");
         controllerManagement.updateControllerAttributes(controllerId, testData, null);
 
-        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
-                .isEqualTo(testData);
+        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong").isEqualTo(testData);
     }
 
     private void addSecondAttributeAndVerify(final String controllerId) {

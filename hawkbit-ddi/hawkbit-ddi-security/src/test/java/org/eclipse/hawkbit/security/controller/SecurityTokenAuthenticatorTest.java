@@ -17,11 +17,9 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
-import org.eclipse.hawkbit.security.SecurityContextTenantAware;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Feature: Unit Tests - Security<br/>
- * Story: Gateway token authentication
+ * Story: Gateway token auth
  */
 @ExtendWith(MockitoExtension.class)
 class SecurityTokenAuthenticatorTest {
@@ -51,19 +49,15 @@ class SecurityTokenAuthenticatorTest {
     private TenantConfigurationManagement tenantConfigurationManagementMock;
     @Mock
     private ControllerManagement controllerManagementMock;
-    @Mock
-    private UserAuthoritiesResolver authoritiesResolver;
 
     @BeforeEach
     void before() {
-        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver);
-        authenticator = new SecurityTokenAuthenticator(
-                tenantConfigurationManagementMock, tenantAware,
-                new SystemSecurityContext(tenantAware), controllerManagementMock);
+        TenantConfigHelper.setTenantConfigurationManagement(tenantConfigurationManagementMock);
+        authenticator = new SecurityTokenAuthenticator(controllerManagementMock);
     }
 
     /**
-     * Tests successful authentication with gateway token
+     * Tests successful auth with gateway token
      */
     @Test
     void testWithSecToken() {
@@ -82,7 +76,7 @@ class SecurityTokenAuthenticatorTest {
     }
 
     /**
-     * Tests that if gateway token doesn't match, the authentication fails
+     * Tests that if gateway token doesn't match, the auth fails
      */
     @Test
     void testWithBadSecToken() {
@@ -94,7 +88,7 @@ class SecurityTokenAuthenticatorTest {
     }
 
     /**
-     * Tests that if gateway token miss, the authentication fails
+     * Tests that if gateway token miss, the auth fails
      */
     @Test
     void testWithoutSecToken() {
@@ -102,7 +96,7 @@ class SecurityTokenAuthenticatorTest {
     }
 
     /**
-     * Tests that if disabled, the authentication fails
+     * Tests that if disabled, the auth fails
      */
     @Test
     void testWithSecTokenButDisabled() {

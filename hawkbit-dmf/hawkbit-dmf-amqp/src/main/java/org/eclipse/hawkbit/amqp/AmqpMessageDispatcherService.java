@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED;
 
@@ -51,7 +52,6 @@ import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
@@ -64,6 +64,7 @@ import org.eclipse.hawkbit.repository.event.remote.service.MultiActionCancelServ
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistributionSetServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -71,8 +72,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.util.IpUtil;
+import org.eclipse.hawkbit.utils.IpUtil;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageProperties;
@@ -94,43 +94,36 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private final ArtifactUrlResolver artifactUrlHandler;
     private final AmqpMessageSenderService amqpSenderService;
-    private final SystemSecurityContext systemSecurityContext;
     private final SystemManagement systemManagement;
     private final TargetManagement<? extends Target> targetManagement;
     private final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final DeploymentManagement deploymentManagement;
-    private final TenantConfigurationManagement tenantConfigurationManagement;
     private final RepositoryProperties repositoryProperties;
 
     @SuppressWarnings("java:S107")
     protected AmqpMessageDispatcherService(
             final RabbitTemplate rabbitTemplate,
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlResolver artifactUrlHandler,
-            final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
+            final SystemManagement systemManagement,
             final TargetManagement<? extends Target> targetManagement,
             final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final DeploymentManagement deploymentManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement,
             final RepositoryProperties repositoryProperties) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
-        this.systemSecurityContext = systemSecurityContext;
         this.systemManagement = systemManagement;
         this.targetManagement = targetManagement;
         this.softwareModuleManagement = softwareModuleManagement;
         this.distributionSetManagement = distributionSetManagement;
         this.deploymentManagement = deploymentManagement;
-        this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.repositoryProperties = repositoryProperties;
     }
 
     public boolean isBatchAssignmentsEnabled() {
-        return systemSecurityContext.runAsSystem(() ->
-                tenantConfigurationManagement
-                        .getConfigurationValue(BATCH_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
+        return TenantConfigHelper.getAsSystem(BATCH_ASSIGNMENTS_ENABLED, Boolean.class);
     }
 
     /**
@@ -184,9 +177,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     protected DmfDownloadAndUpdateRequest createDownloadAndUpdateRequest(
             final Target target, final Long actionId, final Map<SoftwareModule, Map<String, String>> softwareModules) {
         return new DmfDownloadAndUpdateRequest(
-                actionId,
-                systemSecurityContext.runAsSystem(target::getSecurityToken),
-                convertToAmqpSoftwareModules(target, softwareModules));
+                actionId, asSystem(target::getSecurityToken), convertToAmqpSoftwareModules(target, softwareModules));
     }
 
     /**
@@ -227,7 +218,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     protected void sendPingResponseToDmfReceiver(final Message ping, final String tenant, final String virtualHost) {
         final Message message = MessageBuilder
-                .withBody(String.valueOf(System.currentTimeMillis()).getBytes())
+                .withBody(String.valueOf(java.lang.System.currentTimeMillis()).getBytes())
                 .setContentType(MessageProperties.CONTENT_TYPE_TEXT_PLAIN)
                 .setCorrelationId(ping.getMessageProperties().getCorrelationId())
                 .setHeader(MessageHeaderKey.TYPE, MessageType.PING_RESPONSE)
@@ -251,16 +242,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         amqpSenderService.sendMessage(message, address);
     }
 
-    protected DmfTarget convertToDmfTarget(final Target target, final Long actionId) {
-        return new DmfTarget(actionId, target.getControllerId(), systemSecurityContext.runAsSystem(target::getSecurityToken));
-    }
-
     protected DmfConfirmRequest createConfirmRequest(
             final Target target, final Long actionId, final Map<SoftwareModule, Map<String, String>> softwareModules) {
-        return new DmfConfirmRequest(
-                actionId,
-                systemSecurityContext.runAsSystem(target::getSecurityToken),
-                convertToAmqpSoftwareModules(target, softwareModules));
+        return new DmfConfirmRequest(actionId, asSystem(target::getSecurityToken), convertToAmqpSoftwareModules(target, softwareModules));
     }
 
     void sendMultiActionRequestToTarget(
@@ -580,13 +564,14 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final Map<SoftwareModule, Map<String, String>> modules) {
         final List<DmfTarget> dmfTargets = targets.stream()
                 .filter(target -> IpUtil.isAmqpUri(IpUtil.addressToUri(target.getAddress())))
-                .map(t -> convertToDmfTarget(t, actions.get(t.getControllerId()).getId()))
+                // as system - the security token is sent to DMF receiver
+                .map(t -> new DmfTarget(actions.get(t.getControllerId()).getId(), t.getControllerId(), asSystem(t::getSecurityToken)))
                 .toList();
 
         // due to the fact that all targets in a batch use the same set of software modules we don't generate target-specific urls
         final Target firstTarget = targets.get(0);
         final DmfBatchDownloadAndUpdateRequest batchRequest = new DmfBatchDownloadAndUpdateRequest(
-                System.currentTimeMillis(),
+                java.lang.System.currentTimeMillis(),
                 dmfTargets,
                 Optional.ofNullable(modules)
                         .map(Map::entrySet)
@@ -594,7 +579,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                         .map(stream -> stream.map(entry -> convertToAmqpSoftwareModule(firstTarget, entry)).toList())
                         .orElse(null));
 
-        // we use only the first action when constructing message as Tenant and action type are the same
+        // we use only the first action when constructing message as AccessContext and action type are the same
         // since all actions have the same trigger
         final ActionProperties firstAction = actions.values().iterator().next();
         final Message message = getMessageConverter().toMessage(

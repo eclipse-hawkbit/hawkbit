@@ -15,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.springframework.context.ApplicationEvent;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")

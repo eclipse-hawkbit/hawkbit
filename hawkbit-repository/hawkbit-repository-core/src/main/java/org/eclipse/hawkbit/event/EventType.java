@@ -26,15 +26,6 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetTypeDeletedEve
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
-import org.eclipse.hawkbit.repository.event.remote.service.ActionCreatedServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.service.ActionUpdatedServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.service.MultiActionAssignServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.service.MultiActionCancelServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistributionSetServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutStoppedEvent;
@@ -74,6 +65,15 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeUpdatedEvent
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.ActionCreatedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.ActionUpdatedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.MultiActionAssignServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.MultiActionCancelServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistributionSetServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetUpdatedServiceEvent;
 
 /**

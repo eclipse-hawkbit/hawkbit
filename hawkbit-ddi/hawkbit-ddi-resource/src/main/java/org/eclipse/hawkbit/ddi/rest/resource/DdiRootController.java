@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.model.ArtifactStream;
 import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
 import org.eclipse.hawkbit.audit.AuditLog;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionHistory;
 import org.eclipse.hawkbit.ddi.json.model.DdiActivateAutoConfirmation;
@@ -68,8 +69,7 @@ import org.eclipse.hawkbit.rest.util.FileStreamingUtil;
 import org.eclipse.hawkbit.rest.util.HttpUtil;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
-import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.util.IpUtil;
+import org.eclipse.hawkbit.utils.IpUtil;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpHeaders;
@@ -102,7 +102,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private final SystemManagement systemManagement;
     private final ApplicationEventPublisher eventPublisher;
     private final HawkbitSecurityProperties securityProperties;
-    private final TenantAware tenantAware;
 
     @SuppressWarnings("java:S107")
     public DdiRootController(
@@ -110,7 +109,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             final ArtifactManagement artifactManagement, final ArtifactUrlResolver artifactUrlHandler,
             final SystemManagement systemManagement,
             final ApplicationEventPublisher eventPublisher,
-            final HawkbitSecurityProperties securityProperties, final TenantAware tenantAware) {
+            final HawkbitSecurityProperties securityProperties) {
         this.controllerManagement = controllerManagement;
         this.confirmationManagement = confirmationManagement;
         this.artifactManagement = artifactManagement;
@@ -118,7 +117,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
         this.systemManagement = systemManagement;
         this.eventPublisher = eventPublisher;
         this.securityProperties = securityProperties;
-        this.tenantAware = tenantAware;
     }
 
     @Override
@@ -155,7 +153,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                 installedAction, activeAction,
                 activeAction == null
                         ? controllerManagement.getPollingTime(target)
-                        : controllerManagement.getPollingTimeForAction(target, activeAction), tenantAware),
+                        : controllerManagement.getPollingTimeForAction(target, activeAction)),
                 HttpStatus.OK);
     }
 
@@ -190,7 +188,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                         (length, shippedSinceLastEvent, total) -> {
                             if (actionStatus != null) {
                                 eventPublisher.publishEvent(new DownloadProgressEvent(
-                                        tenantAware.getCurrentTenant(), actionStatus.getId(), shippedSinceLastEvent));
+                                        AccessContext.tenant(), actionStatus.getId(), shippedSinceLastEvent));
                             }
                         });
             }
@@ -352,14 +350,13 @@ public class DdiRootController implements DdiRootControllerRestApi {
     @Override
     public ResponseEntity<DdiConfirmationBase> getConfirmationBase(final String tenant, final String controllerId) {
         log.debug("getConfirmationBase is called [controllerId={}].", controllerId);
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, IpUtil
-                .getClientIpFromRequest(RequestResponseContextHolder.getHttpServletRequest(), securityProperties));
+        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(
+                controllerId, IpUtil.getClientIpFromRequest(RequestResponseContextHolder.getHttpServletRequest(), securityProperties));
         final Action activeAction = controllerManagement.findActiveActionWithHighestWeight(controllerId).orElse(null);
 
         final DdiAutoConfirmationState autoConfirmationState = getAutoConfirmationState(controllerId);
 
-        final DdiConfirmationBase confirmationBase = DataConversionHelper.createConfirmationBase(
-                target, activeAction, autoConfirmationState, tenantAware);
+        final DdiConfirmationBase confirmationBase = DataConversionHelper.createConfirmationBase(target, activeAction, autoConfirmationState);
         return new ResponseEntity<>(confirmationBase, HttpStatus.OK);
     }
 

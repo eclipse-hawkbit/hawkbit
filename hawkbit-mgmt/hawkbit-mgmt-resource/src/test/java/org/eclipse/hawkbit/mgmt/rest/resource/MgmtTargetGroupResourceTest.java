@@ -9,21 +9,21 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.eclipse.hawkbit.repository.TargetManagement.Create.*;
+import static org.eclipse.hawkbit.repository.TargetManagement.Create.builder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 
 
 public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegrationTest {

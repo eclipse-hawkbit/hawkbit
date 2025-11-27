@@ -9,13 +9,11 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import static org.eclipse.hawkbit.im.authentication.SpPermission.CREATE_ROLLOUT;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.DISTRIBUTION_SET;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.HANDLE_ROLLOUT;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.ROLLOUT;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_ROLLOUT;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_READ_REPOSITORY;
-import static org.eclipse.hawkbit.im.authentication.SpringEvalExpressions.HAS_UPDATE_REPOSITORY;
+import static org.eclipse.hawkbit.auth.SpPermission.CREATE_ROLLOUT;
+import static org.eclipse.hawkbit.auth.SpPermission.DISTRIBUTION_SET;
+import static org.eclipse.hawkbit.auth.SpPermission.UPDATE_ROLLOUT;
+import static org.eclipse.hawkbit.auth.SpringEvalExpressions.HAS_READ_REPOSITORY;
+import static org.eclipse.hawkbit.auth.SpringEvalExpressions.HAS_UPDATE_REPOSITORY;
 
 import java.util.Collection;
 import java.util.List;
@@ -27,8 +25,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.im.authentication.SpringEvalExpressions;
+import org.eclipse.hawkbit.auth.SpPermission;
+import org.eclipse.hawkbit.auth.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
@@ -51,6 +49,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -70,23 +69,6 @@ public interface DeploymentManagement extends PermissionSupport {
      * Assigns {@link DistributionSet}s to {@link Target}s according to the {@link DeploymentRequest}.
      *
      * @param deploymentRequests information about all target-ds-assignments that shall be made
-     * @return the list of assignment results
-     * @throws IncompleteDistributionSetException if mandatory {@link SoftwareModuleType} are not assigned as
-     *         defined by the {@link DistributionSetType}.
-     * @throws EntityNotFoundException if either provided {@link DistributionSet} or {@link Target}s do not exist
-     * @throws AssignmentQuotaExceededException if the maximum number of targets the distribution set can be
-     *         assigned to at once is exceeded
-     * @throws MultiAssignmentIsNotEnabledException if the request results in multiple assignments to the same
-     *         target and multi-assignment is disabled
-     */
-    @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
-    List<DistributionSetAssignmentResult> assignDistributionSets(@Valid @NotEmpty List<DeploymentRequest> deploymentRequests);
-
-    /**
-     * Assigns {@link DistributionSet}s to {@link Target}s according to the {@link DeploymentRequest}.
-     *
-     * @param initiatedBy the username of the user who initiated the assignment
-     * @param deploymentRequests information about all target-ds-assignments that shall be made
      * @param actionMessage an optional message for the action status
      * @return the list of assignment results
      * @throws IncompleteDistributionSetException if mandatory {@link SoftwareModuleType} are not assigned as
@@ -99,7 +81,7 @@ public interface DeploymentManagement extends PermissionSupport {
      */
     @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
     List<DistributionSetAssignmentResult> assignDistributionSets(
-            String initiatedBy, @Valid @NotEmpty List<DeploymentRequest> deploymentRequests, String actionMessage);
+            @Valid @NotEmpty List<DeploymentRequest> deploymentRequests, @Nullable String actionMessage);
 
     /**
      * Registers "offline" assignments. "offline" assignment means adding a completed action for a {@link DistributionSet} to a {@link Target}.
@@ -123,9 +105,6 @@ public interface DeploymentManagement extends PermissionSupport {
      * @throws MultiAssignmentIsNotEnabledException if the request results in multiple assignments to the same
      *         target and multi-assignment is disabled
      */
-    @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
-    List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(String initiatedBy, Collection<Entry<String, Long>> assignments);
-
     @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
     List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(Collection<Entry<String, Long>> assignments);
 

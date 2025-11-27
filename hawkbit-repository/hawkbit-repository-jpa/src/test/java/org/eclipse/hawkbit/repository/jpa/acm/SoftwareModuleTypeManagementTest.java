@@ -12,11 +12,11 @@ package org.eclipse.hawkbit.repository.jpa.acm;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.CREATE_PREFIX;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.DELETE_PREFIX;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.READ_PREFIX;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SOFTWARE_MODULE_TYPE;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.UPDATE_PREFIX;
+import static org.eclipse.hawkbit.auth.SpPermission.CREATE_PREFIX;
+import static org.eclipse.hawkbit.auth.SpPermission.DELETE_PREFIX;
+import static org.eclipse.hawkbit.auth.SpPermission.READ_PREFIX;
+import static org.eclipse.hawkbit.auth.SpPermission.SOFTWARE_MODULE_TYPE;
+import static org.eclipse.hawkbit.auth.SpPermission.UPDATE_PREFIX;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
 
 import java.util.List;

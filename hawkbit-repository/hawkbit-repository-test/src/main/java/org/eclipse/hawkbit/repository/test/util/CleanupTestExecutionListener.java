@@ -9,14 +9,13 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
-import java.util.List;
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 
 import jakarta.validation.constraints.NotNull;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
-import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager.CacheEvictEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.PageRequest;
@@ -36,26 +35,21 @@ public class CleanupTestExecutionListener extends AbstractTestExecutionListener 
 
     @Override
     public void afterTestMethod(@NotNull final TestContext testContext) throws Exception {
-        SecurityContextSwitch.callAsPrivileged(() -> {
+        SecurityContextSwitch.asPrivileged(() -> {
             final ApplicationContext applicationContext = testContext.getApplicationContext();
-            clearTestRepository(
-                    applicationContext.getBean(SystemSecurityContext.class),
-                    applicationContext.getBean(SystemManagement.class));
+            clearTestRepository(applicationContext.getBean(SystemManagement.class));
             return null;
         });
     }
 
-    private void clearTestRepository(
-            final SystemSecurityContext systemSecurityContext,
-            final SystemManagement systemManagement) {
-        final List<String> tenants = systemSecurityContext.runAsSystem(() -> systemManagement.findTenants(PAGE).getContent());
-        tenants.forEach(tenant -> {
+    private void clearTestRepository(final SystemManagement systemManagement) {
+        asSystem(() -> systemManagement.forEachTenant(tenant -> {
             try {
-                systemSecurityContext.runAsSystem(() -> systemManagement.deleteTenant(tenant));
+                asSystem(() -> systemManagement.deleteTenant(tenant));
             } catch (final Exception e) {
                 log.error("Error while delete tenant", e);
             }
-        });
+        }));
         // evict global cache
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new CacheEvictEvent.Default(null, null, null));
     }

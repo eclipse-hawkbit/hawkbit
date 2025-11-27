@@ -33,7 +33,6 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-
 import org.eclipse.hawkbit.ui.view.Constants;
 
 @SuppressWarnings("java:S119") // better readability
