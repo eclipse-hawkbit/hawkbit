@@ -65,7 +65,7 @@ public class AutoCleanupScheduler {
      */
     @SuppressWarnings("squid:S3516")
     private Void executeAutoCleanup() {
-        systemManagement.forEachTenant(tenant -> cleanupTasks.forEach(task -> {
+        systemManagement.forEachTenantAsSystem(tenant -> cleanupTasks.forEach(task -> {
             final Lock lock = lockRegistry.obtain(AUTO_CLEANUP + SEP + task.getId() + SEP + tenant);
             if (!lock.tryLock()) {
                 return;

@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.auth.SpRole;
@@ -37,11 +38,15 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void findTenantsReturnsAllTenantsNotOnlyWhichLoggedIn() {
-        assertThat(systemManagement.findTenants(PAGE).getContent()).hasSize(1);
-
+        assertThat(listTenants()).hasSize(1);
         createTestTenantsForSystemStatistics(2, 0, 0, 0);
+        assertThat(listTenants()).hasSize(3);
+    }
 
-        assertThat(systemManagement.findTenants(PAGE).getContent()).hasSize(3);
+    private List<String> listTenants() {
+        final List<String> tenants = new ArrayList<>();
+        systemManagement.forEachTenantAsSystem(tenants::add);
+        return tenants;
     }
 
     private void createTestTenantsForSystemStatistics(final int tenants, final int artifactSize, final int targets, final int updates) {

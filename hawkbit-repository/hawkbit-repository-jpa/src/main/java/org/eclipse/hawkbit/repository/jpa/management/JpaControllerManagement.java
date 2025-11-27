@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.eclipse.hawkbit.context.AccessContext.asActor;
 import static org.eclipse.hawkbit.context.AccessContext.asSystem;
-import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
 import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor.afterCommit;
 import static org.eclipse.hawkbit.repository.model.Action.Status.DOWNLOADED;
 import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
@@ -125,7 +124,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
@@ -694,11 +692,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         }
 
         try {
-            events.stream().collect(Collectors.groupingBy(TargetPoll::getTenant)).forEach((tenant, polls) -> {
-                final TransactionCallback<Void> createTransaction = status -> updateLastTargetQueries(tenant, polls);
-                asSystemAsTenant(
-                        tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "flushUpdateQueue", createTransaction));
-            });
+            events.stream().collect(Collectors.groupingBy(TargetPoll::getTenant))
+                    .forEach((tenant, polls) -> DeploymentHelper.runInNewTransaction(
+                            txManager, "flushUpdateQueue",
+                            status -> updateLastTargetQueries(tenant, polls)));
         } catch (final RuntimeException ex) {
             log.error("Failed to persist UpdateQueue content.", ex);
             return;

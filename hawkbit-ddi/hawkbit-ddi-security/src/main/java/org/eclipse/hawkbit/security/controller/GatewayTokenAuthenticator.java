@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.security.controller;
 
-import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
+import static org.eclipse.hawkbit.context.AccessContext.asTenant;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY;
 
@@ -51,14 +51,10 @@ public class GatewayTokenAuthenticator extends Authenticator.AbstractAuthenticat
         final String presentedToken = authHeader.substring(OFFSET_GATEWAY_TOKEN);
 
         // validate if the presented token is the same as the gateway token
-        return presentedToken.equals(asSystemAsTenant(
-                controllerSecurityToken.getTenant(),
-                () -> {
-                    log.trace("retrieving configuration value for configuration key {}", AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY);
-                    return TenantConfigHelper.getAsSystem(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, String.class);
-                }))
-                ? authenticatedController(controllerSecurityToken.getTenant(), controllerSecurityToken.getControllerId())
-                : null;
+        return presentedToken.equals(asTenant(controllerSecurityToken.getTenant(), () -> {
+            log.trace("retrieving configuration value for configuration key {}", AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY);
+            return TenantConfigHelper.getAsSystem(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, String.class);
+        })) ? authenticatedController(controllerSecurityToken.getTenant(), controllerSecurityToken.getControllerId()) : null;
     }
 
     @Override

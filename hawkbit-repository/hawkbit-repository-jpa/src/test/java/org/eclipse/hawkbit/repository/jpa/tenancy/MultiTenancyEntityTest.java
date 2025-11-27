@@ -11,11 +11,14 @@ package org.eclipse.hawkbit.repository.jpa.tenancy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -59,8 +62,7 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         assertThat(findTargetsForTenant.getContent().get(0).getTenant().toUpperCase()).isEqualTo(tenant.toUpperCase());
         final Page<? extends Target> findTargetsForAnotherTenant = findTargetsForTenant(anotherTenant);
         assertThat(findTargetsForAnotherTenant).hasSize(1);
-        assertThat(findTargetsForAnotherTenant.getContent().get(0).getTenant().toUpperCase())
-                .isEqualTo(anotherTenant.toUpperCase());
+        assertThat(findTargetsForAnotherTenant.getContent().get(0).getTenant().toUpperCase()).isEqualTo(anotherTenant.toUpperCase());
     }
 
     /**
@@ -96,11 +98,9 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         final String controllerAnotherTenant = "anotherController";
         createTargetForTenant(controllerAnotherTenant, anotherTenant);
 
-        assertThat(systemManagement.findTenants(PAGE)).as("Expected number if tenants before deletion is").hasSize(3);
-
+        assertThat(listTenants()).as("Expected number if tenants before deletion is").hasSize(3);
         systemManagement.deleteTenant(anotherTenant);
-
-        assertThat(systemManagement.findTenants(PAGE)).as("Expected number if tenants after deletion is").hasSize(2);
+        assertThat(listTenants()).as("Expected number if tenants after deletion is").hasSize(2);
     }
 
     /**
@@ -201,5 +201,11 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
 
     private Slice<? extends DistributionSet> findDistributionSetForTenant(final String tenant) throws Exception {
         return runAsTenant(tenant, () -> distributionSetManagement.findAll(PAGE));
+    }
+
+    private List<String> listTenants() {
+        final List<String> tenants = new ArrayList<>();
+        asSystem(() -> systemManagement.forEachTenantAsSystem(tenants::add));
+        return tenants;
     }
 }

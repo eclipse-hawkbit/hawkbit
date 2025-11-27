@@ -43,7 +43,7 @@ public class CleanupTestExecutionListener extends AbstractTestExecutionListener 
     }
 
     private void clearTestRepository(final SystemManagement systemManagement) {
-        asSystem(() -> systemManagement.forEachTenant(tenant -> {
+        asSystem(() -> systemManagement.forEachTenantAsSystem(tenant -> {
             try {
                 asSystem(() -> systemManagement.deleteTenant(tenant));
             } catch (final Exception e) {

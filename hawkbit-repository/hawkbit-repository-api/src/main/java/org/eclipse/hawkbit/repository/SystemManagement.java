@@ -19,8 +19,6 @@ import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -29,21 +27,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface SystemManagement {
 
     /**
-     * @param pageable for paging information
-     * @return list of all tenant names in the system.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
-    Page<String> findTenants(@NotNull Pageable pageable);
-
-    /**
      * Runs consumer for each tenant as
-     * {@link AccessContext#asSystemAsTenant(String, java.util.concurrent.Callable)}
+     * {@link AccessContext#asSystemAsTenant(String, Runnable)}
      * silently (i.e. exceptions will be logged but operations will continue for further tenants).
      *
      * @param consumer to run as tenant
      */
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
-    void forEachTenant(Consumer<String> consumer);
+    void forEachTenantAsSystem(Consumer<String> consumer);
 
     /**
      * @return {@link TenantMetaData} of {@link AccessContext#tenant()}
