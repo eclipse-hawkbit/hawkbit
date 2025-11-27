@@ -50,7 +50,7 @@ public class RolloutScheduler {
     }
 
     /**
-     * Scheduler method called by the spring-async mechanism. For all tenants, using {@link SystemManagement#forEachTenant},
+     * Scheduler method called by the spring-async mechanism. For all tenants, using {@link SystemManagement#forEachTenantAsSystem},
      * runs the {@link RolloutHandler#handleAll()} scoped to permission of access control context or unscoped (with {@link System}) if null
      */
     @Scheduled(initialDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER)
@@ -63,7 +63,7 @@ public class RolloutScheduler {
                 // workaround eclipselink that is currently not possible to execute a query without multi-tenancy if MultiTenant
                 // annotation is used. https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
                 // iterate through all tenants and execute the rollout check for each tenant separately.
-                systemManagement.forEachTenant(tenant -> {
+                systemManagement.forEachTenantAsSystem(tenant -> {
                     if (rolloutTaskExecutor == null) {
                         handleAll(tenant);
                     } else {

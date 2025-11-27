@@ -9,11 +9,11 @@
  */
 package org.eclipse.hawkbit.context;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
 
 import java.util.List;
 
-import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.junit.jupiter.api.Test;
@@ -23,32 +23,36 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-class SystemSecurityContextTest {
+class AccessContextAsSystemTest {
 
     @Test
     void test() {
-        final UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken("test", "pass", List.of(new SimpleGrantedAuthority("anonymous")));
+        final UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                "test", "pass", List.of(new SimpleGrantedAuthority("anonymous")));
         auth.setDetails("string details");
         test(auth);
     }
 
     @Test
     void testWithNullPrincipal() {
-        final UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(null, "pass", List.of(new SimpleGrantedAuthority("anonymous")));
+        final UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                null, "pass", List.of(new SimpleGrantedAuthority("anonymous")));
         auth.setDetails("string details");
         test(auth);
     }
 
     @Test
     void testWithNullCredentials() {
-        final UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken("test", null, List.of(new SimpleGrantedAuthority("anonymous")));
+        final UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                "test", null, List.of(new SimpleGrantedAuthority("anonymous")));
         auth.setDetails("string details");
         test(auth);
     }
 
     @Test
     void testWitAllNull() {
-        final UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(null, null, List.of(new SimpleGrantedAuthority("anonymous")));
+        final UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                null, null, List.of(new SimpleGrantedAuthority("anonymous")));
         auth.setDetails(null);
         test(auth);
     }
@@ -59,10 +63,10 @@ class SystemSecurityContextTest {
         SecurityContextHolder.setContext(sc);
         asSystemAsTenant("tenant", () -> {
             final Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
-            Assertions.assertThat(currentAuth.getClass().getSimpleName()).isEqualTo("SystemCodeAuthentication");
-            Assertions.assertThat(currentAuth.getCredentials()).isNull();
-            Assertions.assertThat(currentAuth.getAuthorities()).isEqualTo(List.of(new SimpleGrantedAuthority(SpRole.SYSTEM_ROLE)));
-            Assertions.assertThat(currentAuth.getDetails()).isEqualTo(new TenantAwareAuthenticationDetails("tenant", false));
+            assertThat(currentAuth.getClass().getSimpleName()).isEqualTo("SystemCodeAuthentication");
+            assertThat(currentAuth.getCredentials()).isNull();
+            assertThat(currentAuth.getAuthorities()).isEqualTo(List.of(new SimpleGrantedAuthority(SpRole.SYSTEM_ROLE)));
+            assertThat(currentAuth.getDetails()).isEqualTo(new TenantAwareAuthenticationDetails("tenant", false));
         });
         SecurityContextHolder.clearContext();
     }

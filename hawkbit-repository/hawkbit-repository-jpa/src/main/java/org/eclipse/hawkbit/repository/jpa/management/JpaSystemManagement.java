@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
+import static org.eclipse.hawkbit.context.AccessContext.asTenant;
 
 import java.util.Set;
 import java.util.function.Consumer;
@@ -137,19 +138,14 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    public Page<String> findTenants(final Pageable pageable) {
-        return tenantMetaDataRepository.findTenants(pageable);
-    }
-
-    @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     // Exception squid:S2229 - calling findTenants without transaction is intended in this case
     @SuppressWarnings("squid:S2229")
-    public void forEachTenant(final Consumer<String> consumer) {
+    public void forEachTenantAsSystem(final Consumer<String> consumer) {
         Page<String> tenants;
         Pageable query = PageRequest.of(0, MAX_TENANTS_QUERY);
         do {
-            tenants = findTenants(query); // with IS_SYSTEM_CODE so we could find all tenants
+            tenants = tenantMetaDataRepository.findTenants(query); // with IS_SYSTEM_CODE so we could find all tenants
             tenants.forEach(tenant -> asSystemAsTenant(tenant, () -> {
                 try {
                     consumer.accept(tenant);
@@ -200,7 +196,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         }
 
         final String tenant = t.toUpperCase();
-        asSystemAsTenant(tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "deleteTenant", status -> {
+        asTenant(tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "deleteTenant", status -> {
             tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
             tenantConfigurationRepository.deleteByTenant(tenant);
             targetRepository.deleteByTenant(tenant);
@@ -293,10 +289,9 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
      * @return the initial created {@link TenantMetaData}
      */
     private TenantMetaData createInitialTenantMetaData(final String tenant) {
-        return asSystemAsTenant(
-                tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "initial-tenant-creation", status -> {
-                    final DistributionSetType defaultDsType = createStandardSoftwareDataSetup();
-                    return tenantMetaDataRepository.save(new JpaTenantMetaData(defaultDsType, tenant));
-                }));
+        return asSystemAsTenant(tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "initial-tenant-creation", status -> {
+            final DistributionSetType defaultDsType = createStandardSoftwareDataSetup();
+            return tenantMetaDataRepository.save(new JpaTenantMetaData(defaultDsType, tenant));
+        }));
     }
 }

@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.security.controller;
 
-import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
+import static org.eclipse.hawkbit.context.AccessContext.asTenant;
 
 import java.util.Collection;
 import java.util.List;
@@ -47,9 +47,7 @@ public interface Authenticator {
     abstract class AbstractAuthenticator implements Authenticator {
 
         protected boolean isEnabled(final ControllerSecurityToken securityToken) {
-            return asSystemAsTenant(
-                    securityToken.getTenant(),
-                    () -> TenantConfigHelper.getAsSystem(getTenantConfigurationKey(), Boolean.class));
+            return asTenant(securityToken.getTenant(), () -> TenantConfigHelper.getAsSystem(getTenantConfigurationKey(), Boolean.class));
         }
 
         protected abstract String getTenantConfigurationKey();

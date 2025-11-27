@@ -68,7 +68,7 @@ public class AutoAssignScheduler {
         final long startNano = java.lang.System.nanoTime();
         try {
             log.debug("Auto assign scheduled execution has acquired lock and started for each tenant.");
-            systemManagement.forEachTenant(tenant -> {
+            systemManagement.forEachTenantAsSystem(tenant -> {
                 final long startNanoT = java.lang.System.nanoTime();
 
                 autoAssignExecutor.checkAllTargets();

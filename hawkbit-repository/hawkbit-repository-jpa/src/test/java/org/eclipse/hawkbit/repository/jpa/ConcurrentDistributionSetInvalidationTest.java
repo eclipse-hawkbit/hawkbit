@@ -17,7 +17,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 import java.time.Duration;
-import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
@@ -63,8 +63,7 @@ class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTe
         final Rollout rollout = createRollout(distributionSet);
         final String tenant = AccessContext.tenant();
 
-        // run in new Thread so that the invalidation can be executed in
-        // parallel
+        // run in new Thread so that the invalidation can be executed in parallel
         new Thread(() -> asSystemAsTenant(tenant, rolloutHandler::handleAll)).start();
 
         // wait until at least one RolloutGroup is created, as this means that the thread has started and has acquired the lock
@@ -74,7 +73,7 @@ class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTe
                 .until(() -> asSystemAsTenant(tenant, () -> rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getSize() > 0));
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
-                Collections.singletonList(distributionSet.getId()), ActionCancellationType.SOFT);
+                List.of(distributionSet.getId()), ActionCancellationType.SOFT);
         assertThatExceptionOfType(StopRolloutException.class)
                 .as("Invalidation of distributionSet should throw an exception")
                 .isThrownBy(() -> distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation));

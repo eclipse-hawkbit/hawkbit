@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.security.controller;
 
-import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
+import static org.eclipse.hawkbit.context.AccessContext.asTenant;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_HEADER_AUTHORITY_NAME;
 
 import java.util.Arrays;
@@ -73,7 +73,7 @@ public class SecurityHeaderAuthenticator extends Authenticator.AbstractAuthentic
 
         final String sslIssuerHashValue = getIssuerHashHeader(
                 controllerSecurityToken,
-                asSystemAsTenant(
+                asTenant(
                         controllerSecurityToken.getTenant(),
                         () -> TenantConfigHelper.getAsSystem(AUTHENTICATION_HEADER_AUTHORITY_NAME, String.class)));
         if (sslIssuerHashValue == null) {

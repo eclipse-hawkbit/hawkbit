@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.context;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -78,10 +79,7 @@ public class AccessContext {
         return null;
     }
 
-    // Sometimes 'system' need to override the auditor when do create/modify actions in context of a tenant and user.
-    // Though this could be made using runAsTenantAsUser sometimes (as in transaction) this override is needed
-    // after runAsTenantAsUser (because it seems that auditor is got in commit time).
-    // So this thread local variable provides option to override explicitly the auditor.
+    // Sometimes 'system' need to override the auditor when do create/modify actions in context of an actor
     private static final ThreadLocal<String> ACTOR_OVERRIDE = new ThreadLocal<>();
 
     // Return the current actor / auditor / principal name. It could be a user (person), technical user, device, etc.
@@ -141,6 +139,34 @@ public class AccessContext {
                 SecurityContextHolder.setContext(originalContext);
             }
         }
+    }
+
+    /**
+     * Runs a given {@link Runnable} within a current authorities with set tenant in the context.
+     *
+     * @param tenant the tenant to be set in context.
+     * @param runnable the runnable to call within the tenant context
+     */
+    public static void asTenant(final String tenant, final Runnable runnable) {
+        asTenant(tenant, () -> {
+            runnable.run();
+            return null;
+        });
+    }
+
+    /**
+     * Runs a given {@link Supplier} within a current authorities with set tenant in the context.
+     *
+     * @param tenant the tenant to be set in context.
+     * @param supplier the supplier to call within the tenant context
+     * @return the return value of the {@link Supplier#get()} method.
+     */
+    public static <T> T asTenant(final String tenant, final Supplier<T> supplier) {
+        final SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(new AuthenticationDelegate(
+                tenant, Optional.ofNullable(actor()).orElse(SYSTEM_ACTOR),
+                SecurityContextHolder.getContext().getAuthentication()));
+        return withSecurityContext(securityContext, supplier);
     }
 
     public static void asActor(final String actor, final Runnable runnable) {
@@ -219,14 +245,12 @@ public class AccessContext {
      * @return the return value of the {@link Supplier#get()} method.
      */
     public static <T> T asSystemAsTenant(final String tenant, final Supplier<T> supplier) {
-        final SecurityContext currentContext = SecurityContextHolder.getContext();
+        log.debug("Entering system code execution");
         try {
-            log.debug("Entering system code execution");
             final SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
             securityContext.setAuthentication(new SystemCodeAuthentication(tenant));
             return withSecurityContext(securityContext, supplier);
         } finally {
-            SecurityContextHolder.setContext(currentContext);
             log.debug("Leaving system code execution");
         }
     }
@@ -444,6 +468,85 @@ public class AccessContext {
         @Override
         public void setAuthenticated(final boolean isAuthenticated) {
             throw new UnsupportedOperationException();
+        }
+    }
+
+    /**
+     * An {@link Authentication} implementation to delegate to an existing {@link Authentication} object except setting the details
+     * specifically for a specific tenant and user.
+     */
+    private static final class AuthenticationDelegate implements Authentication {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        private final Authentication delegate;
+        private final TenantAwareUser principal;
+        private final TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails;
+
+        private AuthenticationDelegate(final String tenant, final String username, final Authentication delegate) {
+            this.delegate = delegate;
+            principal = new TenantAwareUser(username, username, delegate != null ? delegate.getAuthorities() : Collections.emptyList(), tenant);
+            tenantAwareAuthenticationDetails = new TenantAwareAuthenticationDetails(tenant, false);
+        }
+
+        @Override
+        public int hashCode() {
+            return delegate != null ? delegate.hashCode() : -1;
+        }
+
+        @Override
+        public boolean equals(final Object another) {
+            if (another instanceof Authentication anotherAuthentication) {
+                return Objects.equals(delegate, anotherAuthentication) &&
+                        Objects.equals(principal, anotherAuthentication.getPrincipal()) &&
+                        Objects.equals(tenantAwareAuthenticationDetails, anotherAuthentication.getDetails());
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return delegate != null ? delegate.toString() : null;
+        }
+
+        @Override
+        public String getName() {
+            return delegate != null ? delegate.getName() : null;
+        }
+
+        @Override
+        public Collection<? extends GrantedAuthority> getAuthorities() {
+            return principal.getAuthorities();
+        }
+
+        @Override
+        public Object getCredentials() {
+            return delegate != null ? delegate.getCredentials() : null;
+        }
+
+        @Override
+        public Object getDetails() {
+            return tenantAwareAuthenticationDetails;
+        }
+
+        @Override
+        public Object getPrincipal() {
+            return principal;
+        }
+
+        @Override
+        public boolean isAuthenticated() {
+            return delegate == null || delegate.isAuthenticated();
+        }
+
+        @Override
+        public void setAuthenticated(final boolean isAuthenticated) {
+            if (delegate == null) {
+                return;
+            }
+            delegate.setAuthenticated(isAuthenticated);
         }
     }
 }
