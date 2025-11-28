@@ -43,7 +43,7 @@ public class GatewayTokenAuthenticator extends Authenticator.AbstractAuthenticat
         }
 
         if (!isEnabled(controllerSecurityToken)) {
-            log.debug("The gateway token auth is disabled");
+            log.debug("The gateway token authentication is disabled");
             return null;
         }
 

@@ -22,11 +22,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /**
- * Api for handling basic auth user validation
+ * Api for handling basic authentication user validation
  */
 @SuppressWarnings("squid:S1609")
 @Tag(
-        name = "Basic Authentication", description = "API for basic auth user validation.",
+        name = "Basic Authentication", description = "API for basic authentication user validation.",
         extensions = @Extension(name = OpenApi.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = BASIC_AUTH_ORDER)))
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtBasicAuthRestApi {

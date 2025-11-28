@@ -67,7 +67,7 @@ public class SecurityHeaderAuthenticator extends Authenticator.AbstractAuthentic
         }
 
         if (!isEnabled(controllerSecurityToken)) {
-            log.debug("The gateway header auth is disabled");
+            log.debug("The gateway header authentication is disabled");
             return null;
         }
 

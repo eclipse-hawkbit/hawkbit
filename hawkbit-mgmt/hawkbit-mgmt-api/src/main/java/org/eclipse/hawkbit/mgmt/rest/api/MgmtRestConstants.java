@@ -81,7 +81,7 @@ public final class MgmtRestConstants {
      */
     public static final String ROLLOUT_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/rollouts";
     /**
-     * The basic auth validation mapping
+     * The basic authentication validation mapping
      */
     public static final String AUTH_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/userinfo";
     /**

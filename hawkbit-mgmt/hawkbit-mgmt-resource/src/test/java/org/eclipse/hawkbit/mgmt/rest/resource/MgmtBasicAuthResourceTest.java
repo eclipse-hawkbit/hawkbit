@@ -51,7 +51,7 @@ import org.springframework.web.context.WebApplicationContext;
  * Test for {@link MgmtBasicAuthResource}.
  * <p/>
  * Feature: Component Tests - Management API<br/>
- * Story: Basic auth Userinfo Resource
+ * Story: Basic authentication Userinfo Resource
  */
 @ActiveProfiles({ "test" })
 @ExtendWith({ TestLoggerExtension.class, SharedSqlTestDatabaseExtension.class })
@@ -80,7 +80,7 @@ class MgmtBasicAuthResourceTest {
     MockMvc defaultMock;
 
     /**
-     * Test of userinfo api with basic auth validation
+     * Test of userinfo api with basic authentication validation
      */
     @Test
     @WithUser(principal = TEST_USER, authorities = {"READ", "WRITE", "DELETE"})
@@ -97,7 +97,7 @@ class MgmtBasicAuthResourceTest {
     }
 
     /**
-     * Test of userinfo api with invalid basic auth fails
+     * Test of userinfo api with invalid basic authentication fails
      */
     @Test
     void validateBasicAuthFailsWithInvalidCredentials() throws Exception {

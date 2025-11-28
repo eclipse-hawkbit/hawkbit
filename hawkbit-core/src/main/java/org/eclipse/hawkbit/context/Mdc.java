@@ -49,7 +49,7 @@ public class Mdc {
     }
 
     /**
-     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or actor from the auth in the MDC context.
+     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or actor from the authentication in the MDC context.
      *
      * @param <T> the return type
      * @param callable the callable to execute
@@ -81,7 +81,7 @@ public class Mdc {
     }
 
     /**
-     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or actor from the auth in the MDC context.
+     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or actor from the authentication in the MDC context.
      * Calls the {@link #withAuth(Callable)} method and wraps any catchable exception into a {@link RuntimeException}.
      *
      * @param <T> the return type
@@ -116,7 +116,7 @@ public class Mdc {
     }
 
     /**
-     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or actor from the auth in the MDC context.
+     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or actor from the authentication in the MDC context.
      * Calls the {@link #asTenantAsActor(String, String, Callable)} method and wraps any catchable exception into a {@link RuntimeException}.
      *
      * @param <T> the return type

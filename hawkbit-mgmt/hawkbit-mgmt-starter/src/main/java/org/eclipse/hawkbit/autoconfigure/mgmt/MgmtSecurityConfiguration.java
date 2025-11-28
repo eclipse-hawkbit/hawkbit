@@ -106,7 +106,7 @@ public class MgmtSecurityConfiguration {
             final HttpSecurity http,
             @Autowired(required = false) @Qualifier("hawkbitOAuth2ResourceServerCustomizer") final Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> oauth2ResourceServerCustomizer,
             // called just before build of the SecurityFilterChain.
-            // could be used for instance to set auth provider
+            // could be used for instance to set authentication provider
             // Note: implementation of the customizer shall always take in account what is the already set by the hawkBit
             @Autowired(required = false) @Qualifier("hawkbitHttpSecurityCustomizer") final Customizer<HttpSecurity> httpSecurityCustomizer,
             final SystemManagement systemManagement) throws Exception {
@@ -120,7 +120,7 @@ public class MgmtSecurityConfiguration {
                 .anonymous(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterAfter(
-                        // Servlet filter to create metadata after successful auth over RESTful.
+                        // Servlet filter to create metadata after successful authentication over RESTful.
                         (request, response, chain) -> {
                             final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                             if (authentication != null && authentication.isAuthenticated()) {

@@ -89,7 +89,7 @@ public class DdiSecurityProperties {
         public static class Gatewaytoken {
 
             /**
-             * Gateway token based auth enabled.
+             * Gateway token based authentication enabled.
              */
             private boolean enabled = false;
 

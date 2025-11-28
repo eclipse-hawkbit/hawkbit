@@ -26,7 +26,7 @@ public class Tenant {
     @NonNull
     private String tenantId = "DEFAULT";
 
-    // basic auth user, to access management api
+    // basic authentication user, to access management api
     @Nullable
     private String username = "admin";
     @ToString.Exclude

@@ -332,7 +332,7 @@ public class AccessContext {
     }
 
     // simplified info for the security context keeping just the basic info needed for background execution of
-    // controller auth is not supported - always is false
+    // controller authentication is not supported - always is false
     // only authenticated user is supported
     @NoArgsConstructor
     @Data
@@ -342,7 +342,6 @@ public class AccessContext {
         private static final long serialVersionUID = 1L;
 
         private String tenant;
-        // auditor / username (auth principal name)
         private String auditor = "n/a"; // default value "n/a" is used only on deserialization if field is missing
         @JsonProperty(required = true)
         private String[] authorities;
@@ -354,7 +353,7 @@ public class AccessContext {
             }
             if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails) {
                 if (tenantAwareDetails.controller()) {
-                    throw new IllegalStateException("Controller auth context is not supported");
+                    throw new IllegalStateException("Controller authentication context is not supported");
                 }
                 tenant = tenantAwareDetails.tenant();
             } else if (authentication.getPrincipal() instanceof TenantAwareUser tenantAwareUser) {
@@ -362,7 +361,7 @@ public class AccessContext {
             }
 
             // keep the auditor, ofr audit purposes,
-            // sets principal to the resolved auditor and then deserialized auth will return it as principal
+            // sets principal to the resolved auditor and then deserialized authentication will return it as principal
             // since the class is not known to auditor aware - it shall used default - principal as auditor
             auditor = resolve(authentication);
             authorities = authentication.getAuthorities().stream().map(Object::toString).toArray(String[]::new);
@@ -417,7 +416,7 @@ public class AccessContext {
 
     /**
      * An implementation of the Spring's {@link Authentication} object which is used within a system security code block and
-     * wraps the original auth object. The wrapped object contains the necessary {@link SpRole#SYSTEM_ROLE}
+     * wraps the original authentication object. The wrapped object contains the necessary {@link SpRole#SYSTEM_ROLE}
      * which is allowed to execute all secured methods.
      */
     static final class SystemCodeAuthentication implements Authentication {

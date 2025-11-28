@@ -31,10 +31,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 public interface Authenticator {
 
     /**
-     * If the auth mechanism is not enabled for the tenant - it just returns null.
-     * If the auth mechanism is supported, the filter extracts from the security token the related credentials,
+     * If the authentication mechanism is not enabled for the tenant - it just returns null.
+     * If the authentication mechanism is supported, the filter extracts from the security token the related credentials,
      * validate them (do authenticate the caller).
-     * If validation / auth is successful returns an authenticated auth object. Otherwise,
+     * If validation / authentication is successful returns an authenticated authentication object. Otherwise,
      * throws BadCredentialsException.
      *
      * @param controllerSecurityToken the securityToken

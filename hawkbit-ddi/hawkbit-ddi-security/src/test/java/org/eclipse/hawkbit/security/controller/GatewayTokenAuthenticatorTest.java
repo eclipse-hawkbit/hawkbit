@@ -26,7 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Feature: Unit Tests - Security<br/>
- * Story: Gateway token auth
+ * Story: Gateway token authentication
  */
 @ExtendWith(MockitoExtension.class)
 class GatewayTokenAuthenticatorTest {
@@ -54,7 +54,7 @@ class GatewayTokenAuthenticatorTest {
     }
 
     /**
-     * Tests successful auth with gateway token
+     * Tests successful authentication with gateway token
      */
     @Test
     void testWithGwToken() {
@@ -70,7 +70,7 @@ class GatewayTokenAuthenticatorTest {
     }
 
     /**
-     * Tests that if gateway token doesn't match, the auth fails
+     * Tests that if gateway token doesn't match, the authentication fails
      */
     @Test
     void testWithBadGwToken() {
@@ -84,7 +84,7 @@ class GatewayTokenAuthenticatorTest {
     }
 
     /**
-     * Tests that if gateway token miss, the auth fails
+     * Tests that if gateway token miss, the authentication fails
      */
     @Test
     void testWithoutGwToken() {
@@ -92,7 +92,7 @@ class GatewayTokenAuthenticatorTest {
     }
 
     /**
-     * Tests that if disabled, the auth fails
+     * Tests that if disabled, the authentication fails
      */
     @Test
     void testWithGwTokenButDisabled() {

@@ -12,7 +12,7 @@ information. In
 hawkBit [SecurityAutoConfiguration](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-autoconfigure/src/main/java/org/eclipse/hawkbit/autoconfigure/security/SecurityAutoConfiguration.java)
 is a good starting point for integration.
 
-The default implementation is single user/tenant with basic auth and the logged in user is provided with all
+The default implementation is single user/tenant with basic authentication and the logged-in user is provided with all
 permissions. Additionally, the application properties may be configured for multiple static users;
 see [Multiple Users](#multiple-users) for details.
 

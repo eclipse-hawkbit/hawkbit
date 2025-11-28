@@ -63,7 +63,7 @@ class SecurityHeaderAuthenticatorTest {
     }
 
     /**
-     * Tests successful auth with multiple a single hashes
+     * Tests successful authentication with multiple a single hashes
      */
     @Test
     void testWithSingleKnownHash() {
@@ -79,7 +79,7 @@ class SecurityHeaderAuthenticatorTest {
     }
 
     /**
-     * Tests successful auth with multiple hashes
+     * Tests successful authentication with multiple hashes
      */
     @Test
     void testWithMultipleKnownHashes() {
@@ -100,7 +100,7 @@ class SecurityHeaderAuthenticatorTest {
     }
 
     /**
-     * Tests that if the hash is unknown, the auth fails
+     * Tests that if the hash is unknown, the authentication fails
      */
     @Test
     void testWithUnknownHash() {
@@ -114,7 +114,7 @@ class SecurityHeaderAuthenticatorTest {
     }
 
     /**
-     * Tests that if CN doesn't match the CN in the security token, the auth fails
+     * Tests that if CN doesn't match the CN in the security token, the authentication fails
      */
     @Test
     void testWithNonMatchingCN() {
@@ -126,7 +126,7 @@ class SecurityHeaderAuthenticatorTest {
     }
 
     /**
-     * Tests that if the hash miss, the auth fails
+     * Tests that if the hash miss, the authentication fails
      */
     @Test
     void testWithoutHash() {
@@ -134,7 +134,7 @@ class SecurityHeaderAuthenticatorTest {
     }
 
     /**
-     * Tests that if disabled, the auth fails
+     * Tests that if disabled, the authentication fails
      */
     @Test
     void testWithSingleKnownHashButDisabled() {
