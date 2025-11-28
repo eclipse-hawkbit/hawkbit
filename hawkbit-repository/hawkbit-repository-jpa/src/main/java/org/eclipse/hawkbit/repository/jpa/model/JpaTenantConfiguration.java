@@ -15,7 +15,6 @@ import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -35,9 +34,7 @@ import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 @Setter
 @Getter
 @Entity
-@Table(
-        name = "sp_tenant_configuration",
-        uniqueConstraints = @UniqueConstraint(columnNames = { "conf_key", "tenant" }, name = "uk_tenant_configuration"))
+@Table(name = "sp_tenant_configuration")
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity implements TenantConfiguration, EventAwareEntity {

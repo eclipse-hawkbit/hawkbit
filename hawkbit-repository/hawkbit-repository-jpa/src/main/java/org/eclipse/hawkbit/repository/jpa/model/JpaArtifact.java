@@ -13,11 +13,8 @@ import java.io.Serial;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
-import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -37,11 +34,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 @NoArgsConstructor // Default constructor needed for JPA entities.
 @Setter
 @Getter
-@Table(name = "sp_artifact",
-        indexes = {
-                @Index(name = "sp_idx_artifact_01", columnList = "tenant,software_module"),
-                @Index(name = "sp_idx_artifact_02", columnList = "tenant,sha1_hash"),
-                @Index(name = "sp_idx_artifact_prim", columnList = "tenant,id") })
+@Table(name = "sp_artifact")
 @Entity
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
@@ -52,8 +45,7 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
 
     @ManyToOne(optional = false, cascade = { CascadeType.PERSIST }, fetch = FetchType.LAZY)
     @JoinColumn(
-            name = "software_module", nullable = false, updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_artifact_software_module"))
+            name = "software_module", nullable = false, updatable = false)
     private JpaSoftwareModule softwareModule;
 
     @Column(name = "provided_file_name", length = 256, updatable = false)

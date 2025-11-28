@@ -12,9 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 import java.io.Serial;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.Index;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -30,12 +28,7 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 @NoArgsConstructor // Default constructor for JPA
 @ToString(callSuper = true)
 @Entity
-@Table(
-        name = "sp_target_tag",
-        indexes = {
-                @Index(name = "sp_idx_target_tag_prim", columnList = "tenant,id"),
-                @Index(name = "sp_idx_target_tag_01", columnList = "tenant,name") },
-        uniqueConstraints = @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_target_tag"))
+@Table(name = "sp_target_tag")
 public class JpaTargetTag extends JpaTag implements TargetTag, EventAwareEntity {
 
     @Serial
