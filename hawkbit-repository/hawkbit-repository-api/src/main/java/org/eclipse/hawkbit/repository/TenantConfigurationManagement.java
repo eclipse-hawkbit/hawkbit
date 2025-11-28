@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.io.Serializable;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -38,25 +37,23 @@ public interface TenantConfigurationManagement extends PermissionSupport {
      *
      * @param keyName the key of the configuration
      * @param value the configuration value which will be written into the database.
-     * @return the configuration value which was just written into the database.
      * @throws TenantConfigurationValidatorException if the {@code propertyType} and the value in general does not match the expected type and
      *         format defined by the Key
      * @throws ConversionFailedException if the property cannot be converted to the given
      */
     @PreAuthorize(value = SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    <T extends Serializable> TenantConfigurationValue<T> addOrUpdateConfiguration(String keyName, T value);
+    void addOrUpdateConfiguration(String keyName, Object value);
 
     /**
      * Adds or updates a specific configuration for a specific tenant.
      *
      * @param configurations map containing the key - value of the configuration
-     * @return map of all configuration values which were written into the database.
      * @throws TenantConfigurationValidatorException if the {@code propertyType} and the value in general does not
      *         match the expected type and format defined by the Key
      * @throws ConversionFailedException if the property cannot be converted to the given
      */
     @PreAuthorize(value = SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    <T extends Serializable> Map<String, TenantConfigurationValue<T>> addOrUpdateConfiguration(Map<String, T> configurations);
+    void addOrUpdateConfiguration(Map<String, Object> configurations);
 
     /**
      * Retrieves a configuration value from the e.g. tenant overwritten configuration values or in case the tenant does not a have a specific
@@ -70,7 +67,7 @@ public interface TenantConfigurationManagement extends PermissionSupport {
      * @throws ConversionFailedException if the property cannot be converted to the given {@code propertyType}
      */
     @PreAuthorize(value = SpringEvalExpressions.HAS_READ_REPOSITORY)
-    <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(String keyName);
+    <T> TenantConfigurationValue<T> getConfigurationValue(String keyName);
 
     /**
      * Retrieves a configuration value from the e.g. tenant overwritten configuration values or in case the tenant does not a have a specific
@@ -86,7 +83,7 @@ public interface TenantConfigurationManagement extends PermissionSupport {
      * @throws ConversionFailedException if the property cannot be converted to the given {@code propertyType}
      */
     @PreAuthorize(value = SpringEvalExpressions.HAS_READ_REPOSITORY)
-    <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(String keyName, Class<T> propertyType);
+    <T> TenantConfigurationValue<T> getConfigurationValue(String keyName, Class<T> propertyType);
 
     /**
      * Deletes a specific configuration for the current tenant. Does nothing in case there is no tenant specific configuration value.

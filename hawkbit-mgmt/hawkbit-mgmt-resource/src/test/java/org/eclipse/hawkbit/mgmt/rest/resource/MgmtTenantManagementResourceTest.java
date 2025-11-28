@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.callAs;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.getAs;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withUser;
@@ -28,7 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValueRequest;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
@@ -51,23 +51,22 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      * Handles GET request for receiving all tenant specific configurations.
      */
     @Test
-     void getTenantConfigurations() throws Exception {
-        mvc.perform(get(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs"))
+    void getTenantConfigurations() throws Exception {
+        mvc.perform(get(SYSTEM_V1_REQUEST_MAPPING + "/configs"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
-                //check for TenantMetadata additional properties
+                // check for TenantMetadata additional properties
                 .andExpect(jsonPath("$.['" + DEFAULT_DISTRIBUTION_SET_TYPE_KEY + "']").exists())
                 .andExpect(jsonPath("$.['" + DEFAULT_DISTRIBUTION_SET_TYPE_KEY + "'].value", equalTo(getActualDefaultDsType().intValue())));
-
     }
 
     /**
      * Handles GET request for receiving a tenant specific configuration.
      */
     @Test
-     void getTenantConfiguration() throws Exception {
-        //Test TenantConfiguration property
-        mvc.perform(get(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY))
+    void getTenantConfiguration() throws Exception {
+        // test TenantConfiguration property
+        mvc.perform(get(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
     }
@@ -76,10 +75,9 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      * Handles GET request for receiving (TenantMetadata - DefaultDsType) a tenant specific configuration.
      */
     @Test
-     void getTenantMetadata() throws Exception {
-        //Test TenantMetadata property
-        mvc.perform(get(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
-                        DEFAULT_DISTRIBUTION_SET_TYPE_KEY))
+    void getTenantMetadata() throws Exception {
+        // test TenantMetadata property
+        mvc.perform(get(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", DEFAULT_DISTRIBUTION_SET_TYPE_KEY))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.value", equalTo(getActualDefaultDsType().intValue())));
@@ -89,37 +87,37 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      * Handles PUT request for settings values in tenant specific configuration.
      */
     @Test
-     void putTenantConfiguration() throws Exception {
+    void putTenantConfiguration() throws Exception {
         final MgmtSystemTenantConfigurationValueRequest bodyPut = new MgmtSystemTenantConfigurationValueRequest();
         bodyPut.setValue("exampleToken");
         final ObjectMapper mapper = new ObjectMapper();
         final String json = mapper.writeValueAsString(bodyPut);
 
-        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
-                        AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY).content(json)
-                        .contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     /**
      * Handles PUT request for settings values (TenantMetadata - DefaultDsType) in tenant specific configuration, which is TenantMetadata
      */
     @Test
-     void putTenantMetadata() throws Exception {
+    void putTenantMetadata() throws Exception {
         final MgmtSystemTenantConfigurationValueRequest bodyPut = new MgmtSystemTenantConfigurationValueRequest();
 
-        long updatedTestDefaultDsType = createTestDistributionSetType();
+        final long updatedTestDefaultDsType = createTestDistributionSetType();
         bodyPut.setValue(updatedTestDefaultDsType);
 
         final ObjectMapper mapper = new ObjectMapper();
         final String json = mapper.writeValueAsString(bodyPut);
 
-        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
-                        DEFAULT_DISTRIBUTION_SET_TYPE_KEY).content(json)
-                        .contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", DEFAULT_DISTRIBUTION_SET_TYPE_KEY)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         //check if after Rest success, value is really changed in TenantMetadata
         assertEquals(updatedTestDefaultDsType, getActualDefaultDsType(),
@@ -131,14 +129,14 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      */
     @Test
     void putTenantMetadataFails() throws Exception {
-        long oldDefaultDsType = getActualDefaultDsType();
-        //try an invalid input
+        final long oldDefaultDsType = getActualDefaultDsType();
+        // try an invalid input
         String newDefaultDsType = new JSONObject().put("value", true).toString();
         assertDefaultDsTypeUpdateBadRequestFails(newDefaultDsType, oldDefaultDsType, status().isBadRequest());
-        //try an invalid input
+        // try an invalid input
         newDefaultDsType = new JSONObject().put("value", "someInvalidInput").toString();
         assertDefaultDsTypeUpdateBadRequestFails(newDefaultDsType, oldDefaultDsType, status().isBadRequest());
-        //try valid input, but the given DistributionSetType Id does not exist..
+        // try valid input, but the given DistributionSetType Id does not exist..
         newDefaultDsType = new JSONObject().put("value", 99999).toString();
         assertDefaultDsTypeUpdateBadRequestFails(newDefaultDsType, oldDefaultDsType, status().isNotFound());
     }
@@ -151,13 +149,15 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         final String bodyActivate = new JSONObject().put("value", true).toString();
         final String bodyDeactivate = new JSONObject().put("value", false).toString();
 
-        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", MULTI_ASSIGNMENTS_ENABLED)
-                        .content(bodyActivate).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", MULTI_ASSIGNMENTS_ENABLED)
+                        .content(bodyActivate)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
-        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", MULTI_ASSIGNMENTS_ENABLED)
-                        .content(bodyDeactivate).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", MULTI_ASSIGNMENTS_ENABLED)
+                        .content(bodyDeactivate)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
     }
@@ -167,14 +167,15 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      */
     @Test
     void changeBatchConfigurationShouldFailOnInvalidTenantConfiguration() throws Exception {
-        //in this scenario
-        //  some TenantConfiguration are not valid,
-        //  TenantMetadata - DefaultDSType ID is valid,
-        //in the end batch configuration update must fail, and thus, not a single config should be actually changed
+        // in this scenario
+        //   some TenantConfiguration are not valid,
+        //   TenantMetadata - DefaultDSType ID is valid,
+        // in the end batch configuration update must fail, and thus, not a single config should be actually changed
         long testValidDistributionSetType = createTestDistributionSetType();
         boolean oldRolloutApprovalConfig = (Boolean) tenantConfigurationManagement().getConfigurationValue(ROLLOUT_APPROVAL_ENABLED).getValue();
-        String oldAuthGatewayToken = (String) tenantConfigurationManagement().getConfigurationValue(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY).getValue();
-        //test TenantConfiguration with invalid config value, and a valid TenantMetadata - Default DistributionSetType id
+        String oldAuthGatewayToken = (String) tenantConfigurationManagement().getConfigurationValue(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY)
+                .getValue();
+        // test TenantConfiguration with invalid config value, and a valid TenantMetadata - Default DistributionSetType id
         assertBatchConfigurationFails(!oldRolloutApprovalConfig, "invalid-config-value", oldAuthGatewayToken + "randomSuffix0",
                 testValidDistributionSetType, status().isBadRequest());
     }
@@ -184,29 +185,31 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      */
     @Test
     void changeBatchConfigurationShouldOnInvalidTenantMetadata() throws Exception {
-        //in this scenario
-        //  all TenantConfiguration have valid and new values - using old values, inverted
-        //  TenantMetadata - DefaultDSType ID is invalid
-        //in the end batch configuration update must fail, and thus, not a single config should be actually changed.
-        boolean oldRolloutApprovalConfig = (Boolean) tenantConfigurationManagement().getConfigurationValue(ROLLOUT_APPROVAL_ENABLED).getValue();
-        boolean oldAuthGatewayTokenEnabled = (Boolean) tenantConfigurationManagement()
+        // in this scenario
+        //   all TenantConfiguration have valid and new values - using old values, inverted
+        //   TenantMetadata - DefaultDSType ID is invalid
+        // in the end batch configuration update must fail, and thus, not a single config should be actually changed.
+        final boolean oldRolloutApprovalConfig = (Boolean) tenantConfigurationManagement()
+                .getConfigurationValue(ROLLOUT_APPROVAL_ENABLED).getValue();
+        final boolean oldAuthGatewayTokenEnabled = (Boolean) tenantConfigurationManagement()
                 .getConfigurationValue(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED).getValue();
-        String oldAuthGatewayToken = (String) tenantConfigurationManagement().getConfigurationValue(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY).getValue();
+        final String oldAuthGatewayToken = (String) tenantConfigurationManagement()
+                .getConfigurationValue(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY).getValue();
 
-        //invalid TenantMetadata Default DistributionSetType, it is expected to be a number. Testing invalid type - string
-        //not a single configuration should be changed after the failure
+        // invalid TenantMetadata Default DistributionSetType, it is expected to be a number. Testing invalid type - string
+        // not a single configuration should be changed after the failure
         Object testInvalidDistributionSetType = "someInvalidInput";
         assertBatchConfigurationFails(!oldRolloutApprovalConfig, !oldAuthGatewayTokenEnabled, oldAuthGatewayToken + "randomSuffix1",
                 testInvalidDistributionSetType, status().isBadRequest());
 
-        //invalid TenantMetadata Default DistributionSetType, it is expected to be a number. Testing invalid type - bool
-        //not a single configuration should be changed after the failure
+        // invalid TenantMetadata Default DistributionSetType, it is expected to be a number. Testing invalid type - bool
+        // not a single configuration should be changed after the failure
         testInvalidDistributionSetType = true;
         assertBatchConfigurationFails(!oldRolloutApprovalConfig, !oldAuthGatewayTokenEnabled, oldAuthGatewayToken + "randomSuffix2",
                 testInvalidDistributionSetType, status().isBadRequest());
 
-        //Valid TenantMetadata Default DistributionSetType, it is expected to be a number. Testing valid type - but given DistributionSetType Id does not exist.
-        //not a single configuration should be changed after the failure
+        // valid TenantMetadata Default DistributionSetType, it is expected to be a number. Testing valid type - but given DistributionSetType Id does not exist.
+        // not a single configuration should be changed after the failure
         testInvalidDistributionSetType = 9999;
         assertBatchConfigurationFails(!oldRolloutApprovalConfig, !oldAuthGatewayTokenEnabled, oldAuthGatewayToken + "randomSuffix2",
                 testInvalidDistributionSetType, status().isNotFound());
@@ -217,23 +220,23 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      */
     @Test
     void changeBatchConfiguration() throws Exception {
-        long updatedDistributionSetType = createTestDistributionSetType();
-        boolean updatedRolloutApprovalEnabled = true;
-        boolean updatedAuthGatewayTokenEnabled = true;
-        String updatedAuthGatewayTokenKey = "54321";
-        JSONObject configuration = new JSONObject();
+        final long updatedDistributionSetType = createTestDistributionSetType();
+        final boolean updatedRolloutApprovalEnabled = true;
+        final boolean updatedAuthGatewayTokenEnabled = true;
+        final String updatedAuthGatewayTokenKey = "54321";
+        final JSONObject configuration = new JSONObject();
         configuration.put(ROLLOUT_APPROVAL_ENABLED, updatedRolloutApprovalEnabled);
         configuration.put(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED, updatedAuthGatewayTokenEnabled);
         configuration.put(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, updatedAuthGatewayTokenKey);
         configuration.put(DEFAULT_DISTRIBUTION_SET_TYPE_KEY, updatedDistributionSetType);
 
-        String body = configuration.toString();
+        final String body = configuration.toString();
 
-        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs") .content(body).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
-        //assert all changes were applied after Rest Success
+        // assert all changes were applied after Rest Success
         assertEquals(updatedDistributionSetType, getActualDefaultDsType(),
                 "Change BatchConfiguration was successful but TenantMetadata - Default DistributionSetType was not actually changed.");
         assertEquals(updatedRolloutApprovalEnabled, tenantConfigurationManagement().getConfigurationValue(ROLLOUT_APPROVAL_ENABLED).getValue(),
@@ -255,20 +258,23 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         final String bodyDeactivate = new JSONObject().put("value", false).toString();
 
         // enable Multi-Assignments
-        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", MULTI_ASSIGNMENTS_ENABLED)
-                        .content(bodyActivate).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", MULTI_ASSIGNMENTS_ENABLED)
+                        .content(bodyActivate)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         // try to enable Auto-Close
-        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED)
-                        .content(bodyActivate).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED)
+                        .content(bodyActivate)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
 
         // try to disable Auto-Close
-        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED)
-                        .content(bodyDeactivate).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED)
+                        .content(bodyDeactivate)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
     }
@@ -278,8 +284,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      */
     @Test
     void deleteTenantConfiguration() throws Exception {
-        mvc.perform(delete(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
-                        AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY))
+        mvc.perform(delete(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
     }
@@ -289,10 +294,9 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      */
     @Test
     void deleteTenantMetadataFail() throws Exception {
-        mvc.perform(delete(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
-                        DEFAULT_DISTRIBUTION_SET_TYPE_KEY))
+        mvc.perform(delete(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", DEFAULT_DISTRIBUTION_SET_TYPE_KEY))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
     }
 
     /**
@@ -301,25 +305,24 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     @Test
     void getTenantConfigurationReadGWToken() throws Exception {
         getAs(withUser("tenant_admin", SpPermission.TENANT_CONFIGURATION), () -> {
-            tenantConfigurationManagement().addOrUpdateConfiguration(
-                    AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, "123");
+            tenantConfigurationManagement().addOrUpdateConfiguration(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, "123");
             return null;
         });
 
         // TODO - should be able to read with TENANT_CONFIGURATION but somehow here the role hierarchy doesn't play
         // checked in mgmt / update server runtime PreAuthorizeEnabledTest
         callAs(withUser("tenant_admin", SpPermission.READ_TENANT_CONFIGURATION, SpPermission.READ_GATEWAY_SECURITY_TOKEN), () -> {
-                    mvc.perform(get(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs"))
-                            .andDo(MockMvcResultPrinter.print())
-                            .andDo(m -> System.out.println("-> 1: " + m.getResponse().getContentAsString()))
-                            .andExpect(status().isOk())
-                            .andExpect(jsonPath("$.['" + AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY + "']").exists())
-                            .andExpect(jsonPath("$.['" + AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY + "'].value", equalTo("123")));
-                    return null;
-                });
+            mvc.perform(get(SYSTEM_V1_REQUEST_MAPPING + "/configs"))
+                    .andDo(MockMvcResultPrinter.print())
+                    .andDo(m -> System.out.println("-> 1: " + m.getResponse().getContentAsString()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.['" + AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY + "']").exists())
+                    .andExpect(jsonPath("$.['" + AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY + "'].value", equalTo("123")));
+            return null;
+        });
 
         callAs(withUser("tenant_read", SpPermission.READ_TENANT_CONFIGURATION), () -> {
-            mvc.perform(get(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs"))
+            mvc.perform(get(SYSTEM_V1_REQUEST_MAPPING + "/configs"))
                     .andDo(MockMvcResultPrinter.print())
                     .andDo(m -> System.out.println("-> 2: " + m.getResponse().getContentAsString()))
                     .andExpect(status().isOk())
@@ -329,17 +332,18 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     }
 
     private Long createTestDistributionSetType() {
-        DistributionSetType testDefaultDsType = distributionSetTypeManagement.create(DistributionSetTypeManagement.Create.builder()
+        final DistributionSetType testDefaultDsType = distributionSetTypeManagement.create(DistributionSetTypeManagement.Create.builder()
                 .key("test123").name("TestName123").description("TestDefaultDsType").build());
-        testDefaultDsType = distributionSetTypeManagement
-                .update(DistributionSetTypeManagement.Update.builder().id(testDefaultDsType.getId()).description("TestDefaultDsType").build());
-        return testDefaultDsType.getId();
+        return distributionSetTypeManagement
+                .update(DistributionSetTypeManagement.Update.builder().id(testDefaultDsType.getId()).description("TestDefaultDsType").build())
+                .getId();
     }
 
-    private void assertDefaultDsTypeUpdateBadRequestFails(String newDefaultDsType, long oldDefaultDsType, ResultMatcher resultMatchers)
+    private void assertDefaultDsTypeUpdateBadRequestFails(
+            final String newDefaultDsType, final long oldDefaultDsType, final ResultMatcher resultMatchers)
             throws Exception {
-        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
-                        DEFAULT_DISTRIBUTION_SET_TYPE_KEY).content(newDefaultDsType)
+        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", DEFAULT_DISTRIBUTION_SET_TYPE_KEY)
+                        .content(newDefaultDsType)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(resultMatchers);
@@ -347,23 +351,25 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
                 "Rest endpoint for updating DefaultDistributionType failed, but actual value changed unexpectedly.");
     }
 
-    private void assertBatchConfigurationFails(Object newRolloutApprovalEnabled, Object newAuthGatewayTokenEnabled, Object newGatewayToken,
-            Object newDistributionSetTypeId, ResultMatcher resultMatchers) throws Exception {
+    private void assertBatchConfigurationFails(
+            final Object newRolloutApprovalEnabled, final Object newAuthGatewayTokenEnabled, final Object newGatewayToken,
+            final Object newDistributionSetTypeId, final ResultMatcher resultMatchers) throws Exception {
         long oldDefaultDsType = getActualDefaultDsType();
         boolean oldRolloutApprovalConfig = (Boolean) tenantConfigurationManagement().getConfigurationValue(ROLLOUT_APPROVAL_ENABLED).getValue();
-        boolean oldAuthGatewayTokenEnabled = (Boolean) tenantConfigurationManagement().getConfigurationValue(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED)
+        boolean oldAuthGatewayTokenEnabled = (Boolean) tenantConfigurationManagement()
+                .getConfigurationValue(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED)
                 .getValue();
-        String oldAuthGatewayToken = (String) tenantConfigurationManagement().getConfigurationValue(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY).getValue();
+        String oldAuthGatewayToken = (String) tenantConfigurationManagement().getConfigurationValue(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY)
+                .getValue();
 
-        JSONObject configuration = new JSONObject();
+        final JSONObject configuration = new JSONObject();
         configuration.put(ROLLOUT_APPROVAL_ENABLED, newRolloutApprovalEnabled);
         configuration.put(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED, newAuthGatewayTokenEnabled);
         configuration.put(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, newGatewayToken);
         configuration.put(DEFAULT_DISTRIBUTION_SET_TYPE_KEY, newDistributionSetTypeId);
         String body = configuration.toString();
 
-        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs")
-                        .content(body).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(resultMatchers);
         //Check if TenantMetadata and TenantConfiguration is not changed as Batch config failed
@@ -374,7 +380,8 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         assertEquals(oldAuthGatewayTokenEnabled,
                 tenantConfigurationManagement().getConfigurationValue(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED).getValue(),
                 "Batch configuration update Failed, but TenantConfiguration was actually changed.");
-        assertEquals(oldAuthGatewayToken, tenantConfigurationManagement().getConfigurationValue(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY).getValue(),
+        assertEquals(oldAuthGatewayToken,
+                tenantConfigurationManagement().getConfigurationValue(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY).getValue(),
                 "Batch configuration update Failed, but TenantConfiguration was actually changed.");
     }
 

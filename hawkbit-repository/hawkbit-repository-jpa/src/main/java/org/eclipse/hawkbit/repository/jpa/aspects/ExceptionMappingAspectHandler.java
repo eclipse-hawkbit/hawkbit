@@ -27,17 +27,17 @@ import org.springframework.core.Ordered;
 public class ExceptionMappingAspectHandler implements Ordered {
 
     /**
-     * Catches exceptions of the {@link TransactionManager} and wrap them to custom exceptions.
+     * Catches exceptions the {@link TransactionManager} and wrap them to custom exceptions.
      *
-     * @param ex the thrown and catched exception
-     * @throws Throwable
+     * @param e the thrown and caught exception
+     * @throws Throwable the mapped exception
      */
-    @AfterThrowing(pointcut = "execution( * org.eclipse.hawkbit.repository.jpa.management.*Management.*(..))", throwing = "ex")
+    @AfterThrowing(pointcut = "execution( * org.eclipse.hawkbit.repository.jpa.management.*Management.*(..))", throwing = "e")
     // Exception for squid:S00112, squid:S1162
     // It is a AspectJ proxy which deals with exceptions.
     @SuppressWarnings({ "squid:S00112", "squid:S1162" })
-    public void catchAndWrapJpaExceptionsService(final Exception ex) throws Throwable {
-        throw ExceptionMapper.map(ex);
+    public void catchAndWrapJpaExceptionsService(final Exception e) throws Throwable {
+        throw ExceptionMapper.map(e);
     }
 
     @Override

@@ -77,16 +77,19 @@ class DistributedLockTest extends AbstractJpaIntegrationTest {
         }
 
         @Bean
-        LockRepository lockRepository0(final DataSource dataSource, final LockProperties lockProperties, final PlatformTransactionManager txManager) {
+        LockRepository lockRepository0(final DataSource dataSource, final LockProperties lockProperties,
+                final PlatformTransactionManager txManager) {
             return lockRepository(dataSource, lockProperties, txManager);
         }
 
         @Bean
-        LockRepository lockRepository1(final DataSource dataSource, final LockProperties lockProperties, final PlatformTransactionManager txManager) {
+        LockRepository lockRepository1(final DataSource dataSource, final LockProperties lockProperties,
+                final PlatformTransactionManager txManager) {
             return lockRepository(dataSource, lockProperties, txManager);
         }
 
-        private LockRepository lockRepository(final DataSource dataSource, final LockProperties lockProperties, final PlatformTransactionManager txManager) {
+        private LockRepository lockRepository(final DataSource dataSource, final LockProperties lockProperties,
+                final PlatformTransactionManager txManager) {
             final DefaultLockRepository repository = new DistributedLockRepository(dataSource, lockProperties, txManager);
             repository.setPrefix("SP_");
             return repository;
@@ -96,7 +99,7 @@ class DistributedLockTest extends AbstractJpaIntegrationTest {
     /**
      * Test to verify that lock is kept while ping runs
      */
-    @SuppressWarnings({"java:S2925"})
+    @SuppressWarnings({ "java:S2925" })
     @Test
     void keepLockAlive() {
         final LockRegistry lockRegistry0 = new JdbcLockRegistry(lockRepository0);
@@ -119,13 +122,13 @@ class DistributedLockTest extends AbstractJpaIntegrationTest {
         final AtomicBoolean lock11Locked = new AtomicBoolean(); // state of the lock11
         log.info("Starting test");
         // service 0 must be able to lock lockKey0
-        assertThat(lock00.tryLock()).isTrue();        
+        assertThat(lock00.tryLock()).isTrue();
         try {
             assertThat(lockRepository0.isAcquired(path0)).isTrue(); // check db state
-            
+
             final Thread lockThread1 = new Thread(() -> {
                 // asserts lockKey1 is free and could be locked
-                assertThat(lock11.tryLock()).isTrue();                
+                assertThat(lock11.tryLock()).isTrue();
                 assertThat(lockRepository1.isAcquired(path1)).isTrue(); // check db state
 
                 try {
@@ -140,20 +143,14 @@ class DistributedLockTest extends AbstractJpaIntegrationTest {
                             assertThat(lock01.tryLock()).isFalse();
                             assertThat(lockRepository1.isAcquired(path0)).isFalse(); // check db state
 
-                            try {
-                                Thread.sleep(Math.min(1, lockProperties.getTtl() / 4));
-                            } catch (final InterruptedException e) {
-                                if (Thread.interrupted()) {
-                                    Thread.currentThread().interrupt();
-                                }
-                            }
+                            waitMillis(Math.min(1, lockProperties.getTtl() / 4));
                         }
-                    } catch (final AssertionError e) {    
+                    } catch (final AssertionError e) {
                         log.error("lockRepository1 has locked lockKey0 which has to be in lockRepository0 possession!", e);
                         lock01Obtained.set(true);
                         lock01.unlock();
                     }
-             
+
                     assertThat(lockRepository0.isAcquired(path1)).isFalse(); // check db state
                     assertThat(lockRepository1.isAcquired(path1)).isTrue(); // check db state
                 } finally {
@@ -183,13 +180,7 @@ class DistributedLockTest extends AbstractJpaIntegrationTest {
                         }
                     }
 
-                    try {
-                        Thread.sleep(Math.min(1, lockProperties.getTtl() / 4));
-                    } catch (final InterruptedException e) {
-                        if (Thread.interrupted()) {
-                            Thread.currentThread().interrupt();
-                        }
-                    }
+                    waitMillis(Math.min(1, lockProperties.getTtl() / 4));
                 }
             }
 
@@ -205,7 +196,7 @@ class DistributedLockTest extends AbstractJpaIntegrationTest {
             assertThat(lock01Obtained).isFalse();
             // assert that service 1 has been able to acquire the lock 1
             assertThat(lock11Obtained).isTrue();
-            
+
             assertThat(lockRepository0.isAcquired(path0)).isTrue(); // check db state
             assertThat(lockRepository1.isAcquired(path0)).isFalse(); // check db state
         } finally {
