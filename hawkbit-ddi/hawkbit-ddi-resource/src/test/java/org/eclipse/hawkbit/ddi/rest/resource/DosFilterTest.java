@@ -33,12 +33,11 @@ import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Test potential DOS attack scenarios and check if the filter prevents them.
- */
-@ActiveProfiles({ "test" })
-/**
+ * <p/>
  * Feature: Component Tests - REST Security<br/>
  * Story: Denial of Service protection filter
  */
+@ActiveProfiles({ "test" })
 class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
     private static final String X_FORWARDED_FOR = HawkbitSecurityProperties.Clients.X_FORWARDED_FOR;
@@ -113,7 +112,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     void acceptableGetLoad() throws Exception {
         for (int x = 0; x < 3; x++) {
             // sleep for one second
-            Thread.sleep(1100);
+            waitMillis(1100);
             for (int i = 0; i < 9; i++) {
                 mvc.perform(get("/{tenant}/controller/v1/4711", AccessContext.tenant())
                                 .header(X_FORWARDED_FOR, "10.0.0.1"))
@@ -159,7 +158,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
         for (int x = 0; x < 5; x++) {
             // sleep for one second
-            Thread.sleep(1100);
+            waitMillis(1100);
 
             for (int i = 0; i < 9; i++) {
                 mvc.perform(post("/{tenant}/controller/v1/4711/deploymentBase/" + actionId + "/feedback",

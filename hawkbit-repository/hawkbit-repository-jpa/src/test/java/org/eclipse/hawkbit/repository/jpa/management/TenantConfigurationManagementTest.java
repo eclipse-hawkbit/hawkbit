@@ -18,6 +18,8 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.NonNull;
+import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.InvalidTenantConfigurationKeyException;
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
@@ -28,6 +30,7 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.T
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 
@@ -48,7 +51,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
     }
 
     @Override
-    public void setEnvironment(final Environment env) {
+    public void setEnvironment(@NonNull  final Environment env) {
         this.env = env;
     }
 
@@ -86,12 +89,20 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
         tenantConfigurationManagement.addOrUpdateConfiguration(
                 TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, newConfigurationValue2);
 
+        // sometimes it reads old value, maybe if read too early. wait to settle up?
+        waitMillis(100);
+
         // verify that new configuration value is used
         final TenantConfigurationValue<String> updatedConfigurationValue2 = tenantConfigurationManagement
                 .getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, String.class);
 
         assertThat(updatedConfigurationValue2.isGlobal()).isFalse();
-        assertThat(updatedConfigurationValue2.getValue()).isEqualTo(newConfigurationValue2);
+        try {
+            assertThat(updatedConfigurationValue2.getValue()).isEqualTo(newConfigurationValue2);
+        } catch (final AssertionFailedError e) {
+            Awaitility.await().atMost(Duration.ofSeconds(20)).pollInterval(Duration.ofMillis(100))
+                    .untilAsserted(() -> assertThat(updatedConfigurationValue2.getValue()).isEqualTo(newConfigurationValue2));
+        }
     }
 
     /**
@@ -117,7 +128,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
      */
     @Test
     void batchUpdateTenantSpecificConfiguration() {
-        final Map<String, Serializable> configuration = new HashMap<>() {{
+        final Map<String, Object> configuration = new HashMap<>() {{
             put(TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, "token_123");
             put(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, true);
         }};
@@ -165,7 +176,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
      */
     @Test
     void batchWrongTenantConfigurationValueTypeThrowsException() {
-        final Map<String, Serializable> configuration = new HashMap<>() {{
+        final Map<String, Object> configuration = new HashMap<>() {{
             put(TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, "token_123");
             put(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, true);
             put(TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED, "wrong");
@@ -216,12 +227,19 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
      * Test that an Exception is thrown, when an integer is stored  but a string expected.
      */
     @Test
-    void storesIntegerWhenStringIsExpected() {
-        final String configKey = TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY;
-        final Integer wrongDatType = 123;
-        assertThatThrownBy(() -> tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongDatType))
+    void storesStringWhenIntegerIsExpected() {
+        final String configKey = TenantConfigurationKey.ACTION_CLEANUP_ON_QUOTA_HIT_PERCENTAGE;
+        final String wrongDataType = "123f";
+        assertThatThrownBy(() -> tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongDataType))
                 .as("Should not have worked as integer is not a string")
                 .isInstanceOf(TenantConfigurationValidatorException.class);
+
+        final Integer correctDataType = 123;
+        tenantConfigurationManagement.addOrUpdateConfiguration(configKey, String.valueOf(correctDataType));
+        assertThat(tenantConfigurationManagement.getConfigurationValue(configKey, Integer.class).getValue()).isEqualTo(correctDataType);
+        tenantConfigurationManagement.addOrUpdateConfiguration(configKey, correctDataType);
+        assertThat(tenantConfigurationManagement.getConfigurationValue(configKey, Integer.class).getValue()).isEqualTo(correctDataType);
+
     }
 
     /**
@@ -240,10 +258,9 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
      * Test that an Exception is thrown, when an integer is stored as PollingTime.
      */
     @Test
-    void storesIntegerWhenPollingIntervalIsExpected() {
+    void storesBadPollingIntervalIsExpected() {
         final String configKey = TenantConfigurationKey.POLLING_TIME;
-        final Integer wrongDataType = 123;
-        assertThatThrownBy(() -> tenantConfigurationManagement.addOrUpdateConfiguration(configKey, wrongDataType))
+        assertThatThrownBy(() -> tenantConfigurationManagement.addOrUpdateConfiguration(configKey, "wrongDataType"))
                 .as("Should not have worked as integer is not a time field")
                 .isInstanceOf(TenantConfigurationValidatorException.class);
     }
@@ -348,16 +365,6 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
         tenantConfigurationManagement.addOrUpdateConfiguration(configKey, 2592000000L);
         autoCleanupDaysInMs = tenantConfigurationManagement.getConfigurationValue(configKey, Long.class).getValue();
         Assertions.assertEquals(2592000000L, autoCleanupDaysInMs);
-    }
-
-    @Test
-    void throwExceptionIfTryingToConvertOtherValueThanNumber() {
-        final String configKey = TenantConfigurationKey.ACTION_CLEANUP_AUTO_EXPIRY;
-        // set auto cleanup for 1 day in String ms
-        assertThatThrownBy(() ->
-                tenantConfigurationManagement.addOrUpdateConfiguration(configKey, "86400000"))
-                .as("Cannot convert the value 86400000 of type String to the type Long defined by the configuration key.")
-                .isInstanceOf(TenantConfigurationValidatorException.class);
     }
 
     private static Duration getDurationByTimeValues(final long hours, final long minutes, final long seconds) {

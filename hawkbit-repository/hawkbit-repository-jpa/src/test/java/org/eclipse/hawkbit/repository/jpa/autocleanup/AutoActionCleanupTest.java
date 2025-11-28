@@ -188,7 +188,7 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         assertThat(actionRepository.count()).isEqualTo(3);
 
         // wait for expiry to elapse
-        Thread.sleep(800);
+        waitMillis(800);
 
         autoActionCleanup.run();
 

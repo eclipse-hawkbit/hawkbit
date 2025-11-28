@@ -482,11 +482,15 @@ public abstract class AbstractIntegrationTest {
     protected void waitNextMillis() {
         final long createTime = System.currentTimeMillis();
         while (System.currentTimeMillis() == createTime) {
-            try {
-                Thread.sleep(1);
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+            waitMillis(1);
+        }
+    }
+
+    protected void waitMillis(final long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 

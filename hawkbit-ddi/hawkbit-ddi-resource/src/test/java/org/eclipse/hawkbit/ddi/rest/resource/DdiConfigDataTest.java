@@ -88,7 +88,7 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.configData.href", equalTo(
                         "http://localhost/" + AccessContext.tenant() + "/controller/v1/4712/configData")));
-        Thread.sleep(1); // is required: otherwise processing the next line is
+        waitMillis(1); // is required: otherwise processing the next line is
         // often too fast and // the following assert will fail
         assertThat(targetManagement.getByControllerId("4712")
                 .getLastTargetQuery())
