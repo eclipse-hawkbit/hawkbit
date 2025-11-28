@@ -47,7 +47,7 @@ public class SecurityTokenAuthenticator extends Authenticator.AbstractAuthentica
         }
 
         if (!isEnabled(controllerSecurityToken)) {
-            log.debug("The target security token auth is disabled");
+            log.debug("The target security token authentication is disabled");
             return null;
         }
 

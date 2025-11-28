@@ -32,17 +32,17 @@ import org.eclipse.hawkbit.sdk.ca.CA;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Helper for auth setup
+ * Helper for authentication setup
  */
 @Slf4j
 @AllArgsConstructor
 public class AuthenticationSetupHelper {
 
-    private static final String AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY = "auth.gatewaytoken.key";
-    private static final String AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED = "auth.gatewaytoken.enabled";
-    private static final String AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED = "auth.targettoken.enabled";
-    private static final String AUTHENTICATION_MODE_HEADER_ENABLED = "auth.header.enabled";
-    private static final String AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME = "auth.header.authority";
+    private static final String AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY = "authentication.gatewaytoken.key";
+    private static final String AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED = "authentication.gatewaytoken.enabled";
+    private static final String AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED = "authentication.targettoken.enabled";
+    private static final String AUTHENTICATION_MODE_HEADER_ENABLED = "authentication.header.enabled";
+    private static final String AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME = "authentication.header.authority";
 
     private static final Random RND = new SecureRandom();
 
@@ -57,7 +57,7 @@ public class AuthenticationSetupHelper {
         return Base64.getEncoder().encodeToString(rnd);
     }
 
-    // sets up a certificate auth, if DdiCA is null - generate self signed CA
+    // sets up a certificate authentication, if DdiCA is null - generate self signed CA
     public void setupCertificateAuthentication() throws CertificateException {
         final MgmtTenantManagementRestApi mgmtTenantManagementRestApi = hawkbitClient.mgmtService(MgmtTenantManagementRestApi.class, tenant);
         CA ddiCA = tenant.getDdiCA();
@@ -80,7 +80,7 @@ public class AuthenticationSetupHelper {
         }
     }
 
-    // enables secure token auth
+    // enables secure token authentication
     public void setupSecureTokenAuthentication() {
         final MgmtTenantManagementRestApi mgmtTenantManagementRestApi = hawkbitClient.mgmtService(MgmtTenantManagementRestApi.class, tenant);
         if (!(Boolean.TRUE.equals(Objects.requireNonNull(mgmtTenantManagementRestApi
@@ -90,7 +90,7 @@ public class AuthenticationSetupHelper {
         }
     }
 
-    // set gateway token auth (generate and sets gateway token to tenant, if not set up)
+    // set gateway token authentication (generate and sets gateway token to tenant, if not set up)
     // return the gateway token
     public void setupGatewayTokenAuthentication() {
         String gatewayToken = tenant.getGatewayToken();
@@ -112,8 +112,8 @@ public class AuthenticationSetupHelper {
         }
     }
 
-    // if gateway token is configured then the gateway auth is enabled, so all devices use gateway token auth.
-    // otherwise, target token auth is enabled - then all devices shall be registered and the target token shall be set to the one from
+    // if gateway token is configured then the gateway authentication is enabled, so all devices use gateway token authentication.
+    // otherwise, target token authentication is enabled - then all devices shall be registered and the target token shall be set to the one from
     // the DDI controller instance
     public void setupTargetAuthentication() {
         final String gatewayToken = tenant.getGatewayToken();

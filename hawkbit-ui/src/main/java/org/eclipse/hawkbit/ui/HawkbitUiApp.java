@@ -128,8 +128,8 @@ public class HawkbitUiApp implements AppShellConfigurator {
             final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
-            final String auth = username + ":" + password;
-            final String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+            final String authentication = username + ":" + password;
+            final String encodedAuth = Base64.getEncoder().encodeToString(authentication.getBytes());
             conn.setRequestProperty(AUTHORIZATION_HEADER, "Basic " + encodedAuth);
 
             return conn.getResponseCode() != 401;

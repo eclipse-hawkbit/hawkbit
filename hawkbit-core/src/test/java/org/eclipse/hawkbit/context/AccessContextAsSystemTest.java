@@ -27,39 +27,39 @@ class AccessContextAsSystemTest {
 
     @Test
     void test() {
-        final UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+        final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 "test", "pass", List.of(new SimpleGrantedAuthority("anonymous")));
-        auth.setDetails("string details");
-        test(auth);
+        authentication.setDetails("string details");
+        test(authentication);
     }
 
     @Test
     void testWithNullPrincipal() {
-        final UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+        final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 null, "pass", List.of(new SimpleGrantedAuthority("anonymous")));
-        auth.setDetails("string details");
-        test(auth);
+        authentication.setDetails("string details");
+        test(authentication);
     }
 
     @Test
     void testWithNullCredentials() {
-        final UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+        final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 "test", null, List.of(new SimpleGrantedAuthority("anonymous")));
-        auth.setDetails("string details");
-        test(auth);
+        authentication.setDetails("string details");
+        test(authentication);
     }
 
     @Test
     void testWitAllNull() {
-        final UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+        final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 null, null, List.of(new SimpleGrantedAuthority("anonymous")));
-        auth.setDetails(null);
-        test(auth);
+        authentication.setDetails(null);
+        test(authentication);
     }
 
-    private static void test(final UsernamePasswordAuthenticationToken auth) {
+    private static void test(final UsernamePasswordAuthenticationToken authentication) {
         final SecurityContext sc = SecurityContextHolder.createEmptyContext();
-        sc.setAuthentication(auth);
+        sc.setAuthentication(authentication);
         SecurityContextHolder.setContext(sc);
         asSystemAsTenant("tenant", () -> {
             final Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();

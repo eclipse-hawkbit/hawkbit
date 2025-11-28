@@ -20,7 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST Resource handling basic auth validation.
+ * REST Resource handling basic authentication validation.
  */
 @RestController
 public class MgmtBasicAuthResource implements MgmtBasicAuthRestApi {

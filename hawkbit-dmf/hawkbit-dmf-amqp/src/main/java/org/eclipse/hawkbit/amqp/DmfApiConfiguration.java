@@ -148,7 +148,7 @@ public class DmfApiConfiguration {
     }
 
     /**
-     * Create the DMF API receiver queue for auth requests called by 3rd
+     * Create the DMF API receiver queue for authentication requests called by 3rd
      * party artifact storages for download authorization by devices.
      *
      * @return the receiver queue
