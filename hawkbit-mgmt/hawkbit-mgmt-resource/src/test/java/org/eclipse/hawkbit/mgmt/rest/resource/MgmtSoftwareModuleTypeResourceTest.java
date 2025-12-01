@@ -288,8 +288,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     public void deleteSoftwareModuleTypeUsed() throws Exception {
         final SoftwareModuleType testType = createTestType();
-        softwareModuleManagement
-                .create(SoftwareModuleManagement.Create.builder().type(testType).name("name").version("version").build());
+        softwareModuleManagement.create(SoftwareModuleManagement.Create.builder().type(testType).name("name").version("version").build());
 
         assertThat(softwareModuleTypeManagement.count()).isEqualTo(4);
 

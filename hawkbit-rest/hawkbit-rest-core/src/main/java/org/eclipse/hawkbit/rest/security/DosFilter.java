@@ -43,11 +43,9 @@ public class DosFilter extends OncePerRequestFilter {
 
     private final Pattern ipAddressBlacklist;
 
-    private final Cache<String, AtomicInteger> readCountCache = Caffeine.newBuilder()
-            .expireAfterWrite(1, TimeUnit.SECONDS).build();
+    private final Cache<String, AtomicInteger> readCountCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.SECONDS).build();
 
-    private final Cache<String, AtomicInteger> writeCountCache = Caffeine.newBuilder()
-            .expireAfterWrite(1, TimeUnit.SECONDS).build();
+    private final Cache<String, AtomicInteger> writeCountCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.SECONDS).build();
 
     private final int maxRead;
     private final int maxWrite;

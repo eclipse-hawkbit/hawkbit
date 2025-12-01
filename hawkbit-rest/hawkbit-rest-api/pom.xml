@@ -14,22 +14,21 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.hawkbit</groupId>
-        <artifactId>hawkbit-mgmt-parent</artifactId>
+        <artifactId>hawkbit-rest</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>hawkbit-mgmt-api</artifactId>
-    <name>hawkBit :: Management :: REST API</name>
-
-    <properties>
-        <java.version>${java.client.version}</java.version>
-    </properties>
+    <artifactId>hawkbit-rest-api</artifactId>
+    <name>hawkBit :: REST :: API</name>
 
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-rest-api</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.hateoas</groupId>
+            <artifactId>spring-hateoas</artifactId>
         </dependency>
     </dependencies>
 </project>

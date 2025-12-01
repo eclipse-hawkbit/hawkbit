@@ -15,8 +15,7 @@ import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- * Exception which is thrown in case an request body is not well formatted and
- * cannot be parsed.
+ * Exception which is thrown in case an request body is not well formatted and cannot be parsed.
  */
 public class MessageNotReadableException extends AbstractServerRtException {
 

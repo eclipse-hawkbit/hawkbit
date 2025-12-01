@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.rest.util;
+package org.eclipse.hawkbit.rest.exception;
 
 import java.io.Serial;
 

@@ -25,11 +25,6 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-repository-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-mgmt-api</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -38,27 +33,20 @@
             <artifactId>hawkbit-rest-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.plugin</groupId>
-            <artifactId>spring-plugin-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
-            <scope>provided</scope>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-repository-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- Test -->
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-rest-core</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-repository-test</artifactId>
@@ -69,28 +57,6 @@
             <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-repository-jpa</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-rest-core</artifactId>
-            <version>${project.version}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-json</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-aspects</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
