@@ -89,9 +89,6 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
         tenantConfigurationManagement.addOrUpdateConfiguration(
                 TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, newConfigurationValue2);
 
-        // sometimes it reads old value, maybe if read too early. wait to settle up?
-        waitMillis(100);
-
         // verify that new configuration value is used
         final TenantConfigurationValue<String> updatedConfigurationValue2 = tenantConfigurationManagement
                 .getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY, String.class);
