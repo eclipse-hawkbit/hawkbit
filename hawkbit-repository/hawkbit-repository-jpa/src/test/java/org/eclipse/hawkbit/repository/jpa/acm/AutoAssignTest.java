@@ -41,7 +41,7 @@ class AutoAssignTest extends AbstractAccessControllerManagementTest {
     void verifyOnlyUpdatableTargetsArePartOfAutoAssignmentByScheduler() throws Exception {
         // auto assign scheduler apply stored access control context and the context is correctly applied
         verifyOnlyUpdatableTargetsArePartOfAutoAssignment(
-                () -> new AutoAssignScheduler(systemManagement, autoAssignExecutor, lockRegistry, Optional.empty()).autoAssignScheduler());
+                () -> new AutoAssignScheduler(systemManagement, autoAssignExecutor, 1, lockRegistry, Optional.empty()).autoAssignScheduler());
     }
 
     @Test
