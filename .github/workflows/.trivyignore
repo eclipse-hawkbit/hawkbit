@@ -1,5 +1,4 @@
-# org.springframework:spring-web:5.3.31.RELEASE, ineffective vulnerability - hawkBit doesn't use beans of type HttpInvokerServiceExporter in applications
-CVE-2016-1000027
-
-# org.yaml:snakeyaml:1.33, ineffective vulnerability - Not applicable. Applications does not consume user-provided YAML data
-CVE-2022-1471
+# org.eclipse.hawkbit:*
+# this trivy finding is false positive since the current master (and other, new temporary, branches) doesn't contain http dependencies anymore
+# trivy detects 0-SNAPSHOT version and could not 'understand' that it is newer then 0.3.0M2 (since which the http dependencies were removed)
+CVE-2019-10240

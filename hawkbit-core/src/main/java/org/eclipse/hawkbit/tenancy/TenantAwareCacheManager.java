@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Value;
@@ -27,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
+import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 import org.springframework.lang.Nullable;
@@ -122,6 +124,26 @@ public class TenantAwareCacheManager implements CacheManager {
         }
     }
 
+    // Nop if, null, blank, "nop", "none", "maximumSize=0" or "expireAfterWrite=0"
+    static boolean isNop(@Nullable String spec) {
+        if (spec == null || spec.isBlank()) {
+            return true;
+        }
+        final String trimmed = spec.replaceAll("\\s", "");
+        return "nop".equalsIgnoreCase(trimmed) ||
+                "none".equalsIgnoreCase(trimmed) ||
+                (trimmed.contains("maximumSize=0") &&
+                        ("maximumSize=0".equals(trimmed) ||
+                                trimmed.startsWith("maximumSize=0,") ||
+                                trimmed.contains(",maximumSize=0,") ||
+                                trimmed.endsWith(",maximumSize=0"))) ||
+                (trimmed.contains("expireAfterWrite=0") &&
+                        ("expireAfterWrite=0".equals(trimmed) ||
+                                trimmed.startsWith("expireAfterWrite=0,") ||
+                                trimmed.contains(",expireAfterWrite=0,") ||
+                                trimmed.endsWith(",expireAfterWrite=0")));
+    }
+
     public interface CacheEvictEvent {
 
         String getTenant();
@@ -161,6 +183,11 @@ public class TenantAwareCacheManager implements CacheManager {
                         spec = defaultSpec;
                     }
                 }
+                // it seems that setting maximumSize=0 doesn't filly disables the Caffeine cache, so we explicitly check for Nop cache
+                if (isNop(spec)) {
+                    log.info("Using NOP cache for tenant '{}' and cache '{}'", tenant, name);
+                    return new Nop(name);
+                }
                 try {
                     return new CaffeineCache(n, Caffeine.from(spec).build(), false) {
 
@@ -188,9 +215,15 @@ public class TenantAwareCacheManager implements CacheManager {
     }
 
     @Value
-    private static class Nop implements Cache {
+    @EqualsAndHashCode(callSuper = true)
+    private static class Nop extends AbstractValueAdaptingCache {
 
         String name;
+
+        private Nop(final String name) {
+            super(false);
+            this.name = name;
+        }
 
         @NonNull
         @Override
@@ -198,25 +231,19 @@ public class TenantAwareCacheManager implements CacheManager {
             return name;
         }
 
-        @NonNull
         @Override
-        public Object getNativeCache() {
+        public @NonNull Object getNativeCache() {
             return this;
         }
 
         @Override
-        public ValueWrapper get(@NonNull  final Object key) {
-            return null;
-        }
-
-        @Override
-        public <T> T get(@NonNull final Object key, final Class<T> type) {
-            return null;
-        }
-
-        @Override
+        @SuppressWarnings("unchecked")
         public <T> T get(@NonNull final Object key, @NonNull final Callable<T> valueLoader) {
-            return null;
+            try {
+                return (T) fromStoreValue(valueLoader.call());
+            } catch (Exception e) {
+                throw new ValueRetrievalException(key, valueLoader, e);
+            }
         }
 
         @Override
@@ -232,6 +259,11 @@ public class TenantAwareCacheManager implements CacheManager {
         @Override
         public void clear() {
             // nop
+        }
+
+        @Override
+        protected Object lookup(@NonNull final Object key) {
+            return null; // nop cache doesn't cache anything, especially used to DO NOT cache null values
         }
     }
 }

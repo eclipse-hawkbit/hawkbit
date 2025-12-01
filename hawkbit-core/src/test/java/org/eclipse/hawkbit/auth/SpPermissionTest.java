@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.im.authentication;
+package org.eclipse.hawkbit.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
  * Feature: Unit Tests - Security<br/>
  * Story: Permission Test
  */
-final class SpPermissionTest {
+class SpPermissionTest {
 
     /**
      * Double-checks that all permissions doesn't contain any hierarchies.
