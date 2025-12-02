@@ -29,7 +29,7 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.exception.MultiPartFileUploadException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
-import org.eclipse.hawkbit.rest.util.FileStreamingFailedException;
+import org.eclipse.hawkbit.rest.exception.FileStreamingFailedException;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
