@@ -11,14 +11,19 @@ package org.eclipse.hawkbit.repository.jpa.scheduler;
 
 import static org.eclipse.hawkbit.context.AccessContext.asActor;
 import static org.eclipse.hawkbit.context.AccessContext.withSecurityContext;
+import static org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration.TENANT_TAG;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import jakarta.persistence.PersistenceException;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -64,29 +69,53 @@ public class JpaAutoAssignExecutor implements AutoAssignExecutor {
     private final TargetManagement<? extends Target> targetManagement;
     private final DeploymentManagement deploymentManagement;
     private final PlatformTransactionManager transactionManager;
+    private final Optional<MeterRegistry> meterRegistry;
 
     public JpaAutoAssignExecutor(
             final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
             final TargetManagement<? extends Target> targetManagement, final DeploymentManagement deploymentManagement,
-            final PlatformTransactionManager transactionManager) {
+            final PlatformTransactionManager transactionManager, final Optional<MeterRegistry> meterRegistry) {
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
         this.transactionManager = transactionManager;
+        this.meterRegistry = meterRegistry;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void checkAllTargets() {
         log.debug("Auto assign check call started");
-        forEachFilterWithAutoAssignDS(this::checkByTargetFilterQueryAndAssignDS);
+        forEachFilterWithAutoAssignDS(targetFilterQuery -> {
+            final long startNano = System.nanoTime();
+            try {
+                checkByTargetFilterQueryAndAssignDS(targetFilterQuery);
+            } finally {
+                meterRegistry // handle single targetFilterQuery
+                        .map(mReg -> mReg.timer(
+                                "hawkbit.autoassign.handle", TENANT_TAG, AccessContext.tenant(), "targetFilterQuery",
+                                String.valueOf(targetFilterQuery.getId())))
+                        .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
+            }
+        });
         log.debug("Auto assign check call finished");
     }
 
     @Override
     public void checkSingleTarget(final String controllerId) {
         log.debug("Auto assign check call for device {} started", controllerId);
-        forEachFilterWithAutoAssignDS(filter -> checkForDevice(controllerId, filter));
+        forEachFilterWithAutoAssignDS(targetFilterQuery -> {
+            final long startNano = System.nanoTime();
+            try {
+                checkForDevice(controllerId, targetFilterQuery);
+            } finally {
+                meterRegistry // handle single targetFilterQuery
+                        .map(mReg -> mReg.timer(
+                                "hawkbit.autoassign.handle.single", TENANT_TAG, AccessContext.tenant(), "targetFilterQuery",
+                                String.valueOf(targetFilterQuery.getId())))
+                        .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
+            }
+        });
         log.debug("Auto assign check call for device {} finished", controllerId);
     }
 
@@ -140,8 +169,7 @@ public class JpaAutoAssignExecutor implements AutoAssignExecutor {
                             // has stored context - executes it with it
                             context -> withSecurityContext(context, () -> consumer.accept(filterQuery)),
                             // has no stored context - executes it in the tenant & user scope
-                            () -> asActor(getAutoAssignmentInitiatedBy(filterQuery), () -> consumer.accept(filterQuery))
-                    );
+                            () -> asActor(getAutoAssignmentInitiatedBy(filterQuery), () -> consumer.accept(filterQuery)));
                 } catch (final RuntimeException ex) {
                     if (log.isDebugEnabled()) {
                         log.debug("Exception on forEachFilterWithAutoAssignDS execution for filter id {}. Continue with next filter query.",

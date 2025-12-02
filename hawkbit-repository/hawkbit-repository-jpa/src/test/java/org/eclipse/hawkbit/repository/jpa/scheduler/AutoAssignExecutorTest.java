@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -58,7 +59,7 @@ class AutoAssignExecutorTest {
     @BeforeEach
     void before() {
         autoAssignChecker = new JpaAutoAssignExecutor(
-                targetFilterQueryManagement, targetManagement, deploymentManagement, transactionManager);
+                targetFilterQueryManagement, targetManagement, deploymentManagement, transactionManager, Optional.empty());
     }
 
     /**

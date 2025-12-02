@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.scheduler;
 
 import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
+import static org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration.TENANT_TAG;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -58,7 +59,8 @@ public class AutoAssignScheduler {
     public void autoAssignScheduler() {
         // run this code in system code privileged to have the necessary permission to query and create entities.
         log.debug("Triggered auto-assign scheduler.");
-        final long startNano = java.lang.System.nanoTime();
+        final long startNano = System.nanoTime();
+
         asSystem(() ->
                 systemManagement.forEachTenantAsSystem(tenant -> {
                     if (autoAssignTaskExecutor == null) {// sync
@@ -68,9 +70,10 @@ public class AutoAssignScheduler {
                     }
                 })
         );
-        meterRegistry
-                .map(mReg -> mReg.timer("hawkbit.autoassign.scheduler.all"))
-                .ifPresent(timer -> timer.record(java.lang.System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
+
+        meterRegistry // handle all tenants (some could be skipped if lock could not be obtained)
+                .map(mReg -> mReg.timer("hawkbit.autoassign.scheduler"))
+                .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
         log.debug("Finished auto-assign scheduler run.");
     }
 
@@ -79,16 +82,16 @@ public class AutoAssignScheduler {
         if (!lock.tryLock()) {
             return;
         }
-        final long startNanoT = System.nanoTime();
+
+        final long startNano = System.nanoTime();
         try {
             autoAssignExecutor.checkAllTargets();
         } finally {
             lock.unlock();
+
             meterRegistry
-                    .map(mReg -> mReg.timer(
-                            "hawkbit.autoassign.scheduler",
-                            DefaultTenantConfiguration.TENANT_TAG, tenant))
-                    .ifPresent(timer -> timer.record(System.nanoTime() - startNanoT, TimeUnit.NANOSECONDS));
+                    .map(mReg -> mReg.timer("hawkbit.autoassign.handle.all", TENANT_TAG, tenant))
+                    .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
         }
     }
 
