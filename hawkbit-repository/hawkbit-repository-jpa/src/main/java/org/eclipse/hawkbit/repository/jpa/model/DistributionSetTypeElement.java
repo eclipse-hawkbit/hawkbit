@@ -14,10 +14,8 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.ForeignKey;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
@@ -47,17 +45,13 @@ public class DistributionSetTypeElement implements Serializable {
 
     @MapsId("dsType")
     @ManyToOne(optional = false)
-    @JoinColumn(
-            name = "distribution_set_type", nullable = false, updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_distribution_set_type"))
+    @JoinColumn(name = "distribution_set_type", nullable = false, updatable = false)
     private JpaDistributionSetType dsType;
 
     @Getter
     @MapsId("smType")
     @ManyToOne(optional = false)
-    @JoinColumn(
-            name = "software_module_type", nullable = false, updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_software_module_type"))
+    @JoinColumn(name = "software_module_type", nullable = false, updatable = false)
     private JpaSoftwareModuleType smType;
 
     @Setter
