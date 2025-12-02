@@ -41,13 +41,10 @@ import org.springframework.util.CollectionUtils;
 @PropertySource("classpath:hawkbit-security-defaults.properties")
 public class SecurityManagedConfiguration {
 
-    public static final String ANONYMOUS_CONTROLLER_SECURITY_ENABLED_SHOULD_ONLY_BE_USED_FOR_DEVELOPMENT_PURPOSES = """
-            ******************
-            ** Anonymous controller security enabled, should only be used for development purposes **
-            ******************""";
     public static final int DOS_FILTER_ORDER = -200;
 
-    public static FilterRegistrationBean<DosFilter> dosFilter(final Collection<String> includeAntPaths,
+    public static FilterRegistrationBean<DosFilter> dosFilter(
+            final Collection<String> includeAntPaths,
             final HawkbitSecurityProperties.Dos.Filter filterProperties,
             final HawkbitSecurityProperties.Clients clientProperties) {
         final FilterRegistrationBean<DosFilter> filterRegBean = new FilterRegistrationBean<>();

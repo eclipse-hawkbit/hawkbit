@@ -58,6 +58,8 @@ public class JpaRolloutHandler implements RolloutHandler {
 
     @Override
     public void handleAll() {
+        final long startNano = System.nanoTime();
+
         final List<Long> rollouts = rolloutManagement.findActiveRollouts();
         if (rollouts.isEmpty()) {
             return;
@@ -72,9 +74,8 @@ public class JpaRolloutHandler implements RolloutHandler {
             return;
         }
 
-        final long startNano = System.nanoTime();
         try {
-            log.debug("Trigger handling {} rollouts.", rollouts.size());
+            log.debug("Start handling {} rollouts.", rollouts.size());
             rollouts.forEach(rolloutId -> {
                 try {
                     handleRolloutInNewTransaction(rolloutId, handlerId);

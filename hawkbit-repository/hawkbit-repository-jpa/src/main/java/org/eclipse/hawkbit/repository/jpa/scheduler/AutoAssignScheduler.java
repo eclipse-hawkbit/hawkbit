@@ -11,18 +11,14 @@ package org.eclipse.hawkbit.repository.jpa.scheduler;
 
 import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
-import static org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration.TENANT_TAG;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.AutoAssignExecutor;
+import org.eclipse.hawkbit.repository.AutoAssignHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration;
-import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -35,18 +31,16 @@ public class AutoAssignScheduler {
     private static final String PROP_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.autoassign.scheduler.fixedDelay:2000}";
 
     private final SystemManagement systemManagement;
-    private final AutoAssignExecutor autoAssignExecutor;
-    private final LockRegistry lockRegistry;
+    private final AutoAssignHandler autoAssignHandler;
     private final Optional<MeterRegistry> meterRegistry;
+
     private final ThreadPoolTaskExecutor autoAssignTaskExecutor;
 
     public AutoAssignScheduler(
-            final SystemManagement systemManagement, final AutoAssignExecutor autoAssignExecutor,
-            final int threadPoolSize,
-            final LockRegistry lockRegistry, final Optional<MeterRegistry> meterRegistry) {
+            final SystemManagement systemManagement, final AutoAssignHandler autoAssignHandler,
+            final int threadPoolSize, final Optional<MeterRegistry> meterRegistry) {
         this.systemManagement = systemManagement;
-        this.autoAssignExecutor = autoAssignExecutor;
-        this.lockRegistry = lockRegistry;
+        this.autoAssignHandler = autoAssignHandler;
         this.meterRegistry = meterRegistry;
         autoAssignTaskExecutor = SchedulerUtils.threadPoolTaskExecutor("auto-assign-exec-", threadPoolSize);
     }
@@ -78,24 +72,11 @@ public class AutoAssignScheduler {
     }
 
     private void handleAll(final String tenant) {
-        final Lock lock = lockRegistry.obtain(createAutoAssignmentLockKey(tenant));
-        if (!lock.tryLock()) {
-            return;
-        }
-
-        final long startNano = System.nanoTime();
+        log.trace("Handling auto-assignments for tenant: {}", tenant);
         try {
-            autoAssignExecutor.checkAllTargets();
-        } finally {
-            lock.unlock();
-
-            meterRegistry
-                    .map(mReg -> mReg.timer("hawkbit.autoassign.handle.all", TENANT_TAG, tenant))
-                    .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
+            autoAssignHandler.handleAll();
+        } catch (final Exception e) {
+            log.error("Error auto-assignments rollout for tenant {}", tenant, e);
         }
-    }
-
-    private static String createAutoAssignmentLockKey(final String tenant) {
-        return tenant + "-auto-assign";
     }
 }

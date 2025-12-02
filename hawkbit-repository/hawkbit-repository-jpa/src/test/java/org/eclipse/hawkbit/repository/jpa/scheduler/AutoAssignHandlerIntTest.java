@@ -44,18 +44,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
 /**
- * Test class for {@link JpaAutoAssignExecutor}.
+ * Test class for {@link JpaAutoAssignHandler}.
  * <p/>
  * Feature: Component Tests - Repository<br/>
  * Story: Auto assign checker
  */
 @SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
-class AutoAssignExecutorIntTest extends AbstractJpaIntegrationTest {
+class AutoAssignHandlerIntTest extends AbstractJpaIntegrationTest {
 
     private static final String SPACE_AND_DESCRIPTION = " description";
 
     @Autowired
-    private JpaAutoAssignExecutor autoAssignChecker;
+    private JpaAutoAssignHandler autoAssignChecker;
     @Autowired
     private DeploymentManagement deploymentManagement;
 
@@ -81,7 +81,7 @@ class AutoAssignExecutorIntTest extends AbstractJpaIntegrationTest {
             targetFilterQueryManagement.updateAutoAssignDS(
                     new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(secondDistributionSet.getId()));
             // Run the check
-            autoAssignChecker.checkAllTargets();
+            autoAssignChecker.handleAll();
 
             // verify that manually created action is canceled and action
             // created from AutoAssign is running
@@ -144,7 +144,7 @@ class AutoAssignExecutorIntTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.countByRsqlAndNonDsAndCompatibleAndUpdatable(setA.getId(), targetFilterQuery.getQuery())).isEqualTo(15);
 
         // Run the check
-        autoAssignChecker.checkAllTargets();
+        autoAssignChecker.handleAll();
 
         verifyThatTargetsHaveDistributionSetAssignment(setA, targets.subList(5, 25), targetsCount);
 
@@ -173,7 +173,7 @@ class AutoAssignExecutorIntTest extends AbstractJpaIntegrationTest {
         final int targetsCount = targets.size();
 
         // Run the check
-        autoAssignChecker.checkSingleTarget(targets.get(0).getControllerId());
+        autoAssignChecker.handleSingleTarget(targets.get(0).getControllerId());
 
         verifyThatTargetsHaveDistributionSetAssignment(toAssignDs, targets.subList(0, 1), targetsCount);
 
@@ -204,7 +204,7 @@ class AutoAssignExecutorIntTest extends AbstractJpaIntegrationTest {
                 targetDsAIdPref.concat(SPACE_AND_DESCRIPTION));
 
         // Run the check
-        autoAssignChecker.checkAllTargets();
+        autoAssignChecker.handleAll();
 
         verifyThatTargetsHaveDistributionSetAssignedAndActionStatus(distributionSet, targets, expectedStatus);
     }
@@ -232,7 +232,7 @@ class AutoAssignExecutorIntTest extends AbstractJpaIntegrationTest {
         final List<Target> targets = testdataFactory.createTargets(25);
 
         // Run the check
-        autoAssignChecker.checkSingleTarget(targets.get(0).getControllerId());
+        autoAssignChecker.handleSingleTarget(targets.get(0).getControllerId());
         verifyThatTargetsHaveDistributionSetAssignedAndActionStatus(toAssignDs, targets.subList(0, 1), expectedStatus);
 
         verifyThatTargetsNotHaveDistributionSetAssignment(targets.subList(1, 25));
@@ -281,7 +281,7 @@ class AutoAssignExecutorIntTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveDistributionSetAssignment(setB, targetsF.subList(0, 5), targetsCount);
 
         // Run the check
-        autoAssignChecker.checkAllTargets();
+        autoAssignChecker.handleAll();
 
         // first 5 targets of the fail group should still have setB
         verifyThatTargetsHaveDistributionSetAssignment(setB, targetsF.subList(0, 5), targetsCount);
@@ -309,7 +309,7 @@ class AutoAssignExecutorIntTest extends AbstractJpaIntegrationTest {
 
         final int targetsCount = targetsA.size() + targetsB.size() + targetsC.size();
 
-        autoAssignChecker.checkAllTargets();
+        autoAssignChecker.handleAll();
 
         verifyThatTargetsHaveDistributionSetAssignment(distributionSet, targetsA, targetsCount);
         verifyThatTargetsHaveDistributionSetAssignment(distributionSet, targetsB, targetsCount);
@@ -334,7 +334,7 @@ class AutoAssignExecutorIntTest extends AbstractJpaIntegrationTest {
                 .name("a").query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(weight)
                 .build());
         testdataFactory.createTargets(amountOfTargets);
-        autoAssignChecker.checkAllTargets();
+        autoAssignChecker.handleAll();
 
         final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
         assertThat(actions)
@@ -353,7 +353,7 @@ class AutoAssignExecutorIntTest extends AbstractJpaIntegrationTest {
         enableMultiAssignments();
 
         testdataFactory.createTargets(amountOfTargets);
-        autoAssignChecker.checkAllTargets();
+        autoAssignChecker.handleAll();
 
         final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
         assertThat(actions)
@@ -404,7 +404,7 @@ class AutoAssignExecutorIntTest extends AbstractJpaIntegrationTest {
                 testFilter.getQuery());
         assertThat(compatibleCount).isEqualTo(compatibleTargets.size());
 
-        autoAssignChecker.checkAllTargets();
+        autoAssignChecker.handleAll();
 
         final List<Action> actions = deploymentManagement.findActionsAll(Pageable.unpaged()).getContent();
         assertThat(actions).hasSize(compatibleTargets.size());

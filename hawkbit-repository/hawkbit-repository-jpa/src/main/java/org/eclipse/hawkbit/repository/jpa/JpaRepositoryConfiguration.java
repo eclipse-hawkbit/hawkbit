@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.ql.jpa.QLSupport.NodeTransformer;
 import org.eclipse.hawkbit.ql.jpa.QLSupport.QueryParser;
 import org.eclipse.hawkbit.ql.rsql.RsqlParser;
-import org.eclipse.hawkbit.repository.AutoAssignExecutor;
+import org.eclipse.hawkbit.repository.AutoAssignHandler;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.PropertiesQuotaManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -341,10 +341,10 @@ public class JpaRepositoryConfiguration {
     @Profile("!test")
     @ConditionalOnProperty(prefix = "hawkbit.autoassign.scheduler", name = "enabled", matchIfMissing = true)
     AutoAssignScheduler autoAssignScheduler(
-            final SystemManagement systemManagement, final AutoAssignExecutor autoAssignExecutor,
+            final SystemManagement systemManagement, final AutoAssignHandler autoAssignHandler,
             @Value("${hawkbit.autoassign.executor.thread-pool.size:1}") final int threadPoolSize,
             final LockRegistry lockRegistry, final Optional<MeterRegistry> meterRegistry) {
-        return new AutoAssignScheduler(systemManagement, autoAssignExecutor, threadPoolSize, lockRegistry, meterRegistry);
+        return new AutoAssignScheduler(systemManagement, autoAssignHandler, threadPoolSize, meterRegistry);
     }
 
     /**

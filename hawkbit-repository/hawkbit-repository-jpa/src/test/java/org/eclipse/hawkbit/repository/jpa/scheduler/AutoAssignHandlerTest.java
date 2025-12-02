@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.scheduler;
 
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -20,7 +21,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.locks.Lock;
 
+import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -36,6 +39,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
@@ -43,7 +47,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * Story: Auto assign checker
  */
 @ExtendWith(MockitoExtension.class)
-class AutoAssignExecutorTest {
+class AutoAssignHandlerTest {
 
     @Mock
     private TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
@@ -54,19 +58,36 @@ class AutoAssignExecutorTest {
     @Mock
     private PlatformTransactionManager transactionManager;
 
-    private JpaAutoAssignExecutor autoAssignChecker;
+    @Mock
+    LockRegistry lockRegistry;
+
+    private JpaAutoAssignHandler autoAssignHandler;
 
     @BeforeEach
     void before() {
-        autoAssignChecker = new JpaAutoAssignExecutor(
-                targetFilterQueryManagement, targetManagement, deploymentManagement, transactionManager, Optional.empty());
+        autoAssignHandler = new JpaAutoAssignHandler(
+                targetFilterQueryManagement, targetManagement, deploymentManagement, transactionManager, lockRegistry, Optional.empty());
     }
 
     /**
      * Single device check triggers update for matching auto assignment filter.
      */
     @Test
-    void checkForDevice() {
+    void failToLockInHandleAll() {
+        final Lock lock = mock(Lock.class);
+        when(lock.tryLock()).thenReturn(false);
+        when(lockRegistry.obtain(any())).thenReturn(lock);
+        final TargetFilterQuery matching = mock(TargetFilterQuery.class);
+        when(targetFilterQueryManagement.findWithAutoAssignDS(any())).thenReturn(new SliceImpl<>(Arrays.asList(matching)));
+
+        assertThatNoException().isThrownBy(autoAssignHandler::handleAll);
+    }
+
+    /**
+     * Single device check triggers update for matching auto assignment filter.
+     */
+    @Test
+    void handleSingleTarget() {
         final String target = getRandomString();
         final long ds = getRandomLong();
         final TargetFilterQuery matching = mockFilterQuery(ds);
@@ -76,7 +97,7 @@ class AutoAssignExecutorTest {
         when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, ds, notMatching.getQuery()))
                 .thenReturn(false);
 
-        autoAssignChecker.checkSingleTarget(target);
+        autoAssignHandler.handleSingleTarget(target);
 
         verify(deploymentManagement).assignDistributionSets(Mockito.argThat(deployReqMatcher(target, ds)), any());
         Mockito.verifyNoMoreInteractions(deploymentManagement);
