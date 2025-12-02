@@ -126,15 +126,12 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Getter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
-            name = "rollout_group", updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rollout_group"))
+            name = "rollout_group", updatable = false)
     private JpaRolloutGroup rolloutGroup;
 
     @Getter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "rollout", updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rollout"))
+    @JoinColumn(name = "rollout", updatable = false)
     private JpaRollout rollout;
 
     // a cron expression to be used for scheduling.
