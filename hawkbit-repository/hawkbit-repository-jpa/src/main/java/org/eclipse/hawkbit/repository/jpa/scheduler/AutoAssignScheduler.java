@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.scheduler;
 
 import static org.eclipse.hawkbit.context.AccessContext.asSystem;
+import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +23,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * Scheduler to check target filters for auto assignment of distribution sets
@@ -29,20 +31,23 @@ import org.springframework.scheduling.annotation.Scheduled;
 @Slf4j
 public class AutoAssignScheduler {
 
-    private static final String PROP_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.scheduler.scheduler.fixedDelay:2000}";
+    private static final String PROP_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.autoassign.scheduler.fixedDelay:2000}";
 
     private final SystemManagement systemManagement;
     private final AutoAssignExecutor autoAssignExecutor;
     private final LockRegistry lockRegistry;
     private final Optional<MeterRegistry> meterRegistry;
+    private final ThreadPoolTaskExecutor autoAssignTaskExecutor;
 
     public AutoAssignScheduler(
             final SystemManagement systemManagement, final AutoAssignExecutor autoAssignExecutor,
+            final int threadPoolSize,
             final LockRegistry lockRegistry, final Optional<MeterRegistry> meterRegistry) {
         this.systemManagement = systemManagement;
         this.autoAssignExecutor = autoAssignExecutor;
         this.lockRegistry = lockRegistry;
         this.meterRegistry = meterRegistry;
+        autoAssignTaskExecutor = SchedulerUtils.threadPoolTaskExecutor("auto-assign-exec-", threadPoolSize);
     }
 
     /**
@@ -52,41 +57,42 @@ public class AutoAssignScheduler {
     @Scheduled(initialDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void autoAssignScheduler() {
         // run this code in system code privileged to have the necessary permission to query and create entities.
-        asSystem(this::executeAutoAssign);
+        log.debug("Triggered auto-assign scheduler.");
+        final long startNano = java.lang.System.nanoTime();
+        asSystem(() ->
+                systemManagement.forEachTenantAsSystem(tenant -> {
+                    if (autoAssignTaskExecutor == null) {// sync
+                        handleAll(tenant);
+                    } else {// async
+                        autoAssignTaskExecutor.execute(() -> asSystemAsTenant(tenant, () -> handleAll(tenant)));
+                    }
+                })
+        );
+        meterRegistry
+                .map(mReg -> mReg.timer("hawkbit.autoassign.scheduler.all"))
+                .ifPresent(timer -> timer.record(java.lang.System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
+        log.debug("Finished auto-assign scheduler run.");
     }
 
-    @SuppressWarnings("squid:S3516")
-    private Object executeAutoAssign() {
-        // workaround eclipselink that is currently not possible to execute a query without multitenancy if MultiTenant
-        // annotation is used - https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So iterate through all tenants and execute the rollout
-        // check for each tenant separately.
-        final Lock lock = lockRegistry.obtain("scheduler");
+    private void handleAll(final String tenant) {
+        final Lock lock = lockRegistry.obtain(createAutoAssignmentLockKey(tenant));
         if (!lock.tryLock()) {
-            return null;
+            return;
         }
-
-        final long startNano = java.lang.System.nanoTime();
+        final long startNanoT = System.nanoTime();
         try {
-            log.debug("Auto assign scheduled execution has acquired lock and started for each tenant.");
-            systemManagement.forEachTenantAsSystem(tenant -> {
-                final long startNanoT = java.lang.System.nanoTime();
-
-                autoAssignExecutor.checkAllTargets();
-
-                meterRegistry
-                        .map(mReg -> mReg.timer(
-                                "hawkbit.scheduler.executor",
-                                DefaultTenantConfiguration.TENANT_TAG, tenant))
-                        .ifPresent(timer -> timer.record(java.lang.System.nanoTime() - startNanoT, TimeUnit.NANOSECONDS));
-            });
+            autoAssignExecutor.checkAllTargets();
         } finally {
             lock.unlock();
             meterRegistry
-                    .map(mReg -> mReg.timer("hawkbit.scheduler.executor.all"))
-                    .ifPresent(timer -> timer.record(java.lang.System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
-            log.debug("Auto assign scheduled execution has released lock and finished.");
+                    .map(mReg -> mReg.timer(
+                            "hawkbit.autoassign.scheduler",
+                            DefaultTenantConfiguration.TENANT_TAG, tenant))
+                    .ifPresent(timer -> timer.record(System.nanoTime() - startNanoT, TimeUnit.NANOSECONDS));
         }
+    }
 
-        return null;
+    private static String createAutoAssignmentLockKey(final String tenant) {
+        return tenant + "-auto-assign";
     }
 }

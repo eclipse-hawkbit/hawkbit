@@ -19,7 +19,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.jpa.rollout.BlockWhenFullPolicy;
 import org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -45,7 +44,7 @@ public class RolloutScheduler {
         this.systemManagement = systemManagement;
         this.rolloutHandler = rolloutHandler;
         this.meterRegistry = meterRegistry;
-        rolloutTaskExecutor = threadPoolTaskExecutor(threadPoolSize);
+        rolloutTaskExecutor = SchedulerUtils.threadPoolTaskExecutor("rollout-exec-", threadPoolSize);
 
     }
 
@@ -67,7 +66,7 @@ public class RolloutScheduler {
                     if (rolloutTaskExecutor == null) {
                         handleAll(tenant);
                     } else {
-                        handleAllAsync(tenant);
+                        rolloutTaskExecutor.submit(() -> asSystemAsTenant(tenant, () -> handleAll(tenant)));
                     }
                 }));
 
@@ -91,23 +90,4 @@ public class RolloutScheduler {
                 .ifPresent(timer -> timer.record(java.lang.System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
     }
 
-    private void handleAllAsync(final String tenant) {
-        rolloutTaskExecutor.submit(() -> asSystemAsTenant(tenant, () -> handleAll(tenant)));
-    }
-
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor(final int threadPoolSize) {
-        if (threadPoolSize <= 1) {
-            return null;
-        }
-
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(threadPoolSize);
-        executor.setMaxPoolSize(threadPoolSize);
-        executor.setQueueCapacity(0); // forces a Synchronous Queue
-        // This policy will block the submitter until a worker thread is free
-        executor.setRejectedExecutionHandler(new BlockWhenFullPolicy());
-        executor.setThreadNamePrefix("rollout-exec-");
-        executor.initialize();
-        return executor;
-    }
 }

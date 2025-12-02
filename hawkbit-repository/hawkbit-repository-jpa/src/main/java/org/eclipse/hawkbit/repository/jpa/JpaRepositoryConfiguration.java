@@ -342,8 +342,9 @@ public class JpaRepositoryConfiguration {
     @ConditionalOnProperty(prefix = "hawkbit.autoassign.scheduler", name = "enabled", matchIfMissing = true)
     AutoAssignScheduler autoAssignScheduler(
             final SystemManagement systemManagement, final AutoAssignExecutor autoAssignExecutor,
+            @Value("${hawkbit.autoassign.executor.thread-pool.size:1}") final int threadPoolSize,
             final LockRegistry lockRegistry, final Optional<MeterRegistry> meterRegistry) {
-        return new AutoAssignScheduler(systemManagement, autoAssignExecutor, lockRegistry, meterRegistry);
+        return new AutoAssignScheduler(systemManagement, autoAssignExecutor, threadPoolSize, lockRegistry, meterRegistry);
     }
 
     /**
