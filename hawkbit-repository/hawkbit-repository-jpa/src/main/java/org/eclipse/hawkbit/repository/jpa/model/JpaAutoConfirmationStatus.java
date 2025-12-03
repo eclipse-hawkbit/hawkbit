@@ -10,10 +10,8 @@
 package org.eclipse.hawkbit.repository.jpa.model;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -37,9 +35,7 @@ public class JpaAutoConfirmationStatus extends AbstractJpaTenantAwareBaseEntity 
 
     // actually it is OneToOne - but lazy loading is not supported for OneToOne (at least for hibernate 6.6.2)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "target", nullable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_conf_status_target"))
+    @JoinColumn(name = "target", nullable = false)
     private JpaTarget target;
 
     @Column(name = "initiator", length = USERNAME_FIELD_LENGTH)
