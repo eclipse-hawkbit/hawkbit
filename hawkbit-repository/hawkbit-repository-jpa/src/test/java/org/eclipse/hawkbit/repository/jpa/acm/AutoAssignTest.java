@@ -19,7 +19,7 @@ import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.cal
 
 import java.util.Optional;
 
-import org.eclipse.hawkbit.repository.AutoAssignExecutor;
+import org.eclipse.hawkbit.repository.AutoAssignHandler;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDistributionSetUpdate;
@@ -27,34 +27,30 @@ import org.eclipse.hawkbit.repository.jpa.scheduler.AutoAssignScheduler;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.integration.support.locks.LockRegistry;
 
 class AutoAssignTest extends AbstractAccessControllerManagementTest {
 
     @Autowired
-    AutoAssignExecutor autoAssignExecutor;
-
-    @Autowired
-    LockRegistry lockRegistry;
+    AutoAssignHandler autoAssignHandler;
 
     @Test
     void verifyOnlyUpdatableTargetsArePartOfAutoAssignmentByScheduler() throws Exception {
         // auto assign scheduler apply stored access control context and the context is correctly applied
         verifyOnlyUpdatableTargetsArePartOfAutoAssignment(
-                () -> new AutoAssignScheduler(systemManagement, autoAssignExecutor, 1, lockRegistry, Optional.empty()).autoAssignScheduler());
+                () -> new AutoAssignScheduler(systemManagement, autoAssignHandler, 1, Optional.empty()).autoAssignScheduler());
     }
 
     @Test
     void verifyOnlyUpdatableTargetsArePartOfAutoAssignment() throws Exception {
-        verifyOnlyUpdatableTargetsArePartOfAutoAssignment(autoAssignExecutor::checkAllTargets);
+        verifyOnlyUpdatableTargetsArePartOfAutoAssignment(autoAssignHandler::handleAll);
     }
 
     @Test
     void verifyOnlyUpdatableTargetsWillGetAssignmentOnSingleCheck() throws Exception {
         verifyOnlyUpdatableTargetsArePartOfAutoAssignment(() -> {
-            autoAssignExecutor.checkSingleTarget(target1Type1.getControllerId());
-            autoAssignExecutor.checkSingleTarget(target2Type2.getControllerId());
-            autoAssignExecutor.checkSingleTarget(target3Type2.getControllerId());
+            autoAssignHandler.handleSingleTarget(target1Type1.getControllerId());
+            autoAssignHandler.handleSingleTarget(target2Type2.getControllerId());
+            autoAssignHandler.handleSingleTarget(target3Type2.getControllerId());
         });
     }
 

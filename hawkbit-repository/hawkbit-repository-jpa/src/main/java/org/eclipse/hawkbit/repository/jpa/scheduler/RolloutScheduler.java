@@ -19,7 +19,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -54,8 +53,8 @@ public class RolloutScheduler {
      */
     @Scheduled(initialDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void runningRolloutScheduler() {
-        log.debug("rollout schedule checker has been triggered.");
-        final long startNano = java.lang.System.nanoTime();
+        log.debug("Rollout scheduler has been triggered.");
+        final long startNano = System.nanoTime();
 
         // run this code in system code privileged to have the necessary system code permission execute forEachTenant
         asSystem(() ->
@@ -66,28 +65,21 @@ public class RolloutScheduler {
                     if (rolloutTaskExecutor == null) {
                         handleAll(tenant);
                     } else {
-                        rolloutTaskExecutor.submit(() -> asSystemAsTenant(tenant, () -> handleAll(tenant)));
+                        rolloutTaskExecutor.execute(() -> asSystemAsTenant(tenant, () -> handleAll(tenant)));
                     }
                 }));
 
-        meterRegistry
-                .map(mReg -> mReg.timer("hawkbit.rollout.scheduler.all"))
-                .ifPresent(timer -> timer.record(java.lang.System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
+        meterRegistry // handle all tenants (some could be skipped if lock could not be obtained)
+                .map(mReg -> mReg.timer("hawkbit.rollout.scheduler"))
+                .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
     }
 
     private void handleAll(final String tenant) {
-        log.trace("Handling rollout for tenant: {}", tenant);
-        final long startNano = java.lang.System.nanoTime();
-
+        log.trace("Handling rollouts for tenant: {}", tenant);
         try {
             rolloutHandler.handleAll();
         } catch (final Exception e) {
             log.error("Error processing rollout for tenant {}", tenant, e);
         }
-
-        meterRegistry
-                .map(mReg -> mReg.timer("hawkbit.rollout.scheduler", DefaultTenantConfiguration.TENANT_TAG, tenant))
-                .ifPresent(timer -> timer.record(java.lang.System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
     }
-
 }

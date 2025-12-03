@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 import lombok.SneakyThrows;
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.context.AccessContext;
-import org.eclipse.hawkbit.repository.AutoAssignExecutor;
+import org.eclipse.hawkbit.repository.AutoAssignHandler;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -45,7 +45,7 @@ class SecurityContextCtxTest extends AbstractJpaIntegrationTest {
     private static final Set<String> AUTHORITIES = SpPermission.getAllAuthorities();
 
     @Autowired
-    AutoAssignExecutor autoAssignExecutor;
+    AutoAssignHandler autoAssignHandler;
 
     /**
      * Verifies acm context is persisted when creating Rollout
@@ -97,7 +97,7 @@ class SecurityContextCtxTest extends AbstractJpaIntegrationTest {
         try (final MockedStatic<AccessContext> mocked = mockStatic(AccessContext.class, Mockito.CALLS_REAL_METHODS)) {
             withSecurityContext(userContext, testdataFactory::createTargetFilterWithTargetsAndActiveAutoAssignment);
             withSecurityContext(userContext, () -> {
-                autoAssignExecutor.checkAllTargets();
+                autoAssignHandler.handleAll();
                 return null;
             });
 
@@ -118,7 +118,7 @@ class SecurityContextCtxTest extends AbstractJpaIntegrationTest {
 
             withSecurityContext(userContext, testdataFactory::createTargetFilterWithTargetsAndActiveAutoAssignment);
             withSecurityContext(userContext, () -> {
-                autoAssignExecutor.checkSingleTarget(targetManagement.findAll(Pageable.ofSize(1)).getContent().get(0).getControllerId());
+                autoAssignHandler.handleSingleTarget(targetManagement.findAll(Pageable.ofSize(1)).getContent().get(0).getControllerId());
                 return null;
             });
 
