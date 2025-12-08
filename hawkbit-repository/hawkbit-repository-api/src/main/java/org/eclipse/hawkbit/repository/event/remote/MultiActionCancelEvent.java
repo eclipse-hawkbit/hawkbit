@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.event.remote;
 import java.io.Serial;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.Action;
 
@@ -26,7 +27,8 @@ public class MultiActionCancelEvent extends MultiActionEvent {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public MultiActionCancelEvent(String tenant, List<Action> actions) {
+    @JsonIgnore
+    public MultiActionCancelEvent(final String tenant, final List<Action> actions) {
         super(tenant, actions);
     }
 }

@@ -67,7 +67,8 @@
                             <dependency>
                                 <groupId>org.eclipse.persistence</groupId>
                                 <artifactId>org.eclipse.persistence.jpa</artifactId>
-                                <version>${eclipselink.version}</version>
+                                <version>4.0.8</version>
+<!--                        <version>${eclipselink.version}</version>-->
                             </dependency>
                         </dependencies>
                     </plugin>
@@ -110,7 +111,7 @@
         <!-- Static class generation -->
         <dependency>
             <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-jpamodelgen</artifactId>
+            <artifactId>hibernate-processor</artifactId>
             <optional>true</optional>
         </dependency>
 
@@ -147,16 +148,14 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Enable metrics -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-actuator-autoconfigure</artifactId>
+            <artifactId>spring-boot-starter-data-jpa-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Enable metrics for hibernates -->
         <dependency>
-            <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-micrometer</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-micrometer-metrics</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.8</version>
+        <version>4.0.0</version>
     </parent>
 
     <groupId>org.eclipse.hawkbit</groupId>
@@ -56,9 +56,9 @@
         <java.client.version>17</java.client.version>
 
         <!-- must be the same as the parent version -->
-        <spring.boot.version>3.5.8</spring.boot.version>
-        <spring.cloud.version>2025.0.0</spring.cloud.version>
-        <springdoc-openapi.version>2.8.14</springdoc-openapi.version>
+        <spring.boot.version>4.0.0</spring.boot.version>
+        <spring.cloud.version>2025.1.0</spring.cloud.version>
+        <springdoc-openapi.version>3.0.0</springdoc-openapi.version>
 
         <!-- Spring boot version overrides (should be reviewed with every Spring boot upgrade) - START -->
         <!-- Newer versions needed than defined in the Spring boot -->
@@ -66,7 +66,9 @@
         <!-- Spring boot version overrides - END -->
 
         <!-- Eclipselink - START -->
-        <eclipselink.version>4.0.8</eclipselink.version>
+        <!-- TODO (Spring Boot 4 Migration): !!! just for test !!! 5.0.0-B12 is just a beta.
+          It also it doesn't work fine with ethlo plugin, that's why the static weaving there is usung 4.0.8 -->
+        <eclipselink.version>5.0.0-B12</eclipselink.version>
         <eclipselink.maven.plugin.version>3.0.2</eclipselink.maven.plugin.version>
         <!-- Eclipselink - END -->
 
@@ -94,6 +96,7 @@
         <license.maven.plugin.version>5.0.0</license.maven.plugin.version>
         <central.publishing.maven.plugin.version>0.9.0</central.publishing.maven.plugin.version>
         <maven.gpg.plugin.version>3.2.8</maven.gpg.plugin.version>
+        <spotless-maven-plugin.version>3.1.0</spotless-maven-plugin.version>
         <!-- Maven Plugin versions - END -->
 
         <!-- Test - START -->
@@ -241,25 +244,25 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-web</artifactId>
-                <version>${spring.boot.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.datatype</groupId>
-                        <artifactId>jackson-datatype-jdk8</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.datatype</groupId>
-                        <artifactId>jackson-datatype-jsr310</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.module</groupId>
-                        <artifactId>jackson-module-parameter-names</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>org.springframework.boot</groupId>-->
+<!--                <artifactId>spring-boot-starter-webmvc</artifactId>-->
+<!--                <version>${spring.boot.version}</version>-->
+<!--                <exclusions>-->
+<!--                    <exclusion>-->
+<!--                        <groupId>com.fasterxml.jackson.datatype</groupId>-->
+<!--                        <artifactId>jackson-datatype-jdk8</artifactId>-->
+<!--                    </exclusion>-->
+<!--                    <exclusion>-->
+<!--                        <groupId>com.fasterxml.jackson.datatype</groupId>-->
+<!--                        <artifactId>jackson-datatype-jsr310</artifactId>-->
+<!--                    </exclusion>-->
+<!--                    <exclusion>-->
+<!--                        <groupId>com.fasterxml.jackson.module</groupId>-->
+<!--                        <artifactId>jackson-module-parameter-names</artifactId>-->
+<!--                    </exclusion>-->
+<!--                </exclusions>-->
+<!--            </dependency>-->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter</artifactId>
@@ -368,6 +371,7 @@
                 -->
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless-maven-plugin.version}</version>
                 <configuration>
                     <ratchetFrom>${ratchetFrom}</ratchetFrom>
                     <java>

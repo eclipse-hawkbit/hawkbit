@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.event.remote;
 import java.io.Serial;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.Action;
 
@@ -34,7 +35,8 @@ public class MultiActionAssignEvent extends MultiActionEvent {
      * @param tenant tenant the event is scoped to
      * @param actions the actions of the deployment action
      */
-    public MultiActionAssignEvent(String tenant, List<Action> actions) {
+    @JsonIgnore
+    public MultiActionAssignEvent(final String tenant, final List<Action> actions) {
         super(tenant, actions);
     }
 }
