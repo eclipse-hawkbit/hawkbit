@@ -13,9 +13,7 @@ import java.io.Serial;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Index;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Min;
 
 import lombok.Getter;
@@ -33,11 +31,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 @NoArgsConstructor // Default constructor for JPA
 @Getter
 @Entity
-@Table(name = "sp_software_module_type", indexes = {
-        @Index(name = "sp_idx_software_module_type_01", columnList = "tenant,deleted"),
-        @Index(name = "sp_idx_software_module_type_prim", columnList = "tenant,id") }, uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "tenant", "type_key" }, name = "uk_sp_software_module_type_type_key"),
-        @UniqueConstraint(columnNames = { "tenant", "name" }, name = "uk_sp_software_module_type_name") })
+@Table(name = "sp_software_module_type")
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaSoftwareModuleType extends AbstractJpaTypeEntity implements SoftwareModuleType, EventAwareEntity {

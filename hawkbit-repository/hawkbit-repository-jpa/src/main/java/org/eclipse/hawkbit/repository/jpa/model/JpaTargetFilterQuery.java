@@ -13,15 +13,12 @@ import java.io.Serial;
 import java.util.Optional;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
@@ -44,9 +41,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 @Setter
 @Getter
 @Entity
-@Table(
-        name = "sp_target_filter_query",
-        uniqueConstraints = @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_target_filter_query"))
+@Table(name = "sp_target_filter_query")
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity implements TargetFilterQuery, EventAwareEntity {
@@ -65,9 +60,7 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
     private String query;
 
     @ManyToOne(fetch = FetchType.LAZY, targetEntity = JpaDistributionSet.class)
-    @JoinColumn(
-            name = "auto_assign_distribution_set",
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_filter_query_auto_assign_distribution_set"))
+    @JoinColumn(name = "auto_assign_distribution_set")
     private DistributionSet autoAssignDistributionSet;
 
     @Column(name = "auto_assign_action_type")

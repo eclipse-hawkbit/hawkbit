@@ -18,12 +18,10 @@ import java.util.Optional;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Converter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedAttributeNode;
@@ -32,7 +30,6 @@ import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -59,7 +56,7 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
  */
 @NoArgsConstructor // Default constructor needed for JPA entities.
 @Entity
-@Table(name = "sp_rollout", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_rollout"))
+@Table(name = "sp_rollout")
 @NamedEntityGraphs({ @NamedEntityGraph(name = "Rollout.ds", attributeNodes = { @NamedAttributeNode("distributionSet") }) })
 // squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 // java:S1710 - not possible to use without group annotation
@@ -82,8 +79,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Getter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
-            name = "distribution_set", nullable = false, updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollout_distribution_set"))
+            name = "distribution_set", nullable = false, updatable = false)
     @NotNull
     private JpaDistributionSet distributionSet;
 

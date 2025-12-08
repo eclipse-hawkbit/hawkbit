@@ -15,18 +15,15 @@ import java.util.Map;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Converter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -46,7 +43,7 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
  */
 @NoArgsConstructor // Default constructor needed for JPA entities.
 @Entity
-@Table(name = "sp_rollout_group", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "rollout", "tenant" }, name = "uk_rollout_group"))
+@Table(name = "sp_rollout_group")
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGroup, EventAwareEntity {
@@ -57,8 +54,7 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     @Getter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
-            name = "rollout", nullable = false, updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollout_group_rollout"))
+            name = "rollout", nullable = false, updatable = false)
     private JpaRollout rollout;
 
     @Setter
