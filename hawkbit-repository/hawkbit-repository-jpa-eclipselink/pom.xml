@@ -34,22 +34,21 @@
         </dependency>
 
         <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>org.eclipse.persistence.jpa</artifactId>
+            <version>${eclipselink.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-core</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- Static class generation -->
-        <dependency>
+        <dependency> <!-- Static class generation -->
             <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-jpamodelgen</artifactId>
+            <artifactId>hibernate-processor</artifactId>
             <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>org.eclipse.persistence.jpa</artifactId>
-            <version>${eclipselink.version}</version>
         </dependency>
     </dependencies>
 
@@ -75,8 +74,34 @@
                     <dependency>
                         <groupId>org.eclipse.persistence</groupId>
                         <artifactId>org.eclipse.persistence.jpa</artifactId>
-                        <version>${eclipselink.version}</version>
+                        <version>4.0.8</version>
+<!--                        <version>${eclipselink.version}</version>-->
                     </dependency>
+<!--                    <dependency>-->
+<!--                        <groupId>org.eclipse.persistence</groupId>-->
+<!--                        <artifactId>org.eclipse.persistence.jpa</artifactId>-->
+<!--                        <version>${eclipselink.version}</version>-->
+<!--                    </dependency>-->
+<!--                    <dependency>-->
+<!--                        <groupId>jakarta.persistence</groupId>-->
+<!--                        <artifactId>jakarta.persistence-api</artifactId>-->
+<!--                        <version>3.2.0</version>-->
+<!--                    </dependency>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.hibernate.orm</groupId>-->
+<!--                        <artifactId>hibernate-core</artifactId>-->
+<!--                        <version>7.1.8.Final</version>-->
+<!--                    </dependency>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.hibernate.orm</groupId>-->
+<!--                        <artifactId>hibernate-processor</artifactId>-->
+<!--                        <version>7.1.8.Final</version>-->
+<!--                    </dependency>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.springframework.data</groupId>-->
+<!--                        <artifactId>spring-data-jpa</artifactId>-->
+<!--                        <version>4.0.0</version>-->
+<!--                    </dependency>-->
                 </dependencies>
             </plugin>
         </plugins>

@@ -98,7 +98,7 @@ public final class MgmtRestConstants {
     public static final int REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE = Integer
             .parseInt(REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT);
     /**
-     * The base URL mapping for the spring acuator management context path.
+     * The base URL mapping for the spring actuator management context path.
      */
     public static final String BASE_SYSTEM_MAPPING = "/system";
     public static final String SYSTEM_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + BASE_SYSTEM_MAPPING;
