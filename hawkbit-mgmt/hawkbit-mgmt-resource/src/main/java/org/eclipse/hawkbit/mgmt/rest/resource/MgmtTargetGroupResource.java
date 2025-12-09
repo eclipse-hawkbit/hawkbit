@@ -14,6 +14,7 @@ import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitize
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetGroupRestApi;
@@ -87,7 +88,7 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
 
     @Override
     public ResponseEntity<List<String>> getTargetGroups() {
-        final List<String> groups = targetManagement.findGroups();
+        final List<String> groups = targetManagement.findGroups(AccessContext.tenant());
         return ResponseEntity.ok(groups);
     }
 

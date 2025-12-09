@@ -381,8 +381,8 @@ public class JpaTargetManagement
     }
 
     @Override
-    public List<String> findGroups() {
-        return jpaRepository.findDistinctGroups();
+    public List<String> findGroups(String tenant) {
+        return jpaRepository.findDistinctGroups(tenant);
     }
 
     @Override

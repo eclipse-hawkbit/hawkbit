@@ -375,7 +375,7 @@ public interface TargetManagement<T extends Target>
      * @return list of all distinct target groups
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
-    List<String> findGroups();
+    List<String> findGroups(String tenant);
 
     /**
      * Creates or updates a meta-data value.
