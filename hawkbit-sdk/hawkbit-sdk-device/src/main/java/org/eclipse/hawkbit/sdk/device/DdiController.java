@@ -239,6 +239,7 @@ public class DdiController {
 
     private void cancelActionByCancellationLink(DdiControllerBase controllerBase, long actionToBeCanceled) {
         getRequiredLink(controllerBase, CANCEL_ACTION_LINK).ifPresentOrElse(link -> {
+                // action is in CANCELING state - send cancel feedback
                 final long actionId = actionToBeCanceled == -1 ? getActionIdFromCancellationLink(link) : actionToBeCanceled;
                 log.info(LOG_PREFIX + "Cancelling current action {}", getTenantId(), getControllerId(), actionId);
                 sendCancelFeedback(actionId);
