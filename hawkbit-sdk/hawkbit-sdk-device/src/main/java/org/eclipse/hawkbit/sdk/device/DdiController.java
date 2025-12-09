@@ -207,7 +207,11 @@ public class DdiController {
                                                 // then process the new one
                                                 poll();
                                             } // else same action - already processing
-                                        }, () -> cancelActionByCancellationLink(controllerBase, -1));
+                                        }, () -> {
+                                            cancelActionByCancellationLink(controllerBase, -1);
+                                            // reset current action id - on next poll should be available deploymentBase
+                                            currentActionId = null;
+                                        });
                                 executor.schedule(this::poll, getPollMillis(controllerBase), TimeUnit.MILLISECONDS);
                             }
                         },
@@ -235,12 +239,10 @@ public class DdiController {
 
     private void cancelActionByCancellationLink(DdiControllerBase controllerBase, long actionToBeCanceled) {
         getRequiredLink(controllerBase, CANCEL_ACTION_LINK).ifPresentOrElse(link -> {
-            final long actionId = actionToBeCanceled == -1 ? getActionIdFromCancellationLink(link) : actionToBeCanceled;
-            log.info(LOG_PREFIX + "Cancelling current action {}", getTenantId(), getControllerId(), actionId);
-            sendCancelFeedback(actionId);
-                    // reset current action id - on next poll should be available deploymentBase
-                    currentActionId = null;
-                }, () -> log.info(LOG_PREFIX + "Action {} is canceled while in process (not returned)!", getTenantId(), getControllerId(), getCurrentActionId())
+                final long actionId = actionToBeCanceled == -1 ? getActionIdFromCancellationLink(link) : actionToBeCanceled;
+                log.info(LOG_PREFIX + "Cancelling current action {}", getTenantId(), getControllerId(), actionId);
+                sendCancelFeedback(actionId);
+            }, () -> log.info(LOG_PREFIX + "Action {} is canceled while in process (not returned)!", getTenantId(), getControllerId(), getCurrentActionId())
         );
     }
 
@@ -293,7 +295,7 @@ public class DdiController {
 
     private long getActionIdFromCancellationLink(final Link link) {
         final String href = link.getHref();
-        String[] split = href.split("/");
+        final String[] split = href.split("/");
         return Long.parseLong(split[split.length - 1]);
     }
 }
