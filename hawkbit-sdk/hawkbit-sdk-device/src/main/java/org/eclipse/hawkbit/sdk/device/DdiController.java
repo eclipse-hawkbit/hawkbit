@@ -24,12 +24,16 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiChunk;
 import org.eclipse.hawkbit.ddi.json.model.DdiConfigData;
 import org.eclipse.hawkbit.ddi.json.model.DdiConfirmationFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiControllerBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeployment;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeploymentBase;
+import org.eclipse.hawkbit.ddi.json.model.DdiProgress;
+import org.eclipse.hawkbit.ddi.json.model.DdiResult;
+import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 import org.eclipse.hawkbit.ddi.json.model.DdiUpdateMode;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.sdk.Certificate;
@@ -55,6 +59,7 @@ public class DdiController {
 
     private static final String DEPLOYMENT_BASE_LINK = "deploymentBase";
     private static final String CONFIRMATION_BASE_LINK = "confirmationBase";
+    private static final String CANCEL_ACTION_LINK = "cancelAction";
 
     private final Tenant tenant;
     private final Controller controller;
@@ -147,6 +152,19 @@ public class DdiController {
         }
     }
 
+    public void sendCancelFeedback(long actionId) {
+        try {
+            log.info(LOG_PREFIX + "Sending cancelation feedback for action with id : {}", getTenantId(), getControllerId(), actionId);
+            getDdiApi().postCancelActionFeedback(new DdiActionFeedback(
+                    new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, new DdiResult(DdiResult.FinalResult.SUCCESS,
+                            new DdiProgress(100, 100)), 200, List.of("Successfully cancelled by the controller."))
+            ), getTenantId(), getControllerId(), actionId);
+        } catch (Exception ex) {
+            log.error(LOG_PREFIX + "Failed to send cancelation feedback {}", getTenantId(), getControllerId(),
+                    actionId, ex);
+        }
+    }
+
     private void poll() {
         log.debug(LOG_PREFIX + " Polling ...", getTenantId(), getControllerId());
         Optional.ofNullable(executorService).ifPresent(executor ->
@@ -180,17 +198,16 @@ public class DdiController {
                                                 currentActionId = actionId;
                                                 executor.submit(updateHandler.getUpdateProcessor(this, updateType, modules));
                                             } else if (currentActionId != actionId) {
-                                                // TODO - cancel and start new one?
+                                                // currentActionId had failed to be processed and new one had been initiated
+                                                // try cancel current and process new one
                                                 log.info(LOG_PREFIX + "Action {} is canceled while in process (new {})!", getTenantId(),
                                                         getControllerId(), currentActionId, actionId);
+                                                cancelActionByCancellationLink(controllerBase, currentActionId);
+                                                currentActionId = actionId;
+                                                // then process the new one
+                                                poll();
                                             } // else same action - already processing
-                                        }, () -> {
-                                            if (currentActionId != null) {
-                                                // TODO - cancel current?
-                                                log.info(LOG_PREFIX + "Action {} is canceled while in process (not returned)!", getTenantId(),
-                                                        getControllerId(), getCurrentActionId());
-                                            }
-                                        });
+                                        }, () -> cancelActionByCancellationLink(controllerBase, -1));
                                 executor.schedule(this::poll, getPollMillis(controllerBase), TimeUnit.MILLISECONDS);
                             }
                         },
@@ -214,6 +231,17 @@ public class DdiController {
         }
 
         return Optional.ofNullable(poll.getBody());
+    }
+
+    private void cancelActionByCancellationLink(DdiControllerBase controllerBase, long actionToBeCanceled) {
+        getRequiredLink(controllerBase, CANCEL_ACTION_LINK).ifPresentOrElse(link -> {
+            final long actionId = actionToBeCanceled == -1 ? getActionIdFromCancellationLink(link) : actionToBeCanceled;
+            log.info(LOG_PREFIX + "Cancelling current action {}", getTenantId(), getControllerId(), actionId);
+            sendCancelFeedback(actionId);
+                    // reset current action id - on next poll should be available deploymentBase
+                    currentActionId = null;
+                }, () -> log.info(LOG_PREFIX + "Action {} is canceled while in process (not returned)!", getTenantId(), getControllerId(), getCurrentActionId())
+        );
     }
 
     private Optional<Link> getRequiredLink(final DdiControllerBase controllerBase, final String nameOfTheLink) {
@@ -261,5 +289,11 @@ public class DdiController {
     private long getActionId(final Link link) {
         final String href = link.getHref();
         return Long.parseLong(href.substring(href.lastIndexOf('/') + 1, href.indexOf('?')));
+    }
+
+    private long getActionIdFromCancellationLink(final Link link) {
+        final String href = link.getHref();
+        String[] split = href.split("/");
+        return Long.parseLong(split[split.length - 1]);
     }
 }
