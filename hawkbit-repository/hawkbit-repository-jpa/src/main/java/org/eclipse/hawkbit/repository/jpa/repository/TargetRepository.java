@@ -102,6 +102,6 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget> {
      * Finds all available distinct target groups
      * @return all target groups
      */
-    @Query(value = "SELECT DISTINCT target_group FROM sp_target WHERE t.tenant = :tenant AND target_group IS NOT NULL", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT target_group FROM sp_target WHERE tenant = ?1 AND target_group IS NOT NULL", nativeQuery = true)
     List<String> findDistinctGroups(@Param("tenant") String tenant);
 }
