@@ -9,15 +9,17 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import static org.springframework.messaging.MessageHeaders.CONTENT_TYPE;
+
 import java.util.Map;
 
 import org.eclipse.hawkbit.event.EventJacksonMessageConverter;
 import org.eclipse.hawkbit.event.EventProtoStuffMessageConverter;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.support.MutableMessageHeaders;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Test the remote entity events.
@@ -25,33 +27,27 @@ import org.springframework.messaging.MessageHeaders;
 @SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest {
 
-    private EventProtoStuffMessageConverter eventProtoStuffMessageConverter = new EventProtoStuffMessageConverter();
+    private final EventProtoStuffMessageConverter eventProtoStuffMessageConverter = new EventProtoStuffMessageConverter();
+    private EventJacksonMessageConverter jacksonMessageConverter;
 
-    private EventJacksonMessageConverter jacksonMessageConverter = new EventJacksonMessageConverter();
-
+    @Autowired
+    void setJsonMapper(final JsonMapper jsonMapper) {
+        jacksonMessageConverter = new EventJacksonMessageConverter(jsonMapper);
+    }
 
     @SuppressWarnings("unchecked")
     protected <T extends TenantAwareEvent> T createJacksonEvent(final T event) {
-        final Message<?> message = createJsonMessage(event);
-        return (T) jacksonMessageConverter.fromMessage(message, event.getClass());
+        return (T) jacksonMessageConverter.fromMessage(
+                jacksonMessageConverter.toMessage
+                        (event, new MutableMessageHeaders(Map.of(CONTENT_TYPE, EventJacksonMessageConverter.APPLICATION_REMOTE_EVENT_JSON))),
+                event.getClass());
     }
 
     @SuppressWarnings("unchecked")
     protected <T extends TenantAwareEvent> T createProtoStuffEvent(final T event) {
-        final Message<?> message = createProtoStuffMessage(event);
-        return (T) eventProtoStuffMessageConverter.fromMessage(message, event.getClass());
+        return (T) eventProtoStuffMessageConverter.fromMessage(
+                eventProtoStuffMessageConverter.toMessage(
+                        event, new MutableMessageHeaders(Map.of(CONTENT_TYPE, EventProtoStuffMessageConverter.APPLICATION_BINARY_PROTOSTUFF))),
+                event.getClass());
     }
-
-    private Message<?> createProtoStuffMessage(final TenantAwareEvent event) {
-        return eventProtoStuffMessageConverter.toMessage(
-                event, new MutableMessageHeaders(Map.of(MessageHeaders.CONTENT_TYPE,
-                        EventProtoStuffMessageConverter.APPLICATION_BINARY_PROTOSTUFF))
-        );
-    }
-
-    private Message<?> createJsonMessage(final Object event) {
-        return jacksonMessageConverter.toMessage(event, new MutableMessageHeaders(Map.of(MessageHeaders.CONTENT_TYPE,
-                EventJacksonMessageConverter.APPLICATION_REMOTE_EVENT_JSON)));
-    }
-
 }

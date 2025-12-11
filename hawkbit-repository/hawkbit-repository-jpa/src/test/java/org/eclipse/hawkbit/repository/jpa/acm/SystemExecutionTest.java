@@ -109,7 +109,7 @@ class SystemExecutionTest extends AbstractAccessControllerManagementTest {
         for (final Operation operation : Operation.values()) {
             accessController.appendAccessRules(operation, mock);
         }
-        verify(mock, times(times)).and(any()); // once for every access controller is scoped only
+        verify(mock, times(times)).and(any(Specification.class)); // once for every access controller is scoped only
 
         final Specification mockAsSystem = mock(Specification.class);
         for (final Operation operation : Operation.values()) {

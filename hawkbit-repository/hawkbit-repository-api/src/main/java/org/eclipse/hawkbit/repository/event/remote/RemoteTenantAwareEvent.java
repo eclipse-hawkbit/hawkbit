@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
  * distributed events. All the necessary information of distributing events to
  * other nodes.
  */
-@NoArgsConstructor(access = AccessLevel.PROTECTED) // for serialization libs like jackson
+@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true) // for serialization libs like jackson
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -33,7 +33,7 @@ public class RemoteTenantAwareEvent extends AbstractRemoteEvent implements Tenan
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String tenant;
+    private final String tenant;
 
     /**
      * Constructor.

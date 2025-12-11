@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,6 +40,7 @@ import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.context.AccessContext;
+import org.eclipse.hawkbit.exception.GenericSpServerException;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -88,21 +90,23 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.qfields.ActionFields;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
-import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
+import org.springframework.boot.jpa.autoconfigure.JpaProperties;
+import org.springframework.core.retry.RetryException;
+import org.springframework.core.retry.RetryPolicy;
+import org.springframework.core.retry.RetryTemplate;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.domain.DeleteSpecification;
+import org.springframework.data.jpa.domain.PredicateSpecification;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
-import org.springframework.retry.backoff.FixedBackOffPolicy;
-import org.springframework.retry.policy.SimpleRetryPolicy;
-import org.springframework.retry.support.RetryTemplate;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
@@ -144,7 +148,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final RepositoryProperties repositoryProperties,
             final JpaDistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
-            final EntityManager entityManager, final PlatformTransactionManager txManager, final JpaProperties jpaProperties) {
+            final EntityManager entityManager, final PlatformTransactionManager txManager, final JpaProperties jpaProperties,
+            @Value(Constants.RETRY_MAX) final long maxRetries, @Value(Constants.RETRY_DELAY) final long delay) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
         this.distributionSetManagement = distributionSetManagement;
         this.targetRepository = targetRepository;
@@ -152,7 +157,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         this.txManager = txManager;
         this.database = jpaProperties.getDatabase();
 
-        retryTemplate = createRetryTemplate();
+        retryTemplate = new RetryTemplate(RetryPolicy.builder()
+                .includes(ConcurrencyFailureException.class)
+                .maxRetries(maxRetries)
+                .maxDelay(Duration.ofMillis(delay))
+                .build());
         final Consumer<MaxAssignmentsExceededInfo> maxAssignmentsExceededHandler = maxAssignmentsExceededInfo ->
                 handleMaxAssignmentsExceeded(
                         maxAssignmentsExceededInfo.targetId,
@@ -188,8 +197,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Action cancelAction(final long actionId) {
         return cancelAction0(actionId);
     }
@@ -210,7 +218,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             action.setStatus(Status.CANCELING);
 
             // document that the status has been retrieved
-            actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, java.lang.System.currentTimeMillis(),
+            actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
                     RepositoryConstants.SERVER_MESSAGE_PREFIX + "manual cancelation requested"));
             final Action saveAction = actionRepository.save(action);
 
@@ -330,8 +338,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(retryFor = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Action forceQuitAction(final long actionId) {
         return forceQuitAction0(actionId);
     }
@@ -352,7 +359,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         log.warn("action ({}) was still active and has been force quite.", action);
 
         // document that the status has been retrieved
-        actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELED, java.lang.System.currentTimeMillis(),
+        actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
                 RepositoryConstants.SERVER_MESSAGE_PREFIX + "A force quit has been performed."));
 
         DeploymentHelper.successCancellation(action, actionRepository, targetRepository);
@@ -362,8 +369,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     @Transactional
-    @Retryable(retryFor = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Action forceTargetAction(final long actionId) {
         final JpaAction action = actionRepository.findById(actionId)
                 .map(this::assertTargetUpdateAllowed)
@@ -387,7 +393,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Transactional
     public void deleteActionsByRsql(final String rsql) {
         log.info("Deleting actions matching rsql {}", rsql);
-        actionRepository.delete(QLSupport.getInstance().buildSpec(rsql, ActionFields.class));
+        actionRepository.delete(DeleteSpecification.where(predicateSpec(QLSupport.getInstance().buildSpec(rsql, ActionFields.class))));
+    }
+    @Deprecated
+    static <T> PredicateSpecification<T> predicateSpec(final Specification<T> spec) {
+        return (from, cb) -> spec.toPredicate((Root<T>) from, cb.createQuery(), cb);
     }
 
     @Override
@@ -420,8 +430,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void cancelInactiveScheduledActionsForTargets(final List<Long> targetIds) {
         if (!isMultiAssignmentsEnabled()) {
             targetRepository.getAccessController().ifPresent(v -> {
@@ -626,20 +635,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         return QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.getOrDefault(database, QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED_DEFAULT);
     }
 
-    private static RetryTemplate createRetryTemplate() {
-        final RetryTemplate template = new RetryTemplate();
-
-        final FixedBackOffPolicy backOffPolicy = new FixedBackOffPolicy();
-        backOffPolicy.setBackOffPeriod(Constants.TX_RT_DELAY);
-        template.setBackOffPolicy(backOffPolicy);
-
-        final SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(
-                Constants.TX_RT_MAX, Collections.singletonMap(ConcurrencyFailureException.class, true));
-        template.setRetryPolicy(retryPolicy);
-
-        return template;
-    }
-
     private List<DistributionSetAssignmentResult> assignDistributionSets(
             final List<DeploymentRequest> deploymentRequests, final String actionMessage, final AbstractDsAssignmentStrategy strategy) {
         final List<DeploymentRequest> validatedRequests = validateAndFilterRequestForAssignments(deploymentRequests);
@@ -741,8 +736,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private DistributionSetAssignmentResult assignDistributionSetToTargetsWithRetry(
             final Long dsId, final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy) {
-        return retryTemplate.execute(retryContext ->
-                assignDistributionSetToTargets(dsId, targetsWithActionType, actionMessage, assignmentStrategy));
+        try {
+            return retryTemplate.execute(() -> assignDistributionSetToTargets(dsId, targetsWithActionType, actionMessage, assignmentStrategy));
+        } catch (final RetryException e) {
+            throw new GenericSpServerException(e);
+        }
     }
 
     /**

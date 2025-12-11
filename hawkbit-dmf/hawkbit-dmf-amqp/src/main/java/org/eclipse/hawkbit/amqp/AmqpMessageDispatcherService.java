@@ -218,7 +218,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     protected void sendPingResponseToDmfReceiver(final Message ping, final String tenant, final String virtualHost) {
         final Message message = MessageBuilder
-                .withBody(String.valueOf(java.lang.System.currentTimeMillis()).getBytes())
+                .withBody(String.valueOf(System.currentTimeMillis()).getBytes())
                 .setContentType(MessageProperties.CONTENT_TYPE_TEXT_PLAIN)
                 .setCorrelationId(ping.getMessageProperties().getCorrelationId())
                 .setHeader(MessageHeaderKey.TYPE, MessageType.PING_RESPONSE)
@@ -571,7 +571,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         // due to the fact that all targets in a batch use the same set of software modules we don't generate target-specific urls
         final Target firstTarget = targets.get(0);
         final DmfBatchDownloadAndUpdateRequest batchRequest = new DmfBatchDownloadAndUpdateRequest(
-                java.lang.System.currentTimeMillis(),
+                System.currentTimeMillis(),
                 dmfTargets,
                 Optional.ofNullable(modules)
                         .map(Map::entrySet)
