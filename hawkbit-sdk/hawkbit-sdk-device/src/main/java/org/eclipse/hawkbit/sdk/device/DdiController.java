@@ -183,27 +183,14 @@ public class DdiController {
                                         .ifPresentOrElse(actionWithDeployment -> {
                                             final long actionId = actionWithDeployment.getKey();
                                             if (currentActionId == null) {
-                                                if (lastActionId != null && lastActionId == actionId) {
-                                                    log.info(LOG_PREFIX + "Still receive the last action {}",
-                                                            getTenantId(), getControllerId(), actionId);
-                                                    return;
-                                                }
-
-                                                log.info(LOG_PREFIX + "Process action {}", getTenantId(), getControllerId(),
-                                                        actionId);
-                                                final DdiDeployment deployment = actionWithDeployment.getValue().getDeployment();
-                                                final DdiDeployment.HandlingType updateType = deployment.getUpdate();
-                                                final List<DdiChunk> modules = deployment.getChunks();
-
-                                                currentActionId = actionId;
-                                                executor.submit(updateHandler.getUpdateProcessor(this, updateType, modules));
+                                                processAction(actionId, actionWithDeployment, executor);
                                             } else if (currentActionId != actionId) {
                                                 // currentActionId had failed to be processed and new one had been initiated
                                                 // try cancel current and process new one
                                                 log.info(LOG_PREFIX + "Action {} is canceled while in process (new {})!", getTenantId(),
                                                         getControllerId(), currentActionId, actionId);
                                                 cancelActionByCancellationLink(controllerBase, currentActionId);
-                                                currentActionId = actionId;
+                                                currentActionId = null;
                                                 // then process the new one
                                                 poll();
                                             } // else same action - already processing
@@ -217,6 +204,23 @@ public class DdiController {
                         },
                         () -> // error has occurred or no controller base hasn't been acquired
                                 executor.schedule(this::poll, DEFAULT_POLL_MS, TimeUnit.MILLISECONDS)));
+    }
+
+    private void processAction(final long actionId, final Map.Entry<Long,DdiDeploymentBase> actionWithDeployment, final ScheduledExecutorService executor) {
+        if (lastActionId != null && lastActionId == actionId) {
+            log.info(LOG_PREFIX + "Still receive the last action {}",
+                    getTenantId(), getControllerId(), actionId);
+            return;
+        }
+
+        log.info(LOG_PREFIX + "Process action {}", getTenantId(), getControllerId(),
+                actionId);
+        final DdiDeployment deployment = actionWithDeployment.getValue().getDeployment();
+        final DdiDeployment.HandlingType updateType = deployment.getUpdate();
+        final List<DdiChunk> modules = deployment.getChunks();
+
+        currentActionId = actionId;
+        executor.submit(updateHandler.getUpdateProcessor(this, updateType, modules));
     }
 
     private Optional<DdiControllerBase> getControllerBase() {
