@@ -181,7 +181,7 @@ maven/mavencentral/jakarta.activation/jakarta.activation-api/2.1.4, EPL-2.0 OR B
 maven/mavencentral/jakarta.annotation/jakarta.annotation-api/2.1.1, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.ca
 maven/mavencentral/jakarta.persistence/jakarta.persistence-api/3.1.0, EPL-2.0 OR BSD-3-Clause, approved, ee4j.jpa
 maven/mavencentral/jakarta.servlet/jakarta.servlet-api/6.0.0, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.servlet
-maven/mavencentral/jakarta.transaction/jakarta.transaction-api/2.0.1, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jta
+maven/mavencentral/jakarta.transaction/jakarta.transaction-api/2.0.1, EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0, approved, #7697
 maven/mavencentral/jakarta.validation/jakarta.validation-api/3.0.2, Apache-2.0, approved, ee4j.validation
 maven/mavencentral/jakarta.xml.bind/jakarta.xml.bind-api/4.0.4, BSD-3-Clause, approved, ee4j.jaxb
 maven/mavencentral/joda-time/joda-time/2.12.7, Apache-2.0, approved, #12739
@@ -236,11 +236,11 @@ maven/mavencentral/org.jboss.logging/jboss-logging/3.6.1.Final, Apache-2.0, appr
 maven/mavencentral/org.jetbrains.kotlin/kotlin-reflect/1.9.25, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.jetbrains.kotlin/kotlin-stdlib/1.9.25, Apache-2.0, approved, #11827
 maven/mavencentral/org.jetbrains/annotations/13.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.jline/jline-builtins/3.30.4, BSD-3-Clause, approved, clearlydefined
+maven/mavencentral/org.jline/jline-builtins/3.30.4, BSD-3-Clause AND (Apache-2.0 AND BSD-3-Clause), approved, #25257
 maven/mavencentral/org.jline/jline-console/3.30.4, BSD-3-Clause, approved, clearlydefined
 maven/mavencentral/org.jline/jline-native/3.30.4, BSD-3-Clause AND Apache-2.0, approved, #24519
-maven/mavencentral/org.jline/jline-reader/3.30.4, BSD-3-Clause, approved, clearlydefined
-maven/mavencentral/org.jline/jline-style/3.30.4, BSD-3-Clause, approved, clearlydefined
+maven/mavencentral/org.jline/jline-reader/3.30.4, BSD-3-Clause, approved, #25255
+maven/mavencentral/org.jline/jline-style/3.30.4, BSD-3-Clause, approved, #25258
 maven/mavencentral/org.jline/jline-terminal/3.30.4, BSD-3-Clause AND Apache-2.0, approved, #23127
 maven/mavencentral/org.jsoup/jsoup/1.21.2, MIT AND Apache-2.0, approved, #22199
 maven/mavencentral/org.jspecify/jspecify/1.0.0, Apache-2.0, approved, #21897
