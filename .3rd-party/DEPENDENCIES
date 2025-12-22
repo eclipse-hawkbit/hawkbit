@@ -18,12 +18,12 @@ maven/mavencentral/com.github.javaparser/javaparser-symbol-solver-core/3.26.4, A
 maven/mavencentral/com.github.oshi/oshi-core/6.6.5, MIT, approved, #14290
 maven/mavencentral/com.github.stephenc.jcip/jcip-annotations/1.0-1, Apache-2.0, approved, CQ21949
 maven/mavencentral/com.google.code.findbugs/jsr305/3.0.2, Apache-2.0 and CC-BY-2.5, approved, #15220
-maven/mavencentral/com.google.errorprone/error_prone_annotations/2.36.0, Apache-2.0, approved, #18702
+maven/mavencentral/com.google.errorprone/error_prone_annotations/2.41.0, Apache-2.0, approved, #22631
 maven/mavencentral/com.google.errorprone/error_prone_annotations/2.43.0, Apache-2.0, approved, #24436
-maven/mavencentral/com.google.guava/failureaccess/1.0.2, Apache-2.0, approved, CQ22654
-maven/mavencentral/com.google.guava/guava/33.4.0-jre, Apache-2.0 AND CC0-1.0 AND CC-PDDC, approved, #17939
+maven/mavencentral/com.google.guava/failureaccess/1.0.3, Apache-2.0, approved, CQ22654
+maven/mavencentral/com.google.guava/guava/33.5.0-jre, Apache-2.0 AND CC0-1.0 AND CC-PDDC, approved, #23378
 maven/mavencentral/com.google.guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava, Apache-2.0, approved, CQ22657
-maven/mavencentral/com.google.j2objc/j2objc-annotations/3.0.0, Apache-2.0, approved, #13676
+maven/mavencentral/com.google.j2objc/j2objc-annotations/3.1, Apache-2.0, approved, #23379
 maven/mavencentral/com.h2database/h2/2.3.232, (MPL-2.0 AND EPL-1.0) AND (MPL-2.0 AND EPL-1.0 AND LGPL-3.0-or-later) AND BSD-3-Clause, approved, #15708
 maven/mavencentral/com.helger.commons/ph-commons/11.2.0, Apache-2.0 AND BSD-3-Clause, approved, #21949
 maven/mavencentral/com.helger/ph-css/7.0.4, Apache-2.0, approved, #12134
@@ -41,82 +41,82 @@ maven/mavencentral/com.vaadin.external.gwt/gwt-elemental/2.8.2.vaadin2, Apache-2
 maven/mavencentral/com.vaadin.external/gentyref/1.2.0.vaadin1, Apache-2.0, approved, CQ20645
 maven/mavencentral/com.vaadin.servletdetector/throw-if-servlet3/1.0.2, Apache-2.0, approved, #12159
 maven/mavencentral/com.vaadin/collaboration-engine/6.6.0, Apache-2.0, approved, #23473
-maven/mavencentral/com.vaadin/copilot/24.9.5, Apache-2.0, approved, #23502
-maven/mavencentral/com.vaadin/flow-client/24.9.5, Apache-2.0, approved, #23514
-maven/mavencentral/com.vaadin/flow-data/24.9.5, Apache-2.0, approved, #23457
-maven/mavencentral/com.vaadin/flow-dnd/24.9.5, Apache-2.0, approved, #23452
-maven/mavencentral/com.vaadin/flow-html-components/24.9.5, Apache-2.0, approved, #23461
-maven/mavencentral/com.vaadin/flow-lit-template/24.9.5, Apache-2.0, approved, #23497
-maven/mavencentral/com.vaadin/flow-push/24.9.5, Apache-2.0, approved, #23506
-maven/mavencentral/com.vaadin/flow-react/24.9.5, Apache-2.0, approved, #23519
-maven/mavencentral/com.vaadin/flow-server/24.9.5, Apache-2.0 AND MIT, approved, #23490
-maven/mavencentral/com.vaadin/hilla-dev/24.9.5, Apache-2.0, approved, #23474
-maven/mavencentral/com.vaadin/hilla-endpoint/24.9.5, Apache-2.0, approved, #23472
-maven/mavencentral/com.vaadin/hilla-engine-core/24.9.5, Apache-2.0, approved, #23478
-maven/mavencentral/com.vaadin/hilla-engine-runtime/24.9.5, Apache-2.0, approved, #23479
-maven/mavencentral/com.vaadin/hilla-parser-jvm-core/24.9.5, Apache-2.0, approved, #23501
-maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-backbone/24.9.5, Apache-2.0, approved, #23523
-maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-model/24.9.5, Apache-2.0, approved, #23454
-maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-nonnull-kotlin/24.9.5, Apache-2.0, approved, #23466
-maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-nonnull/24.9.5, Apache-2.0, approved, #23520
-maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-subtypes/24.9.5, Apache-2.0, approved, #23493
-maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-transfertypes/24.9.5, Apache-2.0, approved, #23450
-maven/mavencentral/com.vaadin/hilla-parser-jvm-utils/24.9.5, Apache-2.0, approved, #23508
-maven/mavencentral/com.vaadin/hilla-runtime-plugin-transfertypes/24.9.5, Apache-2.0, approved, #23500
-maven/mavencentral/com.vaadin/hilla/24.9.5, Apache-2.0, approved, #23460
-maven/mavencentral/com.vaadin/license-checker/2.0.0, Apache-2.0, approved, #23484
-maven/mavencentral/com.vaadin/open/8.5.0.4, MIT AND Apache-2.0, approved, #17743
-maven/mavencentral/com.vaadin/signals/24.9.5, Apache-2.0, approved, #23470
+maven/mavencentral/com.vaadin/copilot/24.9.7, Apache-2.0, approved, #23502
+maven/mavencentral/com.vaadin/flow-client/24.9.7, Apache-2.0, approved, #23514
+maven/mavencentral/com.vaadin/flow-data/24.9.7, Apache-2.0, approved, #23457
+maven/mavencentral/com.vaadin/flow-dnd/24.9.7, Apache-2.0, approved, #23452
+maven/mavencentral/com.vaadin/flow-html-components/24.9.7, Apache-2.0, approved, #23461
+maven/mavencentral/com.vaadin/flow-lit-template/24.9.7, Apache-2.0, approved, #23497
+maven/mavencentral/com.vaadin/flow-push/24.9.7, Apache-2.0, approved, #23506
+maven/mavencentral/com.vaadin/flow-react/24.9.7, Apache-2.0, approved, #23519
+maven/mavencentral/com.vaadin/flow-server/24.9.7, Apache-2.0 AND MIT, approved, #23490
+maven/mavencentral/com.vaadin/hilla-dev/24.9.7, Apache-2.0, approved, #23474
+maven/mavencentral/com.vaadin/hilla-endpoint/24.9.7, Apache-2.0, approved, #23472
+maven/mavencentral/com.vaadin/hilla-engine-core/24.9.7, Apache-2.0, approved, #23478
+maven/mavencentral/com.vaadin/hilla-engine-runtime/24.9.7, Apache-2.0, approved, #23479
+maven/mavencentral/com.vaadin/hilla-parser-jvm-core/24.9.7, Apache-2.0, approved, #23501
+maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-backbone/24.9.7, Apache-2.0, approved, #23523
+maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-model/24.9.7, Apache-2.0, approved, #23454
+maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-nonnull-kotlin/24.9.7, Apache-2.0, approved, #23466
+maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-nonnull/24.9.7, Apache-2.0, approved, #23520
+maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-subtypes/24.9.7, Apache-2.0, approved, #23493
+maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-transfertypes/24.9.7, Apache-2.0, approved, #23450
+maven/mavencentral/com.vaadin/hilla-parser-jvm-utils/24.9.7, Apache-2.0, approved, #23508
+maven/mavencentral/com.vaadin/hilla-runtime-plugin-transfertypes/24.9.7, Apache-2.0, approved, #23500
+maven/mavencentral/com.vaadin/hilla/24.9.7, Apache-2.0, approved, #23460
+maven/mavencentral/com.vaadin/license-checker/2.0.1, Apache-2.0, approved, #23484
+maven/mavencentral/com.vaadin/open/8.5.0.5, MIT AND Apache-2.0, approved, #17743
+maven/mavencentral/com.vaadin/signals/24.9.7, Apache-2.0, approved, #23470
 maven/mavencentral/com.vaadin/ui-tests/1.1.5, Apache-2.0, approved, clearlydefined
-maven/mavencentral/com.vaadin/vaadin-accordion-flow/24.9.5, Apache-2.0, approved, #23521
-maven/mavencentral/com.vaadin/vaadin-app-layout-flow/24.9.5, Apache-2.0, approved, #23446
-maven/mavencentral/com.vaadin/vaadin-avatar-flow/24.9.5, Apache-2.0, approved, #23477
-maven/mavencentral/com.vaadin/vaadin-button-flow/24.9.5, Apache-2.0, approved, #23471
-maven/mavencentral/com.vaadin/vaadin-card-flow/24.9.5, Apache-2.0, approved, #23517
-maven/mavencentral/com.vaadin/vaadin-checkbox-flow/24.9.5, Apache-2.0, approved, #23496
-maven/mavencentral/com.vaadin/vaadin-combo-box-flow/24.9.5, Apache-2.0, approved, #23507
-maven/mavencentral/com.vaadin/vaadin-confirm-dialog-flow/24.9.5, Apache-2.0, approved, #23495
-maven/mavencentral/com.vaadin/vaadin-context-menu-flow/24.9.5, Apache-2.0, approved, #23467
-maven/mavencentral/com.vaadin/vaadin-core-components/24.9.5, Apache-2.0, approved, #23503
-maven/mavencentral/com.vaadin/vaadin-core-internal/24.9.5, Apache-2.0, approved, #23469
-maven/mavencentral/com.vaadin/vaadin-core/24.9.5, Apache-2.0, approved, #23476
-maven/mavencentral/com.vaadin/vaadin-custom-field-flow/24.9.5, Apache-2.0, approved, #23458
-maven/mavencentral/com.vaadin/vaadin-date-picker-flow/24.9.5, Apache-2.0, approved, #23516
-maven/mavencentral/com.vaadin/vaadin-date-time-picker-flow/24.9.5, Apache-2.0, approved, #23463
-maven/mavencentral/com.vaadin/vaadin-details-flow/24.9.5, Apache-2.0, approved, #23511
-maven/mavencentral/com.vaadin/vaadin-dev-bundle/24.9.5, MIT AND Apache-2.0 AND BSD-3-Clause AND BSD-2-Clause AND BlueOak-1.0.0 AND 0BSD AND Python-2.0 AND CC-BY-4.0 AND (AFL-2.1 OR BSD-3-Clause) AND (MIT OR CC0-1.0) AND (MPL-2.0 OR Apache-2.0) AND (MIT AND Zlib), approved, #23488
-maven/mavencentral/com.vaadin/vaadin-dev-server/24.9.5, Apache-2.0, approved, #23453
-maven/mavencentral/com.vaadin/vaadin-dev/24.9.5, Apache-2.0, approved, #23447
-maven/mavencentral/com.vaadin/vaadin-dialog-flow/24.9.5, Apache-2.0, approved, #23481
-maven/mavencentral/com.vaadin/vaadin-field-highlighter-flow/24.9.5, Apache-2.0, approved, #23464
-maven/mavencentral/com.vaadin/vaadin-flow-components-base/24.9.5, Apache-2.0, approved, #23485
-maven/mavencentral/com.vaadin/vaadin-form-layout-flow/24.9.5, Apache-2.0, approved, #23445
-maven/mavencentral/com.vaadin/vaadin-grid-flow/24.9.5, Apache-2.0, approved, #23483
-maven/mavencentral/com.vaadin/vaadin-icons-flow/24.9.5, Apache-2.0, approved, #23524
-maven/mavencentral/com.vaadin/vaadin-list-box-flow/24.9.5, Apache-2.0, approved, #23512
-maven/mavencentral/com.vaadin/vaadin-login-flow/24.9.5, Apache-2.0, approved, #23518
-maven/mavencentral/com.vaadin/vaadin-lumo-theme/24.9.5, Apache-2.0, approved, #23442
-maven/mavencentral/com.vaadin/vaadin-markdown-flow/24.9.5, Apache-2.0, approved, #23504
-maven/mavencentral/com.vaadin/vaadin-master-detail-layout-flow/24.9.5, Apache-2.0, approved, #23491
-maven/mavencentral/com.vaadin/vaadin-material-theme/24.9.5, Apache-2.0, approved, #23451
-maven/mavencentral/com.vaadin/vaadin-menu-bar-flow/24.9.5, Apache-2.0, approved, #23498
-maven/mavencentral/com.vaadin/vaadin-messages-flow/24.9.5, Apache-2.0, approved, #23480
-maven/mavencentral/com.vaadin/vaadin-notification-flow/24.9.5, Apache-2.0, approved, #23482
-maven/mavencentral/com.vaadin/vaadin-ordered-layout-flow/24.9.5, Apache-2.0, approved, #23448
-maven/mavencentral/com.vaadin/vaadin-popover-flow/24.9.5, Apache-2.0, approved, #23443
-maven/mavencentral/com.vaadin/vaadin-progress-bar-flow/24.9.5, Apache-2.0, approved, #23459
-maven/mavencentral/com.vaadin/vaadin-radio-button-flow/24.9.5, Apache-2.0, approved, #23486
-maven/mavencentral/com.vaadin/vaadin-renderer-flow/24.9.5, Apache-2.0, approved, #23455
-maven/mavencentral/com.vaadin/vaadin-select-flow/24.9.5, Apache-2.0, approved, #23475
-maven/mavencentral/com.vaadin/vaadin-side-nav-flow/24.9.5, Apache-2.0, approved, #23513
-maven/mavencentral/com.vaadin/vaadin-split-layout-flow/24.9.5, Apache-2.0, approved, #23487
-maven/mavencentral/com.vaadin/vaadin-spring-boot-starter/24.9.5, Apache-2.0, approved, #23505
-maven/mavencentral/com.vaadin/vaadin-spring/24.9.5, Apache-2.0, approved, #23492
-maven/mavencentral/com.vaadin/vaadin-tabs-flow/24.9.5, Apache-2.0, approved, #23510
-maven/mavencentral/com.vaadin/vaadin-text-field-flow/24.9.5, Apache-2.0, approved, #23465
-maven/mavencentral/com.vaadin/vaadin-time-picker-flow/24.9.5, Apache-2.0, approved, #23509
-maven/mavencentral/com.vaadin/vaadin-upload-flow/24.9.5, Apache-2.0, approved, #23449
-maven/mavencentral/com.vaadin/vaadin-virtual-list-flow/24.9.5, Apache-2.0, approved, #23462
+maven/mavencentral/com.vaadin/vaadin-accordion-flow/24.9.7, Apache-2.0, approved, #23521
+maven/mavencentral/com.vaadin/vaadin-app-layout-flow/24.9.7, Apache-2.0, approved, #23446
+maven/mavencentral/com.vaadin/vaadin-avatar-flow/24.9.7, Apache-2.0, approved, #23477
+maven/mavencentral/com.vaadin/vaadin-button-flow/24.9.7, Apache-2.0, approved, #23471
+maven/mavencentral/com.vaadin/vaadin-card-flow/24.9.7, Apache-2.0, approved, #23517
+maven/mavencentral/com.vaadin/vaadin-checkbox-flow/24.9.7, Apache-2.0, approved, #23496
+maven/mavencentral/com.vaadin/vaadin-combo-box-flow/24.9.7, Apache-2.0, approved, #23507
+maven/mavencentral/com.vaadin/vaadin-confirm-dialog-flow/24.9.7, Apache-2.0, approved, #23495
+maven/mavencentral/com.vaadin/vaadin-context-menu-flow/24.9.7, Apache-2.0, approved, #23467
+maven/mavencentral/com.vaadin/vaadin-core-components/24.9.7, Apache-2.0, approved, #23503
+maven/mavencentral/com.vaadin/vaadin-core-internal/24.9.7, Apache-2.0, approved, #23469
+maven/mavencentral/com.vaadin/vaadin-core/24.9.7, Apache-2.0, approved, #23476
+maven/mavencentral/com.vaadin/vaadin-custom-field-flow/24.9.7, Apache-2.0, approved, #23458
+maven/mavencentral/com.vaadin/vaadin-date-picker-flow/24.9.7, Apache-2.0, approved, #23516
+maven/mavencentral/com.vaadin/vaadin-date-time-picker-flow/24.9.7, Apache-2.0, approved, #23463
+maven/mavencentral/com.vaadin/vaadin-details-flow/24.9.7, Apache-2.0, approved, #23511
+maven/mavencentral/com.vaadin/vaadin-dev-bundle/24.9.7, MIT AND Apache-2.0 AND BSD-3-Clause AND BSD-2-Clause AND BlueOak-1.0.0 AND 0BSD AND Python-2.0 AND CC-BY-4.0 AND (AFL-2.1 OR BSD-3-Clause) AND (MIT OR CC0-1.0) AND (MPL-2.0 OR Apache-2.0) AND (MIT AND Zlib), approved, #23488
+maven/mavencentral/com.vaadin/vaadin-dev-server/24.9.7, Apache-2.0, approved, #23453
+maven/mavencentral/com.vaadin/vaadin-dev/24.9.7, Apache-2.0, approved, #23447
+maven/mavencentral/com.vaadin/vaadin-dialog-flow/24.9.7, Apache-2.0, approved, #23481
+maven/mavencentral/com.vaadin/vaadin-field-highlighter-flow/24.9.7, Apache-2.0, approved, #23464
+maven/mavencentral/com.vaadin/vaadin-flow-components-base/24.9.7, Apache-2.0, approved, #23485
+maven/mavencentral/com.vaadin/vaadin-form-layout-flow/24.9.7, Apache-2.0, approved, #23445
+maven/mavencentral/com.vaadin/vaadin-grid-flow/24.9.7, Apache-2.0, approved, #23483
+maven/mavencentral/com.vaadin/vaadin-icons-flow/24.9.7, Apache-2.0, approved, #23524
+maven/mavencentral/com.vaadin/vaadin-list-box-flow/24.9.7, Apache-2.0, approved, #23512
+maven/mavencentral/com.vaadin/vaadin-login-flow/24.9.7, Apache-2.0, approved, #23518
+maven/mavencentral/com.vaadin/vaadin-lumo-theme/24.9.7, Apache-2.0, approved, #23442
+maven/mavencentral/com.vaadin/vaadin-markdown-flow/24.9.7, Apache-2.0, approved, #23504
+maven/mavencentral/com.vaadin/vaadin-master-detail-layout-flow/24.9.7, Apache-2.0, approved, #23491
+maven/mavencentral/com.vaadin/vaadin-material-theme/24.9.7, Apache-2.0, approved, #23451
+maven/mavencentral/com.vaadin/vaadin-menu-bar-flow/24.9.7, Apache-2.0, approved, #23498
+maven/mavencentral/com.vaadin/vaadin-messages-flow/24.9.7, Apache-2.0, approved, #23480
+maven/mavencentral/com.vaadin/vaadin-notification-flow/24.9.7, Apache-2.0, approved, #23482
+maven/mavencentral/com.vaadin/vaadin-ordered-layout-flow/24.9.7, Apache-2.0, approved, #23448
+maven/mavencentral/com.vaadin/vaadin-popover-flow/24.9.7, Apache-2.0, approved, #23443
+maven/mavencentral/com.vaadin/vaadin-progress-bar-flow/24.9.7, Apache-2.0, approved, #23459
+maven/mavencentral/com.vaadin/vaadin-radio-button-flow/24.9.7, Apache-2.0, approved, #23486
+maven/mavencentral/com.vaadin/vaadin-renderer-flow/24.9.7, Apache-2.0, approved, #23455
+maven/mavencentral/com.vaadin/vaadin-select-flow/24.9.7, Apache-2.0, approved, #23475
+maven/mavencentral/com.vaadin/vaadin-side-nav-flow/24.9.7, Apache-2.0, approved, #23513
+maven/mavencentral/com.vaadin/vaadin-split-layout-flow/24.9.7, Apache-2.0, approved, #23487
+maven/mavencentral/com.vaadin/vaadin-spring-boot-starter/24.9.7, Apache-2.0, approved, #23505
+maven/mavencentral/com.vaadin/vaadin-spring/24.9.7, Apache-2.0, approved, #23492
+maven/mavencentral/com.vaadin/vaadin-tabs-flow/24.9.7, Apache-2.0, approved, #23510
+maven/mavencentral/com.vaadin/vaadin-text-field-flow/24.9.7, Apache-2.0, approved, #23465
+maven/mavencentral/com.vaadin/vaadin-time-picker-flow/24.9.7, Apache-2.0, approved, #23509
+maven/mavencentral/com.vaadin/vaadin-upload-flow/24.9.7, Apache-2.0, approved, #23449
+maven/mavencentral/com.vaadin/vaadin-virtual-list-flow/24.9.7, Apache-2.0, approved, #23462
 maven/mavencentral/com.zaxxer/HikariCP/6.3.3, Apache-2.0, approved, #23029
 maven/mavencentral/commons-codec/commons-codec/1.18.0, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #19214
 maven/mavencentral/commons-fileupload/commons-fileupload/1.6.0, Apache-2.0, approved, #21847
@@ -181,7 +181,7 @@ maven/mavencentral/jakarta.activation/jakarta.activation-api/2.1.4, EPL-2.0 OR B
 maven/mavencentral/jakarta.annotation/jakarta.annotation-api/2.1.1, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.ca
 maven/mavencentral/jakarta.persistence/jakarta.persistence-api/3.1.0, EPL-2.0 OR BSD-3-Clause, approved, ee4j.jpa
 maven/mavencentral/jakarta.servlet/jakarta.servlet-api/6.0.0, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.servlet
-maven/mavencentral/jakarta.transaction/jakarta.transaction-api/2.0.1, EPL-2.0 OR GPL-2.0-only WITH Classpath-exception-2.0, approved, #7697
+maven/mavencentral/jakarta.transaction/jakarta.transaction-api/2.0.1, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jta
 maven/mavencentral/jakarta.validation/jakarta.validation-api/3.0.2, Apache-2.0, approved, ee4j.validation
 maven/mavencentral/jakarta.xml.bind/jakarta.xml.bind-api/4.0.4, BSD-3-Clause, approved, ee4j.jaxb
 maven/mavencentral/joda-time/joda-time/2.12.7, Apache-2.0, approved, #12739
@@ -214,10 +214,9 @@ maven/mavencentral/org.aspectj/aspectjrt/1.9.25, EPL-1.0, approved, tools.aspect
 maven/mavencentral/org.aspectj/aspectjweaver/1.9.25, EPL-1.0, approved, tools.aspectj
 maven/mavencentral/org.assertj/assertj-core/3.27.6, Apache-2.0, approved, #17980
 maven/mavencentral/org.awaitility/awaitility/4.3.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.bouncycastle/bcpkix-jdk18on/1.82, MIT, approved, #23373
+maven/mavencentral/org.bouncycastle/bcpkix-jdk18on/1.83, MIT, approved, #25011
 maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.80, MIT AND CC0-1.0, approved, #18694
-maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.82, MIT, approved, #23375
-maven/mavencentral/org.checkerframework/checker-qual/3.43.0, MIT, approved, #23161
+maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.83, MIT, approved, #25009
 maven/mavencentral/org.flywaydb/flyway-core/11.7.2, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.flywaydb/flyway-database-postgresql/11.7.2, Apache-2.0, approved, #21919
 maven/mavencentral/org.flywaydb/flyway-mysql/11.7.2, Apache-2.0, approved, #21980
