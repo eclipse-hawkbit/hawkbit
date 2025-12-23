@@ -43,18 +43,19 @@ import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler
 import org.springframework.amqp.rabbit.listener.FatalExceptionStrategy;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
+import org.springframework.boot.amqp.autoconfigure.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.support.RetryTemplate;
+import org.springframework.core.retry.RetryPolicy;
+import org.springframework.core.retry.RetryTemplate;
 import org.springframework.util.ErrorHandler;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Spring configuration for AMQP based DMF communication for indirect device integration.
@@ -112,16 +113,19 @@ public class DmfApiConfiguration {
     }
 
     /**
-     * @return {@link RabbitTemplate} with automatic retry, published confirms and {@link Jackson2JsonMessageConverter}.
+     * @return {@link RabbitTemplate} with automatic retry, published confirms and {@link JacksonJsonMessageConverter}.
      */
     @Bean
-    public RabbitTemplate rabbitTemplate() {
+    public RabbitTemplate rabbitTemplate(final JsonMapper jsonMapper) {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(rabbitConnectionFactory);
-        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
+        rabbitTemplate.setMessageConverter(new JacksonJsonMessageConverter(jsonMapper));
 
-        final RetryTemplate retryTemplate = new RetryTemplate();
-        retryTemplate.setBackOffPolicy(new ExponentialBackOffPolicy());
-        rabbitTemplate.setRetryTemplate(retryTemplate);
+        // the same policy the previously used default ExponentialBackOffPolicy applied
+        rabbitTemplate.setRetryTemplate(new RetryTemplate(RetryPolicy.builder()
+                .delay(Duration.ofMillis(100))
+                .multiplier(2)
+                .maxDelay(Duration.ofSeconds(30))
+                .build()));
 
         rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
             if (ack) {
@@ -238,8 +242,8 @@ public class DmfApiConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public AmqpMessageSenderService amqpSenderServiceBean() {
-        return new DefaultAmqpMessageSenderService(rabbitTemplate());
+    public AmqpMessageSenderService amqpSenderServiceBean(final RabbitTemplate rabbitTemplate) {
+        return new DefaultAmqpMessageSenderService(rabbitTemplate);
     }
 
     /**

@@ -26,10 +26,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
+import org.eclipse.hawkbit.rest.exception.FileStreamingFailedException;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.exception.MultiPartFileUploadException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
-import org.eclipse.hawkbit.rest.exception.FileStreamingFailedException;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -275,8 +275,8 @@ public class RestConfiguration {
         }
 
         @ExceptionHandler({ DataIntegrityViolationException.class })
-        public ResponseEntity<ExceptionInfo> handleDataAccessException(final HttpServletRequest request,
-                final DataIntegrityViolationException ex) {
+        public ResponseEntity<ExceptionInfo> handleDataAccessException(
+                final HttpServletRequest request, final DataIntegrityViolationException ex) {
             if (log.isDebugEnabled()) {
                 logRequest(request, ex);
             } else {
@@ -294,10 +294,8 @@ public class RestConfiguration {
             return ERROR_TO_HTTP_STATUS.getOrDefault(error, DEFAULT_RESPONSE_STATUS);
         }
 
-        // enable certain level of debug with
-        //  -> logging.level.org.eclipse.hawkbit.rest.RestConfiguration=DEBUG
-        // or for more detailed log
-        //  -> logging.level.org.eclipse.hawkbit.rest.RestConfiguration=TRACE
+        // enable certain level of debug with -> logging.level.org.eclipse.hawkbit.rest.RestConfiguration=DEBUG
+        // or for more detailed log -> logging.level.org.eclipse.hawkbit.rest.RestConfiguration=TRACE
         private void logRequest(final HttpServletRequest request, final Exception ex) {
             if (log.isTraceEnabled()) {
                 log.trace(LOG_EXCEPTION_FORMAT, ex.getClass().getName(), request.getRequestURL(), ex);

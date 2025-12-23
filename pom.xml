@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.8</version>
+        <version>4.0.0</version>
     </parent>
 
     <groupId>org.eclipse.hawkbit</groupId>
@@ -56,9 +56,13 @@
         <java.client.version>17</java.client.version>
 
         <!-- must be the same as the parent version -->
-        <spring.boot.version>3.5.8</spring.boot.version>
-        <spring.cloud.version>2025.0.0</spring.cloud.version>
-        <springdoc-openapi.version>2.8.14</springdoc-openapi.version>
+        <spring.boot.version>4.0.0</spring.boot.version>
+        <spring.cloud.version>2025.1.0</spring.cloud.version>
+        <springdoc-openapi.version>3.0.0</springdoc-openapi.version>
+
+        <!-- openfeign versions -->
+        <spring-cloud-openfeign.version>5.0.0</spring-cloud-openfeign.version>
+        <openfeign-hc5.version>13.6</openfeign-hc5.version>
 
         <!-- Spring boot version overrides (should be reviewed with every Spring boot upgrade) - START -->
         <!-- Newer versions needed than defined in the Spring boot -->
@@ -66,7 +70,9 @@
         <!-- Spring boot version overrides - END -->
 
         <!-- Eclipselink - START -->
-        <eclipselink.version>4.0.8</eclipselink.version>
+        <!-- TODO (Spring Boot 4 Migration): !!! just for test !!! 5.0.0-B12 is just a beta.
+          It also it doesn't work fine with ethlo plugin, that's why the static weaving there is usung 4.0.8 -->
+        <eclipselink.version>5.0.0-B12</eclipselink.version>
         <eclipselink.maven.plugin.version>3.0.2</eclipselink.maven.plugin.version>
         <!-- Eclipselink - END -->
 
@@ -94,6 +100,7 @@
         <license.maven.plugin.version>5.0.0</license.maven.plugin.version>
         <central.publishing.maven.plugin.version>0.9.0</central.publishing.maven.plugin.version>
         <maven.gpg.plugin.version>3.2.8</maven.gpg.plugin.version>
+        <spotless-maven-plugin.version>3.1.0</spotless-maven-plugin.version>
         <!-- Maven Plugin versions - END -->
 
         <!-- Test - START -->
@@ -243,25 +250,6 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-web</artifactId>
-                <version>${spring.boot.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.datatype</groupId>
-                        <artifactId>jackson-datatype-jdk8</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.datatype</groupId>
-                        <artifactId>jackson-datatype-jsr310</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.module</groupId>
-                        <artifactId>jackson-module-parameter-names</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter</artifactId>
                 <version>${spring.boot.version}</version>
                 <exclusions>
@@ -271,11 +259,49 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-jpa</artifactId>
+                <version>${spring.boot.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hibernate.orm</groupId>
+                        <artifactId>hibernate-core</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+                <version>${springdoc-openapi.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc-openapi.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-openfeign</artifactId>
+                <version>${spring-cloud-openfeign.version}</version>
+                <!--
+                  CVE-2025-48976: override commons-fileupload dependency - 1.5 -> 1.6.0,
+                  remove it when spring-cloud-openfeign start bringing it down,
+                  commons-fileupload 1.6.0(+) shall be added explicitly if needed
+                -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-fileupload</groupId>
+                        <artifactId>commons-fileupload</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-hc5</artifactId>
+                <version>${openfeign-hc5.version}</version>
             </dependency>
 
             <!-- Protostuff Io -->
@@ -368,6 +394,7 @@
                 -->
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless-maven-plugin.version}</version>
                 <configuration>
                     <ratchetFrom>${ratchetFrom}</ratchetFrom>
                     <java>
