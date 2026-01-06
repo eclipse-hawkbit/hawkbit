@@ -20,7 +20,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -42,32 +41,32 @@ class UserDetailsSetter extends OncePerRequestFilter {
 
     @SuppressWarnings("java:S1066") // java:S1066 - readability preferred
     @Override
-    protected void doFilterInternal(@NotNull final HttpServletRequest request, @NotNull final HttpServletResponse response,
-            @NotNull final FilterChain filterChain)
+    protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain)
             throws ServletException, IOException {
-
-        Authentication authentication = securityContextHolderStrategy.getContext().getAuthentication();
-        Authentication newAuthentication;
+        final Authentication authentication = securityContextHolderStrategy.getContext().getAuthentication();
+        final Authentication newAuthentication;
 
         if (!(authentication instanceof AnonymousAuthenticationToken) && authentication.isAuthenticated()) {
-            Collection<? extends GrantedAuthority> grantedAuthorities = grantedAuthoritiesService.getGrantedAuthorities(authentication);
-
+            final Collection<? extends GrantedAuthority> grantedAuthorities = grantedAuthoritiesService.getGrantedAuthorities(authentication);
             if (authentication instanceof OAuth2AuthenticationToken oAuth2AuthenticationToken) {
-                newAuthentication = new OAuth2AuthenticationToken(oAuth2AuthenticationToken.getPrincipal(), grantedAuthorities,
+                newAuthentication = new OAuth2AuthenticationToken(
+                        oAuth2AuthenticationToken.getPrincipal(), grantedAuthorities,
                         oAuth2AuthenticationToken.getAuthorizedClientRegistrationId());
                 if (authentication.getPrincipal() instanceof OidcUser user) {
-                    // if there is no refresh token and the access token is expired then relogin is required
+                    // if there is no refresh token and the access token is expired then re-login is required
                     if (user.getIdToken().getExpiresAt() != null && Instant.now().isAfter(user.getIdToken().getExpiresAt())) {
                         throw new AccountExpiredException("Token expired");
                     }
                 }
             } else {
-                newAuthentication = new UsernamePasswordAuthenticationToken(authentication.getName(), authentication.getCredentials(),
-                        grantedAuthorities);
+                newAuthentication = new UsernamePasswordAuthenticationToken(
+                        authentication.getName(), authentication.getCredentials(), grantedAuthorities);
             }
 
             securityContextHolderStrategy.getContext().setAuthentication(newAuthentication);
         }
+
+        // proceed with the filter chain
         filterChain.doFilter(request, response);
     }
 }
