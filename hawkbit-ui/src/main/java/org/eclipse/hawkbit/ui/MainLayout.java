@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -68,8 +69,8 @@ public class MainLayout extends AppLayout {
     }
 
     @Override
-    protected void afterNavigation() {
-        super.afterNavigation();
+    public void showRouterLayoutContent(final HasElement content) {
+        super.showRouterLayoutContent(content);
         viewTitle.setText(
                 Optional.ofNullable(getContent())
                         .map(c -> c.getClass().getAnnotation(PageTitle.class))
