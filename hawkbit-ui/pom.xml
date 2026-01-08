@@ -25,18 +25,8 @@
     <name>hawkBit :: UI</name>
 
     <properties>
-        <vaadin.version>25.0.2</vaadin.version>
+        <vaadin.version>24.9.8</vaadin.version>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>Vaadin Repo</id>
-            <url>https://maven.vaadin.com/vaadin-addons</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
     <dependencyManagement>
         <dependencies>
