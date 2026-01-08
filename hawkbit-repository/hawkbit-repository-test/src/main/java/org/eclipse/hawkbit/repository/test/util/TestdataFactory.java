@@ -63,6 +63,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
@@ -970,30 +971,30 @@ public class TestdataFactory {
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
             final String successCondition, final String errorCondition) {
         return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet,
-                successCondition, errorCondition, Action.ActionType.FORCED, null, false);
+                successCondition, RolloutGroup.RolloutGroupSuccessAction.NEXTGROUP, errorCondition, Action.ActionType.FORCED, null, false);
     }
 
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
             final String successCondition, final String errorCondition, final boolean confirmationRequired) {
         return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet,
-                successCondition, errorCondition, Action.ActionType.FORCED, null, confirmationRequired);
+                successCondition, RolloutGroup.RolloutGroupSuccessAction.NEXTGROUP, errorCondition, Action.ActionType.FORCED, null, confirmationRequired);
     }
 
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
-            final String successCondition, final String errorCondition, final boolean confirmationRequired,
+            final String successCondition, final RolloutGroup.RolloutGroupSuccessAction successAction, final String errorCondition, final boolean confirmationRequired,
             final boolean dynamic) {
         return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet,
-                successCondition, errorCondition, Action.ActionType.FORCED, null, confirmationRequired, dynamic);
+                successCondition, successAction, errorCondition, Action.ActionType.FORCED, null, confirmationRequired, dynamic);
     }
 
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
-            final String successCondition, final String errorCondition, final Action.ActionType actionType,
+            final String successCondition, final RolloutGroup.RolloutGroupSuccessAction successAction, final String errorCondition, final Action.ActionType actionType,
             final Integer weight, final boolean confirmationRequired) {
         return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet,
-                successCondition, errorCondition, actionType, weight, confirmationRequired, false);
+                successCondition, successAction, errorCondition, actionType, weight, confirmationRequired, false);
     }
 
     /**
@@ -1014,19 +1015,21 @@ public class TestdataFactory {
      */
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
-            final String successCondition, final String errorCondition, final Action.ActionType actionType,
+            final String successCondition, final RolloutGroup.RolloutGroupSuccessAction successAction, final String errorCondition, final Action.ActionType actionType,
             final Integer weight, final boolean confirmationRequired, final boolean dynamic) {
         return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet,
-                successCondition, errorCondition, actionType, weight, confirmationRequired, dynamic, null);
+                successCondition, successAction, errorCondition, actionType, weight, confirmationRequired, dynamic, null);
     }
 
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
-            final String successCondition, final String errorCondition, final Action.ActionType actionType,
+            final String successCondition, final RolloutGroup.RolloutGroupSuccessAction successAction, final String errorCondition,
+            final Action.ActionType actionType,
             final Integer weight, final boolean confirmationRequired, final boolean dynamic,
             final RolloutManagement.DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
+                .successAction(successAction, "")
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
@@ -1144,7 +1147,7 @@ public class TestdataFactory {
         createTargets(amountOtherTargets, "others-" + suffix + "-", "rollout");
         final String filterQuery = "controllerId==rollout-" + suffix + "-*";
         return createRolloutByVariables("rollout-" + suffix, "test-rollout-description", amountOfGroups, filterQuery,
-                rolloutDS, successCondition, errorCondition, actionType, weight, false);
+                rolloutDS, successCondition, RolloutGroup.RolloutGroupSuccessAction.NEXTGROUP, errorCondition, actionType, weight, false);
     }
 
     /**

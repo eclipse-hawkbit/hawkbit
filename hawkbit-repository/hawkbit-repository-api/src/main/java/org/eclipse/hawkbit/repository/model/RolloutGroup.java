@@ -169,6 +169,7 @@ public interface RolloutGroup extends NamedEntity {
      * is hit.
      */
     enum RolloutGroupSuccessAction {
-        NEXTGROUP
+        NEXTGROUP,
+        PAUSE
     }
 }

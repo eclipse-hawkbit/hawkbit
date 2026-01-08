@@ -58,6 +58,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutTargetGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.EvaluatorNotConfiguredException;
+import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupActionEvaluator;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupEvaluationManager;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
@@ -353,11 +354,10 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 .filter(group -> group.getStatus() == RolloutGroupStatus.RUNNING)
                 .map(JpaRolloutGroup.class::cast)
                 .toList();
-
         if (runningGroups.isEmpty()) {
             // no running rollouts, probably there was an error somewhere at the latest group. And the latest group has
             // been switched from running into error state. So we need to find the latest group which
-            executeLatestRolloutGroup(rollout);
+            executeNextRolloutGroup(rollout);
         } else {
             log.debug("Rollout {} has {} running groups", rollout.getId(), runningGroups.size());
             executeRunningGroups(rollout, runningGroups, rollout.getRolloutGroups().get(rollout.getRolloutGroups().size() - 1));
@@ -410,16 +410,9 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         return groupsActiveLeft == 0;
     }
 
-    private void executeLatestRolloutGroup(final JpaRollout rollout) {
-        final List<JpaRolloutGroup> latestRolloutGroup = rollout.getRolloutGroups().stream()
-                .filter(group -> group.getStatus() != RolloutGroupStatus.SCHEDULED)
-                .sorted(DESC_COMP)
-                .map(JpaRolloutGroup.class::cast)
-                .toList();
-        if (latestRolloutGroup.isEmpty()) {
-            return;
-        }
-        executeRolloutGroupSuccessAction(rollout, latestRolloutGroup.get(0));
+    private void executeNextRolloutGroup(final JpaRollout rollout) {
+        asSystem(() -> rolloutManagement.triggerNextGroup(rollout.getId()));
+
     }
 
     // fakes getTotalTargets count to match expected for the last dynamic group
@@ -540,7 +533,14 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private void executeRolloutGroupSuccessAction(final Rollout rollout, final RolloutGroup rolloutGroup) {
-        evaluationManager.getSuccessActionEvaluator(rolloutGroup.getSuccessAction()).exec(rollout, rolloutGroup);
+        final RolloutGroupActionEvaluator<RolloutGroup.RolloutGroupSuccessAction> successAction = evaluationManager.getSuccessActionEvaluator(rolloutGroup.getSuccessAction());
+        successAction.exec(rollout, rolloutGroup);
+        //change success action to NEXTGROUP because success condition != finished group
+        //if group is not finished (all actions in terminate state), group success condition will be evaluated again next time
+        if (rolloutGroup.getSuccessAction() == RolloutGroup.RolloutGroupSuccessAction.PAUSE) {
+            ((JpaRolloutGroup)rolloutGroup).setSuccessAction(RolloutGroup.RolloutGroupSuccessAction.NEXTGROUP);
+            rolloutGroupRepository.save((JpaRolloutGroup) rolloutGroup);
+        }
     }
 
     private void startFirstRolloutGroup(final JpaRollout rollout) {

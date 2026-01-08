@@ -118,6 +118,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             RolloutStatus.CREATING, RolloutStatus.READY, RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.STARTING, RolloutStatus.RUNNING,
             RolloutStatus.PAUSED, RolloutStatus.APPROVAL_DENIED);
 
+    private static final Comparator<RolloutGroup> ROLLOUT_GROUP_DESC_COMP = Comparator.comparingLong(RolloutGroup::getId).reversed();
     @Value("${hawkbit.repository.jpa.management.rollout.max.actions.per.transaction:5000}")
     private int maxActions;
 
@@ -482,13 +483,15 @@ public class JpaRolloutManagement implements RolloutManagement {
             throw new RolloutIllegalStateException("Rollout does not have any groups left to be triggered");
         }
 
-        final RolloutGroup latestRunning = groups.stream()
-                .sorted(Comparator.comparingLong(RolloutGroup::getId).reversed())
-                .filter(g -> RolloutGroupStatus.RUNNING.equals(g.getStatus()))
-                .findFirst()
-                .orElseThrow(() -> new RolloutIllegalStateException("No group is running"));
-
-        startNextRolloutGroupAction.exec(rollout, latestRunning);
+        final List<JpaRolloutGroup> latestRolloutGroup = rollout.getRolloutGroups().stream()
+                .filter(group -> group.getStatus() != RolloutGroupStatus.SCHEDULED)
+                .sorted(ROLLOUT_GROUP_DESC_COMP)
+                .map(JpaRolloutGroup.class::cast)
+                .toList();
+        if (latestRolloutGroup.isEmpty()) {
+            throw new RolloutIllegalStateException("Cannot find latest rollout group to trigger next from");
+        }
+        startNextRolloutGroupAction.exec(rollout, latestRolloutGroup.get(0));
     }
 
     @Override

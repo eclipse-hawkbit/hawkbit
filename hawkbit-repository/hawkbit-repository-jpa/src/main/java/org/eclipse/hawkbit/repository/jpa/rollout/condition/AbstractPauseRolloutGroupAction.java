@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,38 +12,27 @@ package org.eclipse.hawkbit.repository.jpa.rollout.condition;
 import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 
 /**
- * Error action evaluator which pauses the whole {@link Rollout} and sets the
- * current {@link RolloutGroup} to error.
+ * Abstract class for pausing a rollout group.
+ *
+ * @param <T> the type of the action
  */
-public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator<RolloutGroup.RolloutGroupErrorAction> {
+public abstract class AbstractPauseRolloutGroupAction<T extends Enum<T>> implements RolloutGroupActionEvaluator<T> {
 
-    private final RolloutManagement rolloutManagement;
-    private final RolloutGroupRepository rolloutGroupRepository;
+    protected final RolloutManagement rolloutManagement;
+    protected final RolloutGroupRepository rolloutGroupRepository;
 
-    public PauseRolloutGroupAction(final RolloutManagement rolloutManagement,
+    protected AbstractPauseRolloutGroupAction(final RolloutManagement rolloutManagement,
             final RolloutGroupRepository rolloutGroupRepository) {
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupRepository = rolloutGroupRepository;
     }
 
-    @Override
-    public RolloutGroup.RolloutGroupErrorAction getAction() {
-        return RolloutGroup.RolloutGroupErrorAction.PAUSE;
-    }
-
-    @Override
-    public void exec(final Rollout rollout, final RolloutGroup rolloutG) {
-        final JpaRolloutGroup rolloutGroup = (JpaRolloutGroup) rolloutG;
-
-        rolloutGroup.setStatus(RolloutGroupStatus.ERROR);
-        rolloutGroupRepository.save(rolloutGroup);
+    public void exec(final Rollout rollout, final RolloutGroup rolloutGroup) {
         // Refresh latest rollout state in order to avoid cases when
         // previous group have matched error condition and paused the rollout
         // and this one tries to pause the rollout too but throws an exception
@@ -56,3 +45,4 @@ public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator<Roll
         }
     }
 }
+
