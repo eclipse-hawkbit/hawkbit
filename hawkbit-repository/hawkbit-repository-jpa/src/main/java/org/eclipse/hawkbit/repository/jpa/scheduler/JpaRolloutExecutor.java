@@ -523,23 +523,12 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                     .eval(rollout, evalProxy, rolloutGroup.getSuccessConditionExp());
             if (isFinished) {
                 log.debug("Rollout group {} is finished, starting next group", rolloutGroup);
-                executeRolloutGroupSuccessAction(rollout, rolloutGroup);
+                evaluationManager.getSuccessActionEvaluator(rolloutGroup.getSuccessAction()).exec(rollout, rolloutGroup);
             } else {
                 log.debug("Rollout group {} is still running", rolloutGroup);
             }
         } catch (final EvaluatorNotConfiguredException e) {
             log.error("Something bad happened when accessing the finish condition or success action bean {}", successCondition.name(), e);
-        }
-    }
-
-    private void executeRolloutGroupSuccessAction(final Rollout rollout, final RolloutGroup rolloutGroup) {
-        final RolloutGroupActionEvaluator<RolloutGroup.RolloutGroupSuccessAction> successAction = evaluationManager.getSuccessActionEvaluator(rolloutGroup.getSuccessAction());
-        successAction.exec(rollout, rolloutGroup);
-        //change success action to NEXTGROUP because success condition != finished group
-        //if group is not finished (all actions in terminate state), group success condition will be evaluated again next time
-        if (rolloutGroup.getSuccessAction() == RolloutGroup.RolloutGroupSuccessAction.PAUSE) {
-            ((JpaRolloutGroup)rolloutGroup).setSuccessAction(RolloutGroup.RolloutGroupSuccessAction.NEXTGROUP);
-            rolloutGroupRepository.save((JpaRolloutGroup) rolloutGroup);
         }
     }
 

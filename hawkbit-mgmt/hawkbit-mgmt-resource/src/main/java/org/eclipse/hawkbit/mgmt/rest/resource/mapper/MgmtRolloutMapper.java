@@ -296,6 +296,8 @@ public final class MgmtRolloutMapper {
     private static RolloutGroupSuccessAction map(final SuccessAction action) {
         if (SuccessAction.NEXTGROUP == action) {
             return RolloutGroupSuccessAction.NEXTGROUP;
+        } else if (SuccessAction.PAUSE == action) {
+            return RolloutGroupSuccessAction.PAUSE;
         }
         throw new IllegalArgumentException("Success Action " + action + NOT_SUPPORTED);
     }
@@ -303,6 +305,8 @@ public final class MgmtRolloutMapper {
     private static SuccessAction map(final RolloutGroupSuccessAction successAction) {
         if (RolloutGroupSuccessAction.NEXTGROUP == successAction) {
             return SuccessAction.NEXTGROUP;
+        } else  if (RolloutGroupSuccessAction.PAUSE == successAction) {
+            return SuccessAction.PAUSE;
         }
         throw new IllegalArgumentException("Rollout group success action " + successAction + NOT_SUPPORTED);
     }
