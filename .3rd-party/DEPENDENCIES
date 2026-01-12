@@ -1,5 +1,5 @@
-maven/mavencentral/ch.qos.logback/logback-classic/1.5.21, EPL-1.0 AND LGPL-2.1-only, approved, #18704
-maven/mavencentral/ch.qos.logback/logback-core/1.5.21, EPL-1.0 AND LGPL-2.1-only, approved, #15210
+maven/mavencentral/ch.qos.logback/logback-classic/1.5.22, EPL-1.0 AND LGPL-2.1-only, approved, #18704
+maven/mavencentral/ch.qos.logback/logback-core/1.5.22, EPL-1.0 AND LGPL-2.1-only, approved, #15210
 maven/mavencentral/com.cronutils/cron-utils/9.2.1, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.19.4, Apache-2.0, approved, #21911
 maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.19.4, Apache-2.0 AND MIT, approved, #21916
@@ -41,82 +41,82 @@ maven/mavencentral/com.vaadin.external.gwt/gwt-elemental/2.8.2.vaadin2, Apache-2
 maven/mavencentral/com.vaadin.external/gentyref/1.2.0.vaadin1, Apache-2.0, approved, CQ20645
 maven/mavencentral/com.vaadin.servletdetector/throw-if-servlet3/1.0.2, Apache-2.0, approved, #12159
 maven/mavencentral/com.vaadin/collaboration-engine/6.6.0, Apache-2.0, approved, #23473
-maven/mavencentral/com.vaadin/copilot/24.9.7, Apache-2.0, approved, #23502
-maven/mavencentral/com.vaadin/flow-client/24.9.7, Apache-2.0, approved, #23514
-maven/mavencentral/com.vaadin/flow-data/24.9.7, Apache-2.0, approved, #23457
-maven/mavencentral/com.vaadin/flow-dnd/24.9.7, Apache-2.0, approved, #23452
-maven/mavencentral/com.vaadin/flow-html-components/24.9.7, Apache-2.0, approved, #23461
-maven/mavencentral/com.vaadin/flow-lit-template/24.9.7, Apache-2.0, approved, #23497
-maven/mavencentral/com.vaadin/flow-push/24.9.7, Apache-2.0, approved, #23506
-maven/mavencentral/com.vaadin/flow-react/24.9.7, Apache-2.0, approved, #23519
-maven/mavencentral/com.vaadin/flow-server/24.9.7, Apache-2.0 AND MIT, approved, #23490
-maven/mavencentral/com.vaadin/hilla-dev/24.9.7, Apache-2.0, approved, #23474
-maven/mavencentral/com.vaadin/hilla-endpoint/24.9.7, Apache-2.0, approved, #23472
-maven/mavencentral/com.vaadin/hilla-engine-core/24.9.7, Apache-2.0, approved, #23478
-maven/mavencentral/com.vaadin/hilla-engine-runtime/24.9.7, Apache-2.0, approved, #23479
-maven/mavencentral/com.vaadin/hilla-parser-jvm-core/24.9.7, Apache-2.0, approved, #23501
-maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-backbone/24.9.7, Apache-2.0, approved, #23523
-maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-model/24.9.7, Apache-2.0, approved, #23454
-maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-nonnull-kotlin/24.9.7, Apache-2.0, approved, #23466
-maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-nonnull/24.9.7, Apache-2.0, approved, #23520
-maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-subtypes/24.9.7, Apache-2.0, approved, #23493
-maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-transfertypes/24.9.7, Apache-2.0, approved, #23450
-maven/mavencentral/com.vaadin/hilla-parser-jvm-utils/24.9.7, Apache-2.0, approved, #23508
-maven/mavencentral/com.vaadin/hilla-runtime-plugin-transfertypes/24.9.7, Apache-2.0, approved, #23500
-maven/mavencentral/com.vaadin/hilla/24.9.7, Apache-2.0, approved, #23460
+maven/mavencentral/com.vaadin/copilot/24.9.8, Apache-2.0, approved, #23502
+maven/mavencentral/com.vaadin/flow-client/24.9.9, Apache-2.0, approved, #23514
+maven/mavencentral/com.vaadin/flow-data/24.9.9, Apache-2.0, approved, #23457
+maven/mavencentral/com.vaadin/flow-dnd/24.9.9, Apache-2.0, approved, #23452
+maven/mavencentral/com.vaadin/flow-html-components/24.9.9, Apache-2.0, approved, #23461
+maven/mavencentral/com.vaadin/flow-lit-template/24.9.9, Apache-2.0, approved, #23497
+maven/mavencentral/com.vaadin/flow-push/24.9.9, Apache-2.0, approved, #23506
+maven/mavencentral/com.vaadin/flow-react/24.9.9, Apache-2.0, approved, #23519
+maven/mavencentral/com.vaadin/flow-server/24.9.9, Apache-2.0 AND MIT, approved, #23490
+maven/mavencentral/com.vaadin/hilla-dev/24.9.8, Apache-2.0, approved, #23474
+maven/mavencentral/com.vaadin/hilla-endpoint/24.9.8, Apache-2.0, approved, #23472
+maven/mavencentral/com.vaadin/hilla-engine-core/24.9.8, Apache-2.0, approved, #23478
+maven/mavencentral/com.vaadin/hilla-engine-runtime/24.9.8, Apache-2.0, approved, #23479
+maven/mavencentral/com.vaadin/hilla-parser-jvm-core/24.9.8, Apache-2.0, approved, #23501
+maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-backbone/24.9.8, Apache-2.0, approved, #23523
+maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-model/24.9.8, Apache-2.0, approved, #23454
+maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-nonnull-kotlin/24.9.8, Apache-2.0, approved, #23466
+maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-nonnull/24.9.8, Apache-2.0, approved, #23520
+maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-subtypes/24.9.8, Apache-2.0, approved, #23493
+maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-transfertypes/24.9.8, Apache-2.0, approved, #23450
+maven/mavencentral/com.vaadin/hilla-parser-jvm-utils/24.9.8, Apache-2.0, approved, #23508
+maven/mavencentral/com.vaadin/hilla-runtime-plugin-transfertypes/24.9.8, Apache-2.0, approved, #23500
+maven/mavencentral/com.vaadin/hilla/24.9.8, Apache-2.0, approved, #23460
 maven/mavencentral/com.vaadin/license-checker/2.0.1, Apache-2.0, approved, #23484
 maven/mavencentral/com.vaadin/open/8.5.0.5, MIT AND Apache-2.0, approved, #17743
-maven/mavencentral/com.vaadin/signals/24.9.7, Apache-2.0, approved, #23470
+maven/mavencentral/com.vaadin/signals/24.9.9, Apache-2.0, approved, #23470
 maven/mavencentral/com.vaadin/ui-tests/1.1.5, Apache-2.0, approved, clearlydefined
-maven/mavencentral/com.vaadin/vaadin-accordion-flow/24.9.7, Apache-2.0, approved, #23521
-maven/mavencentral/com.vaadin/vaadin-app-layout-flow/24.9.7, Apache-2.0, approved, #23446
-maven/mavencentral/com.vaadin/vaadin-avatar-flow/24.9.7, Apache-2.0, approved, #23477
-maven/mavencentral/com.vaadin/vaadin-button-flow/24.9.7, Apache-2.0, approved, #23471
-maven/mavencentral/com.vaadin/vaadin-card-flow/24.9.7, Apache-2.0, approved, #23517
-maven/mavencentral/com.vaadin/vaadin-checkbox-flow/24.9.7, Apache-2.0, approved, #23496
-maven/mavencentral/com.vaadin/vaadin-combo-box-flow/24.9.7, Apache-2.0, approved, #23507
-maven/mavencentral/com.vaadin/vaadin-confirm-dialog-flow/24.9.7, Apache-2.0, approved, #23495
-maven/mavencentral/com.vaadin/vaadin-context-menu-flow/24.9.7, Apache-2.0, approved, #23467
-maven/mavencentral/com.vaadin/vaadin-core-components/24.9.7, Apache-2.0, approved, #23503
-maven/mavencentral/com.vaadin/vaadin-core-internal/24.9.7, Apache-2.0, approved, #23469
-maven/mavencentral/com.vaadin/vaadin-core/24.9.7, Apache-2.0, approved, #23476
-maven/mavencentral/com.vaadin/vaadin-custom-field-flow/24.9.7, Apache-2.0, approved, #23458
-maven/mavencentral/com.vaadin/vaadin-date-picker-flow/24.9.7, Apache-2.0, approved, #23516
-maven/mavencentral/com.vaadin/vaadin-date-time-picker-flow/24.9.7, Apache-2.0, approved, #23463
-maven/mavencentral/com.vaadin/vaadin-details-flow/24.9.7, Apache-2.0, approved, #23511
-maven/mavencentral/com.vaadin/vaadin-dev-bundle/24.9.7, MIT AND Apache-2.0 AND BSD-3-Clause AND BSD-2-Clause AND BlueOak-1.0.0 AND 0BSD AND Python-2.0 AND CC-BY-4.0 AND (AFL-2.1 OR BSD-3-Clause) AND (MIT OR CC0-1.0) AND (MPL-2.0 OR Apache-2.0) AND (MIT AND Zlib), approved, #23488
-maven/mavencentral/com.vaadin/vaadin-dev-server/24.9.7, Apache-2.0, approved, #23453
-maven/mavencentral/com.vaadin/vaadin-dev/24.9.7, Apache-2.0, approved, #23447
-maven/mavencentral/com.vaadin/vaadin-dialog-flow/24.9.7, Apache-2.0, approved, #23481
-maven/mavencentral/com.vaadin/vaadin-field-highlighter-flow/24.9.7, Apache-2.0, approved, #23464
-maven/mavencentral/com.vaadin/vaadin-flow-components-base/24.9.7, Apache-2.0, approved, #23485
-maven/mavencentral/com.vaadin/vaadin-form-layout-flow/24.9.7, Apache-2.0, approved, #23445
-maven/mavencentral/com.vaadin/vaadin-grid-flow/24.9.7, Apache-2.0, approved, #23483
-maven/mavencentral/com.vaadin/vaadin-icons-flow/24.9.7, Apache-2.0, approved, #23524
-maven/mavencentral/com.vaadin/vaadin-list-box-flow/24.9.7, Apache-2.0, approved, #23512
-maven/mavencentral/com.vaadin/vaadin-login-flow/24.9.7, Apache-2.0, approved, #23518
-maven/mavencentral/com.vaadin/vaadin-lumo-theme/24.9.7, Apache-2.0, approved, #23442
-maven/mavencentral/com.vaadin/vaadin-markdown-flow/24.9.7, Apache-2.0, approved, #23504
-maven/mavencentral/com.vaadin/vaadin-master-detail-layout-flow/24.9.7, Apache-2.0, approved, #23491
-maven/mavencentral/com.vaadin/vaadin-material-theme/24.9.7, Apache-2.0, approved, #23451
-maven/mavencentral/com.vaadin/vaadin-menu-bar-flow/24.9.7, Apache-2.0, approved, #23498
-maven/mavencentral/com.vaadin/vaadin-messages-flow/24.9.7, Apache-2.0, approved, #23480
-maven/mavencentral/com.vaadin/vaadin-notification-flow/24.9.7, Apache-2.0, approved, #23482
-maven/mavencentral/com.vaadin/vaadin-ordered-layout-flow/24.9.7, Apache-2.0, approved, #23448
-maven/mavencentral/com.vaadin/vaadin-popover-flow/24.9.7, Apache-2.0, approved, #23443
-maven/mavencentral/com.vaadin/vaadin-progress-bar-flow/24.9.7, Apache-2.0, approved, #23459
-maven/mavencentral/com.vaadin/vaadin-radio-button-flow/24.9.7, Apache-2.0, approved, #23486
-maven/mavencentral/com.vaadin/vaadin-renderer-flow/24.9.7, Apache-2.0, approved, #23455
-maven/mavencentral/com.vaadin/vaadin-select-flow/24.9.7, Apache-2.0, approved, #23475
-maven/mavencentral/com.vaadin/vaadin-side-nav-flow/24.9.7, Apache-2.0, approved, #23513
-maven/mavencentral/com.vaadin/vaadin-split-layout-flow/24.9.7, Apache-2.0, approved, #23487
-maven/mavencentral/com.vaadin/vaadin-spring-boot-starter/24.9.7, Apache-2.0, approved, #23505
-maven/mavencentral/com.vaadin/vaadin-spring/24.9.7, Apache-2.0, approved, #23492
-maven/mavencentral/com.vaadin/vaadin-tabs-flow/24.9.7, Apache-2.0, approved, #23510
-maven/mavencentral/com.vaadin/vaadin-text-field-flow/24.9.7, Apache-2.0, approved, #23465
-maven/mavencentral/com.vaadin/vaadin-time-picker-flow/24.9.7, Apache-2.0, approved, #23509
-maven/mavencentral/com.vaadin/vaadin-upload-flow/24.9.7, Apache-2.0, approved, #23449
-maven/mavencentral/com.vaadin/vaadin-virtual-list-flow/24.9.7, Apache-2.0, approved, #23462
+maven/mavencentral/com.vaadin/vaadin-accordion-flow/24.9.8, Apache-2.0, approved, #23521
+maven/mavencentral/com.vaadin/vaadin-app-layout-flow/24.9.8, Apache-2.0, approved, #23446
+maven/mavencentral/com.vaadin/vaadin-avatar-flow/24.9.8, Apache-2.0, approved, #23477
+maven/mavencentral/com.vaadin/vaadin-button-flow/24.9.8, Apache-2.0, approved, #23471
+maven/mavencentral/com.vaadin/vaadin-card-flow/24.9.8, Apache-2.0, approved, #23517
+maven/mavencentral/com.vaadin/vaadin-checkbox-flow/24.9.8, Apache-2.0, approved, #23496
+maven/mavencentral/com.vaadin/vaadin-combo-box-flow/24.9.8, Apache-2.0, approved, #23507
+maven/mavencentral/com.vaadin/vaadin-confirm-dialog-flow/24.9.8, Apache-2.0, approved, #23495
+maven/mavencentral/com.vaadin/vaadin-context-menu-flow/24.9.8, Apache-2.0, approved, #23467
+maven/mavencentral/com.vaadin/vaadin-core-components/24.9.8, Apache-2.0, approved, #23503
+maven/mavencentral/com.vaadin/vaadin-core-internal/24.9.8, Apache-2.0, approved, #23469
+maven/mavencentral/com.vaadin/vaadin-core/24.9.8, Apache-2.0, approved, #23476
+maven/mavencentral/com.vaadin/vaadin-custom-field-flow/24.9.8, Apache-2.0, approved, #23458
+maven/mavencentral/com.vaadin/vaadin-date-picker-flow/24.9.8, Apache-2.0, approved, #23516
+maven/mavencentral/com.vaadin/vaadin-date-time-picker-flow/24.9.8, Apache-2.0, approved, #23463
+maven/mavencentral/com.vaadin/vaadin-details-flow/24.9.8, Apache-2.0, approved, #23511
+maven/mavencentral/com.vaadin/vaadin-dev-bundle/24.9.8, MIT AND Apache-2.0 AND BSD-3-Clause AND BSD-2-Clause AND BlueOak-1.0.0 AND 0BSD AND Python-2.0 AND CC-BY-4.0 AND (AFL-2.1 OR BSD-3-Clause) AND (MIT OR CC0-1.0) AND (MPL-2.0 OR Apache-2.0) AND (MIT AND Zlib), approved, #23488
+maven/mavencentral/com.vaadin/vaadin-dev-server/24.9.9, Apache-2.0, approved, #23453
+maven/mavencentral/com.vaadin/vaadin-dev/24.9.8, Apache-2.0, approved, #23447
+maven/mavencentral/com.vaadin/vaadin-dialog-flow/24.9.8, Apache-2.0, approved, #23481
+maven/mavencentral/com.vaadin/vaadin-field-highlighter-flow/24.9.8, Apache-2.0, approved, #23464
+maven/mavencentral/com.vaadin/vaadin-flow-components-base/24.9.8, Apache-2.0, approved, #23485
+maven/mavencentral/com.vaadin/vaadin-form-layout-flow/24.9.8, Apache-2.0, approved, #23445
+maven/mavencentral/com.vaadin/vaadin-grid-flow/24.9.8, Apache-2.0, approved, #23483
+maven/mavencentral/com.vaadin/vaadin-icons-flow/24.9.8, Apache-2.0, approved, #23524
+maven/mavencentral/com.vaadin/vaadin-list-box-flow/24.9.8, Apache-2.0, approved, #23512
+maven/mavencentral/com.vaadin/vaadin-login-flow/24.9.8, Apache-2.0, approved, #23518
+maven/mavencentral/com.vaadin/vaadin-lumo-theme/24.9.8, Apache-2.0, approved, #23442
+maven/mavencentral/com.vaadin/vaadin-markdown-flow/24.9.8, Apache-2.0, approved, #23504
+maven/mavencentral/com.vaadin/vaadin-master-detail-layout-flow/24.9.8, Apache-2.0, approved, #23491
+maven/mavencentral/com.vaadin/vaadin-material-theme/24.9.8, Apache-2.0, approved, #23451
+maven/mavencentral/com.vaadin/vaadin-menu-bar-flow/24.9.8, Apache-2.0, approved, #23498
+maven/mavencentral/com.vaadin/vaadin-messages-flow/24.9.8, Apache-2.0, approved, #23480
+maven/mavencentral/com.vaadin/vaadin-notification-flow/24.9.8, Apache-2.0, approved, #23482
+maven/mavencentral/com.vaadin/vaadin-ordered-layout-flow/24.9.8, Apache-2.0, approved, #23448
+maven/mavencentral/com.vaadin/vaadin-popover-flow/24.9.8, Apache-2.0, approved, #23443
+maven/mavencentral/com.vaadin/vaadin-progress-bar-flow/24.9.8, Apache-2.0, approved, #23459
+maven/mavencentral/com.vaadin/vaadin-radio-button-flow/24.9.8, Apache-2.0, approved, #23486
+maven/mavencentral/com.vaadin/vaadin-renderer-flow/24.9.8, Apache-2.0, approved, #23455
+maven/mavencentral/com.vaadin/vaadin-select-flow/24.9.8, Apache-2.0, approved, #23475
+maven/mavencentral/com.vaadin/vaadin-side-nav-flow/24.9.8, Apache-2.0, approved, #23513
+maven/mavencentral/com.vaadin/vaadin-split-layout-flow/24.9.8, Apache-2.0, approved, #23487
+maven/mavencentral/com.vaadin/vaadin-spring-boot-starter/24.9.8, Apache-2.0, approved, #23505
+maven/mavencentral/com.vaadin/vaadin-spring/24.9.9, Apache-2.0, approved, #23492
+maven/mavencentral/com.vaadin/vaadin-tabs-flow/24.9.8, Apache-2.0, approved, #23510
+maven/mavencentral/com.vaadin/vaadin-text-field-flow/24.9.8, Apache-2.0, approved, #23465
+maven/mavencentral/com.vaadin/vaadin-time-picker-flow/24.9.8, Apache-2.0, approved, #23509
+maven/mavencentral/com.vaadin/vaadin-upload-flow/24.9.8, Apache-2.0, approved, #23449
+maven/mavencentral/com.vaadin/vaadin-virtual-list-flow/24.9.8, Apache-2.0, approved, #23462
 maven/mavencentral/com.zaxxer/HikariCP/6.3.3, Apache-2.0, approved, #23029
 maven/mavencentral/commons-codec/commons-codec/1.18.0, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #19214
 maven/mavencentral/commons-fileupload/commons-fileupload/1.6.0, Apache-2.0, approved, #21847
@@ -129,54 +129,54 @@ maven/mavencentral/io.github.openfeign/feign-form/13.6, Apache-2.0, approved, cl
 maven/mavencentral/io.github.openfeign/feign-hc5/13.6, Apache-2.0, approved, #21983
 maven/mavencentral/io.github.openfeign/feign-slf4j/13.6, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.methvin/directory-watcher/0.19.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/io.micrometer/micrometer-commons/1.15.6, Apache-2.0 AND (Apache-2.0 AND MIT), approved, #23144
-maven/mavencentral/io.micrometer/micrometer-core/1.15.6, Apache-2.0 AND (Apache-2.0 AND MIT), approved, #23142
-maven/mavencentral/io.micrometer/micrometer-observation/1.15.6, Apache-2.0, approved, #23139
-maven/mavencentral/io.netty/netty-all/4.1.128.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ22582
-maven/mavencentral/io.netty/netty-buffer/4.1.128.Final, Apache-2.0, approved, CQ21842
-maven/mavencentral/io.netty/netty-codec-dns/4.1.128.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-maven/mavencentral/io.netty/netty-codec-haproxy/4.1.128.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
-maven/mavencentral/io.netty/netty-codec-http/4.1.128.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-maven/mavencentral/io.netty/netty-codec-http2/4.1.128.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-maven/mavencentral/io.netty/netty-codec-memcache/4.1.128.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
-maven/mavencentral/io.netty/netty-codec-mqtt/4.1.128.Final, Apache-2.0 OR LicenseRef-Public-Domain OR BSD-2-Clause OR MIT, approved, CQ15280
-maven/mavencentral/io.netty/netty-codec-redis/4.1.128.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
-maven/mavencentral/io.netty/netty-codec-smtp/4.1.128.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
-maven/mavencentral/io.netty/netty-codec-socks/4.1.128.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-maven/mavencentral/io.netty/netty-codec-stomp/4.1.128.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
-maven/mavencentral/io.netty/netty-codec-xml/4.1.128.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
-maven/mavencentral/io.netty/netty-codec/4.1.128.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-maven/mavencentral/io.netty/netty-common/4.1.128.Final, Apache-2.0 AND MIT AND CC0-1.0, approved, CQ21843
-maven/mavencentral/io.netty/netty-handler-proxy/4.1.128.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-maven/mavencentral/io.netty/netty-handler-ssl-ocsp/4.1.128.Final, Apache-2.0, approved, #6365
-maven/mavencentral/io.netty/netty-handler/4.1.128.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-maven/mavencentral/io.netty/netty-resolver-dns-classes-macos/4.1.128.Final, Apache-2.0, approved, #6367
-maven/mavencentral/io.netty/netty-resolver-dns-native-macos/4.1.128.Final, Apache-2.0, approved, #7004
-maven/mavencentral/io.netty/netty-resolver-dns/4.1.128.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-maven/mavencentral/io.netty/netty-resolver/4.1.128.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-maven/mavencentral/io.netty/netty-transport-classes-epoll/4.1.128.Final, Apache-2.0, approved, #6366
-maven/mavencentral/io.netty/netty-transport-classes-kqueue/4.1.128.Final, Apache-2.0, approved, #4107
-maven/mavencentral/io.netty/netty-transport-native-epoll/4.1.128.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-maven/mavencentral/io.netty/netty-transport-native-unix-common/4.1.128.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-maven/mavencentral/io.netty/netty-transport-rxtx/4.1.128.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
-maven/mavencentral/io.netty/netty-transport-sctp/4.1.128.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
-maven/mavencentral/io.netty/netty-transport-udt/4.1.128.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
-maven/mavencentral/io.netty/netty-transport/4.1.128.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-maven/mavencentral/io.projectreactor.netty/reactor-netty-core/1.2.12, Apache-2.0, approved, #23393
-maven/mavencentral/io.projectreactor.netty/reactor-netty-http/1.2.12, Apache-2.0, approved, #23394
-maven/mavencentral/io.projectreactor.netty/reactor-netty/1.2.12, Apache-2.0, approved, #23499
-maven/mavencentral/io.projectreactor/reactor-core/3.7.13, Apache-2.0, approved, #17529
+maven/mavencentral/io.micrometer/micrometer-commons/1.15.7, Apache-2.0 AND (Apache-2.0 AND MIT), approved, #23144
+maven/mavencentral/io.micrometer/micrometer-core/1.15.7, Apache-2.0 AND (Apache-2.0 AND MIT), approved, #23142
+maven/mavencentral/io.micrometer/micrometer-observation/1.15.7, Apache-2.0, approved, #23139
+maven/mavencentral/io.netty/netty-all/4.1.130.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ22582
+maven/mavencentral/io.netty/netty-buffer/4.1.130.Final, Apache-2.0, approved, CQ21842
+maven/mavencentral/io.netty/netty-codec-dns/4.1.130.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-codec-haproxy/4.1.130.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
+maven/mavencentral/io.netty/netty-codec-http/4.1.130.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-codec-http2/4.1.130.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-codec-memcache/4.1.130.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
+maven/mavencentral/io.netty/netty-codec-mqtt/4.1.130.Final, Apache-2.0 OR LicenseRef-Public-Domain OR BSD-2-Clause OR MIT, approved, CQ15280
+maven/mavencentral/io.netty/netty-codec-redis/4.1.130.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
+maven/mavencentral/io.netty/netty-codec-smtp/4.1.130.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
+maven/mavencentral/io.netty/netty-codec-socks/4.1.130.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-codec-stomp/4.1.130.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
+maven/mavencentral/io.netty/netty-codec-xml/4.1.130.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
+maven/mavencentral/io.netty/netty-codec/4.1.130.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-common/4.1.130.Final, Apache-2.0 AND MIT AND CC0-1.0, approved, CQ21843
+maven/mavencentral/io.netty/netty-handler-proxy/4.1.130.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-handler-ssl-ocsp/4.1.130.Final, Apache-2.0, approved, #6365
+maven/mavencentral/io.netty/netty-handler/4.1.130.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-resolver-dns-classes-macos/4.1.130.Final, Apache-2.0, approved, #6367
+maven/mavencentral/io.netty/netty-resolver-dns-native-macos/4.1.130.Final, Apache-2.0, approved, #7004
+maven/mavencentral/io.netty/netty-resolver-dns/4.1.130.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-resolver/4.1.130.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-transport-classes-epoll/4.1.130.Final, Apache-2.0, approved, #6366
+maven/mavencentral/io.netty/netty-transport-classes-kqueue/4.1.130.Final, Apache-2.0, approved, #4107
+maven/mavencentral/io.netty/netty-transport-native-epoll/4.1.130.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-transport-native-unix-common/4.1.130.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-transport-rxtx/4.1.130.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
+maven/mavencentral/io.netty/netty-transport-sctp/4.1.130.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
+maven/mavencentral/io.netty/netty-transport-udt/4.1.130.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ21553
+maven/mavencentral/io.netty/netty-transport/4.1.130.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.projectreactor.netty/reactor-netty-core/1.2.13, Apache-2.0, approved, #23393
+maven/mavencentral/io.projectreactor.netty/reactor-netty-http/1.2.13, Apache-2.0, approved, #23394
+maven/mavencentral/io.projectreactor.netty/reactor-netty/1.2.13, Apache-2.0, approved, #23499
+maven/mavencentral/io.projectreactor/reactor-core/3.7.14, Apache-2.0, approved, #17529
 maven/mavencentral/io.protostuff/protostuff-api/1.8.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.protostuff/protostuff-collectionschema/1.8.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.protostuff/protostuff-core/1.8.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.protostuff/protostuff-runtime/1.8.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.smallrye/jandex/3.2.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.swagger.core.v3/swagger-annotations-jakarta/2.2.32, Apache-2.0, approved, #5947
-maven/mavencentral/io.swagger.core.v3/swagger-annotations-jakarta/2.2.38, Apache-2.0, approved, #5947
+maven/mavencentral/io.swagger.core.v3/swagger-annotations-jakarta/2.2.41, Apache-2.0, approved, #5947
 maven/mavencentral/io.swagger.core.v3/swagger-core-jakarta/2.2.32, Apache-2.0, approved, #5929
-maven/mavencentral/io.swagger.core.v3/swagger-core-jakarta/2.2.38, Apache-2.0, approved, #5929
+maven/mavencentral/io.swagger.core.v3/swagger-core-jakarta/2.2.41, Apache-2.0, approved, #5929
 maven/mavencentral/io.swagger.core.v3/swagger-models-jakarta/2.2.32, Apache-2.0, approved, #5919
-maven/mavencentral/io.swagger.core.v3/swagger-models-jakarta/2.2.38, Apache-2.0, approved, #5919
+maven/mavencentral/io.swagger.core.v3/swagger-models-jakarta/2.2.41, Apache-2.0, approved, #5919
 maven/mavencentral/jakarta.activation/jakarta.activation-api/2.1.4, EPL-2.0 OR BSD-3-Clause OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jaf
 maven/mavencentral/jakarta.annotation/jakarta.annotation-api/2.1.1, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.ca
 maven/mavencentral/jakarta.persistence/jakarta.persistence-api/3.1.0, EPL-2.0 OR BSD-3-Clause, approved, ee4j.jpa
@@ -206,12 +206,12 @@ maven/mavencentral/org.apache.httpcomponents.core5/httpcore5-h2/5.3.6, Apache-2.
 maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.3.6, Apache-2.0, approved, #16866
 maven/mavencentral/org.apache.httpcomponents/httpclient/4.5.14, Apache-2.0, approved, #15248
 maven/mavencentral/org.apache.httpcomponents/httpcore/4.4.16, Apache-2.0, approved, CQ23528
-maven/mavencentral/org.apache.tomcat.embed/tomcat-embed-core/10.1.49, Apache-2.0 AND (EPL-2.0 OR (GPL-2.0-only WITH Classpath-exception-2.0)) AND CDDL-1.0 AND (CDDL-1.1 OR (GPL-2.0-only WITH Classpath-exception-2.0)) AND EPL-2.0, approved, #15195
-maven/mavencentral/org.apache.tomcat.embed/tomcat-embed-el/10.1.49, Apache-2.0, approved, #6997
-maven/mavencentral/org.apache.tomcat.embed/tomcat-embed-websocket/10.1.49, Apache-2.0, approved, #7920
+maven/mavencentral/org.apache.tomcat.embed/tomcat-embed-core/10.1.50, Apache-2.0 AND (EPL-2.0 OR (GPL-2.0-only WITH Classpath-exception-2.0)) AND CDDL-1.0 AND (CDDL-1.1 OR (GPL-2.0-only WITH Classpath-exception-2.0)) AND EPL-2.0, approved, #15195
+maven/mavencentral/org.apache.tomcat.embed/tomcat-embed-el/10.1.50, Apache-2.0, approved, #6997
+maven/mavencentral/org.apache.tomcat.embed/tomcat-embed-websocket/10.1.50, Apache-2.0, approved, #7920
 maven/mavencentral/org.apiguardian/apiguardian-api/1.1.2, Apache-2.0, approved, #17641
-maven/mavencentral/org.aspectj/aspectjrt/1.9.25, EPL-1.0, approved, tools.aspectj
-maven/mavencentral/org.aspectj/aspectjweaver/1.9.25, EPL-1.0, approved, tools.aspectj
+maven/mavencentral/org.aspectj/aspectjrt/1.9.25.1, EPL-1.0, approved, tools.aspectj
+maven/mavencentral/org.aspectj/aspectjweaver/1.9.25.1, EPL-1.0, approved, tools.aspectj
 maven/mavencentral/org.assertj/assertj-core/3.27.6, Apache-2.0, approved, #17980
 maven/mavencentral/org.awaitility/awaitility/4.3.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.bouncycastle/bcpkix-jdk18on/1.83, MIT, approved, #25011
@@ -227,8 +227,8 @@ maven/mavencentral/org.hamcrest/hamcrest-core/3.0, BSD-3-Clause, approved, clear
 maven/mavencentral/org.hamcrest/hamcrest-library/3.0, BSD-3-Clause, approved, clearlydefined
 maven/mavencentral/org.hamcrest/hamcrest/3.0, BSD-3-Clause, approved, #17661
 maven/mavencentral/org.hibernate.common/hibernate-commons-annotations/7.0.3.Final, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.hibernate.orm/hibernate-core/6.6.36.Final, (EPL-2.0 OR BSD-3-Clause) AND LGPL-2.1-or-later AND MIT, approved, #17553
-maven/mavencentral/org.hibernate.orm/hibernate-jpamodelgen/6.6.36.Final, EPL-2.0 OR BSD-3-Clause AND LGPL-2.1-only AND MIT, approved, #18221
+maven/mavencentral/org.hibernate.orm/hibernate-core/6.6.39.Final, (EPL-2.0 OR BSD-3-Clause) AND LGPL-2.1-or-later AND MIT, approved, #17553
+maven/mavencentral/org.hibernate.orm/hibernate-jpamodelgen/6.6.39.Final, EPL-2.0 OR BSD-3-Clause AND LGPL-2.1-only AND MIT, approved, #18221
 maven/mavencentral/org.hibernate.validator/hibernate-validator/8.0.3.Final, Apache-2.0 AND CC-PDDC, approved, #18198
 maven/mavencentral/org.javassist/javassist/3.30.2-GA, Apache-2.0 AND LGPL-2.1-or-later AND MPL-1.1, approved, #12108
 maven/mavencentral/org.jboss.logging/jboss-logging/3.6.1.Final, Apache-2.0, approved, clearlydefined
@@ -241,9 +241,9 @@ maven/mavencentral/org.jline/jline-native/3.30.4, BSD-3-Clause AND Apache-2.0, a
 maven/mavencentral/org.jline/jline-reader/3.30.4, BSD-3-Clause, approved, #25255
 maven/mavencentral/org.jline/jline-style/3.30.4, BSD-3-Clause, approved, #25258
 maven/mavencentral/org.jline/jline-terminal/3.30.4, BSD-3-Clause AND Apache-2.0, approved, #23127
-maven/mavencentral/org.jsoup/jsoup/1.21.2, MIT AND Apache-2.0, approved, #22199
+maven/mavencentral/org.jsoup/jsoup/1.22.1, MIT AND (Apache-2.0 AND BSD-3-Clause), approved, #25465
 maven/mavencentral/org.jspecify/jspecify/1.0.0, Apache-2.0, approved, #21897
-maven/mavencentral/org.mariadb.jdbc/mariadb-java-client/3.5.6, LGPL-2.1-or-later AND CC0-1.0, approved, #22822
+maven/mavencentral/org.mariadb.jdbc/mariadb-java-client/3.5.7, LGPL-2.1-or-later AND CC0-1.0, approved, #22822
 maven/mavencentral/org.mockito/mockito-core/5.17.0, MIT AND (Apache-2.0 AND MIT) AND Apache-2.0, approved, #20444
 maven/mavencentral/org.mockito/mockito-junit-jupiter/5.17.0, MIT, approved, #20445
 maven/mavencentral/org.opentest4j/opentest4j/1.3.0, Apache-2.0, approved, #9713
@@ -256,53 +256,54 @@ maven/mavencentral/org.reflections/reflections/0.10.2, Apache-2.0 AND WTFPL, app
 maven/mavencentral/org.skyscreamer/jsonassert/1.5.3, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.slf4j/jul-to-slf4j/2.0.17, MIT, approved, #7698
 maven/mavencentral/org.slf4j/slf4j-api/2.0.17, MIT, approved, #5915
-maven/mavencentral/org.springdoc/springdoc-openapi-starter-common/2.8.14, Apache-2.0, approved, #18209
-maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-api/2.8.14, Apache-2.0, approved, #18210
-maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-ui/2.8.14, Apache-2.0, approved, #18211
+maven/mavencentral/org.springdoc/springdoc-openapi-starter-common/2.8.15, Apache-2.0, approved, #18209
+maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-api/2.8.15, Apache-2.0, approved, #18210
+maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-ui/2.8.15, Apache-2.0, approved, #18211
 maven/mavencentral/org.springframework.amqp/spring-amqp/3.2.8, Apache-2.0, approved, #18234
 maven/mavencentral/org.springframework.amqp/spring-rabbit-junit/3.2.8, Apache-2.0, approved, #23456
 maven/mavencentral/org.springframework.amqp/spring-rabbit-test/3.2.8, Apache-2.0, approved, #23489
 maven/mavencentral/org.springframework.amqp/spring-rabbit/3.2.8, Apache-2.0, approved, #18214
-maven/mavencentral/org.springframework.boot/spring-boot-actuator-autoconfigure/3.5.8, Apache-2.0, approved, #23038
-maven/mavencentral/org.springframework.boot/spring-boot-actuator/3.5.8, Apache-2.0, approved, #23035
-maven/mavencentral/org.springframework.boot/spring-boot-autoconfigure/3.5.8, Apache-2.0, approved, #23034
-maven/mavencentral/org.springframework.boot/spring-boot-devtools/3.5.8, Apache-2.0, approved, #23515
-maven/mavencentral/org.springframework.boot/spring-boot-starter-amqp/3.5.8, Apache-2.0, approved, #21951
-maven/mavencentral/org.springframework.boot/spring-boot-starter-data-jpa/3.5.8, Apache-2.0, approved, #22162
-maven/mavencentral/org.springframework.boot/spring-boot-starter-hateoas/3.5.8, Apache-2.0, approved, #21971
-maven/mavencentral/org.springframework.boot/spring-boot-starter-jdbc/3.5.8, Apache-2.0, approved, #22180
-maven/mavencentral/org.springframework.boot/spring-boot-starter-json/3.5.8, Apache-2.0, approved, #23033
-maven/mavencentral/org.springframework.boot/spring-boot-starter-logging/3.5.8, Apache-2.0, approved, #22825
-maven/mavencentral/org.springframework.boot/spring-boot-starter-oauth2-client/3.5.8, Apache-2.0, approved, #22178
-maven/mavencentral/org.springframework.boot/spring-boot-starter-reactor-netty/3.5.8, Apache-2.0, approved, #22185
-maven/mavencentral/org.springframework.boot/spring-boot-starter-security/3.5.8, Apache-2.0, approved, #22151
-maven/mavencentral/org.springframework.boot/spring-boot-starter-test/3.5.8, Apache-2.0, approved, #21921
-maven/mavencentral/org.springframework.boot/spring-boot-starter-tomcat/3.5.8, Apache-2.0, approved, #23031
-maven/mavencentral/org.springframework.boot/spring-boot-starter-validation/3.5.8, Apache-2.0, approved, #22150
-maven/mavencentral/org.springframework.boot/spring-boot-starter-web/3.5.8, Apache-2.0, approved, #23027
-maven/mavencentral/org.springframework.boot/spring-boot-starter-webflux/3.5.8, Apache-2.0, approved, #22118
-maven/mavencentral/org.springframework.boot/spring-boot-starter/3.5.8, Apache-2.0, approved, #23030
-maven/mavencentral/org.springframework.boot/spring-boot-test-autoconfigure/3.5.8, Apache-2.0, approved, #22215
-maven/mavencentral/org.springframework.boot/spring-boot-test/3.5.8, Apache-2.0, approved, #22213
-maven/mavencentral/org.springframework.boot/spring-boot/3.5.8, Apache-2.0, approved, #23032
-maven/mavencentral/org.springframework.cloud/spring-cloud-commons/4.3.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.springframework.cloud/spring-cloud-context/4.3.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.springframework.cloud/spring-cloud-function-context/4.3.0, Apache-2.0, approved, #21964
-maven/mavencentral/org.springframework.cloud/spring-cloud-function-core/4.3.0, Apache-2.0, approved, #22002
-maven/mavencentral/org.springframework.cloud/spring-cloud-openfeign-core/4.3.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.springframework.boot/spring-boot-actuator-autoconfigure/3.5.9, Apache-2.0, approved, #23038
+maven/mavencentral/org.springframework.boot/spring-boot-actuator/3.5.9, Apache-2.0, approved, #23035
+maven/mavencentral/org.springframework.boot/spring-boot-autoconfigure/3.5.9, Apache-2.0, approved, #23034
+maven/mavencentral/org.springframework.boot/spring-boot-devtools/3.5.9, Apache-2.0, approved, #23515
+maven/mavencentral/org.springframework.boot/spring-boot-starter-amqp/3.5.9, Apache-2.0, approved, #21951
+maven/mavencentral/org.springframework.boot/spring-boot-starter-data-jpa/3.5.9, Apache-2.0, approved, #22162
+maven/mavencentral/org.springframework.boot/spring-boot-starter-hateoas/3.5.9, Apache-2.0, approved, #21971
+maven/mavencentral/org.springframework.boot/spring-boot-starter-jdbc/3.5.9, Apache-2.0, approved, #22180
+maven/mavencentral/org.springframework.boot/spring-boot-starter-json/3.5.9, Apache-2.0, approved, #23033
+maven/mavencentral/org.springframework.boot/spring-boot-starter-logging/3.5.9, Apache-2.0, approved, #22825
+maven/mavencentral/org.springframework.boot/spring-boot-starter-oauth2-client/3.5.9, Apache-2.0, approved, #22178
+maven/mavencentral/org.springframework.boot/spring-boot-starter-reactor-netty/3.5.9, Apache-2.0, approved, #22185
+maven/mavencentral/org.springframework.boot/spring-boot-starter-security/3.5.9, Apache-2.0, approved, #22151
+maven/mavencentral/org.springframework.boot/spring-boot-starter-test/3.5.9, Apache-2.0, approved, #21921
+maven/mavencentral/org.springframework.boot/spring-boot-starter-tomcat/3.5.9, Apache-2.0, approved, #23031
+maven/mavencentral/org.springframework.boot/spring-boot-starter-validation/3.5.9, Apache-2.0, approved, #22150
+maven/mavencentral/org.springframework.boot/spring-boot-starter-web/3.5.9, Apache-2.0, approved, #23027
+maven/mavencentral/org.springframework.boot/spring-boot-starter-webflux/3.5.9, Apache-2.0, approved, #22118
+maven/mavencentral/org.springframework.boot/spring-boot-starter/3.5.9, Apache-2.0, approved, #23030
+maven/mavencentral/org.springframework.boot/spring-boot-test-autoconfigure/3.5.9, Apache-2.0, approved, #22215
+maven/mavencentral/org.springframework.boot/spring-boot-test/3.5.9, Apache-2.0, approved, #22213
+maven/mavencentral/org.springframework.boot/spring-boot/3.5.9, Apache-2.0, approved, #23032
+maven/mavencentral/org.springframework.cloud/spring-cloud-commons/4.3.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.springframework.cloud/spring-cloud-context/4.3.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.springframework.cloud/spring-cloud-function-context/4.3.1, Apache-2.0, approved, #21964
+maven/mavencentral/org.springframework.cloud/spring-cloud-function-core/4.3.1, Apache-2.0, approved, #22002
+maven/mavencentral/org.springframework.cloud/spring-cloud-openfeign-core/4.3.1, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.springframework.cloud/spring-cloud-starter-openfeign/4.3.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.springframework.cloud/spring-cloud-starter-stream-rabbit/4.3.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.springframework.cloud/spring-cloud-starter/4.3.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.springframework.cloud/spring-cloud-stream-binder-rabbit-core/4.3.0, Apache-2.0, approved, #21992
-maven/mavencentral/org.springframework.cloud/spring-cloud-stream-binder-rabbit/4.3.0, Apache-2.0, approved, #21988
-maven/mavencentral/org.springframework.cloud/spring-cloud-stream/4.3.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.springframework.data/spring-data-commons/3.5.6, Apache-2.0, approved, #21920
-maven/mavencentral/org.springframework.data/spring-data-jpa/3.5.6, Apache-2.0, approved, #21922
+maven/mavencentral/org.springframework.cloud/spring-cloud-starter-openfeign/4.3.1, , restricted, clearlydefined
+maven/mavencentral/org.springframework.cloud/spring-cloud-starter-stream-rabbit/4.3.1, , restricted, clearlydefined
+maven/mavencentral/org.springframework.cloud/spring-cloud-starter/4.3.1, , restricted, clearlydefined
+maven/mavencentral/org.springframework.cloud/spring-cloud-stream-binder-rabbit-core/4.3.1, Apache-2.0, approved, #21992
+maven/mavencentral/org.springframework.cloud/spring-cloud-stream-binder-rabbit/4.3.1, Apache-2.0, approved, #21988
+maven/mavencentral/org.springframework.cloud/spring-cloud-stream/4.3.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.springframework.data/spring-data-commons/3.5.7, Apache-2.0, approved, #21920
+maven/mavencentral/org.springframework.data/spring-data-jpa/3.5.7, Apache-2.0, approved, #21922
 maven/mavencentral/org.springframework.hateoas/spring-hateoas/2.5.1, Apache-2.0, approved, #22189
-maven/mavencentral/org.springframework.integration/spring-integration-amqp/6.5.4, Apache-2.0, approved, #21953
-maven/mavencentral/org.springframework.integration/spring-integration-core/6.5.4, Apache-2.0, approved, #23444
-maven/mavencentral/org.springframework.integration/spring-integration-jdbc/6.5.4, Apache-2.0, approved, #21987
-maven/mavencentral/org.springframework.integration/spring-integration-jmx/6.5.4, Apache-2.0, approved, #23494
+maven/mavencentral/org.springframework.integration/spring-integration-amqp/6.5.5, Apache-2.0, approved, #21953
+maven/mavencentral/org.springframework.integration/spring-integration-core/6.5.5, Apache-2.0, approved, #23444
+maven/mavencentral/org.springframework.integration/spring-integration-jdbc/6.5.5, Apache-2.0, approved, #21987
+maven/mavencentral/org.springframework.integration/spring-integration-jmx/6.5.5, Apache-2.0, approved, #23494
 maven/mavencentral/org.springframework.plugin/spring-plugin-core/3.0.0, Apache-2.0, approved, #7104
 maven/mavencentral/org.springframework.retry/spring-retry/2.0.12, Apache-2.0, approved, #16889
 maven/mavencentral/org.springframework.security/spring-security-aspects/6.5.7, Apache-2.0, approved, #21979
@@ -321,24 +322,24 @@ maven/mavencentral/org.springframework.shell/spring-shell-standard-commands/3.4.
 maven/mavencentral/org.springframework.shell/spring-shell-standard/3.4.1, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.springframework.shell/spring-shell-starter/3.4.1, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.springframework.shell/spring-shell-table/3.4.1, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.springframework/spring-aop/6.2.14, Apache-2.0, approved, #17530
-maven/mavencentral/org.springframework/spring-aspects/6.2.14, Apache-2.0, approved, #17550
-maven/mavencentral/org.springframework/spring-beans/6.2.14, Apache-2.0, approved, #17528
-maven/mavencentral/org.springframework/spring-context-support/6.2.14, Apache-2.0, approved, #18233
-maven/mavencentral/org.springframework/spring-context/6.2.14, Apache-2.0, approved, #17554
-maven/mavencentral/org.springframework/spring-core/6.2.14, Apache-2.0 AND BSD-3-Clause, approved, #17535
-maven/mavencentral/org.springframework/spring-expression/6.2.14, Apache-2.0, approved, #17544
-maven/mavencentral/org.springframework/spring-jcl/6.2.14, Apache-2.0, approved, #17571
-maven/mavencentral/org.springframework/spring-jdbc/6.2.14, Apache-2.0, approved, #17543
-maven/mavencentral/org.springframework/spring-messaging/6.2.14, Apache-2.0, approved, #18225
-maven/mavencentral/org.springframework/spring-orm/6.2.14, Apache-2.0, approved, #17572
-maven/mavencentral/org.springframework/spring-test/6.2.14, Apache-2.0, approved, #17559
-maven/mavencentral/org.springframework/spring-tx/6.2.14, Apache-2.0, approved, #17547
-maven/mavencentral/org.springframework/spring-web/6.2.14, Apache-2.0, approved, #17558
-maven/mavencentral/org.springframework/spring-webflux/6.2.14, Apache-2.0, approved, #17567
-maven/mavencentral/org.springframework/spring-webmvc/6.2.14, Apache-2.0, approved, #17532
-maven/mavencentral/org.springframework/spring-websocket/6.2.14, Apache-2.0, approved, #18223
-maven/mavencentral/org.webjars/swagger-ui/5.30.1, Apache-2.0 AND (Apache-2.0 AND MIT), approved, #24622
+maven/mavencentral/org.springframework/spring-aop/6.2.15, Apache-2.0, approved, #17530
+maven/mavencentral/org.springframework/spring-aspects/6.2.15, Apache-2.0, approved, #17550
+maven/mavencentral/org.springframework/spring-beans/6.2.15, Apache-2.0, approved, #17528
+maven/mavencentral/org.springframework/spring-context-support/6.2.15, Apache-2.0, approved, #18233
+maven/mavencentral/org.springframework/spring-context/6.2.15, Apache-2.0, approved, #17554
+maven/mavencentral/org.springframework/spring-core/6.2.15, Apache-2.0 AND BSD-3-Clause, approved, #17535
+maven/mavencentral/org.springframework/spring-expression/6.2.15, Apache-2.0, approved, #17544
+maven/mavencentral/org.springframework/spring-jcl/6.2.15, Apache-2.0, approved, #17571
+maven/mavencentral/org.springframework/spring-jdbc/6.2.15, Apache-2.0, approved, #17543
+maven/mavencentral/org.springframework/spring-messaging/6.2.15, Apache-2.0, approved, #18225
+maven/mavencentral/org.springframework/spring-orm/6.2.15, Apache-2.0, approved, #17572
+maven/mavencentral/org.springframework/spring-test/6.2.15, Apache-2.0, approved, #17559
+maven/mavencentral/org.springframework/spring-tx/6.2.15, Apache-2.0, approved, #17547
+maven/mavencentral/org.springframework/spring-web/6.2.15, Apache-2.0, approved, #17558
+maven/mavencentral/org.springframework/spring-webflux/6.2.15, Apache-2.0, approved, #17567
+maven/mavencentral/org.springframework/spring-webmvc/6.2.15, Apache-2.0, approved, #17532
+maven/mavencentral/org.springframework/spring-websocket/6.2.15, Apache-2.0, approved, #18223
+maven/mavencentral/org.webjars/swagger-ui/5.31.0, , restricted, clearlydefined
 maven/mavencentral/org.webjars/webjars-locator-lite/1.1.2, MIT, approved, #24484
 maven/mavencentral/org.xmlunit/xmlunit-core/2.10.4, Apache-2.0, approved, #14590
 maven/mavencentral/org.yaml/snakeyaml/2.4, Apache-2.0, approved, #19469
