@@ -2432,7 +2432,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet dsForRolloutTwo = testdataFactory.createDistributionSet("dsFor" + rolloutName);
         testdataFactory.createTargets(amountTargetsForRollout, targetPrefixName + "-", targetPrefixName);
         return testdataFactory.createRolloutByVariables(rolloutName, rolloutName + "description", groupSize,
-                "controllerId==" + targetPrefixName + "-*", dsForRolloutTwo, successCondition, RolloutGroup.RolloutGroupSuccessAction.NEXTGROUP, errorCondition,
+                "controllerId==" + targetPrefixName + "-*", dsForRolloutTwo, successCondition, errorCondition,
                 Action.ActionType.FORCED, weight, false);
     }
 

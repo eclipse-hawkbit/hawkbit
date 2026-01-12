@@ -363,9 +363,11 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
         final List<RolloutGroup> allStartedGroups = rollout.getRolloutGroups().stream()
                 .filter(g -> RolloutGroupStatus.SCHEDULED != g.getStatus()).toList();
-        final RolloutGroup lastStartedGroup = allStartedGroups.get(allStartedGroups.size() - 1);
-        if (isStartNextGroupOnResume(rollout, lastStartedGroup)) {
-            startNextRolloutGroupAction.exec(rollout, lastStartedGroup);
+        if (!allStartedGroups.isEmpty()) {
+            final RolloutGroup lastStartedGroup = allStartedGroups.get(allStartedGroups.size() - 1);
+            if (shouldStartNextGroupOnResume(rollout, lastStartedGroup)) {
+                startNextRolloutGroupAction.exec(rollout, lastStartedGroup);
+            }
         }
         rollout.setStatus(RolloutStatus.RUNNING);
         rolloutRepository.save(rollout);
@@ -380,7 +382,7 @@ public class JpaRolloutManagement implements RolloutManagement {
      * @param lastStartedGroup
      * @return true if next group shall be started directly on resume, false otherwise
      */
-    private boolean isStartNextGroupOnResume(final JpaRollout rollout, final RolloutGroup lastStartedGroup) {
+    private boolean shouldStartNextGroupOnResume(final JpaRollout rollout, final RolloutGroup lastStartedGroup) {
         return lastStartedGroup.getStatus().equals(RolloutGroupStatus.ERROR) ||
                 (lastStartedGroup.getSuccessAction() == RolloutGroup.RolloutGroupSuccessAction.PAUSE &&
                         rolloutGroupEvaluationManager.getSuccessConditionEvaluator(lastStartedGroup.getSuccessCondition())
@@ -517,15 +519,15 @@ public class JpaRolloutManagement implements RolloutManagement {
             throw new RolloutIllegalStateException("Rollout does not have any groups left to be triggered");
         }
 
-        final List<JpaRolloutGroup> latestRolloutGroup = rollout.getRolloutGroups().stream()
+        final List<JpaRolloutGroup> startedRolloutGroups = rollout.getRolloutGroups().stream()
                 .filter(group -> group.getStatus() != RolloutGroupStatus.SCHEDULED)
                 .sorted(ROLLOUT_GROUP_DESC_COMP)
                 .map(JpaRolloutGroup.class::cast)
                 .toList();
-        if (latestRolloutGroup.isEmpty()) {
-            throw new RolloutIllegalStateException("Cannot find latest rollout group to trigger next from");
+        if (startedRolloutGroups.isEmpty()) {
+            throw new RolloutIllegalStateException("Cannot find any started rollout group to trigger next from");
         }
-        startNextRolloutGroupAction.exec(rollout, latestRolloutGroup.get(0));
+        startNextRolloutGroupAction.exec(rollout, startedRolloutGroups.get(0));
     }
 
     @Override

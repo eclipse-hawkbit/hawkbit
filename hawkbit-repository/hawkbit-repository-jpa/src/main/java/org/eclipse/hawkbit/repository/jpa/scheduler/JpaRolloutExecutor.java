@@ -58,7 +58,6 @@ import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutTargetGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.EvaluatorNotConfiguredException;
-import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupActionEvaluator;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupEvaluationManager;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
@@ -112,7 +111,6 @@ public class JpaRolloutExecutor implements RolloutExecutor {
      */
     private static final List<Status> DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES =
             List.of(Status.ERROR, Status.FINISHED, Status.CANCELED, Status.DOWNLOADED);
-    private static final Comparator<RolloutGroup> DESC_COMP = Comparator.comparingLong(RolloutGroup::getId).reversed();
     private static final String TRANSACTION_ASSIGNING_TARGETS_TO_ROLLOUT_GROUP_FAILED = "Transaction assigning Targets to RolloutGroup failed";
 
     private final ActionRepository actionRepository;
@@ -357,7 +355,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         if (runningGroups.isEmpty()) {
             // no running rollouts, probably there was an error somewhere at the latest group. And the latest group has
             // been switched from running into error state. So we need to find the latest group which
-            executeNextRolloutGroup(rollout);
+            asSystem(() -> rolloutManagement.triggerNextGroup(rollout.getId()));
         } else {
             log.debug("Rollout {} has {} running groups", rollout.getId(), runningGroups.size());
             executeRunningGroups(rollout, runningGroups, rollout.getRolloutGroups().get(rollout.getRolloutGroups().size() - 1));
@@ -408,11 +406,6 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         final Long groupsActiveLeft = rolloutGroupRepository.countByRolloutIdAndStatusOrStatus(rollout.getId(),
                 RolloutGroupStatus.RUNNING, RolloutGroupStatus.SCHEDULED);
         return groupsActiveLeft == 0;
-    }
-
-    private void executeNextRolloutGroup(final JpaRollout rollout) {
-        asSystem(() -> rolloutManagement.triggerNextGroup(rollout.getId()));
-
     }
 
     // fakes getTotalTargets count to match expected for the last dynamic group

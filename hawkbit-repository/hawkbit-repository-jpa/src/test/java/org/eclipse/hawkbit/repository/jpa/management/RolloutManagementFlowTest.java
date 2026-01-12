@@ -14,7 +14,6 @@ import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.cal
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withUser;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import lombok.SneakyThrows;
@@ -275,7 +274,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         final Rollout rollout = callAs(
                 withUser("dynamicRolloutTemplateFlow", "READ_DISTRIBUTION_SET", "READ_TARGET", "READ_ROLLOUT", "CREATE_ROLLOUT"),
                 () -> testdataFactory.createRolloutByVariables(rolloutName, rolloutName, amountGroups,
-                        "controllerid==" + targetPrefix + "*", distributionSet, "60", successAction,"30",
+                        "controllerid==" + targetPrefix + "*", distributionSet, "60", successAction, "30",
                         Action.ActionType.FORCED, 1000, false, true,
                         RolloutManagement.DynamicRolloutGroupTemplate.builder().nameSuffix("-dyn").targetCount(6).build()));
 

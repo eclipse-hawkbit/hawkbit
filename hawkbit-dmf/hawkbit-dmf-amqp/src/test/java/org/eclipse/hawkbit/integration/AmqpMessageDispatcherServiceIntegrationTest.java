@@ -780,7 +780,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
 
     private Rollout createAndStartRollout(final DistributionSet ds, final String filterQuery, final Integer weight) {
         final Rollout rollout = testdataFactory.createRolloutByVariables(UUID.randomUUID().toString(), "", 1,
-                filterQuery, ds, "50", RolloutGroup.RolloutGroupSuccessAction.NEXTGROUP, "5", ActionType.FORCED, weight, false);
+                filterQuery, ds, "50", "5", ActionType.FORCED, weight, false);
         rolloutManagement.start(rollout.getId());
         rolloutHandler.handleAll();
         return rollout;
