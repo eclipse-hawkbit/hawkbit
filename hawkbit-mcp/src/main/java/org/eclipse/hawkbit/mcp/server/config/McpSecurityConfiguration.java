@@ -1,0 +1,122 @@
+/**
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+package org.eclipse.hawkbit.mcp.server.config;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.mcp.server.client.HawkBitAuthenticationValidator;
+import org.eclipse.hawkbit.mcp.server.client.HawkBitAuthenticationValidator.ValidationResult;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+/**
+ * Security configuration for the MCP server.
+ */
+@Slf4j
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
+public class McpSecurityConfiguration {
+
+    /**
+     * Request attribute key for storing the Authorization header.
+     */
+    public static final String AUTH_HEADER_ATTRIBUTE = "hawkbit.mcp.auth.header";
+
+    private final HawkBitAuthenticationValidator authenticationValidator;
+
+    @Bean
+    @SuppressWarnings("java:S4502") // CSRF protection is not needed for stateless REST APIs using Authorization header
+    public SecurityFilterChain mcpSecurityFilterChain(final HttpSecurity http) throws Exception {
+        http
+            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(new HawkBitAuthenticationFilter(authenticationValidator),
+                    UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    /**
+     * Filter that validates authentication.
+     */
+    @Slf4j
+    @RequiredArgsConstructor
+    public static class HawkBitAuthenticationFilter extends OncePerRequestFilter {
+
+        private final HawkBitAuthenticationValidator validator;
+
+        @Override
+        protected void doFilterInternal(final HttpServletRequest request, final @NonNull HttpServletResponse response,
+                                        final @NonNull  FilterChain filterChain) throws ServletException, IOException {
+            String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+            if (authHeader != null) {
+                request.setAttribute(AUTH_HEADER_ATTRIBUTE, authHeader);
+            }
+
+            ValidationResult result = validator.validate(authHeader);
+
+            switch (result) {
+                case VALID:
+                    filterChain.doFilter(request, response);
+                    break;
+
+                case MISSING_CREDENTIALS:
+                    log.debug("Rejecting request: missing credentials");
+                    sendErrorResponse(response, HttpStatus.UNAUTHORIZED,
+                            "Authentication required. Please provide hawkBit credentials.");
+                    break;
+
+                case INVALID_CREDENTIALS:
+                    log.debug("Rejecting request: invalid credentials");
+                    request.removeAttribute(AUTH_HEADER_ATTRIBUTE);
+                    sendErrorResponse(response, HttpStatus.UNAUTHORIZED,
+                            "Invalid hawkBit credentials.");
+                    break;
+
+                case HAWKBIT_ERROR:
+                    log.warn("Rejecting request: hawkBit unavailable");
+                    request.removeAttribute(AUTH_HEADER_ATTRIBUTE);
+                    sendErrorResponse(response, HttpStatus.SERVICE_UNAVAILABLE,
+                            "Unable to validate credentials. hawkBit may be unavailable.");
+                    break;
+            }
+        }
+
+        private void sendErrorResponse(final HttpServletResponse response, final HttpStatus status, final String message)
+                throws IOException {
+            response.setStatus(status.value());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.getWriter().write(String.format(
+                    "{\"error\":\"%s\",\"message\":\"%s\"}",
+                    status.getReasonPhrase(),
+                    message));
+        }
+    }
+}
