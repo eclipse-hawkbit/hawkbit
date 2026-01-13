@@ -117,7 +117,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         testdataFactory.createTargets(targetPrefix, 0, amountGroups * 2);
         final Rollout dynamicRollout = testdataFactory.createRolloutByVariables("dynamic", "static rollout", amountGroups,
-                "controllerid==" + targetPrefix + "*", distributionSet, "0", "30", ActionType.FORCED, 1000, false, true);
+                "controllerid==" + targetPrefix + "*", distributionSet, "0", RolloutGroup.RolloutGroupSuccessAction.NEXTGROUP, "30", ActionType.FORCED, 1000, false, true);
         rolloutManagement.start(dynamicRollout.getId());
         rolloutHandler.handleAll();
         assertRollout(dynamicRollout, true, RolloutStatus.RUNNING, amountGroups + 1, amountGroups * 2);
@@ -152,7 +152,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         testdataFactory.createTargets(targetPrefix, amountGroups * 2, amountGroups);
         final Rollout staticRollout = testdataFactory.createRolloutByVariables("static", "static rollout", amountGroups,
-                "controllerid==" + targetPrefix + "*", distributionSet, "0", "30", ActionType.FORCED, 0, false, false);
+                "controllerid==" + targetPrefix + "*", distributionSet, "0", RolloutGroup.RolloutGroupSuccessAction.NEXTGROUP,"30", ActionType.FORCED, 0, false, false);
         rolloutManagement.start(staticRollout.getId());
         rolloutHandler.handleAll();
         assertRollout(staticRollout, false, RolloutStatus.RUNNING, amountGroups, amountGroups * 3);

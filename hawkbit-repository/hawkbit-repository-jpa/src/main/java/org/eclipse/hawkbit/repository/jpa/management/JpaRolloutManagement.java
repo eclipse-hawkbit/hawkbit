@@ -66,6 +66,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
+import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupEvaluationManager;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
@@ -86,8 +87,10 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.qfields.RolloutFields;
 import org.eclipse.hawkbit.utils.ObjectCopyUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -118,6 +121,9 @@ public class JpaRolloutManagement implements RolloutManagement {
             RolloutStatus.CREATING, RolloutStatus.READY, RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.STARTING, RolloutStatus.RUNNING,
             RolloutStatus.PAUSED, RolloutStatus.APPROVAL_DENIED);
 
+    private static final Comparator<RolloutGroup> ROLLOUT_GROUP_DESC_COMP = Comparator.comparingLong(RolloutGroup::getId).reversed();
+
+    private RolloutGroupEvaluationManager rolloutGroupEvaluationManager;
     @Value("${hawkbit.repository.jpa.management.rollout.max.actions.per.transaction:5000}")
     private int maxActions;
 
@@ -162,6 +168,13 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository,
                 quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties, null);
+    }
+
+    @Autowired
+    @Lazy
+    private void setRolloutGroupEvaluationManager(
+            final RolloutGroupEvaluationManager rolloutGroupEvaluationManager) {
+        this.rolloutGroupEvaluationManager = rolloutGroupEvaluationManager;
     }
 
     public static String createRolloutLockKey(final String tenant) {
@@ -348,8 +361,32 @@ public class JpaRolloutManagement implements RolloutManagement {
             throw new RolloutIllegalStateException("Rollout can only be resumed in state paused but current state is " +
                     rollout.getStatus().name().toLowerCase());
         }
+        final List<RolloutGroup> allStartedGroups = rollout.getRolloutGroups().stream()
+                .filter(g -> RolloutGroupStatus.SCHEDULED != g.getStatus()).toList();
+        if (!allStartedGroups.isEmpty()) {
+            final RolloutGroup lastStartedGroup = allStartedGroups.get(allStartedGroups.size() - 1);
+            if (shouldStartNextGroupOnResume(rollout, lastStartedGroup)) {
+                startNextRolloutGroupAction.exec(rollout, lastStartedGroup);
+            }
+        }
         rollout.setStatus(RolloutStatus.RUNNING);
         rolloutRepository.save(rollout);
+    }
+
+    /**
+     * Check if on resume of a paused rollout the next group shall be started directly.
+     * Cases where we need to manually start the next group:
+     *  - last running group is in error state and there is still some old group in running state, only running groups would be evaluated which would leave Rollout in running state but no trigger new group
+     *  - last running group has success action to PAUSE and the success condition is fulfilled
+     * @param rollout
+     * @param lastStartedGroup
+     * @return true if next group shall be started directly on resume, false otherwise
+     */
+    private boolean shouldStartNextGroupOnResume(final JpaRollout rollout, final RolloutGroup lastStartedGroup) {
+        return lastStartedGroup.getStatus().equals(RolloutGroupStatus.ERROR) ||
+                (lastStartedGroup.getSuccessAction() == RolloutGroup.RolloutGroupSuccessAction.PAUSE &&
+                        rolloutGroupEvaluationManager.getSuccessConditionEvaluator(lastStartedGroup.getSuccessCondition())
+                                .eval(rollout, lastStartedGroup, lastStartedGroup.getSuccessConditionExp()));
     }
 
     @Override
@@ -482,13 +519,15 @@ public class JpaRolloutManagement implements RolloutManagement {
             throw new RolloutIllegalStateException("Rollout does not have any groups left to be triggered");
         }
 
-        final RolloutGroup latestRunning = groups.stream()
-                .sorted(Comparator.comparingLong(RolloutGroup::getId).reversed())
-                .filter(g -> RolloutGroupStatus.RUNNING.equals(g.getStatus()))
-                .findFirst()
-                .orElseThrow(() -> new RolloutIllegalStateException("No group is running"));
-
-        startNextRolloutGroupAction.exec(rollout, latestRunning);
+        final List<JpaRolloutGroup> startedRolloutGroups = rollout.getRolloutGroups().stream()
+                .filter(group -> group.getStatus() != RolloutGroupStatus.SCHEDULED)
+                .sorted(ROLLOUT_GROUP_DESC_COMP)
+                .map(JpaRolloutGroup.class::cast)
+                .toList();
+        if (startedRolloutGroups.isEmpty()) {
+            throw new RolloutIllegalStateException("Cannot find any started rollout group to trigger next from");
+        }
+        startNextRolloutGroupAction.exec(rollout, startedRolloutGroups.get(0));
     }
 
     @Override

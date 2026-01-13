@@ -294,17 +294,17 @@ public final class MgmtRolloutMapper {
     }
 
     private static RolloutGroupSuccessAction map(final SuccessAction action) {
-        if (SuccessAction.NEXTGROUP == action) {
-            return RolloutGroupSuccessAction.NEXTGROUP;
-        }
-        throw new IllegalArgumentException("Success Action " + action + NOT_SUPPORTED);
+        return switch (action) {
+            case NEXTGROUP -> RolloutGroupSuccessAction.NEXTGROUP;
+            case PAUSE -> RolloutGroupSuccessAction.PAUSE;
+        };
     }
 
     private static SuccessAction map(final RolloutGroupSuccessAction successAction) {
-        if (RolloutGroupSuccessAction.NEXTGROUP == successAction) {
-            return SuccessAction.NEXTGROUP;
-        }
-        throw new IllegalArgumentException("Rollout group success action " + successAction + NOT_SUPPORTED);
+        return switch (successAction) {
+            case NEXTGROUP -> SuccessAction.NEXTGROUP;
+            case PAUSE -> SuccessAction.PAUSE;
+        };
     }
 
     private static ErrorAction map(final RolloutGroupErrorAction errorAction) {

@@ -70,7 +70,8 @@ import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
-import org.eclipse.hawkbit.repository.jpa.rollout.condition.PauseRolloutGroupAction;
+import org.eclipse.hawkbit.repository.jpa.rollout.condition.PauseRolloutGroupErrorAction;
+import org.eclipse.hawkbit.repository.jpa.rollout.condition.PauseRolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupActionEvaluator;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupConditionEvaluator;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupEvaluationManager;
@@ -213,9 +214,9 @@ public class JpaRepositoryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    PauseRolloutGroupAction pauseRolloutGroupAction(
+    PauseRolloutGroupErrorAction pauseRolloutGroupErrorAction(
             final RolloutManagement rolloutManagement, final RolloutGroupRepository rolloutGroupRepository) {
-        return new PauseRolloutGroupAction(rolloutManagement, rolloutGroupRepository);
+        return new PauseRolloutGroupErrorAction(rolloutManagement, rolloutGroupRepository);
     }
 
     @Bean
@@ -223,6 +224,13 @@ public class JpaRepositoryConfiguration {
     StartNextGroupRolloutGroupSuccessAction startNextRolloutGroupAction(
             final RolloutGroupRepository rolloutGroupRepository, final DeploymentManagement deploymentManagement) {
         return new StartNextGroupRolloutGroupSuccessAction(rolloutGroupRepository, deploymentManagement);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    PauseRolloutGroupSuccessAction pauseRolloutGroupSuccessAction(final RolloutManagement rolloutManagement,
+            final RolloutGroupRepository rolloutGroupRepository) {
+        return new PauseRolloutGroupSuccessAction(rolloutManagement, rolloutGroupRepository);
     }
 
     @Bean
