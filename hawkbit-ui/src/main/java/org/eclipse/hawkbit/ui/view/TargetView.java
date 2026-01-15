@@ -342,8 +342,9 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
         }
     }
 
-    protected static class TargetDetailedView extends TabSheet {
+    protected static class TargetDetailedView extends VerticalLayout {
 
+        private final Span targetId;
         private final TargetDetails targetDetails;
         private final TargetAssignedInstalled targetAssignedInstalled;
         private final TargetTags targetTags;
@@ -351,6 +352,8 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
         private final TargetActionsHistoryLayout targetActionsHistoryLayout;
 
         private TargetDetailedView(final HawkbitMgmtClient hawkbitClient) {
+            final TabSheet tabSheet = new TabSheet();
+            targetId = new Span();
             targetDetails = new TargetDetails(hawkbitClient);
             targetAssignedInstalled = new TargetAssignedInstalled(hawkbitClient);
             targetTags = new TargetTags(hawkbitClient);
@@ -358,14 +361,17 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
             targetActionsHistoryLayout = new TargetActionsHistoryLayout(hawkbitClient);
             setWidthFull();
 
-            add("Details", targetDetails);
-            add("Assigned / Installed", targetAssignedInstalled);
-            add("Tags", targetTags);
-            add("Metadata", targetMetadata);
-            add("Action History", targetActionsHistoryLayout);
+            add(targetId);
+            tabSheet.add("Details", targetDetails);
+            tabSheet.add("Assigned / Installed", targetAssignedInstalled);
+            tabSheet.add("Tags", targetTags);
+            tabSheet.add("Metadata", targetMetadata);
+            tabSheet.add("Action History", targetActionsHistoryLayout);
+            add(tabSheet);
         }
 
         private void setItem(final MgmtTarget target) {
+            this.targetId.setText(target.getControllerId());
             this.targetDetails.setItem(target);
             this.targetAssignedInstalled.setItem(target);
             this.targetTags.setItem(target);

@@ -82,7 +82,7 @@ public class TableView<T, ID> extends Div implements Constants, BeforeEnterObser
 
         if (detailsButtonHandler != null) {
             ComponentRenderer<Button, T> renderer = new ComponentRenderer<>(renderDetailsButton(detailsButtonHandler));
-            selectionGrid.addColumn(renderer).setHeader("Details").setAutoWidth(true).setFlexGrow(0);
+            selectionGrid.addColumn(renderer).setHeader("Details").setAutoWidth(true).setFlexGrow(0).setFrozenToEnd(true);
         }
 
         filter = new Filter(
