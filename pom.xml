@@ -77,6 +77,8 @@
         <commons-io.version>2.21.0</commons-io.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
         <io-protostuff.version>1.8.0</io-protostuff.version>
+        <!-- Spring AI for MCP support -->
+        <spring-ai.version>1.1.2</spring-ai.version>
         <!-- test -->
         <rabbitmq.http-client.version>5.4.0</rabbitmq.http-client.version>
         <classgraph.version>4.8.184</classgraph.version>
@@ -238,6 +240,14 @@
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
                 <version>${spring.cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Spring AI for MCP Server -->
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -728,6 +738,7 @@
         <module>hawkbit-mgmt</module>
         <module>hawkbit-ddi</module>
         <module>hawkbit-dmf</module>
+        <module>hawkbit-mcp</module>
         <module>hawkbit-monolith</module>
 
         <module>hawkbit-ui</module>
