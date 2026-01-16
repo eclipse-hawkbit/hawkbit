@@ -109,7 +109,7 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
 
     public TargetView(final HawkbitMgmtClient hawkbitClient) {
         super(
-                new RawFilter(hawkbitClient), new SimpleFilter(hawkbitClient),
+                new SimpleFilter(hawkbitClient), new RawFilter(hawkbitClient),
                 new SelectionGrid.EntityRepresentation<>(TargetWithDs.class, TargetWithDs::getControllerId) {
 
                     @Override
