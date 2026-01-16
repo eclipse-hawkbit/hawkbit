@@ -25,7 +25,7 @@
     <name>hawkBit :: UI</name>
 
     <properties>
-        <vaadin.version>24.9.8</vaadin.version>
+        <vaadin.version>25.0.3</vaadin.version>
     </properties>
 
     <dependencyManagement>
