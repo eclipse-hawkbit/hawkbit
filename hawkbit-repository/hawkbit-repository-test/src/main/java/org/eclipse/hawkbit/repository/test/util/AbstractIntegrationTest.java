@@ -32,7 +32,6 @@ import java.util.Random;
 import jakarta.validation.constraints.NotEmpty;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionFactory;
 import org.eclipse.hawkbit.artifact.ArtifactStorage;
@@ -196,7 +195,7 @@ public abstract class AbstractIntegrationTest {
     public static void afterClass() {
         if (new File(ARTIFACT_DIRECTORY).exists()) {
             try {
-                FileUtils.deleteDirectory(new File(ARTIFACT_DIRECTORY));
+                delete(new File(ARTIFACT_DIRECTORY));
             } catch (final IOException | IllegalArgumentException e) {
                 log.warn("Cannot delete file-directory", e);
             }
@@ -237,7 +236,7 @@ public abstract class AbstractIntegrationTest {
     public void cleanUp() {
         if (new File(ARTIFACT_DIRECTORY).exists()) {
             try {
-                FileUtils.cleanDirectory(new File(ARTIFACT_DIRECTORY));
+                delete(new File(ARTIFACT_DIRECTORY));
             } catch (final IOException | IllegalArgumentException e) {
                 log.warn("Cannot cleanup file-directory", e);
             }
@@ -494,6 +493,22 @@ public abstract class AbstractIntegrationTest {
         }
     }
 
+    protected List<? extends Target> findByUpdateStatus(final TargetUpdateStatus status, final Pageable pageable) {
+        return targetManagement.findAll(pageable).stream().filter(target -> status.equals(target.getUpdateStatus())).toList();
+    }
+
+    protected TargetType findTargetTypeByName(@NotEmpty String name) {
+        return targetTypeManagement.findByRsql("name==" + name, UNPAGED).stream().findAny()
+                .orElseThrow(() -> new EntityNotFoundException(TargetType.class, name));
+    }
+
+    @SafeVarargs
+    protected static <T> Collection<T> concat(final Collection<T>... targets) {
+        final List<T> result = new ArrayList<>();
+        List.of(targets).forEach(result::addAll);
+        return result;
+    }
+
     @SuppressWarnings("java:S4042")
     private static File createTempDir() {
         try {
@@ -519,19 +534,19 @@ public abstract class AbstractIntegrationTest {
         }
     }
 
-    protected List<? extends Target> findByUpdateStatus(final TargetUpdateStatus status, final Pageable pageable) {
-        return targetManagement.findAll(pageable).stream().filter(target -> status.equals(target.getUpdateStatus())).toList();
-    }
+    private static void delete(final File file) throws IOException {
+        if (file.exists()) {
+            if (file.isDirectory()) {
+                // delete children
+                final File[] children = file.listFiles();
+                if (children != null) {
+                    for (final File child : children) {
+                        delete(child);
+                    }
+                }
+            }
 
-    protected TargetType findTargetTypeByName(@NotEmpty String name) {
-        return targetTypeManagement.findByRsql("name==" + name, UNPAGED).stream().findAny()
-                .orElseThrow(() -> new EntityNotFoundException(TargetType.class, name));
-    }
-
-    @SafeVarargs
-    protected static <T> Collection<T> concat(final Collection<T>... targets) {
-        final List<T> result = new ArrayList<>();
-        List.of(targets).forEach(result::addAll);
-        return result;
+            Files.delete(file.toPath());
+        }
     }
 }

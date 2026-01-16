@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.tenancy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Collection;
-
 import org.junit.jupiter.api.Test;
 
 class TenantAwareCacheManagerTest {
