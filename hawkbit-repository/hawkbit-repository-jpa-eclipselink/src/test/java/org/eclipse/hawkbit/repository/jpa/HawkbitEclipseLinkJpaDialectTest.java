@@ -28,7 +28,7 @@ import org.springframework.dao.UncategorizedDataAccessException;
  * Feature: Unit Tests - Repository<br/>
  * Story: Exception handling
  */
-class HawkBitEclipseLinkJpaDialectTest {
+class HawkbitEclipseLinkJpaDialectTest {
 
     private final HawkbitEclipseLinkJpaDialect hawkBitEclipseLinkJpaDialectUnderTest = new HawkbitEclipseLinkJpaDialect();
 
