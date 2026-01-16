@@ -24,6 +24,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -281,8 +282,8 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
     private static class CreateDialog extends Utils.BaseDialog<Void> {
 
         private final TextField name;
-        private final Select<MgmtDistributionSet> distributionSet;
-        private final Select<MgmtTargetFilterQuery> targetFilter;
+        private final ComboBox<MgmtDistributionSet> distributionSet;
+        private final ComboBox<MgmtTargetFilterQuery> targetFilter;
         private final TextArea description;
         private final Select<MgmtActionType> actionType;
         private final DateTimePicker forceTime = new DateTimePicker("Force Time");
@@ -299,27 +300,21 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
             name = Utils.textField("Name", this::readyToCreate);
             name.focus();
-            distributionSet = new Select<>(
+            distributionSet = Utils.nameComboBox(
                     "Distribution Set",
                     this::readyToCreate,
-                    Optional.ofNullable(
-                            hawkbitClient.getDistributionSetRestApi()
-                                    .getDistributionSets(null, 0, 30, Constants.CREATED_AT_DESC)
-                                    .getBody())
-                            .map(body -> body.getContent().toArray(new MgmtDistributionSet[0]))
-                            .orElseGet(() -> new MgmtDistributionSet[0]));
+                    query -> hawkbitClient.getDistributionSetRestApi()
+                            .getDistributionSets(query.getFilter().orElse(null), query.getOffset(), query.getPageSize(), Constants.NAME_ASC)
+                            .getBody().getContent().stream());
             distributionSet.setRequiredIndicatorVisible(true);
             distributionSet.setItemLabelGenerator(distributionSetO -> distributionSetO.getName() + ":" + distributionSetO.getVersion());
             distributionSet.setWidthFull();
-            targetFilter = new Select<>(
+            targetFilter = Utils.nameComboBox(
                     "Target Filter",
                     this::readyToCreate,
-                    Optional.ofNullable(
-                            hawkbitClient.getTargetFilterQueryRestApi()
-                                    .getFilters(null, 0, 30, Constants.NAME_ASC, null)
-                                    .getBody())
-                            .map(body -> body.getContent().toArray(new MgmtTargetFilterQuery[0]))
-                            .orElseGet(() -> new MgmtTargetFilterQuery[0]));
+                    query -> hawkbitClient.getTargetFilterQueryRestApi()
+                            .getFilters(query.getFilter().orElse(null), query.getOffset(), query.getPageSize(), Constants.NAME_ASC, null)
+                            .getBody().getContent().stream());
             targetFilter.setRequiredIndicatorVisible(true);
             targetFilter.setItemLabelGenerator(MgmtTargetFilterQuery::getName);
             targetFilter.setWidthFull();
