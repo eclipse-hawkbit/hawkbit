@@ -731,5 +731,7 @@
 
         <module>hawkbit-ui</module>
         <module>hawkbit-sdk</module>
+
+        <module>hawkbit-mcp-server</module>
     </modules>
 </project>
