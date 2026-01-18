@@ -23,9 +23,12 @@ server:
 
 ## Build
 
-To build the project using Maven:
+This module is built independently from the main HawkBit services.
+
+Run the Maven build **from the `hawkbit-mcp-server` module directory only**:
 
 ```bash
+cd hawkbit-mcp-server
 mvn clean package
 ```
 
