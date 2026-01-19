@@ -36,9 +36,10 @@ The following capabilities are currently supported by the _Rollout Management_:
 
 The cascading execution of the deployment groups is based on two thresholds that can be defined by the rollout creator.
 
-- success condition by means of percentage of successfully installed targets in the current groups triggers.
-- error condition by means of absolute or percentage of failed installations which triggers an emergency shutdown of the
-  entire rollout.
+- **Success Condition**: Defined by the percentage of successfully installed targets in the current group. When this threshold is reached, a success action is executed.
+    - (Default) **NextGroup** success action, enabling a fully cascading rollout, starting the next group automatically.
+    - **Pause** success action allows the rollout to pause after a group’s success condition is met, enabling additional external verification or manual checks before proceeding. The rollout will await a manual resume action, which then starts the next group.
+- **Error Condition**: Defined by an absolute number or percentage of failed installations. This triggers an emergency shutdown of the entire rollout.
 
 ---
 
