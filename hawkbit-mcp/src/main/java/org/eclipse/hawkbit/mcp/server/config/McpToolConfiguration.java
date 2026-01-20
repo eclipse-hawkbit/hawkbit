@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Contributors to the Eclipse Foundation
+ * Copyright (c) 2026 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,9 +9,9 @@
  */
 package org.eclipse.hawkbit.mcp.server.config;
 
-import org.eclipse.hawkbit.mcp.server.prompts.HawkBitPromptProvider;
-import org.eclipse.hawkbit.mcp.server.resources.HawkBitDocumentationResource;
-import org.eclipse.hawkbit.mcp.server.tools.HawkBitMcpToolProvider;
+import org.eclipse.hawkbit.mcp.server.prompts.HawkbitPromptProvider;
+import org.eclipse.hawkbit.mcp.server.resources.HawkbitDocumentationResource;
+import org.eclipse.hawkbit.mcp.server.tools.HawkbitMcpToolProvider;
 import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.Tenant;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -44,11 +44,11 @@ public class McpToolConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "hawkbit.mcp.tools-enabled", havingValue = "true", matchIfMissing = true)
-    public HawkBitMcpToolProvider hawkBitMcpToolProvider(
+    public HawkbitMcpToolProvider hawkBitMcpToolProvider(
             final HawkbitClient hawkbitClient,
             final Tenant dummyTenant,
-            final HawkBitMcpProperties properties) {
-        return new HawkBitMcpToolProvider(hawkbitClient, dummyTenant, properties);
+            final HawkbitMcpProperties properties) {
+        return new HawkbitMcpToolProvider(hawkbitClient, dummyTenant, properties);
     }
 
     /**
@@ -62,8 +62,8 @@ public class McpToolConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "hawkbit.mcp.resources-enabled", havingValue = "true", matchIfMissing = true)
-    public HawkBitDocumentationResource hawkBitDocumentationResource() {
-        return new HawkBitDocumentationResource();
+    public HawkbitDocumentationResource hawkBitDocumentationResource() {
+        return new HawkbitDocumentationResource();
     }
 
     /**
@@ -77,7 +77,7 @@ public class McpToolConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "hawkbit.mcp.prompts-enabled", havingValue = "true", matchIfMissing = true)
-    public HawkBitPromptProvider hawkBitPromptProvider() {
-        return new HawkBitPromptProvider();
+    public HawkbitPromptProvider hawkBitPromptProvider() {
+        return new HawkbitPromptProvider();
     }
 }

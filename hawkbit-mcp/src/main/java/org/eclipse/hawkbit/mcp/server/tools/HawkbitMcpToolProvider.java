@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Contributors to the Eclipse Foundation
+ * Copyright (c) 2026 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.mcp.server.tools;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.mcp.server.config.HawkBitMcpProperties;
+import org.eclipse.hawkbit.mcp.server.config.HawkbitMcpProperties;
 import org.eclipse.hawkbit.mcp.server.dto.ActionOperation;
 import org.eclipse.hawkbit.mcp.server.dto.ListRequest;
 import org.eclipse.hawkbit.mcp.server.dto.ManageActionRequest;
@@ -54,7 +54,7 @@ import java.util.List;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class HawkBitMcpToolProvider {
+public class HawkbitMcpToolProvider {
 
     private static final String OP_CREATE = "CREATE";
     private static final String OP_UPDATE = "UPDATE";
@@ -71,7 +71,7 @@ public class HawkBitMcpToolProvider {
 
     private final HawkbitClient hawkbitClient;
     private final Tenant dummyTenant;
-    private final HawkBitMcpProperties properties;
+    private final HawkbitMcpProperties properties;
 
     private <T> PagedResponse<T> toPagedResponse(final PagedList<T> pagedList, final ListRequest request) {
         if (pagedList == null) {
@@ -486,7 +486,7 @@ public class HawkBitMcpToolProvider {
 
     private void validateRolloutOperation(final RolloutOperation operation) {
         final String opName = operation.name().toLowerCase().replace("_", "-");
-        final HawkBitMcpProperties.RolloutConfig config = properties.getOperations().getRollouts();
+        final HawkbitMcpProperties.RolloutConfig config = properties.getOperations().getRollouts();
         final Boolean entitySetting = config.getOperationEnabled(opName);
 
         // For standard CRUD ops, check global fallback
@@ -508,7 +508,7 @@ public class HawkBitMcpToolProvider {
 
     private void validateActionOperation(final ActionOperation operation) {
         final String opName = operation.name().toLowerCase().replace("_", "-");
-        final HawkBitMcpProperties.ActionConfig config = properties.getOperations().getActions();
+        final HawkbitMcpProperties.ActionConfig config = properties.getOperations().getActions();
         final Boolean entitySetting = config.getOperationEnabled(opName);
 
         if (entitySetting == null) {
@@ -528,8 +528,8 @@ public class HawkBitMcpToolProvider {
     }
 
     private boolean isOperationEnabled(final String operation, final String entity) {
-        final HawkBitMcpProperties.Operations ops = properties.getOperations();
-        final HawkBitMcpProperties.EntityConfig entityConfig = getEntityConfig(entity);
+        final HawkbitMcpProperties.Operations ops = properties.getOperations();
+        final HawkbitMcpProperties.EntityConfig entityConfig = getEntityConfig(entity);
 
         final Boolean entitySetting = entityConfig != null ? entityConfig.getOperationEnabled(operation) : null;
         if (entitySetting != null) {
@@ -539,8 +539,8 @@ public class HawkBitMcpToolProvider {
         return ops.isGlobalOperationEnabled(operation);
     }
 
-    private HawkBitMcpProperties.EntityConfig getEntityConfig(final String entity) {
-        final HawkBitMcpProperties.Operations ops = properties.getOperations();
+    private HawkbitMcpProperties.EntityConfig getEntityConfig(final String entity) {
+        final HawkbitMcpProperties.Operations ops = properties.getOperations();
         return switch (entity.toLowerCase()) {
             case "targets" -> ops.getTargets();
             case "rollouts" -> ops.getRollouts();

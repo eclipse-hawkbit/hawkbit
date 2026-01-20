@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Contributors to the Eclipse Foundation
+ * Copyright (c) 2026 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,8 +16,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.mcp.server.client.HawkBitAuthenticationValidator;
-import org.eclipse.hawkbit.mcp.server.client.HawkBitAuthenticationValidator.ValidationResult;
+import org.eclipse.hawkbit.mcp.server.client.HawkbitAuthenticationValidator;
+import org.eclipse.hawkbit.mcp.server.client.HawkbitAuthenticationValidator.ValidationResult;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -35,11 +36,16 @@ import java.io.IOException;
 
 /**
  * Security configuration for the MCP server.
+ * <p>
+ * This configuration is only active in HTTP/servlet mode. In STDIO mode,
+ * authentication is handled via static credentials from properties.
+ * </p>
  */
 @Slf4j
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class McpSecurityConfiguration {
 
     /**
@@ -47,7 +53,7 @@ public class McpSecurityConfiguration {
      */
     public static final String AUTH_HEADER_ATTRIBUTE = "hawkbit.mcp.auth.header";
 
-    private final HawkBitAuthenticationValidator authenticationValidator;
+    private final HawkbitAuthenticationValidator authenticationValidator;
 
     @Bean
     @SuppressWarnings("java:S4502") // CSRF protection is not needed for stateless REST APIs using Authorization header
@@ -69,7 +75,7 @@ public class McpSecurityConfiguration {
     @RequiredArgsConstructor
     public static class HawkBitAuthenticationFilter extends OncePerRequestFilter {
 
-        private final HawkBitAuthenticationValidator validator;
+        private final HawkbitAuthenticationValidator validator;
 
         @Override
         protected void doFilterInternal(final HttpServletRequest request, final @NonNull HttpServletResponse response,

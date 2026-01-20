@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Contributors to the Eclipse Foundation
+ * Copyright (c) 2026 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.mcp.server.config.HawkBitMcpProperties;
+import org.eclipse.hawkbit.mcp.server.config.HawkbitMcpProperties;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTenantManagementRestApi;
 import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.Tenant;
@@ -30,16 +30,16 @@ import java.util.HexFormat;
  */
 @Slf4j
 @Component
-public class HawkBitAuthenticationValidator {
+public class HawkbitAuthenticationValidator {
 
     private final HawkbitClient hawkbitClient;
     private final Tenant dummyTenant;
     private final Cache<String, Boolean> validationCache;
     private final boolean enabled;
 
-    public HawkBitAuthenticationValidator(HawkbitClient hawkbitClient,
-                                          Tenant dummyTenant,
-                                          HawkBitMcpProperties properties) {
+    public HawkbitAuthenticationValidator(final HawkbitClient hawkbitClient,
+                                          final Tenant dummyTenant,
+                                          final HawkbitMcpProperties properties) {
         this.hawkbitClient = hawkbitClient;
         this.dummyTenant = dummyTenant;
         this.enabled = properties.getValidation().isEnabled();
@@ -60,7 +60,7 @@ public class HawkBitAuthenticationValidator {
      * @param authHeader the Authorization header value
      * @return validation result
      */
-    public ValidationResult validate(String authHeader) {
+    public ValidationResult validate(final String authHeader) {
         if (!enabled) {
             return ValidationResult.VALID;
         }
@@ -77,10 +77,10 @@ public class HawkBitAuthenticationValidator {
             return cachedResult ? ValidationResult.VALID : ValidationResult.INVALID_CREDENTIALS;
         }
 
-        return validateWithHawkBit(cacheKey);
+        return validateWithHawkbit(cacheKey);
     }
 
-    private ValidationResult validateWithHawkBit(String cacheKey) {
+    private ValidationResult validateWithHawkbit(final String cacheKey) {
         log.debug("Validating authentication against hawkBit using SDK");
 
         try {
@@ -119,7 +119,7 @@ public class HawkBitAuthenticationValidator {
         }
     }
 
-    private String hashAuthHeader(String authHeader) {
+    private String hashAuthHeader(final String authHeader) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(authHeader.getBytes(StandardCharsets.UTF_8));

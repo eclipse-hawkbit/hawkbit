@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Contributors to the Eclipse Foundation
+ * Copyright (c) 2026 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,13 +22,34 @@ import java.time.Duration;
 @Data
 @Validated
 @ConfigurationProperties(prefix = "hawkbit.mcp")
-public class HawkBitMcpProperties {
+public class HawkbitMcpProperties {
 
     /**
      * Base URL of the hawkBit Management API (e.g., <a href="http://localhost:8080">...</a>).
      */
     @NotBlank(message = "hawkbit.mcp.mgmt-url must be configured")
     private String mgmtUrl;
+
+    /**
+     * Username for hawkBit authentication (used in STDIO mode).
+     * Format: {@code tenant\\username} or just username depending on hawkBit configuration.
+     * Can be set via HAWKBIT_USERNAME environment variable.
+     */
+    private String username;
+
+    /**
+     * Password for hawkBit authentication (used in STDIO mode).
+     * Can be set via HAWKBIT_PASSWORD environment variable.
+     */
+    private String password;
+
+    /**
+     * Check if static credentials are configured.
+     */
+    public boolean hasStaticCredentials() {
+        return username != null && !username.isBlank()
+                && password != null && !password.isBlank();
+    }
 
     /**
      * Whether to enable the built-in hawkBit tools.

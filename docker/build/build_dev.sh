@@ -62,6 +62,8 @@ if [ -z "$1" ]; then
     build "hawkbit-update-server"
     # db init
     build "hawkbit-repository-jpa-init"
+    # mcp server
+    build "hawkbit-mcp-server"
 else
     echo "Build $1"
     build $1
