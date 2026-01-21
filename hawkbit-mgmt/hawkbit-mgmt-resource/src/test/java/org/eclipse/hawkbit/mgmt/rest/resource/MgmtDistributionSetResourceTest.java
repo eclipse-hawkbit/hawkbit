@@ -1831,6 +1831,22 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 Arguments.of(false, false), Arguments.of(true, null), Arguments.of(false, null));
     }
 
+    private static List<MgmtDistributionSetRequestBodyPut> toMgmtDistributionSetPost(final List<DistributionSetManagement.Create> creates) {
+        return creates.stream()
+                .map(create ->
+                        new MgmtDistributionSetRequestBodyPost()
+                                .setType(create.getType().getKey())
+                                .setModules(create.getModules().stream()
+                                        .map(module -> new MgmtSoftwareModuleAssignment().setId(module.getId()))
+                                        .map(MgmtSoftwareModuleAssignment.class::cast)
+                                        .toList())
+                                .setName(create.getName())
+                                .setDescription(create.getDescription())
+                                .setVersion(create.getVersion())
+                                .setRequiredMigrationStep(create.getRequiredMigrationStep()))
+                .toList();
+    }
+
     private JSONArray createTargetAndJsonArray(final String schedule, final String duration, final String timezone,
             final String type, final Boolean confirmationRequired, final String... targetIds) throws Exception {
         final JSONArray result = new JSONArray();
@@ -1925,22 +1941,6 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                         contains(findFirstModuleByType(three, osType).get().getId().intValue())))
                 .andExpect(jsonPath("[2]requiredMigrationStep", equalTo(three.getRequiredMigrationStep())))
                 .andReturn();
-    }
-
-    private static List<MgmtDistributionSetRequestBodyPut> toMgmtDistributionSetPost(final List<DistributionSetManagement.Create> creates) {
-        return creates.stream()
-                .map(create ->
-                        new MgmtDistributionSetRequestBodyPost()
-                                .setType(create.getType().getKey())
-                                .setModules(create.getModules().stream()
-                                        .map(module -> new MgmtSoftwareModuleAssignment().setId(module.getId()))
-                                        .map(MgmtSoftwareModuleAssignment.class::cast)
-                                        .toList())
-                                .setName(create.getName())
-                                .setDescription(create.getDescription())
-                                .setVersion(create.getVersion())
-                                .setRequiredMigrationStep(create.getRequiredMigrationStep()))
-                .toList();
     }
 
     private Set<DistributionSet> createDistributionSetsAlphabetical(final int amount) {

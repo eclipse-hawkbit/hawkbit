@@ -63,7 +63,7 @@ class SortUtilityTest {
     }
 
     /**
-     * Sorting based on name with case sensitive is possible.
+     * Sorting based on name with case-sensitive is possible.
      */
     @Test
     @SuppressWarnings("squid:S2699") // assert no error

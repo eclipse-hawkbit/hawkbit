@@ -116,7 +116,7 @@ public class MgmtTarget extends MgmtNamedEntity {
 
     @Schema(description = "Pre-Shared key that allows targets to authenticate at Direct Device Integration " +
             "API if enabled in the tenant settings", example = "38e6a19932b014040ba061795186514e")
-    @ToString.Exclude
+    @ToString.Exclude // note - it is included only if the received has the needed permissions
     private String securityToken;
 
     @Schema(description = "Request re-transmission of target attributes", example = "true")

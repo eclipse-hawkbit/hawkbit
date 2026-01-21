@@ -71,7 +71,7 @@ public class MgmtActionResource implements MgmtActionRestApi {
     }
 
     @Override
-    @AuditLog(entity = "Actions",type = AuditLog.Type.DELETE, description = "Delete Action", logResponse = true)
+    @AuditLog(entity = "Actions", type = AuditLog.Type.DELETE, description = "Delete Action", logResponse = true)
     public ResponseEntity<Void> deleteAction(Long actionId) {
         deploymentManagement.deleteAction(actionId);
         return ResponseEntity.noContent().build();

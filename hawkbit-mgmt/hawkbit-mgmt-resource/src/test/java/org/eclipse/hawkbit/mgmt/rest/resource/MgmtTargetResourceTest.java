@@ -2571,32 +2571,32 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         testdataFactory.createTargetType("targettype", Set.of());
 
         // GET is not allowed
-        mvc.perform(get(TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING, knownTargetId))
+        mvc.perform(get(TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_ID_TARGETTYPE, knownTargetId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
         // PUT is not allowed
-        mvc.perform(put(TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING, knownTargetId))
+        mvc.perform(put(TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_ID_TARGETTYPE, knownTargetId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
         // POST does not exist with path parameter targettype
-        mvc.perform(post(TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING + "/123", knownTargetId))
+        mvc.perform(post(TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_ID_TARGETTYPE + "/123", knownTargetId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
         // DELETE does not exist with path parameter targettype
-        mvc.perform(delete(TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING + "/123", knownTargetId))
+        mvc.perform(delete(TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_ID_TARGETTYPE + "/123", knownTargetId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
         // Invalid content
-        mvc.perform(post(TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING, knownTargetId))
+        mvc.perform(post(TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_ID_TARGETTYPE, knownTargetId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isUnsupportedMediaType());
 
         // Bad request if id field is missing
-        mvc.perform(post(TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING, knownTargetId)
+        mvc.perform(post(TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_ID_TARGETTYPE, knownTargetId)
                         .content("{\"unknownfield\":123}").contentType(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());

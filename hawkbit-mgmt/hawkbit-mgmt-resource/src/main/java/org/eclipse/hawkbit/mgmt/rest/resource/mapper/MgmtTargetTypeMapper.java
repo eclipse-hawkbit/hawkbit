@@ -74,7 +74,7 @@ public final class MgmtTargetTypeMapper {
 
     public static void addLinks(final MgmtTargetType result) {
         result.add(linkTo(methodOn(MgmtTargetTypeRestApi.class).getCompatibleDistributionSets(result.getId()))
-                .withRel(MgmtRestConstants.TARGETTYPE_V1_DS_TYPES).expand());
+                .withRel(MgmtRestConstants.COMPATIBLEDISTRIBUTIONSETTYPES).expand());
     }
 
     private TargetTypeManagement.Create fromRequest(final MgmtTargetTypeRequestBodyPost targetTypesRest) {

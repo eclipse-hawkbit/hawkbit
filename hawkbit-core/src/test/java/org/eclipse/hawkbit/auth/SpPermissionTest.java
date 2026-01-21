@@ -13,7 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collection;
 
-import org.eclipse.hawkbit.auth.SpPermission;
 import org.junit.jupiter.api.Test;
 
 /**

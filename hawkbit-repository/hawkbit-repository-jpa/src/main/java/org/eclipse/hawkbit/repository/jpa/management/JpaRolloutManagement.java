@@ -376,8 +376,9 @@ public class JpaRolloutManagement implements RolloutManagement {
     /**
      * Check if on resume of a paused rollout the next group shall be started directly.
      * Cases where we need to manually start the next group:
-     *  - last running group is in error state and there is still some old group in running state, only running groups would be evaluated which would leave Rollout in running state but no trigger new group
-     *  - last running group has success action to PAUSE and the success condition is fulfilled
+     * - last running group is in error state and there is still some old group in running state, only running groups would be evaluated which would leave Rollout in running state but no trigger new group
+     * - last running group has success action to PAUSE and the success condition is fulfilled
+     *
      * @param rollout
      * @param lastStartedGroup
      * @return true if next group shall be started directly on resume, false otherwise
@@ -964,8 +965,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             RolloutHelper.verifyRolloutGroupTargetPercentage(group.getTargetPercentage());
 
             final long targetsInGroupFilter = targetFilterCounts.get(groupTargetFilter);
-            final long overlappingTargets = countOverlappingTargetsWithPreviousGroups(baseFilter, groups, group, i,
-                    targetFilterCounts);
+            final long overlappingTargets = countOverlappingTargetsWithPreviousGroups(baseFilter, groups, group, i, targetFilterCounts);
 
             final long realTargetsInGroup;
             // Assume that targets which were not used in the previous groups
@@ -995,8 +995,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             return 0;
         }
         final List<RolloutGroup> previousGroups = groups.subList(0, groupIndex);
-        final String overlappingTargetsFilter = RolloutHelper.getOverlappingWithGroupsTargetFilter(baseFilter,
-                previousGroups, group);
+        final String overlappingTargetsFilter = RolloutHelper.getOverlappingWithGroupsTargetFilter(baseFilter, previousGroups, group);
 
         if (targetFilterCounts.containsKey(overlappingTargetsFilter)) {
             return targetFilterCounts.get(overlappingTargetsFilter);
@@ -1007,8 +1006,8 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
     }
 
-    private long calculateRemainingTargets(final List<RolloutGroup> groups, final String targetFilter, final Long createdAt,
-            final Long dsTypeId) {
+    private long calculateRemainingTargets(
+            final List<RolloutGroup> groups, final String targetFilter, final Long createdAt, final Long dsTypeId) {
         final TargetCount targets = calculateTargets(targetFilter, createdAt, dsTypeId);
 
         final long totalTargets = targets.total();

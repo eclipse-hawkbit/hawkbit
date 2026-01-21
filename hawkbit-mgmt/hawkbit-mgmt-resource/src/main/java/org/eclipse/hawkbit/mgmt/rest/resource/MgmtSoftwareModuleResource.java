@@ -263,7 +263,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> updateMetadata(final Long softwareModuleId, final String metadataKey, final MgmtSoftwareModuleMetadataBodyPut metadata) {
+    public ResponseEntity<Void> updateMetadata(
+            final Long softwareModuleId, final String metadataKey, final MgmtSoftwareModuleMetadataBodyPut metadata) {
         softwareModuleManagement.createMetadata(
                 softwareModuleId, metadataKey, new MetadataValueCreate(metadata.getValue(), metadata.getTargetVisible()));
         return ResponseEntity.noContent().build();

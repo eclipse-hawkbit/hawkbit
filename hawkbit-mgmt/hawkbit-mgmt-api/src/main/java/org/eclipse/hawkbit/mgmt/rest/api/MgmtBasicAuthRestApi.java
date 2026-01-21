@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.mgmt.rest.api;
 
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.BASIC_AUTH_ORDER;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
 
 import io.swagger.v3.oas.annotations.extensions.Extension;
 import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
@@ -36,6 +37,7 @@ public interface MgmtBasicAuthRestApi {
      *
      * @return the userinfo with status OK.
      */
+    @GetResponses
     @GetMapping(value = MgmtRestConstants.AUTH_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtUserInfo> validateBasicAuth();
 }

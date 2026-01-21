@@ -60,7 +60,8 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     @Override
     public ResponseEntity<PagedList<MgmtDistributionSetType>> getDistributionSetTypes(
             final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
-        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetTypeSortParam(sortParam));
+        final Pageable pageable = PagingUtility.toPageable(
+                pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetTypeSortParam(sortParam));
         final Slice<? extends DistributionSetType> findModuleTypesAll;
         long countModulesAll;
         if (rsqlParam != null) {

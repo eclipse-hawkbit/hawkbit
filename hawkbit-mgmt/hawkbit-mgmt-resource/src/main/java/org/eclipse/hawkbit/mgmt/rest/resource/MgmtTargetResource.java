@@ -249,16 +249,6 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    private Optional<Action> getValidatedAction(final String targetId, final Long actionId) {
-        final Action action = deploymentManagement.findAction(actionId)
-                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
-        if (!action.getTarget().getControllerId().equals(targetId)) {
-            log.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), targetId);
-            return Optional.empty();
-        }
-        return Optional.of(action);
-    }
-
     @Override
     @AuditLog(entity = "Target", type = AuditLog.Type.UPDATE, description = "Cancel Target Action")
     public ResponseEntity<Void> cancelAction(final String targetId, final Long actionId, final boolean force) {
@@ -477,6 +467,16 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<Void> deactivateAutoConfirm(final String targetId) {
         confirmationManagement.deactivateAutoConfirmation(targetId);
         return ResponseEntity.noContent().build();
+    }
+
+    private Optional<Action> getValidatedAction(final String targetId, final Long actionId) {
+        final Action action = deploymentManagement.findAction(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+        if (!action.getTarget().getControllerId().equals(targetId)) {
+            log.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), targetId);
+            return Optional.empty();
+        }
+        return Optional.of(action);
     }
 
     private <T, R> R getNullIfEmpty(final T object, final Function<T, R> extractMethod) {

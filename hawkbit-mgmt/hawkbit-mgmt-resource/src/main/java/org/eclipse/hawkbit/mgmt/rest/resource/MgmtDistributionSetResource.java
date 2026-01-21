@@ -159,7 +159,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                                                 dsTypeKey));
                                     }
                                     return dsType;
-                                }).orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class,  dsTypeKey))));
+                                }).orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, dsTypeKey))));
 
         final Collection<? extends DistributionSet> createdDSets =
                 distributionSetManagement.create(mgmtDistributionSetMapper.fromRequest(sets, defaultDsKey, dsTypeKeyToDsType));

@@ -71,19 +71,18 @@ import org.springframework.web.context.WebApplicationContext;
         classes = { MgmtApiConfiguration.class, RestConfiguration.class, JpaRepositoryConfiguration.class, TestConfiguration.class })
 class MgmtBasicAuthResourceTest {
 
-    private static final String DEFAULT_TENANT = "DEFAULT";
-    private static final String TEST_USER = "testUser";
-
     @Autowired
     protected WebApplicationContext webApplicationContext;
     @Autowired
     MockMvc defaultMock;
+    private static final String DEFAULT_TENANT = "DEFAULT";
+    private static final String TEST_USER = "testUser";
 
     /**
      * Test of userinfo api with basic authentication validation
      */
     @Test
-    @WithUser(principal = TEST_USER, authorities = {"READ", "WRITE", "DELETE"})
+    @WithUser(principal = TEST_USER, authorities = { "READ", "WRITE", "DELETE" })
     void validateBasicAuthWithUserDetails() throws Exception {
         withSecurityMock().perform(get(MgmtRestConstants.AUTH_V1_REQUEST_MAPPING))
                 .andDo(MockMvcResultPrinter.print())
