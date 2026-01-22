@@ -35,18 +35,21 @@ import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 public final class ApiResponsesConstants {
 
     // Response Codes
-    private static final String OK_200 = "200";
-    private static final String CREATED_201 = "201";
-    private static final String NO_CONTENT_204 = "204";
-    private static final String BAD_REQUEST_400 = "400";
-    private static final String UNAUTHORIZED_401 = "401";
-    private static final String FORBIDDEN_403 = "403";
-    private static final String NOT_FOUND_404 = "404";
-    private static final String METHOD_NOT_ALLOWED_405 = "405";
-    private static final String NOT_ACCEPTABLE_406 = "406";
-    private static final String CONFLICT_409 = "409";
-    private static final String UNSUPPORTED_MEDIA_TYPE_415 = "415";
-    private static final String TOO_MANY_REQUESTS_429 = "429";
+    public static final String OK_200 = "200";
+    public static final String CREATED_201 = "201";
+    public static final String NO_CONTENT_204 = "204";
+    public static final String BAD_REQUEST_400 = "400";
+    public static final String UNAUTHORIZED_401 = "401";
+    public static final String FORBIDDEN_403 = "403";
+    public static final String NOT_FOUND_404 = "404";
+    public static final String METHOD_NOT_ALLOWED_405 = "405";
+    public static final String NOT_ACCEPTABLE_406 = "406";
+    public static final String CONFLICT_409 = "409";
+    public static final String GONE_410 = "410";
+    public static final String UNSUPPORTED_MEDIA_TYPE_415 = "415";
+    public static final String LOCKED_423 = "423";
+    public static final String TOO_MANY_REQUESTS_429 = "429";
+    public static final String INTERNAL_SERVER_ERROR_500 = "500";
 
     // Success Descriptions
     private static final String DESC_SUCCESS_CREATED = "Successfully created";
@@ -80,6 +83,10 @@ public final class ApiResponsesConstants {
             @ApiResponse(
                     responseCode = UNSUPPORTED_MEDIA_TYPE_415,
                     description = DESC_UNSUPPORTED_MEDIA_TYPE,
+                    content = @Content(mediaType = MEDIA_TYPE_JSON, schema = @Schema(hidden = true))),
+            @ApiResponse(
+                    responseCode = TOO_MANY_REQUESTS_429,
+                    description = DESC_TOO_MANY_REQUESTS,
                     content = @Content(mediaType = MEDIA_TYPE_JSON, schema = @Schema(hidden = true)))
     })
     @CommonErrorResponses
@@ -114,6 +121,10 @@ public final class ApiResponsesConstants {
                     description = DESC_CONFLICT,
                     content = @Content(mediaType = MEDIA_TYPE_JSON, schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = UNSUPPORTED_MEDIA_TYPE_415, description = DESC_UNSUPPORTED_MEDIA_TYPE,
+                    content = @Content(mediaType = MEDIA_TYPE_JSON, schema = @Schema(hidden = true))),
+            @ApiResponse(
+                    responseCode = TOO_MANY_REQUESTS_429,
+                    description = DESC_TOO_MANY_REQUESTS,
                     content = @Content(mediaType = MEDIA_TYPE_JSON, schema = @Schema(hidden = true)))
     })
     @CommonErrorResponses
@@ -169,6 +180,10 @@ public final class ApiResponsesConstants {
             @ApiResponse(
                     responseCode = UNSUPPORTED_MEDIA_TYPE_415,
                     description = DESC_UNSUPPORTED_MEDIA_TYPE,
+                    content = @Content(mediaType = MEDIA_TYPE_JSON, schema = @Schema(hidden = true))),
+            @ApiResponse(
+                    responseCode = TOO_MANY_REQUESTS_429,
+                    description = DESC_TOO_MANY_REQUESTS,
                     content = @Content(mediaType = MEDIA_TYPE_JSON, schema = @Schema(hidden = true)))
     })
     @CommonErrorResponses
@@ -189,6 +204,10 @@ public final class ApiResponsesConstants {
             @ApiResponse(
                     responseCode = UNSUPPORTED_MEDIA_TYPE_415,
                     description = DESC_UNSUPPORTED_MEDIA_TYPE,
+                    content = @Content(mediaType = MEDIA_TYPE_JSON, schema = @Schema(hidden = true))),
+            @ApiResponse(
+                    responseCode = TOO_MANY_REQUESTS_429,
+                    description = DESC_TOO_MANY_REQUESTS,
                     content = @Content(mediaType = MEDIA_TYPE_JSON, schema = @Schema(hidden = true)))
     })
     @CommonErrorResponses
@@ -221,14 +240,7 @@ public final class ApiResponsesConstants {
                     description = DESC_FORBIDDEN,
                     content = @Content(mediaType = MEDIA_TYPE_JSON, schema = @Schema(hidden = true))),
             @ApiResponse(
-                    responseCode = METHOD_NOT_ALLOWED_405, description = DESC_METHOD_NOT_ALLOWED,
-                    content = @Content(mediaType = MEDIA_TYPE_JSON, schema = @Schema(hidden = true))),
-            @ApiResponse(
                     responseCode = NOT_ACCEPTABLE_406, description = DESC_NOT_ACCEPTABLE,
-                    content = @Content(mediaType = MEDIA_TYPE_JSON, schema = @Schema(hidden = true))),
-            @ApiResponse(
-                    responseCode = TOO_MANY_REQUESTS_429,
-                    description = DESC_TOO_MANY_REQUESTS,
                     content = @Content(mediaType = MEDIA_TYPE_JSON, schema = @Schema(hidden = true)))
     })
     private @interface CommonErrorResponses {

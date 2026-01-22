@@ -9,6 +9,16 @@
  */
 package org.eclipse.hawkbit.rest;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.GONE;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.LOCKED;
+import static org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
+
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.List;
@@ -93,62 +103,60 @@ public class RestConfiguration {
     public static class ResponseExceptionHandler {
 
         private static final Map<SpServerError, HttpStatus> ERROR_TO_HTTP_STATUS = new EnumMap<>(SpServerError.class);
-        private static final HttpStatus DEFAULT_RESPONSE_STATUS = HttpStatus.INTERNAL_SERVER_ERROR;
+        private static final HttpStatus DEFAULT_RESPONSE_STATUS = INTERNAL_SERVER_ERROR;
 
         private static final String MESSAGE_FORMATTER_SEPARATOR = " ";
         private static final String LOG_EXCEPTION_FORMAT = "Handling exception {} of request {}";
 
         static {
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_ENTITY_NOT_EXISTS, HttpStatus.NOT_FOUND);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_ENTITY_ALREADY_EXISTS, HttpStatus.CONFLICT);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_ENTITY_READ_ONLY, HttpStatus.FORBIDDEN);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REST_SORT_PARAM_INVALID_DIRECTION, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REST_SORT_PARAM_INVALID_FIELD, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REST_SORT_PARAM_SYNTAX, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REST_RSQL_PARAM_INVALID_FIELD, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_INSUFFICIENT_PERMISSION, HttpStatus.FORBIDDEN);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_UPLOAD_FAILED, HttpStatus.INTERNAL_SERVER_ERROR);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_ENCRYPTION_NOT_SUPPORTED, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_ENCRYPTION_FAILED, HttpStatus.INTERNAL_SERVER_ERROR);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_SHA1_MATCH, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_SHA256_MATCH, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_MD5_MATCH, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_DELETE_FAILED, HttpStatus.INTERNAL_SERVER_ERROR);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_BINARY_DELETED, HttpStatus.GONE);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_LOAD_FAILED, HttpStatus.INTERNAL_SERVER_ERROR);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_QUOTA_EXCEEDED, HttpStatus.TOO_MANY_REQUESTS);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_FILE_SIZE_QUOTA_EXCEEDED, HttpStatus.TOO_MANY_REQUESTS);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_STORAGE_QUOTA_EXCEEDED, HttpStatus.TOO_MANY_REQUESTS);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ACTION_NOT_CANCELABLE, HttpStatus.METHOD_NOT_ALLOWED);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ACTION_NOT_FORCE_QUITABLE, HttpStatus.METHOD_NOT_ALLOWED);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_CREATION_FAILED_MISSING_MODULE, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_MODULE_UNSUPPORTED, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_TYPE_UNDEFINED, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_TENANT_NOT_EXISTS, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ENTITY_LOCKED, HttpStatus.LOCKED);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ROLLOUT_ILLEGAL_STATE, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_CONFIGURATION_VALUE_INVALID, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_CONFIGURATION_KEY_INVALID, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_INVALID_TARGET_ADDRESS, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_CONSTRAINT_VIOLATION, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_OPERATION_NOT_SUPPORTED, HttpStatus.GONE);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_CONCURRENT_MODIFICATION, HttpStatus.CONFLICT);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_MAINTENANCE_SCHEDULE_INVALID, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_TARGET_ATTRIBUTES_INVALID, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_AUTO_CONFIRMATION_ALREADY_ACTIVE, HttpStatus.CONFLICT);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_AUTO_ASSIGN_ACTION_TYPE_INVALID, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_CONFIGURATION_VALUE_CHANGE_NOT_ALLOWED, HttpStatus.FORBIDDEN);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_MULTIASSIGNMENT_NOT_ENABLED, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_NO_WEIGHT_PROVIDED_IN_MULTIASSIGNMENT_MODE, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_TARGET_TYPE_IN_USE, HttpStatus.CONFLICT);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_TARGET_TYPE_INCOMPATIBLE, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_TARGET_TYPE_KEY_OR_NAME_REQUIRED, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_INVALID, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_INCOMPLETE, HttpStatus.BAD_REQUEST);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_LOCKED, HttpStatus.LOCKED);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DELETED, HttpStatus.NOT_FOUND);
-            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_STOP_ROLLOUT_FAILED, HttpStatus.LOCKED);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_ENTITY_NOT_EXISTS, NOT_FOUND);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_ENTITY_ALREADY_EXISTS, CONFLICT);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_ENTITY_READ_ONLY, FORBIDDEN);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REST_SORT_PARAM_INVALID_DIRECTION, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REST_SORT_PARAM_INVALID_FIELD, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REST_SORT_PARAM_SYNTAX, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REST_RSQL_PARAM_INVALID_FIELD, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_INSUFFICIENT_PERMISSION, FORBIDDEN);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_UPLOAD_FAILED, INTERNAL_SERVER_ERROR);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_ENCRYPTION_NOT_SUPPORTED, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_ENCRYPTION_FAILED, INTERNAL_SERVER_ERROR);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_SHA1_MATCH, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_SHA256_MATCH, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_UPLOAD_FAILED_MD5_MATCH, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_DELETE_FAILED, INTERNAL_SERVER_ERROR);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_BINARY_DELETED, GONE);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ARTIFACT_LOAD_FAILED, INTERNAL_SERVER_ERROR);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_QUOTA_EXCEEDED, TOO_MANY_REQUESTS);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_FILE_SIZE_QUOTA_EXCEEDED, TOO_MANY_REQUESTS);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_STORAGE_QUOTA_EXCEEDED, TOO_MANY_REQUESTS);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ACTION_NOT_CANCELABLE, METHOD_NOT_ALLOWED);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ACTION_NOT_FORCE_QUITABLE, METHOD_NOT_ALLOWED);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_CREATION_FAILED_MISSING_MODULE, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_MODULE_UNSUPPORTED, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_TYPE_UNDEFINED, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_TENANT_NOT_EXISTS, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_ROLLOUT_ILLEGAL_STATE, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_CONFIGURATION_VALUE_INVALID, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_CONFIGURATION_KEY_INVALID, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_INVALID_TARGET_ADDRESS, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_CONSTRAINT_VIOLATION, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_CONCURRENT_MODIFICATION, CONFLICT);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_MAINTENANCE_SCHEDULE_INVALID, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_TARGET_ATTRIBUTES_INVALID, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_AUTO_CONFIRMATION_ALREADY_ACTIVE, CONFLICT);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_AUTO_ASSIGN_ACTION_TYPE_INVALID, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_CONFIGURATION_VALUE_CHANGE_NOT_ALLOWED, FORBIDDEN);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_MULTIASSIGNMENT_NOT_ENABLED, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_NO_WEIGHT_PROVIDED_IN_MULTIASSIGNMENT_MODE, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_TARGET_TYPE_IN_USE, CONFLICT);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_TARGET_TYPE_INCOMPATIBLE, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_TARGET_TYPE_KEY_OR_NAME_REQUIRED, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_INVALID, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_INCOMPLETE, BAD_REQUEST);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_LOCKED, LOCKED);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DELETED, NOT_FOUND);
+            ERROR_TO_HTTP_STATUS.put(SpServerError.SP_STOP_ROLLOUT_FAILED, LOCKED);
         }
 
         /**
@@ -186,7 +194,7 @@ public class RestConfiguration {
             logRequest(request, ex);
 
             log.warn("File streaming failed: {}", ex.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
         }
 
         /**
@@ -206,7 +214,7 @@ public class RestConfiguration {
             logRequest(request, ex);
 
             final ExceptionInfo response = createExceptionInfo(new MessageNotReadableException());
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response, BAD_REQUEST);
         }
 
         /**
@@ -229,7 +237,7 @@ public class RestConfiguration {
             response.setExceptionClass(ex.getClass().getName());
             response.setErrorCode(SpServerError.SP_REPO_CONSTRAINT_VIOLATION.getKey());
 
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response, BAD_REQUEST);
         }
 
         /**
@@ -249,7 +257,7 @@ public class RestConfiguration {
             response.setExceptionClass(ex.getClass().getName());
             response.setErrorCode(SpServerError.SP_REPO_CONSTRAINT_VIOLATION.getKey());
 
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response, BAD_REQUEST);
         }
 
         /**
@@ -271,7 +279,7 @@ public class RestConfiguration {
                 log.warn("Request {} lead to MultipartException without root cause message:\n{}", request.getRequestURL(), ex.getStackTrace());
             }
 
-            return new ResponseEntity<>(createExceptionInfo(new MultiPartFileUploadException(responseCause)), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(createExceptionInfo(new MultiPartFileUploadException(responseCause)), BAD_REQUEST);
         }
 
         @ExceptionHandler({ DataIntegrityViolationException.class })
@@ -287,7 +295,7 @@ public class RestConfiguration {
             response.setMessage("The data provided violates integrity rules. Please ensure all required fields are valid.");
             response.setExceptionClass(ex.getClass().getName());
 
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response, BAD_REQUEST);
         }
 
         private static HttpStatus getStatusOrDefault(final SpServerError error) {

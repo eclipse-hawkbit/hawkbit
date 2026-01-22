@@ -13,6 +13,9 @@ import static org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants.BASE_V1_REQUEST_
 import static org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants.DEPLOYMENT_BASE;
 import static org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants.FEEDBACK;
 import static org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GONE_410;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.INTERNAL_SERVER_ERROR_500;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.METHOD_NOT_ALLOWED_405;
 import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -117,6 +120,10 @@ public interface DdiRootControllerRestApi {
     @Operation(summary = "Artifact download", description = "Handles GET DdiArtifact download request. This could be " +
             "full or partial (as specified by RFC7233 (Range Requests)) download request.")
     @GetResponses
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = INTERNAL_SERVER_ERROR_500, description = "Artifact download or decryption failed",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @GetMapping(value = BASE_V1_REQUEST_MAPPING +
             "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
     ResponseEntity<InputStream> downloadArtifact(
@@ -198,7 +205,7 @@ public interface DdiRootControllerRestApi {
             """)
     @PostUpdateResponses
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "410", description = "Action is not active anymore.",
+            @ApiResponse(responseCode = GONE_410, description = "Action is not active anymore.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DEPLOYMENT_BASE +
@@ -262,6 +269,9 @@ public interface DdiRootControllerRestApi {
             until the controller on the device reports a finished (either successful or error) or rejects the action,
             e.g. the canceled actions have been started already.""")
     @PostUpdateResponses
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = METHOD_NOT_ALLOWED_405, description = "Software module is locked", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @PostMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION + "/{actionId}/" +
             FEEDBACK, consumes = { APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
     ResponseEntity<Void> postCancelActionFeedback(
@@ -375,7 +385,7 @@ public interface DdiRootControllerRestApi {
             """)
     @PostUpdateResponses
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "410", description = "Action is not active anymore.",
+            @ApiResponse(responseCode = GONE_410, description = "Action is not active anymore.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE + "/{actionId}/" +
@@ -442,7 +452,7 @@ public interface DdiRootControllerRestApi {
             """)
     @PutResponses
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "410", description = "Action is not active anymore.",
+            @ApiResponse(responseCode = GONE_410, description = "Action is not active anymore.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PutMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.INSTALLED_BASE,

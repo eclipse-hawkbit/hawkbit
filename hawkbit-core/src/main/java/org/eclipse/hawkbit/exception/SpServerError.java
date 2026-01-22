@@ -131,9 +131,6 @@ public enum SpServerError {
     SP_REPO_TENANT_NOT_EXISTS(
             "hawkbit.server.error.repo.tenantNotExists",
             "The entity cannot be inserted due the tenant does not exists"),
-    SP_ENTITY_LOCKED(
-            "hawkbit.server.error.entityLocked",
-            "The given entity is locked by the server."),
     SP_REPO_ENTITY_READ_ONLY(
             "hawkbit.server.error.entityReadOnly",
             "The given entity is read only and the change cannot be completed."),
@@ -149,9 +146,6 @@ public enum SpServerError {
     SP_ROLLOUT_VERIFICATION_FAILED(
             "hawkbit.server.error.rollout.verificationFailed",
             "The rollout configuration could not be verified successfully"),
-    SP_REPO_OPERATION_NOT_SUPPORTED(
-            "hawkbit.server.error.operation.notSupported",
-            "Operation or method is (no longer) supported by service."),
     SP_MAINTENANCE_SCHEDULE_INVALID(
             "hawkbit.server.error.maintenanceScheduleInvalid",
             "Information for schedule, duration or timezone is missing; or there is no valid maintenance window available in future."),
