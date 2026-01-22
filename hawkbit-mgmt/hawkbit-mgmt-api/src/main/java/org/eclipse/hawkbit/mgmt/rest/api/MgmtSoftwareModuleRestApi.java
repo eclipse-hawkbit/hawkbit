@@ -11,8 +11,12 @@ package org.eclipse.hawkbit.mgmt.rest.api;
 
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.SOFTWARE_MODULE_ORDER;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GONE_410;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.INTERNAL_SERVER_ERROR_500;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.LOCKED_423;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.NOT_FOUND_404;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PutResponses;
 
@@ -73,7 +77,13 @@ public interface MgmtSoftwareModuleRestApi {
     @Operation(summary = "Upload artifact", description = "Handles POST request for artifact upload. Required Permission: CREATE_REPOSITORY")
     @PostCreateResponses
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "404", description = "Software Module not found", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+            @ApiResponse(responseCode = NOT_FOUND_404, description = "Software Module not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = GONE_410, description = "Artifact binary no longer exists",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = LOCKED_423, description = "Software module is locked",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = INTERNAL_SERVER_ERROR_500, description = "Upload / store to storage or encryption failed", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
@@ -96,6 +106,9 @@ public interface MgmtSoftwareModuleRestApi {
             description = "Handles the GET request of retrieving all metadata of artifacts assigned to a " +
                     "software module. Required Permission: READ_REPOSITORY")
     @GetResponses
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = GONE_410, description = "Artifact binary no longer exists", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtArtifact>> getArtifacts(
@@ -112,6 +125,9 @@ public interface MgmtSoftwareModuleRestApi {
      */
     @Operation(summary = "Return single Artifact metadata", description = "Handles the GET request of retrieving a single Artifact metadata request. Required Permission: READ_REPOSITORY")
     @GetResponses
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = GONE_410, description = "Artifact binary no longer exists", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     @ResponseBody
@@ -129,6 +145,12 @@ public interface MgmtSoftwareModuleRestApi {
      */
     @Operation(summary = "Delete artifact by Id", description = "Handles the DELETE request for a single Artifact assigned to a SoftwareModule. Required Permission: DELETE_REPOSITORY")
     @DeleteResponses
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = LOCKED_423, description = "Software module is locked",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = INTERNAL_SERVER_ERROR_500, description = "Artifact delete failed with internal server error",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @DeleteMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}")
     @ResponseBody
     ResponseEntity<Void> deleteArtifact(
@@ -195,6 +217,10 @@ public interface MgmtSoftwareModuleRestApi {
      */
     @Operation(summary = "Create Software Module(s)", description = "Handles the POST request of creating new software modules. The request body must always be a list of modules. Required Permission: CREATE_REPOSITORY")
     @PostCreateResponses
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = INTERNAL_SERVER_ERROR_500, description = "Artifact encryption failed",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
@@ -237,7 +263,8 @@ public interface MgmtSoftwareModuleRestApi {
     @Operation(summary = "Creates a list of metadata for a specific Software Module", description = "Create a list of metadata entries Required Permission: UPDATE_REPOSITORY")
     @PostCreateResponses
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "404", description = "Software Module not found", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+            @ApiResponse(responseCode = NOT_FOUND_404, description = "Software Module not found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata",
             consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })

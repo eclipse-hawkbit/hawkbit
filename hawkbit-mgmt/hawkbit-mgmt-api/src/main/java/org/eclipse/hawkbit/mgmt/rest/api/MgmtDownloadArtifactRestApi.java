@@ -11,11 +11,16 @@ package org.eclipse.hawkbit.mgmt.rest.api;
 
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.DOWNLOAD_ARTIFACT_ORDER;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.INTERNAL_SERVER_ERROR_500;
 
 import java.io.InputStream;
 
 import io.swagger.v3.oas.annotations.extensions.Extension;
 import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.rest.OpenApi;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +46,10 @@ public interface MgmtDownloadArtifactRestApi {
      * @return responseEntity with status ok if successful
      */
     @GetResponses
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = INTERNAL_SERVER_ERROR_500, description = "Artifact download or decryption failed",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}/download")
     @ResponseBody
     ResponseEntity<InputStream> downloadArtifact(

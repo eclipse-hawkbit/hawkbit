@@ -13,6 +13,7 @@ import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.DISTRIBUTION_S
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.NOT_FOUND_404;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateNoContentResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PutResponses;
@@ -271,7 +272,7 @@ public interface MgmtDistributionSetTypeRestApi {
                     "Required Permission: UPDATE_REPOSITORY and READ_REPOSITORY")
     @PostCreateNoContentResponses
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
+            @ApiResponse(responseCode = NOT_FOUND_404, description = "Distribution Set Type not found.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/" +
@@ -294,7 +295,7 @@ public interface MgmtDistributionSetTypeRestApi {
                     "Required Permission: UPDATE_REPOSITORY and READ_REPOSITORY")
     @PostCreateNoContentResponses
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
+            @ApiResponse(responseCode = NOT_FOUND_404, description = "Distribution Set Type not found.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/" +

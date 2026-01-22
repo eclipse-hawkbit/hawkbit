@@ -11,8 +11,11 @@ package org.eclipse.hawkbit.mgmt.rest.api;
 
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.TARGET_ORDER;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GONE_410;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.METHOD_NOT_ALLOWED_405;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.NOT_FOUND_404;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PutNoContentResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PutResponses;
@@ -288,6 +291,9 @@ public interface MgmtTargetRestApi {
      */
     @Operation(summary = "Cancel action for a specific target", description = "Cancels an active action, only active actions can be deleted. Required Permission: UPDATE_TARGET")
     @DeleteResponses
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = METHOD_NOT_ALLOWED_405, description = "Software module is locked", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @DeleteMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}")
     ResponseEntity<Void> cancelAction(
             @PathVariable("targetId") String targetId,
@@ -323,7 +329,7 @@ public interface MgmtTargetRestApi {
             """)
     @PutNoContentResponses
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "410", description = "Action is not active anymore.",
+            @ApiResponse(responseCode = GONE_410, description = "Action is not active anymore.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
     })
     @PutMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}/confirmation",
@@ -426,7 +432,7 @@ public interface MgmtTargetRestApi {
     @Operation(summary = "Create a list of metadata for a specific target", description = "Create a list of metadata entries Required permissions: READ_REPOSITORY and UPDATE_TARGET")
     @PostCreateResponses
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "404", description = "Target not found", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+            @ApiResponse(responseCode = NOT_FOUND_404, description = "Target not found", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata",
             consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })

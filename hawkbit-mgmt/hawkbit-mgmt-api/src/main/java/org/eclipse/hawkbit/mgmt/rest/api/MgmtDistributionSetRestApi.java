@@ -13,6 +13,9 @@ import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.DISTRIBUTION_S
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.LOCKED_423;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.METHOD_NOT_ALLOWED_405;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.NOT_FOUND_404;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PutNoContentResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PutResponses;
@@ -323,7 +326,7 @@ public interface MgmtDistributionSetRestApi {
             description = "Create a list of meta data entries Required permissions: READ_REPOSITORY and UPDATE_TARGET")
     @PostCreateResponses
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "404", description = "Distribution Set not found.",
+            @ApiResponse(responseCode = NOT_FOUND_404, description = "Distribution Set not found.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata",
@@ -404,6 +407,9 @@ public interface MgmtDistributionSetRestApi {
             always be a list of software module IDs. Required permissions: READ_REPOSITORY and UPDATE_REPOSITORY
             """)
     @PostUpdateNoContentResponses
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = LOCKED_423, description = "Software module is locked", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/assignedSM",
             consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
@@ -421,6 +427,9 @@ public interface MgmtDistributionSetRestApi {
     @Operation(summary = "Delete the assignment of the software module from the distribution set",
             description = "Delete an assignment. Required permission: UPDATE_REPOSITORY")
     @DeleteResponses
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = LOCKED_423, description = "Distribution set is locked", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/assignedSM/{softwareModuleId}")
     ResponseEntity<Void> deleteAssignSoftwareModules(
             @PathVariable("distributionSetId") Long distributionSetId,
@@ -534,6 +543,10 @@ public interface MgmtDistributionSetRestApi {
             cancel all actions connected to this distribution set. Required permission: UPDATE_REPOSITORY, UPDATE_TARGET
             """)
     @PostUpdateNoContentResponses
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = METHOD_NOT_ALLOWED_405, description = "Software module is locked", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = LOCKED_423, description = "Distribution set is locked", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/invalidate",
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })

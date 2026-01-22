@@ -13,6 +13,7 @@ import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.TARGET_TYPE_OR
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.NOT_FOUND_404;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PutResponses;
 
@@ -146,7 +147,7 @@ public interface MgmtTargetTypeRestApi {
             "types. The request body must always be a list of types. Required Permission: CREATE_TARGET")
     @PostCreateResponses
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "404", description = "Target type not found.",
+            @ApiResponse(responseCode = NOT_FOUND_404, description = "Target type not found.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING,

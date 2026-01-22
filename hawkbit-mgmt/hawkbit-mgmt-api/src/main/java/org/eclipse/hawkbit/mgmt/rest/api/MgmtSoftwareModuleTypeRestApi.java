@@ -13,6 +13,7 @@ import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.SOFTWARE_MODUL
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.NOT_FOUND_404;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PutResponses;
 
@@ -148,7 +149,7 @@ public interface MgmtSoftwareModuleTypeRestApi {
                     "always be a list of module types. Required Permission: CREATE_REPOSITORY")
     @PostCreateResponses
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "404", description = "Software Module not found",
+            @ApiResponse(responseCode = NOT_FOUND_404, description = "Software Module not found",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING,

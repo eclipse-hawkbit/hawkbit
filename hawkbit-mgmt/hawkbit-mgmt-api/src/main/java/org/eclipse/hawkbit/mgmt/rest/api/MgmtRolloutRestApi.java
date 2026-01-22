@@ -13,6 +13,7 @@ import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.ROLLOUT_ORDER;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.NOT_FOUND_404;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateNoContentResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PutResponses;
@@ -372,7 +373,7 @@ public interface MgmtRolloutRestApi {
             "Required Permission: CREATE_ROLLOUT")
     @PostCreateResponses
     @ApiResponses(value = {
-           @ApiResponse(responseCode = "404", description = "Rollout not found.",
+            @ApiResponse(responseCode = NOT_FOUND_404, description = "Rollout not found.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/retry",
