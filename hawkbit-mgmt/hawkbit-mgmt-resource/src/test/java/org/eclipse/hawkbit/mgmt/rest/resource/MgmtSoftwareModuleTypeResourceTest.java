@@ -28,6 +28,7 @@ import java.util.List;
 
 import com.jayway.jsonpath.JsonPath;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
@@ -104,7 +105,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                 .update(SoftwareModuleTypeManagement.Update.builder().id(testType.getId()).description("Desc1234").colour("rgb(106,178,83)")
                         .build());
 
-        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING + "?limit=10&sort=name:ASC&offset=0&q=name==a")
+        mvc.perform(get(MgmtSoftwareModuleTypeRestApi.SOFTWAREMODULETYPES_V1 + "?limit=10&sort=name:ASC&offset=0&q=name==a")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
@@ -359,7 +360,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     @Test
     void getSoftwareModuleTypesWithoutAddtionalRequestParameters() throws Exception {
         final int types = 3;
-        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING))
+        mvc.perform(get(MgmtSoftwareModuleTypeRestApi.SOFTWAREMODULETYPES_V1))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(types)))
@@ -374,7 +375,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     void getSoftwareModuleTypesWithPagingLimitRequestParameter() throws Exception {
         final int types = 3;
         final int limitSize = 1;
-        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING)
+        mvc.perform(get(MgmtSoftwareModuleTypeRestApi.SOFTWAREMODULETYPES_V1)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -391,7 +392,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
         final int types = 3;
         final int offsetParam = 2;
         final int expectedSize = types - offsetParam;
-        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING)
+        mvc.perform(get(MgmtSoftwareModuleTypeRestApi.SOFTWAREMODULETYPES_V1)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(types)))
                 .andDo(MockMvcResultPrinter.print())

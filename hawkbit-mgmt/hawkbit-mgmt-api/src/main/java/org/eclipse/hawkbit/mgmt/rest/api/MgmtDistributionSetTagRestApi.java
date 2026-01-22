@@ -10,12 +10,18 @@
 package org.eclipse.hawkbit.mgmt.rest.api;
 
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.DISTRIBUTION_SET_TAG_ORDER;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateNoContentResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PutResponses;
+import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.List;
 
@@ -30,8 +36,6 @@ import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateNoContentResponses;
 import org.eclipse.hawkbit.rest.OpenApi;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,13 +46,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * REST Resource handling for DistributionSetTag CRUD operations.
+ * REST API for DistributionSetTag CRUD operations.
  */
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
-@Tag(
-        name = "Distribution Set Tags", description = "REST Resource handling for DistributionSetTag CRUD operations.",
+@Tag(name = "Distribution Set Tags", description = "REST Resource handling for DistributionSetTag CRUD operations.",
         extensions = @Extension(name = OpenApi.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = DISTRIBUTION_SET_TAG_ORDER)))
 public interface MgmtDistributionSetTagRestApi {
+
+    String DISTRIBUTIONSETTAGS_V1 = MgmtRestConstants.REST_V1 + "/distributionsettags";
+    String DISTRIBUTIONSET_TAG_ID_ASSIGNED = "/{distributionsetTagId}/assigned";
 
     /**
      * Handles the GET request of retrieving all DistributionSet tags.
@@ -61,33 +67,24 @@ public interface MgmtDistributionSetTagRestApi {
      * @return a list of all target tags for a defined or default page request with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
-    @Operation(summary = "Return all Distribution Set Tags", description = "Handles the GET request of retrieving " +
-            "all distribution set tags.")
+    @Operation(summary = "Return all Distribution Set Tags",
+            description = "Handles the GET request of retrieving all distribution set tags.")
     @GetIfExistResponses
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING,
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = DISTRIBUTIONSETTAGS_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTag>> getDistributionSetTags(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
+            @Schema(description = "Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for available fields.")
             String rsqlParam,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
             int pagingOffsetParam,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
             @Schema(description = "The maximum number of entries in a page (default is 50)")
             int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false)
-            @Schema(description = """
-                    The query parameter sort allows to define the sort order for the result of a query. A sort criteria
-                    consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
-                    The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
-                    in the result.""")
+            @Schema(description = "The query parameter sort allows to define the sort order for the result of a query. " +
+                    "A sort criteria consists of the name of a field and the sort direction (ASC for ascending and DESC descending)." +
+                    "The sequence of the sort criteria (multiple can be used) defines the sort order of the entities in the result.")
             String sortParam);
 
     /**
@@ -99,8 +96,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Return single Distribution Set Tag",
             description = "Handles the GET request of retrieving a single distribution set tag.")
     @GetResponses
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/{distributionsetTagId}",
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = DISTRIBUTIONSETTAGS_V1 + "/{distributionsetTagId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTag> getDistributionSetTag(@PathVariable("distributionsetTagId") Long distributionsetTagId);
 
     /**
@@ -113,9 +109,8 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Creates new Distribution Set Tags", description = "Handles the POST request of creating " +
             "new distribution set tag. The request body must always be a list of distribution set tags.")
     @PostCreateResponses
-    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING,
-            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = DISTRIBUTIONSETTAGS_V1,
+            consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTag>> createDistributionSetTags(@RequestBody List<MgmtTagRequestBodyPut> tags);
 
     /**
@@ -128,9 +123,8 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Update Distribution Set Tag",
             description = "Handles the PUT request of updating a distribution set tag.")
     @PutResponses
-    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/{distributionsetTagId}",
-            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = DISTRIBUTIONSETTAGS_V1 + "/{distributionsetTagId}",
+            consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTag> updateDistributionSetTag(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
             @RequestBody MgmtTagRequestBodyPut restDSTagRest);
@@ -144,7 +138,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Delete a single distribution set tag",
             description = "Handles the DELETE request of deleting a single distribution set tag.")
     @DeleteResponses
-    @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/{distributionsetTagId}")
+    @DeleteMapping(value = DISTRIBUTIONSETTAGS_V1 + "/{distributionsetTagId}")
     ResponseEntity<Void> deleteDistributionSetTag(@PathVariable("distributionsetTagId") Long distributionsetTagId);
 
     /**
@@ -161,31 +155,22 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Return all assigned distribution sets by given tag Id",
             description = "Handles the GET request of retrieving a list of assigned distributions.")
     @GetResponses
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.DISTRIBUTIONSET_TAG_ID_ASSIGNED,
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = DISTRIBUTIONSETTAGS_V1 + DISTRIBUTIONSET_TAG_ID_ASSIGNED, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtDistributionSet>> getAssignedDistributionSets(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
+            @Schema(description = "Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for available fields.")
             String rsqlParam,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
             int pagingOffsetParam,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
             @Schema(description = "The maximum number of entries in a page (default is 50)")
             int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false)
-            @Schema(description = """
-                    The query parameter sort allows to define the sort order for the result of a query. A sort criteria
-                    consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
-                    The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
-                    in the result.""")
+            @Schema(description = "The query parameter sort allows to define the sort order for the result of a query. " +
+                    "A sort criteria consists of the name of a field and the sort direction (ASC for ascending and DESC descending)." +
+                    "The sequence of the sort criteria (multiple can be used) defines the sort order of the entities in the result.")
             String sortParam);
 
     /**
@@ -198,7 +183,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Assign distribution set to the given tag id",
             description = "Handles the POST request of distribution assignment. Already assigned distribution will be ignored.")
     @PostCreateNoContentResponses
-    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.DISTRIBUTIONSET_TAG_ID_ASSIGNED + "/{distributionsetId}")
+    @PostMapping(value = DISTRIBUTIONSETTAGS_V1 + DISTRIBUTIONSET_TAG_ID_ASSIGNED + "/{distributionsetId}")
     ResponseEntity<Void> assignDistributionSet(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
             @PathVariable("distributionsetId") Long distributionsetId);
@@ -213,9 +198,8 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Assign distribution sets to the given tag id",
             description = "Handles the POST request of distribution assignment. Already assigned distribution will be ignored.")
     @PostUpdateNoContentResponses
-    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.DISTRIBUTIONSET_TAG_ID_ASSIGNED,
-            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = DISTRIBUTIONSETTAGS_V1 + DISTRIBUTIONSET_TAG_ID_ASSIGNED,
+            consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> assignDistributionSets(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
             @RequestBody List<Long> distributionsetIds);
@@ -230,8 +214,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Unassign one distribution set from the given tag id",
             description = "Handles the DELETE request of unassign the given distribution.")
     @DeleteResponses
-    @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING +
-            MgmtRestConstants.DISTRIBUTIONSET_TAG_ID_ASSIGNED + "/{distributionsetId}")
+    @DeleteMapping(value = DISTRIBUTIONSETTAGS_V1 + DISTRIBUTIONSET_TAG_ID_ASSIGNED + "/{distributionsetId}")
     ResponseEntity<Void> unassignDistributionSet(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
             @PathVariable("distributionsetId") Long distributionsetId);
@@ -246,8 +229,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Unassign multiple distribution sets from the given tag id",
             description = "Handles the DELETE request of unassign the given distribution.")
     @DeleteResponses
-    @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING +
-            MgmtRestConstants.DISTRIBUTIONSET_TAG_ID_ASSIGNED)
+    @DeleteMapping(value = DISTRIBUTIONSETTAGS_V1 + DISTRIBUTIONSET_TAG_ID_ASSIGNED)
     ResponseEntity<Void> unassignDistributionSets(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
             @RequestBody List<Long> distributionsetIds);

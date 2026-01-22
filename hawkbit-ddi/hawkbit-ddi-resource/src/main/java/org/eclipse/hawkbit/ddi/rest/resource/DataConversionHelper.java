@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.ddi.json.model.DdiConfirmationBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiControllerBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiMetadata;
 import org.eclipse.hawkbit.ddi.json.model.DdiPolling;
-import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
+import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -54,19 +54,19 @@ public final class DataConversionHelper {
             confirmationBase.add(WebMvcLinkBuilder
                     .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, AccessContext.tenant())
                             .deactivateAutoConfirmation(AccessContext.tenant(), controllerId))
-                    .withRel(DdiRestConstants.DEACTIVATE_AUTO_CONFIRM).expand());
+                    .withRel(DdiRootControllerRestApi.DEACTIVATE_AUTO_CONFIRM).expand());
         } else {
             confirmationBase.add(WebMvcLinkBuilder
                     .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, AccessContext.tenant())
                             .activateAutoConfirmation(AccessContext.tenant(), controllerId, null))
-                    .withRel(DdiRestConstants.ACTIVATE_AUTO_CONFIRM).expand());
+                    .withRel(DdiRootControllerRestApi.ACTIVATE_AUTO_CONFIRM).expand());
         }
         if (activeAction != null && activeAction.isWaitingConfirmation()) {
             confirmationBase.add(WebMvcLinkBuilder
                     .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, AccessContext.tenant())
                             .getConfirmationBaseAction(AccessContext.tenant(), controllerId,
                                     activeAction.getId(), calculateEtag(activeAction), null))
-                    .withRel(DdiRestConstants.CONFIRMATION_BASE).expand());
+                    .withRel(DdiRootControllerRestApi.CONFIRMATION_BASE).expand());
         }
 
         return confirmationBase;
@@ -84,14 +84,14 @@ public final class DataConversionHelper {
                                 .methodOn(DdiRootController.class, AccessContext.tenant())
                                 .getConfirmationBaseAction(AccessContext.tenant(), target.getControllerId(),
                                         activeAction.getId(), calculateEtag(activeAction), null))
-                        .withRel(DdiRestConstants.CONFIRMATION_BASE).expand());
+                        .withRel(DdiRootControllerRestApi.CONFIRMATION_BASE).expand());
 
             } else if (activeAction.isCancelingOrCanceled()) {
                 result.add(WebMvcLinkBuilder
                         .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, AccessContext.tenant())
                                 .getControllerCancelAction(AccessContext.tenant(), target.getControllerId(),
                                         activeAction.getId()))
-                        .withRel(DdiRestConstants.CANCEL_ACTION).expand());
+                        .withRel(DdiRootControllerRestApi.CANCEL_ACTION).expand());
             } else {
                 // we need to add the hashcode here of the actionWithStatus because the action might
                 // have changed from 'soft' to 'forced' type, and we need to change the payload of the
@@ -101,7 +101,7 @@ public final class DataConversionHelper {
                                 .getControllerDeploymentBaseAction(
                                         AccessContext.tenant(), target.getControllerId(),
                                         activeAction.getId(), calculateEtag(activeAction), null))
-                        .withRel(DdiRestConstants.DEPLOYMENT_BASE).expand());
+                        .withRel(DdiRootControllerRestApi.DEPLOYMENT_BASE).expand());
             }
         }
 
@@ -111,7 +111,7 @@ public final class DataConversionHelper {
                             .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, AccessContext.tenant())
                                     .getControllerInstalledAction(AccessContext.tenant(),
                                             target.getControllerId(), installedAction.getId(), null))
-                            .withRel(DdiRestConstants.INSTALLED_BASE).expand());
+                            .withRel(DdiRootControllerRestApi.INSTALLED_BASE).expand());
         }
 
         if (target.isRequestControllerAttributes()) {
@@ -120,7 +120,7 @@ public final class DataConversionHelper {
                             .methodOn(DdiRootController.class, AccessContext.tenant())
                             // doesn't really call the putConfigData with null, just create the link
                             .putConfigData(null, AccessContext.tenant(), target.getControllerId()))
-                    .withRel(DdiRestConstants.CONFIG_DATA).expand());
+                    .withRel(DdiRootControllerRestApi.CONFIG_DATA).expand());
         }
 
         return result;

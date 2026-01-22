@@ -10,7 +10,7 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.ACTION_V1_REQUEST_MAPPING;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtActionRestApi.ACTIONS_V1;
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_SEARCH;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -27,9 +27,12 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -91,7 +94,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final String rsqlPendingOrFinishedStatus = rsqlFinishedStatus + "," + rsqlPendingStatus;
 
         // pending status one result
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlPendingStatus))
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlPendingStatus))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(1)))
@@ -99,14 +102,14 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("content[0].active", equalTo(true)));
 
         // finished status none result
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlFinishedStatus))
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlFinishedStatus))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(0)))
                 .andExpect(jsonPath("size", equalTo(0)));
 
         // pending or finished status one result
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlPendingOrFinishedStatus))
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlPendingOrFinishedStatus))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(1)))
@@ -129,7 +132,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final String rsqlPendingOrFinishedStatus = rsqlFinishedStatus + "," + rsqlPendingStatus;
 
         // running status one result
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlPendingStatus))
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlPendingStatus))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(1)))
@@ -138,14 +141,14 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("content[0].status", equalTo("running")));
 
         // finished status none result
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlFinishedStatus))
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlFinishedStatus))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(0)))
                 .andExpect(jsonPath("size", equalTo(0)));
 
         // running or finished status one result
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlPendingOrFinishedStatus))
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlPendingOrFinishedStatus))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(1)))
@@ -177,7 +180,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final String rsqlExtRefNoMatch = "externalref==234extRef";
 
         // pending status one result
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlExtRef))
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlExtRef))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(1)))
@@ -185,14 +188,14 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("content[0].externalRef", equalTo(externalRefs.get(0))));
 
         // finished status none result
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlExtRefWildcard))
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlExtRefWildcard))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(2)))
                 .andExpect(jsonPath("size", equalTo(2)));
 
         // pending or finished status one result
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlExtRefNoMatch))
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlExtRefNoMatch))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(0)))
@@ -218,7 +221,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
 
         // verify that one result is returned if the actions are filtered for status code 200
         final String rsqlStatusCode = "lastStatusCode==200";
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlStatusCode))
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlStatusCode))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(1)))
@@ -227,7 +230,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
 
         // verify no result is returned if we filter for a non-existing status code
         final String rsqlWrongStatusCode = "lastStatusCode==999";
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlWrongStatusCode))
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlWrongStatusCode))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(0)))
@@ -247,7 +250,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final String rsqlDsVersion = "distributionSet.version==" + ds.getVersion();
         final String rsqlDsId = "distributionSet.id==" + ds.getId();
 
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlDsName)
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlDsName)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -256,25 +259,25 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("content.[0]._links.distributionset.name",
                         equalTo(ds.getName() + ":" + ds.getVersion())));
 
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlDsVersion))
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlDsVersion))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(1)))
                 .andExpect(jsonPath("size", equalTo(1)));
 
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlDsName + "," + rsqlDsVersion))
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlDsName + "," + rsqlDsVersion))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(1)))
                 .andExpect(jsonPath("size", equalTo(1)));
 
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=distributionSet.name==FooBar"))
+        mvc.perform(get(ACTIONS_V1 + "?q=distributionSet.name==FooBar"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(0)))
                 .andExpect(jsonPath("size", equalTo(0)));
 
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlDsId))
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlDsId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(1)))
@@ -303,7 +306,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final String rsqlRolloutName = "rollout.name==" + rollout.getName();
         final String rsqlRolloutId = "rollout.id==" + rollout.getId();
 
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlRolloutName)
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlRolloutName)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -313,7 +316,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath(
                         "content.[0]._links.distributionset.name", equalTo(ds.getName() + ":" + ds.getVersion())));
 
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlRolloutId)
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlRolloutId)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -365,7 +368,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
 
         final Action action0 = actions.get(0);
         final Action action1 = actions.get(1);
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING)
+        mvc.perform(get(ACTIONS_V1)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
                 .andDo(MockMvcResultPrinter.print())
@@ -403,7 +406,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
      */
     @Test
     void getActionsWithEmptyResult() throws Exception {
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING))
+        mvc.perform(get(ACTIONS_V1))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("size", equalTo(0)))
@@ -421,7 +424,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
 
         // page 1: one entry
         final Action action0 = actions.get(0);
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING)
+        mvc.perform(get(ACTIONS_V1)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
                 .andDo(MockMvcResultPrinter.print())
@@ -442,7 +445,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
 
         // page 2: one entry
         final Action action1 = actions.get(1);
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING)
+        mvc.perform(get(ACTIONS_V1)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1))
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1))
@@ -473,8 +476,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
 
         // not allowed methods
-        mvc.perform(post(ACTION_V1_REQUEST_MAPPING)).andDo(MockMvcResultPrinter.print()).andExpect(status().isMethodNotAllowed());
-        mvc.perform(put(ACTION_V1_REQUEST_MAPPING)).andDo(MockMvcResultPrinter.print()).andExpect(status().isMethodNotAllowed());
+        mvc.perform(post(ACTIONS_V1)).andDo(MockMvcResultPrinter.print()).andExpect(status().isMethodNotAllowed());
+        mvc.perform(put(ACTIONS_V1)).andDo(MockMvcResultPrinter.print()).andExpect(status().isMethodNotAllowed());
     }
 
     /**
@@ -487,7 +490,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
         final Long actionId = actions.get(0).getId();
 
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "/" + actionId))
+        mvc.perform(get(ACTIONS_V1 + "/" + actionId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(JSON_PATH_ACTION_ID, equalTo(actionId.intValue())));
@@ -498,7 +501,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
      */
     @Test
     void requestActionThatDoesNotExistsLeadsToNotFound() throws Exception {
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "/" + 101)).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+        mvc.perform(get(ACTIONS_V1 + "/" + 101)).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
     }
 
     @Test
@@ -507,18 +510,18 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         Action action1 = assignmentResults.get(0).getAssignedEntity().get(0);
         Action action2 = assignmentResults.get(1).getAssignedEntity().get(0);
 
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
+        mvc.perform(get(ACTIONS_V1).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 // verify action 1
                 .andExpect(jsonPath("content.[0].id", equalTo(action1.getId().intValue())))
                 .andExpect(jsonPath("content.[1].id", equalTo(action2.getId().intValue())));
 
-        mvc.perform(delete(ACTION_V1_REQUEST_MAPPING + "/" + action1.getId()))
+        mvc.perform(delete(ACTIONS_V1 + "/" + action1.getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
 
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "/" + action1.getId()))
+        mvc.perform(get(ACTIONS_V1 + "/" + action1.getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
     }
@@ -527,7 +530,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     void shouldSuccessfullyDeleteMultipleActions() throws Exception {
         final List<DistributionSetAssignmentResult> assignmentResults = createTargetsAndPerformAssignment(4);
 
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
+        mvc.perform(get(ACTIONS_V1).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 // verify action 1
@@ -542,28 +545,28 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final long deletedActionId2 = assignmentResults.get(3).getAssignedEntity().get(0).getId();
         actionIdsToDelete.add(deletedActionId2);
 
-        mvc.perform(delete(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)
+        mvc.perform(delete(MgmtActionRestApi.ACTIONS_V1)
                         .content(toJson(actionIdsToDelete)).contentType(APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "/" + deletedActionId1))
+        mvc.perform(get(ACTIONS_V1 + "/" + deletedActionId1))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "/" + deletedActionId2))
+        mvc.perform(get(ACTIONS_V1 + "/" + deletedActionId2))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
         final Action deletedAction3 = assignmentResults.get(1).getAssignedEntity().get(0);
         final String rsql = "target.name==" + deletedAction3.getTarget().getName();
 
-        mvc.perform(delete(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)
+        mvc.perform(delete(MgmtActionRestApi.ACTIONS_V1)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, rsql).contentType(APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "/" + deletedAction3.getId()))
+        mvc.perform(get(ACTIONS_V1 + "/" + deletedAction3.getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "/" + assignmentResults.get(0).getAssignedEntity().get(0).getId()))
+        mvc.perform(get(ACTIONS_V1 + "/" + assignmentResults.get(0).getAssignedEntity().get(0).getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
     }
@@ -571,10 +574,10 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     void shouldReceiveBadRequestWhenNeeded() throws Exception {
         // bad request on both empty parameters
-        mvc.perform(delete(ACTION_V1_REQUEST_MAPPING).contentType(APPLICATION_JSON)).andExpect(status().isBadRequest());
+        mvc.perform(delete(ACTIONS_V1).contentType(APPLICATION_JSON)).andExpect(status().isBadRequest());
 
         // bad request when both parameters are present
-        mvc.perform(delete(ACTION_V1_REQUEST_MAPPING).contentType(APPLICATION_JSON)
+        mvc.perform(delete(ACTIONS_V1).contentType(APPLICATION_JSON)
                         .param(REQUEST_PARAMETER_SEARCH, "target.name==test")
                         .content(toJson(List.of(1, 2, 3)))
                         .contentType(APPLICATION_JSON))
@@ -582,16 +585,16 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     private static String generateActionLink(final String targetId, final Long actionId) {
-        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING +
-                "/" + targetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId;
+        return "http://localhost" + MgmtTargetRestApi.TARGETS_V1 +
+                "/" + targetId + "/" + MgmtTarget.TARGET_V1_ACTIONS + "/" + actionId;
     }
 
     private static String generateTargetLink(final String targetId) {
-        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetId;
+        return "http://localhost" + MgmtTargetRestApi.TARGETS_V1 + "/" + targetId;
     }
 
     private static String generateDistributionSetLink(final Action action) {
-        return "http://localhost" + MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + action.getDistributionSet().getId();
+        return "http://localhost" + MgmtDistributionSetRestApi.DISTRIBUTIONSETS_V1 + "/" + action.getDistributionSet().getId();
     }
 
     private List<DistributionSetAssignmentResult> createTargetsAndPerformAssignment(int n) {
@@ -611,7 +614,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     private void verifyResultsByTargetPropertyFilter(final Target target, final DistributionSet ds, final String rsqlTargetFilter)
             throws Exception {
         // pending status one result
-        mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlTargetFilter)
+        mvc.perform(get(ACTIONS_V1 + "?q=" + rsqlTargetFilter)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -637,7 +640,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         }
 
         final ResultActions resultActions =
-                mvc.perform(get(ACTION_V1_REQUEST_MAPPING).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
+                mvc.perform(get(ACTIONS_V1).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
                         .andDo(MockMvcResultPrinter.print())
                         .andExpect(status().isOk())
                         // verify action 1
@@ -683,7 +686,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
             controllerManagement.updateActionExternalRef(actions.get(0).getId(), externalRef);
         }
 
-        final ResultActions resultActions = mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "/{actionId}", actions.get(0).getId()))
+        final ResultActions resultActions = mvc.perform(get(ACTIONS_V1 + "/{actionId}", actions.get(0).getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 

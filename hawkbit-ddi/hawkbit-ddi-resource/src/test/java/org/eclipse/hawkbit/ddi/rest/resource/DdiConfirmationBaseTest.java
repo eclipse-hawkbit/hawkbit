@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ddi.json.model.DdiActivateAutoConfirmation;
 import org.eclipse.hawkbit.ddi.json.model.DdiConfirmationFeedback;
-import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
+import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
@@ -150,11 +150,11 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
         final Action action = deploymentManagement.findActiveActionsByTarget(target.getControllerId(), PAGE).getContent().get(0);
 
         // get confirmation base
-        performGet(CONFIRMATION_BASE_ACTION, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR),
+        performGet(CONFIRMATION_BASE_ACTION, MediaType.parseMediaType(DdiRootControllerRestApi.MEDIA_TYPE_APPLICATION_CBOR),
                 status().isOk(), AccessContext.tenant(), target.getControllerId(), action.getId().toString());
 
         // get artifacts
-        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR),
+        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.parseMediaType(DdiRootControllerRestApi.MEDIA_TYPE_APPLICATION_CBOR),
                 status().isOk(), AccessContext.tenant(), target.getControllerId(),
                 String.valueOf(softwareModuleId));
     }

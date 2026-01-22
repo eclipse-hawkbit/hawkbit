@@ -55,7 +55,7 @@ import org.springframework.test.web.servlet.ResultActions;
  */
 public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationTest {
 
-    private static final String TARGETTAGS_ROOT = "http://localhost" + MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/";
+    private static final String TARGETTAGS_ROOT = "http://localhost" + MgmtTargetTagRestApi.TARGETTAGS_V1 + "/";
 
     /**
      * Verifies that a paged result list of target tags reflects the content on the repository side.
@@ -67,7 +67,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final TargetTag assigned = tags.get(0);
         final TargetTag unassigned = tags.get(1);
 
-        mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING).accept(MediaType.APPLICATION_JSON))
+        mvc.perform(get(MgmtTargetTagRestApi.TARGETTAGS_V1).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -87,7 +87,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     @Test
      void getTargetTagsWithParameters() throws Exception {
         testdataFactory.createTargetTags(2, "");
-        mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "?limit=10&sort=name:ASC&offset=0&q=name==targetTag"))
+        mvc.perform(get(MgmtTargetTagRestApi.TARGETTAGS_V1 + "?limit=10&sort=name:ASC&offset=0&q=name==targetTag"))
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print());
     }
@@ -111,7 +111,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
         // pass here q directly as a pure string because .queryParam method delimiters the parameters in q with ,
         // which is logical OR, we want AND here
-        mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING +
+        mvc.perform(get(MgmtTargetTagRestApi.TARGETTAGS_V1 +
                         "?" + MgmtRestConstants.REQUEST_PARAMETER_SEARCH + "=colour==" + tag2.getColour())
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -133,7 +133,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final List<? extends TargetTag> tags = testdataFactory.createTargetTags(2, "");
         final TargetTag assigned = tags.get(0);
 
-        mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + assigned.getId())
+        mvc.perform(get(MgmtTargetTagRestApi.TARGETTAGS_V1 + "/" + assigned.getId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -159,7 +159,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .build();
 
         final ResultActions result = mvc
-                .perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING)
+                .perform(post(MgmtTargetTagRestApi.TARGETTAGS_V1)
                         .content(toJson(List.of(tagOne, tagTwo)))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -194,7 +194,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .build();
 
         final ResultActions result = mvc
-                .perform(put(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + original.getId())
+                .perform(put(MgmtTargetTagRestApi.TARGETTAGS_V1 + "/" + original.getId())
                         .content(toJson(update)).contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -221,7 +221,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final List<? extends TargetTag> tags = testdataFactory.createTargetTags(1, "");
         final TargetTag original = tags.get(0);
 
-        mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + original.getId()))
+        mvc.perform(delete(MgmtTargetTagRestApi.TARGETTAGS_V1 + "/" + original.getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
 
@@ -242,7 +242,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
         targetManagement.assignTag(targets.stream().map(Target::getControllerId).toList(), tag.getId());
 
-        mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned"))
+        mvc.perform(get(MgmtTargetTagRestApi.TARGETTAGS_V1 + "/" + tag.getId() + "/assigned"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(targetsAssigned)))
@@ -265,7 +265,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
         targetManagement.assignTag(targets.stream().map(Target::getControllerId).toList(), tag.getId());
 
-        mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+        mvc.perform(get(MgmtTargetTagRestApi.TARGETTAGS_V1 + "/" + tag.getId() + "/assigned")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -291,7 +291,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
         targetManagement.assignTag(targets.stream().map(Target::getControllerId).toList(), tag.getId());
 
-        mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+        mvc.perform(get(MgmtTargetTagRestApi.TARGETTAGS_V1 + "/" + tag.getId() + "/assigned")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(targetsAssigned)))
                 .andDo(MockMvcResultPrinter.print())
@@ -313,7 +313,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
         final Target assigned = testdataFactory.createTargets(1).get(0);
 
-        mvc.perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
+        mvc.perform(post(MgmtTargetTagRestApi.TARGETTAGS_V1 + "/" + tag.getId() + "/assigned/" +
                         assigned.getControllerId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
@@ -336,7 +336,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final Target assigned0 = targets.get(0);
         final Target assigned1 = targets.get(1);
 
-        mvc.perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+        mvc.perform(post(MgmtTargetTagRestApi.TARGETTAGS_V1 + "/" + tag.getId() + "/assigned")
                         .content(toJson(List.of(assigned0.getControllerId(), assigned1.getControllerId())))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -371,7 +371,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final List<String> withMissing = new ArrayList<>(targets);
         withMissing.addAll(missing);
 
-        mvc.perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+        mvc.perform(post(MgmtTargetTagRestApi.TARGETTAGS_V1 + "/" + tag.getId() + "/assigned")
                         .content(toJson(withMissing))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -413,7 +413,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final List<String> withMissing = new ArrayList<>(targets);
         withMissing.addAll(missing);
 
-        mvc.perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+        mvc.perform(post(MgmtTargetTagRestApi.TARGETTAGS_V1 + "/" + tag.getId() + "/assigned")
                         .param("onNotFoundPolicy", MgmtTargetTagRestApi.OnNotFoundPolicy.ON_WHAT_FOUND_AND_FAIL.name())
                         .content(toJson(withMissing))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -457,7 +457,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final List<String> withMissing = new ArrayList<>(targets);
         withMissing.addAll(missing);
 
-        mvc.perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+        mvc.perform(post(MgmtTargetTagRestApi.TARGETTAGS_V1 + "/" + tag.getId() + "/assigned")
                         .param("onNotFoundPolicy", MgmtTargetTagRestApi.OnNotFoundPolicy.ON_WHAT_FOUND_AND_SUCCESS.name())
                         .content(toJson(withMissing))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -483,7 +483,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
         targetManagement.assignTag(targets.stream().map(Target::getControllerId).toList(), tag.getId());
 
-        mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
+        mvc.perform(delete(MgmtTargetTagRestApi.TARGETTAGS_V1 + "/" + tag.getId() + "/assigned/" +
                         unassigned.getControllerId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
@@ -510,7 +510,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
         targetManagement.assignTag(targets.stream().map(Target::getControllerId).toList(), tag.getId());
 
-        mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+        mvc.perform(delete(MgmtTargetTagRestApi.TARGETTAGS_V1 + "/" + tag.getId() + "/assigned")
                         .content(toJson(Arrays.asList(unassigned0.getControllerId(), unassigned1.getControllerId())))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -548,7 +548,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
         targetManagement.assignTag(targets, tag.getId());
 
-        mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+        mvc.perform(delete(MgmtTargetTagRestApi.TARGETTAGS_V1 + "/" + tag.getId() + "/assigned")
                         .content(toJson(withMissing))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -593,7 +593,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
         targetManagement.assignTag(targets, tag.getId());
 
-        mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+        mvc.perform(delete(MgmtTargetTagRestApi.TARGETTAGS_V1 + "/" + tag.getId() + "/assigned")
                         .param("onNotFoundPolicy", MgmtTargetTagRestApi.OnNotFoundPolicy.ON_WHAT_FOUND_AND_FAIL.name())
                         .content(toJson(withMissing))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -638,7 +638,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
         targetManagement.assignTag(targets, tag.getId());
 
-        mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+        mvc.perform(delete(MgmtTargetTagRestApi.TARGETTAGS_V1 + "/" + tag.getId() + "/assigned")
                         .param("onNotFoundPolicy", MgmtTargetTagRestApi.OnNotFoundPolicy.ON_WHAT_FOUND_AND_SUCCESS.name())
                         .content(toJson(withMissing))
                         .contentType(MediaType.APPLICATION_JSON))

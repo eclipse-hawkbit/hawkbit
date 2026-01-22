@@ -9,6 +9,10 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.api;
 
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET;
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.TARGET_TYPE_ORDER;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
@@ -16,6 +20,8 @@ import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.NOT_FOUND_404;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PutResponses;
+import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.List;
 
@@ -35,8 +41,6 @@ import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetTypeRequestBodyP
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetTypeRequestBodyPut;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateNoContentResponses;
 import org.eclipse.hawkbit.rest.OpenApi;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,6 +59,9 @@ import org.springframework.web.bind.annotation.RequestParam;
         extensions = @Extension(name = OpenApi.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = TARGET_TYPE_ORDER)))
 public interface MgmtTargetTypeRestApi {
 
+    String TARGETTYPES_V1 = MgmtRestConstants.REST_V1 + "/targettypes";
+    String COMPATIBLEDISTRIBUTIONSETTYPES = "compatibledistributionsettypes";
+
     /**
      * Handles the GET request of retrieving all TargetTypes.
      *
@@ -68,30 +75,21 @@ public interface MgmtTargetTypeRestApi {
      */
     @Operation(summary = "Return all target types", description = "Handles the GET request of retrieving all target types.")
     @GetIfExistResponses
-    @GetMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING,
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = TARGETTYPES_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTargetType>> getTargetTypes(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
+            @Schema(description = "Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for available fields.")
             String rsqlParam,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
             int pagingOffsetParam,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
             @Schema(description = "The maximum number of entries in a page (default is 50)")
             int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false)
-            @Schema(description = """
-                    The query parameter sort allows to define the sort order for the result of a query. A sort criteria
-                    consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
-                    The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
-                    in the result.""")
+            @Schema(description = "The query parameter sort allows to define the sort order for the result of a query. " +
+                    "A sort criteria consists of the name of a field and the sort direction (ASC for ascending and DESC descending)." +
+                    "The sequence of the sort criteria (multiple can be used) defines the sort order of the entities in the result.")
             String sortParam);
 
     /**
@@ -100,11 +98,9 @@ public interface MgmtTargetTypeRestApi {
      * @param targetTypeId the ID of the target type to retrieve
      * @return a single target type with status OK.
      */
-    @Operation(summary = "Return target type by id",
-            description = "Handles the GET request of retrieving a single target type")
+    @Operation(summary = "Return target type by id", description = "Handles the GET request of retrieving a single target type")
     @GetResponses
-    @GetMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}",
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = TARGETTYPES_V1 + "/{targetTypeId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetType> getTargetType(@PathVariable("targetTypeId") Long targetTypeId);
 
     /**
@@ -116,7 +112,7 @@ public interface MgmtTargetTypeRestApi {
     @Operation(summary = "Delete target type by id",
             description = "Handles the DELETE request for a single target type. Required Permission: DELETE_TARGET")
     @DeleteResponses
-    @DeleteMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}")
+    @DeleteMapping(value = TARGETTYPES_V1 + "/{targetTypeId}")
     ResponseEntity<Void> deleteTargetType(@PathVariable("targetTypeId") Long targetTypeId);
 
     /**
@@ -129,9 +125,8 @@ public interface MgmtTargetTypeRestApi {
     @Operation(summary = "Update target type by id",
             description = "Handles the PUT request for a single target type. Required Permission: UPDATE_TARGET")
     @PutResponses
-    @PutMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}",
-            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = TARGETTYPES_V1 + "/{targetTypeId}",
+            consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetType> updateTargetType(
             @PathVariable("targetTypeId") Long targetTypeId,
             @RequestBody MgmtTargetTypeRequestBodyPut restTargetType);
@@ -143,16 +138,16 @@ public interface MgmtTargetTypeRestApi {
      * @return In case all target types could be successfully created the ResponseEntity with status code 201 - Created but without
      *         ResponseBody. In any failure the JsonResponseExceptionHandler is handling the response.
      */
-    @Operation(summary = "Create target types", description = "Handles the POST request for creating new target " +
-            "types. The request body must always be a list of types. Required Permission: CREATE_TARGET")
+    @Operation(summary = "Create target types",
+            description = "Handles the POST request for creating new target types. The request body must always be a list of types. " +
+                    "Required Permission: CREATE_TARGET")
     @PostCreateResponses
     @ApiResponses(value = {
             @ApiResponse(responseCode = NOT_FOUND_404, description = "Target type not found.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING,
-            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = TARGETTYPES_V1,
+            consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTargetType>> createTargetTypes(@RequestBody List<MgmtTargetTypeRequestBodyPost> targetTypes);
 
     /**
@@ -165,8 +160,8 @@ public interface MgmtTargetTypeRestApi {
             "of retrieving the list of compatible distribution set types in that target type. " +
             "Required Permission: READ_TARGET, READ_REPOSITORY")
     @GetResponses
-    @GetMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}/" + MgmtRestConstants.COMPATIBLEDISTRIBUTIONSETTYPES,
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = TARGETTYPES_V1 + "/{targetTypeId}/" + COMPATIBLEDISTRIBUTIONSETTYPES,
+            produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSetType>> getCompatibleDistributionSets(@PathVariable("targetTypeId") Long targetTypeId);
 
     /**
@@ -180,8 +175,7 @@ public interface MgmtTargetTypeRestApi {
             description = "Handles the DELETE request for removing a distribution set type from a single target type. " +
                     "Required Permission: UPDATE_TARGET and READ_REPOSITORY")
     @DeleteResponses
-    @DeleteMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}/" +
-            MgmtRestConstants.COMPATIBLEDISTRIBUTIONSETTYPES + "/{distributionSetTypeId}")
+    @DeleteMapping(value = TARGETTYPES_V1 + "/{targetTypeId}/" + COMPATIBLEDISTRIBUTIONSETTYPES + "/{distributionSetTypeId}")
     ResponseEntity<Void> removeCompatibleDistributionSet(
             @PathVariable("targetTypeId") Long targetTypeId,
             @PathVariable("distributionSetTypeId") Long distributionSetTypeId);
@@ -197,8 +191,8 @@ public interface MgmtTargetTypeRestApi {
             description = "Handles the POST request for adding compatible distribution set types to a target type. " +
                     "Required Permission: UPDATE_TARGET and READ_REPOSITORY")
     @PostUpdateNoContentResponses
-    @PostMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}/" + MgmtRestConstants.COMPATIBLEDISTRIBUTIONSETTYPES,
-            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = TARGETTYPES_V1 + "/{targetTypeId}/" + COMPATIBLEDISTRIBUTIONSETTYPES,
+            consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> addCompatibleDistributionSets(
             @PathVariable("targetTypeId") Long targetTypeId,
             @RequestBody List<MgmtDistributionSetTypeAssignment> distributionSetTypeIds);

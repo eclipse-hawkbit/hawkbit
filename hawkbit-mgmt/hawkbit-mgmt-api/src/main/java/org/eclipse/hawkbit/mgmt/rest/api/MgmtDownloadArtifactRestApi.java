@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * API to download artifacts
+ * REST API to download artifacts
  */
 @FunctionalInterface
 @Tag(
@@ -50,7 +50,7 @@ public interface MgmtDownloadArtifactRestApi {
             @ApiResponse(responseCode = INTERNAL_SERVER_ERROR_500, description = "Artifact download or decryption failed",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}/download")
+    @GetMapping(value = MgmtSoftwareModuleRestApi.SOFTWAREMODULES_V1 + "/{softwareModuleId}/artifacts/{artifactId}/download")
     @ResponseBody
     ResponseEntity<InputStream> downloadArtifact(
             @PathVariable("softwareModuleId") Long softwareModuleId,

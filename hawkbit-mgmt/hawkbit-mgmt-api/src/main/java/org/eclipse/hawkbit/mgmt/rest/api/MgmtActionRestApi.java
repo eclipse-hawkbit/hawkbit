@@ -10,9 +10,17 @@
 package org.eclipse.hawkbit.mgmt.rest.api;
 
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.ACTION_ORDER;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
+import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.List;
 
@@ -24,8 +32,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.rest.OpenApi;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,10 +43,11 @@ import org.springframework.web.bind.annotation.RequestParam;
  * REST API providing (read-only) access to actions.
  */
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
-@Tag(
-        name = "Actions", description = "REST API providing (read-only) access to actions.",
+@Tag(name = "Actions", description = "REST API providing (read-only) access to actions.",
         extensions = @Extension(name = OpenApi.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = ACTION_ORDER)))
 public interface MgmtActionRestApi {
+
+    String ACTIONS_V1 = MgmtRestConstants.REST_V1 + "/actions";
 
     /**
      * Handles the GET request of retrieving all actions.
@@ -56,33 +63,23 @@ public interface MgmtActionRestApi {
      */
     @Operation(summary = "Return all actions", description = "Handles the GET request of retrieving all actions.")
     @GetIfExistResponses
-    @GetMapping(value = MgmtRestConstants.ACTION_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = ACTIONS_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtAction>> getActions(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
+            @Schema(description = "Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for available fields.")
             String rsqlParam,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
             int pagingOffsetParam,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
             @Schema(description = "The maximum number of entries in a page (default is 50)")
             int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false)
-            @Schema(description = """
-                    The query parameter sort allows to define the sort order for the result of a query. A sort criteria
-                    consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
-                    The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
-                    in the result.""")
+            @Schema(description = "The query parameter sort allows to define the sort order for the result of a query. " +
+                    "A sort criteria consists of the name of a field and the sort direction (ASC for ascending and DESC descending)." +
+                    "The sequence of the sort criteria (multiple can be used) defines the sort order of the entities in the result.")
             String sortParam,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT)
+            @RequestParam(value = REQUEST_PARAMETER_REPRESENTATION_MODE, defaultValue = REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT)
             @Schema(description = """
                     The representation mode. Can be "full" or "compact". Defaults to "compact"
                     """)
@@ -94,11 +91,9 @@ public interface MgmtActionRestApi {
      * @param actionId The ID of the requested action
      * @return the {@link MgmtAction}
      */
-    @Operation(summary = "Return action by id",
-            description = "Handles the GET request of retrieving a single action by actionId.")
+    @Operation(summary = "Return action by id", description = "Handles the GET request of retrieving a single action by actionId.")
     @GetResponses
-    @GetMapping(value = MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/{actionId}",
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = ACTIONS_V1 + "/{actionId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtAction> getAction(@PathVariable("actionId") Long actionId);
 
     /**
@@ -109,7 +104,7 @@ public interface MgmtActionRestApi {
      */
     @Operation(summary = "Delete a single action by id", description = "Handles the DELETE request for single action within Bosch IoT Rollouts. Required Permission: DELETE_REPOSITORY")
     @DeleteResponses
-    @DeleteMapping(value = MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/{actionId}")
+    @DeleteMapping(value = ACTIONS_V1 + "/{actionId}")
     ResponseEntity<Void> deleteAction(@PathVariable("actionId") Long actionId);
 
     /**
@@ -121,12 +116,10 @@ public interface MgmtActionRestApi {
      */
     @Operation(summary = "Delete multiple actions by list OR rsql filter", description = "Handles the DELETE request for multiple actions within Bosch IoT Rollouts. Either action id list OR rsql filter SHOULD be provided. Required Permission: DELETE_REPOSITORY")
     @DeleteResponses
-    @DeleteMapping(value = MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)
+    @DeleteMapping(value = ACTIONS_V1)
     ResponseEntity<Void> deleteActions(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false, defaultValue = "")
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
+            @Schema(description = "Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for available fields.")
             String rsqlParam,
             @Schema(description = "List of action ids to be deleted", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "[253, 255]")
             @RequestBody(required = false)

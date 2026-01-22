@@ -9,10 +9,6 @@
  */
 package org.eclipse.hawkbit.ddi.rest.api;
 
-import static org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants.BASE_V1_REQUEST_MAPPING;
-import static org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants.DEPLOYMENT_BASE;
-import static org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants.FEEDBACK;
-import static org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GONE_410;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.INTERNAL_SERVER_ERROR_500;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.METHOD_NOT_ALLOWED_405;
@@ -67,6 +63,57 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface DdiRootControllerRestApi {
 
     /**
+     * The base URL mapping of the direct device integration rest resources.
+     */
+    String CONTROLLER_V1 = "/{tenant}/controller/v1";
+
+    /**
+     * Deployment action resources.
+     */
+    String DEPLOYMENT_BASE = "deploymentBase";
+    /**
+     * Confirmation base resource.
+     */
+    String CONFIRMATION_BASE = "confirmationBase";
+    /**
+     * Installed action resources.
+     */
+    String INSTALLED_BASE = "installedBase";
+    /**
+     * Feedback channel.
+     */
+    String FEEDBACK = "feedback";
+    /**
+     * Cancel action resources.
+     */
+    String CANCEL_ACTION = "cancelAction";
+    /**
+     * Config data action resources.
+     */
+    String CONFIG_DATA = "configData";
+    /**
+     * Activate auto-confirm
+     */
+    String ACTIVATE_AUTO_CONFIRM = "activateAutoConfirm";
+    /**
+     * Deactivate auto-confirm
+     */
+    String DEACTIVATE_AUTO_CONFIRM = "deactivateAutoConfirm";
+    /**
+     * Media type for CBOR content.
+     */
+    String MEDIA_TYPE_APPLICATION_CBOR = "application/cbor";
+    /**
+     * File suffix for MDH hash download (see Linux md5sum).
+     */
+    String ARTIFACT_MD5_DOWNLOAD_SUFFIX = ".MD5SUM";
+    /**
+     * Default value specifying that no action history to be sent as part of response to deploymentBase
+     * {@link DdiRootControllerRestApi#getControllerDeploymentBaseAction}, {@link DdiRootControllerRestApi#getConfirmationBaseAction}.
+     */
+    String NO_ACTION_HISTORY = "0";
+
+    /**
      * Returns all artifacts of a given software module and target.
      *
      * @param tenant of the client
@@ -77,7 +124,7 @@ public interface DdiRootControllerRestApi {
     @Operation(summary = "Return all artifacts of a given software module and target",
             description = "Returns all artifacts that are assigned to the software module")
     @GetIfExistResponses
-    @GetMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts",
+    @GetMapping(value = CONTROLLER_V1 + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts",
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
     ResponseEntity<List<DdiArtifact>> getSoftwareModulesArtifacts(
             @PathVariable("tenant") String tenant,
@@ -100,7 +147,7 @@ public interface DdiRootControllerRestApi {
             Note: deployments have to be confirmed in order to move on to the next action. Cancellations have to be
             confirmed or rejected.""")
     @GetResponses
-    @GetMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}",
+    @GetMapping(value = CONTROLLER_V1 + "/{controllerId}",
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
     ResponseEntity<DdiControllerBase> getControllerBase(
             @PathVariable("tenant") String tenant,
@@ -117,15 +164,15 @@ public interface DdiRootControllerRestApi {
      * @return response of the servlet which in case of success is status code
      *         {@link HttpStatus#OK} or in case of partial download {@link HttpStatus#PARTIAL_CONTENT}.
      */
-    @Operation(summary = "Artifact download", description = "Handles GET DdiArtifact download request. This could be " +
-            "full or partial (as specified by RFC7233 (Range Requests)) download request.")
+    @Operation(summary = "Artifact download",
+            description = "Handles GET DdiArtifact download request. This could be full or partial (as specified by RFC7233 (Range Requests)) " +
+                    "download request.")
     @GetResponses
     @ApiResponses(value = {
             @ApiResponse(responseCode = INTERNAL_SERVER_ERROR_500, description = "Artifact download or decryption failed",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = BASE_V1_REQUEST_MAPPING +
-            "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
+    @GetMapping(value = CONTROLLER_V1 + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
     ResponseEntity<InputStream> downloadArtifact(
             @PathVariable("tenant") String tenant,
             @PathVariable("controllerId") String controllerId,
@@ -144,8 +191,8 @@ public interface DdiRootControllerRestApi {
     @Operation(summary = "MD5 checksum download",
             description = "Handles GET {@link DdiArtifact} MD5 checksum file download request.")
     @GetResponses
-    @GetMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}" +
-            DdiRestConstants.ARTIFACT_MD5_DOWNLOAD_SUFFIX, produces = MediaType.TEXT_PLAIN_VALUE)
+    @GetMapping(value = CONTROLLER_V1 + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}" + ARTIFACT_MD5_DOWNLOAD_SUFFIX,
+            produces = MediaType.TEXT_PLAIN_VALUE)
     ResponseEntity<Void> downloadArtifactMd5(
             @PathVariable("tenant") String tenant,
             @PathVariable("controllerId") String controllerId,
@@ -176,14 +223,14 @@ public interface DdiRootControllerRestApi {
             runtime.
             """)
     @GetResponses
-    @GetMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DEPLOYMENT_BASE + "/{actionId}",
+    @GetMapping(value = CONTROLLER_V1 + "/{controllerId}/" + DEPLOYMENT_BASE + "/{actionId}",
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
     ResponseEntity<DdiDeploymentBase> getControllerDeploymentBaseAction(
             @PathVariable("tenant") String tenant,
             @PathVariable("controllerId") @NotEmpty String controllerId,
             @PathVariable("actionId") @NotNull Long actionId,
             @RequestParam(value = "c", required = false, defaultValue = "-1") int resource,
-            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY)
+            @RequestParam(value = "actionHistory", defaultValue = NO_ACTION_HISTORY)
             @Schema(description = """
                     (Optional) GET parameter to retrieve a given number of messages which are previously provided by the
                     device. Useful if the devices sent state information to the feedback channel and never stored them
@@ -208,7 +255,7 @@ public interface DdiRootControllerRestApi {
             @ApiResponse(responseCode = GONE_410, description = "Action is not active anymore.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DEPLOYMENT_BASE +
+    @PostMapping(value = CONTROLLER_V1 + "/{controllerId}/" + DEPLOYMENT_BASE +
             "/{actionId}/" + FEEDBACK, consumes = { APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
     ResponseEntity<Void> postDeploymentBaseActionFeedback(
             @Valid @RequestBody DdiActionFeedback feedback,
@@ -229,7 +276,7 @@ public interface DdiRootControllerRestApi {
             information that will allow the server to identify the device on a hardware level (e.g. hardware revision,
             mac address, serial number etc.).""")
     @PutResponses
-    @PutMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIG_DATA,
+    @PutMapping(value = CONTROLLER_V1 + "/{controllerId}/" + CONFIG_DATA,
             consumes = { APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
     ResponseEntity<Void> putConfigData(
             @Valid @RequestBody DdiConfigData configData,
@@ -248,7 +295,7 @@ public interface DdiRootControllerRestApi {
             The Hawkbit server might cancel an operation, e.g. an unfinished update has a successor. It is up to the
             provisioning target to decide to accept the cancellation or reject it.""")
     @GetResponses
-    @GetMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION + "/{actionId}",
+    @GetMapping(value = CONTROLLER_V1 + "/{controllerId}/" + CANCEL_ACTION + "/{actionId}",
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
     ResponseEntity<DdiCancel> getControllerCancelAction(
             @PathVariable("tenant") String tenant,
@@ -272,7 +319,7 @@ public interface DdiRootControllerRestApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = METHOD_NOT_ALLOWED_405, description = "Software module is locked", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION + "/{actionId}/" +
+    @PostMapping(value = CONTROLLER_V1 + "/{controllerId}/" + CANCEL_ACTION + "/{actionId}/" +
             FEEDBACK, consumes = { APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
     ResponseEntity<Void> postCancelActionFeedback(
             @Valid @RequestBody DdiActionFeedback feedback,
@@ -305,13 +352,13 @@ public interface DdiRootControllerRestApi {
             runtime.
             """)
     @GetResponses
-    @GetMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.INSTALLED_BASE + "/{actionId}",
+    @GetMapping(value = CONTROLLER_V1 + "/{controllerId}/" + INSTALLED_BASE + "/{actionId}",
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
     ResponseEntity<DdiDeploymentBase> getControllerInstalledAction(
             @PathVariable("tenant") String tenant,
             @PathVariable("controllerId") @NotEmpty String controllerId,
             @PathVariable("actionId") @NotNull Long actionId,
-            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) Integer actionHistoryMessageCount);
+            @RequestParam(value = "actionHistory", defaultValue = NO_ACTION_HISTORY) Integer actionHistoryMessageCount);
 
     /**
      * Returns the confirmation base with the current auto-confirmation state for a given controllerId and toggle links. In case there are
@@ -328,7 +375,7 @@ public interface DdiRootControllerRestApi {
             Reference links to switch the auto-confirmation state are exposed as well.
             """)
     @GetResponses
-    @GetMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE,
+    @GetMapping(value = CONTROLLER_V1 + "/{controllerId}/" + CONFIRMATION_BASE,
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
     ResponseEntity<DdiConfirmationBase> getConfirmationBase(
             @PathVariable("tenant") String tenant,
@@ -360,14 +407,14 @@ public interface DdiRootControllerRestApi {
             runtime.
             """)
     @GetResponses
-    @GetMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE + "/{actionId}",
+    @GetMapping(value = CONTROLLER_V1 + "/{controllerId}/" + CONFIRMATION_BASE + "/{actionId}",
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
     ResponseEntity<DdiConfirmationBaseAction> getConfirmationBaseAction(
             @PathVariable("tenant") String tenant,
             @PathVariable("controllerId") @NotEmpty String controllerId,
             @PathVariable("actionId") @NotNull Long actionId,
             @RequestParam(value = "c", required = false, defaultValue = "-1") int resource,
-            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) Integer actionHistoryMessageCount);
+            @RequestParam(value = "actionHistory", defaultValue = NO_ACTION_HISTORY) Integer actionHistoryMessageCount);
 
     /**
      * This is the feedback channel for the {@link DdiConfirmationBaseAction} action.
@@ -388,8 +435,7 @@ public interface DdiRootControllerRestApi {
             @ApiResponse(responseCode = GONE_410, description = "Action is not active anymore.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE + "/{actionId}/" +
-            FEEDBACK,
+    @PostMapping(value = CONTROLLER_V1 + "/{controllerId}/" + CONFIRMATION_BASE + "/{actionId}/" + FEEDBACK,
             consumes = { APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
     ResponseEntity<Void> postConfirmationActionFeedback(
             @Valid @RequestBody DdiConfirmationFeedback feedback,
@@ -413,8 +459,8 @@ public interface DdiRootControllerRestApi {
             be automatically confirmed, as long as auto-confirmation is active.
             """)
     @PostUpdateResponses
-    @PostMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE + "/" +
-            DdiRestConstants.ACTIVATE_AUTO_CONFIRM, consumes = { APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
+    @PostMapping(value = CONTROLLER_V1 + "/{controllerId}/" + CONFIRMATION_BASE + "/" + ACTIVATE_AUTO_CONFIRM,
+            consumes = { APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
     ResponseEntity<Void> activateAutoConfirmation(
             @PathVariable("tenant") String tenant,
             @PathVariable("controllerId") @NotEmpty String controllerId,
@@ -432,8 +478,7 @@ public interface DdiRootControllerRestApi {
             while all future actions need to be confirmed, before processing with the deployment.
             """)
     @PostUpdateResponses
-    @PostMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE + "/" +
-            DdiRestConstants.DEACTIVATE_AUTO_CONFIRM)
+    @PostMapping(value = CONTROLLER_V1 + "/{controllerId}/" + CONFIRMATION_BASE + "/" + DEACTIVATE_AUTO_CONFIRM)
     ResponseEntity<Void> deactivateAutoConfirmation(
             @PathVariable("tenant") String tenant,
             @PathVariable("controllerId") @NotEmpty String controllerId);
@@ -455,7 +500,7 @@ public interface DdiRootControllerRestApi {
             @ApiResponse(responseCode = GONE_410, description = "Action is not active anymore.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PutMapping(value = BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.INSTALLED_BASE,
+    @PutMapping(value = CONTROLLER_V1 + "/{controllerId}/" + INSTALLED_BASE,
             consumes = { APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
     ResponseEntity<Void> setAssignedOfflineVersion(
             @Valid @RequestBody DdiAssignedVersion ddiAssignedVersion,

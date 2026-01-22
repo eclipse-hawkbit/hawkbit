@@ -38,6 +38,7 @@ import org.awaitility.core.ConditionFactory;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtRestModelMapper;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -125,7 +126,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
             rolloutManagement.approveOrDeny(rollout.getId(), Rollout.ApprovalDecision.APPROVED, "Approved remark.");
 
-            mvc.perform(get(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}", rollout.getId())
+            mvc.perform(get(MgmtRolloutRestApi.ROLLOUTS_V1 + "/{rolloutId}", rollout.getId())
                             .accept(MediaTypes.HAL_JSON_VALUE))
                     .andDo(MockMvcResultPrinter.print())
                     .andExpect(status().isOk())
@@ -146,7 +147,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final RolloutGroup firstRolloutGroup = rolloutGroupManagement
                 .findByRollout(rollout.getId(), PageRequest.of(0, 1)).getContent().get(0);
 
-        mvc.perform(get(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deploygroups/{deployGroupId}/targets",
+        mvc.perform(get(MgmtRolloutRestApi.ROLLOUTS_V1 + "/{rolloutId}/deploygroups/{deployGroupId}/targets",
                         rollout.getId(), firstRolloutGroup.getId()).param("offset", "0").param("limit", "2")
                         .param("sort", "name:ASC").param("q", "controllerId==exampleTarget0")
                         .accept(MediaTypes.HAL_JSON_VALUE))
@@ -165,7 +166,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
             testdataFactory.createTargets(4, "rollout", "description");
             final DistributionSet dsA = testdataFactory.createDistributionSet("");
             final Rollout rollout = createRollout("rollout1", 3, dsA, "controllerId==rollout*", false);
-            mvc.perform(post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/approve", rollout.getId())
+            mvc.perform(post(MgmtRolloutRestApi.ROLLOUTS_V1 + "/{rolloutId}/approve", rollout.getId())
                             .accept(MediaTypes.HAL_JSON_VALUE))
                     .andDo(MockMvcResultPrinter.print())
                     .andExpect(status().isNoContent());
@@ -184,7 +185,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
             testdataFactory.createTargets(4, "rollout", "description");
             final DistributionSet dsA = testdataFactory.createDistributionSet("");
             final Rollout rollout = createRollout("rollout1", 3, dsA, "controllerId==rollout*", false);
-            mvc.perform(post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deny", rollout.getId())
+            mvc.perform(post(MgmtRolloutRestApi.ROLLOUTS_V1 + "/{rolloutId}/deny", rollout.getId())
                             .accept(MediaTypes.HAL_JSON_VALUE))
                     .andDo(MockMvcResultPrinter.print())
                     .andExpect(status().isNoContent());

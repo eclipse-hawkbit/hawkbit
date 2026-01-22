@@ -41,7 +41,7 @@ import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
-import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
+import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
@@ -94,9 +94,9 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
      */
     @Test
     void rootPollResourceCbor() throws Exception {
-        mvc.perform(get(CONTROLLER_BASE, AccessContext.tenant(), 4711).accept(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR))
+        mvc.perform(get(CONTROLLER_BASE, AccessContext.tenant(), 4711).accept(DdiRootControllerRestApi.MEDIA_TYPE_APPLICATION_CBOR))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(content().contentType(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR))
+                .andExpect(content().contentType(DdiRootControllerRestApi.MEDIA_TYPE_APPLICATION_CBOR))
                 .andExpect(status().isOk());
     }
 

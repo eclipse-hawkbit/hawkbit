@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetType;
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetTypeRequestBodyPost;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTypeRestApi;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
@@ -74,7 +73,7 @@ public final class MgmtTargetTypeMapper {
 
     public static void addLinks(final MgmtTargetType result) {
         result.add(linkTo(methodOn(MgmtTargetTypeRestApi.class).getCompatibleDistributionSets(result.getId()))
-                .withRel(MgmtRestConstants.COMPATIBLEDISTRIBUTIONSETTYPES).expand());
+                .withRel(MgmtTargetTypeRestApi.COMPATIBLEDISTRIBUTIONSETTYPES).expand());
     }
 
     private TargetTypeManagement.Create fromRequest(final MgmtTargetTypeRequestBodyPost targetTypesRest) {

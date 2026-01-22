@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtTenantManagementRestApi.SYSTEM_V1;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.callAs;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.getAs;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withUser;
@@ -52,7 +52,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      */
     @Test
     void getTenantConfigurations() throws Exception {
-        mvc.perform(get(SYSTEM_V1_REQUEST_MAPPING + "/configs"))
+        mvc.perform(get(SYSTEM_V1 + "/configs"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 // check for TenantMetadata additional properties
@@ -66,7 +66,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     @Test
     void getTenantConfiguration() throws Exception {
         // test TenantConfiguration property
-        mvc.perform(get(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY))
+        mvc.perform(get(SYSTEM_V1 + "/configs/{keyName}", AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
     }
@@ -77,7 +77,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     @Test
     void getTenantMetadata() throws Exception {
         // test TenantMetadata property
-        mvc.perform(get(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", DEFAULT_DISTRIBUTION_SET_TYPE_KEY))
+        mvc.perform(get(SYSTEM_V1 + "/configs/{keyName}", DEFAULT_DISTRIBUTION_SET_TYPE_KEY))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.value", equalTo(getActualDefaultDsType().intValue())));
@@ -93,7 +93,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         final ObjectMapper mapper = new ObjectMapper();
         final String json = mapper.writeValueAsString(bodyPut);
 
-        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY)
+        mvc.perform(put(SYSTEM_V1 + "/configs/{keyName}", AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andDo(MockMvcResultPrinter.print())
@@ -113,7 +113,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         final ObjectMapper mapper = new ObjectMapper();
         final String json = mapper.writeValueAsString(bodyPut);
 
-        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", DEFAULT_DISTRIBUTION_SET_TYPE_KEY)
+        mvc.perform(put(SYSTEM_V1 + "/configs/{keyName}", DEFAULT_DISTRIBUTION_SET_TYPE_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andDo(MockMvcResultPrinter.print())
@@ -149,13 +149,13 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         final String bodyActivate = new JSONObject().put("value", true).toString();
         final String bodyDeactivate = new JSONObject().put("value", false).toString();
 
-        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", MULTI_ASSIGNMENTS_ENABLED)
+        mvc.perform(put(SYSTEM_V1 + "/configs/{keyName}", MULTI_ASSIGNMENTS_ENABLED)
                         .content(bodyActivate)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
 
-        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", MULTI_ASSIGNMENTS_ENABLED)
+        mvc.perform(put(SYSTEM_V1 + "/configs/{keyName}", MULTI_ASSIGNMENTS_ENABLED)
                         .content(bodyDeactivate)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -232,7 +232,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
 
         final String body = configuration.toString();
 
-        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs").content(body).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(put(SYSTEM_V1 + "/configs").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
 
@@ -258,21 +258,21 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         final String bodyDeactivate = new JSONObject().put("value", false).toString();
 
         // enable Multi-Assignments
-        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", MULTI_ASSIGNMENTS_ENABLED)
+        mvc.perform(put(SYSTEM_V1 + "/configs/{keyName}", MULTI_ASSIGNMENTS_ENABLED)
                         .content(bodyActivate)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
 
         // try to enable Auto-Close
-        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED)
+        mvc.perform(put(SYSTEM_V1 + "/configs/{keyName}", REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED)
                         .content(bodyActivate)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
 
         // try to disable Auto-Close
-        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED)
+        mvc.perform(put(SYSTEM_V1 + "/configs/{keyName}", REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED)
                         .content(bodyDeactivate)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -284,7 +284,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      */
     @Test
     void deleteTenantConfiguration() throws Exception {
-        mvc.perform(delete(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY))
+        mvc.perform(delete(SYSTEM_V1 + "/configs/{keyName}", AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
     }
@@ -294,7 +294,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
      */
     @Test
     void deleteTenantMetadataFail() throws Exception {
-        mvc.perform(delete(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", DEFAULT_DISTRIBUTION_SET_TYPE_KEY))
+        mvc.perform(delete(SYSTEM_V1 + "/configs/{keyName}", DEFAULT_DISTRIBUTION_SET_TYPE_KEY))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
     }
@@ -312,7 +312,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         // TODO - should be able to read with TENANT_CONFIGURATION but somehow here the role hierarchy doesn't play
         // checked in mgmt / update server runtime PreAuthorizeEnabledTest
         callAs(withUser("tenant_admin", SpPermission.READ_TENANT_CONFIGURATION, SpPermission.READ_GATEWAY_SECURITY_TOKEN), () -> {
-            mvc.perform(get(SYSTEM_V1_REQUEST_MAPPING + "/configs"))
+            mvc.perform(get(SYSTEM_V1 + "/configs"))
                     .andDo(MockMvcResultPrinter.print())
                     .andDo(m -> System.out.println("-> 1: " + m.getResponse().getContentAsString()))
                     .andExpect(status().isOk())
@@ -322,7 +322,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         });
 
         callAs(withUser("tenant_read", SpPermission.READ_TENANT_CONFIGURATION), () -> {
-            mvc.perform(get(SYSTEM_V1_REQUEST_MAPPING + "/configs"))
+            mvc.perform(get(SYSTEM_V1 + "/configs"))
                     .andDo(MockMvcResultPrinter.print())
                     .andDo(m -> System.out.println("-> 2: " + m.getResponse().getContentAsString()))
                     .andExpect(status().isOk())
@@ -342,7 +342,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     private void assertDefaultDsTypeUpdateBadRequestFails(
             final String newDefaultDsType, final long oldDefaultDsType, final ResultMatcher resultMatchers)
             throws Exception {
-        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", DEFAULT_DISTRIBUTION_SET_TYPE_KEY)
+        mvc.perform(put(SYSTEM_V1 + "/configs/{keyName}", DEFAULT_DISTRIBUTION_SET_TYPE_KEY)
                         .content(newDefaultDsType)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -369,7 +369,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         configuration.put(DEFAULT_DISTRIBUTION_SET_TYPE_KEY, newDistributionSetTypeId);
         String body = configuration.toString();
 
-        mvc.perform(put(SYSTEM_V1_REQUEST_MAPPING + "/configs").content(body).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(put(SYSTEM_V1 + "/configs").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(resultMatchers);
         //Check if TenantMetadata and TenantConfiguration is not changed as Batch config failed

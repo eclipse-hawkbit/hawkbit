@@ -45,7 +45,6 @@ import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeploymentBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult.FinalResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiUpdateMode;
-import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
@@ -581,7 +580,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final byte[] content = (md5Hash + "  " + filename).getBytes(StandardCharsets.US_ASCII);
         response.setContentType("text/plain");
         response.setContentLength(content.length);
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + filename + DdiRestConstants.ARTIFACT_MD5_DOWNLOAD_SUFFIX);
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + filename + DdiRootControllerRestApi.ARTIFACT_MD5_DOWNLOAD_SUFFIX);
         response.getOutputStream().write(content);
     }
 
@@ -740,7 +739,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private Optional<DdiActionHistory> generateDdiActionHistory(final Action action, final Integer actionHistoryMessageCount) {
         final List<String> actionHistoryMessages = controllerManagement.getActionHistoryMessages(
                 action.getId(),
-                actionHistoryMessageCount == null ? Integer.parseInt(DdiRestConstants.NO_ACTION_HISTORY) : actionHistoryMessageCount);
+                actionHistoryMessageCount == null ? Integer.parseInt(DdiRootControllerRestApi.NO_ACTION_HISTORY) : actionHistoryMessageCount);
         return actionHistoryMessages.isEmpty()
                 ? Optional.empty()
                 : Optional.of(new DdiActionHistory(action.getStatus().name(), actionHistoryMessages));

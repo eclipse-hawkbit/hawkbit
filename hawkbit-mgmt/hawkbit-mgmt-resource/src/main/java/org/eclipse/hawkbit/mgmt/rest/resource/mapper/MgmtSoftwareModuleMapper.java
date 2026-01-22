@@ -28,7 +28,6 @@ import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifactHash;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.MgmtDownloadArtifactResource;
@@ -118,9 +117,9 @@ public final class MgmtSoftwareModuleMapper {
 
     public static void addLinks(final SoftwareModule softwareModule, final MgmtSoftwareModule response) {
         response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getArtifacts(response.getId(), null, null))
-                .withRel(MgmtRestConstants.SOFTWAREMODULE_V1_ARTIFACT).expand());
+                .withRel("artifacts").expand());
         response.add(linkTo(methodOn(MgmtSoftwareModuleTypeRestApi.class).getSoftwareModuleType(softwareModule.getType().getId()))
-                .withRel(MgmtRestConstants.SOFTWAREMODULE_V1_TYPE).expand());
+                .withRel("type").expand());
         response.add(WebMvcLinkBuilder.linkTo(methodOn(MgmtSoftwareModuleResource.class).getMetadata(response.getId()))
                 .withRel("metadata").expand());
     }

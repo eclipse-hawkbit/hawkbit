@@ -14,6 +14,8 @@ import static org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PutResponses;
+import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.Map;
 
@@ -24,9 +26,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValue;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValueRequest;
 import org.eclipse.hawkbit.rest.OpenApi;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,16 +44,17 @@ import org.springframework.web.bind.annotation.ResponseStatus;
         extensions = @Extension(name = OpenApi.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = TENANT_ORDER)))
 public interface MgmtTenantManagementRestApi {
 
+    String SYSTEM_V1 = MgmtRestConstants.REST_V1 + "/system";
+
     /**
      * Handles the GET request for receiving all tenant specific configuration values.
      *
      * @return a map of all configuration values.
      */
-    @Operation(summary = "Return all tenant specific configuration values", description = "The GET request returns " +
-            "a list of all possible configuration keys for the tenant. Required Permission: READ_TENANT_CONFIGURATION")
+    @Operation(summary = "Return all tenant specific configuration values",
+            description = "The GET request returns a list of all possible configuration keys for the tenant. Required Permission: READ_TENANT_CONFIGURATION")
     @GetIfExistResponses
-    @GetMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs",
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = SYSTEM_V1 + "/configs", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Map<String, MgmtSystemTenantConfigurationValue>> getTenantConfiguration();
 
     /**
@@ -67,8 +68,7 @@ public interface MgmtTenantManagementRestApi {
             "configuration value of a specific configuration key for the tenant. " +
             "Required Permission: READ_TENANT_CONFIGURATION")
     @GetResponses
-    @GetMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = SYSTEM_V1 + "/configs/{keyName}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSystemTenantConfigurationValue> getTenantConfigurationValue(@PathVariable("keyName") String keyName);
 
     /**
@@ -77,13 +77,12 @@ public interface MgmtTenantManagementRestApi {
      * @param keyName the name of the configuration key
      * @param configurationValueRest the new value for the configuration
      */
-    @Operation(summary = "Update a tenant specific configuration value.", description = "The PUT request changes a " +
-            "configuration value of a specific configuration key for the tenant. " +
-            "Required Permission: TENANT_CONFIGURATION")
+    @Operation(summary = "Update a tenant specific configuration value.",
+            description = "The PUT request changes a configuration value of a specific configuration key for the tenant. " +
+                    "Required Permission: TENANT_CONFIGURATION")
     @PutResponses
-    @PutMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
-            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = SYSTEM_V1 + "/configs/{keyName}",
+            consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void updateTenantConfigurationValue(
             @PathVariable("keyName") String keyName,
@@ -94,12 +93,11 @@ public interface MgmtTenantManagementRestApi {
      *
      * @param configurationValueMap a Map of name - value pairs for the configurations
      */
-    @Operation(summary = "Batch update of tenant configuration.", description = "The PUT request updates the whole " +
-            "configuration for the tenant. Required Permission: TENANT_CONFIGURATION")
+    @Operation(summary = "Batch update of tenant configuration.",
+            description = "The PUT request updates the whole configuration for the tenant. Required Permission: TENANT_CONFIGURATION")
     @PutResponses
-    @PutMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs",
-            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = SYSTEM_V1 + "/configs",
+            consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void updateTenantConfiguration(@RequestBody Map<String, Object> configurationValueMap);
 
@@ -108,12 +106,11 @@ public interface MgmtTenantManagementRestApi {
      *
      * @param keyName the Name of the configuration key
      */
-    @Operation(summary = "Delete a tenant specific configuration value", description = "The DELETE request removes a " +
-            "tenant specific configuration value for the tenant. Afterwards the global default value is used. " +
-            "Required Permission: TENANT_CONFIGURATION")
+    @Operation(summary = "Delete a tenant specific configuration value",
+            description = "The DELETE request removes a tenant specific configuration value for the tenant. " +
+                    "Afterwards the global default value is used. Required Permission: TENANT_CONFIGURATION")
     @DeleteResponses
-    @DeleteMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @DeleteMapping(value = SYSTEM_V1 + "/configs/{keyName}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteTenantConfigurationValue(@PathVariable("keyName") String keyName);
 }
