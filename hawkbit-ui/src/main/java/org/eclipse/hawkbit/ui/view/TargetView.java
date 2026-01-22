@@ -38,6 +38,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -60,6 +61,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import lombok.EqualsAndHashCode;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtPollStatus;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
@@ -345,18 +347,21 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
         private final TargetDetails targetDetails;
         private final TargetAssignedInstalled targetAssignedInstalled;
         private final TargetTags targetTags;
+        private final TargetMetadata targetMetadata;
         private final TargetActionsHistoryLayout targetActionsHistoryLayout;
 
         private TargetDetailedView(final HawkbitMgmtClient hawkbitClient) {
             targetDetails = new TargetDetails(hawkbitClient);
             targetAssignedInstalled = new TargetAssignedInstalled(hawkbitClient);
             targetTags = new TargetTags(hawkbitClient);
+            targetMetadata = new TargetMetadata(hawkbitClient);
             targetActionsHistoryLayout = new TargetActionsHistoryLayout(hawkbitClient);
             setWidthFull();
 
             add("Details", targetDetails);
             add("Assigned / Installed", targetAssignedInstalled);
             add("Tags", targetTags);
+            add("Metadata", targetMetadata);
             add("Action History", targetActionsHistoryLayout);
         }
 
@@ -364,6 +369,7 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
             this.targetDetails.setItem(target);
             this.targetAssignedInstalled.setItem(target);
             this.targetTags.setItem(target);
+            this.targetMetadata.setItem(target);
             this.targetActionsHistoryLayout.setItem(target);
         }
     }
@@ -583,6 +589,79 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
                 offset += fetched;
             } while (fetched > 0);
             return tags;
+        }
+    }
+
+    private static class TargetMetadata extends VerticalLayout {
+
+        public static final String KEY = "Key";
+        public static final String VALUE = "Value";
+
+        private final transient HawkbitMgmtClient hawkbitClient;
+        private final Grid<MgmtMetadata> metadataArea = new Grid<>();
+        private transient MgmtTarget target;
+
+        private TargetMetadata(HawkbitMgmtClient hawkbitClient) {
+            this.hawkbitClient = hawkbitClient;
+            setWidthFull();
+            setPadding(false);
+            setSpacing(true);
+            setAlignItems(FlexComponent.Alignment.STRETCH);
+            setJustifyContentMode(JustifyContentMode.CENTER);
+
+            metadataArea.setEmptyStateText("No metadata found");
+            metadataArea.addColumn(MgmtMetadata::getKey).setHeader(KEY).setAutoWidth(true);
+            metadataArea.addColumn(MgmtMetadata::getValue).setHeader(VALUE).setAutoWidth(true);
+            metadataArea.addComponentColumn(metadata -> {
+                final Button deleteBtn = Utils.tooltip(new Button(VaadinIcon.TRASH.create()), "Delete Metadata");
+                deleteBtn.addClickListener(e -> confirmDeleteDialog(metadata.getKey()));
+                return deleteBtn;
+            }).setHeader("Actions").setAutoWidth(true).setFlexGrow(0);
+            metadataArea.setWidthFull();
+            add(metadataArea);
+
+            final Button addBtn = new Button("Add");
+            addBtn.addClickListener(e -> new AddMetadataDialog(hawkbitClient, target, this::refreshMetadatas).result());
+            addBtn.setEnabled(true);
+            final HorizontalLayout tools = new HorizontalLayout(); 
+            tools.setWidthFull();
+            tools.add(addBtn);
+            add(tools);
+        }
+
+        private void setItem(final MgmtTarget target) {
+            this.target = target;
+        }
+
+        @Override
+        protected void onAttach(AttachEvent attachEvent) {
+            refreshMetadatas();
+        }
+
+        private void refreshMetadatas() {
+            metadataArea.setItems(
+                    Optional.ofNullable(
+                            hawkbitClient.getTargetRestApi().getMetadata(target.getControllerId()).getBody())
+                            .map(PagedList::getContent)
+                            .orElse(Collections.emptyList()));
+        }
+
+        private void confirmDeleteDialog(String key) {
+            final ConfirmDialog dialog = new ConfirmDialog();
+            dialog.setHeader("Confirm Deletion");
+            dialog.setText("Are you sure you want to delete metadata " + key + "?");
+
+            dialog.setCancelable(true);
+            dialog.addCancelListener(event -> dialog.close());
+
+            dialog.setConfirmButtonTheme(ButtonVariant.LUMO_ERROR.getVariantName());
+            dialog.setConfirmText("Delete");
+            dialog.addConfirmListener(event -> {
+                hawkbitClient.getTargetRestApi().deleteMetadata(target.getControllerId(), key);
+                refreshMetadatas();
+                dialog.close();
+            });
+            dialog.open();
         }
     }
 
@@ -873,6 +952,46 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
 
             getFooter().add(cancel);
             getFooter().add(create);
+            open();
+        }
+    }
+
+    private static class AddMetadataDialog extends Utils.BaseDialog<Void> {
+
+        private final TextField key;
+        private final TextField value;
+
+        private AddMetadataDialog(final HawkbitMgmtClient hawkbitClient, MgmtTarget target, Runnable onSuccess) {
+            super("Add Metadata");
+
+            final FormLayout formLayout = new FormLayout();
+            formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
+            final Button add = Utils.tooltip(new Button("Add"), "Add (Enter)");
+            final Button cancel = Utils.tooltip(new Button(CANCEL), CANCEL_ESC);
+
+            key = Utils.textField(TargetMetadata.KEY, e -> add.setEnabled(!e.getHasValue().isEmpty()));
+            formLayout.add(key);
+            value = Utils.textField(TargetMetadata.VALUE);
+            formLayout.add(value);
+            add(formLayout);
+
+            add.setEnabled(false);
+            add.addClickShortcut(Key.ENTER);
+            add.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            add.addClickListener(e -> {
+                hawkbitClient.getTargetRestApi().createMetadata(target.getControllerId(), List.of(
+                        new MgmtMetadata()
+                                .setKey(key.getValue())
+                                .setValue(value.getValue())));
+                onSuccess.run();
+                close();
+            });
+
+            cancel.addClickListener(e -> close());
+            cancel.addClickShortcut(Key.ESCAPE);
+
+            getFooter().add(cancel);
+            getFooter().add(add);
             open();
         }
     }
