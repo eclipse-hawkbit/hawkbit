@@ -62,7 +62,7 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
             findTargetTypes = targetTypeManagement.findAll(pageable);
         }
         return ResponseEntity.ok(
-                new PagedList<>(MgmtTargetTypeMapper.toListResponse(findTargetTypes.getContent()),  findTargetTypes.getTotalElements()));
+                new PagedList<>(MgmtTargetTypeMapper.toListResponse(findTargetTypes.getContent()), findTargetTypes.getTotalElements()));
     }
 
     @Override

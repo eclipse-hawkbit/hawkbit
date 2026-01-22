@@ -90,11 +90,11 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         postDeploymentFeedback(target.getControllerId(), actionId, getJsonClosedDeploymentActionFeedback(), status().isOk());
 
         // get installed base
-        performGet(INSTALLED_BASE, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR), status().isOk(),
+        performGet(INSTALLED_BASE, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR), status().isOk(),
                 AccessContext.tenant(), target.getControllerId(), actionId.toString());
 
         // get artifacts
-        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR),
+        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR),
                 status().isOk(), AccessContext.tenant(), target.getControllerId(),
                 String.valueOf(softwareModuleId));
     }

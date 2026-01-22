@@ -543,7 +543,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         actionIdsToDelete.add(deletedActionId2);
 
         mvc.perform(delete(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)
-                .content(toJson(actionIdsToDelete)).contentType(APPLICATION_JSON))
+                        .content(toJson(actionIdsToDelete)).contentType(APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
         mvc.perform(get(ACTION_V1_REQUEST_MAPPING + "/" + deletedActionId1))
@@ -581,6 +581,19 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
+    private static String generateActionLink(final String targetId, final Long actionId) {
+        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING +
+                "/" + targetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId;
+    }
+
+    private static String generateTargetLink(final String targetId) {
+        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetId;
+    }
+
+    private static String generateDistributionSetLink(final Action action) {
+        return "http://localhost" + MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + action.getDistributionSet().getId();
+    }
+
     private List<DistributionSetAssignmentResult> createTargetsAndPerformAssignment(int n) {
         final List<Target> targets = new ArrayList<>();
         for (int i = 0; i < n; i++) {
@@ -593,19 +606,6 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
             results.add(assignDistributionSet(distributionSet.getId(), target.getControllerId()));
         }
         return results;
-    }
-
-    private static String generateActionLink(final String targetId, final Long actionId) {
-        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING +
-                "/" + targetId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId;
-    }
-
-    private static String generateTargetLink(final String targetId) {
-        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetId;
-    }
-
-    private static String generateDistributionSetLink(final Action action) {
-        return "http://localhost" + MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + action.getDistributionSet().getId();
     }
 
     private void verifyResultsByTargetPropertyFilter(final Target target, final DistributionSet ds, final String rsqlTargetFilter)

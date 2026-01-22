@@ -94,9 +94,9 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
      */
     @Test
     void rootPollResourceCbor() throws Exception {
-        mvc.perform(get(CONTROLLER_BASE, AccessContext.tenant(), 4711).accept(DdiRestConstants.MEDIA_TYPE_CBOR))
+        mvc.perform(get(CONTROLLER_BASE, AccessContext.tenant(), 4711).accept(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(content().contentType(DdiRestConstants.MEDIA_TYPE_CBOR))
+                .andExpect(content().contentType(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR))
                 .andExpect(status().isOk());
     }
 

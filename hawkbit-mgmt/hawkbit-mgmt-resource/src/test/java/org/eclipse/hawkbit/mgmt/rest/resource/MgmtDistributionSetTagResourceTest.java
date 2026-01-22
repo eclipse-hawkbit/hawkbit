@@ -469,7 +469,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
                     final Map<String, Object> info = exceptionInfo.getInfo();
                     assertThat(info).isNotNull();
                     assertThat(info.get(EntityNotFoundException.TYPE)).isEqualTo(DistributionSet.class.getSimpleName());
-                    final List<String> notFound = (List<String>)info.get(EntityNotFoundException.ENTITY_ID);
+                    final List<String> notFound = (List<String>) info.get(EntityNotFoundException.ENTITY_ID);
                     Collections.sort(notFound);
                     assertThat(notFound).isEqualTo(missing);
                 });

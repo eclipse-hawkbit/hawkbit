@@ -53,8 +53,7 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
 
     @Getter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "rollout", nullable = false, updatable = false)
+    @JoinColumn(name = "rollout", nullable = false, updatable = false)
     private JpaRollout rollout;
 
     @Setter
@@ -63,9 +62,8 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     @Convert(converter = RolloutGroupStatusConverter.class)
     private RolloutGroupStatus status = RolloutGroupStatus.CREATING;
 
-    @OneToMany(
-            mappedBy = "rolloutGroup", fetch = FetchType.LAZY,
-            cascade = { CascadeType.PERSIST, CascadeType.REMOVE }, targetEntity = RolloutTargetGroup.class)
+    @OneToMany(targetEntity = RolloutTargetGroup.class, mappedBy = "rolloutGroup",
+            fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
     private List<RolloutTargetGroup> rolloutTargetGroup;
 
     // No foreign key to avoid to many nested cascades on delete which some DBs cannot handle

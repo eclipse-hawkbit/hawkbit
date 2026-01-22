@@ -25,9 +25,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
-
 public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegrationTest {
-
 
     @Test
     void shouldRetrieveDistinctTargetGroups() throws Exception {
@@ -38,7 +36,7 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
         targetManagement.create(builder().controllerId("target3").group("Europe").build());
 
         mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING)
-                .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0]", Matchers.in(expectedGroups)))
                 .andExpect(jsonPath("$.[1]", Matchers.in(expectedGroups)));
@@ -51,8 +49,8 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
         targetManagement.create(builder().controllerId("target3").group("Europe").build());
 
         mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
-                .param("group", "Europe/East")
-                .param("subgroups", "false"))
+                        .param("group", "Europe/East")
+                        .param("subgroups", "false"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("content", Matchers.hasSize(1)))
                 .andExpect(jsonPath("content.[0].controllerId", Matchers.equalTo("target2")));
@@ -92,7 +90,6 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(Arrays.asList("target1", "target2", "target3"))))
                 .andExpect(status().isNoContent());
-
 
         mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/newGroup/assigned")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
@@ -169,8 +166,8 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
         targetManagement.create(builder().controllerId("target2").group("Europe").build());
 
         mvc.perform(delete(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(toJson(Arrays.asList("target1", "target2"))))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(Arrays.asList("target1", "target2"))))
                 .andExpect(status().isNoContent());
 
         mvc.perform(get(MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
@@ -230,7 +227,5 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
                 .andExpect(jsonPath("content.[0].controllerId", Matchers.equalTo("target1")))
                 .andExpect(jsonPath("content.[1].controllerId", Matchers.equalTo("target2")))
                 .andExpect(jsonPath("content.[2].controllerId", Matchers.equalTo("target3")));
-
-
     }
 }

@@ -282,7 +282,7 @@ class JsonBuilder {
 
     private static RolloutGroupConditions getConditions(final RolloutGroup rolloutGroup) {
         if (rolloutGroup == null) {
-            return  new RolloutGroupConditionBuilder().withDefaults().build();
+            return new RolloutGroupConditionBuilder().withDefaults().build();
         } else {
             return new RolloutGroupConditionBuilder()
                     .errorCondition(rolloutGroup.getErrorCondition(), rolloutGroup.getErrorConditionExp())

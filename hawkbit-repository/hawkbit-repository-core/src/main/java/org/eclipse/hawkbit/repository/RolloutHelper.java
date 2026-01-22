@@ -167,8 +167,8 @@ public final class RolloutHelper {
      * @param group the target group
      * @return RSQL string without base filter of the Rollout. Can be an empty string.
      */
-    public static String getOverlappingWithGroupsTargetFilter(final String baseFilter, final List<RolloutGroup> groups,
-            final RolloutGroup group) {
+    public static String getOverlappingWithGroupsTargetFilter(
+            final String baseFilter, final List<RolloutGroup> groups, final RolloutGroup group) {
         final String groupFilter = group.getTargetFilterQuery();
         // when any previous group has the same filter as the target group the
         // overlap is 100%
@@ -248,8 +248,7 @@ public final class RolloutHelper {
 
     private static boolean isTargetFilterInGroups(final String groupFilter, final List<RolloutGroup> groups) {
         return !ObjectUtils.isEmpty(groupFilter)
-                && groups.stream().anyMatch(prevGroup -> !ObjectUtils.isEmpty(prevGroup.getTargetFilterQuery())
-                && prevGroup.getTargetFilterQuery().equals(groupFilter));
+                && groups.stream().anyMatch(group -> groupFilter.equals(group.getTargetFilterQuery()));
     }
 
     private static String concatAndTargetFilters(final String... filters) {

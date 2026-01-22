@@ -70,3 +70,6 @@ spring-shell.log
 
 # Documentation
 .gitmodules
+
+# AI
+.claude

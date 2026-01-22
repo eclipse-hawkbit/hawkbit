@@ -10,6 +10,12 @@
 package org.eclipse.hawkbit.mgmt.rest.api;
 
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.ROLLOUT_ORDER;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateNoContentResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PutResponses;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.extensions.Extension;
@@ -25,8 +31,8 @@ import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPos
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
+import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateNoContentResponses;
 import org.eclipse.hawkbit.rest.OpenApi;
-import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -61,24 +67,7 @@ public interface MgmtRolloutRestApi {
      */
     @Operation(summary = "Return all Rollouts", description = "Handles the GET request of retrieving all rollouts. " +
             "Required Permission: READ_ROLLOUT")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @GetIfExistResponses
     @GetMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING,
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtRolloutResponseBody>> getRollouts(
@@ -86,7 +75,8 @@ public interface MgmtRolloutRestApi {
             @Schema(description = """
                     Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
                     available fields.""")
-            String rsqlParam, @RequestParam(
+            String rsqlParam,
+            @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
@@ -115,26 +105,7 @@ public interface MgmtRolloutRestApi {
      */
     @Operation(summary = "Return single Rollout", description = "Handles the GET request of retrieving a single " +
             "rollout. Required Permission: READ_ROLLOUT")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "Rollout not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @GetResponses
     @GetMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtRolloutResponseBody> getRollout(@PathVariable("rolloutId") Long rolloutId);
@@ -142,36 +113,13 @@ public interface MgmtRolloutRestApi {
     /**
      * Handles the POST request for creating rollout.
      *
-     * @param rolloutCreateBody the rollout body to be created.
+     * @param rolloutRequestBody the rollout body to be created.
      * @return In case rollout could successful created the ResponseEntity with status code 201 with the successfully created rollout. In any
      *         failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Create a new Rollout",
             description = "Handles the POST request of creating new rollout. Required Permission: CREATE_ROLLOUT")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Successfully created"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
-                    "user in another request at the same time. You may retry your modification request.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
-                    "supported by the server for this resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @PostCreateResponses
     @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
@@ -187,31 +135,7 @@ public interface MgmtRolloutRestApi {
      */
     @Operation(summary = "Update Rollout", description = "Handles the UPDATE request for a single " +
             "Rollout. Required permission: UPDATE_ROLLOUT")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
-                    "changed (i.e. read-only) or data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "Distribution Set not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
-                    "user in another request at the same time. You may retry your modification request.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
-                    "supported by the server for this resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further " +
-                    "attempts and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @PutResponses
     @PutMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}",
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
@@ -230,24 +154,7 @@ public interface MgmtRolloutRestApi {
             description = "Handles the POST request of approving a created rollout. Only possible if approval " +
                     "workflow is enabled in system configuration and rollout is in state WAITING_FOR_APPROVAL. " +
                     "Required Permission: APPROVE_ROLLOUT")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Successfully approved"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @PostCreateNoContentResponses
     @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/approve",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> approve(
@@ -264,24 +171,7 @@ public interface MgmtRolloutRestApi {
     @Operation(summary = "Deny a Rollout", description = "Handles the POST request of denying a created rollout. " +
             "Only possible if approval workflow is enabled in system configuration and rollout is in state " +
             "WAITING_FOR_APPROVAL. Required Permission: APPROVE_ROLLOUT")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Successfully denied"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @PostCreateNoContentResponses
     @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deny",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> deny(
@@ -296,24 +186,7 @@ public interface MgmtRolloutRestApi {
      */
     @Operation(summary = "Start a Rollout", description = "Handles the POST request of starting a created rollout. " +
             "Required Permission: HANDLE_ROLLOUT")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Successfully started"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @PostCreateNoContentResponses
     @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/start",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> start(@PathVariable("rolloutId") Long rolloutId);
@@ -326,28 +199,10 @@ public interface MgmtRolloutRestApi {
      */
     @Operation(summary = "Pause a Rollout", description = "Handles the POST request of pausing a running rollout. " +
             "Required Permission: HANDLE_ROLLOUT")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Successfully paused"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @PostCreateNoContentResponses
     @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/pause",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> pause(@PathVariable("rolloutId") Long rolloutId);
-
 
     /**
      * Handles the POST request for stopping a rollout.
@@ -357,26 +212,7 @@ public interface MgmtRolloutRestApi {
      */
     @Operation(summary = "Stop a Rollout", description = "Handles the POST request of stopping a running rollout. " +
             "Required Permission: HANDLE_ROLLOUT")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Successfully stopped"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "Rollout not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @PostUpdateNoContentResponses
     @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/stop",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> stop(@PathVariable("rolloutId") Long rolloutId);
@@ -390,26 +226,7 @@ public interface MgmtRolloutRestApi {
      */
     @Operation(summary = "Delete a Rollout", description = "Handles the DELETE request of deleting a rollout. " +
             "Required Permission: DELETE_ROLLOUT")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "Rollout not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @DeleteResponses
     @DeleteMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> delete(@PathVariable("rolloutId") Long rolloutId);
@@ -422,24 +239,7 @@ public interface MgmtRolloutRestApi {
      */
     @Operation(summary = "Resume a Rollout", description = "Handles the POST request of resuming a paused rollout. " +
             "Required Permission: HANDLE_ROLLOUT")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Successfully resumed"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @PostCreateNoContentResponses
     @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/resume",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> resume(@PathVariable("rolloutId") Long rolloutId);
@@ -458,26 +258,7 @@ public interface MgmtRolloutRestApi {
      */
     @Operation(summary = "Return all rollout groups referred to a Rollout", description = "Handles the GET request of " +
             "retrieving all deploy groups of a specific rollout. Required Permission: READ_ROLLOUT")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "Rollout not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @GetResponses
     @GetMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deploygroups",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtRolloutGroupResponseBody>> getRolloutGroups(
@@ -486,7 +267,8 @@ public interface MgmtRolloutRestApi {
             @Schema(description = """
                     Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
                     available fields.""")
-            String rsqlParam, @RequestParam(
+            String rsqlParam,
+            @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
@@ -516,26 +298,7 @@ public interface MgmtRolloutRestApi {
      */
     @Operation(summary = "Return single rollout group", description = "Handles the GET request of a single deploy " +
             "group of a specific rollout. Required Permission: READ_ROLLOUT")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "Rollout not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @GetResponses
     @GetMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deploygroups/{groupId}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtRolloutGroupResponseBody> getRolloutGroup(
@@ -557,26 +320,7 @@ public interface MgmtRolloutRestApi {
     @Operation(summary = "Return all targets related to a specific rollout group",
             description = "Handles the GET request of retrieving all targets of a single deploy group of a specific " +
                     "rollout. Required Permissions: READ_ROLLOUT, READ_TARGET.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "Rollout not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @GetResponses
     @GetMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deploygroups/{groupId}/targets",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getRolloutGroupTargets(
@@ -586,7 +330,8 @@ public interface MgmtRolloutRestApi {
             @Schema(description = """
                     Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
                     available fields.""")
-            String rsqlParam, @RequestParam(
+            String rsqlParam,
+            @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
@@ -612,24 +357,7 @@ public interface MgmtRolloutRestApi {
      */
     @Operation(summary = "Force trigger processing next group of a Rollout", description = "Handles the POST request " +
             "of triggering the next group of a rollout. Required Permission: UPDATE_ROLLOUT")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Successfully triggered"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @PostCreateNoContentResponses
     @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/triggerNextGroup",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> triggerNextGroup(@PathVariable("rolloutId") Long rolloutId);
@@ -642,24 +370,9 @@ public interface MgmtRolloutRestApi {
      */
     @Operation(summary = "Retry a rollout", description = "Handles the POST request of retrying a rollout. " +
             "Required Permission: CREATE_ROLLOUT")
+    @PostCreateResponses
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Successfully created"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "Rollout not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
+           @ApiResponse(responseCode = "404", description = "Rollout not found.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/retry",

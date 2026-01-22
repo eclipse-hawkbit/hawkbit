@@ -59,7 +59,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String TARGETTYPES_ENDPOINT = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING;
     private static final String TARGETTYPE_SINGLE_ENDPOINT = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{typeid}";
-    private static final String TARGETTYPE_DSTYPES_ENDPOINT = TARGETTYPE_SINGLE_ENDPOINT + "/" + MgmtRestConstants.TARGETTYPE_V1_DS_TYPES;
+    private static final String TARGETTYPE_DSTYPES_ENDPOINT = TARGETTYPE_SINGLE_ENDPOINT + "/" + MgmtRestConstants.COMPATIBLEDISTRIBUTIONSETTYPES;
     private static final String TARGETTYPE_DSTYPE_SINGLE_ENDPOINT = TARGETTYPE_DSTYPES_ENDPOINT + "/{dstypeid}";
 
     private static final String TEST_USER = "targetTypeTester";

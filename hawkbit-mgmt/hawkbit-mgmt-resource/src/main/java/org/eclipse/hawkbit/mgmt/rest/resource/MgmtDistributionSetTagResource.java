@@ -85,7 +85,8 @@ class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRestApi {
     public ResponseEntity<List<MgmtTag>> createDistributionSetTags(final List<MgmtTagRequestBodyPut> tags) {
         log.debug("creating {} ds tags", tags.size());
 
-        final List<? extends DistributionSetTag> createdTags = distributionSetTagManagement.create(MgmtDistributionSetMapper.mapTagFromRequest(tags));
+        final List<? extends DistributionSetTag> createdTags = distributionSetTagManagement
+                .create(MgmtDistributionSetMapper.mapTagFromRequest(tags));
         return new ResponseEntity<>(MgmtTagMapper.toResponseDistributionSetTag(createdTags), HttpStatus.CREATED);
     }
 

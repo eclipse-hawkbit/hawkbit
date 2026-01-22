@@ -54,12 +54,12 @@ public final class DataConversionHelper {
             confirmationBase.add(WebMvcLinkBuilder
                     .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, AccessContext.tenant())
                             .deactivateAutoConfirmation(AccessContext.tenant(), controllerId))
-                    .withRel(DdiRestConstants.AUTO_CONFIRM_DEACTIVATE).expand());
+                    .withRel(DdiRestConstants.DEACTIVATE_AUTO_CONFIRM).expand());
         } else {
             confirmationBase.add(WebMvcLinkBuilder
                     .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, AccessContext.tenant())
                             .activateAutoConfirmation(AccessContext.tenant(), controllerId, null))
-                    .withRel(DdiRestConstants.AUTO_CONFIRM_ACTIVATE).expand());
+                    .withRel(DdiRestConstants.ACTIVATE_AUTO_CONFIRM).expand());
         }
         if (activeAction != null && activeAction.isWaitingConfirmation()) {
             confirmationBase.add(WebMvcLinkBuilder
@@ -101,7 +101,7 @@ public final class DataConversionHelper {
                                 .getControllerDeploymentBaseAction(
                                         AccessContext.tenant(), target.getControllerId(),
                                         activeAction.getId(), calculateEtag(activeAction), null))
-                        .withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION).expand());
+                        .withRel(DdiRestConstants.DEPLOYMENT_BASE).expand());
             }
         }
 
@@ -111,7 +111,7 @@ public final class DataConversionHelper {
                             .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, AccessContext.tenant())
                                     .getControllerInstalledAction(AccessContext.tenant(),
                                             target.getControllerId(), installedAction.getId(), null))
-                            .withRel(DdiRestConstants.INSTALLED_BASE_ACTION).expand());
+                            .withRel(DdiRestConstants.INSTALLED_BASE).expand());
         }
 
         if (target.isRequestControllerAttributes()) {
@@ -120,7 +120,7 @@ public final class DataConversionHelper {
                             .methodOn(DdiRootController.class, AccessContext.tenant())
                             // doesn't really call the putConfigData with null, just create the link
                             .putConfigData(null, AccessContext.tenant(), target.getControllerId()))
-                    .withRel(DdiRestConstants.CONFIG_DATA_ACTION).expand());
+                    .withRel(DdiRestConstants.CONFIG_DATA).expand());
         }
 
         return result;

@@ -68,10 +68,10 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         final byte[] result = mvc
                 .perform(get("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                         + cancelAction.getId(), AccessContext.tenant())
-                        .accept(DdiRestConstants.MEDIA_TYPE_CBOR))
+                        .accept(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(DdiRestConstants.MEDIA_TYPE_CBOR))
+                .andExpect(content().contentType(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR))
                 .andReturn().getResponse()
                 .getContentAsByteArray();
         assertThat(JsonPathUtils.<String> evaluate(cborToJson(result), "$.id"))
@@ -83,7 +83,7 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                         + cancelAction.getId() + "/feedback", AccessContext.tenant())
                         .content(jsonToCbor(getJsonProceedingCancelActionFeedback()))
-                        .contentType(DdiRestConstants.MEDIA_TYPE_CBOR).accept(DdiRestConstants.MEDIA_TYPE_CBOR))
+                        .contentType(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR).accept(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
     }

@@ -25,5 +25,4 @@ public class MgmtInvalidateDistributionSetRequestBody {
     @NotNull
     @Schema(description = "Type of cancelation for actions referring to the given distribution set")
     private MgmtCancelationType actionCancelationType;
-    
 }

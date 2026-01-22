@@ -96,17 +96,17 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Action action = deploymentManagement.findActiveActionsByTarget(target.getControllerId(), PAGE).getContent().get(0);
 
         // get deployment base
-        performGet(DEPLOYMENT_BASE, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR), status().isOk(),
+        performGet(DEPLOYMENT_BASE, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR), status().isOk(),
                 AccessContext.tenant(), target.getControllerId(), action.getId().toString());
 
         // get artifacts
-        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR),
+        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR),
                 status().isOk(), AccessContext.tenant(), target.getControllerId(),
                 String.valueOf(softwareModuleId));
 
         final byte[] feedback = jsonToCbor(getJsonProceedingDeploymentActionFeedback());
         postDeploymentFeedback(
-                MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR), target.getControllerId(), action.getId(), feedback,
+                MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR), target.getControllerId(), action.getId(), feedback,
                 status().isOk());
     }
 

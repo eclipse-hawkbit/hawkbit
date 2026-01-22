@@ -153,23 +153,23 @@ public final class MgmtRestConstants {
     /**
      * The target URL mapping rest resource.
      */
-    public static final String TARGET_TARGET_TYPE_V1_REQUEST_MAPPING = "/{targetId}/targettype";
+    public static final String TARGET_TARGET_ID_TARGETTYPE = "/{targetId}/targettype";
     /**
      * The target type URL mapping rest resource.
      */
-    public static final String TARGETTYPE_V1_DS_TYPES = "compatibledistributionsettypes";
+    public static final String COMPATIBLEDISTRIBUTIONSETTYPES = "compatibledistributionsettypes";
     /**
      * The tag URL mapping rest resource.
      */
-    public static final String TARGET_TAG_TARGETS_REQUEST_MAPPING = "/{targetTagId}/assigned";
+    public static final String TARGET_TAG_ID_ASSIGNED = "/{targetTagId}/assigned";
     /**
      * The tag URL mapping rest resource.
      */
-    public static final String DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING = "/{distributionsetTagId}/assigned";
+    public static final String DISTRIBUTIONSET_TAG_ID_ASSIGNED = "/{distributionsetTagId}/assigned";
     /**
      * Target group URL mapping rest resource
      */
-    public static final String TARGET_GROUP_TARGETS_REQUEST_MAPPING = "/{group}/assigned";
+    public static final String GROUP_ASSIGNED = "/{group}/assigned";
     /**
      * The default offset parameter in case the offset parameter is not present in the request.
      *
@@ -227,10 +227,10 @@ public final class MgmtRestConstants {
      * The target URL mapping, href link for type information.
      */
     public static final String SOFTWAREMODULE_V1_TYPE = "type";
-    public static final String DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULES = "optionalmodules";
-    public static final String DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULES = "mandatorymodules";
-    public static final String DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES = "optionalmoduletypes";
-    public static final String DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES = "mandatorymoduletypes";
+    public static final String OPTIONALMODULES = "optionalmodules";
+    public static final String MANDATORYMODULES = "mandatorymodules";
+    public static final String OPTIONALMODULETYPES = "optionalmoduletypes";
+    public static final String MANDATORYMODULETYPES = "mandatorymoduletypes";
     /**
      * Request parameter if the artifact url handler should be used
      */

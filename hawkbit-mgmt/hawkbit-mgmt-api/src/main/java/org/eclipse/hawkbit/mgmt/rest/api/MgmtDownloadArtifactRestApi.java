@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.mgmt.rest.api;
 
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.DOWNLOAD_ARTIFACT_ORDER;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
 
 import java.io.InputStream;
 
@@ -39,6 +40,7 @@ public interface MgmtDownloadArtifactRestApi {
      * @param artifactId of the related repository Artifact
      * @return responseEntity with status ok if successful
      */
+    @GetResponses
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}/download")
     @ResponseBody
     ResponseEntity<InputStream> downloadArtifact(

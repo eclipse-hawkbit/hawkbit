@@ -10,6 +10,11 @@
 package org.eclipse.hawkbit.mgmt.rest.api;
 
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.TARGET_TYPE_ORDER;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PutResponses;
 
 import java.util.List;
 
@@ -27,8 +32,8 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionS
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetType;
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetTypeRequestBodyPut;
+import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateNoContentResponses;
 import org.eclipse.hawkbit.rest.OpenApi;
-import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -61,24 +66,7 @@ public interface MgmtTargetTypeRestApi {
      *         JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all target types", description = "Handles the GET request of retrieving all target types.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @GetIfExistResponses
     @GetMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING,
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTargetType>> getTargetTypes(
@@ -86,7 +74,8 @@ public interface MgmtTargetTypeRestApi {
             @Schema(description = """
                     Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
                     available fields.""")
-            String rsqlParam, @RequestParam(
+            String rsqlParam,
+            @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
@@ -112,26 +101,7 @@ public interface MgmtTargetTypeRestApi {
      */
     @Operation(summary = "Return target type by id",
             description = "Handles the GET request of retrieving a single target type")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "Target type not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @GetResponses
     @GetMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetType> getTargetType(@PathVariable("targetTypeId") Long targetTypeId);
@@ -144,26 +114,7 @@ public interface MgmtTargetTypeRestApi {
      */
     @Operation(summary = "Delete target type by id",
             description = "Handles the DELETE request for a single target type. Required Permission: DELETE_TARGET")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Successfully deleted"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "Target type not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @DeleteResponses
     @DeleteMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}")
     ResponseEntity<Void> deleteTargetType(@PathVariable("targetTypeId") Long targetTypeId);
 
@@ -176,32 +127,7 @@ public interface MgmtTargetTypeRestApi {
      */
     @Operation(summary = "Update target type by id",
             description = "Handles the PUT request for a single target type. Required Permission: UPDATE_TARGET")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully updated"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "Target type not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
-                    "user in another request at the same time. You may retry your modification request.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
-                    "supported by the server for this resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @PutResponses
     @PutMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}",
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
@@ -218,30 +144,9 @@ public interface MgmtTargetTypeRestApi {
      */
     @Operation(summary = "Create target types", description = "Handles the POST request for creating new target " +
             "types. The request body must always be a list of types. Required Permission: CREATE_TARGET")
+    @PostCreateResponses
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Successfully created"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "404", description = "Target type not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
-                    "user in another request at the same time. You may retry your modification request.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
-                    "supported by the server for this resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING,
@@ -258,30 +163,10 @@ public interface MgmtTargetTypeRestApi {
     @Operation(summary = "Return list of compatible distribution set types", description = "Handles the GET request " +
             "of retrieving the list of compatible distribution set types in that target type. " +
             "Required Permission: READ_TARGET, READ_REPOSITORY")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "Distribution set type was not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
-    @GetMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}/" + MgmtRestConstants.TARGETTYPE_V1_DS_TYPES,
+    @GetResponses
+    @GetMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}/" + MgmtRestConstants.COMPATIBLEDISTRIBUTIONSETTYPES,
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtDistributionSetType>> getCompatibleDistributionSets(
-            @PathVariable("targetTypeId") Long targetTypeId);
+    ResponseEntity<List<MgmtDistributionSetType>> getCompatibleDistributionSets(@PathVariable("targetTypeId") Long targetTypeId);
 
     /**
      * Handles DELETE request for removing the compatibility of a distribution set type from the target type.
@@ -293,28 +178,9 @@ public interface MgmtTargetTypeRestApi {
     @Operation(summary = "Remove compatibility of distribution set type from the target type",
             description = "Handles the DELETE request for removing a distribution set type from a single target type. " +
                     "Required Permission: UPDATE_TARGET and READ_REPOSITORY")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Successfully removed"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "Distribution set type was not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
+    @DeleteResponses
     @DeleteMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}/" +
-            MgmtRestConstants.TARGETTYPE_V1_DS_TYPES + "/{distributionSetTypeId}")
+            MgmtRestConstants.COMPATIBLEDISTRIBUTIONSETTYPES + "/{distributionSetTypeId}")
     ResponseEntity<Void> removeCompatibleDistributionSet(
             @PathVariable("targetTypeId") Long targetTypeId,
             @PathVariable("distributionSetTypeId") Long distributionSetTypeId);
@@ -329,33 +195,8 @@ public interface MgmtTargetTypeRestApi {
     @Operation(summary = "Adding compatibility of a distribution set type to a target type",
             description = "Handles the POST request for adding compatible distribution set types to a target type. " +
                     "Required Permission: UPDATE_TARGET and READ_REPOSITORY")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Successfully added"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user auth.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "Distribution set type was not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
-                    "user in another request at the same time. You may retry your modification request.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
-                    "supported by the server for this resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
-    @PostMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}/" + MgmtRestConstants.TARGETTYPE_V1_DS_TYPES,
+    @PostUpdateNoContentResponses
+    @PostMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}/" + MgmtRestConstants.COMPATIBLEDISTRIBUTIONSETTYPES,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> addCompatibleDistributionSets(
             @PathVariable("targetTypeId") Long targetTypeId,
