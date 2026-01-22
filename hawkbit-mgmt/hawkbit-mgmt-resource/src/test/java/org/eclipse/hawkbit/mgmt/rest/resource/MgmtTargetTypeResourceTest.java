@@ -33,7 +33,9 @@ import com.jayway.jsonpath.JsonPath;
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTypeRestApi;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement.Create;
 import org.eclipse.hawkbit.repository.TargetTypeManagement.Update;
@@ -57,9 +59,9 @@ import org.springframework.test.web.servlet.ResultActions;
  */
 class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
-    private static final String TARGETTYPES_ENDPOINT = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING;
-    private static final String TARGETTYPE_SINGLE_ENDPOINT = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{typeid}";
-    private static final String TARGETTYPE_DSTYPES_ENDPOINT = TARGETTYPE_SINGLE_ENDPOINT + "/" + MgmtRestConstants.COMPATIBLEDISTRIBUTIONSETTYPES;
+    private static final String TARGETTYPES_ENDPOINT = MgmtTargetTypeRestApi.TARGETTYPES_V1;
+    private static final String TARGETTYPE_SINGLE_ENDPOINT = MgmtTargetTypeRestApi.TARGETTYPES_V1 + "/{typeid}";
+    private static final String TARGETTYPE_DSTYPES_ENDPOINT = TARGETTYPE_SINGLE_ENDPOINT + "/" + MgmtTargetTypeRestApi.COMPATIBLEDISTRIBUTIONSETTYPES;
     private static final String TARGETTYPE_DSTYPE_SINGLE_ENDPOINT = TARGETTYPE_DSTYPES_ENDPOINT + "/{dstypeid}";
 
     private static final String TEST_USER = "targetTypeTester";
@@ -423,7 +425,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         assertThat(testType.getDistributionSetTypes()).hasSize(1);
         assertThat(distributionSetTypeManagement.findByKey(standardDsType.getKey())).isNotEmpty();
 
-        mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/" + standardDsType.getId()))
+        mvc.perform(delete(MgmtDistributionSetTypeRestApi.DISTRIBUTIONSETTYPES_V1 + "/" + standardDsType.getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
 

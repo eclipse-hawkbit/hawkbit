@@ -9,13 +9,18 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.api;
 
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET;
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.TARGET_TAG_ORDER;
-import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PutResponses;
+import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.List;
 
@@ -30,8 +35,6 @@ import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateNoContentResponses;
 import org.eclipse.hawkbit.rest.OpenApi;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,6 +53,9 @@ import org.springframework.web.bind.annotation.RequestParam;
         extensions = @Extension(name = OpenApi.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = TARGET_TAG_ORDER)))
 public interface MgmtTargetTagRestApi {
 
+    String TARGETTAGS_V1 = MgmtRestConstants.REST_V1 + "/targettags";
+    String TARGET_TAG_ID_ASSIGNED = "/{targetTagId}/assigned";
+
     /**
      * Handles the GET request of retrieving all target tags.
      *
@@ -61,33 +67,23 @@ public interface MgmtTargetTagRestApi {
      * @return a list of all target tags for a defined or default page request with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
-    @Operation(summary = "Return all target tags",
-            description = "Handles the GET request of retrieving all target tags.")
+    @Operation(summary = "Return all target tags", description = "Handles the GET request of retrieving all target tags.")
     @GetIfExistResponses
-    @GetMapping(value = TARGET_TAG_V1_REQUEST_MAPPING,
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = TARGETTAGS_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTag>> getTargetTags(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
+            @Schema(description = "Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for available fields.")
             String rsqlParam,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
             int pagingOffsetParam,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
             @Schema(description = "The maximum number of entries in a page (default is 50)")
             int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false)
-            @Schema(description = """
-                    The query parameter sort allows to define the sort order for the result of a query. A sort criteria
-                    consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
-                    The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
-                    in the result.""")
+            @Schema(description = "The query parameter sort allows to define the sort order for the result of a query. " +
+                    "A sort criteria consists of the name of a field and the sort direction (ASC for ascending and DESC descending)." +
+                    "The sequence of the sort criteria (multiple can be used) defines the sort order of the entities in the result.")
             String sortParam);
 
     /**
@@ -96,11 +92,9 @@ public interface MgmtTargetTagRestApi {
      * @param targetTagId the ID of the target tag to retrieve
      * @return a single target tag with status OK.
      */
-    @Operation(summary = "Return target tag by id",
-            description = "Handles the GET request of retrieving a single target tag.")
+    @Operation(summary = "Return target tag by id", description = "Handles the GET request of retrieving a single target tag.")
     @GetResponses
-    @GetMapping(value = TARGET_TAG_V1_REQUEST_MAPPING + "/{targetTagId}",
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = TARGETTAGS_V1 + "/{targetTagId}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTag> getTargetTag(@PathVariable("targetTagId") Long targetTagId);
 
     /**
@@ -113,9 +107,8 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Create target tag(s)", description = "Handles the POST request of creating new target tag. " +
             "The request body must always be a list of target tags.")
     @PostCreateResponses
-    @PostMapping(value = TARGET_TAG_V1_REQUEST_MAPPING,
-            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = TARGETTAGS_V1,
+            consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTag>> createTargetTags(@RequestBody List<MgmtTagRequestBodyPut> tags);
 
     /**
@@ -127,9 +120,8 @@ public interface MgmtTargetTagRestApi {
      */
     @Operation(summary = "Update target tag by id", description = "Handles the PUT request of updating a target tag.")
     @PutResponses
-    @PutMapping(value = TARGET_TAG_V1_REQUEST_MAPPING + "/{targetTagId}",
-            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = TARGETTAGS_V1 + "/{targetTagId}",
+            consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTag> updateTargetTag(
             @PathVariable("targetTagId") Long targetTagId,
             @RequestBody MgmtTagRequestBodyPut restTargetTagRest);
@@ -140,10 +132,9 @@ public interface MgmtTargetTagRestApi {
      * @param targetTagId the ID of the target tag
      * @return status OK if delete as successfully.
      */
-    @Operation(summary = "Delete target tag by id",
-            description = "Handles the DELETE request of deleting a single target tag.")
+    @Operation(summary = "Delete target tag by id", description = "Handles the DELETE request of deleting a single target tag.")
     @DeleteResponses
-    @DeleteMapping(value = TARGET_TAG_V1_REQUEST_MAPPING + "/{targetTagId}")
+    @DeleteMapping(value = TARGETTAGS_V1 + "/{targetTagId}")
     ResponseEntity<Void> deleteTargetTag(@PathVariable("targetTagId") Long targetTagId);
 
     /**
@@ -160,31 +151,22 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Return assigned targets for tag",
             description = "Handles the GET request of retrieving a list of assigned targets.")
     @GetResponses
-    @GetMapping(value = TARGET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TAG_ID_ASSIGNED,
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = TARGETTAGS_V1 + TARGET_TAG_ID_ASSIGNED, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(
             @PathVariable("targetTagId") Long targetTagId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
+            @Schema(description = "Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for available fields.")
             String rsqlParam,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
             int pagingOffsetParam,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
             @Schema(description = "The maximum number of entries in a page (default is 50)")
             int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false)
-            @Schema(description = """
-                    The query parameter sort allows to define the sort order for the result of a query. A sort criteria
-                    consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
-                    The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
-                    in the result.""")
+            @Schema(description = "The query parameter sort allows to define the sort order for the result of a query. " +
+                    "A sort criteria consists of the name of a field and the sort direction (ASC for ascending and DESC descending)." +
+                    "The sequence of the sort criteria (multiple can be used) defines the sort order of the entities in the result.")
             String sortParam);
 
     /**
@@ -197,7 +179,7 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Assign target(s) to given tagId",
             description = "Handles the POST request of target assignment. Already assigned target will be ignored.")
     @PostUpdateNoContentResponses
-    @PostMapping(value = TARGET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TAG_ID_ASSIGNED + "/{controllerId}")
+    @PostMapping(value = TARGETTAGS_V1 + TARGET_TAG_ID_ASSIGNED + "/{controllerId}")
     ResponseEntity<Void> assignTarget(
             @PathVariable("targetTagId") Long targetTagId,
             @PathVariable("controllerId") String controllerId);
@@ -212,9 +194,7 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Assign target(s) to given tagId",
             description = "Handles the POST request of target assignment. Already assigned target will be ignored.")
     @PostUpdateNoContentResponses
-    @PostMapping(
-            value = TARGET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TAG_ID_ASSIGNED,
-            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = TARGETTAGS_V1 + TARGET_TAG_ID_ASSIGNED, consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> assignTargets(
             @PathVariable("targetTagId") Long targetTagId,
             @Schema(description = "List of controller ids to be assigned", example = "[\"controllerId1\", \"controllerId2\"]")
@@ -228,11 +208,9 @@ public interface MgmtTargetTagRestApi {
      * @param controllerId the ID of the target to unassign
      * @return http status code
      */
-    @Operation(summary = "Unassign target from a given tagId",
-            description = "Handles the DELETE request to unassign the given target.")
+    @Operation(summary = "Unassign target from a given tagId", description = "Handles the DELETE request to unassign the given target.")
     @DeleteResponses
-    @DeleteMapping(value = TARGET_TAG_V1_REQUEST_MAPPING +
-            MgmtRestConstants.TARGET_TAG_ID_ASSIGNED + "/{controllerId}")
+    @DeleteMapping(value = TARGETTAGS_V1 + TARGET_TAG_ID_ASSIGNED + "/{controllerId}")
     ResponseEntity<Void> unassignTarget(
             @PathVariable("targetTagId") Long targetTagId,
             @PathVariable("controllerId") String controllerId);
@@ -244,11 +222,9 @@ public interface MgmtTargetTagRestApi {
      * @param controllerId the ID of the target to unassign
      * @return http status code
      */
-    @Operation(summary = "Unassign targets from a given tagId",
-            description = "Handles the DELETE request to unassign the given targets.")
+    @Operation(summary = "Unassign targets from a given tagId", description = "Handles the DELETE request to unassign the given targets.")
     @DeleteResponses
-    @DeleteMapping(value = TARGET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TAG_ID_ASSIGNED,
-            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @DeleteMapping(value = TARGETTAGS_V1 + TARGET_TAG_ID_ASSIGNED, consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> unassignTargets(
             @PathVariable("targetTagId") Long targetTagId,
             @RequestParam(value = "onNotFoundPolicy", required = false, defaultValue = "FAIL") OnNotFoundPolicy onNotFoundPolicy,

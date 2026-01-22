@@ -48,6 +48,14 @@ import org.springframework.hateoas.RepresentationModel;
         }""")
 public class MgmtTargetAutoConfirm extends RepresentationModel<MgmtTargetAutoConfirm> {
 
+    /**
+     * The target URL mapping, href link activate auto-confirm on a target.
+     */
+    public static final String ACTIVATE = "activate";
+    /**
+     * The target URL mapping, href link deactivate auto-confirm on a target.
+     */
+    public static final String DEACTIVATE = "deactivate";
     @NotNull
     @Schema(description = "Flag if auto confirm is active", example = "true")
     private boolean active;

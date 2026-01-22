@@ -33,6 +33,7 @@ import com.jayway.jsonpath.JsonPath;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssignment;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
@@ -420,7 +421,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
      */
     @Test
     void getDistributionSetTypesWithParameter() throws Exception {
-        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
+        mvc.perform(get(MgmtDistributionSetTypeRestApi.DISTRIBUTIONSETTYPES_V1
                         + "?limit=10&sort=name:ASC&offset=0&q=name==a"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
@@ -528,7 +529,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
                 .put("colour", "rgb(106,178,83)").toString();
 
         mvc
-                .perform(put(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}",
+                .perform(put(MgmtDistributionSetTypeRestApi.DISTRIBUTIONSETTYPES_V1 + "/{distributionSetTypeId}",
                         testType.getId()).content(body).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
@@ -560,7 +561,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
 
         // 4 types overall (3 hawkbit tenant default, 1 test default
         final int types = 4;
-        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING))
+        mvc.perform(get(MgmtDistributionSetTypeRestApi.DISTRIBUTIONSETTYPES_V1))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(types)))
@@ -576,7 +577,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
 
         final int types = DEFAULT_DS_TYPES;
         final int limitSize = 1;
-        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING)
+        mvc.perform(get(MgmtDistributionSetTypeRestApi.DISTRIBUTIONSETTYPES_V1)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -593,7 +594,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
         final int types = DEFAULT_DS_TYPES;
         final int offsetParam = 2;
         final int expectedSize = types - offsetParam;
-        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING)
+        mvc.perform(get(MgmtDistributionSetTypeRestApi.DISTRIBUTIONSETTYPES_V1)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(types)))
                 .andDo(MockMvcResultPrinter.print())

@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionS
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssignment;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -76,10 +75,10 @@ public final class MgmtDistributionSetTypeMapper {
     public static void addLinks(final MgmtDistributionSetType result) {
 
         result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getMandatoryModules(result.getId()))
-                .withRel(MgmtRestConstants.MANDATORYMODULES).expand());
+                .withRel("mandatorymodules").expand());
 
         result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getOptionalModules(result.getId()))
-                .withRel(MgmtRestConstants.OPTIONALMODULES).expand());
+                .withRel("optionalmodules").expand());
     }
 
     private DistributionSetTypeManagement.Create fromRequest(final MgmtDistributionSetTypeRequestBodyPost smsRest) {

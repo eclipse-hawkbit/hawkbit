@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.hawkbit.context.AccessContext;
-import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
+import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
@@ -65,7 +65,7 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
         mvc.perform(put(TARGET1_CONFIG_DATA_PATH, AccessContext.tenant())
                         .content(jsonToCbor(JsonBuilder.configData(attributes).toString()))
-                        .contentType(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR))
+                        .contentType(DdiRootControllerRestApi.MEDIA_TYPE_APPLICATION_CBOR))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
         assertThat(targetManagement.getControllerAttributes(TARGET1_ID)).isEqualTo(attributes);

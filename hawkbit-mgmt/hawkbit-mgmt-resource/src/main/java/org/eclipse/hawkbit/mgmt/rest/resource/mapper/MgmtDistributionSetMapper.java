@@ -109,7 +109,7 @@ public class MgmtDistributionSetMapper {
         response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getAssignedSoftwareModules(response.getId(),
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null))
-                .withRel(MgmtRestConstants.DISTRIBUTIONSET_V1_MODULE).expand());
+                .withRel("modules").expand());
 
         response.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class)
                 .getDistributionSetType(distributionSet.getType().getId())).withRel("type").expand());

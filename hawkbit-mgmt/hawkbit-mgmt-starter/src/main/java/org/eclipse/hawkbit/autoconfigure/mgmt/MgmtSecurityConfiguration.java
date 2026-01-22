@@ -85,8 +85,8 @@ public class MgmtSecurityConfiguration {
         final FilterRegistrationBean<DosFilter> filterRegBean = SecurityManagedConfiguration.dosFilter(null,
                 securityProperties.getDos().getFilter(), securityProperties.getClients());
         filterRegBean.setUrlPatterns(List.of(
-                MgmtRestConstants.BASE_REST_MAPPING + "/*",
-                MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/*"));
+                MgmtRestConstants.REST + "/*",
+                "/system/admin/*"));
         filterRegBean.setOrder(SecurityManagedConfiguration.DOS_FILTER_ORDER);
         filterRegBean.setName("dosMgmtFilter");
 
@@ -111,9 +111,9 @@ public class MgmtSecurityConfiguration {
             @Autowired(required = false) @Qualifier("hawkbitHttpSecurityCustomizer") final Customizer<HttpSecurity> httpSecurityCustomizer,
             final SystemManagement systemManagement) throws Exception {
         http
-                .securityMatcher(MgmtRestConstants.BASE_REST_MAPPING + "/**", MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
+                .securityMatcher(MgmtRestConstants.REST + "/**", "/system/admin/**")
                 .authorizeHttpRequests(amrmRegistry -> amrmRegistry
-                        .requestMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
+                        .requestMatchers("/system/admin/**")
                         .hasAnyAuthority(SpPermission.SYSTEM_ADMIN)
                         .anyRequest()
                         .authenticated())

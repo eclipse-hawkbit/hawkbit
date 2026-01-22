@@ -19,157 +19,40 @@ import lombok.NoArgsConstructor;
 public final class MgmtRestConstants {
 
     /**
+     * The base URL mapping of the rest resources.
+     */
+    public static final String REST = "/rest";
+    /**
      * API version definition. We are using only major versions.
      */
-    public static final String API_VERSION = "v1";
+    public static final String API_VERSION_1 = "v1";
     /**
-     * The base URL mapping of the SP rest resources.
+     * The base URL mapping of the rest V1 resources.
      */
-    public static final String BASE_REST_MAPPING = "/rest";
+    public static final String REST_V1 = REST + "/" + API_VERSION_1;
+
     /**
-     * The base URL mapping of the SP rest resources.
+     * The request parameter for searching. The value of the search parameter must be in the FIQL syntax.
      */
-    public static final String BASE_V1_REQUEST_MAPPING = BASE_REST_MAPPING + "/v1";
+    public static final String REQUEST_PARAMETER_SEARCH = "q";
     /**
-     * The software module URL mapping rest resource.
+     * The request parameter for specifying the representation mode. The value of this parameter can either be "full" or "compact".
      */
-    public static final String SOFTWAREMODULE_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/softwaremodules";
+    public static final String REQUEST_PARAMETER_REPRESENTATION_MODE = "representation";
     /**
-     * The target URL mapping rest resource.
+     * The default representation mode.
      */
-    public static final String TARGET_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targets";
+    public static final String REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT = "compact";
     /**
-     * The tag URL mapping rest resource.
-     */
-    public static final String TARGET_TAG_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targettags";
-    /**
-     * The target type URL mapping rest resource.
-     */
-    public static final String TARGETTYPE_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targettypes";
-    /**
-     * The target group URL mapping rest resource.
-     */
-    public static final String TARGET_GROUP_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targetgroups";
-    /**
-     * The tag URL mapping rest resource.
-     */
-    public static final String DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING
-            + "/distributionsettags";
-    /**
-     * The target URL mapping rest resource.
-     */
-    public static final String TARGET_FILTER_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targetfilters";
-    /**
-     * The action URL mapping rest resource.
-     */
-    public static final String ACTION_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/actions";
-    /**
-     * The software module type URL mapping rest resource.
-     */
-    public static final String SOFTWAREMODULETYPE_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/softwaremoduletypes";
-    /**
-     * The distributon set base resource.
-     */
-    public static final String DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING
-            + "/distributionsettypes";
-    /**
-     * The software module URL mapping rest resource.
-     */
-    public static final String DISTRIBUTIONSET_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/distributionsets";
-    /**
-     * The rollout URL mapping rest resource.
-     */
-    public static final String ROLLOUT_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/rollouts";
-    /**
-     * The basic authentication validation mapping
-     */
-    public static final String AUTH_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/userinfo";
-    /**
-     * String representation of
-     * {@link #REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE}.
+     * String representation of {@link #REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE}.
      */
     public static final String REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT = "50";
     /**
-     * The default limit parameter in case the limit parameter is not present in
-     * the request.
+     * The default limit parameter in case the limit parameter is not present in the request.
      *
      * @see #REQUEST_PARAMETER_PAGING_LIMIT
      */
-    public static final int REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE = Integer
-            .parseInt(REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT);
-    /**
-     * The base URL mapping for the spring acuator management context path.
-     */
-    public static final String BASE_SYSTEM_MAPPING = "/system";
-    public static final String SYSTEM_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + BASE_SYSTEM_MAPPING;
-    /**
-     * URL mapping for system admin operations.
-     */
-    public static final String SYSTEM_ADMIN_MAPPING = BASE_SYSTEM_MAPPING + "/admin";
-    /**
-     * The target URL mapping, href link for assigned target type.
-     */
-    public static final String TARGET_V1_ASSIGNED_TARGET_TYPE = "targetType";
-    /**
-     * The target URL mapping, href link for autoConfirm state of a target.
-     */
-    public static final String TARGET_V1_AUTO_CONFIRM = "autoConfirm";
-    /**
-     * The target URL mapping, href link activate auto-confirm on a target.
-     */
-    public static final String TARGET_V1_ACTIVATE_AUTO_CONFIRM = "activate";
-    /**
-     * The target URL mapping, href link deactivate auto-confirm on a target.
-     */
-    public static final String TARGET_V1_DEACTIVATE_AUTO_CONFIRM = "deactivate";
-    /**
-     * The target URL mapping, href link for assigned distribution set.
-     */
-    public static final String TARGET_V1_ASSIGNED_DISTRIBUTION_SET = "assignedDS";
-    /**
-     * The target URL mapping, href link for installed distribution set.
-     */
-    public static final String TARGET_V1_INSTALLED_DISTRIBUTION_SET = "installedDS";
-    /**
-     * The target URL mapping, href link for target attributes.
-     */
-    public static final String TARGET_V1_ATTRIBUTES = "attributes";
-    /**
-     * The target URL mapping, href link for target actions.
-     */
-    public static final String TARGET_V1_ACTIONS = "actions";
-    /**
-     * The target URL mapping, href link for canceled actions.
-     */
-    public static final String TARGET_V1_CANCELED_ACTION = "canceledaction";
-    /**
-     * The target URL mapping, href link for canceled actions.
-     */
-    public static final String TARGET_V1_ACTION_STATUS = "status";
-    /**
-     * The target URL mapping, href link for a rollout.
-     */
-    public static final String TARGET_V1_ROLLOUT = "rollout";
-    /**
-     * The target URL mapping rest resource.
-     */
-    public static final String TARGET_TARGET_ID_TARGETTYPE = "/{targetId}/targettype";
-    /**
-     * The target type URL mapping rest resource.
-     */
-    public static final String COMPATIBLEDISTRIBUTIONSETTYPES = "compatibledistributionsettypes";
-    /**
-     * The tag URL mapping rest resource.
-     */
-    public static final String TARGET_TAG_ID_ASSIGNED = "/{targetTagId}/assigned";
-    /**
-     * The tag URL mapping rest resource.
-     */
-    public static final String DISTRIBUTIONSET_TAG_ID_ASSIGNED = "/{distributionsetTagId}/assigned";
-    /**
-     * Target group URL mapping rest resource
-     */
-    public static final String GROUP_ASSIGNED = "/{group}/assigned";
+    public static final int REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE = Integer.parseInt(REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT);
     /**
      * The default offset parameter in case the offset parameter is not present in the request.
      *
@@ -195,48 +78,12 @@ public final class MgmtRestConstants {
      */
     public static final String REQUEST_PARAMETER_PAGING_OFFSET = "offset";
     /**
-     * The request parameter for sorting. The value of the sort parameter must be in the following pattern. Example:
-     * http://www.bosch.com/iap/sp/rest/targets?sort=field_1:ASC,field_2:DESC,field_3:ASC
+     * The request parameter for sorting. The value of the sort parameter must be in the following pattern.<br/>
+     * Example: <code>https://www.foo.com/iap/sp/rest/targets?sort=field_1:ASC,field_2:DESC,field_3:ASC</code>
      */
     public static final String REQUEST_PARAMETER_SORTING = "sort";
-    /**
-     * The request parameter for searching. The value of the search parameter must be in the FIQL syntax.
-     */
-    public static final String REQUEST_PARAMETER_SEARCH = "q";
-    /**
-     * The request parameter for specifying the representation mode. The value of this parameter can either be "full" or "compact".
-     */
-    public static final String REQUEST_PARAMETER_REPRESENTATION_MODE = "representation";
-    /**
-     * The default representation mode.
-     */
-    public static final String REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT = "compact";
-    /**
-     * Request parameter for async
-     */
-    public static final String REQUEST_PARAMETER_ASYNC = "async";
-    /**
-     * The target URL mapping, href link for artifact download.
-     */
-    public static final String SOFTWAREMODULE_V1_ARTIFACT = "artifacts";
-    /**
-     * The target URL mapping, href link for software module access.
-     */
-    public static final String DISTRIBUTIONSET_V1_MODULE = "modules";
-    /**
-     * The target URL mapping, href link for type information.
-     */
-    public static final String SOFTWAREMODULE_V1_TYPE = "type";
-    public static final String OPTIONALMODULES = "optionalmodules";
-    public static final String MANDATORYMODULES = "mandatorymodules";
-    public static final String OPTIONALMODULETYPES = "optionalmoduletypes";
-    public static final String MANDATORYMODULETYPES = "mandatorymoduletypes";
-    /**
-     * Request parameter if the artifact url handler should be used
-     */
-    public static final String REQUEST_PARAMETER_USE_ARTIFACT_URL_HANDLER = "useartifacturlhandler";
 
-    // Orders
+    // API Orders (used for sorting in OpenAPI doc / Swagger UI)
     public static final String TARGET_ORDER = "1000";
     public static final String TARGET_TAG_ORDER = "2000";
     public static final String TARGET_TYPE_ORDER = "3000";

@@ -28,7 +28,7 @@ import java.util.List;
 import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
-import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
+import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -68,10 +68,10 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         final byte[] result = mvc
                 .perform(get("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                         + cancelAction.getId(), AccessContext.tenant())
-                        .accept(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR))
+                        .accept(DdiRootControllerRestApi.MEDIA_TYPE_APPLICATION_CBOR))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR))
+                .andExpect(content().contentType(DdiRootControllerRestApi.MEDIA_TYPE_APPLICATION_CBOR))
                 .andReturn().getResponse()
                 .getContentAsByteArray();
         assertThat(JsonPathUtils.<String> evaluate(cborToJson(result), "$.id"))
@@ -83,7 +83,7 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                         + cancelAction.getId() + "/feedback", AccessContext.tenant())
                         .content(jsonToCbor(getJsonProceedingCancelActionFeedback()))
-                        .contentType(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR).accept(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR))
+                        .contentType(DdiRootControllerRestApi.MEDIA_TYPE_APPLICATION_CBOR).accept(DdiRootControllerRestApi.MEDIA_TYPE_APPLICATION_CBOR))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
     }

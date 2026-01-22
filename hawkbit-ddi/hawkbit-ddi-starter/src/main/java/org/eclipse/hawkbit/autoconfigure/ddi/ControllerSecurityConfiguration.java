@@ -13,7 +13,7 @@ import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.context.Mdc;
-import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
+import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.rest.SecurityManagedConfiguration;
 import org.eclipse.hawkbit.rest.security.DosFilter;
@@ -46,7 +46,7 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 @EnableWebSecurity
 class ControllerSecurityConfiguration {
 
-    private static final String[] DDI_ANT_MATCHERS = { DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/**" };
+    private static final String[] DDI_ANT_MATCHERS = { DdiRootControllerRestApi.CONTROLLER_V1 + "/**" };
 
     private final ControllerManagement controllerManagement;
     private final DdiSecurityProperties ddiSecurityConfiguration;

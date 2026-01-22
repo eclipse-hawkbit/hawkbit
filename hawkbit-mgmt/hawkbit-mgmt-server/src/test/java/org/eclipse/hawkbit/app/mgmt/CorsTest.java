@@ -60,14 +60,14 @@ class CorsTest extends AbstractSecurityTest {
         assertThat(invalidOriginResponseBody).isEqualTo(INVALID_CORS_REQUEST);
 
         final String invalidCorsUrlResponseBody = performOptionsRequestToUrlWithOrigin(
-                MgmtRestConstants.BASE_SYSTEM_MAPPING, ALLOWED_ORIGIN_FIRST).andExpect(status().isForbidden())
+                "/some_uri", ALLOWED_ORIGIN_FIRST).andExpect(status().isForbidden())
                 .andExpect(header().doesNotExist(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).andReturn()
                 .getResponse().getContentAsString();
         assertThat(invalidCorsUrlResponseBody).isEqualTo(INVALID_CORS_REQUEST);
     }
 
     private ResultActions performOptionsRequestToRestWithOrigin(final String origin) throws Exception {
-        return performOptionsRequestToUrlWithOrigin(MgmtRestConstants.BASE_V1_REQUEST_MAPPING, origin);
+        return performOptionsRequestToUrlWithOrigin(MgmtRestConstants.REST_V1, origin);
     }
 
     private ResultActions performOptionsRequestToUrlWithOrigin(final String url, final String origin) throws Exception {

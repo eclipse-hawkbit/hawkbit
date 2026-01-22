@@ -28,7 +28,9 @@ import java.util.stream.Stream;
 
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetFilterQueryRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtRestModelMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -101,7 +103,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     void getTargetFilterQueries() throws Exception {
         final String filterName = "filter_01";
         createSingleTargetFilterQuery(filterName, "name==test_01");
-        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING))
+        mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1))
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print());
     }
@@ -111,7 +113,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
      */
     @Test
     void getTargetFilterQueriesWithParameters() throws Exception {
-        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "?limit=10&sort=name:ASC&offset=0&q=name==*1"))
+        mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "?limit=10&sort=name:ASC&offset=0&q=name==*1"))
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print());
     }
@@ -127,7 +129,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .put("name", name)
                 .put("query", filterQuery).toString();
 
-        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING)
+        mvc.perform(post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1)
                         .contentType(MediaType.APPLICATION_JSON).content(body))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated());
@@ -141,7 +143,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final String filterName = "filter_01";
         final TargetFilterQuery filterQuery = createSingleTargetFilterQuery(filterName, "name==test_01");
 
-        mvc.perform(delete(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId()))
+        mvc.perform(delete(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + filterQuery.getId()))
                 .andExpect(status().isNoContent());
 
         assertThat(targetFilterQueryManagement.find(filterQuery.getId())).isNotPresent();
@@ -154,7 +156,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     void deleteTargetWhichDoesNotExistsLeadsToEntityNotFound() throws Exception {
         final String notExistingId = "4395";
 
-        mvc.perform(delete(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + notExistingId))
+        mvc.perform(delete(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + notExistingId))
                 .andExpect(status().isNotFound());
     }
 
@@ -164,7 +166,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     @Test
     void updateTargetWhichDoesNotExistsLeadsToEntityNotFound() throws Exception {
         final String notExistingId = "4395";
-        mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + notExistingId).content("{}")
+        mvc.perform(put(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + notExistingId).content("{}")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound());
@@ -183,7 +185,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         // prepare
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(filterName, filterQuery);
 
-        mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId()).content(body)
+        mvc.perform(put(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId()).content(body)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -210,7 +212,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         // prepare
         final TargetFilterQuery tfq = targetFilterQueryManagement.create(Create.builder().name(filterName).query(filterQuery).build());
 
-        mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId()).content(body)
+        mvc.perform(put(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId()).content(body)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -239,7 +241,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         createSingleTargetFilterQuery(idB, testQuery);
         createSingleTargetFilterQuery(idC, testQuery);
 
-        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING))
+        mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(knownTargetAmount)))
@@ -272,7 +274,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         createSingleTargetFilterQuery(idB, testQuery);
         createSingleTargetFilterQuery(idC, testQuery);
 
-        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING)
+        mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -290,25 +292,25 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
 
         final DistributionSet set = testdataFactory.createDistributionSet();
         final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("a", testQuery);
-        final String hrefPrefix = "http://localhost" + MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"
+        final String hrefPrefix = "http://localhost" + MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/"
                 + filterQuery.getId();
-        final String distributionsetHrefPrefix = "http://localhost" + MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING;
+        final String distributionsetHrefPrefix = "http://localhost" + MgmtDistributionSetRestApi.DISTRIBUTIONSETS_V1;
 
         final String dsQuery = "?q=name==" + set.getName() + ";" + "version==" + set.getVersion() + "&offset=0&limit=50";
         mvc.perform(
-                        post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
+                        post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + filterQuery.getId() + "/autoAssignDS")
                                 .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
 
         final String result = mvc.perform(
-                        get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId()))
+                        get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + filterQuery.getId()))
                 .andExpect(jsonPath("$._links.autoAssignDS.href", equalTo(hrefPrefix + "/autoAssignDS")))
                 .andExpect(jsonPath("$._links.DS.href", startsWith(distributionsetHrefPrefix)))
                 .andReturn().getResponse().getContentAsString();
 
         final String multipleResult = mvc.perform(
-                        get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "?representation=full"))
+                        get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "?representation=full"))
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.total", equalTo(1)))
                 .andExpect(jsonPath("$.content[0]._links.DS.href", startsWith(distributionsetHrefPrefix)))
@@ -345,7 +347,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         createSingleTargetFilterQuery(idD, testQuery);
         createSingleTargetFilterQuery(idE, testQuery);
 
-        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING)
+        mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(knownTargetAmount)))
                 .andExpect(status().isOk())
@@ -373,10 +375,10 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final String knownQuery = "name==test01";
         final String knownName = "someName";
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
-        final String hrefPrefix = "http://localhost" + MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"
+        final String hrefPrefix = "http://localhost" + MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/"
                 + tfq.getId();
         // test
-        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId()))
+        mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(JSON_PATH_NAME, equalTo(knownName)))
@@ -395,7 +397,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         // test
 
         final MvcResult mvcResult = mvc
-                .perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + targetIdNotExists))
+                .perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + targetIdNotExists))
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -413,7 +415,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final String notJson = "abc";
 
         final MvcResult mvcResult = mvc
-                .perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING).content(notJson)
+                .perform(post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1).content(notJson)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -436,7 +438,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final String invalidQuery = "name=abc";
         final String body = new JSONObject().put("query", invalidQuery).put("name", "invalidFilter").toString();
 
-        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING).content(body)
+        mvc.perform(post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1).content(body)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -461,7 +463,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("1", "controllerId==target*");
 
         mvc.perform(
-                        post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
+                        post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + filterQuery.getId() + "/autoAssignDS")
                                 .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isTooManyRequests())
@@ -487,7 +489,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
 
         // assign the auto-assign distribution set, this should work
         mvc.perform(
-                        post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
+                        post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + filterQuery.getId() + "/autoAssignDS")
                                 .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -499,7 +501,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         assertThat(updatedFilterQuery.getAutoAssignActionType()).isEqualTo(ActionType.FORCED);
 
         // update the query of the filter query to trigger a quota hit
-        mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId())
+        mvc.perform(put(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + filterQuery.getId())
                         .content("{\"query\":\"controllerId==target*\"}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isTooManyRequests())
@@ -547,7 +549,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final DistributionSet ds = testdataFactory.createDistributionSet("ds");
         targetFilterQueryManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(filterQuery.getId()).ds(ds.getId()));
 
-        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
+        mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/{targetFilterQueryId}/autoAssignDS",
                         filterQuery.getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
@@ -568,7 +570,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .put("type", MgmtActionType.SOFT.getName()).put("weight", 200).toString();
 
         mvc
-                .perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
+                .perform(post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/{targetFilterQueryId}/autoAssignDS",
                         filterQuery.getId()).contentType(MediaType.APPLICATION_JSON).content(autoAssignBody))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
@@ -583,7 +585,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final TargetFilterQuery filterQuery = createSingleTargetFilterQuery(filterName, "name==test_01");
         mvc
                 .perform(delete(
-                        MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
+                        MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/{targetFilterQueryId}/autoAssignDS",
                         filterQuery.getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
@@ -608,11 +610,11 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         assertThat(updatedFilterQuery.getAutoAssignDistributionSet()).isEqualTo(set);
         assertThat(updatedFilterQuery.getAutoAssignActionType()).isEqualTo(ActionType.FORCED);
 
-        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
+        mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(JSON_PATH_NAME, equalTo(dsName)));
 
-        mvc.perform(delete(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
+        mvc.perform(delete(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isNoContent());
 
         final TargetFilterQuery filterQueryWithDeletedDs = targetFilterQueryManagement.find(tfq.getId()).get();
@@ -620,7 +622,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         assertThat(filterQueryWithDeletedDs.getAutoAssignDistributionSet()).isNull();
         assertThat(filterQueryWithDeletedDs.getAutoAssignActionType()).isNull();
 
-        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS"))
+        mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isNoContent());
 
     }
@@ -637,17 +639,17 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .toString();
         final String valideWeightRequest = new JSONObject().put("id", dsId).put("weight", 45).toString();
 
-        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
+        mvc.perform(post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/{targetFilterQueryId}/autoAssignDS",
                         filterId).content(valideWeightRequest).contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
         enableMultiAssignments();
-        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
+        mvc.perform(post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/{targetFilterQueryId}/autoAssignDS",
                         filterId).content(invalideWeightRequest).contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.repo.constraintViolation")));
-        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
+        mvc.perform(post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/{targetFilterQueryId}/autoAssignDS",
                         filterId).content(valideWeightRequest).contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -702,7 +704,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
 
     private void verifyAutoAssignmentByActionType(final TargetFilterQuery tfq, final DistributionSet set,
             final MgmtActionType actionType, final Boolean confirmationRequired) throws Exception {
-        final String hrefPrefix = "http://localhost" + MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"
+        final String hrefPrefix = "http://localhost" + MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/"
                 + tfq.getId();
 
         final JSONObject jsonObject = new JSONObject();
@@ -714,7 +716,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
             jsonObject.put("confirmationRequired", confirmationRequired);
         }
 
-        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
+        mvc.perform(post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId() + "/autoAssignDS")
                         .content(jsonObject.toString()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -727,7 +729,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         assertThat(updatedFilterQuery.getAutoAssignActionType())
                 .isEqualTo(MgmtRestModelMapper.convertActionType(expectedActionType));
 
-        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId()))
+        mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(JSON_PATH_NAME, equalTo(tfq.getName())))
@@ -744,7 +746,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
 
     private void verifyAutoAssignmentWithTimeForcedActionType(final TargetFilterQuery tfq, final DistributionSet set)
             throws Exception {
-        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
+        mvc.perform(post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId() + "/autoAssignDS")
                         .content("{\"id\":" + set.getId() + ", \"type\":\"" + MgmtActionType.TIMEFORCED.getName() + "\"}")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -762,7 +764,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
 
     private void verifyAutoAssignmentWithUnknownActionType(final TargetFilterQuery tfq, final DistributionSet set)
             throws Exception {
-        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
+        mvc.perform(post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId() + "/autoAssignDS")
                         .content("{\"id\":" + set.getId() + ", \"type\":\"unknown\"}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -777,7 +779,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                         .name("incomplete").version("1")
                         .build());
 
-        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
+        mvc.perform(post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId() + "/autoAssignDS")
                         .content("{\"id\":" + incompleteDistributionSet.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -791,7 +793,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         assignDistributionSet(softDeletedDs, testdataFactory.createTarget("forSoftDeletedDs"));
         distributionSetManagement.delete(softDeletedDs.getId());
 
-        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
+        mvc.perform(post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId() + "/autoAssignDS")
                         .content("{\"id\":" + softDeletedDs.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound())

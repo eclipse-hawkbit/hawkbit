@@ -18,7 +18,6 @@ import java.util.Optional;
 public enum MgmtRepresentationMode {
 
     FULL("full"),
-
     COMPACT("compact");
 
     private final String mode;

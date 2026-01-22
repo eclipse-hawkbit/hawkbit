@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
 import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
@@ -145,7 +146,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random), null, 0, null, sm.getId(), "file1", false));
 
-        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts", sm.getId())
+        mvc.perform(get(MgmtSoftwareModuleRestApi.SOFTWAREMODULES_V1 + "/{softwareModuleId}/artifacts", sm.getId())
                         .param("representation", MgmtRepresentationMode.FULL.toString())
                         .param("useartifacturlhandler", Boolean.TRUE.toString()))
                 .andDo(MockMvcResultPrinter.print())
@@ -167,7 +168,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
             softwareModuleManagement.createMetadata(module.getId(), knownKeyPrefix + index, new MetadataValueCreate(knownValuePrefix + index));
         }
 
-        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata",
+        mvc.perform(get(MgmtSoftwareModuleRestApi.SOFTWAREMODULES_V1 + "/{softwareModuleId}/metadata",
                         module.getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -188,7 +189,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
             softwareModuleManagement.createMetadata(module.getId(), knownKeyPrefix + index, new MetadataValueCreate(knownValuePrefix + index));
         }
 
-        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata",
+        mvc.perform(get(MgmtSoftwareModuleRestApi.SOFTWAREMODULES_V1 + "/{softwareModuleId}/metadata",
                         module.getId()).param("offset", "1").param("limit", "2").param("sort", "key:DESC").param("q",
                         "key==known*"))
                 .andDo(MockMvcResultPrinter.print())
@@ -208,7 +209,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final SoftwareModule module = findFirstModuleByType(testdataFactory.createDistributionSet("one"), osType).orElseThrow();
         softwareModuleManagement.createMetadata(module.getId(), knownKey, new MetadataValueCreate(knownValue));
 
-        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata/{metadataKey}",
+        mvc.perform(get(MgmtSoftwareModuleRestApi.SOFTWAREMODULES_V1 + "/{softwareModuleId}/metadata/{metadataKey}",
                         module.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
@@ -1056,7 +1057,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     void getSoftwareModulesWithoutAdditionalRequestParameters() throws Exception {
         final int modules = 5;
         createSoftwareModulesAlphabetical(modules);
-        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING))
+        mvc.perform(get(MgmtSoftwareModuleRestApi.SOFTWAREMODULES_V1))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(modules)))
@@ -1072,7 +1073,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final int modules = 5;
         final int limitSize = 1;
         createSoftwareModulesAlphabetical(modules);
-        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING).param(
+        mvc.perform(get(MgmtSoftwareModuleRestApi.SOFTWAREMODULES_V1).param(
                         MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -1090,7 +1091,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final int offsetParam = 2;
         final int expectedSize = modules - offsetParam;
         createSoftwareModulesAlphabetical(modules);
-        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING).param(
+        mvc.perform(get(MgmtSoftwareModuleRestApi.SOFTWAREMODULES_V1).param(
                                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(modules)))
                 .andDo(MockMvcResultPrinter.print())

@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
-import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
+import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
@@ -90,11 +90,11 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         postDeploymentFeedback(target.getControllerId(), actionId, getJsonClosedDeploymentActionFeedback(), status().isOk());
 
         // get installed base
-        performGet(INSTALLED_BASE, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR), status().isOk(),
+        performGet(INSTALLED_BASE, MediaType.parseMediaType(DdiRootControllerRestApi.MEDIA_TYPE_APPLICATION_CBOR), status().isOk(),
                 AccessContext.tenant(), target.getControllerId(), actionId.toString());
 
         // get artifacts
-        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_APPLICATION_CBOR),
+        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.parseMediaType(DdiRootControllerRestApi.MEDIA_TYPE_APPLICATION_CBOR),
                 status().isOk(), AccessContext.tenant(), target.getControllerId(),
                 String.valueOf(softwareModuleId));
     }

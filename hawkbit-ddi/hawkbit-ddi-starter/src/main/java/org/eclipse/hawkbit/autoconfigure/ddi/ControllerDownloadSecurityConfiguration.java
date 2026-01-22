@@ -13,7 +13,7 @@ import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.context.Mdc;
-import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
+import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.rest.SecurityManagedConfiguration;
 import org.eclipse.hawkbit.rest.security.DosFilter;
@@ -44,7 +44,7 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 class ControllerDownloadSecurityConfiguration {
 
     private static final String DDI_DL_ANT_MATCHER =
-            DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/*";
+            DdiRootControllerRestApi.CONTROLLER_V1 + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/*";
 
     private final ControllerManagement controllerManagement;
     private final DdiSecurityProperties ddiSecurityConfiguration;

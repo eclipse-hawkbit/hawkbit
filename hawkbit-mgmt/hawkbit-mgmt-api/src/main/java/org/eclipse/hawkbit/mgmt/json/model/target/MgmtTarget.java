@@ -86,6 +86,22 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtPollStatus;
          }""")
 public class MgmtTarget extends MgmtNamedEntity {
 
+    /**
+     * The target URL mapping, href link for assigned target type.
+     */
+    public static final String TARGET_TYPE = "targetType";
+    /**
+     * The target URL mapping, href link for autoConfirm state of a target.
+     */
+    public static final String AUTO_CONFIRM = "autoConfirm";
+    /**
+     * The target URL mapping, href link for target actions.
+     */
+    public static final String TARGET_V1_ACTIONS = "actions";
+    /**
+     * The target URL mapping, href link for canceled actions.
+     */
+    public static final String TARGET_V1_ACTION_STATUS = "status";
     @JsonProperty(required = true)
     @Schema(description = "Controller ID", example = "123")
     private String controllerId;

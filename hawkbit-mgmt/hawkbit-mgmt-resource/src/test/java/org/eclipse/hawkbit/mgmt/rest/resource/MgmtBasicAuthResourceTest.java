@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Base64;
 
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtBasicAuthRestApi;
 import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
@@ -84,7 +84,7 @@ class MgmtBasicAuthResourceTest {
     @Test
     @WithUser(principal = TEST_USER, authorities = { "READ", "WRITE", "DELETE" })
     void validateBasicAuthWithUserDetails() throws Exception {
-        withSecurityMock().perform(get(MgmtRestConstants.AUTH_V1_REQUEST_MAPPING))
+        withSecurityMock().perform(get(MgmtBasicAuthRestApi.USERINFO_V1))
                 .andDo(MockMvcResultPrinter.print())
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -100,7 +100,7 @@ class MgmtBasicAuthResourceTest {
      */
     @Test
     void validateBasicAuthFailsWithInvalidCredentials() throws Exception {
-        defaultMock.perform(get(MgmtRestConstants.AUTH_V1_REQUEST_MAPPING)
+        defaultMock.perform(get(MgmtBasicAuthRestApi.USERINFO_V1)
                         .header(HttpHeaders.AUTHORIZATION, getBasicAuth("wrongUser", "wrongSecret")))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isUnauthorized());

@@ -9,10 +9,16 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.api;
 
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET;
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.TARGET_GROUP_ORDER;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.PutNoContentResponses;
+import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.List;
 
@@ -24,8 +30,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.rest.OpenApi;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,10 +38,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Tag(
-        name = "Target Groups", description = "REST API for Target Groups operations.",
+@Tag(name = "Target Groups", description = "REST API for Target Groups operations.",
         extensions = @Extension(name = OpenApi.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = TARGET_GROUP_ORDER)))
 public interface MgmtTargetGroupRestApi {
+
+    String TARGETGROUPS_V1 = MgmtRestConstants.REST_V1 + "/targetgroups";
 
     /**
      * Handles the GET request of retrieving a list of assigned targets for a specific group. Complex grouping (subgroups) not supported here.
@@ -55,28 +60,21 @@ public interface MgmtTargetGroupRestApi {
             description = "Handles the GET request of retrieving a list of assigned targets for a specific group. Complex grouping (subgroups) not supported here." +
                     "For complex grouping use the analogical resource with query parameter for target group.")
     @GetIfExistResponses
-    @GetMapping(value = MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + MgmtRestConstants.GROUP_ASSIGNED,
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = TARGETGROUPS_V1 + "/{group}/assigned", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(
             @PathVariable
             @Schema(description = "The target group of the targets")
             String group,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
             int pagingOffsetParam,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
             @Schema(description = "The maximum number of entries in a page (default is 50)")
             int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false)
-            @Schema(description = """
-                    The query parameter sort allows to define the sort order for the result of a query. A sort criteria
-                    consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
-                    The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
-                    in the result.""")
+            @Schema(description = "The query parameter sort allows to define the sort order for the result of a query. " +
+                    "A sort criteria consists of the name of a field and the sort direction (ASC for ascending and DESC descending)." +
+                    "The sequence of the sort criteria (multiple can be used) defines the sort order of the entities in the result.")
             String sortParam
     );
 
@@ -97,7 +95,7 @@ public interface MgmtTargetGroupRestApi {
             description = "Handles the GET request of retrieving a list of assigned targets for a specific group. Complex grouping (subgroups) is supported here." +
                     "Search could be for specific group, complex group e.g Parent/Child or also for groups including its subgroups")
     @GetIfExistResponses
-    @GetMapping(value = MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
+    @GetMapping(value = TARGETGROUPS_V1 + "/assigned")
     ResponseEntity<PagedList<MgmtTarget>> getAssignedTargetsWithSubgroups(
             @RequestParam(value = "group")
             @Schema(description = "Target Group or Filter based on target groups. ")
@@ -105,22 +103,16 @@ public interface MgmtTargetGroupRestApi {
             @RequestParam(value = "subgroups", defaultValue = "false")
             @Schema(description = " Possibility to search for subgroups with wildcard or not - e.g. ParentGroup/*")
             boolean subgroups,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
             int pagingOffsetParam,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
             @Schema(description = "The maximum number of entries in a page (default is 50)")
             int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false)
-            @Schema(description = """
-                    The query parameter sort allows to define the sort order for the result of a query. A sort criteria
-                    consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
-                    The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
-                    in the result.""")
+            @Schema(description = "The query parameter sort allows to define the sort order for the result of a query. " +
+                    "A sort criteria consists of the name of a field and the sort direction (ASC for ascending and DESC descending)." +
+                    "The sequence of the sort criteria (multiple can be used) defines the sort order of the entities in the result.")
             String sortParam
     );
 
@@ -136,7 +128,7 @@ public interface MgmtTargetGroupRestApi {
             description = "Handles the POST request of target assignment. Already assigned target will be ignored. " +
                     "For complex groups use analogical method with query parameters.")
     @PutNoContentResponses
-    @PutMapping(value = MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
+    @PutMapping(value = TARGETGROUPS_V1 + "/assigned")
     ResponseEntity<Void> assignTargetsToGroupWithSubgroups(
             @RequestParam("group")
             @Schema(description = "The target group to be set. Sub-grouping is allowed here - '/' could be used for subgroups") String group,
@@ -154,7 +146,7 @@ public interface MgmtTargetGroupRestApi {
             description = "Handles the PUT request of target assignment." +
                     "Subgroups are NOT allowed here - e.g. Parent/Child")
     @PutNoContentResponses
-    @PutMapping(value = MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + MgmtRestConstants.GROUP_ASSIGNED)
+    @PutMapping(value = TARGETGROUPS_V1 + "/{group}/assigned")
     ResponseEntity<Void> assignTargetsToGroup(
             @PathVariable(value = "group")
             @Schema(description = "The target group to be set. Sub-grouping not allowed here, for sub-grouping use the analogical method with query parameter.")
@@ -173,17 +165,14 @@ public interface MgmtTargetGroupRestApi {
      *
      */
     @Operation(summary = "Assign target(s) to given group by rsql",
-            description = "Handles the PUT request of target group assignment." +
-                    "Subgroups are NOT allowed here - e.g. Parent/Child")
+            description = "Handles the PUT request of target group assignment. Subgroups are NOT allowed here - e.g. Parent/Child")
     @PutNoContentResponses
-    @PutMapping(value = MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/{group}")
+    @PutMapping(value = TARGETGROUPS_V1 + "/{group}")
     ResponseEntity<Void> assignTargetsToGroupWithRsql(
             @PathVariable
             String group,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
+            @Schema(description = "Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for available fields.")
             String rsql
     );
 
@@ -195,7 +184,7 @@ public interface MgmtTargetGroupRestApi {
     @Operation(summary = "Unassign targets from their target groups",
             description = "Handles the DELETE request to unassign the given target(s).")
     @DeleteResponses
-    @DeleteMapping(value = MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING + "/assigned")
+    @DeleteMapping(value = TARGETGROUPS_V1 + "/assigned")
     ResponseEntity<Void> unassignTargetsFromGroup(
             @RequestBody(required = false)
             @Schema(description = "List of controller ids to be unassigned from their groups", example = "[\"controllerId1\", \"controllerId2\"]")
@@ -210,12 +199,10 @@ public interface MgmtTargetGroupRestApi {
     @Operation(summary = "Unassign targets from their target groups by filter",
             description = "Handles the DELETE request to unassign targets by RSQL filter.")
     @DeleteResponses
-    @DeleteMapping(value = MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING)
+    @DeleteMapping(value = TARGETGROUPS_V1)
     ResponseEntity<Void> unassignTargetsFromGroupByRsql(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
+            @Schema(description = "Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for available fields.")
             String rsql
     );
 
@@ -226,8 +213,7 @@ public interface MgmtTargetGroupRestApi {
     @Operation(summary = "Return all assigned target groups",
             description = "Handles the GET request of retrieving a list of all target groups.")
     @GetIfExistResponses
-    @GetMapping(value = MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING,
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = TARGETGROUPS_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<String>> getTargetGroups();
 
     /**
@@ -240,14 +226,12 @@ public interface MgmtTargetGroupRestApi {
             description = "Assign targets matching a rsql filter to a provided target group" +
                     "Subgroups are allowed - e.g. Parent/Child")
     @PutNoContentResponses
-    @PutMapping(value = MgmtRestConstants.TARGET_GROUP_V1_REQUEST_MAPPING)
+    @PutMapping(value = TARGETGROUPS_V1)
     ResponseEntity<Void> assignTargetsToGroup(
             @RequestParam(name = "group")
             @Schema(description = "The target group to be set. Sub-grouping is allowed here - '/' could be used for subgroups")
             String group,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
+            @Schema(description = "Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for available fields.")
             String rsqlParam);
 }
