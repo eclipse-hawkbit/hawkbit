@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -181,7 +182,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
         }
 
         private void setItem(final MgmtSoftwareModule softwareModule) {
-            description.setValue(softwareModule.getDescription());
+            description.setValue(Objects.requireNonNullElse(softwareModule.getDescription(), ""));
             createdBy.setValue(softwareModule.getCreatedBy());
             createdAt.setValue(Utils.localDateTimeFromTs(softwareModule.getCreatedAt()));
             lastModifiedBy.setValue(softwareModule.getLastModifiedBy());
