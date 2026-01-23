@@ -228,7 +228,10 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
         }
 
         private void setItem(final MgmtRolloutResponseBody rollout) {
-            description.setValue(rollout.getDescription());
+            // allow null values for description
+            final String rolloutDescription = rollout.getDescription();
+            description.setValue(rolloutDescription != null ? rolloutDescription : "");
+
             createdBy.setValue(rollout.getCreatedBy());
             createdAt.setValue(Utils.localDateTimeFromTs(rollout.getCreatedAt()));
             lastModifiedBy.setValue(rollout.getLastModifiedBy());
