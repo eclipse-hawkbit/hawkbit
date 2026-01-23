@@ -99,9 +99,8 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
 
     private void invalidateDistributionSetsInTransaction(final DistributionSetInvalidation distributionSetInvalidation, final String tenant) {
         DeploymentHelper.runInNewTransaction(txManager, tenant + "-invalidateDS", status -> {
-            distributionSetInvalidation.getDistributionSetIds().forEach(setId -> invalidateDistributionSet(setId,
-                    distributionSetInvalidation.getActionCancellationType()));
-
+            distributionSetInvalidation.getDistributionSetIds().forEach(
+                    setId -> invalidateDistributionSet(setId, distributionSetInvalidation.getActionCancellationType()));
             return 0;
         });
     }

@@ -143,7 +143,7 @@ public interface MgmtTargetTypeRestApi {
                     "Required Permission: CREATE_TARGET")
     @PostCreateResponses
     @ApiResponses(value = {
-            @ApiResponse(responseCode = NOT_FOUND_404, description = "Target type not found.",
+            @ApiResponse(responseCode = NOT_FOUND_404, description = "Compatible distributions sets not found.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = TARGETTYPES_V1,
