@@ -85,8 +85,6 @@ public interface MgmtSoftwareModuleRestApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = NOT_FOUND_404, description = "Software Module not found",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = GONE_410, description = "Artifact binary no longer exists",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = LOCKED_423, description = "Software module is locked",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = INTERNAL_SERVER_ERROR_500, description = "Upload / store to storage or encryption failed",
@@ -113,10 +111,6 @@ public interface MgmtSoftwareModuleRestApi {
             description = "Handles the GET request of retrieving all metadata of artifacts assigned to a " +
                     "software module. Required Permission: READ_REPOSITORY")
     @GetResponses
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = GONE_410, description = "Artifact binary no longer exists",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
     @GetMapping(value = SOFTWAREMODULES_V1 + "/{softwareModuleId}/artifacts", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtArtifact>> getArtifacts(
             @PathVariable("softwareModuleId") Long softwareModuleId,
@@ -133,10 +127,6 @@ public interface MgmtSoftwareModuleRestApi {
     @Operation(summary = "Return single Artifact metadata",
             description = "Handles the GET request of retrieving a single Artifact metadata request. Required Permission: READ_REPOSITORY")
     @GetResponses
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = GONE_410, description = "Artifact binary no longer exists",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
     @GetMapping(value = SOFTWAREMODULES_V1 + "/{softwareModuleId}/artifacts/{artifactId}",
             produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     @ResponseBody
