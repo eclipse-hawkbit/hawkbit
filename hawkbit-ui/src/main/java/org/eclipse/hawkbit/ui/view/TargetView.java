@@ -843,7 +843,7 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
 
     private static class AssignDialog extends Utils.BaseDialog<Void> {
 
-        private final Select<MgmtDistributionSet> distributionSet;
+        private final ComboBox<MgmtDistributionSet> distributionSet;
         private final Select<MgmtActionType> actionType;
         private final DateTimePicker forceTime = new DateTimePicker("Force Time");
         private final Button assign = new Button("Assign");
@@ -851,16 +851,12 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
         private AssignDialog(final HawkbitMgmtClient hawkbitClient, Set<TargetWithDs> selectedTargets) {
             super("Assign Distribution Set");
 
-            distributionSet = new Select<>(
+            distributionSet = Utils.nameComboBox(
                     "Distribution Set",
                     this::readyToAssign,
-                    Optional.ofNullable(
-                            hawkbitClient.getDistributionSetRestApi()
-                                    .getDistributionSets(null, 0, 500, Constants.CREATED_AT_DESC)
-                                    .getBody())
-                            .map(body -> body.getContent().toArray(new MgmtDistributionSet[0]))
-                            .orElseGet(() -> new MgmtDistributionSet[0])
-            );
+                    query -> hawkbitClient.getDistributionSetRestApi()
+                            .getDistributionSets(query.getFilter().orElse(null), query.getOffset(), query.getPageSize(), Constants.NAME_ASC)
+                            .getBody().getContent().stream());
             distributionSet.setRequiredIndicatorVisible(true);
             distributionSet.setItemLabelGenerator(distributionSetO -> distributionSetO.getName() + ":" + distributionSetO.getVersion());
             distributionSet.setWidthFull();

@@ -35,6 +35,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -51,6 +52,7 @@ import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.CallbackDataProvider.FetchCallback;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
@@ -66,6 +68,8 @@ public class Utils {
     private Utils() {
         // prevent initialization
     }
+
+    public static final String COMBO_NAME_ALLOWED_CHARS = "[0-9a-zA-Z-_./]";
 
     public static TextField textField(final String label) {
         return textField(label, null);
@@ -97,6 +101,16 @@ public class Utils {
             numberField.setValueChangeTimeout(200);
         }
         return numberField;
+    }
+
+    public static <T> ComboBox<T> nameComboBox(
+            final String label,
+            final Consumer<HasValue.ValueChangeEvent<T>> changeListener,
+            final FetchCallback<T, String> listHandler) {
+        final ComboBox<T> combo = new ComboBox<T>(label, changeListener::accept);
+        combo.setAllowedCharPattern(Utils.COMBO_NAME_ALLOWED_CHARS);
+        combo.setItemsWithFilterConverter(listHandler, nameFilter -> "name==*" + nameFilter + "*");
+        return combo;
     }
 
     @SuppressWarnings("java:S119") // better readability
