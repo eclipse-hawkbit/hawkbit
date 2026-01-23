@@ -485,7 +485,7 @@ public class AccessContext {
 
         private AuthenticationDelegate(final String tenant, final String username, final Authentication delegate) {
             this.delegate = delegate;
-            principal = new TenantAwareUser(username, username, delegate != null ? delegate.getAuthorities() : Collections.emptyList(), tenant);
+            principal = new TenantAwareUser(username, username, delegate == null ? Collections.emptyList() : delegate.getAuthorities(), tenant);
             tenantAwareAuthenticationDetails = new TenantAwareAuthenticationDetails(tenant, false);
         }
 
@@ -507,12 +507,12 @@ public class AccessContext {
 
         @Override
         public String toString() {
-            return delegate != null ? delegate.toString() : null;
+            return delegate == null ? null : delegate.toString();
         }
 
         @Override
         public String getName() {
-            return delegate != null ? delegate.getName() : null;
+            return delegate == null ? null : delegate.getName();
         }
 
         @Override
@@ -522,7 +522,7 @@ public class AccessContext {
 
         @Override
         public Object getCredentials() {
-            return delegate != null ? delegate.getCredentials() : null;
+            return delegate == null ? null : delegate.getCredentials();
         }
 
         @Override
@@ -537,15 +537,14 @@ public class AccessContext {
 
         @Override
         public boolean isAuthenticated() {
-            return delegate == null || delegate.isAuthenticated();
+            return delegate != null && delegate.isAuthenticated();
         }
 
         @Override
         public void setAuthenticated(final boolean isAuthenticated) {
-            if (delegate == null) {
-                return;
+            if (delegate != null) {
+                delegate.setAuthenticated(isAuthenticated);
             }
-            delegate.setAuthenticated(isAuthenticated);
         }
     }
 }
