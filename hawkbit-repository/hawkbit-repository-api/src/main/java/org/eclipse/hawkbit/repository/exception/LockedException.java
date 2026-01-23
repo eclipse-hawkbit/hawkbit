@@ -35,9 +35,7 @@ public class LockedException extends AbstractServerRtException {
 
     public LockedException(
             final Class<? extends BaseEntity> type, final Object entityId, final String operation, final String reason) {
-        super(
-                THIS_ERROR, type.getSimpleName() + " with given identifier {" + entityId + "} is locked and " + operation + " is forbidden!" +
-                        (reason == null ? "" : " Reason: " + reason)
-        );
+        super(THIS_ERROR, type.getSimpleName() + " with given identifier {" + entityId + "} is locked and " + operation + " is forbidden!" +
+                (reason == null ? "" : " Reason: " + reason));
     }
 }

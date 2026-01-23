@@ -276,7 +276,7 @@ public interface MgmtTargetRestApi {
             description = "Cancels an active action, only active actions can be deleted. Required Permission: UPDATE_TARGET")
     @DeleteResponses
     @ApiResponses(value = {
-            @ApiResponse(responseCode = METHOD_NOT_ALLOWED_405, description = "Software module is locked",
+            @ApiResponse(responseCode = METHOD_NOT_ALLOWED_405, description = "Action is not in cancelling state",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @DeleteMapping(value = TARGETS_V1 + "/{targetId}/actions/{actionId}")

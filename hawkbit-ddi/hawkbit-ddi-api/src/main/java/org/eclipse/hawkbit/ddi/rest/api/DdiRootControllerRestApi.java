@@ -317,7 +317,7 @@ public interface DdiRootControllerRestApi {
             e.g. the canceled actions have been started already.""")
     @PostUpdateResponses
     @ApiResponses(value = {
-            @ApiResponse(responseCode = METHOD_NOT_ALLOWED_405, description = "Software module is locked", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+            @ApiResponse(responseCode = METHOD_NOT_ALLOWED_405, description = "The action is not cancelable / force quitable", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = CONTROLLER_V1 + "/{controllerId}/" + CANCEL_ACTION + "/{actionId}/" +
             FEEDBACK, consumes = { APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
