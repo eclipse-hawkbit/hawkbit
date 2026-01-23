@@ -204,7 +204,7 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
                             List.of("controllerid", "name"), textFilter.getOptionalValue().map(s -> "*" + s + "*"),
                             "targettype.name", type.getSelectedItems().stream().map(MgmtTargetType::getName)
                                     .toList(),
-                            "tag", tag.getSelectedItems().stream().map(MgmtTag::getName).toList()));
+                            "tag", tag.getSelectedItems().stream().map(t -> "\"" + t.getName() + "\"").toList()));
         }
     }
 
