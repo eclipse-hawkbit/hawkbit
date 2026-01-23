@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.ui.view;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -228,9 +229,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
         }
 
         private void setItem(final MgmtRolloutResponseBody rollout) {
-            // allow null values for description
-            final String rolloutDescription = rollout.getDescription();
-            description.setValue(rolloutDescription != null ? rolloutDescription : "");
+            description.setValue(Objects.requireNonNullElse(rollout.getDescription(), ""));
 
             createdBy.setValue(rollout.getCreatedBy());
             createdAt.setValue(Utils.localDateTimeFromTs(rollout.getCreatedAt()));

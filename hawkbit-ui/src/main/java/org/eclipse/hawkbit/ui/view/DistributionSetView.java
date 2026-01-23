@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -213,7 +214,8 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
         }
 
         private void setItem(final MgmtDistributionSet distributionSet) {
-            description.setValue(distributionSet.getDescription());
+            description.setValue(Objects.requireNonNullElse(distributionSet.getDescription(), ""));
+
             createdBy.setValue(distributionSet.getCreatedBy());
             createdAt.setValue(Utils.localDateTimeFromTs(distributionSet.getCreatedAt()));
             lastModifiedBy.setValue(distributionSet.getLastModifiedBy());
