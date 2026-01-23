@@ -92,7 +92,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
+import org.springframework.boot.jpa.autoconfigure.JpaProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -145,8 +145,6 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     ActionRepository actionRepository;
     @Autowired
     private JpaProperties jpaProperties;
-    @Autowired
-    private ObjectMapper objectMapper;
 
     /**
      * Ensures that when targetType value of -1 is provided the target type is unassigned from the target.
@@ -254,7 +252,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final MgmtTargetAutoConfirmUpdate body = new MgmtTargetAutoConfirmUpdate("custom_initiator_value", "custom_remark_value");
         mvc.perform(post(TARGETS_V1 + "/{targetId}/" + AUTO_CONFIRM + "/" + ACTIVATE,
                         testTarget.getControllerId())
-                        .content(objectMapper.writeValueAsString(body)).contentType(APPLICATION_JSON))
+                        .content(OBJECT_MAPPER.writeValueAsString(body)).contentType(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
     }

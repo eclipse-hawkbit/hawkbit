@@ -43,10 +43,9 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Static class generation -->
-        <dependency>
+        <dependency> <!-- Static class generation -->
             <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-jpamodelgen</artifactId>
+            <artifactId>hibernate-processor</artifactId>
             <optional>true</optional>
         </dependency>
     </dependencies>

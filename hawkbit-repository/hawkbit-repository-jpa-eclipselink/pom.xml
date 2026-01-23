@@ -34,22 +34,21 @@
         </dependency>
 
         <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>org.eclipse.persistence.jpa</artifactId>
+            <version>${eclipselink.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-core</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- Static class generation -->
-        <dependency>
+        <dependency> <!-- Static class generation -->
             <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-jpamodelgen</artifactId>
+            <artifactId>hibernate-processor</artifactId>
             <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>org.eclipse.persistence.jpa</artifactId>
-            <version>${eclipselink.version}</version>
         </dependency>
     </dependencies>
 
@@ -71,13 +70,6 @@
                 <configuration>
                     <basePackage>org.eclipse.hawkbit.repository.jpa.model</basePackage>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.eclipse.persistence</groupId>
-                        <artifactId>org.eclipse.persistence.jpa</artifactId>
-                        <version>${eclipselink.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>

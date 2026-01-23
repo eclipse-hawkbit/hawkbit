@@ -566,13 +566,13 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
-        mvc.perform(post(TARGETTYPE_DSTYPES_ENDPOINT, testType.getId()).content("{\"id\":1}")
-                        .contentType(MediaType.APPLICATION_JSON))
+        // actually it is semi invalid could become bad request - not strict but yet accepted
+        // single element is assumed to be array of single element see {@link MgmtApiConfiguration#configureMessageConverters}
+        mvc.perform(post(TARGETTYPE_DSTYPES_ENDPOINT, testType.getId()).contentType(MediaType.APPLICATION_JSON).content("{\"id\":44456}"))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
 
-        mvc.perform(post(TARGETTYPE_DSTYPES_ENDPOINT, testType.getId()).content("[{\"id\":44456}]")
-                        .contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(post(TARGETTYPE_DSTYPES_ENDPOINT, testType.getId()).contentType(MediaType.APPLICATION_JSON).content("[{\"id\":44456}]"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 

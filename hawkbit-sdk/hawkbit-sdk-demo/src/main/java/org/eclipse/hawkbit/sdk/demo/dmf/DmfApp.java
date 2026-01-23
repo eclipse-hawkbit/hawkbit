@@ -21,13 +21,13 @@ import org.eclipse.hawkbit.sdk.dmf.UpdateHandler;
 import org.eclipse.hawkbit.sdk.dmf.amqp.Amqp;
 import org.eclipse.hawkbit.sdk.dmf.amqp.AmqpProperties;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.amqp.autoconfigure.RabbitProperties;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellOption;
+import org.springframework.shell.core.command.annotation.Command;
+import org.springframework.shell.core.command.annotation.Option;
+import org.springframework.stereotype.Component;
 
 /**
  * Abstract class representing DDI device connecting directly to hawkVit.
@@ -51,7 +51,7 @@ public class DmfApp {
         return new DmfTenant(tenant, amqp);
     }
 
-    @ShellComponent
+    @Component
     public static class Shell {
 
         private final DmfTenant dmfTenant;
@@ -62,36 +62,36 @@ public class DmfApp {
             this.updateHandler = updateHandler.orElse(null);
         }
 
-        @ShellMethod(key = "start-one")
-        public void startOne(@ShellOption("--id") final String controllerId) {
+        @Command(name = "start-one")
+        public void startOne(@Option(longName = "--id") final String controllerId) {
             dmfTenant.getController(controllerId).ifPresentOrElse(
                     dmfController -> dmfController.start(Executors.newSingleThreadScheduledExecutor()),
                     () -> dmfTenant.createController(Controller.builder().controllerId(controllerId).build(), updateHandler)
                             .start(Executors.newSingleThreadScheduledExecutor()));
         }
 
-        @ShellMethod(key = "stop-one")
-        public void stopOne(@ShellOption("--id") final String controllerId) {
+        @Command(name = "stop-one")
+        public void stopOne(@Option(longName = "--id") final String controllerId) {
             dmfTenant.getController(controllerId).ifPresentOrElse(
                     DmfController::stop,
                     () -> log.error("Controller with id {} not found!", controllerId));
         }
 
-        @ShellMethod(key = "start")
+        @Command(name = "start")
         public void start(
-                @ShellOption(value = "--prefix", defaultValue = "") final String prefix,
-                @ShellOption(value = "--offset", defaultValue = "0") final int offset,
-                @ShellOption(value = "--count") final int count) {
+                @Option(longName = "--prefix") final String prefix,
+                @Option(longName = "--offset", defaultValue = "0") final int offset,
+                @Option(longName = "--count") final int count) {
             for (int i = 0; i < count; i++) {
                 startOne(toId(prefix, offset + i));
             }
         }
 
-        @ShellMethod(key = "stop")
+        @Command(name = "stop")
         public void stop(
-                @ShellOption(value = "--prefix", defaultValue = "") final String prefix,
-                @ShellOption(value = "--offset", defaultValue = "0") final int offset,
-                @ShellOption(value = "--count") final int count) {
+                @Option(longName = "--prefix") final String prefix,
+                @Option(longName = "--offset", defaultValue = "0") final int offset,
+                @Option(longName = "--count") final int count) {
             for (int i = 0; i < count; i++) {
                 stopOne(toId(prefix, offset + i));
             }

@@ -29,17 +29,20 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.messaging.converter.MessageConverter;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Autoconfiguration for the events.
+ * Autoconfiguration for the events publishing.
  */
 @Slf4j
 @Configuration
+@Import(EventJacksonConfiguration.class)
 public class EventPublisherConfiguration {
 
     /**
@@ -108,15 +111,21 @@ public class EventPublisherConfiguration {
     }
 
     @Bean
-    public Consumer<AbstractRemoteEvent> serviceEventConsumer(ApplicationEventPublisher publisher) {
+    public Consumer<AbstractRemoteEvent> serviceEventConsumer(final ApplicationEventPublisher publisher) {
         return publisher::publishEvent;
     }
 
     @Bean
-    public Consumer<AbstractRemoteEvent> fanoutEventConsumer(ApplicationEventPublisher publisher) {
+    public Consumer<AbstractRemoteEvent> fanoutEventConsumer(final ApplicationEventPublisher publisher) {
         return publisher::publishEvent;
     }
 
+    @Bean
+    public MessageConverter eventJacksonMessageConverter(final JsonMapper mapper) {
+        return new EventJacksonMessageConverter(mapper);
+    }
+
+    @Configuration
     @ConditionalOnClass({ Schema.class, ProtostuffIOUtil.class })
     protected static class EventProtostuffConfiguration {
 
@@ -124,10 +133,5 @@ public class EventPublisherConfiguration {
         public MessageConverter eventProtostuffMessageConverter() {
             return new EventProtoStuffMessageConverter();
         }
-    }
-
-    @Bean
-    public MessageConverter eventJacksonMessageConverter() {
-        return new EventJacksonMessageConverter();
     }
 }

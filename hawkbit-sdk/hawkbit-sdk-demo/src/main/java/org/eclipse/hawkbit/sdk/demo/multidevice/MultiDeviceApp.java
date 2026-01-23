@@ -27,9 +27,9 @@ import org.eclipse.hawkbit.sdk.mgmt.AuthenticationSetupHelper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellOption;
+import org.springframework.shell.core.command.annotation.Command;
+import org.springframework.shell.core.command.annotation.Option;
+import org.springframework.stereotype.Component;
 
 /**
  * Abstract class representing DDI device connecting directly to hawkVit.
@@ -59,7 +59,7 @@ public class MultiDeviceApp {
         return new AuthenticationSetupHelper(defaultTenant, hawkbitClient);
     }
 
-    @ShellComponent
+    @Component
     public static class Shell {
 
         private final DdiTenant ddiTenant;
@@ -74,14 +74,14 @@ public class MultiDeviceApp {
             this.updateHandler = updateHandler.orElse(null);
         }
 
-        @ShellMethod(key = "setup")
+        @Command(name = "setup")
         public void setup() {
             mgmtApi.setupTargetAuthentication();
             setup = true;
         }
 
-        @ShellMethod(key = "start-one")
-        public void startOne(@ShellOption("--id") final String controllerId) {
+        @Command(name = "start-one")
+        public void startOne(@Option(longName = "--id") final String controllerId) {
             final String securityTargetToken;
             if (setup) {
                 securityTargetToken = mgmtApi.setupTargetSecureToken(controllerId, null);
@@ -102,29 +102,29 @@ public class MultiDeviceApp {
             );
         }
 
-        @ShellMethod(key = "stop-one")
-        public void stopOne(@ShellOption("--id") final String controllerId) {
+        @Command(name = "stop-one")
+        public void stopOne(@Option(longName = "--id") final String controllerId) {
             ddiTenant.getController(controllerId).ifPresentOrElse(
                     DdiController::stop,
                     () -> log.error("Controller with id {} not found!", controllerId));
 
         }
 
-        @ShellMethod(key = "start")
+        @Command(name = "start")
         public void start(
-                @ShellOption(value = "--prefix", defaultValue = "") final String prefix,
-                @ShellOption(value = "--offset", defaultValue = "0") final int offset,
-                @ShellOption(value = "--count") final int count) {
+                @Option(longName = "--prefix", defaultValue = "") final String prefix,
+                @Option(longName = "--offset", defaultValue = "0") final int offset,
+                @Option(longName = "--count") final int count) {
             for (int i = 0; i < count; i++) {
                 startOne(toId(prefix, offset + i));
             }
         }
 
-        @ShellMethod(key = "stop")
+        @Command(name = "stop")
         public void stop(
-                @ShellOption(value = "--prefix", defaultValue = "") final String prefix,
-                @ShellOption(value = "--offset", defaultValue = "0") final int offset,
-                @ShellOption(value = "--count") final int count) {
+                @Option(longName = "--prefix") final String prefix,
+                @Option(longName = "--offset", defaultValue = "0") final int offset,
+                @Option(longName = "--count") final int count) {
             for (int i = 0; i < count; i++) {
                 stopOne(toId(prefix, offset + i));
             }

@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -185,23 +186,20 @@ class AutoAssignHandlerIntTest extends AbstractJpaIntegrationTest {
      */
     @ParameterizedTest
     @MethodSource("confirmationOptions")
-    void checkAutoAssignWithConfirmationOptions(final boolean confirmationFlowActive, final boolean confirmationRequired,
-            final Action.Status expectedStatus) {
-
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsA");
-
+    void checkAutoAssignWithConfirmationOptions(
+            final boolean confirmationFlowActive, final boolean confirmationRequired, final Action.Status expectedStatus) {
         if (confirmationFlowActive) {
             enableConfirmationFlow();
         }
 
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsA");
         targetFilterQueryManagement.updateAutoAssignDS(
                 new AutoAssignDistributionSetUpdate(targetFilterQueryManagement
                         .create(Create.builder().name("filterA").query("name==*").build()).getId())
                         .ds(distributionSet.getId()).confirmationRequired(confirmationRequired));
 
         final String targetDsAIdPref = "targ";
-        final List<Target> targets = testdataFactory.createTargets(20, targetDsAIdPref,
-                targetDsAIdPref.concat(SPACE_AND_DESCRIPTION));
+        final List<Target> targets = testdataFactory.createTargets(20, targetDsAIdPref, targetDsAIdPref.concat(SPACE_AND_DESCRIPTION));
 
         // Run the check
         autoAssignChecker.handleAll();
@@ -214,15 +212,13 @@ class AutoAssignHandlerIntTest extends AbstractJpaIntegrationTest {
      */
     @ParameterizedTest
     @MethodSource("confirmationOptions")
-    void checkAutoAssignmentForDeviceWithConfirmationRequired(final boolean confirmationFlowActive,
-            final boolean confirmationRequired, final Action.Status expectedStatus) {
-
-        final DistributionSet toAssignDs = testdataFactory.createDistributionSet();
-
+    void checkAutoAssignmentForDeviceWithConfirmationRequired(
+            final boolean confirmationFlowActive, final boolean confirmationRequired, final Action.Status expectedStatus) {
         if (confirmationFlowActive) {
             enableConfirmationFlow();
         }
 
+        final DistributionSet toAssignDs = testdataFactory.createDistributionSet();
         // target filter query that matches all targets
         targetFilterQueryManagement.updateAutoAssignDS(
                 new AutoAssignDistributionSetUpdate(targetFilterQueryManagement
@@ -243,7 +239,6 @@ class AutoAssignHandlerIntTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void checkAutoAssignWithFailures() {
-
         // incomplete distribution set that will be assigned
         final DistributionSet setF = distributionSetManagement.create(DistributionSetManagement.Create.builder()
                 .type(testdataFactory.findOrCreateDefaultTestDsType())
@@ -255,23 +250,21 @@ class AutoAssignHandlerIntTest extends AbstractJpaIntegrationTest {
         final String targetDsAIdPref = "targA";
         final String targetDsFIdPref = "targB";
 
-        final Long filterId = targetFilterQueryManagement.create(
-                        Create.builder().name("filterA").query("id==" + targetDsFIdPref + "*").build())
-                .getId();
+        final Long filterId = targetFilterQueryManagement
+                .create(Create.builder().name("filterA").query("id==" + targetDsFIdPref + "*").build()).getId();
         final AutoAssignDistributionSetUpdate targetFilterQuery = new AutoAssignDistributionSetUpdate(filterId).ds(setF.getId());
         // target filter query that matches first bunch of targets, that should fail
-        assertThatExceptionOfType(IncompleteDistributionSetException.class).isThrownBy(
-                () -> targetFilterQueryManagement.updateAutoAssignDS(targetFilterQuery));
+        assertThatExceptionOfType(IncompleteDistributionSetException.class)
+                .isThrownBy(() -> targetFilterQueryManagement.updateAutoAssignDS(targetFilterQuery));
         // target filter query that matches failed bunch of targets
-        targetFilterQueryManagement.create(Create.builder().name("filterB")
-                .query("id==" + targetDsAIdPref + "*").autoAssignDistributionSet(setA).build());
+        targetFilterQueryManagement.create(Create.builder()
+                .name("filterB").query("id==" + targetDsAIdPref + "*").autoAssignDistributionSet(setA)
+                .build());
         implicitLock(setA);
 
-        final List<Target> targetsF = testdataFactory.createTargets(10, targetDsFIdPref,
-                targetDsFIdPref.concat(SPACE_AND_DESCRIPTION));
+        final List<Target> targetsF = testdataFactory.createTargets(10, targetDsFIdPref, targetDsFIdPref.concat(SPACE_AND_DESCRIPTION));
 
-        final List<Target> targetsA = testdataFactory.createTargets(10, targetDsAIdPref,
-                targetDsAIdPref.concat(SPACE_AND_DESCRIPTION));
+        final List<Target> targetsA = testdataFactory.createTargets(10, targetDsAIdPref, targetDsAIdPref.concat(SPACE_AND_DESCRIPTION));
 
         final int targetsCount = targetsA.size() + targetsF.size();
 
@@ -288,7 +281,6 @@ class AutoAssignHandlerIntTest extends AbstractJpaIntegrationTest {
 
         // all targets of A group should have received setA
         verifyThatTargetsHaveDistributionSetAssignment(setA, targetsA, targetsCount);
-
     }
 
     /**
@@ -468,16 +460,13 @@ class AutoAssignHandlerIntTest extends AbstractJpaIntegrationTest {
                         .isEqualTo(targetFilterQuery.getAutoAssignInitiatedBy()));
     }
 
-    private List<Target> createTargetsAndAutoAssignDistSet(final String prefix, final int targetCount,
-            final DistributionSet distributionSet, final ActionType actionType) {
-
-        final List<Target> targets = testdataFactory.createTargets(targetCount, "target" + prefix,
-                prefix.concat(SPACE_AND_DESCRIPTION));
+    private List<Target> createTargetsAndAutoAssignDistSet(
+            final String prefix, final int targetCount, final DistributionSet distributionSet, final ActionType actionType) {
+        final List<Target> targets = testdataFactory.createTargets(targetCount, "target" + prefix, prefix.concat(SPACE_AND_DESCRIPTION));
         targetFilterQueryManagement.create(Create.builder()
                 .name("filter" + prefix).query("id==target" + prefix + "*")
                 .autoAssignDistributionSet(distributionSet).autoAssignActionType(actionType)
                 .build());
-
         return targets;
     }
 
@@ -486,12 +475,12 @@ class AutoAssignHandlerIntTest extends AbstractJpaIntegrationTest {
                 .map(Target::getControllerId)
                 .flatMap(controllerId -> deploymentManagement.findActionsByTarget(controllerId, PAGE).getContent().stream())
                 .toList();
-
         assertThat(actions).hasSize(targets.size());
         assertThat(actions).allMatch(action -> action.getActionType().equals(actionType));
     }
 
-    private Slice<Action> findActionsByDistributionSet(final Pageable pageable, final long distributionSetId) {
+
+    private Slice<@NonNull Action> findActionsByDistributionSet(final Pageable pageable, final long distributionSetId) {
         return actionRepository
                 .findAll(byDistributionSetId(distributionSetId), pageable)
                 .map(Action.class::cast);

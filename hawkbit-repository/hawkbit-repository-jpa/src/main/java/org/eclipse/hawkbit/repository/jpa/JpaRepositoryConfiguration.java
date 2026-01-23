@@ -94,8 +94,8 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
+import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -110,8 +110,8 @@ import org.springframework.integration.jdbc.lock.JdbcLockRegistry;
 import org.springframework.integration.jdbc.lock.LockRepository;
 import org.springframework.integration.support.locks.DefaultLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
-import org.springframework.lang.NonNull;
-import org.springframework.retry.annotation.EnableRetry;
+import org.jspecify.annotations.NonNull;
+import org.springframework.resilience.annotation.EnableResilientMethods;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.authorization.AuthorizationResult;
@@ -129,7 +129,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @EnableAspectJAutoProxy
 @Configuration
 @EnableScheduling
-@EnableRetry
+@EnableResilientMethods
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 @ComponentScan({ "org.eclipse.hawkbit.repository.jpa.management", "org.eclipse.hawkbit.repository.jpa.scheduler" })
 @PropertySource("classpath:/hawkbit-jpa-defaults.properties")

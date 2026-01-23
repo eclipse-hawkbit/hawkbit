@@ -35,20 +35,14 @@ import org.springframework.messaging.converter.MessageConverter;
 
 abstract class AbstractEventMessageConverterTest {
 
-    protected final MessageConverter messageConverter;
-
     @Mock
     protected Message<Object> messageMock;
-
     @Mock
     protected Target targetMock;
-
     @Mock
     protected Action actionMock;
 
-    AbstractEventMessageConverterTest(MessageConverter messageConverter) {
-        this.messageConverter = messageConverter;
-    }
+    protected abstract MessageConverter messageConverter();
 
     /**
      * Verifies that the TargetCreatedEvent can be successfully serialized and deserialized
@@ -82,11 +76,8 @@ abstract class AbstractEventMessageConverterTest {
 
     @Test
     void successfullySerializeAndDeserializeActionServiceEvent() {
-        final ActionCreatedServiceEvent actionCreatedServiceEvent =
-                new ActionCreatedServiceEvent(createActionCreatedEvent());
-
-        final ActionUpdatedServiceEvent actionUpdatedServiceEvent =
-                new ActionUpdatedServiceEvent(createActionUpdatedEvent());
+        final ActionCreatedServiceEvent actionCreatedServiceEvent = new ActionCreatedServiceEvent(createActionCreatedEvent());
+        final ActionUpdatedServiceEvent actionUpdatedServiceEvent = new ActionUpdatedServiceEvent(createActionUpdatedEvent());
 
         assertSerializeAndDeserialize(actionCreatedServiceEvent, ActionCreatedServiceEvent.class);
         assertSerializeAndDeserialize(actionUpdatedServiceEvent, ActionUpdatedServiceEvent.class);
@@ -112,7 +103,9 @@ abstract class AbstractEventMessageConverterTest {
         return new ActionUpdatedEvent(actionMock, 1L, 2L, 3L);
     }
 
-    <T extends AbstractRemoteEvent> void assertSerializeAndDeserialize(T event, Class<? extends AbstractRemoteEvent> expectedClass) {
+    private <T extends AbstractRemoteEvent> void assertSerializeAndDeserialize(
+            final T event, final Class<? extends AbstractRemoteEvent> expectedClass) {
+        final MessageConverter messageConverter = messageConverter();
         // serialize
         Object serializedEvent = null;
         if (messageConverter instanceof EventProtoStuffMessageConverter protoStuff) {

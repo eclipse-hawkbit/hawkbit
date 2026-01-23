@@ -26,12 +26,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.data.jpa.domain.Specification;
 
 @SuppressWarnings("java:S5961") // complex check because the matter is very complex
-@DataJpaTest(properties = { "spring.jpa.database=H2" }, excludeAutoConfiguration = { FlywayAutoConfiguration.class })
+@DataJpaTest(properties = "spring.jpa.database=H2")
 @EnableAutoConfiguration
 @Slf4j
 class SpecificationBuilderTest {

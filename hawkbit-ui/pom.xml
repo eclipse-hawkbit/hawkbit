@@ -25,7 +25,8 @@
     <name>hawkBit :: UI</name>
 
     <properties>
-        <vaadin.version>24.9.8</vaadin.version>
+        <java.version>21</java.version>
+        <vaadin.version>25.0.3</vaadin.version>
     </properties>
 
     <dependencyManagement>
@@ -67,7 +68,11 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+            <artifactId>spring-boot-starter-security-oauth2-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

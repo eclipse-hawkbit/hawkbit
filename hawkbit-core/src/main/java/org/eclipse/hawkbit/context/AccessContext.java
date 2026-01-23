@@ -20,8 +20,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -36,6 +34,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * A 'static' class providing methods related to access context:
@@ -298,11 +297,7 @@ public class AccessContext {
     @SuppressWarnings("java:S112") // java:S112 - generic method
     private static String serialize(final SecurityContext securityContext) {
         Objects.requireNonNull(securityContext);
-        try {
-            return OBJECT_MAPPER.writeValueAsString(new SecCtxInfo(securityContext));
-        } catch (final JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return OBJECT_MAPPER.writeValueAsString(new SecCtxInfo(securityContext));
     }
 
     /**
@@ -314,12 +309,7 @@ public class AccessContext {
     @SuppressWarnings("java:S112") // java:S112 - generic method
     private static SecurityContext deserialize(final String securityContextString) {
         Objects.requireNonNull(securityContextString);
-        final String securityContextTrimmed = securityContextString.trim();
-        try {
-            return OBJECT_MAPPER.readerFor(SecCtxInfo.class).<SecCtxInfo> readValue(securityContextTrimmed).toSecurityContext();
-        } catch (final JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return OBJECT_MAPPER.readerFor(SecCtxInfo.class).<SecCtxInfo> readValue(securityContextString.trim()).toSecurityContext();
     }
 
     private static boolean isAuthenticationInvalid(final Authentication authentication) {

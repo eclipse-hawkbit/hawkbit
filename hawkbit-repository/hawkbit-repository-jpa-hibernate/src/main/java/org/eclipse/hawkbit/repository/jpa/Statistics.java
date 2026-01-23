@@ -27,8 +27,8 @@ import org.springframework.context.annotation.Configuration;
  * <ol>
  *     <li>The Spring property spring.jpa.properties.hibernate.generate_statistics=true shall be set - enables Hibernate statistics
  *         collecting</li>
- *     <li>If don't need periodic log (Slf4J) set logging.level.org.hibernate.engine.internal.StatisticalLoggingSessionEventListener=WARN</li>
- *     <li>The MeterRegistry shall be registered available - e.g. include org.springframework.boot:spring-boot-actuator-autoconfigure</li>
+ *     <li>If you don't need periodic log (Slf4J) set logging.level.org.hibernate.engine.internal.StatisticalLoggingSessionEventListener=WARN</li>
+ *     <li>The MeterRegistry shall be registered and available</li>
  *     <li>Hibernate reporting to micrometer shall be enabled - include org.hibernate.orm:hibernate-micrometer</li>
  *     <li>(?) When using in test the metrics MAYBE shall be enabled with @AutoConfigureObservability(tracing = false)</li>
  * </ol>
