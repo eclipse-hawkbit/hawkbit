@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.audit;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,16 +51,18 @@ public class AuditLogger {
             final String tenant, final String username, final String entity, final String message, final AuditLog.Level level) {
         final String logMessage = String.format("[%s] User: %s, AccessContext: %s - %s", entity, username, tenant, message);
         final Logger auditLogger = LoggerFactory.getLogger("AUDIT" + (entity != null ? ("." + entity.toUpperCase()) : ""));
-        switch (level) {
-            case INFO:
-                auditLogger.info(logMessage);
-                break;
-            case WARN:
-                auditLogger.warn(logMessage);
-                break;
-            case ERROR:
-                auditLogger.error(logMessage);
-                break;
-        }
+        AccessContext.asTenant(tenant, () -> {
+            switch (level) {
+                case INFO:
+                    auditLogger.info(logMessage);
+                    break;
+                case WARN:
+                    auditLogger.warn(logMessage);
+                    break;
+                case ERROR:
+                    auditLogger.error(logMessage);
+                    break;
+            }
+        });
     }
 }
