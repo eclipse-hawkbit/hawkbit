@@ -23,7 +23,7 @@ import org.springframework.context.ApplicationEvent;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class AbstractRemoteEvent extends ApplicationEvent {
 
-    private final String id;
+    private String id; // not a final - jackson 3 doesn't override finals
 
     // for serialization libs like jackson
     protected AbstractRemoteEvent() {

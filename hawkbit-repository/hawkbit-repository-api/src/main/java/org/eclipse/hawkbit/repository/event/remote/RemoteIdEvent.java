@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
  * Note: it implements {@link org.eclipse.hawkbit.tenancy.TenantAwareCacheManager.CacheEvictEvent} methods but in order
  * to be really include in the cache eviction process the subclasses must declare that it implements that interface.
  */
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -34,13 +34,13 @@ public abstract class RemoteIdEvent extends RemoteTenantAwareEvent {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private Long entityId;
-    private String entityClass;
+    private final Long entityId;
+    private final String entityClass;
 
     protected RemoteIdEvent(final String tenant, final Long entityId, final Class<? extends TenantAwareBaseEntity> entityClass) {
         super(tenant, entityId);
-        this.entityClass = entityClass.getName();
         this.entityId = entityId;
+        this.entityClass = entityClass.getName();
     }
 
     public String getCacheName() {

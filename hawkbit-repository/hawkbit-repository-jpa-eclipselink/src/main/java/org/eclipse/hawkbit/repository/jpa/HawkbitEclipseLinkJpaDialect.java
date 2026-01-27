@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.repository.jpa.utils.JpaExceptionTranslator;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
 

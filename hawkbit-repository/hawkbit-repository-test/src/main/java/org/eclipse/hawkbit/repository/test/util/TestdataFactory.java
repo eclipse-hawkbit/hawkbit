@@ -27,7 +27,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.Constants;
@@ -480,7 +479,7 @@ public class TestdataFactory {
      * @return {@link Artifact} entity.
      */
     public Artifact createArtifact(final String artifactData, final Long moduleId, final String filename) {
-        final InputStream stubInputStream = IOUtils.toInputStream(artifactData, StandardCharsets.UTF_8);
+        final InputStream stubInputStream = new ByteArrayInputStream(artifactData.getBytes(StandardCharsets.UTF_8));
         return artifactManagement.create(new ArtifactUpload(stubInputStream, null, artifactData.length(), null, moduleId, filename, false));
     }
 

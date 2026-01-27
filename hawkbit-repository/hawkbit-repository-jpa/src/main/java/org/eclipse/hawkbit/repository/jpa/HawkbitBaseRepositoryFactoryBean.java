@@ -15,18 +15,27 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.jpa.repository.HawkbitBaseRepository;
 import org.eclipse.hawkbit.repository.jpa.utils.ExceptionMapper;
+import org.jspecify.annotations.Nullable;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.query.EscapeCharacter;
 import org.springframework.data.jpa.repository.query.JpaQueryMethodFactory;
+import org.springframework.data.jpa.repository.query.QueryEnhancerSelector;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactory;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
+import org.springframework.data.jpa.repository.support.JpaRepositoryFragmentsContributor;
 import org.springframework.data.jpa.repository.support.JpaRepositoryImplementation;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.querydsl.EntityPathResolver;
@@ -35,16 +44,17 @@ import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
 import org.springframework.data.repository.core.support.TransactionalRepositoryFactoryBeanSupport;
-import org.springframework.lang.Nullable;
 
 /**
  * A {@link TransactionalRepositoryFactoryBeanSupport} extension that uses {@link HawkbitBaseRepository} as base repository and
  * proxied repositories in order to convert exceptions to management exceptions.
  */
+@Slf4j
 @SuppressWarnings("java:S119") // java:S119 - ID is inherited from TransactionalRepositoryFactoryBeanSupport
 public class HawkbitBaseRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> extends TransactionalRepositoryFactoryBeanSupport<T, S, ID> {
 
     private EntityPathResolver entityPathResolver;
+    private JpaRepositoryFragmentsContributor repositoryFragmentsContributor;
     private EscapeCharacter escapeCharacter = EscapeCharacter.DEFAULT;
     private JpaQueryMethodFactory queryMethodFactory;
 
@@ -66,6 +76,11 @@ public class HawkbitBaseRepositoryFactoryBean<T extends Repository<S, ID>, S, ID
     }
 
     @Autowired
+    public void setRepositoryFragmentsContributor(final ObjectProvider<JpaRepositoryFragmentsContributor> repositoryFragmentsContributor) {
+        this.repositoryFragmentsContributor = repositoryFragmentsContributor.getIfAvailable(() -> JpaRepositoryFragmentsContributor.DEFAULT);
+    }
+
+    @Autowired
     public void setEscapeCharacter(final char escapeCharacter) {
         this.escapeCharacter = EscapeCharacter.of(escapeCharacter);
     }
@@ -77,6 +92,45 @@ public class HawkbitBaseRepositoryFactoryBean<T extends Repository<S, ID>, S, ID
         }
     }
 
+    @Autowired
+    public void setQueryMethodFactory(final ObjectProvider<JpaQueryMethodFactory> resolver) {
+        final JpaQueryMethodFactory factory = resolver.getIfAvailable();
+        if (factory != null) {
+            this.queryMethodFactory = factory;
+        }
+    }
+
+    private @Nullable BeanFactory beanFactory;
+
+    @Override
+    public void setBeanFactory(final BeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
+        super.setBeanFactory(beanFactory);
+    }
+
+    private @Nullable Function<@Nullable BeanFactory, QueryEnhancerSelector> queryEnhancerSelectorSource;
+
+    public void setQueryEnhancerSelectorSource(QueryEnhancerSelector queryEnhancerSelectorSource) {
+        this.queryEnhancerSelectorSource = bf -> queryEnhancerSelectorSource;
+    }
+
+    public void setQueryEnhancerSelector(final Class<? extends QueryEnhancerSelector> queryEnhancerSelectorType) {
+        queryEnhancerSelectorSource = bf -> {
+            if (bf != null) {
+                final QueryEnhancerSelector selector = bf.getBeanProvider(queryEnhancerSelectorType).getIfAvailable();
+                if (selector != null) {
+                    return selector;
+                }
+
+                if (bf instanceof AutowireCapableBeanFactory acbf) {
+                    return acbf.createBean(queryEnhancerSelectorType);
+                }
+            }
+
+            return BeanUtils.instantiateClass(queryEnhancerSelectorType);
+        };
+    }
+
     @PersistenceContext
     public void setEntityManager(final EntityManager entityManager) {
         this.entityManager = entityManager;
@@ -85,6 +139,7 @@ public class HawkbitBaseRepositoryFactoryBean<T extends Repository<S, ID>, S, ID
     @Override
     public void afterPropertiesSet() {
         Objects.requireNonNull(entityManager, "EntityManager must not be null");
+        setRepositoryBaseClass(HawkbitBaseRepository.class); // overrides set by properties base class
         super.afterPropertiesSet();
     }
 
@@ -107,6 +162,19 @@ public class HawkbitBaseRepositoryFactoryBean<T extends Repository<S, ID>, S, ID
                         interfaces(jpaRepositoryImplementation.getClass(), new HashSet<>()).toArray(new Class<?>[0]),
                         (proxy, method, args) -> {
                             try {
+                                if (args != null) {
+                                    final Class<?>[] parameterTypes = method.getParameterTypes();
+                                    for (int i = 0; i < parameterTypes.length; i++) {
+                                        if (parameterTypes[i] == Specification.class && args[i] == null) {
+                                            // replaces null specifications with unrestricted specifications (null not accepted since Spring Boott 4.0
+                                            if (log.isTraceEnabled()) {
+                                                log.trace("Replace null Specification argument with unrestricted Specification",
+                                                        new Exception("Method " + method + ", arg[" + i + "]"));
+                                            }
+                                            args[i] = Specification.unrestricted();
+                                        }
+                                    }
+                                }
                                 return method.invoke(jpaRepositoryImplementation, args);
                             } catch (final InvocationTargetException e) {
                                 final Throwable cause = e.getCause() == null ? e : e.getCause();
@@ -120,9 +188,12 @@ public class HawkbitBaseRepositoryFactoryBean<T extends Repository<S, ID>, S, ID
 
         jpaRepositoryFactory.setEntityPathResolver(entityPathResolver);
         jpaRepositoryFactory.setEscapeCharacter(escapeCharacter);
-
+        jpaRepositoryFactory.setFragmentsContributor(repositoryFragmentsContributor);
         if (queryMethodFactory != null) {
             jpaRepositoryFactory.setQueryMethodFactory(queryMethodFactory);
+        }
+        if (queryEnhancerSelectorSource != null) {
+            jpaRepositoryFactory.setQueryEnhancerSelector(queryEnhancerSelectorSource.apply(beanFactory));
         }
         jpaRepositoryFactory.setRepositoryBaseClass(HawkbitBaseRepository.class);
         return jpaRepositoryFactory;

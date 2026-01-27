@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
-import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_DELAY;
-import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.IMPLICIT_LOCK_ENABLED;
 
 import java.util.ArrayList;
@@ -41,6 +39,7 @@ import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
+import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
@@ -62,8 +61,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -195,7 +193,7 @@ public class JpaDistributionSetManagement
     // implicitly lock a distribution set if not already locked and implicit lock is enabled and not to skip
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public boolean shouldLockImplicitly(final DistributionSet distributionSet) {
         final JpaDistributionSet jpaDistributionSet = toJpaDistributionSet(distributionSet);
         if (jpaDistributionSet.isLocked()) {
@@ -227,7 +225,7 @@ public class JpaDistributionSetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public JpaDistributionSet lock(final DistributionSet distributionSet) {
         final JpaDistributionSet jpaDistributionSet = toJpaDistributionSet(distributionSet);
         if (distributionSet.isLocked()) {
@@ -244,7 +242,7 @@ public class JpaDistributionSetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public JpaDistributionSet unlock(final DistributionSet distributionSet) {
         final JpaDistributionSet jpaDistributionSet = toJpaDistributionSet(distributionSet);
         if (jpaDistributionSet.isLocked()) {
@@ -265,7 +263,7 @@ public class JpaDistributionSetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public JpaDistributionSet assignSoftwareModules(final long id, final Collection<Long> softwareModuleId) {
         final JpaDistributionSet set = getValid0(id);
         assertSoftwareModuleQuota(id, softwareModuleId.size());
@@ -283,7 +281,7 @@ public class JpaDistributionSetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public JpaDistributionSet unassignSoftwareModule(final long id, final long moduleId) {
         final JpaDistributionSet set = getValid0(id);
 
@@ -295,7 +293,7 @@ public class JpaDistributionSetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public List<JpaDistributionSet> assignTag(final Collection<Long> ids, final long dsTagId) {
         return updateTag(ids, dsTagId, (tag, distributionSet) -> {
             if (distributionSet.getTags().contains(tag)) {
@@ -309,7 +307,7 @@ public class JpaDistributionSetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public List<JpaDistributionSet> unassignTag(final Collection<Long> ids, final long dsTagId) {
         return updateTag(ids, dsTagId, (tag, distributionSet) -> {
             if (distributionSet.getTags().contains(tag)) {

@@ -37,6 +37,8 @@ import org.eclipse.hawkbit.repository.qfields.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.qfields.SoftwareModuleTypeFields;
 import org.eclipse.hawkbit.repository.qfields.TargetFields;
 import org.eclipse.hawkbit.repository.qfields.TargetTypeFields;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -144,13 +146,16 @@ public class AccessControllerConfiguration {
         final DefaultMethodSecurityExpressionHandler methodSecurityExpressionHandler = new DefaultMethodSecurityExpressionHandler() {
 
             @Override
-            public EvaluationContext createEvaluationContext(final Supplier<Authentication> authentication, final MethodInvocation mi) {
+            @NullMarked
+            public EvaluationContext createEvaluationContext(
+                    final Supplier<? extends @Nullable Authentication> authentication, final MethodInvocation mi) {
                 return super.createEvaluationContext(SingletonSupplier.of(() -> new RawAuthoritiesAuthentication(authentication.get())), mi);
             }
 
             @Override
+            @NullMarked
             protected MethodSecurityExpressionOperations createSecurityExpressionRoot(
-                    final Authentication authentication, final MethodInvocation mi) {
+                    @Nullable final Authentication authentication, final MethodInvocation mi) {
                 return super.createSecurityExpressionRoot(new RawAuthoritiesAuthentication(authentication), mi);
             }
         };

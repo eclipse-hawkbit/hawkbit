@@ -61,8 +61,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -241,16 +240,14 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void deleteByControllerId(final String controllerId) {
         jpaRepository.delete(jpaRepository.getByControllerId(controllerId));
     }
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public List<Target> assignTag(
             final Collection<String> controllerIds, final long targetTagId, final Consumer<Collection<String>> notFoundHandler) {
         return assignTag0(controllerIds, targetTagId, notFoundHandler);
@@ -258,8 +255,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public List<Target> assignTag(final Collection<String> controllerIds, final long targetTagId) {
         return assignTag0(controllerIds, targetTagId, null);
     }
@@ -284,8 +280,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public List<Target> unassignTag(
             final Collection<String> controllerIds, final long targetTagId, final Consumer<Collection<String>> notFoundHandler) {
         return unassignTag0(controllerIds, targetTagId, notFoundHandler);
@@ -293,8 +288,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public List<Target> unassignTag(final Collection<String> controllerIds, final long targetTagId) {
         return unassignTag0(controllerIds, targetTagId, null);
     }
@@ -313,8 +307,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Target assignType(final String controllerId, final Long targetTypeId) {
         final JpaTarget target = jpaRepository.getByControllerId(controllerId);
 
@@ -328,8 +321,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Target unassignType(final String controllerId) {
         final JpaTarget target = jpaRepository.getByControllerId(controllerId);
         target.setTargetType(null);
@@ -338,8 +330,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void assignTargetGroupWithRsql(String group, String rsql) {
         final Specification<JpaTarget> rsqlSpecification = QLSupport.getInstance().buildSpec(rsql, TargetFields.class);
 
@@ -356,8 +347,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void assignTargetsWithGroup(String group, List<String> controllerIds) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaUpdate<JpaTarget> criteriaQuery = cb.createCriteriaUpdate(JpaTarget.class);
@@ -387,8 +377,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void createMetadata(final String controllerId, final String key, final String value) {
         final JpaTarget target = jpaRepository.getByControllerId(controllerId);
 
@@ -404,8 +393,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void createMetadata(final String controllerId, final Map<String, String> md) {
         final JpaTarget target = jpaRepository.getByControllerId(controllerId);
 
@@ -434,8 +422,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void deleteMetadata(final String controllerId, final String key) {
         final JpaTarget target = jpaRepository.getByControllerId(controllerId);
 

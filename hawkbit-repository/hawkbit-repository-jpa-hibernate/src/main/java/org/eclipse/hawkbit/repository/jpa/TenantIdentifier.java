@@ -13,10 +13,9 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.context.AccessContext;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
 
 /**
- * {@link CurrentTenantIdentifierResolver} and {@link HibernatePropertiesCustomizer} that resolves the
+ * {@link CurrentTenantIdentifierResolver} and {@link org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer} that resolves the
  * {@link AccessContext#tenant()} for hibernate.
  */
 class TenantIdentifier implements CurrentTenantIdentifierResolver<String> {

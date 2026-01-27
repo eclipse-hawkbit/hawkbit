@@ -25,14 +25,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController.Operation;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.DeleteSpecification;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import org.springframework.data.jpa.domain.UpdateSpecification;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 @Slf4j
 public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements BaseEntityRepository<T> {
@@ -52,7 +55,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
     @Override
     @NonNull
     public <S extends T> S save(@NonNull final S entity) {
-        accessController.assertOperationAllowed(AccessController.Operation.UPDATE, entity);
+        accessController.assertOperationAllowed(Operation.UPDATE, entity);
         return repository.save(entity);
     }
 
@@ -75,15 +78,15 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
 
     @Override
     public long count() {
-        return count(null);
+        return count((Specification<T>) null);
     }
 
     @Override
     public void deleteById(@NonNull final Long id) {
-        if (!exists(AccessController.Operation.READ, byIdSpec(id))) {
+        if (!exists(Operation.READ, byIdSpec(id))) {
             throw new EntityNotFoundException(repository.getDomainClass(), id);
         }
-        if (!exists(AccessController.Operation.DELETE, byIdSpec(id))) {
+        if (!exists(Operation.DELETE, byIdSpec(id))) {
             throw new InsufficientPermissionException();
         }
         repository.deleteById(id);
@@ -91,7 +94,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
 
     @Override
     public void delete(@NonNull final T entity) {
-        accessController.assertOperationAllowed(AccessController.Operation.DELETE, entity);
+        accessController.assertOperationAllowed(Operation.DELETE, entity);
         repository.delete(entity);
     }
 
@@ -99,7 +102,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
     public void deleteAllById(@NonNull final Iterable<? extends Long> ids) {
         final Set<Long> idList = new HashSet<>();
         ids.forEach(idList::add);
-        if (count(AccessController.Operation.DELETE, byIdsSpec(idList)) != idList.size()) {
+        if (count(Operation.DELETE, byIdsSpec(idList)) != idList.size()) {
             throw new InsufficientPermissionException("Has at least one id that is not allowed for deletion!");
         }
         repository.deleteAllById(idList);
@@ -107,7 +110,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
 
     @Override
     public void deleteAll(@NonNull final Iterable<? extends T> entities) {
-        accessController.assertOperationAllowed(AccessController.Operation.DELETE, entities);
+        accessController.assertOperationAllowed(Operation.DELETE, entities);
         repository.deleteAll(entities);
     }
 
@@ -124,7 +127,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
 
     @Override
     public <S extends T> List<S> saveAll(final Iterable<S> entities) {
-        accessController.assertOperationAllowed(AccessController.Operation.UPDATE, entities);
+        accessController.assertOperationAllowed(Operation.UPDATE, entities);
         return repository.saveAll(entities);
     }
 
@@ -142,7 +145,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
 
     @Override
     public void deleteByTenant(final String tenant) {
-        if (accessController.getAccessRules(AccessController.Operation.DELETE).isPresent()) {
+        if (accessController.getAccessRules(Operation.DELETE).isPresent()) {
             throw new InsufficientPermissionException("DELETE operation has restriction for given context! deleteAll can't be executed!");
         }
         repository.deleteByTenant(tenant);
@@ -160,47 +163,52 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
         return repository.findOne(
                 // spec shall be non-null and the result of appending rules shall be non-null
                 Objects.requireNonNull(
-                        accessController.appendAccessRules(AccessController.Operation.READ, spec),
+                        accessController.appendAccessRules(Operation.READ, spec),
                         APPENDED_ACCESS_RULES_SPEC_OF_NON_NULL_SPEC_MUST_NOT_BE_NULL));
     }
 
     @Override
     @NonNull
     public List<T> findAll(final Specification<T> spec) {
-        return repository.findAll(accessController.appendAccessRules(AccessController.Operation.READ, spec));
+        return repository.findAll(accessController.appendAccessRules(Operation.READ, spec));
     }
 
     @Override
     @NonNull
     public Page<T> findAll(final Specification<T> spec, @NonNull final Pageable pageable) {
-        return repository.findAll(accessController.appendAccessRules(AccessController.Operation.READ, spec), pageable);
+        return repository.findAll(accessController.appendAccessRules(Operation.READ, spec), pageable);
     }
 
     @Override
     public Page<T> findAll(final Specification<T> spec, final Specification<T> countSpec, final Pageable pageable) {
-        return repository.findAll(accessController.appendAccessRules(AccessController.Operation.READ, spec), countSpec, pageable);
+        return repository.findAll(accessController.appendAccessRules(Operation.READ, spec), countSpec, pageable);
     }
 
     @Override
     @NonNull
     public List<T> findAll(final Specification<T> spec, @NonNull final Sort sort) {
-        return repository.findAll(accessController.appendAccessRules(AccessController.Operation.READ, spec), sort);
+        return repository.findAll(accessController.appendAccessRules(Operation.READ, spec), sort);
     }
 
     @Override
     public long count(final Specification<T> spec) {
-        return repository.count(accessController.appendAccessRules(AccessController.Operation.READ, spec));
+        return repository.count(accessController.appendAccessRules(Operation.READ, spec));
     }
 
     @Override
     public boolean exists(@NonNull final Specification<T> spec) {
         return repository.exists(
-                Objects.requireNonNull(accessController.appendAccessRules(AccessController.Operation.READ, spec)));
+                Objects.requireNonNull(accessController.appendAccessRules(Operation.READ, spec)));
     }
 
     @Override
-    public long delete(final Specification<T> spec) {
-        return repository.delete(accessController.appendAccessRules(AccessController.Operation.DELETE, spec));
+    public long update(final UpdateSpecification<T> spec) {
+        return repository.update(accessController.appendAccessRules(Operation.UPDATE, spec));
+    }
+
+    @Override
+    public long delete(final DeleteSpecification<T> spec) {
+        return repository.delete(accessController.appendAccessRules(Operation.DELETE, spec));
     }
 
     @Override
@@ -209,7 +217,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
         return repository.findBy(
                 // spec shall be non-null and the result of appending rules shall be non-null
                 Objects.requireNonNull(
-                        accessController.appendAccessRules(AccessController.Operation.READ, spec),
+                        accessController.appendAccessRules(Operation.READ, spec),
                         APPENDED_ACCESS_RULES_SPEC_OF_NON_NULL_SPEC_MUST_NOT_BE_NULL),
                 queryFunction);
     }
@@ -234,13 +242,13 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
     @Override
     public Slice<T> findAllWithoutCount(final Specification<T> spec, final Pageable pageable) {
         return repository.findAllWithoutCount(
-                accessController.appendAccessRules(AccessController.Operation.READ, spec), pageable);
+                accessController.appendAccessRules(Operation.READ, spec), pageable);
     }
 
     @Override
     @Transactional
     @NonNull
-    public <S extends T> S save(@Nullable AccessController.Operation operation, @NonNull final S entity) {
+    public <S extends T> S save(Operation operation, @NonNull final S entity) {
         if (operation != null) {
             accessController.assertOperationAllowed(operation, entity);
         }
@@ -249,7 +257,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
 
     @Override
     @Transactional
-    public <S extends T> List<S> saveAll(@Nullable AccessController.Operation operation, final Iterable<S> entities) {
+    public <S extends T> List<S> saveAll(final Operation operation, final Iterable<S> entities) {
         if (operation != null) {
             accessController.assertOperationAllowed(operation, entities);
         }
@@ -257,7 +265,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
     }
 
     @NonNull
-    public Optional<T> findOne(@Nullable AccessController.Operation operation, @NonNull Specification<T> spec) {
+    public Optional<T> findOne(final Operation operation, @NonNull Specification<T> spec) {
         Objects.requireNonNull(spec, SPEC_MUST_NOT_BE_NULL);
         if (operation == null) {
             return repository.findOne(spec);
@@ -272,7 +280,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
 
     @Override
     @NonNull
-    public List<T> findAll(@Nullable final AccessController.Operation operation, @Nullable final Specification<T> spec) {
+    public List<T> findAll(final Operation operation, @Nullable final Specification<T> spec) {
         if (operation == null) {
             return repository.findAll(spec);
         } else {
@@ -282,7 +290,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
 
     @Override
     @NonNull
-    public boolean exists(@Nullable AccessController.Operation operation, Specification<T> spec) {
+    public boolean exists(final Operation operation, Specification<T> spec) {
         if (operation == null) {
             return repository.exists(spec);
         } else {
@@ -292,8 +300,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
     }
 
     @Override
-    @NonNull
-    public long count(@Nullable final AccessController.Operation operation, @Nullable final Specification<T> spec) {
+    public long count(final Operation operation, @Nullable final Specification<T> spec) {
         if (operation == null) {
             return repository.count(spec);
         } else {
@@ -303,8 +310,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
 
     @Override
     @NonNull
-    public Slice<T> findAllWithoutCount(
-            @Nullable final AccessController.Operation operation, @Nullable Specification<T> spec, Pageable pageable) {
+    public Slice<T> findAllWithoutCount(final Operation operation, @Nullable Specification<T> spec, Pageable pageable) {
         if (operation == null) {
             return repository.findAllWithoutCount(spec, pageable);
         } else {
@@ -321,25 +327,25 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
     @Override
     public Optional<T> findOne(final Specification<T> spec, final String entityGraph) {
         return repository.findOne(
-                accessController.appendAccessRules(AccessController.Operation.READ, spec), entityGraph);
+                accessController.appendAccessRules(Operation.READ, spec), entityGraph);
     }
 
     @Override
     public List<T> findAll(final Specification<T> spec, final String entityGraph) {
         return repository.findAll(
-                accessController.appendAccessRules(AccessController.Operation.READ, spec), entityGraph);
+                accessController.appendAccessRules(Operation.READ, spec), entityGraph);
     }
 
     @Override
     public Page<T> findAll(final Specification<T> spec, final String entityGraph, final Pageable pageable) {
         return repository.findAll(
-                accessController.appendAccessRules(AccessController.Operation.READ, spec), entityGraph, pageable);
+                accessController.appendAccessRules(Operation.READ, spec), entityGraph, pageable);
     }
 
     @Override
     public List<T> findAll(final Specification<T> spec, final String entityGraph, final Sort sort) {
         return repository.findAll(
-                accessController.appendAccessRules(AccessController.Operation.READ, spec), entityGraph, sort);
+                accessController.appendAccessRules(Operation.READ, spec), entityGraph, sort);
     }
 
     @SuppressWarnings("unchecked")
@@ -370,7 +376,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
                                 if (Iterable.class.isAssignableFrom(method.getReturnType())) {
                                     for (final Object e : (Iterable<?>) result) {
                                         if (repository.getDomainClass().isAssignableFrom(e.getClass())) {
-                                            accessController.assertOperationAllowed(AccessController.Operation.READ, (T) e);
+                                            accessController.assertOperationAllowed(Operation.READ, (T) e);
                                         }
                                     }
                                 } else if (Optional.class.isAssignableFrom(method.getReturnType()) && ((Optional<?>) result)
@@ -379,11 +385,11 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
                                     return ((Optional<T>) result).filter(
                                             t -> {
                                                 // if not accessible - throws exception (as for iterables or single entities)
-                                                accessController.assertOperationAllowed(AccessController.Operation.READ, t);
+                                                accessController.assertOperationAllowed(Operation.READ, t);
                                                 return true;
                                             });
                                 } else if (repository.getDomainClass().isAssignableFrom(method.getReturnType())) {
-                                    accessController.assertOperationAllowed(AccessController.Operation.READ, (T) result);
+                                    accessController.assertOperationAllowed(Operation.READ, (T) result);
                                 }
                                 return result;
                             } else if ("toString".equals(method.getName()) && method.getParameterCount() == 0) {

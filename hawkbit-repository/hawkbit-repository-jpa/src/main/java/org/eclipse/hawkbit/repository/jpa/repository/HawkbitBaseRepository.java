@@ -19,7 +19,9 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 
-import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController.Operation;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -30,8 +32,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -61,7 +61,7 @@ public class HawkbitBaseRepository<T, ID extends Serializable> extends SimpleJpa
 
     @Override
     public Slice<T> findAllWithoutCount(final Pageable pageable) {
-        return findAllWithoutCount(null, pageable);
+        return findAllWithoutCount(Specification.unrestricted(), pageable);
     }
 
     @Override
@@ -74,38 +74,36 @@ public class HawkbitBaseRepository<T, ID extends Serializable> extends SimpleJpa
     @Transactional
     @NonNull
     @SuppressWarnings("java:S6809") // this method already has a transactional annotation witch shall be applied
-    public <S extends T> S save(@Nullable AccessController.Operation operation, @NonNull final S entity) {
+    public <S extends T> S save(final Operation operation, @NonNull final S entity) {
         return save(entity);
     }
 
     @Override
     @Transactional
     @SuppressWarnings("java:S6809") // this method already has a transactional annotation witch shall be applied
-    public <S extends T> List<S> saveAll(@Nullable AccessController.Operation operation, final Iterable<S> entities) {
+    public <S extends T> List<S> saveAll(final Operation operation, final Iterable<S> entities) {
         return saveAll(entities);
     }
 
     @NonNull
-    public Optional<T> findOne(@Nullable AccessController.Operation operation, @NonNull Specification<T> spec) {
+    public Optional<T> findOne(final Operation operation, @NonNull Specification<T> spec) {
         return findOne(spec);
     }
 
     @Override
     @NonNull
     @SuppressWarnings("java:S4449") // find all accepts null
-    public List<T> findAll(@Nullable final AccessController.Operation operation, @Nullable final Specification<T> spec) {
+    public List<T> findAll(@Nullable final Operation operation, @Nullable final Specification<T> spec) {
         return findAll(spec);
     }
 
     @Override
-    @NonNull
-    public boolean exists(@Nullable AccessController.Operation operation, Specification<T> spec) {
+    public boolean exists(@Nullable Operation operation, Specification<T> spec) {
         return exists(spec);
     }
 
     @Override
-    @NonNull
-    public long count(@Nullable final AccessController.Operation operation, @Nullable final Specification<T> spec) {
+    public long count(@Nullable final Operation operation, @Nullable final Specification<T> spec) {
         return count(spec);
     }
 
@@ -137,7 +135,7 @@ public class HawkbitBaseRepository<T, ID extends Serializable> extends SimpleJpa
 
     @NonNull
     @Override
-    public Slice<T> findAllWithoutCount(@Nullable final AccessController.Operation operation, @Nullable Specification<T> spec,
+    public Slice<T> findAllWithoutCount(@Nullable final Operation operation, @Nullable Specification<T> spec,
             Pageable pageable) {
         return findAllWithoutCount(spec, pageable);
     }

@@ -109,7 +109,7 @@ public class MgmtSecurityConfiguration {
             // could be used for instance to set authentication provider
             // Note: implementation of the customizer shall always take in account what is the already set by the hawkBit
             @Autowired(required = false) @Qualifier("hawkbitHttpSecurityCustomizer") final Customizer<HttpSecurity> httpSecurityCustomizer,
-            final SystemManagement systemManagement) throws Exception {
+            final SystemManagement systemManagement) {
         http
                 .securityMatcher(MgmtRestConstants.REST + "/**", "/system/admin/**")
                 .authorizeHttpRequests(amrmRegistry -> amrmRegistry

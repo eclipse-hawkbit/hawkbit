@@ -36,8 +36,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProp
 import org.springframework.cache.Cache;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -94,10 +93,8 @@ public class JpaTargetTypeManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public TargetType assignCompatibleDistributionSetTypes(final long id,
-            final Collection<Long> distributionSetTypeIds) {
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public TargetType assignCompatibleDistributionSetTypes(final long id, final Collection<Long> distributionSetTypeIds) {
         final Collection<JpaDistributionSetType> dsTypes = distributionSetTypeRepository.findAllById(distributionSetTypeIds);
 
         if (dsTypes.size() < distributionSetTypeIds.size()) {
@@ -115,8 +112,7 @@ public class JpaTargetTypeManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public TargetType unassignDistributionSetType(final long id, final long distributionSetTypeId) {
         final JpaTargetType type = jpaRepository.getById(id);
         if (!distributionSetTypeRepository.existsById(distributionSetTypeId)) {
