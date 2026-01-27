@@ -2214,24 +2214,6 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     /**
-     * Assign multiple DSs to a target in one request with multiassignments enabled.
-     */
-    @Test
-    void multiAssignment() throws Exception {
-        final String targetId = testdataFactory.createTarget().getControllerId();
-        final List<Long> dsIds = testdataFactory.createDistributionSets(2).stream().map(DistributionSet::getId).toList();
-
-        final JSONArray body = new JSONArray();
-        dsIds.forEach(id -> body.put(getAssignmentObject(id, MgmtActionType.FORCED, 76)));
-
-        enableMultiAssignments();
-        mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(body.toString()).contentType(APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("total", equalTo(2)));
-    }
-
-    /**
      * An assignment request containing a weight is only accepted when weight is valid and multi assignment is on.
      */
     @Test
@@ -2243,7 +2225,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final JSONObject bodyValid = getAssignmentObject(dsId, MgmtActionType.FORCED, weight);
         final JSONObject bodyInvalid = getAssignmentObject(dsId, MgmtActionType.FORCED, Action.WEIGHT_MIN - 1);
 
-        enableMultiAssignments();
+        // enableMultiAssignments(); TODO:
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyInvalid.toString()).contentType(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest())
@@ -2273,47 +2255,23 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     /**
-     * An assignment request containing a valid weight when multi assignment is on.
-     */
-    @Test
-    void weightWithMultiAssignment() throws Exception {
-        final String targetId = testdataFactory.createTarget().getControllerId();
-        final Long dsId = testdataFactory.createDistributionSet().getId();
-        final int weight = 98;
-
-        final JSONObject bodyValid = getAssignmentObject(dsId, MgmtActionType.FORCED, weight);
-
-        enableMultiAssignments();
-        mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyValid.toString()).contentType(APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
-
-        final List<Action> actions = deploymentManagement.findActionsAll(PAGE).get().toList();
-        assertThat(actions).size().isEqualTo(1);
-        assertThat(actions.get(0).getWeight()).get().isEqualTo(weight);
-    }
-
-    /**
      * Get weight of action
      */
     @Test
     void getActionWeight() throws Exception {
         final String targetId = testdataFactory.createTarget().getControllerId();
-        final Long dsId = testdataFactory.createDistributionSet().getId();
-        final int customWeightHigh = 800;
-        final int customWeightLow = 300;
-        assignDistributionSet(dsId, targetId); // default weight 1000
-        enableMultiAssignments();
-        assignDistributionSet(dsId, targetId, customWeightHigh);
-        assignDistributionSet(dsId, targetId, customWeightLow);
+        final Long dsId1 = testdataFactory.createDistributionSet().getId();
+        final Long dsId2 = testdataFactory.createDistributionSet().getId();
+        final int customWeight = 800;
+        assignDistributionSet(dsId1, targetId); // default weight 1000
+        assignDistributionSet(dsId2, targetId, customWeight);
 
         mvc.perform(get("/rest/v1/targets/{targetId}/actions", targetId)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "WEIGHT:ASC"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("content.[0].weight", equalTo(customWeightLow)))
-                .andExpect(jsonPath("content.[1].weight", equalTo(customWeightHigh)))
-                .andExpect(jsonPath("content.[2].weight", equalTo(1000)));
+                .andExpect(jsonPath("content.[0].weight", equalTo(customWeight)))
+                .andExpect(jsonPath("content.[1].weight", equalTo(1000)));
     }
 
     /**

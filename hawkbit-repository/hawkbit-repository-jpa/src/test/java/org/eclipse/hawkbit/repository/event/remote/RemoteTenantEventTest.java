@@ -31,44 +31,6 @@ class RemoteTenantEventTest extends AbstractRemoteEventTest {
     private static final String TENANT_DEFAULT = "DEFAULT";
 
     /**
-     * Verifies that a testMultiActionAssignEvent can be properly serialized and deserialized
-     */
-    @Test
-    void testMultiActionAssignEvent() {
-        final List<String> controllerIds = List.of("id0", "id1", "id2", "id3", "id4loooooooooooooooooooooooooooooooooooonnnnnnnnnnnnnnnnnng");
-        final List<Action> actions = controllerIds.stream().map(this::createAction).toList();
-
-        final MultiActionAssignEvent assignEvent = new MultiActionAssignEvent(TENANT_DEFAULT, actions);
-
-        final MultiActionAssignEvent remoteAssignEventProtoStuff = createProtoStuffEvent(assignEvent);
-        assertThat(assignEvent).isEqualTo(remoteAssignEventProtoStuff);
-        assertThat(remoteAssignEventProtoStuff.getControllerIds()).containsExactlyElementsOf(controllerIds);
-
-        final MultiActionAssignEvent remoteAssignEventJackson = createJacksonEvent(assignEvent);
-        assertThat(assignEvent).isEqualTo(remoteAssignEventJackson);
-        assertThat(remoteAssignEventJackson.getControllerIds()).containsExactlyElementsOf(controllerIds);
-    }
-
-    /**
-     * Verifies that a MultiActionCancelEvent can be properly serialized and deserialized
-     */
-    @Test
-    void testMultiActionCancelEvent() {
-        final List<String> controllerIds = List.of("id0", "id1", "id2", "id3", "id4loooooooooooooooooooooooooooooooooooonnnnnnnnnnnnnnnnnng");
-        final List<Action> actions = controllerIds.stream().map(this::createAction).toList();
-
-        final MultiActionCancelEvent cancelEvent = new MultiActionCancelEvent(TENANT_DEFAULT, actions);
-
-        final MultiActionCancelEvent remoteCancelEventProtoStuff = createProtoStuffEvent(cancelEvent);
-        assertThat(cancelEvent).isEqualTo(remoteCancelEventProtoStuff);
-        assertThat(remoteCancelEventProtoStuff.getControllerIds()).containsExactlyElementsOf(controllerIds);
-
-        final MultiActionCancelEvent remoteCancelEventJackson = createJacksonEvent(cancelEvent);
-        assertThat(cancelEvent).isEqualTo(remoteCancelEventJackson);
-        assertThat(remoteCancelEventJackson.getControllerIds()).containsExactlyElementsOf(controllerIds);
-    }
-
-    /**
      * Verifies that a DownloadProgressEvent can be properly serialized and deserialized
      */
     @Test

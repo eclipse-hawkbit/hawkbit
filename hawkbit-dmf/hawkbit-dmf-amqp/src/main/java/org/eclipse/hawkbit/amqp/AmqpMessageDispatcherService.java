@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.amqp;
 
 import static org.eclipse.hawkbit.context.AccessContext.asSystem;
-import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED;
 
 import java.net.URI;
@@ -43,7 +42,6 @@ import org.eclipse.hawkbit.dmf.json.model.DmfBatchDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfConfirmRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
-import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.dmf.json.model.DmfTarget;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -53,14 +51,10 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
-import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.service.MultiActionAssignServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.service.MultiActionCancelServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistributionSetServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
@@ -142,30 +136,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         }
     }
 
-    /**
-     * Listener for Multi-Action events.
-     *
-     * @param multiActionAssignServiceEvent the Multi-Action event to be processed
-     */
-    @EventListener(classes = MultiActionAssignServiceEvent.class)
-    protected void onMultiActionAssign(final MultiActionAssignServiceEvent multiActionAssignServiceEvent) {
-        final MultiActionAssignEvent multiActionAssignEvent = multiActionAssignServiceEvent.getRemoteEvent();
-        log.debug("MultiActionAssignEvent received for {}", multiActionAssignEvent.getControllerIds());
-        sendMultiActionRequestMessages(multiActionAssignEvent.getControllerIds());
-    }
-
-    /**
-     * Listener for Multi-Action events.
-     *
-     * @param multiActionCancelServiceEvent the Multi-Action event to be processed
-     */
-    @EventListener(classes = MultiActionCancelServiceEvent.class)
-    protected void onMultiActionCancel(final MultiActionCancelServiceEvent multiActionCancelServiceEvent) {
-        final MultiActionCancelEvent multiActionCancelEvent = multiActionCancelServiceEvent.getRemoteEvent();
-        log.debug("MultiActionCancelEvent received for {}", multiActionCancelEvent.getControllerIds());
-        sendMultiActionRequestMessages(multiActionCancelEvent.getControllerIds());
-    }
-
     protected void sendUpdateMessageToTarget(
             final ActionProperties actionsProps, final Target target,
             final Map<SoftwareModule, Map<String, String>> softwareModules) {
@@ -245,39 +215,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     protected DmfConfirmRequest createConfirmRequest(
             final Target target, final Long actionId, final Map<SoftwareModule, Map<String, String>> softwareModules) {
         return new DmfConfirmRequest(actionId, asSystem(target::getSecurityToken), convertToAmqpSoftwareModules(target, softwareModules));
-    }
-
-    void sendMultiActionRequestToTarget(
-            final Target target, final List<Action> actions,
-            final Function<SoftwareModule, Map<String, String>> getSoftwareModuleMetaData) {
-        final URI targetAddress = IpUtil.addressToUri(target.getAddress());
-        if (!IpUtil.isAmqpUri(targetAddress) || CollectionUtils.isEmpty(actions)) {
-            return;
-        }
-
-        final DmfMultiActionRequest multiActionRequest = new DmfMultiActionRequest(
-                actions.stream()
-                        .map(action -> {
-                            final DmfActionRequest actionRequest = createDmfActionRequest(
-                                    target, action,
-                                    action.getDistributionSet().getModules().stream()
-                                            .collect(Collectors.toMap(Function.identity(), module -> {
-                                                final Map<String, String> softwareModuleMetadata = getSoftwareModuleMetaData.apply(module);
-                                                return softwareModuleMetadata == null ? Collections.emptyMap() : softwareModuleMetadata;
-                                            })));
-                            final int weight = getWeightConsideringDefault(action);
-                            return new DmfMultiActionRequest.DmfMultiActionElement(getEventTypeForAction(action), actionRequest, weight);
-                        })
-                        .toList());
-
-        final Message message = getMessageConverter().toMessage(
-                multiActionRequest,
-                createConnectorMessagePropertiesEvent(target.getTenant(), target.getControllerId(), EventTopic.MULTI_ACTION));
-        amqpSenderService.sendMessage(message, targetAddress);
-    }
-
-    private int getWeightConsideringDefault(final Action action) {
-        return action.getWeight().orElse(repositoryProperties.getActionWeightIfAbsent());
     }
 
     /**
@@ -410,40 +347,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 sendSingleUpdateMessage(actionProp, target, softwareModules);
             });
         }
-    }
-
-    private void sendMultiActionRequestMessages(final List<String> controllerIds) {
-        final Map<String, List<Action>> controllerIdToActions = controllerIds.stream()
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        controllerId -> deploymentManagement.findActiveActionsWithHighestWeight(controllerId, MAX_ACTION_COUNT)));
-
-        // gets all software modules for all action at once
-        final Set<Long> allSmIds = controllerIdToActions.values().stream()
-                .flatMap(actions -> actions.stream()
-                        .map(Action::getDistributionSet)
-                        .flatMap(ds -> ds.getModules().stream())
-                        .map(SoftwareModule::getId))
-                .collect(Collectors.toSet());
-        final Map<Long, ? extends Map<String, String>> getSoftwareModuleMetadata =
-                allSmIds.isEmpty()
-                        ? Collections.emptyMap()
-                        : softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(allSmIds);
-
-        targetManagement.findByControllerId(controllerIds).forEach(target ->
-                sendMultiActionRequestToTarget(
-                        target, controllerIdToActions.get(target.getControllerId()), module -> getSoftwareModuleMetadata.get(module.getId())));
-    }
-
-    private DmfActionRequest createDmfActionRequest(
-            final Target target, final Action action,
-            final Map<SoftwareModule, Map<String, String>> softwareModules) {
-        if (action.isCancelingOrCanceled()) {
-            return new DmfActionRequest(action.getId());
-        } else if (action.isWaitingConfirmation()) {
-            return createConfirmRequest(target, action.getId(), softwareModules);
-        }
-        return createDownloadAndUpdateRequest(target, action.getId(), softwareModules);
     }
 
     private void sendSingleUpdateMessage(

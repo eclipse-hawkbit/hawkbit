@@ -65,7 +65,6 @@ public abstract class AbstractDsAssignmentStrategy {
 
     private final ActionStatusRepository actionStatusRepository;
     private final QuotaManagement quotaManagement;
-    private final BooleanSupplier multiAssignmentsConfig;
     private final BooleanSupplier confirmationFlowConfig;
     private final RepositoryProperties repositoryProperties;
     private final Consumer<MaxAssignmentsExceededInfo> maxAssignmentExceededHandler;
@@ -74,14 +73,13 @@ public abstract class AbstractDsAssignmentStrategy {
     AbstractDsAssignmentStrategy(
             final TargetRepository targetRepository,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-            final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
-            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties,
+            final QuotaManagement quotaManagement, final BooleanSupplier confirmationFlowConfig,
+            final RepositoryProperties repositoryProperties,
             final Consumer<MaxAssignmentsExceededInfo> maxAssignmentExceededHandler) {
         this.targetRepository = targetRepository;
         this.actionRepository = actionRepository;
         this.actionStatusRepository = actionStatusRepository;
         this.quotaManagement = quotaManagement;
-        this.multiAssignmentsConfig = multiAssignmentsConfig;
         this.confirmationFlowConfig = confirmationFlowConfig;
         this.repositoryProperties = repositoryProperties;
         this.maxAssignmentExceededHandler = maxAssignmentExceededHandler;
@@ -209,10 +207,6 @@ public abstract class AbstractDsAssignmentStrategy {
      */
     protected void cancelAssignDistributionSetEvent(final Action action) {
         afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new CancelTargetAssignmentEvent(action)));
-    }
-
-    protected boolean isMultiAssignmentsEnabled() {
-        return multiAssignmentsConfig.getAsBoolean();
     }
 
     protected boolean isConfirmationFlowEnabled() {

@@ -688,23 +688,6 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     }
 
     /**
-     * Assign multiple DS in multi-assignment mode. The earliest active Action is exposed to the controller.
-     */
-    @Test
-    void earliestActionIsExposedToControllerInMultiAssignMode() throws Exception {
-        enableMultiAssignments();
-        final Target target = testdataFactory.createTarget();
-        final DistributionSet ds1 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
-        final DistributionSet ds2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
-        final Action action1 = getFirstAssignedAction(assignDistributionSet(ds1.getId(), target.getControllerId(), 56));
-        final Long action2Id = getFirstAssignedActionId(assignDistributionSet(ds2.getId(), target.getControllerId(), 34));
-
-        assertDeploymentActionIsExposedToTarget(target.getControllerId(), action1.getId());
-        sendDeploymentActionFeedback(target, action1, "closed", "success");
-        assertDeploymentActionIsExposedToTarget(target.getControllerId(), action2Id);
-    }
-
-    /**
      * The system should not create a new target because of a too long controller id.
      */
     @Test

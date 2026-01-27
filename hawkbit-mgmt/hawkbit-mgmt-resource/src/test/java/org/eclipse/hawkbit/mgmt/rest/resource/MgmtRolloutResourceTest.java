@@ -105,7 +105,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
      */
     @Test
     void getRollout() throws Exception {
-        enableMultiAssignments();
+        // enableMultiAssignments(); TODO: why even enabled here ?
         approvalStrategy.setApprovalNeeded(true);
         try {
             approvalStrategy.setApprovalDecidedBy("exampleUsername");
@@ -1678,26 +1678,20 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 null, null);
         final String valideWeightRequest = JsonBuilder.rollout("withWeight", "d", 2, dsId, "id==rollout*",
                 new RolloutGroupConditionBuilder().withDefaults().build(), null, null, weight, null, null, null);
-        final String valideWeightRequestMultiAssignment = JsonBuilder.rollout("withWeightMultiAssignment", "d", 2, dsId, "id==rollout*",
-                new RolloutGroupConditionBuilder().withDefaults().build(), null, null, weight, null, null, null);
 
         mvc.perform(post("/rest/v1/rollouts").content(valideWeightRequest).contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated());
-        enableMultiAssignments();
+
         mvc.perform(post("/rest/v1/rollouts").content(invalideWeightRequest).contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.repo.constraintViolation")));
-        mvc.perform(post("/rest/v1/rollouts").content(valideWeightRequestMultiAssignment).contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isCreated());
 
         final List<Rollout> rollouts = rolloutManagement.findAll(false, PAGE).getContent();
-        assertThat(rollouts).hasSize(2);
+        assertThat(rollouts).hasSize(1);
         assertThat(rollouts.get(0).getWeight()).get().isEqualTo(weight);
     }
 

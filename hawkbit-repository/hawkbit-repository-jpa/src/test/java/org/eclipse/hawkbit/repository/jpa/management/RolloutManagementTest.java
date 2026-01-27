@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.eclipse.hawkbit.auth.SpPermission;
@@ -1995,18 +1996,6 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Creating a rollout without weight value when multi assignment in enabled.
-     */
-    @Test
-    void weightNotRequiredInMultiAssignmentMode() {
-        enableMultiAssignments();
-        final Rollout rollout = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 2, "50",
-                "80",
-                ActionType.FORCED, null);
-        assertThat(rollout).isNotNull();
-    }
-
-    /**
      * Creating a rollout with a weight causes an error when multi assignment in disabled.
      */
     @Test
@@ -2024,7 +2013,6 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     void weightValidatedAndSaved() {
         final String targetPrefix = UUID.randomUUID().toString();
         testdataFactory.createTargets(4, targetPrefix);
-        enableMultiAssignments();
 
         final String rolloutName = UUID.randomUUID().toString();
         final String targetPrefixName = UUID.randomUUID().toString();
@@ -2054,7 +2042,6 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     void actionsWithWeightAreCreated() {
         final int amountOfTargets = 5;
         final int weight = 99;
-        enableMultiAssignments();
         final Long rolloutId = testdataFactory
                 .createSimpleTestRolloutWithTargetsAndDistributionSet(amountOfTargets, 2, amountOfTargets,
                         "80", "50", null, weight).getId();
@@ -2064,24 +2051,6 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actions) //
                 .hasSize(amountOfTargets) //
                 .allMatch(action -> action.getWeight().get() == weight);
-    }
-
-    /**
-     * Rollout can be created without weight in single assignment and be started in multi assignment
-     */
-    @Test
-    void createInSingleStartInMultiassignMode() {
-        final int amountOfTargets = 5;
-        final Long rolloutId = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(amountOfTargets, 2,
-                amountOfTargets,
-                "80", "50", null, null).getId();
-
-        enableMultiAssignments();
-        rolloutManagement.start(rolloutId);
-        rolloutHandler.handleAll();
-        final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
-        // wight replaced with default
-        assertThat(actions).hasSize(5).allMatch(action -> action.getWeight().isPresent());
     }
 
     /**

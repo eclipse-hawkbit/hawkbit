@@ -34,8 +34,6 @@ import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
-import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -48,8 +46,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.ActionCreatedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.ActionUpdatedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.service.MultiActionAssignServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.service.MultiActionCancelServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistributionSetServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
@@ -177,10 +173,6 @@ public class EventVerifier extends AbstractTestExecutionListener {
             modifiedEvents.add(new DynamicExpect(TargetDeletedServiceEvent.class, event.count()));
         } else if (type.isAssignableFrom(TargetAssignDistributionSetEvent.class)) {
             modifiedEvents.add(new DynamicExpect(TargetAssignDistributionSetServiceEvent.class, event.count()));
-        } else if (type.isAssignableFrom(MultiActionAssignEvent.class)) {
-            modifiedEvents.add(new DynamicExpect(MultiActionAssignServiceEvent.class, event.count()));
-        } else if (type.isAssignableFrom(MultiActionCancelEvent.class)) {
-            modifiedEvents.add(new DynamicExpect(MultiActionCancelServiceEvent.class, event.count()));
         } else if (type.isAssignableFrom(TargetAttributesRequestedEvent.class)) {
             modifiedEvents.add(new DynamicExpect(TargetAttributesRequestedServiceEvent.class, event.count()));
         } else if (type.isAssignableFrom(CancelTargetAssignmentEvent.class)) {

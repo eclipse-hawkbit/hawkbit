@@ -167,7 +167,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         this.repositoryProperties = repositoryProperties;
 
         onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository,
-                quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties, null);
+                quotaManagement, this::isConfirmationFlowEnabled, repositoryProperties, null);
     }
 
     @Autowired
@@ -1031,10 +1031,6 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
 
         return new TargetCount(totalTargets, baseFilter);
-    }
-
-    private boolean isMultiAssignmentsEnabled() {
-        return TenantConfigHelper.isMultiAssignmentsEnabled();
     }
 
     private boolean isConfirmationFlowEnabled() {
