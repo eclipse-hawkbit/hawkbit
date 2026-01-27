@@ -18,8 +18,9 @@ tenant.
 
 #### Target Security Token Authentication
 
-There is a 128 alphanumeric character security-token for each created target within IoT hawkBit. This token can be used
-to authenticate the target at hawkBit through the HTTP-Authorization header with the custom scheme _TargetToken_.
+If not set by the user, the security token is automatically generated with 32 alphanumeric characters. 
+However, the user can provide a custom token with a maximum length of 128 alphanumeric characters.
+This token can be used to authenticate the target at hawkBit through the HTTP-Authorization Header with the custom scheme _TargetToken_.
 
 ```http
 GET /DEFAULT/controller/v1/0e945f95-9117-4500-9b0a-9c6d72fa6c07 HTTP/1.1
