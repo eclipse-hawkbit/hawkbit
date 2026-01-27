@@ -2225,7 +2225,6 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final JSONObject bodyValid = getAssignmentObject(dsId, MgmtActionType.FORCED, weight);
         final JSONObject bodyInvalid = getAssignmentObject(dsId, MgmtActionType.FORCED, Action.WEIGHT_MIN - 1);
 
-        // enableMultiAssignments(); TODO:
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyInvalid.toString()).contentType(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest())

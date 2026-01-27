@@ -97,15 +97,6 @@ class RemoteTenantEventTest extends AbstractRemoteEventTest {
         assertCancelTargetAssignmentEvent(action, remoteEventJackson);
     }
 
-    private Action createAction(final String controllerId) {
-        final JpaAction generateAction = new JpaAction();
-        generateAction.setId(1L);
-        generateAction.setActionType(ActionType.FORCED);
-        generateAction.setTarget(testdataFactory.createTarget(controllerId));
-        generateAction.setStatus(Status.RUNNING);
-        return generateAction;
-    }
-
     private void assertTargetAssignDistributionSetEvent(final Action action, final TargetAssignDistributionSetEvent underTest) {
         assertThat(underTest.getActions()).hasSize(1);
         final ActionProperties actionProperties = underTest.getActions().get(action.getTarget().getControllerId());

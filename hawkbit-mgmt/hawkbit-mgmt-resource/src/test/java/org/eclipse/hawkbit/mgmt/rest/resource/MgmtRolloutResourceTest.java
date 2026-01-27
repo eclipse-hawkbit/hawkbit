@@ -105,7 +105,6 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
      */
     @Test
     void getRollout() throws Exception {
-        // enableMultiAssignments(); TODO: why even enabled here ?
         approvalStrategy.setApprovalNeeded(true);
         try {
             approvalStrategy.setApprovalDecidedBy("exampleUsername");

@@ -234,19 +234,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 : EventTopic.DOWNLOAD_AND_INSTALL;
     }
 
-    /**
-     * Determines the {@link EventTopic} for the given {@link Action}, depending on its action type.
-     *
-     * @param action to obtain the corresponding {@link EventTopic} for
-     * @return the {@link EventTopic} for this action
-     */
-    private static EventTopic getEventTypeForAction(final Action action) {
-        if (action.isCancelingOrCanceled()) {
-            return EventTopic.CANCEL_DOWNLOAD;
-        }
-        return getEventTypeForTarget(new ActionProperties(action));
-    }
-
     private static <T, R> List<R> partitionedParallelExecution(
             final Collection<T> controllerIds, final Function<Collection<T>, List<R>> loadingFunction) {
         // Ensure not exceeding the max value of MAX_PROCESSING_SIZE

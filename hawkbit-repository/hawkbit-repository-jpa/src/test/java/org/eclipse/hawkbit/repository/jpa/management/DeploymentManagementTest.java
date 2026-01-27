@@ -807,9 +807,9 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         }
 
         final Long dsId = testdataFactory.createDistributionSet().getId();
+        final List<DeploymentRequest> deploymentRequests = List.of(DeploymentRequest.builder(controllerId, dsId).weight(24).build());
         Assertions.assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> deploymentManagement.assignDistributionSets(
-                        List.of(DeploymentRequest.builder(controllerId, dsId).weight(24).build()), null));
+                .isThrownBy(() -> deploymentManagement.assignDistributionSets(deploymentRequests, null));
         assertThat(actionRepository.countByTargetControllerId(controllerId)).isEqualTo(20L);
     }
 

@@ -265,10 +265,6 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
                 Arguments.of(null, null));
     }
 
-    private static DeploymentRequest toDeploymentRequest(final String controllerId, final Long distributionSetId) {
-        return DeploymentRequest.builder(controllerId, distributionSetId).confirmationRequired(true).build();
-    }
-
     private void verifyAutoConfirmationIsDisabled(final String controllerId) {
         assertThat(targetManagement.getWithAutoConfigurationStatus(controllerId).getAutoConfirmationStatus()).isNull();
     }

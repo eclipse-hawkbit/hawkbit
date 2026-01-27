@@ -554,7 +554,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         storeActionsAndStatuses(actions, Action.Status.CANCELING);
 
         // send cancellation messages to event publisher
-        onlineDsAssignmentStrategy.sendCancellationMessages(actions, AccessContext.tenant());
+        onlineDsAssignmentStrategy.sendCancellationMessages(actions);
     }
 
     private void forceQuitActionsOfRollout(final Rollout rollout) {

@@ -328,7 +328,6 @@ class AutoAssignHandlerIntTest extends AbstractJpaIntegrationTest {
         final int amountOfTargets = 5;
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final int weight = 32;
-        // enableMultiAssignments(); TODO : disable and fix
 
         targetFilterQueryManagement.create(Create.builder()
                 .name("a").query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(weight)

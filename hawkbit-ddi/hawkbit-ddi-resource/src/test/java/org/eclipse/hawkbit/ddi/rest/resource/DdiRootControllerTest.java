@@ -742,16 +742,6 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         return sendDeploymentActionFeedback(target, action, execution, finished, null);
     }
 
-    private void assertDeploymentActionIsExposedToTarget(final String controllerId, final long expectedActionId) throws Exception {
-        final String expectedDeploymentBaseLink = String.format(
-                "/%s/controller/v1/%s/deploymentBase/%d",
-                AccessContext.tenant(), controllerId, expectedActionId);
-        mvc.perform(get(CONTROLLER_BASE, AccessContext.tenant(), controllerId).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$._links.deploymentBase.href", containsString(expectedDeploymentBaseLink)));
-    }
-
     private void withPollingTime(final String pollingTime, final Callable<Void> runnable) throws Exception {
         getAs(withUser("tenantadmin", TENANT_CONFIGURATION),
                 () -> {

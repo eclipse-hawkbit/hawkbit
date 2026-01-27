@@ -159,7 +159,7 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         cancelAssignDistributionSetEvent(action);
     }
 
-    void sendCancellationMessages(final List<JpaAction> actions, final String tenant) {
+    void sendCancellationMessages(final List<JpaAction> actions) {
         actions.forEach(this::cancelAssignDistributionSetEvent);
     }
 
