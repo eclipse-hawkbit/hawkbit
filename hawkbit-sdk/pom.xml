@@ -24,7 +24,7 @@
     <name>hawkBit :: SDK :: Parent</name>
 
     <properties>
-        <spring-cloud-starter-openfeign.version>4.3.0</spring-cloud-starter-openfeign.version>
+        <spring-cloud-starter-openfeign.version>5.0.1</spring-cloud-starter-openfeign.version>
         <openfeign-hc5.version>13.6</openfeign-hc5.version>
         <bouncycastle.version>1.83</bouncycastle.version>
         <java.version>${java.client.version}</java.version>
