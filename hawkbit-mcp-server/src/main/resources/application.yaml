@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: hawkbit-mcp-server
+
+  ai:
+    mcp:
+      server:
+        name: hawkbit-mcp-server
+        version: 0.0.1
+        type: SYNC
+        annotation-scanner:
+          enabled: true
+  main:
+    web-application-type: NONE
+    banner-mode: OFF
+
+logging:
+  level:
+    root: OFF
+
+hawkbit:
+  server:
+    mgmt-url: http://localhost:8080
+
+server:
+  port: 8090
