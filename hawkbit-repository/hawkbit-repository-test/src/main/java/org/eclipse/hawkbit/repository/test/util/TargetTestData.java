@@ -9,8 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
-import java.security.SecureRandom;
-import java.util.Random;
+import static org.eclipse.hawkbit.repository.test.util.TestdataFactory.SECURE_RND;
 
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -24,20 +23,19 @@ public class TargetTestData {
     public static final String ATTRIBUTE_VALUE_VALID;
 
     static {
-        final Random rand = new SecureRandom();
-        ATTRIBUTE_KEY_TOO_LONG = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_MAX_KEY_SIZE + 1, rand);
-        ATTRIBUTE_KEY_VALID = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_MAX_KEY_SIZE, rand);
-        ATTRIBUTE_VALUE_TOO_LONG = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_MAX_VALUE_SIZE + 1, rand);
-        ATTRIBUTE_VALUE_VALID = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_MAX_VALUE_SIZE, rand);
+        ATTRIBUTE_KEY_TOO_LONG = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_MAX_KEY_SIZE + 1);
+        ATTRIBUTE_KEY_VALID = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_MAX_KEY_SIZE);
+        ATTRIBUTE_VALUE_TOO_LONG = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_MAX_VALUE_SIZE + 1);
+        ATTRIBUTE_VALUE_VALID = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_MAX_VALUE_SIZE);
     }
 
-    private static String generateRandomStringWithLength(final int length, final Random rand) {
+    private static String generateRandomStringWithLength(final int length) {
         final StringBuilder randomStringBuilder = new StringBuilder(length);
         final int lowercaseACode = 97;
         final int lowercaseZCode = 122;
 
         for (int i = 0; i < length; i++) {
-            final char randomCharacter = (char) (rand.nextInt(lowercaseZCode - lowercaseACode + 1) + lowercaseACode);
+            final char randomCharacter = (char) (SECURE_RND.nextInt(lowercaseZCode - lowercaseACode + 1) + lowercaseACode);
             randomStringBuilder.append(randomCharacter);
         }
         return randomStringBuilder.toString();

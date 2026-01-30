@@ -20,7 +20,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -263,7 +264,7 @@ public class HawkbitClient {
     private Object callMultipartFormDataRequest(
             final Method method, final Object[] args,
             final Tenant tenant, final Controller controller,
-            final Class<?>[] parameterTypes, final ObjectMapper objectMapper) throws IOException {
+            final Class<?>[] parameterTypes, final ObjectMapper objectMapper) throws URISyntaxException, IOException {
         final PostMapping postMapping = method.getAnnotation(PostMapping.class);
         final Annotation[][] parametersAnnotations = method.getParameterAnnotations();
         // build path - replace @PathVariables
@@ -275,8 +276,8 @@ public class HawkbitClient {
             }
         }
 
-        final HttpURLConnection conn = (HttpURLConnection) new URL(
-                (controller == null ? hawkBitServer.getMgmtUrl() : hawkBitServer.getDdiUrl()) + path).openConnection();
+        final HttpURLConnection conn = (HttpURLConnection) new URI(
+                (controller == null ? hawkBitServer.getMgmtUrl() : hawkBitServer.getDdiUrl()) + path).toURL().openConnection();
         conn.setRequestMethod("POST");
 
         // deal with authentication - only from headers1
@@ -407,15 +408,6 @@ public class HawkbitClient {
         return null;
     }
 
-    private static final String KEYSTORE_PASSWORD;
-
-    static {
-        final Random random = new SecureRandom();
-        final byte[] bytes = new byte[16];
-        random.nextBytes(bytes);
-        KEYSTORE_PASSWORD = Base64.getEncoder().encodeToString(bytes);
-    }
-
     private static final Map<HttpClientKey, HttpClientWrapper> HTTP_CLIENTS = new HashMap<>();
 
     private static HttpClient httpClient(final HttpClientKey key) {
@@ -430,7 +422,7 @@ public class HawkbitClient {
                     try {
                         builder.setConnectionManager(
                                 PoolingHttpClientConnectionManagerBuilder.create()
-                                        .setTlsSocketStrategy(getTlsSocketStragegy(key.getClientCertificate(), key.getServerCertificates()))
+                                        .setTlsSocketStrategy(getTlsSocketStrategy(key.getClientCertificate(), key.getServerCertificates()))
                                         .build());
                     } catch (final RuntimeException e) {
                         throw e;
@@ -448,12 +440,17 @@ public class HawkbitClient {
         }
     }
 
-    private static TlsSocketStrategy getTlsSocketStragegy(final Certificate clientCertificate, final X509Certificate[] serverCertificates)
+    private static final Random SECURE_RND = new SecureRandom();
+
+    private static TlsSocketStrategy getTlsSocketStrategy(final Certificate clientCertificate, final X509Certificate[] serverCertificates)
             throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, KeyManagementException, CertificateException,
             IOException {
         final SSLContextBuilder sslContextBuilder = SSLContextBuilder.create();
         if (clientCertificate != null) {
-            sslContextBuilder.loadKeyMaterial(clientCertificate.toKeyStore(KEYSTORE_PASSWORD), KEYSTORE_PASSWORD.toCharArray());
+            final byte[] bytes = new byte[16];
+            SECURE_RND.nextBytes(bytes);
+            final String keystorePassword = Base64.getEncoder().encodeToString(bytes);
+            sslContextBuilder.loadKeyMaterial(clientCertificate.toKeyStore(keystorePassword), keystorePassword.toCharArray());
         }
         if (serverCertificates == null) {
             // trust all

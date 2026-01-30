@@ -93,6 +93,7 @@ public class TestdataFactory {
 
     @SuppressWarnings("java:S2245") // used for tests only, no need of secure random
     public static final Random RND = new Random();
+    public static final SecureRandom SECURE_RND = new SecureRandom();
 
     public static final String VISIBLE_SM_MD_KEY = "visibleMetdataKey";
     public static final String VISIBLE_SM_MD_VALUE = "visibleMetdataValue";
@@ -309,7 +310,7 @@ public class TestdataFactory {
                 SoftwareModuleManagement.Create.builder()
                         .type(findOrCreateSoftwareModuleType(SM_TYPE_APP, Integer.MAX_VALUE))
                         .name(prefix + SM_TYPE_APP)
-                        .version(version + "." + new SecureRandom().nextInt(100))
+                        .version(version + "." + SECURE_RND.nextInt(100))
                         .description(randomDescriptionLong())
                         .vendor(prefix + " vendor Limited, California")
                         .build());
@@ -317,14 +318,14 @@ public class TestdataFactory {
                 .create(SoftwareModuleManagement.Create.builder()
                         .type(findOrCreateSoftwareModuleType(SM_TYPE_RT))
                         .name(prefix + "app runtime")
-                        .version(version + "." + new SecureRandom().nextInt(100))
+                        .version(version + "." + SECURE_RND.nextInt(100))
                         .description(randomDescriptionLong()).vendor(prefix + " vendor GmbH, Stuttgart, Germany")
                         .build());
         final SoftwareModule osMod = softwareModuleManagement
                 .create(SoftwareModuleManagement.Create.builder()
                         .type(findOrCreateSoftwareModuleType(SM_TYPE_OS))
                         .name(prefix + " Firmware")
-                        .version(version + "." + new SecureRandom().nextInt(100))
+                        .version(version + "." + SECURE_RND.nextInt(100))
                         .description(randomDescriptionLong()).vendor(prefix + " vendor Limited Inc, California")
                         .build());
 
