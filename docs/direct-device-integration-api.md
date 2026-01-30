@@ -35,7 +35,7 @@ The *DDI* API allows the device to provide the following feedback messages:
 
 ---
 
-See this [issue](https://github.com/eclipse-hawkbit/hawkbit/issues/xxx) for additional information, concerning the cancellation of updates.  
+See this [issue](https://github.com/eclipse-hawkbit/hawkbit/issues/952) for additional information, concerning the cancellation of updates.  
 To finally accept a cancellation, you must send a `closed` status.execution type.
  
 ## REST Doc
