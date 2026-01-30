@@ -113,6 +113,15 @@ public class Utils {
         return combo;
     }
 
+    public static Button deleteButton(String tooltipText, Runnable deleteAction) {
+        final Button button = Utils.tooltip(new Button(VaadinIcon.TRASH.create()), tooltipText);
+        button.addClickListener(e -> {
+            ConfirmDialog dialog = Utils.deleteConfirmDialog(deleteAction);
+            dialog.open();
+        });
+        return button;
+    }
+
     @SuppressWarnings("java:S119") // better readability
     public static <T, ID> HorizontalLayout addRemoveControls(
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> addHandler,
@@ -138,7 +147,10 @@ public class Utils {
             layout.add(addBtn);
         }
         if (removeHandler != null) {
-            final ConfirmDialog dialog = promptForDeleteConfirmation(removeHandler, selectionGrid);
+            final ConfirmDialog dialog = deleteConfirmDialog(
+                    () -> removeHandler
+                            .apply(selectionGrid)
+                            .thenAccept(v -> selectionGrid.refreshGrid(false)));
             final Button removeBtn = tooltip(new Button(VaadinIcon.MINUS.create()), "Remove");
             removeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_CONTRAST);
             removeBtn.addClickListener(e -> dialog.open());
@@ -148,21 +160,25 @@ public class Utils {
         return layout;
     }
 
-    private static <T, ID> ConfirmDialog promptForDeleteConfirmation(Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler,
-            SelectionGrid<T, ID> selectionGrid) {
+    private static ConfirmDialog deleteConfirmDialog(Runnable removeHandler) {
+        return confirmDialog("Confirm Deletion",
+                "Are you sure you want to delete the selected items? This action cannot be undone.",
+                "Delete",
+                removeHandler);
+    }
+
+    public static ConfirmDialog confirmDialog(String header, String text, String confirmText, Runnable onConfirm) {
         final ConfirmDialog dialog = new ConfirmDialog();
-        dialog.setHeader("Confirm Deletion");
-        dialog.setText("Are you sure you want to delete the selected items? This action cannot be undone.");
+        dialog.setHeader(header);
+        dialog.setText(text);
 
         dialog.setCancelable(true);
         dialog.addCancelListener(event -> dialog.close());
 
         dialog.setConfirmButtonTheme(ButtonVariant.LUMO_ERROR.getVariantName());
-        dialog.setConfirmText("Delete");
+        dialog.setConfirmText(confirmText);
         dialog.addConfirmListener(event -> {
-            removeHandler
-                    .apply(selectionGrid)
-                    .thenAccept(v -> selectionGrid.refreshGrid(false));
+            onConfirm.run();
             dialog.close();
         });
         return dialog;
@@ -213,12 +229,15 @@ public class Utils {
         return icon;
     }
 
-    public static Select<MgmtActionType> actionTypeControls(DateTimePicker forceTime) {
+    public static Select<MgmtActionType> actionTypeControls(MgmtActionType defaultValue, DateTimePicker forceTime) {
+        return actionTypeControls(MgmtActionType.values(), defaultValue, forceTime);
+    }
 
+    public static Select<MgmtActionType> actionTypeControls(MgmtActionType[] displayedValues, MgmtActionType defaultValue, DateTimePicker forceTime) {
         Select<MgmtActionType> actionType = new Select<>();
         actionType.setLabel(Constants.ACTION_TYPE);
-        actionType.setItems(MgmtActionType.values());
-        actionType.setValue(MgmtActionType.FORCED);
+        actionType.setItems(displayedValues);
+        actionType.setValue(defaultValue);
         final ComponentRenderer<Component, MgmtActionType> actionTypeRenderer = new ComponentRenderer<>(actionTypeO -> switch (actionTypeO) {
             case SOFT -> new Text(Constants.SOFT);
             case FORCED -> new Text(Constants.FORCED);

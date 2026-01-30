@@ -324,7 +324,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
             description.setMinLength(2);
             description.setWidthFull();
 
-            actionType = Utils.actionTypeControls(forceTime);
+            actionType = Utils.actionTypeControls(MgmtActionType.FORCED, forceTime);
 
             startType = new Select<>();
             startType.setValue(StartType.MANUAL);
