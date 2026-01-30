@@ -15,7 +15,6 @@ import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.get
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withUser;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY;
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -142,27 +141,6 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     }
 
     /**
-     * The 'multi.assignments.enabled' property must not be changed to false.
-     */
-    @Test
-    void deactivateMultiAssignment() throws Exception {
-        final String bodyActivate = new JSONObject().put("value", true).toString();
-        final String bodyDeactivate = new JSONObject().put("value", false).toString();
-
-        mvc.perform(put(SYSTEM_V1 + "/configs/{keyName}", MULTI_ASSIGNMENTS_ENABLED)
-                        .content(bodyActivate)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isNoContent());
-
-        mvc.perform(put(SYSTEM_V1 + "/configs/{keyName}", MULTI_ASSIGNMENTS_ENABLED)
-                        .content(bodyDeactivate)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden());
-    }
-
-    /**
      * The Batch configuration should not be applied, because of invalid TenantConfiguration props
      */
     @Test
@@ -247,36 +225,6 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         assertEquals(updatedAuthGatewayTokenKey,
                 tenantConfigurationManagement().getConfigurationValue(AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY).getValue(),
                 "Change BatchConfiguration was successful but TenantConfiguration property was not actually changed.");
-    }
-
-    /**
-     * The 'repository.actions.autoclose.enabled' property must not be modified if Multi-Assignments is enabled.
-     */
-    @Test
-    void autoCloseCannotBeModifiedIfMultiAssignmentIsEnabled() throws Exception {
-        final String bodyActivate = new JSONObject().put("value", true).toString();
-        final String bodyDeactivate = new JSONObject().put("value", false).toString();
-
-        // enable Multi-Assignments
-        mvc.perform(put(SYSTEM_V1 + "/configs/{keyName}", MULTI_ASSIGNMENTS_ENABLED)
-                        .content(bodyActivate)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isNoContent());
-
-        // try to enable Auto-Close
-        mvc.perform(put(SYSTEM_V1 + "/configs/{keyName}", REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED)
-                        .content(bodyActivate)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden());
-
-        // try to disable Auto-Close
-        mvc.perform(put(SYSTEM_V1 + "/configs/{keyName}", REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED)
-                        .content(bodyDeactivate)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden());
     }
 
     /**

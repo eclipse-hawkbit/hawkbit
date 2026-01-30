@@ -117,10 +117,6 @@ public class TenantConfigurationProperties {
          */
         public static final String ACTION_CLEANUP_ON_QUOTA_HIT_PERCENTAGE = "action.cleanup.onQuotaHit.percent";
         /**
-         * Switch to enable/disable the multi-assignment feature.
-         */
-        public static final String MULTI_ASSIGNMENTS_ENABLED = "multi.assignments.enabled";
-        /**
          * Switch to enable/disable the batch-assignment feature.
          */
         public static final String BATCH_ASSIGNMENTS_ENABLED = "batch.assignments.enabled";

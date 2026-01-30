@@ -409,10 +409,6 @@ public abstract class AbstractIntegrationTest {
         return assignDistributionSet(dsId, Collections.singletonList(targetId), weight);
     }
 
-    protected void enableMultiAssignments() {
-        tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, true);
-    }
-
     protected void enableConfirmationFlow() {
         tenantConfigurationManagement().addOrUpdateConfiguration(TenantConfigurationKey.USER_CONFIRMATION_FLOW_ENABLED, true);
     }

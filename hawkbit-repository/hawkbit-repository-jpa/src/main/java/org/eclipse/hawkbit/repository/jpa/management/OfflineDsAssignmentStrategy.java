@@ -46,11 +46,11 @@ class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     OfflineDsAssignmentStrategy(
             final TargetRepository targetRepository,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-            final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
+            final QuotaManagement quotaManagement,
             final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties,
             final Consumer<MaxAssignmentsExceededInfo> maxAssignmentExceededHandler) {
         super(targetRepository, actionRepository, actionStatusRepository,
-                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties, maxAssignmentExceededHandler);
+                quotaManagement, confirmationFlowConfig, repositoryProperties, maxAssignmentExceededHandler);
     }
 
     @Override
@@ -74,14 +74,11 @@ class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     @Override
     public List<JpaTarget> findTargetsForAssignment(final List<String> controllerIDs, final long setId) {
-        final Function<List<String>, List<JpaTarget>> mapper;
-        if (isMultiAssignmentsEnabled()) {
-            mapper = ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids));
-        } else {
-            mapper = ids -> targetRepository.findAll(JpaManagementHelper.combineWithAnd(List.of(
-                    TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, setId),
-                    TargetSpecifications.notEqualToTargetUpdateStatus(TargetUpdateStatus.PENDING))));
-        }
+        final Function<List<String>, List<JpaTarget>> mapper =
+                ids -> targetRepository.findAll(JpaManagementHelper.combineWithAnd(List.of(
+                        TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, setId),
+                        TargetSpecifications.notEqualToTargetUpdateStatus(TargetUpdateStatus.PENDING))));
+
         return ListUtils.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream().map(mapper).flatMap(List::stream).toList();
     }
 

@@ -1583,41 +1583,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Actions are exposed according to thier weight in multi assignment mode.
-     */
-    @Test
-    void actionsAreExposedAccordingToTheirWeight() {
-        final String targetId = testdataFactory.createTarget().getControllerId();
-        final DistributionSet ds = testdataFactory.createDistributionSet();
-        final Long actionWeightNull = assignDistributionSet(ds.getId(), targetId).getAssignedEntity().get(0).getId();
-        enableMultiAssignments();
-        final Long actionWeight500old = assignDistributionSet(ds.getId(), targetId, 500).getAssignedEntity().get(0)
-                .getId();
-        final Long actionWeight500new = assignDistributionSet(ds.getId(), targetId, 500).getAssignedEntity().get(0)
-                .getId();
-        final Long actionWeight1000 = assignDistributionSet(ds.getId(), targetId, 1000).getAssignedEntity().get(0)
-                .getId();
-
-        assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
-                .isEqualTo(actionWeightNull);
-        controllerManagement
-                .addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionWeightNull).status(Status.FINISHED).build());
-        assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
-                .isEqualTo(actionWeight1000);
-        controllerManagement
-                .addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionWeight1000).status(Status.FINISHED).build());
-        assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
-                .isEqualTo(actionWeight500old);
-        controllerManagement
-                .addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionWeight500old).status(Status.FINISHED).build());
-        assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId).get().getId())
-                .isEqualTo(actionWeight500new);
-        controllerManagement
-                .addUpdateActionStatus(ActionStatusCreate.builder().actionId(actionWeight500new).status(Status.FINISHED).build());
-        assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId)).isEmpty();
-    }
-
-    /**
      * Delete a target on requested target deletion from client side
      */
     @Test

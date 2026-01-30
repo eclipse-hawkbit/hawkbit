@@ -328,7 +328,6 @@ class AutoAssignHandlerIntTest extends AbstractJpaIntegrationTest {
         final int amountOfTargets = 5;
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final int weight = 32;
-        enableMultiAssignments();
 
         targetFilterQueryManagement.create(Create.builder()
                 .name("a").query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(weight)
@@ -340,25 +339,6 @@ class AutoAssignHandlerIntTest extends AbstractJpaIntegrationTest {
         assertThat(actions)
                 .hasSize(amountOfTargets)
                 .allMatch(action -> action.getWeight().get() == weight);
-    }
-
-    /**
-     * An auto assignment target filter without weight still works after multi assignment is enabled
-     */
-    @Test
-    void filterWithoutWeightWorksInMultiAssignmentMode() {
-        final int amountOfTargets = 5;
-        final DistributionSet ds = testdataFactory.createDistributionSet();
-        targetFilterQueryManagement.create(Create.builder().name("a").query("name==*").autoAssignDistributionSet(ds).build());
-        enableMultiAssignments();
-
-        testdataFactory.createTargets(amountOfTargets);
-        autoAssignChecker.handleAll();
-
-        final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
-        assertThat(actions)
-                .hasSize(amountOfTargets)
-                .allMatch(action -> action.getWeight().isPresent());
     }
 
     /**

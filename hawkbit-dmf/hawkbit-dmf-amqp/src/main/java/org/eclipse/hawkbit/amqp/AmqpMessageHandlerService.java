@@ -9,15 +9,12 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -42,7 +39,6 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
-import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate.ActionStatusCreateBuilder;
@@ -52,7 +48,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.utils.IpUtil;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
@@ -315,29 +310,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void sendUpdateCommandToTarget(final Target target) {
-        if (TenantConfigHelper.getAsSystem(TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class)) {
-            sendCurrentActionsAsMultiActionToTarget(target);
-        } else {
-            sendOldestActionToTarget(target);
-        }
-    }
-
-    private void sendCurrentActionsAsMultiActionToTarget(final Target target) {
-        final List<Action> actions = controllerManagement.findActiveActionsWithHighestWeight(target.getControllerId(), MAX_ACTION_COUNT);
-
-        // gets all software modules for all action at once
-        final Set<Long> allSmIds = actions.stream()
-                .map(Action::getDistributionSet)
-                .flatMap(ds -> ds.getModules().stream())
-                .map(SoftwareModule::getId)
-                .collect(Collectors.toSet());
-        final Map<Long, Map<String, String>> getSoftwareModuleMetadata =
-                allSmIds.isEmpty() ? Collections.emptyMap() : controllerManagement.findTargetVisibleMetaDataBySoftwareModuleId(allSmIds);
-
-        amqpMessageDispatcherService.sendMultiActionRequestToTarget(target, actions, module -> getSoftwareModuleMetadata.get(module.getId()));
-    }
-
-    private void sendOldestActionToTarget(final Target target) {
+        // send oldest action to Target
         final Optional<Action> actionOptional = controllerManagement.findActiveActionWithHighestWeight(target.getControllerId());
         if (actionOptional.isEmpty()) {
             return;

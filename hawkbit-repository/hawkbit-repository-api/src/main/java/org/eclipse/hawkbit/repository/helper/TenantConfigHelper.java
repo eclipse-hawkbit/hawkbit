@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository.helper;
 
 import static org.eclipse.hawkbit.context.AccessContext.asSystem;
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.USER_CONFIRMATION_FLOW_ENABLED;
 
 import java.io.Serializable;
@@ -43,10 +42,6 @@ public final class TenantConfigHelper {
 
     public static <T extends Serializable> T getAsSystem(final String key, final Class<T> valueType) {
         return asSystem(() -> getTenantConfigurationManagement().getConfigurationValue(key, valueType).getValue());
-    }
-
-    public static boolean isMultiAssignmentsEnabled() {
-        return getAsSystem(MULTI_ASSIGNMENTS_ENABLED, Boolean.class);
     }
 
     public static boolean isUserConfirmationFlowEnabled() {

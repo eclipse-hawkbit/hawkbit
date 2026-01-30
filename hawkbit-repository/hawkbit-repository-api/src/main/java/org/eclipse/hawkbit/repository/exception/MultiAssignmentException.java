@@ -21,14 +21,14 @@ import org.eclipse.hawkbit.exception.SpServerError;
  */
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class MultiAssignmentIsNotEnabledException extends AbstractServerRtException {
+public class MultiAssignmentException extends AbstractServerRtException {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private static final SpServerError THIS_ERROR = SpServerError.SP_MULTIASSIGNMENT_NOT_ENABLED;
+    private static final SpServerError THIS_ERROR = SpServerError.SP_MULTIASSIGNMENT;
 
-    public MultiAssignmentIsNotEnabledException() {
+    public MultiAssignmentException() {
         super(THIS_ERROR);
     }
 }

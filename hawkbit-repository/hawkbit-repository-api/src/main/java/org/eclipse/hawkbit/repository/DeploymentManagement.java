@@ -32,7 +32,7 @@ import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
-import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.MultiAssignmentException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -76,8 +76,8 @@ public interface DeploymentManagement extends PermissionSupport {
      * @throws EntityNotFoundException if either provided {@link DistributionSet} or {@link Target}s do not exist
      * @throws AssignmentQuotaExceededException if the maximum number of targets the distribution set can be
      *         assigned to at once is exceeded
-     * @throws MultiAssignmentIsNotEnabledException if the request results in multiple assignments to the same
-     *         target and multi-assignment is disabled
+     * @throws MultiAssignmentException if the request results in multiple assignments to the same
+     *         target
      */
     @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
     List<DistributionSetAssignmentResult> assignDistributionSets(
@@ -102,8 +102,8 @@ public interface DeploymentManagement extends PermissionSupport {
      *         defined by the {@link DistributionSetType}.
      * @throws EntityNotFoundException if either provided {@link DistributionSet} or {@link Target}s do not exist
      * @throws AssignmentQuotaExceededException if the maximum number of targets the distribution set can be assigned to at once is exceeded
-     * @throws MultiAssignmentIsNotEnabledException if the request results in multiple assignments to the same
-     *         target and multi-assignment is disabled
+     * @throws MultiAssignmentException if the request results in multiple assignments to the same
+     *         target
      */
     @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
     List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(Collection<Entry<String, Long>> assignments);

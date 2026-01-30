@@ -65,37 +65,6 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Verify 'findActiveActionsWaitingConfirmation' method is filtering like expected with multi assignment active
-     */
-    @Test
-    void retrieveActionsWithConfirmationStateInMultiAssignment() {
-        enableMultiAssignments();
-        enableConfirmationFlow();
-
-        final String controllerId = testdataFactory.createTarget().getControllerId();
-        final Long dsId = testdataFactory.createDistributionSet().getId();
-
-        final List<Action> actions = assignDistributionSet(dsId, controllerId).getAssignedEntity();
-        assertThat(actions).hasSize(1);
-
-        assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).hasSize(1)
-                .allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
-
-        final Long dsId2 = testdataFactory.createDistributionSet().getId();
-        assignDistributionSet(dsId2, controllerId);
-
-        assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).hasSize(2)
-                .allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
-
-        confirmationManagement.confirmAction(actions.get(0).getId(), null, null);
-
-        assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).hasSize(1)
-                .allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION
-                        && Objects.equals(action.getDistributionSet().getId(), dsId2));
-
-    }
-
-    /**
      * Verify confirming an action will put it to the running state
      */
     @Test
@@ -189,34 +158,6 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
         // no status entry RUNNING should be present in status history
         assertThat(controllerManagement.findActionStatusByAction(newAction.getId(), PAGE)).hasSize(2)
                 .noneMatch(status -> status.getStatus() == Status.RUNNING);
-    }
-
-    /**
-     * Verify multiple actions in WFC state will be transferred in RUNNING state in case auto-confirmation is activated.
-     */
-    @Test
-    void activateAutoConfirmationInMultiAssignment() {
-        enableMultiAssignments();
-        enableConfirmationFlow();
-
-        final String controllerId = testdataFactory.createTarget().getControllerId();
-        final Long dsId = testdataFactory.createDistributionSet().getId();
-        final Long dsId2 = testdataFactory.createDistributionSet().getId();
-
-        final List<Action> actions = assignDistributionSets(
-                Arrays.asList(toDeploymentRequest(controllerId, dsId), toDeploymentRequest(controllerId, dsId2)))
-                .stream().flatMap(s -> s.getAssignedEntity().stream()).toList();
-        assertThat(actions).hasSize(2);
-
-        assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).hasSize(2)
-                .allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
-
-        confirmationManagement.activateAutoConfirmation(controllerId, null, null);
-
-        assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).isEmpty();
-
-        assertThat(deploymentManagement.findActionsByTarget(controllerId, PAGE).getContent()).hasSize(2)
-                .allMatch(action -> action.getStatus() == Status.RUNNING);
     }
 
     /**
@@ -322,10 +263,6 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
                 Arguments.of("TestUser", null),
                 Arguments.of(null, "TestRemark"),
                 Arguments.of(null, null));
-    }
-
-    private static DeploymentRequest toDeploymentRequest(final String controllerId, final Long distributionSetId) {
-        return DeploymentRequest.builder(controllerId, distributionSetId).confirmationRequired(true).build();
     }
 
     private void verifyAutoConfirmationIsDisabled(final String controllerId) {

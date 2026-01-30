@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.amqp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -112,10 +111,6 @@ class AmqpMessageHandlerServiceTest {
         TenantConfigHelper.setTenantConfigurationManagement(tenantConfigurationManagement);
         messageConverter = new Jackson2JsonMessageConverter();
         lenient().when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
-        final TenantConfigurationValue multiAssignmentConfig = TenantConfigurationValue.builder().value(Boolean.FALSE)
-                .global(Boolean.FALSE).build();
-        lenient().when(tenantConfigurationManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class))
-                .thenReturn(multiAssignmentConfig);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(
                 rabbitTemplate, amqpMessageDispatcherServiceMock, controllerManagementMock, confirmationManagementMock);

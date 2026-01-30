@@ -16,7 +16,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
@@ -25,7 +24,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.service.MultiActionAssignServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistributionSetServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
@@ -79,8 +77,6 @@ class ServiceEventsTest {
                 TargetAssignDistributionSetEvent.class,
                 CancelTargetAssignmentEvent.class,
                 TargetAttributesRequestedEvent.class,
-                MultiActionAssignEvent.class,
-                MultiActionCancelEvent.class,
                 ActionCreatedEvent.class,
                 ActionUpdatedEvent.class
         );
@@ -122,16 +118,6 @@ class ServiceEventsTest {
 
         verify(streamBridge).send("fanout", event);
         verify(streamBridge).send(eq("group"), any(TargetAttributesRequestedServiceEvent.class));
-    }
-
-    @Test
-    void testProcessingMultiActionAssignmentEventIsSent() {
-        MultiActionAssignEvent event = new MultiActionAssignEvent("testtenant", List.of(mockAction()));
-
-        publisher.publishEvent(event);
-
-        verify(streamBridge).send("fanout", event);
-        verify(streamBridge).send(eq("group"), any(MultiActionAssignServiceEvent.class));
     }
 
     @Test
