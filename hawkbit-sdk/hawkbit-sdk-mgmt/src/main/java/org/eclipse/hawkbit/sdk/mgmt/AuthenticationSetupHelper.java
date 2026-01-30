@@ -44,7 +44,7 @@ public class AuthenticationSetupHelper {
     private static final String AUTHENTICATION_MODE_HEADER_ENABLED = "authentication.header.enabled";
     private static final String AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME = "authentication.header.authority";
 
-    private static final Random RND = new SecureRandom();
+    private static final Random SECURE_RND = new SecureRandom();
 
     @NonNull
     private final Tenant tenant;
@@ -53,7 +53,7 @@ public class AuthenticationSetupHelper {
 
     public static String randomToken() {
         final byte[] rnd = new byte[24];
-        RND.nextBytes(rnd);
+        SECURE_RND.nextBytes(rnd);
         return Base64.getEncoder().encodeToString(rnd);
     }
 

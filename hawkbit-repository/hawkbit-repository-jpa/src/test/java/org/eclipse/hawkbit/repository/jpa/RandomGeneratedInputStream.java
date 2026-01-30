@@ -14,12 +14,9 @@ import java.io.InputStream;
 import java.security.SecureRandom;
 import java.util.Random;
 
-/**
- *
- */
-public class RandomGeneratedInputStream extends InputStream {
+import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 
-    private final Random random = new SecureRandom();
+public class RandomGeneratedInputStream extends InputStream {
 
     /** Target size of the stream. */
     private final long size;
@@ -42,7 +39,6 @@ public class RandomGeneratedInputStream extends InputStream {
 
         index++;
 
-        return random.nextInt(255);
+        return TestdataFactory.SECURE_RND.nextInt(255);
     }
-
 }
