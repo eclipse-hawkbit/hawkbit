@@ -353,6 +353,7 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
 
         private TargetDetailedView(final HawkbitMgmtClient hawkbitClient) {
             final TabSheet tabSheet = new TabSheet();
+            tabSheet.setWidthFull();
             targetId = new Span();
             targetDetails = new TargetDetails(hawkbitClient);
             targetAssignedInstalled = new TargetAssignedInstalled(hawkbitClient);
