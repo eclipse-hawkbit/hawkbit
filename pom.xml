@@ -57,7 +57,7 @@
 
         <!-- must be the same as the parent version -->
         <spring.boot.version>3.5.10</spring.boot.version>
-        <spring.cloud.version>2025.0.1</spring.cloud.version>
+        <spring.cloud.version>2025.1.1</spring.cloud.version>
         <springdoc-openapi.version>2.8.15</springdoc-openapi.version>
 
         <!-- Spring boot version overrides (should be reviewed with every Spring boot upgrade) - START -->
