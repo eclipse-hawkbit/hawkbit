@@ -290,7 +290,6 @@ maven/mavencentral/org.springframework.cloud/spring-cloud-context/4.3.1, Apache-
 maven/mavencentral/org.springframework.cloud/spring-cloud-function-context/4.3.1, Apache-2.0, approved, #21964
 maven/mavencentral/org.springframework.cloud/spring-cloud-function-core/4.3.1, Apache-2.0, approved, #22002
 maven/mavencentral/org.springframework.cloud/spring-cloud-openfeign-core/4.3.1, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.springframework.cloud/spring-cloud-starter-openfeign/4.3.0, MIT AND Apache-2.0, approved, #25561
 maven/mavencentral/org.springframework.cloud/spring-cloud-starter-openfeign/4.3.1, MIT AND Apache-2.0, approved, #25561
 maven/mavencentral/org.springframework.cloud/spring-cloud-starter-stream-rabbit/4.3.1, Apache-2.0, approved, #25560
 maven/mavencentral/org.springframework.cloud/spring-cloud-starter/4.3.1, Apache-2.0, approved, #25562
