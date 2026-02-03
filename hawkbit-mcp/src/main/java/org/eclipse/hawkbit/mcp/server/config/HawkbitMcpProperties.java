@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mcp.server.config;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -165,6 +166,7 @@ public class HawkbitMcpProperties {
      * Rollout-specific operation configuration including lifecycle operations.
      */
     @Data
+    @EqualsAndHashCode(callSuper = true)
     public static class RolloutConfig extends EntityConfig {
 
         private Boolean startEnabled = true;

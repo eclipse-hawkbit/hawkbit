@@ -16,8 +16,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.mcp.server.client.HawkbitAuthenticationValidator;
-import org.eclipse.hawkbit.mcp.server.client.HawkbitAuthenticationValidator.ValidationResult;
+import org.eclipse.hawkbit.mcp.server.client.AuthenticationValidator;
+import org.eclipse.hawkbit.mcp.server.client.AuthenticationValidator.ValidationResult;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,6 +47,7 @@ import java.io.IOException;
 @EnableWebSecurity
 @RequiredArgsConstructor
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@ConditionalOnProperty(name = "spring.ai.mcp.server.stdio", havingValue = "false", matchIfMissing = true)
 public class McpSecurityConfiguration {
 
     /**
@@ -53,7 +55,7 @@ public class McpSecurityConfiguration {
      */
     public static final String AUTH_HEADER_ATTRIBUTE = "hawkbit.mcp.auth.header";
 
-    private final HawkbitAuthenticationValidator authenticationValidator;
+    private final AuthenticationValidator authenticationValidator;
 
     @Bean
     @SuppressWarnings("java:S4502") // CSRF protection is not needed for stateless REST APIs using Authorization header
@@ -75,7 +77,7 @@ public class McpSecurityConfiguration {
     @RequiredArgsConstructor
     public static class HawkBitAuthenticationFilter extends OncePerRequestFilter {
 
-        private final HawkbitAuthenticationValidator validator;
+        private final AuthenticationValidator validator;
 
         @Override
         protected void doFilterInternal(final HttpServletRequest request, final @NonNull HttpServletResponse response,

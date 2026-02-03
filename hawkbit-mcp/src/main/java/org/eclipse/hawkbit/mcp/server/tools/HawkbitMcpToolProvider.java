@@ -12,18 +12,15 @@ package org.eclipse.hawkbit.mcp.server.tools;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mcp.server.config.HawkbitMcpProperties;
-import org.eclipse.hawkbit.mcp.server.dto.ActionOperation;
+import org.eclipse.hawkbit.mcp.server.dto.ActionRequest;
+import org.eclipse.hawkbit.mcp.server.dto.DistributionSetRequest;
 import org.eclipse.hawkbit.mcp.server.dto.ListRequest;
-import org.eclipse.hawkbit.mcp.server.dto.ManageActionRequest;
-import org.eclipse.hawkbit.mcp.server.dto.ManageDistributionSetRequest;
-import org.eclipse.hawkbit.mcp.server.dto.ManageRolloutRequest;
-import org.eclipse.hawkbit.mcp.server.dto.ManageSoftwareModuleRequest;
-import org.eclipse.hawkbit.mcp.server.dto.ManageTargetFilterRequest;
-import org.eclipse.hawkbit.mcp.server.dto.ManageTargetRequest;
-import org.eclipse.hawkbit.mcp.server.dto.Operation;
 import org.eclipse.hawkbit.mcp.server.dto.OperationResponse;
 import org.eclipse.hawkbit.mcp.server.dto.PagedResponse;
-import org.eclipse.hawkbit.mcp.server.dto.RolloutOperation;
+import org.eclipse.hawkbit.mcp.server.dto.RolloutRequest;
+import org.eclipse.hawkbit.mcp.server.dto.SoftwareModuleRequest;
+import org.eclipse.hawkbit.mcp.server.dto.TargetFilterRequest;
+import org.eclipse.hawkbit.mcp.server.dto.TargetRequest;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
@@ -197,303 +194,313 @@ public class HawkbitMcpToolProvider {
              description = "Create, update, or delete targets (devices). " +
                            "Operations: CREATE (new target with controllerId, name, description), " +
                            "UPDATE (modify existing target by controllerId), " +
-                           "DELETE (remove target by controllerId)")
-    public OperationResponse<Object> manageTarget(final ManageTargetRequest request) {
-        validateOperation(request.operation(), "targets");
-        log.debug("Managing target: operation={}, controllerId={}", request.operation(), request.controllerId());
+                           "DELETE (remove target by controllerId). " +
+                           "Use 'type' field to select operation: " +
+                           "{\"type\":\"Create\",\"body\":{\"controllerId\":\"id\",\"name\":\"name\"}}, " +
+                           "{\"type\":\"Update\",\"controllerId\":\"id\",\"body\":{...}}, " +
+                           "{\"type\":\"Delete\",\"controllerId\":\"id\"}")
+    public OperationResponse<Object> manageTarget(final TargetRequest request) {
+        log.debug("Managing target: request={}", request.getClass().getSimpleName());
 
         final MgmtTargetRestApi api = hawkbitClient.mgmtService(MgmtTargetRestApi.class, dummyTenant);
 
-        return switch (request.operation()) {
-            case CREATE -> {
-                if (request.body() == null) {
-                    yield OperationResponse.failure(OP_CREATE, "Request body is required for CREATE operation");
-                }
-                final ResponseEntity<List<MgmtTarget>> response = api.createTargets(List.of(request.body()));
-                final List<MgmtTarget> created = response.getBody();
-                yield OperationResponse.success(OP_CREATE, "Target created successfully",
-                        created != null && !created.isEmpty() ? created.get(0) : null);
+        if (request instanceof TargetRequest.Create r) {
+            validateOperation("create", "targets");
+            if (r.body() == null) {
+                return OperationResponse.failure(OP_CREATE, "Request body is required for CREATE operation");
             }
-            case UPDATE -> {
-                if (request.controllerId() == null || request.controllerId().isBlank()) {
-                    yield OperationResponse.failure(OP_UPDATE, "controllerId is required for UPDATE operation");
-                }
-                if (request.body() == null) {
-                    yield OperationResponse.failure(OP_UPDATE, "Request body is required for UPDATE operation");
-                }
-                final ResponseEntity<MgmtTarget> response = api.updateTarget(request.controllerId(), request.body());
-                yield OperationResponse.success(OP_UPDATE, "Target updated successfully", response.getBody());
+            final ResponseEntity<List<MgmtTarget>> response = api.createTargets(List.of(r.body()));
+            final List<MgmtTarget> created = response.getBody();
+            return OperationResponse.success(OP_CREATE, "Target created successfully",
+                    created != null && !created.isEmpty() ? created.get(0) : null);
+        } else if (request instanceof TargetRequest.Update r) {
+            validateOperation("update", "targets");
+            if (r.controllerId() == null || r.controllerId().isBlank()) {
+                return OperationResponse.failure(OP_UPDATE, "controllerId is required for UPDATE operation");
             }
-            case DELETE -> {
-                if (request.controllerId() == null || request.controllerId().isBlank()) {
-                    yield OperationResponse.failure(OP_DELETE, "controllerId is required for DELETE operation");
-                }
-                api.deleteTarget(request.controllerId());
-                yield OperationResponse.success(OP_DELETE, "Target deleted successfully");
+            if (r.body() == null) {
+                return OperationResponse.failure(OP_UPDATE, "Request body is required for UPDATE operation");
             }
-        };
+            final ResponseEntity<MgmtTarget> response = api.updateTarget(r.controllerId(), r.body());
+            return OperationResponse.success(OP_UPDATE, "Target updated successfully", response.getBody());
+        } else if (request instanceof TargetRequest.Delete r) {
+            validateOperation("delete", "targets");
+            if (r.controllerId() == null || r.controllerId().isBlank()) {
+                return OperationResponse.failure(OP_DELETE, "controllerId is required for DELETE operation");
+            }
+            api.deleteTarget(r.controllerId());
+            return OperationResponse.success(OP_DELETE, "Target deleted successfully");
+        }
+        throw new IllegalArgumentException("Unknown request type: " + request.getClass().getSimpleName());
     }
 
     @McpTool(name = "manage_rollout",
              description = "Create, update, delete, and control rollouts for software deployment. " +
-                           "Operations: CREATE (new rollout), UPDATE (modify rollout), DELETE (remove rollout), " +
-                           "START (begin rollout), PAUSE, STOP, RESUME, APPROVE, DENY, RETRY, TRIGGER_NEXT_GROUP")
-    public OperationResponse<Object> manageRollout(final ManageRolloutRequest request) {
-        validateRolloutOperation(request.operation());
-        log.debug("Managing rollout: operation={}, rolloutId={}", request.operation(), request.rolloutId());
+                           "Use 'type' field to select operation. " +
+                           "Types: Create, Update, Delete, Start, Pause, Stop, Resume, Approve, Deny, Retry, TriggerNextGroup. " +
+                           "Examples: {\"type\":\"Create\",\"body\":{...}}, " +
+                           "{\"type\":\"Start\",\"rolloutId\":123}, " +
+                           "{\"type\":\"Approve\",\"rolloutId\":123,\"remark\":\"approved\"}")
+    public OperationResponse<Object> manageRollout(final RolloutRequest request) {
+        log.debug("Managing rollout: request={}", request.getClass().getSimpleName());
 
         final MgmtRolloutRestApi api = hawkbitClient.mgmtService(MgmtRolloutRestApi.class, dummyTenant);
 
-        return switch (request.operation()) {
-            case CREATE -> {
-                if (request.createBody() == null) {
-                    yield OperationResponse.failure(OP_CREATE, "createBody is required for CREATE operation");
-                }
-                final ResponseEntity<MgmtRolloutResponseBody> response = api.create(request.createBody());
-                yield OperationResponse.success(OP_CREATE, "Rollout created successfully", response.getBody());
+        if (request instanceof RolloutRequest.Create r) {
+            validateRolloutOperation("create");
+            if (r.body() == null) {
+                return OperationResponse.failure(OP_CREATE, "body is required for CREATE operation");
             }
-            case UPDATE -> {
-                if (request.rolloutId() == null) {
-                    yield OperationResponse.failure(OP_UPDATE, "rolloutId is required for UPDATE operation");
-                }
-                if (request.updateBody() == null) {
-                    yield OperationResponse.failure(OP_UPDATE, "updateBody is required for UPDATE operation");
-                }
-                final ResponseEntity<MgmtRolloutResponseBody> response = api.update(request.rolloutId(), request.updateBody());
-                yield OperationResponse.success(OP_UPDATE, "Rollout updated successfully", response.getBody());
+            final ResponseEntity<MgmtRolloutResponseBody> response = api.create(r.body());
+            return OperationResponse.success(OP_CREATE, "Rollout created successfully", response.getBody());
+        } else if (request instanceof RolloutRequest.Update r) {
+            validateRolloutOperation("update");
+            if (r.rolloutId() == null) {
+                return OperationResponse.failure(OP_UPDATE, "rolloutId is required for UPDATE operation");
             }
-            case DELETE -> {
-                if (request.rolloutId() == null) {
-                    yield OperationResponse.failure(OP_DELETE, "rolloutId is required for DELETE operation");
-                }
-                api.delete(request.rolloutId());
-                yield OperationResponse.success(OP_DELETE, "Rollout deleted successfully");
+            if (r.body() == null) {
+                return OperationResponse.failure(OP_UPDATE, "body is required for UPDATE operation");
             }
-            case START -> {
-                if (request.rolloutId() == null) {
-                    yield OperationResponse.failure(OP_START, "rolloutId is required for START operation");
-                }
-                api.start(request.rolloutId());
-                yield OperationResponse.success(OP_START, "Rollout started successfully");
+            final ResponseEntity<MgmtRolloutResponseBody> response = api.update(r.rolloutId(), r.body());
+            return OperationResponse.success(OP_UPDATE, "Rollout updated successfully", response.getBody());
+        } else if (request instanceof RolloutRequest.Delete r) {
+            validateRolloutOperation("delete");
+            if (r.rolloutId() == null) {
+                return OperationResponse.failure(OP_DELETE, "rolloutId is required for DELETE operation");
             }
-            case PAUSE -> {
-                if (request.rolloutId() == null) {
-                    yield OperationResponse.failure(OP_PAUSE, "rolloutId is required for PAUSE operation");
-                }
-                api.pause(request.rolloutId());
-                yield OperationResponse.success(OP_PAUSE, "Rollout paused successfully");
+            api.delete(r.rolloutId());
+            return OperationResponse.success(OP_DELETE, "Rollout deleted successfully");
+        } else if (request instanceof RolloutRequest.Start r) {
+            validateRolloutOperation("start");
+            if (r.rolloutId() == null) {
+                return OperationResponse.failure(OP_START, "rolloutId is required for START operation");
             }
-            case STOP -> {
-                if (request.rolloutId() == null) {
-                    yield OperationResponse.failure(OP_STOP, "rolloutId is required for STOP operation");
-                }
-                api.stop(request.rolloutId());
-                yield OperationResponse.success(OP_STOP, "Rollout stopped successfully");
+            api.start(r.rolloutId());
+            return OperationResponse.success(OP_START, "Rollout started successfully");
+        } else if (request instanceof RolloutRequest.Pause r) {
+            validateRolloutOperation("pause");
+            if (r.rolloutId() == null) {
+                return OperationResponse.failure(OP_PAUSE, "rolloutId is required for PAUSE operation");
             }
-            case RESUME -> {
-                if (request.rolloutId() == null) {
-                    yield OperationResponse.failure(OP_RESUME, "rolloutId is required for RESUME operation");
-                }
-                api.resume(request.rolloutId());
-                yield OperationResponse.success(OP_RESUME, "Rollout resumed successfully");
+            api.pause(r.rolloutId());
+            return OperationResponse.success(OP_PAUSE, "Rollout paused successfully");
+        } else if (request instanceof RolloutRequest.Stop r) {
+            validateRolloutOperation("stop");
+            if (r.rolloutId() == null) {
+                return OperationResponse.failure(OP_STOP, "rolloutId is required for STOP operation");
             }
-            case APPROVE -> {
-                if (request.rolloutId() == null) {
-                    yield OperationResponse.failure(OP_APPROVE, "rolloutId is required for APPROVE operation");
-                }
-                api.approve(request.rolloutId(), request.remark());
-                yield OperationResponse.success(OP_APPROVE, "Rollout approved successfully");
+            api.stop(r.rolloutId());
+            return OperationResponse.success(OP_STOP, "Rollout stopped successfully");
+        } else if (request instanceof RolloutRequest.Resume r) {
+            validateRolloutOperation("resume");
+            if (r.rolloutId() == null) {
+                return OperationResponse.failure(OP_RESUME, "rolloutId is required for RESUME operation");
             }
-            case DENY -> {
-                if (request.rolloutId() == null) {
-                    yield OperationResponse.failure(OP_DENY, "rolloutId is required for DENY operation");
-                }
-                api.deny(request.rolloutId(), request.remark());
-                yield OperationResponse.success(OP_DENY, "Rollout denied successfully");
+            api.resume(r.rolloutId());
+            return OperationResponse.success(OP_RESUME, "Rollout resumed successfully");
+        } else if (request instanceof RolloutRequest.Approve r) {
+            validateRolloutOperation("approve");
+            if (r.rolloutId() == null) {
+                return OperationResponse.failure(OP_APPROVE, "rolloutId is required for APPROVE operation");
             }
-            case RETRY -> {
-                if (request.rolloutId() == null) {
-                    yield OperationResponse.failure(OP_RETRY, "rolloutId is required for RETRY operation");
-                }
-                final ResponseEntity<MgmtRolloutResponseBody> response = api.retryRollout(request.rolloutId());
-                yield OperationResponse.success(OP_RETRY, "Rollout retry created successfully", response.getBody());
+            api.approve(r.rolloutId(), r.remark());
+            return OperationResponse.success(OP_APPROVE, "Rollout approved successfully");
+        } else if (request instanceof RolloutRequest.Deny r) {
+            validateRolloutOperation("deny");
+            if (r.rolloutId() == null) {
+                return OperationResponse.failure(OP_DENY, "rolloutId is required for DENY operation");
             }
-            case TRIGGER_NEXT_GROUP -> {
-                if (request.rolloutId() == null) {
-                    yield OperationResponse.failure(OP_TRIGGER_NEXT_GROUP, "rolloutId is required for TRIGGER_NEXT_GROUP operation");
-                }
-                api.triggerNextGroup(request.rolloutId());
-                yield OperationResponse.success(OP_TRIGGER_NEXT_GROUP, "Next rollout group triggered successfully");
+            api.deny(r.rolloutId(), r.remark());
+            return OperationResponse.success(OP_DENY, "Rollout denied successfully");
+        } else if (request instanceof RolloutRequest.Retry r) {
+            validateRolloutOperation("retry");
+            if (r.rolloutId() == null) {
+                return OperationResponse.failure(OP_RETRY, "rolloutId is required for RETRY operation");
             }
-        };
+            final ResponseEntity<MgmtRolloutResponseBody> response = api.retryRollout(r.rolloutId());
+            return OperationResponse.success(OP_RETRY, "Rollout retry created successfully", response.getBody());
+        } else if (request instanceof RolloutRequest.TriggerNextGroup r) {
+            validateRolloutOperation("trigger-next-group");
+            if (r.rolloutId() == null) {
+                return OperationResponse.failure(OP_TRIGGER_NEXT_GROUP, "rolloutId is required for TRIGGER_NEXT_GROUP operation");
+            }
+            api.triggerNextGroup(r.rolloutId());
+            return OperationResponse.success(OP_TRIGGER_NEXT_GROUP, "Next rollout group triggered successfully");
+        }
+        throw new IllegalArgumentException("Unknown request type: " + request.getClass().getSimpleName());
     }
 
     @McpTool(name = "manage_distribution_set",
              description = "Create, update, or delete distribution sets (software packages). " +
-                           "Operations: CREATE (new distribution set with name, version, type), " +
-                           "UPDATE (modify existing distribution set), DELETE (remove distribution set)")
-    public OperationResponse<Object> manageDistributionSet(final ManageDistributionSetRequest request) {
-        validateOperation(request.operation(), "distributionSets");
-        log.debug("Managing distribution set: operation={}, distributionSetId={}", request.operation(), request.distributionSetId());
+                           "Use 'type' field to select operation: " +
+                           "{\"type\":\"Create\",\"body\":{\"name\":\"n\",\"version\":\"v\",\"type\":\"t\"}}, " +
+                           "{\"type\":\"Update\",\"distributionSetId\":123,\"body\":{...}}, " +
+                           "{\"type\":\"Delete\",\"distributionSetId\":123}")
+    public OperationResponse<Object> manageDistributionSet(final DistributionSetRequest request) {
+        log.debug("Managing distribution set: request={}", request.getClass().getSimpleName());
 
         final MgmtDistributionSetRestApi api = hawkbitClient.mgmtService(MgmtDistributionSetRestApi.class, dummyTenant);
 
-        return switch (request.operation()) {
-            case CREATE -> {
-                if (request.createBody() == null) {
-                    yield OperationResponse.failure(OP_CREATE, "createBody is required for CREATE operation");
-                }
-                final ResponseEntity<List<MgmtDistributionSet>> response = api.createDistributionSets(List.of(request.createBody()));
-                final List<MgmtDistributionSet> created = response.getBody();
-                yield OperationResponse.success(OP_CREATE, "Distribution set created successfully",
-                        created != null && !created.isEmpty() ? created.get(0) : null);
+        if (request instanceof DistributionSetRequest.Create r) {
+            validateOperation("create", "distributionSets");
+            if (r.body() == null) {
+                return OperationResponse.failure(OP_CREATE, "body is required for CREATE operation");
             }
-            case UPDATE -> {
-                if (request.distributionSetId() == null) {
-                    yield OperationResponse.failure(OP_UPDATE, "distributionSetId is required for UPDATE operation");
-                }
-                if (request.updateBody() == null) {
-                    yield OperationResponse.failure(OP_UPDATE, "updateBody is required for UPDATE operation");
-                }
-                final ResponseEntity<MgmtDistributionSet> response = api.updateDistributionSet(request.distributionSetId(), request.updateBody());
-                yield OperationResponse.success(OP_UPDATE, "Distribution set updated successfully", response.getBody());
+            final ResponseEntity<List<MgmtDistributionSet>> response = api.createDistributionSets(List.of(r.body()));
+            final List<MgmtDistributionSet> created = response.getBody();
+            return OperationResponse.success(OP_CREATE, "Distribution set created successfully",
+                    created != null && !created.isEmpty() ? created.get(0) : null);
+        } else if (request instanceof DistributionSetRequest.Update r) {
+            validateOperation("update", "distributionSets");
+            if (r.distributionSetId() == null) {
+                return OperationResponse.failure(OP_UPDATE, "distributionSetId is required for UPDATE operation");
             }
-            case DELETE -> {
-                if (request.distributionSetId() == null) {
-                    yield OperationResponse.failure(OP_DELETE, "distributionSetId is required for DELETE operation");
-                }
-                api.deleteDistributionSet(request.distributionSetId());
-                yield OperationResponse.success(OP_DELETE, "Distribution set deleted successfully");
+            if (r.body() == null) {
+                return OperationResponse.failure(OP_UPDATE, "body is required for UPDATE operation");
             }
-        };
+            final ResponseEntity<MgmtDistributionSet> response = api.updateDistributionSet(r.distributionSetId(), r.body());
+            return OperationResponse.success(OP_UPDATE, "Distribution set updated successfully", response.getBody());
+        } else if (request instanceof DistributionSetRequest.Delete r) {
+            validateOperation("delete", "distributionSets");
+            if (r.distributionSetId() == null) {
+                return OperationResponse.failure(OP_DELETE, "distributionSetId is required for DELETE operation");
+            }
+            api.deleteDistributionSet(r.distributionSetId());
+            return OperationResponse.success(OP_DELETE, "Distribution set deleted successfully");
+        }
+        throw new IllegalArgumentException("Unknown request type: " + request.getClass().getSimpleName());
     }
 
     @McpTool(name = "manage_action",
              description = "Delete deployment actions. Actions are created indirectly via distribution set assignment. " +
-                           "Operations: DELETE (single action by ID), DELETE_BATCH (multiple actions by RSQL filter or list of IDs)")
-    public OperationResponse<Object> manageAction(final ManageActionRequest request) {
-        validateActionOperation(request.operation());
-        log.debug("Managing action: operation={}, actionId={}", request.operation(), request.actionId());
+                           "Use 'type' field to select operation: " +
+                           "{\"type\":\"Delete\",\"actionIds\":[123]}, " +
+                           "{\"type\":\"DeleteBatch\",\"actionIds\":[1,2,3],\"rsql\":\"\"}")
+    public OperationResponse<Object> manageAction(final ActionRequest request) {
+        log.debug("Managing action: request={}", request.getClass().getSimpleName());
 
         final MgmtActionRestApi api = hawkbitClient.mgmtService(MgmtActionRestApi.class, dummyTenant);
 
-        return switch (request.operation()) {
-            case DELETE -> {
-                if (request.actionId() == null) {
-                    yield OperationResponse.failure(OP_DELETE, "actionId is required for DELETE operation");
-                }
-                api.deleteAction(request.actionId());
-                yield OperationResponse.success(OP_DELETE, "Action deleted successfully");
+        if (request instanceof ActionRequest.Delete r) {
+            validateActionOperation("delete");
+            if (r.actionIds() == null || r.actionIds().isEmpty()) {
+                return OperationResponse.failure(OP_DELETE, "actionIds with single element is required for DELETE operation");
             }
-            case DELETE_BATCH -> {
-                if ((request.actionIds() == null || request.actionIds().isEmpty()) &&
-                    (request.rsql() == null || request.rsql().isBlank())) {
-                    yield OperationResponse.failure(OP_DELETE_BATCH, "Either actionIds or rsql is required for DELETE_BATCH operation");
-                }
-                api.deleteActions(request.rsql(), request.actionIds());
-                yield OperationResponse.success(OP_DELETE_BATCH, "Actions deleted successfully");
+            if (r.actionIds().size() != 1) {
+                return OperationResponse.failure(OP_DELETE, "actionIds must contain exactly one element for DELETE operation. Use DELETE_BATCH for multiple.");
             }
-        };
+            api.deleteAction(r.actionIds().get(0));
+            return OperationResponse.success(OP_DELETE, "Action deleted successfully");
+        } else if (request instanceof ActionRequest.DeleteBatch r) {
+            validateActionOperation("delete-batch");
+            if ((r.actionIds() == null || r.actionIds().isEmpty()) &&
+                (r.rsql() == null || r.rsql().isBlank())) {
+                return OperationResponse.failure(OP_DELETE_BATCH, "Either actionIds or rsql is required for DELETE_BATCH operation");
+            }
+            api.deleteActions(r.rsql(), r.actionIds());
+            return OperationResponse.success(OP_DELETE_BATCH, "Actions deleted successfully");
+        }
+        throw new IllegalArgumentException("Unknown request type: " + request.getClass().getSimpleName());
     }
 
     @McpTool(name = "manage_software_module",
              description = "Create, update, or delete software modules. " +
-                           "Operations: CREATE (new software module with name, version, type), " +
-                           "UPDATE (modify existing software module), DELETE (remove software module)")
-    public OperationResponse<Object> manageSoftwareModule(final ManageSoftwareModuleRequest request) {
-        validateOperation(request.operation(), "softwareModules");
-        log.debug("Managing software module: operation={}, softwareModuleId={}", request.operation(), request.softwareModuleId());
+                           "Use 'type' field to select operation: " +
+                           "{\"type\":\"Create\",\"body\":{\"name\":\"n\",\"version\":\"v\",\"type\":\"t\"}}, " +
+                           "{\"type\":\"Update\",\"softwareModuleId\":123,\"body\":{...}}, " +
+                           "{\"type\":\"Delete\",\"softwareModuleId\":123}")
+    public OperationResponse<Object> manageSoftwareModule(final SoftwareModuleRequest request) {
+        log.debug("Managing software module: request={}", request.getClass().getSimpleName());
 
         final MgmtSoftwareModuleRestApi api = hawkbitClient.mgmtService(MgmtSoftwareModuleRestApi.class, dummyTenant);
 
-        return switch (request.operation()) {
-            case CREATE -> {
-                if (request.createBody() == null) {
-                    yield OperationResponse.failure(OP_CREATE, "createBody is required for CREATE operation");
-                }
-                final ResponseEntity<List<MgmtSoftwareModule>> response = api.createSoftwareModules(List.of(request.createBody()));
-                final List<MgmtSoftwareModule> created = response.getBody();
-                yield OperationResponse.success(OP_CREATE, "Software module created successfully",
-                        created != null && !created.isEmpty() ? created.get(0) : null);
+        if (request instanceof SoftwareModuleRequest.Create r) {
+            validateOperation("create", "softwareModules");
+            if (r.body() == null) {
+                return OperationResponse.failure(OP_CREATE, "body is required for CREATE operation");
             }
-            case UPDATE -> {
-                if (request.softwareModuleId() == null) {
-                    yield OperationResponse.failure(OP_UPDATE, "softwareModuleId is required for UPDATE operation");
-                }
-                if (request.updateBody() == null) {
-                    yield OperationResponse.failure(OP_UPDATE, "updateBody is required for UPDATE operation");
-                }
-                final ResponseEntity<MgmtSoftwareModule> response = api.updateSoftwareModule(request.softwareModuleId(), request.updateBody());
-                yield OperationResponse.success(OP_UPDATE, "Software module updated successfully", response.getBody());
+            final ResponseEntity<List<MgmtSoftwareModule>> response = api.createSoftwareModules(List.of(r.body()));
+            final List<MgmtSoftwareModule> created = response.getBody();
+            return OperationResponse.success(OP_CREATE, "Software module created successfully",
+                    created != null && !created.isEmpty() ? created.get(0) : null);
+        } else if (request instanceof SoftwareModuleRequest.Update r) {
+            validateOperation("update", "softwareModules");
+            if (r.softwareModuleId() == null) {
+                return OperationResponse.failure(OP_UPDATE, "softwareModuleId is required for UPDATE operation");
             }
-            case DELETE -> {
-                if (request.softwareModuleId() == null) {
-                    yield OperationResponse.failure(OP_DELETE, "softwareModuleId is required for DELETE operation");
-                }
-                api.deleteSoftwareModule(request.softwareModuleId());
-                yield OperationResponse.success(OP_DELETE, "Software module deleted successfully");
+            if (r.body() == null) {
+                return OperationResponse.failure(OP_UPDATE, "body is required for UPDATE operation");
             }
-        };
+            final ResponseEntity<MgmtSoftwareModule> response = api.updateSoftwareModule(r.softwareModuleId(), r.body());
+            return OperationResponse.success(OP_UPDATE, "Software module updated successfully", response.getBody());
+        } else if (request instanceof SoftwareModuleRequest.Delete r) {
+            validateOperation("delete", "softwareModules");
+            if (r.softwareModuleId() == null) {
+                return OperationResponse.failure(OP_DELETE, "softwareModuleId is required for DELETE operation");
+            }
+            api.deleteSoftwareModule(r.softwareModuleId());
+            return OperationResponse.success(OP_DELETE, "Software module deleted successfully");
+        }
+        throw new IllegalArgumentException("Unknown request type: " + request.getClass().getSimpleName());
     }
 
     @McpTool(name = "manage_target_filter",
              description = "Create, update, or delete target filter queries. " +
-                           "Operations: CREATE (new target filter with name and RSQL query), " +
-                           "UPDATE (modify existing target filter), DELETE (remove target filter)")
-    public OperationResponse<Object> manageTargetFilter(final ManageTargetFilterRequest request) {
-        validateOperation(request.operation(), "targetFilters");
-        log.debug("Managing target filter: operation={}, filterId={}", request.operation(), request.filterId());
+                           "Use 'type' field to select operation: " +
+                           "{\"type\":\"Create\",\"body\":{\"name\":\"n\",\"query\":\"name==*\"}}, " +
+                           "{\"type\":\"Update\",\"filterId\":123,\"body\":{...}}, " +
+                           "{\"type\":\"Delete\",\"filterId\":123}")
+    public OperationResponse<Object> manageTargetFilter(final TargetFilterRequest request) {
+        log.debug("Managing target filter: request={}", request.getClass().getSimpleName());
 
         final MgmtTargetFilterQueryRestApi api = hawkbitClient.mgmtService(MgmtTargetFilterQueryRestApi.class, dummyTenant);
 
-        return switch (request.operation()) {
-            case CREATE -> {
-                if (request.body() == null) {
-                    yield OperationResponse.failure(OP_CREATE, "Request body is required for CREATE operation");
-                }
-                final ResponseEntity<MgmtTargetFilterQuery> response = api.createFilter(request.body());
-                yield OperationResponse.success(OP_CREATE, "Target filter created successfully", response.getBody());
+        if (request instanceof TargetFilterRequest.Create r) {
+            validateOperation("create", "targetFilters");
+            if (r.body() == null) {
+                return OperationResponse.failure(OP_CREATE, "body is required for CREATE operation");
             }
-            case UPDATE -> {
-                if (request.filterId() == null) {
-                    yield OperationResponse.failure(OP_UPDATE, "filterId is required for UPDATE operation");
-                }
-                if (request.body() == null) {
-                    yield OperationResponse.failure(OP_UPDATE, "Request body is required for UPDATE operation");
-                }
-                final ResponseEntity<MgmtTargetFilterQuery> response = api.updateFilter(request.filterId(), request.body());
-                yield OperationResponse.success(OP_UPDATE, "Target filter updated successfully", response.getBody());
+            final ResponseEntity<MgmtTargetFilterQuery> response = api.createFilter(r.body());
+            return OperationResponse.success(OP_CREATE, "Target filter created successfully", response.getBody());
+        } else if (request instanceof TargetFilterRequest.Update r) {
+            validateOperation("update", "targetFilters");
+            if (r.filterId() == null) {
+                return OperationResponse.failure(OP_UPDATE, "filterId is required for UPDATE operation");
             }
-            case DELETE -> {
-                if (request.filterId() == null) {
-                    yield OperationResponse.failure(OP_DELETE, "filterId is required for DELETE operation");
-                }
-                api.deleteFilter(request.filterId());
-                yield OperationResponse.success(OP_DELETE, "Target filter deleted successfully");
+            if (r.body() == null) {
+                return OperationResponse.failure(OP_UPDATE, "body is required for UPDATE operation");
             }
-        };
+            final ResponseEntity<MgmtTargetFilterQuery> response = api.updateFilter(r.filterId(), r.body());
+            return OperationResponse.success(OP_UPDATE, "Target filter updated successfully", response.getBody());
+        } else if (request instanceof TargetFilterRequest.Delete r) {
+            validateOperation("delete", "targetFilters");
+            if (r.filterId() == null) {
+                return OperationResponse.failure(OP_DELETE, "filterId is required for DELETE operation");
+            }
+            api.deleteFilter(r.filterId());
+            return OperationResponse.success(OP_DELETE, "Target filter deleted successfully");
+        }
+        throw new IllegalArgumentException("Unknown request type: " + request.getClass().getSimpleName());
     }
 
 
-    private void validateOperation(final Operation operation, final String entity) {
-        final String opName = operation.name().toLowerCase();
-        if (!isOperationEnabled(opName, entity)) {
+    private void validateOperation(final String operation, final String entity) {
+        if (!isOperationEnabled(operation, entity)) {
             throw new IllegalArgumentException(
-                    "Operation " + operation + " is not enabled for " + entity +
+                    "Operation " + operation.toUpperCase() + " is not enabled for " + entity +
                     ". Check hawkbit.mcp.operations configuration.");
         }
     }
 
-    private void validateRolloutOperation(final RolloutOperation operation) {
-        final String opName = operation.name().toLowerCase().replace("_", "-");
+    private void validateRolloutOperation(final String operation) {
         final HawkbitMcpProperties.RolloutConfig config = properties.getOperations().getRollouts();
-        final Boolean entitySetting = config.getOperationEnabled(opName);
+        final Boolean entitySetting = config.getOperationEnabled(operation);
 
         // For standard CRUD ops, check global fallback
         if (entitySetting == null) {
-            if (!properties.getOperations().isGlobalOperationEnabled(opName)) {
+            if (!properties.getOperations().isGlobalOperationEnabled(operation)) {
                 throw new IllegalArgumentException(
-                        "Operation " + operation + " is not enabled for rollouts. " +
+                        "Operation " + operation.toUpperCase() + " is not enabled for rollouts. " +
                         "Check hawkbit.mcp.operations configuration.");
             }
             return;
@@ -501,20 +508,19 @@ public class HawkbitMcpToolProvider {
 
         if (!entitySetting) {
             throw new IllegalArgumentException(
-                    "Operation " + operation + " is not enabled for rollouts. " +
+                    "Operation " + operation.toUpperCase() + " is not enabled for rollouts. " +
                     "Check hawkbit.mcp.operations configuration.");
         }
     }
 
-    private void validateActionOperation(final ActionOperation operation) {
-        final String opName = operation.name().toLowerCase().replace("_", "-");
+    private void validateActionOperation(final String operation) {
         final HawkbitMcpProperties.ActionConfig config = properties.getOperations().getActions();
-        final Boolean entitySetting = config.getOperationEnabled(opName);
+        final Boolean entitySetting = config.getOperationEnabled(operation);
 
         if (entitySetting == null) {
-            if (opName.equals("delete") && !properties.getOperations().isGlobalOperationEnabled("delete")) {
+            if (operation.equals("delete") && !properties.getOperations().isGlobalOperationEnabled("delete")) {
                 throw new IllegalArgumentException(
-                        "Operation " + operation + " is not enabled for actions. " +
+                        "Operation " + operation.toUpperCase() + " is not enabled for actions. " +
                         "Check hawkbit.mcp.operations configuration.");
             }
             return;
@@ -522,7 +528,7 @@ public class HawkbitMcpToolProvider {
 
         if (!entitySetting) {
             throw new IllegalArgumentException(
-                    "Operation " + operation + " is not enabled for actions. " +
+                    "Operation " + operation.toUpperCase() + " is not enabled for actions. " +
                     "Check hawkbit.mcp.operations configuration.");
         }
     }

@@ -51,10 +51,10 @@ java -jar hawkbit-mcp-server-0-SNAPSHOT.jar \
 
 ```bash
 # Linux/Mac
-echo -n "<TENANT>\\<USERNAME>:<PASSWORD>" | base64
+echo -n "<USERNAME>:<PASSWORD>" | base64
 
 # PowerShell
-[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes("<TENANT>\<USERNAME>:<PASSWORD>"))
+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes("<USERNAME>:<PASSWORD>"))
 ```
 
 ### STDIO Transport
@@ -74,7 +74,7 @@ Use STDIO transport for direct integration:
       ],
       "env": {
         "HAWKBIT_URL": "<HAWKBIT_URL>",
-        "HAWKBIT_USERNAME": "<TENANT>\\<USERNAME>",
+        "HAWKBIT_USERNAME": "<USERNAME>",
         "HAWKBIT_PASSWORD": "<PASSWORD>"
       }
     }

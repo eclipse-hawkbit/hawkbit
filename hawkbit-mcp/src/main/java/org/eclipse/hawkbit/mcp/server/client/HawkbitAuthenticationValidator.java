@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtTenantManagementRestApi;
 import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.Tenant;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -27,44 +26,39 @@ import java.util.HexFormat;
 
 /**
  * Validates authentication credentials against hawkBit REST API using the SDK.
+ * This validator is conditionally created when {@code hawkbit.mcp.validation.enabled=true}.
  */
 @Slf4j
-@Component
-public class HawkbitAuthenticationValidator {
+public class HawkbitAuthenticationValidator implements AuthenticationValidator {
 
     private final HawkbitClient hawkbitClient;
     private final Tenant dummyTenant;
     private final Cache<String, Boolean> validationCache;
-    private final boolean enabled;
 
     public HawkbitAuthenticationValidator(final HawkbitClient hawkbitClient,
                                           final Tenant dummyTenant,
                                           final HawkbitMcpProperties properties) {
         this.hawkbitClient = hawkbitClient;
         this.dummyTenant = dummyTenant;
-        this.enabled = properties.getValidation().isEnabled();
 
         this.validationCache = Caffeine.newBuilder()
                 .expireAfterWrite(properties.getValidation().getCacheTtl())
                 .maximumSize(properties.getValidation().getCacheMaxSize())
                 .build();
 
-        log.info("Authentication validation {} with cache TTL={}, maxSize={}",
-                enabled ? "enabled" : "disabled",
+        log.info("Authentication validation enabled with cache TTL={}, maxSize={}",
                 properties.getValidation().getCacheTtl(),
                 properties.getValidation().getCacheMaxSize());
     }
 
     /**
      * Validates the given authorization header against hawkBit.
+     *
      * @param authHeader the Authorization header value
      * @return validation result
      */
+    @Override
     public ValidationResult validate(final String authHeader) {
-        if (!enabled) {
-            return ValidationResult.VALID;
-        }
-
         if (authHeader == null || authHeader.isBlank()) {
             return ValidationResult.MISSING_CREDENTIALS;
         }
@@ -128,30 +122,5 @@ public class HawkbitAuthenticationValidator {
             // SHA-256 is always available
             throw new McpAuthenticationException("SHA-256 not available." + e.getMessage());
         }
-    }
-
-    /**
-     * Result of authentication validation.
-     */
-    public enum ValidationResult {
-        /**
-         * Credentials are valid (authenticated user).
-         */
-        VALID,
-
-        /**
-         * No credentials provided.
-         */
-        MISSING_CREDENTIALS,
-
-        /**
-         * Credentials are invalid (401 from hawkBit).
-         */
-        INVALID_CREDENTIALS,
-
-        /**
-         * hawkBit is unavailable or returned unexpected error.
-         */
-        HAWKBIT_ERROR
     }
 }
