@@ -18,7 +18,7 @@ services:
   # HawkBit UI
   # ---------------------
   hawkbit-ui:
-    image: "hawkbit/hawkbit-ui:latest"
+    image: "hawkbit/hawkbit-simple-ui:latest"
     environment:
       - 'SPRING_APPLICATION_JSON={"hawkbit.server.mgmtUrl": "http://hawkbit-mgmt:8080"}'
     restart: always
