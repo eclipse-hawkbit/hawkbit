@@ -265,11 +265,10 @@ public class DmfApiConfiguration {
             final SystemManagement systemManagement,
             final TargetManagement<? extends Target> targetManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
-            final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement, final DeploymentManagement deploymentManagement,
-            final RepositoryProperties repositoryProperties) {
+            final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement, final DeploymentManagement deploymentManagement) {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
                 systemManagement, targetManagement, softwareModuleManagement, distributionSetManagement,
-                deploymentManagement, repositoryProperties);
+                deploymentManagement);
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {

@@ -46,7 +46,6 @@ import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.dmf.json.model.DmfTarget;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -93,7 +92,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final DeploymentManagement deploymentManagement;
-    private final RepositoryProperties repositoryProperties;
 
     @SuppressWarnings("java:S107")
     protected AmqpMessageDispatcherService(
@@ -103,8 +101,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final TargetManagement<? extends Target> targetManagement,
             final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
-            final DeploymentManagement deploymentManagement,
-            final RepositoryProperties repositoryProperties) {
+            final DeploymentManagement deploymentManagement) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
@@ -113,7 +110,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         this.softwareModuleManagement = softwareModuleManagement;
         this.distributionSetManagement = distributionSetManagement;
         this.deploymentManagement = deploymentManagement;
-        this.repositoryProperties = repositoryProperties;
     }
 
     public boolean isBatchAssignmentsEnabled() {
