@@ -9,15 +9,10 @@
  */
 package org.eclipse.hawkbit.mcp.server.config;
 
-import feign.Contract;
 import feign.RequestInterceptor;
-import feign.codec.Decoder;
-import feign.codec.Encoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.sdk.Controller;
-import org.eclipse.hawkbit.sdk.HawkbitClient;
-import org.eclipse.hawkbit.sdk.HawkbitServer;
 import org.eclipse.hawkbit.sdk.Tenant;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -43,22 +38,12 @@ public class McpStdioClientConfiguration {
 
     private final HawkbitMcpProperties properties;
 
+    /**
+     * Request interceptor for STDIO mode - uses static credentials from configuration.
+     */
     @Bean
-    public HawkbitClient hawkbitClient(final HawkbitServer server,
-                                       final Encoder encoder,
-                                       final Decoder decoder,
-                                       final Contract contract) {
-        log.info("Configuring hawkBit client for STDIO mode (static credentials)");
-        return HawkbitClient.builder()
-                .hawkBitServer(server)
-                .encoder(encoder)
-                .decoder(decoder)
-                .contract(contract)
-                .requestInterceptorFn(stdioRequestInterceptor())
-                .build();
-    }
-
-    private BiFunction<Tenant, Controller, RequestInterceptor> stdioRequestInterceptor() {
+    public BiFunction<Tenant, Controller, RequestInterceptor> hawkbitRequestInterceptor() {
+        log.info("Configuring STDIO mode request interceptor (static credentials)");
         return (tenant, controller) -> template -> {
             if (properties.hasStaticCredentials()) {
                 String credentials = properties.getUsername() + ":" + properties.getPassword();
@@ -72,21 +57,4 @@ public class McpStdioClientConfiguration {
         };
     }
 
-    /**
-     * Tenant bean for STDIO mode - uses static credentials from configuration.
-     */
-    @Bean
-    public Tenant dummyTenant() {
-        Tenant tenant = new Tenant();
-        if (properties.hasStaticCredentials()) {
-            tenant.setUsername(properties.getUsername());
-            tenant.setPassword(properties.getPassword());
-            log.info("Configured tenant with static credentials for STDIO mode");
-        } else {
-            tenant.setUsername(null);
-            tenant.setPassword(null);
-            log.warn("STDIO mode enabled but no static credentials configured");
-        }
-        return tenant;
-    }
 }

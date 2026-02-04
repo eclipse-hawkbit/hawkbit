@@ -192,7 +192,7 @@ public class HawkbitMcpToolProvider {
 
     @McpTool(name = "manage_target",
              description = "Create, update, or delete targets (devices). " +
-                           "Operations: CREATE (new target with controllerId, name, description), " +
+                           "Operations: CREATE (new target with controllerId, name, description. When creating a target without a specific target type, set \"targetType\": null), " +
                            "UPDATE (modify existing target by controllerId), " +
                            "DELETE (remove target by controllerId). " +
                            "Use 'type' field to select operation: " +
@@ -238,6 +238,8 @@ public class HawkbitMcpToolProvider {
              description = "Create, update, delete, and control rollouts for software deployment. " +
                            "Use 'type' field to select operation. " +
                            "Types: Create, Update, Delete, Start, Pause, Stop, Resume, Approve, Deny, Retry, TriggerNextGroup. " +
+                           "For Create: use rollout 'type' values: 'soft', 'forced', 'timeforced', 'downloadonly' (lowercase). " +
+                           "If 'groups' list is provided, omit 'amountGroups' (they are mutually exclusive). " +
                            "Examples: {\"type\":\"Create\",\"body\":{...}}, " +
                            "{\"type\":\"Start\",\"rolloutId\":123}, " +
                            "{\"type\":\"Approve\",\"rolloutId\":123,\"remark\":\"approved\"}")
@@ -383,13 +385,10 @@ public class HawkbitMcpToolProvider {
 
         if (request instanceof ActionRequest.Delete r) {
             validateActionOperation("delete");
-            if (r.actionIds() == null || r.actionIds().isEmpty()) {
-                return OperationResponse.failure(OP_DELETE, "actionIds with single element is required for DELETE operation");
+            if (r.actionId() == null) {
+                return OperationResponse.failure(OP_DELETE, "actionId is required for DELETE operation");
             }
-            if (r.actionIds().size() != 1) {
-                return OperationResponse.failure(OP_DELETE, "actionIds must contain exactly one element for DELETE operation. Use DELETE_BATCH for multiple.");
-            }
-            api.deleteAction(r.actionIds().get(0));
+            api.deleteAction(r.actionId());
             return OperationResponse.success(OP_DELETE, "Action deleted successfully");
         } else if (request instanceof ActionRequest.DeleteBatch r) {
             validateActionOperation("delete-batch");

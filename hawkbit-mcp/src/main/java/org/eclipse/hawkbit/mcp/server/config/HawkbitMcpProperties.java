@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mcp.server.config;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -33,23 +34,24 @@ public class HawkbitMcpProperties {
 
     /**
      * Username for hawkBit authentication (used in STDIO mode).
-     * Format: {@code tenant\\username} or just username depending on hawkBit configuration.
-     * Can be set via HAWKBIT_USERNAME environment variable.
+     * Read directly from HAWKBIT_USERNAME environment variable.
      */
+    @Value("${HAWKBIT_USERNAME:#{null}}")
     private String username;
 
     /**
      * Password for hawkBit authentication (used in STDIO mode).
-     * Can be set via HAWKBIT_PASSWORD environment variable.
+     * Read directly from HAWKBIT_PASSWORD environment variable.
      */
+    @Value("${HAWKBIT_PASSWORD:#{null}}")
     private String password;
 
     /**
      * Check if static credentials are configured.
+     * Allows empty strings as valid values (for users who intentionally set empty password).
      */
     public boolean hasStaticCredentials() {
-        return username != null && !username.isBlank()
-                && password != null && !password.isBlank();
+        return username != null && password != null;
     }
 
     /**

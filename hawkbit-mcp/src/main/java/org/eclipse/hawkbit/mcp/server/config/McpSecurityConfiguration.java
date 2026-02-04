@@ -34,6 +34,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Security configuration for the MCP server.
@@ -41,21 +42,27 @@ import java.io.IOException;
  * This configuration is only active in HTTP/servlet mode. In STDIO mode,
  * authentication is handled via static credentials from properties.
  * </p>
+ * <p>
+ * When authentication validation is enabled ({@code hawkbit.mcp.validation.enabled=true}),
+ * a filter validates credentials against hawkBit before forwarding requests.
+ * When disabled, no validation filter is added and requests pass through directly.
+ * </p>
  */
 @Slf4j
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnProperty(name = "spring.ai.mcp.server.stdio", havingValue = "false", matchIfMissing = true)
 public class McpSecurityConfiguration {
 
-    /**
-     * Request attribute key for storing the Authorization header.
-     */
-    public static final String AUTH_HEADER_ATTRIBUTE = "hawkbit.mcp.auth.header";
+    private final Optional<AuthenticationValidator> authenticationValidator;
 
-    private final AuthenticationValidator authenticationValidator;
+    public McpSecurityConfiguration(final Optional<AuthenticationValidator> authenticationValidator) {
+        this.authenticationValidator = authenticationValidator;
+        if (authenticationValidator.isEmpty()) {
+            log.info("Authentication validation disabled - requests will be forwarded without validation");
+        }
+    }
 
     @Bean
     @SuppressWarnings("java:S4502") // CSRF protection is not needed for stateless REST APIs using Authorization header
@@ -63,15 +70,22 @@ public class McpSecurityConfiguration {
         http
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
             .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterBefore(new HawkBitAuthenticationFilter(authenticationValidator),
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        authenticationValidator.ifPresent(validator -> {
+            log.info("Authentication validation enabled - adding validation filter");
+            http.addFilterBefore(new HawkBitAuthenticationFilter(validator),
                     UsernamePasswordAuthenticationFilter.class);
+        });
 
         return http.build();
     }
 
     /**
-     * Filter that validates authentication.
+     * Filter that validates authentication against hawkBit.
+     * <p>
+     * Only added to the filter chain when authentication validation is enabled.
+     * </p>
      */
     @Slf4j
     @RequiredArgsConstructor
@@ -81,39 +95,27 @@ public class McpSecurityConfiguration {
 
         @Override
         protected void doFilterInternal(final HttpServletRequest request, final @NonNull HttpServletResponse response,
-                                        final @NonNull  FilterChain filterChain) throws ServletException, IOException {
-            String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-
-            if (authHeader != null) {
-                request.setAttribute(AUTH_HEADER_ATTRIBUTE, authHeader);
-            }
-
-            ValidationResult result = validator.validate(authHeader);
+                                        final @NonNull FilterChain filterChain) throws ServletException, IOException {
+            final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+            final ValidationResult result = validator.validate(authHeader);
 
             switch (result) {
-                case VALID:
-                    filterChain.doFilter(request, response);
-                    break;
-
-                case MISSING_CREDENTIALS:
+                case VALID -> filterChain.doFilter(request, response);
+                case MISSING_CREDENTIALS -> {
                     log.debug("Rejecting request: missing credentials");
                     sendErrorResponse(response, HttpStatus.UNAUTHORIZED,
                             "Authentication required. Please provide hawkBit credentials.");
-                    break;
-
-                case INVALID_CREDENTIALS:
+                }
+                case INVALID_CREDENTIALS -> {
                     log.debug("Rejecting request: invalid credentials");
-                    request.removeAttribute(AUTH_HEADER_ATTRIBUTE);
                     sendErrorResponse(response, HttpStatus.UNAUTHORIZED,
                             "Invalid hawkBit credentials.");
-                    break;
-
-                case HAWKBIT_ERROR:
+                }
+                case HAWKBIT_ERROR -> {
                     log.warn("Rejecting request: hawkBit unavailable");
-                    request.removeAttribute(AUTH_HEADER_ATTRIBUTE);
                     sendErrorResponse(response, HttpStatus.SERVICE_UNAVAILABLE,
                             "Unable to validate credentials. hawkBit may be unavailable.");
-                    break;
+                }
             }
         }
 

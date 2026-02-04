@@ -28,9 +28,9 @@ public sealed interface ActionRequest
     /**
      * Request to delete a single action.
      *
-     * @param actionIds list containing the single action ID to delete (use single-element list)
+     * @param actionId to delete
      */
-    record Delete(List<Long> actionIds) implements ActionRequest {}
+    record Delete(Long actionId) implements ActionRequest {}
 
     /**
      * Request to delete multiple actions.

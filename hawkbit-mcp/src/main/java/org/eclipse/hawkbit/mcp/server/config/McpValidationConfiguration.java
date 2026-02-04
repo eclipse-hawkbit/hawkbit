@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.mcp.server.config;
 
 import org.eclipse.hawkbit.mcp.server.client.AuthenticationValidator;
 import org.eclipse.hawkbit.mcp.server.client.HawkbitAuthenticationValidator;
-import org.eclipse.hawkbit.mcp.server.client.NoOpAuthenticationValidator;
 import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.Tenant;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -20,14 +19,18 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Configuration for authentication validation beans.
- * Creates either a real validator (with caching) or a no-op validator based on configuration.
  */
 @Configuration
 public class McpValidationConfiguration {
 
     /**
      * Creates the hawkBit authentication validator when validation is enabled.
-     * It validates against hawkBit REST API.
+     * Validates credentials against hawkBit REST API with result caching.
+     *
+     * @param hawkbitClient the hawkBit client for API calls
+     * @param dummyTenant the tenant configuration
+     * @param properties the MCP properties with cache configuration
+     * @return the authentication validator
      */
     @Bean
     @ConditionalOnProperty(name = "hawkbit.mcp.validation.enabled", havingValue = "true", matchIfMissing = true)
@@ -36,15 +39,5 @@ public class McpValidationConfiguration {
             final Tenant dummyTenant,
             final HawkbitMcpProperties properties) {
         return new HawkbitAuthenticationValidator(hawkbitClient, dummyTenant, properties);
-    }
-
-    /**
-     * Creates a no-op authentication validator when validation is disabled.
-     * This validator always returns VALID without any actual validation.
-     */
-    @Bean
-    @ConditionalOnProperty(name = "hawkbit.mcp.validation.enabled", havingValue = "false")
-    public AuthenticationValidator noOpAuthenticationValidator() {
-        return new NoOpAuthenticationValidator();
     }
 }
