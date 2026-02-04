@@ -123,7 +123,7 @@ $ mvn clean install -DskipTests
 $ java -jar ./hawkbit-monolith/hawkbit-update-server/target/hawkbit-update-server-0-SNAPSHOT.jar
 ```
 
-> **Note:** you could start it also in **microservices mode** by:
+**Note:** you could start it also in **microservices mode** by:
 
 ```bash
 $ java -jar ./hawkbit-mgmt/hawkbit-mgmt-server/target/hawkbit-mgmt-server-0-SNAPSHOT.jar
@@ -137,10 +137,22 @@ And (only if you want to use the DMF feature):
 $ java -jar ./hawkbit-monolith/hawkbit-update-server/target/hawkbit-update-server-0-SNAPSHOT.jar
 ```
 
+**Note:** You could also start with H2 console enabled with:
+```bash
+$java -jar ./hawkbit-monolith/hawkbit-update-server/target/hawkbit-update-server-0-SNAPSHOT.jar --spring.h2.console.enabled=true --spring.h2.console.path=/h2-console
+```
+for monolith, and:
+```bash
+$java -jar ./hawkbit-mgmt/hawkbit-mgmt-server/target/hawkbit-mgmt-server-0-SNAPSHOT.jar --spring.h2.console.enabled=true --spring.h2.console.path=/h2-console
+```
+for mgmt server in micro-service mode.
+
+Then you will get H2 console available at '/h2-console' (Database available at 'jdbc:h2:mem:hawkbit')
+
 You could also start the **hawkBit UI** by:
 
 ```bash
-$ java -jar ./hawkbit--ui/target/hawkbit-ui-0-SNAPSHOT.jar
+$ java -jar ./hawkbit-ui/target/hawkbit-ui-0-SNAPSHOT.jar
 ```
 
 ---
