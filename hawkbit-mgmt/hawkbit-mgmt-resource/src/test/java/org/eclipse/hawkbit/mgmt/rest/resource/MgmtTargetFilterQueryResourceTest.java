@@ -560,7 +560,6 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
      */
     @Test
     void createAutoAssignDS() throws Exception {
-        enableMultiAssignments();
         enableConfirmationFlow();
 
         final String filterName = "filter_01";
@@ -643,7 +642,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                         filterId).content(valideWeightRequest).contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
-        enableMultiAssignments();
+
         mvc.perform(post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/{targetFilterQueryId}/autoAssignDS",
                         filterId).content(invalideWeightRequest).contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())

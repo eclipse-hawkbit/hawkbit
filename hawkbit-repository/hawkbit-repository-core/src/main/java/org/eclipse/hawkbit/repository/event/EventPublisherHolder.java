@@ -17,8 +17,6 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
-import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
-import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
@@ -29,8 +27,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.ActionCreatedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.ActionUpdatedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.CancelTargetAssignmentServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.service.MultiActionAssignServiceEvent;
-import org.eclipse.hawkbit.repository.event.remote.service.MultiActionCancelServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistributionSetServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
@@ -77,8 +73,6 @@ public final class EventPublisherHolder {
             TargetAssignDistributionSetEvent.class,
             CancelTargetAssignmentEvent.class,
             TargetAttributesRequestedEvent.class,
-            MultiActionAssignEvent.class,
-            MultiActionCancelEvent.class,
             ActionCreatedEvent.class,
             ActionUpdatedEvent.class
     );
@@ -183,10 +177,6 @@ public final class EventPublisherHolder {
                 return new CancelTargetAssignmentServiceEvent(cancelTargetAssignmentEvent);
             } else if (event instanceof TargetAttributesRequestedEvent targetAttributesRequestedEvent) {
                 return new TargetAttributesRequestedServiceEvent(targetAttributesRequestedEvent);
-            } else if (event instanceof MultiActionAssignEvent multiActionAssignEvent) {
-                return new MultiActionAssignServiceEvent(multiActionAssignEvent);
-            } else if (event instanceof MultiActionCancelEvent multiActionCancelEvent) {
-                return new MultiActionCancelServiceEvent(multiActionCancelEvent);
             } else if (event instanceof ActionCreatedEvent actionCreatedEvent) {
                 return new ActionCreatedServiceEvent(actionCreatedEvent);
             } else if (event instanceof ActionUpdatedEvent actionUpdatedEvent) {

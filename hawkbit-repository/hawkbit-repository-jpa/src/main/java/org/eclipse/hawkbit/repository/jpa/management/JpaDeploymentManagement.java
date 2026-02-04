@@ -52,7 +52,7 @@ import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedExcepti
 import org.eclipse.hawkbit.repository.exception.IncompatibleTargetTypeException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
-import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.MultiAssignmentException;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
@@ -159,10 +159,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                         maxAssignmentsExceededInfo.requested,
                         maxAssignmentsExceededInfo.quotaExceededException);
         onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository,
-                quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties,
+                quotaManagement, this::isConfirmationFlowEnabled, repositoryProperties,
                 maxAssignmentsExceededHandler);
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository,
-                quotaManagement, this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties,
+                quotaManagement, this::isConfirmationFlowEnabled, repositoryProperties,
                 maxAssignmentsExceededHandler);
     }
 
@@ -423,16 +423,12 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void cancelInactiveScheduledActionsForTargets(final List<Long> targetIds) {
-        if (!isMultiAssignmentsEnabled()) {
-            targetRepository.getAccessController().ifPresent(v -> {
-                if (targetRepository.count(AccessController.Operation.UPDATE, TargetSpecifications.hasIdIn(targetIds)) != targetIds.size()) {
-                    throw new EntityNotFoundException(Target.class, targetIds);
-                }
-            });
-            actionRepository.switchStatus(Status.CANCELED, targetIds, false, Status.SCHEDULED);
-        } else {
-            log.debug("The Multi Assignments feature is enabled: No need to cancel inactive scheduled actions.");
-        }
+        targetRepository.getAccessController().ifPresent(v -> {
+            if (targetRepository.count(AccessController.Operation.UPDATE, TargetSpecifications.hasIdIn(targetIds)) != targetIds.size()) {
+                throw new EntityNotFoundException(Target.class, targetIds);
+            }
+        });
+        actionRepository.switchStatus(Status.CANCELED, targetIds, false, Status.SCHEDULED);
     }
 
     @Override
@@ -668,12 +664,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private void checkForMultiAssignment(final Collection<DeploymentRequest> deploymentRequests) {
-        if (!isMultiAssignmentsEnabled()) {
-            final long distinctTargetsInRequest = deploymentRequests.stream()
-                    .map(request -> request.getTargetWithActionType().getControllerId()).distinct().count();
-            if (distinctTargetsInRequest < deploymentRequests.size()) {
-                throw new MultiAssignmentIsNotEnabledException();
-            }
+        final long distinctTargetsInRequest = deploymentRequests.stream()
+                .map(request -> request.getTargetWithActionType().getControllerId()).distinct().count();
+        if (distinctTargetsInRequest < deploymentRequests.size()) {
+            throw new MultiAssignmentException();
         }
     }
 
@@ -819,9 +813,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final List<JpaTarget> targetEntities) {
         final List<List<Long>> targetEntitiesIdsChunks = getTargetEntitiesAsChunks(targetEntities);
 
-        if (!isMultiAssignmentsEnabled()) {
-            closeOrCancelActiveActions(assignmentStrategy, targetEntitiesIdsChunks);
-        }
+        closeOrCancelActiveActions(assignmentStrategy, targetEntitiesIdsChunks);
         // cancel all scheduled actions which are in-active, these actions were
         // not active before and the manual assignment which has been done cancels them
         targetEntitiesIdsChunks.forEach(this::cancelInactiveScheduledActionsForTargets);
@@ -944,10 +936,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private JpaAction closeActionIfSetWasAlreadyAssigned(final JpaAction action) {
-        if (isMultiAssignmentsEnabled()) {
-            return action;
-        }
-
         final JpaTarget target = action.getTarget();
         if (target.getAssignedDistributionSet() != null && action.getDistributionSet().getId()
                 .equals(target.getAssignedDistributionSet().getId())) {
@@ -965,9 +953,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private List<Action> startScheduledActionsAndHandleOpenCancellationFirst(final List<JpaAction> actions) {
-        if (!isMultiAssignmentsEnabled()) {
-            closeOrCancelOpenDeviceActions(actions);
-        }
+        closeOrCancelOpenDeviceActions(actions);
         final List<JpaAction> savedActions = activateActionsOfRolloutGroup(actions);
         setInitialActionStatusOfRolloutGroup(savedActions);
         setAssignmentOnTargets(savedActions);
@@ -1015,10 +1001,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         actionStatus.setStatus(Status.RUNNING);
         actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Distribution Set is already assigned. Skipping this action.");
         actionStatusRepository.save(actionStatus);
-    }
-
-    private boolean isMultiAssignmentsEnabled() {
-        return TenantConfigHelper.isMultiAssignmentsEnabled();
     }
 
     private boolean isConfirmationFlowEnabled() {

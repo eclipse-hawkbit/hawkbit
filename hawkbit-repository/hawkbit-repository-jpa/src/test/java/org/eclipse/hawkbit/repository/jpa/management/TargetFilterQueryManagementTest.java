@@ -245,23 +245,6 @@ class TargetFilterQueryManagementTest extends AbstractRepositoryManagementTest<T
     }
 
     /**
-     * Creating or updating a target filter query with autoassignment and no-value weight when multi assignment in enabled.
-     */
-    @Test
-    void weightNotRequiredInMultiAssignmentMode() {
-        enableMultiAssignments();
-        final DistributionSet ds = testdataFactory.createDistributionSet();
-        final Long filterId = targetFilterQueryManagement.create(Create.builder().name("a").query("name==*").build()).getId();
-
-        assertThat(
-                targetFilterQueryManagement.create(Create.builder().name("b").query("name==*").autoAssignDistributionSet(ds).build()))
-                .isNotNull();
-        assertThat(
-                targetFilterQueryManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(filterId).ds(ds.getId())))
-                .isNotNull();
-    }
-
-    /**
      * Creating or updating a target filter query with autoassignment with a weight causes an error when multi assignment in disabled.
      */
     @Test
@@ -279,23 +262,8 @@ class TargetFilterQueryManagementTest extends AbstractRepositoryManagementTest<T
                 .isNotNull();
     }
 
-    /**
-     * Auto assignment can be removed from filter when multi assignment in enabled.
-     */
-    @Test
-    void removeDsFromFilterWhenMultiAssignmentModeNotEnabled() {
-        enableMultiAssignments();
-        final DistributionSet ds = testdataFactory.createDistributionSet();
-        final Long filterId = targetFilterQueryManagement.create(
-                Create.builder().name("a").query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(23).build()).getId();
-        assertThat(targetFilterQueryManagement.updateAutoAssignDS(
-                new AutoAssignDistributionSetUpdate(filterId).ds(null).weight(null)))
-                .isNotNull();
-    }
-
     @Test
     void weightValidatedAndSaved() {
-        enableMultiAssignments();
         final DistributionSet ds = testdataFactory.createDistributionSet();
 
         final Create targetFilterQueryCreate = Create.builder().name("a")

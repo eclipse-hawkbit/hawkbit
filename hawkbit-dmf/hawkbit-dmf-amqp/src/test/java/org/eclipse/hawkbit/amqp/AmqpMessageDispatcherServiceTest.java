@@ -78,9 +78,6 @@ import org.springframework.test.context.TestPropertySource;
         "spring.main.allow-bean-definition-overriding=true" })
 class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
-    @Autowired
-    protected RepositoryProperties repositoryProperties;
-
     private static final String TENANT = "DEFAULT";
     private static final Long TENANT_ID = 4711L;
 
@@ -117,7 +114,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
         amqpMessageDispatcherService = new AmqpMessageDispatcherService(rabbitTemplate, senderService,
                 artifactUrlHandlerMock, systemManagement, targetManagement,
-                softwareModuleManagement, distributionSetManagement, deploymentManagement, repositoryProperties);
+                softwareModuleManagement, distributionSetManagement, deploymentManagement);
 
     }
 

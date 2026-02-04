@@ -688,23 +688,6 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     }
 
     /**
-     * Assign multiple DS in multi-assignment mode. The earliest active Action is exposed to the controller.
-     */
-    @Test
-    void earliestActionIsExposedToControllerInMultiAssignMode() throws Exception {
-        enableMultiAssignments();
-        final Target target = testdataFactory.createTarget();
-        final DistributionSet ds1 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
-        final DistributionSet ds2 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
-        final Action action1 = getFirstAssignedAction(assignDistributionSet(ds1.getId(), target.getControllerId(), 56));
-        final Long action2Id = getFirstAssignedActionId(assignDistributionSet(ds2.getId(), target.getControllerId(), 34));
-
-        assertDeploymentActionIsExposedToTarget(target.getControllerId(), action1.getId());
-        sendDeploymentActionFeedback(target, action1, "closed", "success");
-        assertDeploymentActionIsExposedToTarget(target.getControllerId(), action2Id);
-    }
-
-    /**
      * The system should not create a new target because of a too long controller id.
      */
     @Test
@@ -757,16 +740,6 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     private ResultActions sendDeploymentActionFeedback(final Target target, final Action action, final String execution, final String finished)
             throws Exception {
         return sendDeploymentActionFeedback(target, action, execution, finished, null);
-    }
-
-    private void assertDeploymentActionIsExposedToTarget(final String controllerId, final long expectedActionId) throws Exception {
-        final String expectedDeploymentBaseLink = String.format(
-                "/%s/controller/v1/%s/deploymentBase/%d",
-                AccessContext.tenant(), controllerId, expectedActionId);
-        mvc.perform(get(CONTROLLER_BASE, AccessContext.tenant(), controllerId).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$._links.deploymentBase.href", containsString(expectedDeploymentBaseLink)));
     }
 
     private void withPollingTime(final String pollingTime, final Callable<Void> runnable) throws Exception {
