@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.scheduler;
 import static org.eclipse.hawkbit.context.AccessContext.asActor;
 import static org.eclipse.hawkbit.context.AccessContext.withSecurityContext;
 import static org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration.TENANT_TAG;
+import static org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration.TENANT_TAG_VALUE_PROVIDER;
 
 import java.util.Collections;
 import java.util.List;
@@ -119,7 +120,7 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
                 } finally {
                     meterRegistry // handle single targetFilterQuery
                             .map(mReg -> mReg.timer(
-                                    "hawkbit.autoassign.handle", TENANT_TAG, AccessContext.tenant(), "targetFilterQuery",
+                                    "hawkbit.autoassign.handle", TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get(), "targetFilterQuery",
                                     String.valueOf(targetFilterQuery.getId())))
                             .ifPresent(timer -> timer.record(System.nanoTime() - startNanoPartial, TimeUnit.NANOSECONDS));
                 }
@@ -132,7 +133,7 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
                 // only if there is at least one targetFilterQuery and lock has been obtained then will be measured (as in rollouts)
                 meterRegistry // handle single targetFilterQuery for single target
                         .map(mReg -> mReg.timer(
-                                "hawkbit.autoassign.handle.all", TENANT_TAG, AccessContext.tenant()))
+                                "hawkbit.autoassign.handle.all", TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get()))
                         .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
                 log.debug("Auto assign check all targets finished");
             }
@@ -151,7 +152,7 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
             } finally {
                 meterRegistry // handle single targetFilterQuery for single target
                         .map(mReg -> mReg.timer(
-                                "hawkbit.autoassign.handle.single", TENANT_TAG, AccessContext.tenant(), "targetFilterQuery",
+                                "hawkbit.autoassign.handle.single", TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get(), "targetFilterQuery",
                                 String.valueOf(targetFilterQuery.getId())))
                         .ifPresent(timer -> timer.record(System.nanoTime() - startNanoPartial, TimeUnit.NANOSECONDS));
             }
@@ -159,7 +160,7 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
 
         meterRegistry // handle single targetFilterQuery for single target
                 .map(mReg -> mReg.timer(
-                        "hawkbit.autoassign.handle.single.all", TENANT_TAG, AccessContext.tenant()))
+                        "hawkbit.autoassign.handle.single.all", TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get()))
                 .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
         log.debug("Auto assign check call for device {} finished", controllerId);
     }
