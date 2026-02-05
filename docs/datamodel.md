@@ -50,6 +50,38 @@ Software Content Definition:
 
 The public defined entities and their relation which are reflected by the Management API.
 
+<p align="center">
+  <img src="images/domain_model.png" alt="Domain Model Entity Relationship" width="1100"/>
+</p>
+
+| Entity | Role |
+|---|---|
+| Action | Action delivered from backend to target side and potentially executed on a target. Can have an execution status of `closed`, `proceeding`, `canceled`, `scheduled`, `rejected`, `resumed`, `downloaded`, `download`. Can have a result of `success`, `failure`, `none`. |
+| Artifact | Update data + metadata delivered to targets. |
+| Distribution Set | Subset of targets used during a rollout. |
+| Software Module | Child entity of distribution set. |
+| Rollout | Root entity (overall backend side state machine). |
+| Target | A physical device. |
+
+Information about the Rollout related behavior can be found in
+[Rollout management](https://eclipse.dev/hawkbit/concepts/rollout-management/).
+Information about target side behavior can be found in
+[Target State Machine](https://eclipse.dev/hawkbit/concepts/targetstate/).
+The behavior shown in *Target State Machine* needs to be implemented in the
+update client used on target side (behavioral interface specification for
+update clients).
+
+Additional information required to understand the high level functionality:
+
+| Type | Role |
+|---|---|
+| Action Type | Type of the action (`SOFT`, `FORCED`, `TIMEFORCED`, `DOWNLOAD_ONLY`). |
+| Action Cancelation Type | Type of action cancelation responded from target to backend side via a DDI API feedback endpoint `SOFT`, `FORCE`, `NONE`. |
+| Distribution Set Tag | Allows classification of distribution set. |
+| Distribution Set Type | Allows classification of distribution set (according to type). Builtin are `os_app`, `os`, `app`. |
+| Target Tag | Allows classification of target (e.g. for grouping, indicating target roles, ...). |
+| Target Type | Allows classification of target (optional). |
+
 ---
 
 ## Deleting and Archiving Software Modules
