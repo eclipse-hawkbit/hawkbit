@@ -51,18 +51,12 @@ import java.util.Optional;
 @Slf4j
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnProperty(name = "spring.ai.mcp.server.stdio", havingValue = "false", matchIfMissing = true)
 public class McpSecurityConfiguration {
 
     private final Optional<AuthenticationValidator> authenticationValidator;
-
-    public McpSecurityConfiguration(final Optional<AuthenticationValidator> authenticationValidator) {
-        this.authenticationValidator = authenticationValidator;
-        if (authenticationValidator.isEmpty()) {
-            log.info("Authentication validation disabled - requests will be forwarded without validation");
-        }
-    }
 
     @Bean
     @SuppressWarnings("java:S4502") // CSRF protection is not needed for stateless REST APIs using Authorization header
@@ -72,11 +66,14 @@ public class McpSecurityConfiguration {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        authenticationValidator.ifPresent(validator -> {
-            log.info("Authentication validation enabled - adding validation filter");
-            http.addFilterBefore(new HawkBitAuthenticationFilter(validator),
-                    UsernamePasswordAuthenticationFilter.class);
-        });
+        authenticationValidator.ifPresentOrElse(
+                validator -> {
+                    log.info("Authentication validation enabled - adding validation filter");
+                    http.addFilterBefore(new HawkBitAuthenticationFilter(validator),
+                            UsernamePasswordAuthenticationFilter.class);
+                },
+                () -> log.info("Authentication validation disabled - requests will be forwarded without validation")
+        );
 
         return http.build();
     }

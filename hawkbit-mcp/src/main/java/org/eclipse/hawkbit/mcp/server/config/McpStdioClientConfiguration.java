@@ -57,4 +57,20 @@ public class McpStdioClientConfiguration {
         };
     }
 
+    /**
+     * Tenant bean for STDIO mode - uses static credentials from configuration properties.
+     */
+    @Bean
+    public Tenant dummyTenant() {
+        final Tenant tenant = new Tenant();
+        if (properties.hasStaticCredentials()) {
+            tenant.setUsername(properties.getUsername());
+            tenant.setPassword(properties.getPassword());
+            log.info("Configured tenant with static credentials for STDIO mode");
+        } else {
+            log.warn("STDIO mode enabled but no static credentials configured");
+        }
+        return tenant;
+    }
+
 }

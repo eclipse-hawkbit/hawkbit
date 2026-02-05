@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.sdk.Controller;
 import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.HawkbitServer;
 import org.eclipse.hawkbit.sdk.Tenant;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -30,7 +29,7 @@ import java.util.function.BiFunction;
  * Common configuration for the hawkBit SDK client.
  * <p>
  * Provides the {@link HawkbitServer} and {@link HawkbitClient} beans.
- * Mode-specific authentication is provided via the request interceptor bean from:
+ * Mode-specific beans (Tenant, request interceptor) are provided by:
  * <ul>
  *   <li>{@link McpHttpClientConfiguration} - for HTTP mode (per-request authentication)</li>
  *   <li>{@link McpStdioClientConfiguration} - for STDIO mode (static credentials)</li>
@@ -70,29 +69,4 @@ public class HawkbitClientConfiguration {
                 .build();
     }
 
-    /**
-     * Tenant bean - credentials depend on the mode:
-     * <ul>
-     *   <li>STDIO mode with credentials: uses static credentials from configuration</li>
-     *   <li>STDIO mode without credentials: null credentials (will fail)</li>
-     *   <li>HTTP mode: null credentials (auth comes from request context via interceptor)</li>
-     * </ul>
-     */
-    @Bean
-    public Tenant dummyTenant(@Value("${spring.ai.mcp.server.stdio:false}") final boolean stdioMode) {
-        final Tenant tenant = new Tenant();
-        // Tenant fields are null by default - only set credentials in STDIO mode when configured
-        if (stdioMode) {
-            if (properties.hasStaticCredentials()) {
-                tenant.setUsername(properties.getUsername());
-                tenant.setPassword(properties.getPassword());
-                log.info("Configured tenant with static credentials for STDIO mode");
-            } else {
-                log.warn("STDIO mode enabled but no static credentials configured");
-            }
-        } else {
-            log.info("Configured tenant for HTTP mode (per-request authentication)");
-        }
-        return tenant;
-    }
 }

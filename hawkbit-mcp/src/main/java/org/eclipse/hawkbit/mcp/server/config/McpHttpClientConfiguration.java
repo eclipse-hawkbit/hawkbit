@@ -59,4 +59,14 @@ public class McpHttpClientConfiguration {
         };
     }
 
+    /**
+     * Tenant bean for HTTP mode - credentials are null as authentication
+     * comes from the incoming HTTP request context via the interceptor.
+     */
+    @Bean
+    public Tenant dummyTenant() {
+        log.info("Configured tenant for HTTP mode (per-request authentication)");
+        return new Tenant();
+    }
+
 }
