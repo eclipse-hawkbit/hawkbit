@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.scheduler;
 
 import static org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration.TENANT_TAG;
+import static org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration.TENANT_TAG_VALUE_PROVIDER;
 
 import java.util.List;
 import java.util.Optional;
@@ -91,7 +92,7 @@ public class JpaRolloutHandler implements RolloutHandler {
                 log.trace("Unlock lock {}", lock);
             }
             meterRegistry // handle all rollouts of a tenant
-                    .map(mReg -> mReg.timer("hawkbit.rollout.handle.all", TENANT_TAG, AccessContext.tenant()))
+                    .map(mReg -> mReg.timer("hawkbit.rollout.handle.all", TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get()))
                     .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
         }
     }
@@ -113,7 +114,7 @@ public class JpaRolloutHandler implements RolloutHandler {
 
         meterRegistry // handle single rollout
                 .map(mReg -> mReg.timer(
-                        "hawkbit.rollout.handle", TENANT_TAG, AccessContext.tenant(), "rollout", String.valueOf(rolloutId)))
+                        "hawkbit.rollout.handle", TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get(), "rollout", String.valueOf(rolloutId)))
                 .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
     }
 }

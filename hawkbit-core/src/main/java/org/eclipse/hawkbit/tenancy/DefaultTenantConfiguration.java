@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.tenancy;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
@@ -45,6 +46,10 @@ public class DefaultTenantConfiguration {
 
     public static final String TENANT_TAG = "tenant";
 
+    public static final Supplier<String> TENANT_TAG_VALUE_PROVIDER = () -> Optional.ofNullable(AccessContext.tenant())
+                .map(String::toUpperCase)
+                .orElse("N/A");
+
     @Bean
     @ConditionalOnMissingBean
     TenantAwareCacheManager cacheManager() {
@@ -73,7 +78,7 @@ public class DefaultTenantConfiguration {
                 }
 
                 private KeyValue tenant() {
-                    return KeyValue.of(TENANT_TAG, Optional.ofNullable(AccessContext.tenant()).orElse("n/a"));
+                    return KeyValue.of(TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get());
                 }
             };
         }
@@ -108,7 +113,7 @@ public class DefaultTenantConfiguration {
                 @Override
                 public Iterable<Tag> repositoryTags(final RepositoryMethodInvocationListener.RepositoryMethodInvocation invocation) {
                     final Iterable<Tag> defaultTags = super.repositoryTags(invocation);
-                    final String tenant = Optional.ofNullable(AccessContext.tenant()).orElse("n/a");
+                    final String tenant = TENANT_TAG_VALUE_PROVIDER.get();
                     return () -> {
                         final Iterator<Tag> defaultTagsIterator = defaultTags.iterator();
                         return new Iterator<>() {
