@@ -618,11 +618,10 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
             metadataArea.setEmptyStateText("No metadata found");
             metadataArea.addColumn(MgmtMetadata::getKey).setHeader(KEY).setAutoWidth(true);
             metadataArea.addColumn(MgmtMetadata::getValue).setHeader(VALUE).setAutoWidth(true);
-            metadataArea.addComponentColumn(metadata -> {
-                final Button deleteBtn = Utils.tooltip(new Button(VaadinIcon.TRASH.create()), "Delete Metadata");
-                deleteBtn.addClickListener(e -> confirmDeleteDialog(metadata.getKey()));
-                return deleteBtn;
-            }).setHeader("Actions").setAutoWidth(true).setFlexGrow(0);
+            metadataArea.addComponentColumn(metadata -> Utils.deleteButton("Delete metadata", () -> {
+                hawkbitClient.getTargetRestApi().deleteMetadata(target.getControllerId(), metadata.getKey());
+                refreshMetadatas();
+            })).setHeader("Actions").setAutoWidth(true).setFlexGrow(0);
             metadataArea.setWidthFull();
             add(metadataArea);
 
@@ -650,24 +649,6 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
                             hawkbitClient.getTargetRestApi().getMetadata(target.getControllerId()).getBody())
                             .map(PagedList::getContent)
                             .orElse(Collections.emptyList()));
-        }
-
-        private void confirmDeleteDialog(String key) {
-            final ConfirmDialog dialog = new ConfirmDialog();
-            dialog.setHeader("Confirm Deletion");
-            dialog.setText("Are you sure you want to delete metadata " + key + "?");
-
-            dialog.setCancelable(true);
-            dialog.addCancelListener(event -> dialog.close());
-
-            dialog.setConfirmButtonTheme(ButtonVariant.LUMO_ERROR.getVariantName());
-            dialog.setConfirmText("Delete");
-            dialog.addConfirmListener(event -> {
-                hawkbitClient.getTargetRestApi().deleteMetadata(target.getControllerId(), key);
-                refreshMetadatas();
-                dialog.close();
-            });
-            dialog.open();
         }
     }
 
@@ -867,7 +848,7 @@ public class TargetView extends TableView<TargetView.TargetWithDs, String> {
             distributionSet.setItemLabelGenerator(distributionSetO -> distributionSetO.getName() + ":" + distributionSetO.getVersion());
             distributionSet.setWidthFull();
 
-            actionType = Utils.actionTypeControls(forceTime);
+            actionType = Utils.actionTypeControls(MgmtActionType.FORCED, forceTime);
 
             assign.setEnabled(false);
             assign.addThemeVariants(ButtonVariant.LUMO_PRIMARY);

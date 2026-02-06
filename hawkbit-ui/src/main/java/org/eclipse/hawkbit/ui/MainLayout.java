@@ -44,6 +44,7 @@ import org.eclipse.hawkbit.ui.view.ConfigView;
 import org.eclipse.hawkbit.ui.view.DistributionSetView;
 import org.eclipse.hawkbit.ui.view.RolloutView;
 import org.eclipse.hawkbit.ui.view.SoftwareModuleView;
+import org.eclipse.hawkbit.ui.view.TargetFilterQueryView;
 import org.eclipse.hawkbit.ui.view.TargetView;
 
 /**
@@ -112,6 +113,9 @@ public class MainLayout extends AppLayout {
         final SideNav nav = new SideNav();
         if (accessChecker.hasAccess(TargetView.class)) {
             nav.addItem(new SideNavItem("Targets", TargetView.class, VaadinIcon.FILTER.create()));
+        }
+        if (accessChecker.hasAccess(TargetFilterQueryView.class)) {
+            nav.addItem(new SideNavItem("Target Filter Queries", TargetFilterQueryView.class, VaadinIcon.FILTER.create()));
         }
         if (accessChecker.hasAccess(RolloutView.class)) {
             nav.addItem(new SideNavItem("Rollouts", RolloutView.class, VaadinIcon.COGS.create()));
