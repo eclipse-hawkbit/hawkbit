@@ -75,7 +75,6 @@ public class TableView<T, ID> extends Div implements Constants, BeforeEnterObser
         splitLayout = new SplitLayout();
         splitLayout.setSizeFull();
         splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);
-        splitLayout.addThemeVariants(SplitLayoutVariant.LUMO_SMALL);
         splitLayout.setSplitterPosition(100);
         splitLayout.addToPrimary(selectionGrid);
         detailsPanel = new Div();

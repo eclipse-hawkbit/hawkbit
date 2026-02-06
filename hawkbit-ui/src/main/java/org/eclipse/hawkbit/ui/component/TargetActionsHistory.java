@@ -57,9 +57,9 @@ public class TargetActionsHistory extends Grid<TargetActionsHistory.ActionStatus
                 .setComparator(ActionStatusEntry::getLastModifiedAt);
 
         addColumn(new ComponentRenderer<>(ActionStatusEntry::getForceTypeIcon)).setHeader("Type").setAutoWidth(true).setFlexGrow(0);
-        addColumn(new ComponentRenderer<>(ActionStatusEntry::getActionsLayout)).setHeader("Actions").setAutoWidth(true).setFlexGrow(0);
+        addColumn(new ComponentRenderer<>(ActionStatusEntry::getActionsLayout)).setHeader("Actions").setAutoWidth(true).setFlexGrow(0).setFrozenToEnd(true);
         addColumn(new ComponentRenderer<>(ActionStatusEntry::getForceQuitLayout)).setHeader("Force Quit").setAutoWidth(true)
-                .setFlexGrow(0);
+                .setFlexGrow(0).setFrozenToEnd(true);;
         addItemClickListener(e -> actionStepsGrid.setActionId(e.getItem().action.getId()));
         this.actionStepsGrid = actionStepsGrid;
     }
