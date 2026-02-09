@@ -1,5 +1,5 @@
 # set Java
-ARG JAVA_VERSION=21.0.9_10
+ARG JAVA_VERSION=21.0.10_7
 # extracts spring layers from the app jar (to optimize boot)
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS build
 
