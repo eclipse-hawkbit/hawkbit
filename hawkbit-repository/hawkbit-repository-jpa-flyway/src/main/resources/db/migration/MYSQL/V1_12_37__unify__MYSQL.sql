@@ -28,6 +28,8 @@ ALTER TABLE sp_rollout_group MODIFY name VARCHAR(128) NOT NULL;
 UPDATE sp_target SET controller_id = '' WHERE controller_id IS NULL;
 ALTER TABLE sp_target MODIFY controller_id VARCHAR(256) NOT NULL;
 
+ALTER TABLE sp_rollout_group DROP INDEX sp_idx_rollout_group_parent;
+
 -- remove unnecessary / faulty default for a tenant's scope unique key
 ALTER TABLE sp_target_type ALTER COLUMN type_key DROP DEFAULT;
 
