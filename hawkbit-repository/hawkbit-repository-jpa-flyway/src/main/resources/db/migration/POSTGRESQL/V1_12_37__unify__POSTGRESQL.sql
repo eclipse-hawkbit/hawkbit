@@ -108,3 +108,6 @@ ALTER INDEX sp_idx_action_external_ref_sp_action RENAME TO sp_idx_action_externa
 -- sp_action_status table indexes
 ALTER INDEX sp_idx_action_status_prim_sp_action_status RENAME TO sp_idx_action_status_prim;
 ALTER INDEX sp_idx_action_status_02_sp_action_status RENAME TO sp_idx_action_status_02;
+
+-- rename index
+ALTER TABLE sp_tenant RENAME CONSTRAINT fk_sp_tenant_default_ds_type TO fk_tenant_default_ds_type;
