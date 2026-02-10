@@ -118,10 +118,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <mainClass>org.eclipse.hawkbit.mcp.server.HawkbitMcpServerApplication</mainClass>
-                    <attach>false</attach>
-                </configuration>
                 <executions>
                     <execution>
                         <goals>
