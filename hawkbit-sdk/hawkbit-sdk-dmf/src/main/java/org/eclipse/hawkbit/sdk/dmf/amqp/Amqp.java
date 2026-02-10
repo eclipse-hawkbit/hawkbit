@@ -14,7 +14,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.sdk.Tenant.DMF;
+import org.eclipse.hawkbit.sdk.Tenant;
+import org.eclipse.hawkbit.sdk.Tenant.Dmf;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
@@ -40,7 +41,7 @@ public class Amqp {
     }
 
     @SuppressWarnings("java:S3358") // java:S3358
-    public VHost getVhost(final DMF dmf, final boolean initVHost) {
+    public VHost getVhost(final Tenant.Dmf dmf, final boolean initVHost) {
         final String vHost = dmf == null || ObjectUtils.isEmpty(dmf.getVirtualHost()) ?
                 (rabbitProperties.getVirtualHost() == null ? "/" : rabbitProperties.getVirtualHost()) :
                 dmf.getVirtualHost();
@@ -48,7 +49,7 @@ public class Amqp {
     }
 
     @SuppressWarnings("java:S4449") // java:S4449 - setUsername/Password is called with non-null
-    private ConnectionFactory getConnectionFactory(final DMF dmf, final String vHost) {
+    private ConnectionFactory getConnectionFactory(final Dmf dmf, final String vHost) {
         final CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
         connectionFactory.setHost(rabbitProperties.getHost());
         connectionFactory.setPort(rabbitProperties.determinePort());

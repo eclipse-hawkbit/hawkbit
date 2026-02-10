@@ -10,6 +10,8 @@
 package org.eclipse.hawkbit.repository.model;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import lombok.Data;
 import lombok.Setter;
@@ -77,6 +79,8 @@ public class DeploymentRequest {
         @Setter
         private long forceTime = RepositoryModelConstants.NO_FORCE_TIME;
         @Setter
+        @Min(Action.WEIGHT_MIN)
+        @Max(Action.WEIGHT_MAX)
         private ActionType actionType = ActionType.FORCED;
         private String maintenanceSchedule;
         private String maintenanceWindowDuration;
@@ -85,8 +89,7 @@ public class DeploymentRequest {
         private boolean confirmationRequired;
 
         /**
-         * Create a builder for a target distribution set assignment with the
-         * mandatory fields
+         * Create a builder for a target distribution set assignment with the mandatory fields
          *
          * @param controllerId ID of the target
          * @param distributionSetId ID of the distribution set

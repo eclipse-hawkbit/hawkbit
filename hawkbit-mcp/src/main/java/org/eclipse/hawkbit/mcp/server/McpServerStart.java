@@ -24,9 +24,9 @@ import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServic
  */
 @SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
 @EnableConfigurationProperties(HawkbitMcpProperties.class)
-public class HawkbitMcpServerApplication {
+public class McpServerStart {
 
-    public static void main(String[] args) {
-        SpringApplication.run(HawkbitMcpServerApplication.class, args);
+    public static void main(final String[] args) {
+        SpringApplication.run(McpServerStart.class, args);
     }
 }

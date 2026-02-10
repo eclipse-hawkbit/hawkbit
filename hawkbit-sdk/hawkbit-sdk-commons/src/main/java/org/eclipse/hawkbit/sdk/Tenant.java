@@ -49,11 +49,11 @@ public class Tenant {
 
     // amqp settings (if DMF is used)
     @Nullable
-    private DMF dmf;
+    private Dmf dmf;
 
     @Data
     @ToString
-    public static class DMF {
+    public static class Dmf {
 
         @Nullable
         private String virtualHost;

@@ -71,7 +71,6 @@ import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
-import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -170,7 +169,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> assignDistributionSets(
             final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
-        WeightValidationHelper.validate(deploymentRequests);
         return assignDistributionSets(deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
     }
 

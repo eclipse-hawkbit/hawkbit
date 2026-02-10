@@ -9,6 +9,11 @@
  */
 package org.eclipse.hawkbit.mcp.server.client;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
+
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import feign.FeignException;
@@ -20,11 +25,6 @@ import org.eclipse.hawkbit.sdk.Tenant;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HexFormat;
 
 /**
  * Validates authentication credentials against hawkBit REST API using the SDK.
@@ -39,9 +39,7 @@ public class HawkbitAuthenticationValidator implements AuthenticationValidator {
     private final Tenant dummyTenant;
     private final Cache<String, Boolean> validationCache;
 
-    public HawkbitAuthenticationValidator(final HawkbitClient hawkbitClient,
-                                          final Tenant dummyTenant,
-                                          final HawkbitMcpProperties properties) {
+    public HawkbitAuthenticationValidator(final HawkbitClient hawkbitClient, final Tenant dummyTenant, final HawkbitMcpProperties properties) {
         this.hawkbitClient = hawkbitClient;
         this.dummyTenant = dummyTenant;
 

@@ -9,10 +9,14 @@
  */
 package org.eclipse.hawkbit.mcp.server.config;
 
+import java.io.IOException;
+import java.util.Optional;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,9 +36,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import java.io.IOException;
-import java.util.Optional;
 
 /**
  * Security configuration for the MCP server.
@@ -62,15 +63,14 @@ public class McpSecurityConfiguration {
     @SuppressWarnings("java:S4502") // CSRF protection is not needed for stateless REST APIs using Authorization header
     public SecurityFilterChain mcpSecurityFilterChain(final HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         authenticationValidator.ifPresentOrElse(
                 validator -> {
                     log.info("Authentication validation enabled - adding validation filter");
-                    http.addFilterBefore(new HawkBitAuthenticationFilter(validator),
-                            UsernamePasswordAuthenticationFilter.class);
+                    http.addFilterBefore(new HawkBitAuthenticationFilter(validator), UsernamePasswordAuthenticationFilter.class);
                 },
                 () -> log.info("Authentication validation disabled - requests will be forwarded without validation")
         );
@@ -91,8 +91,9 @@ public class McpSecurityConfiguration {
         private final AuthenticationValidator validator;
 
         @Override
-        protected void doFilterInternal(final HttpServletRequest request, final @NonNull HttpServletResponse response,
-                                        final @NonNull FilterChain filterChain) throws ServletException, IOException {
+        protected void doFilterInternal(
+                final HttpServletRequest request, final @NonNull HttpServletResponse response, final @NonNull FilterChain filterChain)
+                throws ServletException, IOException {
             final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
             final ValidationResult result = validator.validate(authHeader);
 
@@ -120,10 +121,7 @@ public class McpSecurityConfiguration {
                 throws IOException {
             response.setStatus(status.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.getWriter().write(String.format(
-                    "{\"error\":\"%s\",\"message\":\"%s\"}",
-                    status.getReasonPhrase(),
-                    message));
+            response.getWriter().write(String.format("{\"error\":\"%s\",\"message\":\"%s\"}", status.getReasonPhrase(), message));
         }
     }
 }

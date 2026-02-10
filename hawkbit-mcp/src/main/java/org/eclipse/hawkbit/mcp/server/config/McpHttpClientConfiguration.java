@@ -68,5 +68,4 @@ public class McpHttpClientConfiguration {
         log.info("Configured tenant for HTTP mode (per-request authentication)");
         return new Tenant();
     }
-
 }

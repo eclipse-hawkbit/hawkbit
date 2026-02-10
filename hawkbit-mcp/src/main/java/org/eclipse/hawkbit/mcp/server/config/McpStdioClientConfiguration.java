@@ -46,9 +46,8 @@ public class McpStdioClientConfiguration {
         log.info("Configuring STDIO mode request interceptor (static credentials)");
         return (tenant, controller) -> template -> {
             if (properties.hasStaticCredentials()) {
-                String credentials = properties.getUsername() + ":" + properties.getPassword();
-                String authHeader = "Basic " + Base64.getEncoder().encodeToString(
-                        credentials.getBytes(StandardCharsets.UTF_8));
+                final String credentials = properties.getUsername() + ":" + properties.getPassword();
+                final String authHeader = "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
                 template.header(HttpHeaders.AUTHORIZATION, authHeader);
                 log.trace("Using static credentials from properties (STDIO mode)");
             } else {
@@ -72,5 +71,4 @@ public class McpStdioClientConfiguration {
         }
         return tenant;
     }
-
 }

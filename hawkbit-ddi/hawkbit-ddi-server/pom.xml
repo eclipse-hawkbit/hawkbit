@@ -22,7 +22,7 @@
     <name>hawkBit :: DDI :: Server</name>
 
     <properties>
-        <spring.app.class>org.eclipse.hawkbit.app.ddi.DDIStart</spring.app.class>
+        <spring.app.class>org.eclipse.hawkbit.app.ddi.DdiStart</spring.app.class>
     </properties>
 
     <dependencies>

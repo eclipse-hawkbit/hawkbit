@@ -27,6 +27,7 @@ public interface AuthenticationValidator {
      * Result of authentication validation.
      */
     enum ValidationResult {
+
         /**
          * Credentials are valid (authenticated user).
          */

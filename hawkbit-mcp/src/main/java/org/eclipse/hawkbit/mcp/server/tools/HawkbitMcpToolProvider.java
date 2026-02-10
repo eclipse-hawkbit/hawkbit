@@ -53,10 +53,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HawkbitMcpToolProvider {
 
-    private static final String OP_CREATE = "CREATE";
-    private static final String OP_UPDATE = "UPDATE";
-    private static final String OP_DELETE = "DELETE";
-    private static final String OP_DELETE_BATCH = "DELETE_BATCH";
+    private static final String OP_CREATE = HawkbitMcpProperties.OP_CREATE.toUpperCase();
+    private static final String OP_UPDATE = HawkbitMcpProperties.OP_UPDATE.toUpperCase();
+    private static final String OP_DELETE = HawkbitMcpProperties.OP_DELETE.toUpperCase();
+    private static final String OP_DELETE_BATCH = HawkbitMcpProperties.OP_DELETE_BATCH.toUpperCase().replace('-', '_');
     private static final String OP_START = "START";
     private static final String OP_PAUSE = "PAUSE";
     private static final String OP_STOP = "STOP";
@@ -65,6 +65,14 @@ public class HawkbitMcpToolProvider {
     private static final String OP_DENY = "DENY";
     private static final String OP_RETRY = "RETRY";
     private static final String OP_TRIGGER_NEXT_GROUP = "TRIGGER_NEXT_GROUP";
+
+    private static final String SOFTWARE_MODULES = "softwareModules";
+    private static final String DISTRIBUTION_SETS = "distributionSets";
+    private static final String TARGETS = "targets";
+    private static final String TARGET_FILTERS = "targetFilters";
+
+    private static final String BODY_IS_REQUIRED_FOR_UPDATE_OPERATION = "body is required for UPDATE operation";
+    private static final String BODY_IS_REQUIRED_FOR_CREATE_OPERATION = "body is required for CREATE operation";
 
     private final HawkbitClient hawkbitClient;
     private final Tenant dummyTenant;
@@ -199,13 +207,14 @@ public class HawkbitMcpToolProvider {
                            "{\"type\":\"Create\",\"body\":{\"controllerId\":\"id\",\"name\":\"name\"}}, " +
                            "{\"type\":\"Update\",\"controllerId\":\"id\",\"body\":{...}}, " +
                            "{\"type\":\"Delete\",\"controllerId\":\"id\"}")
+    @SuppressWarnings("java:S3776") // not too complex
     public OperationResponse<Object> manageTarget(final TargetRequest request) {
         log.debug("Managing target: request={}", request.getClass().getSimpleName());
 
         final MgmtTargetRestApi api = hawkbitClient.mgmtService(MgmtTargetRestApi.class, dummyTenant);
 
         if (request instanceof TargetRequest.Create r) {
-            validateOperation("create", "targets");
+            validateOperation(OP_CREATE, TARGETS);
             if (r.body() == null) {
                 return OperationResponse.failure(OP_CREATE, "Request body is required for CREATE operation");
             }
@@ -214,7 +223,7 @@ public class HawkbitMcpToolProvider {
             return OperationResponse.success(OP_CREATE, "Target created successfully",
                     created != null && !created.isEmpty() ? created.get(0) : null);
         } else if (request instanceof TargetRequest.Update r) {
-            validateOperation("update", "targets");
+            validateOperation(OP_UPDATE, TARGETS);
             if (r.controllerId() == null || r.controllerId().isBlank()) {
                 return OperationResponse.failure(OP_UPDATE, "controllerId is required for UPDATE operation");
             }
@@ -224,7 +233,7 @@ public class HawkbitMcpToolProvider {
             final ResponseEntity<MgmtTarget> response = api.updateTarget(r.controllerId(), r.body());
             return OperationResponse.success(OP_UPDATE, "Target updated successfully", response.getBody());
         } else if (request instanceof TargetRequest.Delete r) {
-            validateOperation("delete", "targets");
+            validateOperation(OP_DELETE, TARGETS);
             if (r.controllerId() == null || r.controllerId().isBlank()) {
                 return OperationResponse.failure(OP_DELETE, "controllerId is required for DELETE operation");
             }
@@ -243,15 +252,16 @@ public class HawkbitMcpToolProvider {
                            "Examples: {\"type\":\"Create\",\"body\":{...}}, " +
                            "{\"type\":\"Start\",\"rolloutId\":123}, " +
                            "{\"type\":\"Approve\",\"rolloutId\":123,\"remark\":\"approved\"}")
+    @SuppressWarnings("java:S3776") // not too complex, iterative logic
     public OperationResponse<Object> manageRollout(final RolloutRequest request) {
         log.debug("Managing rollout: request={}", request.getClass().getSimpleName());
 
         final MgmtRolloutRestApi api = hawkbitClient.mgmtService(MgmtRolloutRestApi.class, dummyTenant);
 
         if (request instanceof RolloutRequest.Create r) {
-            validateRolloutOperation("create");
+            validateRolloutOperation(OP_CREATE);
             if (r.body() == null) {
-                return OperationResponse.failure(OP_CREATE, "body is required for CREATE operation");
+                return OperationResponse.failure(OP_CREATE, BODY_IS_REQUIRED_FOR_CREATE_OPERATION);
             }
             final ResponseEntity<MgmtRolloutResponseBody> response = api.create(r.body());
             return OperationResponse.success(OP_CREATE, "Rollout created successfully", response.getBody());
@@ -261,12 +271,12 @@ public class HawkbitMcpToolProvider {
                 return OperationResponse.failure(OP_UPDATE, "rolloutId is required for UPDATE operation");
             }
             if (r.body() == null) {
-                return OperationResponse.failure(OP_UPDATE, "body is required for UPDATE operation");
+                return OperationResponse.failure(OP_UPDATE, BODY_IS_REQUIRED_FOR_UPDATE_OPERATION);
             }
             final ResponseEntity<MgmtRolloutResponseBody> response = api.update(r.rolloutId(), r.body());
             return OperationResponse.success(OP_UPDATE, "Rollout updated successfully", response.getBody());
         } else if (request instanceof RolloutRequest.Delete r) {
-            validateRolloutOperation("delete");
+            validateRolloutOperation(OP_DELETE);
             if (r.rolloutId() == null) {
                 return OperationResponse.failure(OP_DELETE, "rolloutId is required for DELETE operation");
             }
@@ -344,26 +354,26 @@ public class HawkbitMcpToolProvider {
         final MgmtDistributionSetRestApi api = hawkbitClient.mgmtService(MgmtDistributionSetRestApi.class, dummyTenant);
 
         if (request instanceof DistributionSetRequest.Create r) {
-            validateOperation("create", "distributionSets");
+            validateOperation(OP_CREATE, DISTRIBUTION_SETS);
             if (r.body() == null) {
-                return OperationResponse.failure(OP_CREATE, "body is required for CREATE operation");
+                return OperationResponse.failure(OP_CREATE, BODY_IS_REQUIRED_FOR_CREATE_OPERATION);
             }
             final ResponseEntity<List<MgmtDistributionSet>> response = api.createDistributionSets(List.of(r.body()));
             final List<MgmtDistributionSet> created = response.getBody();
             return OperationResponse.success(OP_CREATE, "Distribution set created successfully",
                     created != null && !created.isEmpty() ? created.get(0) : null);
         } else if (request instanceof DistributionSetRequest.Update r) {
-            validateOperation("update", "distributionSets");
+            validateOperation(OP_UPDATE, DISTRIBUTION_SETS);
             if (r.distributionSetId() == null) {
                 return OperationResponse.failure(OP_UPDATE, "distributionSetId is required for UPDATE operation");
             }
             if (r.body() == null) {
-                return OperationResponse.failure(OP_UPDATE, "body is required for UPDATE operation");
+                return OperationResponse.failure(OP_UPDATE, BODY_IS_REQUIRED_FOR_UPDATE_OPERATION);
             }
             final ResponseEntity<MgmtDistributionSet> response = api.updateDistributionSet(r.distributionSetId(), r.body());
             return OperationResponse.success(OP_UPDATE, "Distribution set updated successfully", response.getBody());
         } else if (request instanceof DistributionSetRequest.Delete r) {
-            validateOperation("delete", "distributionSets");
+            validateOperation(OP_DELETE, DISTRIBUTION_SETS);
             if (r.distributionSetId() == null) {
                 return OperationResponse.failure(OP_DELETE, "distributionSetId is required for DELETE operation");
             }
@@ -384,7 +394,7 @@ public class HawkbitMcpToolProvider {
         final MgmtActionRestApi api = hawkbitClient.mgmtService(MgmtActionRestApi.class, dummyTenant);
 
         if (request instanceof ActionRequest.Delete r) {
-            validateActionOperation("delete");
+            validateActionOperation(OP_DELETE);
             if (r.actionId() == null) {
                 return OperationResponse.failure(OP_DELETE, "actionId is required for DELETE operation");
             }
@@ -414,26 +424,26 @@ public class HawkbitMcpToolProvider {
         final MgmtSoftwareModuleRestApi api = hawkbitClient.mgmtService(MgmtSoftwareModuleRestApi.class, dummyTenant);
 
         if (request instanceof SoftwareModuleRequest.Create r) {
-            validateOperation("create", "softwareModules");
+            validateOperation(OP_CREATE, SOFTWARE_MODULES);
             if (r.body() == null) {
-                return OperationResponse.failure(OP_CREATE, "body is required for CREATE operation");
+                return OperationResponse.failure(OP_CREATE, BODY_IS_REQUIRED_FOR_CREATE_OPERATION);
             }
             final ResponseEntity<List<MgmtSoftwareModule>> response = api.createSoftwareModules(List.of(r.body()));
             final List<MgmtSoftwareModule> created = response.getBody();
             return OperationResponse.success(OP_CREATE, "Software module created successfully",
                     created != null && !created.isEmpty() ? created.get(0) : null);
         } else if (request instanceof SoftwareModuleRequest.Update r) {
-            validateOperation("update", "softwareModules");
+            validateOperation(OP_UPDATE, SOFTWARE_MODULES);
             if (r.softwareModuleId() == null) {
                 return OperationResponse.failure(OP_UPDATE, "softwareModuleId is required for UPDATE operation");
             }
             if (r.body() == null) {
-                return OperationResponse.failure(OP_UPDATE, "body is required for UPDATE operation");
+                return OperationResponse.failure(OP_UPDATE, BODY_IS_REQUIRED_FOR_UPDATE_OPERATION);
             }
             final ResponseEntity<MgmtSoftwareModule> response = api.updateSoftwareModule(r.softwareModuleId(), r.body());
             return OperationResponse.success(OP_UPDATE, "Software module updated successfully", response.getBody());
         } else if (request instanceof SoftwareModuleRequest.Delete r) {
-            validateOperation("delete", "softwareModules");
+            validateOperation(OP_DELETE, SOFTWARE_MODULES);
             if (r.softwareModuleId() == null) {
                 return OperationResponse.failure(OP_DELETE, "softwareModuleId is required for DELETE operation");
             }
@@ -455,24 +465,24 @@ public class HawkbitMcpToolProvider {
         final MgmtTargetFilterQueryRestApi api = hawkbitClient.mgmtService(MgmtTargetFilterQueryRestApi.class, dummyTenant);
 
         if (request instanceof TargetFilterRequest.Create r) {
-            validateOperation("create", "targetFilters");
+            validateOperation(OP_CREATE, TARGET_FILTERS);
             if (r.body() == null) {
-                return OperationResponse.failure(OP_CREATE, "body is required for CREATE operation");
+                return OperationResponse.failure(OP_CREATE, BODY_IS_REQUIRED_FOR_CREATE_OPERATION);
             }
             final ResponseEntity<MgmtTargetFilterQuery> response = api.createFilter(r.body());
             return OperationResponse.success(OP_CREATE, "Target filter created successfully", response.getBody());
         } else if (request instanceof TargetFilterRequest.Update r) {
-            validateOperation("update", "targetFilters");
+            validateOperation(OP_UPDATE, TARGET_FILTERS);
             if (r.filterId() == null) {
                 return OperationResponse.failure(OP_UPDATE, "filterId is required for UPDATE operation");
             }
             if (r.body() == null) {
-                return OperationResponse.failure(OP_UPDATE, "body is required for UPDATE operation");
+                return OperationResponse.failure(OP_UPDATE, BODY_IS_REQUIRED_FOR_UPDATE_OPERATION);
             }
             final ResponseEntity<MgmtTargetFilterQuery> response = api.updateFilter(r.filterId(), r.body());
             return OperationResponse.success(OP_UPDATE, "Target filter updated successfully", response.getBody());
         } else if (request instanceof TargetFilterRequest.Delete r) {
-            validateOperation("delete", "targetFilters");
+            validateOperation(OP_DELETE, TARGET_FILTERS);
             if (r.filterId() == null) {
                 return OperationResponse.failure(OP_DELETE, "filterId is required for DELETE operation");
             }
@@ -517,7 +527,7 @@ public class HawkbitMcpToolProvider {
         final Boolean entitySetting = config.getOperationEnabled(operation);
 
         if (entitySetting == null) {
-            if (operation.equals("delete") && !properties.getOperations().isGlobalOperationEnabled("delete")) {
+            if (operation.equals("delete") && !properties.getOperations().isGlobalOperationEnabled(OP_DELETE)) {
                 throw new IllegalArgumentException(
                         "Operation " + operation.toUpperCase() + " is not enabled for actions. " +
                         "Check hawkbit.mcp.operations configuration.");
@@ -547,7 +557,7 @@ public class HawkbitMcpToolProvider {
     private HawkbitMcpProperties.EntityConfig getEntityConfig(final String entity) {
         final HawkbitMcpProperties.Operations ops = properties.getOperations();
         return switch (entity.toLowerCase()) {
-            case "targets" -> ops.getTargets();
+            case TARGETS -> ops.getTargets();
             case "rollouts" -> ops.getRollouts();
             case "distributionsets" -> ops.getDistributionSets();
             case "softwaremodules" -> ops.getSoftwareModules();

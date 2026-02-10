@@ -22,7 +22,7 @@
     <name>hawkBit :: DMF :: Server</name>
 
     <properties>
-        <spring.app.class>org.eclipse.hawkbit.app.ddi.DMFStart</spring.app.class>
+        <spring.app.class>org.eclipse.hawkbit.app.ddi.DmfStart</spring.app.class>
     </properties>
 
     <dependencies>

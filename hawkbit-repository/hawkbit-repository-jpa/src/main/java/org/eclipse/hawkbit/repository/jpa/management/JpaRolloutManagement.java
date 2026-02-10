@@ -71,7 +71,6 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRollou
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
-import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -718,8 +717,6 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private JpaRollout createRollout(final JpaRollout rollout, final boolean pureDynamic) {
-        WeightValidationHelper.validate(rollout);
-
         rollout.setCreatedAt(System.currentTimeMillis());
 
         final JpaDistributionSet distributionSet = rollout.getDistributionSet();

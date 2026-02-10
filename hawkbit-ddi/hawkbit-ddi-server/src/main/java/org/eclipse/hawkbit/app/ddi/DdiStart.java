@@ -7,17 +7,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.app.dmf;
+package org.eclipse.hawkbit.app.ddi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.servlet.view.RedirectView;
 
 /**
  * A {@link SpringBootApplication} annotated class with a main method to start.
- * The minimal configuration for the stand alone hawkBit DMF server.
+ * The minimal configuration for the stand alone hawkBit DDI server.
  */
 @SpringBootApplication(scanBasePackages = "org.eclipse.hawkbit")
-public class DMFStart {
+public class DdiStart {
 
     /**
      * Main method to start the spring-boot application.
@@ -25,6 +28,15 @@ public class DMFStart {
      * @param args the VM arguments.
      */
     public static void main(final String[] args) {
-        SpringApplication.run(DMFStart.class, args);
+        SpringApplication.run(DdiStart.class, args);
+    }
+
+    @Controller
+    public static class RedirectController {
+
+        @GetMapping("/")
+        public RedirectView redirectToSwagger() {
+            return new RedirectView("swagger-ui/index.html");
+        }
     }
 }

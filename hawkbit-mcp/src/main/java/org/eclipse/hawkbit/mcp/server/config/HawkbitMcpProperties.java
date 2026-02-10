@@ -26,6 +26,12 @@ import java.time.Duration;
 @ConfigurationProperties(prefix = "hawkbit.mcp")
 public class HawkbitMcpProperties {
 
+    public static final String OP_LIST = "list";
+    public static final String OP_CREATE = "create";
+    public static final String OP_UPDATE = "update";
+    public static final String OP_DELETE = "delete";
+    public static final String OP_DELETE_BATCH = "delete-batch";
+
     /**
      * Base URL of the hawkBit Management API (e.g., <a href="http://localhost:8080">...</a>).
      */
@@ -56,19 +62,19 @@ public class HawkbitMcpProperties {
 
     /**
      * Whether to enable the built-in hawkBit tools.
-     * Set to false to provide custom tool implementations.
+     * Set to <code>false</code> to provide custom tool implementations.
      */
     private boolean toolsEnabled = true;
 
     /**
      * Whether to enable the built-in hawkBit documentation resources.
-     * Set to false to provide custom resource implementations.
+     * Set <code>false</code> provide custom resource implementations.
      */
     private boolean resourcesEnabled = true;
 
     /**
      * Whether to enable the built-in hawkBit prompts.
-     * Set to false to provide custom prompt implementations.
+     * Set <code>false</code> provide custom prompt implementations.
      */
     private boolean promptsEnabled = true;
 
@@ -130,10 +136,10 @@ public class HawkbitMcpProperties {
          */
         public boolean isGlobalOperationEnabled(final String operation) {
             return switch (operation.toLowerCase()) {
-                case "list" -> listEnabled;
-                case "create" -> createEnabled;
-                case "update" -> updateEnabled;
-                case "delete" -> deleteEnabled;
+                case OP_LIST -> listEnabled;
+                case OP_CREATE -> createEnabled;
+                case OP_UPDATE -> updateEnabled;
+                case OP_DELETE -> deleteEnabled;
                 default -> true;
             };
         }
@@ -155,10 +161,10 @@ public class HawkbitMcpProperties {
          */
         public Boolean getOperationEnabled(final String operation) {
             return switch (operation.toLowerCase()) {
-                case "list" -> listEnabled;
-                case "create" -> createEnabled;
-                case "update" -> updateEnabled;
-                case "delete" -> deleteEnabled;
+                case OP_LIST -> listEnabled;
+                case OP_CREATE -> createEnabled;
+                case OP_UPDATE -> updateEnabled;
+                case OP_DELETE -> deleteEnabled;
                 default -> null;
             };
         }
@@ -215,9 +221,9 @@ public class HawkbitMcpProperties {
          */
         public Boolean getOperationEnabled(final String operation) {
             return switch (operation.toLowerCase().replace("_", "-")) {
-                case "list" -> listEnabled;
-                case "delete" -> deleteEnabled;
-                case "delete-batch" -> deleteBatchEnabled;
+                case OP_LIST -> listEnabled;
+                case OP_DELETE -> deleteEnabled;
+                case OP_DELETE_BATCH -> deleteBatchEnabled;
                 default -> null;
             };
         }

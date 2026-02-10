@@ -17,13 +17,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public record ListRequest(
         @JsonPropertyDescription("RSQL filter query (e.g., 'name==test*')")
         String rsql,
-
         @JsonPropertyDescription("Number of items to skip (default: 0)")
         Integer offset,
-
         @JsonPropertyDescription("Maximum number of items to return (default: 50)")
-        Integer limit
-) {
+        Integer limit) {
 
     public static final int DEFAULT_OFFSET = 0;
     public static final int DEFAULT_LIMIT = 50;

@@ -16,7 +16,7 @@ _(Note: you have to add the JDBC driver also to your class path if you intend to
 Or:
 
 ```bash
-run org.eclipse.hawkbit.app.ddi.DDIStart
+run org.eclipse.hawkbit.app.ddi.DdiStart
 ```
 
 ### Usage

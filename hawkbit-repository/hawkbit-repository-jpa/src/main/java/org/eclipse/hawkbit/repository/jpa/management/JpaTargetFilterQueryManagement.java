@@ -37,7 +37,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
-import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -150,7 +149,6 @@ class JpaTargetFilterQueryManagement
             targetFilterQuery.setAutoAssignInitiatedBy(null);
             targetFilterQuery.setConfirmationRequired(false);
         } else {
-            WeightValidationHelper.validate(update);
             assertMaxTargetsQuota(targetFilterQuery.getQuery(), targetFilterQuery.getName(), update.dsId());
 
             DistributionSet distributionSet = distributionSetManagement.getValidAndComplete(update.dsId());
@@ -215,10 +213,8 @@ class JpaTargetFilterQueryManagement
             QLSupport.getInstance().validate(query, TargetFields.class, JpaTarget.class);
 
             // enforce the 'max targets per auto assign' quota right here even if the result of the filter query can vary over time
-            Optional.ofNullable(create.getAutoAssignDistributionSet()).ifPresent(dsId -> {
-                WeightValidationHelper.validate(create);
-                assertMaxTargetsQuota(query, create.getName(), dsId.getId());
-            });
+            Optional.ofNullable(create.getAutoAssignDistributionSet())
+                    .ifPresent(dsId -> assertMaxTargetsQuota(query, create.getName(), dsId.getId()));
         });
         if (create.getAutoAssignWeight() == null) {
             create.setAutoAssignWeight(create.getAutoAssignDistributionSet() == null ? 0 : repositoryProperties.getActionWeightIfAbsent());

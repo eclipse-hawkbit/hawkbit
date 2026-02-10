@@ -9,10 +9,10 @@
  */
 package org.eclipse.hawkbit.mcp.server.dto;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
-import java.util.List;
 
 /**
  * Sealed interface for action management operations.
@@ -36,7 +36,7 @@ public sealed interface ActionRequest
      * Request to delete multiple actions.
      *
      * @param actionIds list of action IDs to delete (mutually exclusive with rsql)
-     * @param rsql      RSQL filter query for selecting actions to delete (mutually exclusive with actionIds)
+     * @param rsql RSQL filter query for selecting actions to delete (mutually exclusive with actionIds)
      */
     record DeleteBatch(List<Long> actionIds, String rsql) implements ActionRequest {}
 }

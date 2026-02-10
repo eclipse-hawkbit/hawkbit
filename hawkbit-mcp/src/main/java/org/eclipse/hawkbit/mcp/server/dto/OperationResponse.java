@@ -18,12 +18,7 @@ package org.eclipse.hawkbit.mcp.server.dto;
  * @param message   optional message (typically for success confirmations or error details)
  * @param data      the operation result data (e.g., created/updated entity)
  */
-public record OperationResponse<T>(
-        String operation,
-        boolean success,
-        String message,
-        T data
-) {
+public record OperationResponse<T>(String operation, boolean success, String message, T data) {
 
     /**
      * Creates a successful response with data.

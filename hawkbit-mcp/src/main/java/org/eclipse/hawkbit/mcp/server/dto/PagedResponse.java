@@ -16,12 +16,7 @@ import java.util.List;
  *
  * @param <T> the type of items in the response
  */
-public record PagedResponse<T>(
-        List<T> content,
-        long total,
-        int offset,
-        int limit
-) {
+public record PagedResponse<T>(List<T> content, long total, int offset, int limit) {
 
     public static <T> PagedResponse<T> of(final List<T> content, final long total, final int offset, final int limit) {
         return new PagedResponse<>(content, total, offset, limit);

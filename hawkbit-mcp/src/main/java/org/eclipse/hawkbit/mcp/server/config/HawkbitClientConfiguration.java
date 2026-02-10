@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.mcp.server.config;
 
+import java.util.function.BiFunction;
+
 import feign.Contract;
 import feign.RequestInterceptor;
 import feign.codec.Decoder;
@@ -22,8 +24,6 @@ import org.eclipse.hawkbit.sdk.Tenant;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-
-import java.util.function.BiFunction;
 
 /**
  * Common configuration for the hawkBit SDK client.
@@ -46,7 +46,7 @@ public class HawkbitClientConfiguration {
     @Bean
     @Primary
     public HawkbitServer hawkbitServer() {
-        HawkbitServer server = new HawkbitServer();
+        final HawkbitServer server = new HawkbitServer();
         server.setMgmtUrl(properties.getMgmtUrl());
         log.info("Configured hawkBit server URL: {}", properties.getMgmtUrl());
         return server;
@@ -68,5 +68,4 @@ public class HawkbitClientConfiguration {
                 .requestInterceptorFn(hawkbitRequestInterceptor)
                 .build();
     }
-
 }

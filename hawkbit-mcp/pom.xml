@@ -23,7 +23,7 @@
     <description>Standalone MCP server that connects to hawkBit via REST API</description>
 
     <properties>
-        <spring.app.class>org.eclipse.hawkbit.mcp.server.HawkbitMcpServerApplication</spring.app.class>
+        <spring.app.class>org.eclipse.hawkbit.mcp.server.McpServerStart</spring.app.class>
     </properties>
 
     <dependencies>

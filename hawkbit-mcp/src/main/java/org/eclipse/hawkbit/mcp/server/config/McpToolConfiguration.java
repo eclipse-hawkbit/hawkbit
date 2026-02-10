@@ -45,9 +45,7 @@ public class McpToolConfiguration {
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "hawkbit.mcp.tools-enabled", havingValue = "true", matchIfMissing = true)
     public HawkbitMcpToolProvider hawkBitMcpToolProvider(
-            final HawkbitClient hawkbitClient,
-            final Tenant dummyTenant,
-            final HawkbitMcpProperties properties) {
+            final HawkbitClient hawkbitClient, final Tenant dummyTenant, final HawkbitMcpProperties properties) {
         return new HawkbitMcpToolProvider(hawkbitClient, dummyTenant, properties);
     }
 
