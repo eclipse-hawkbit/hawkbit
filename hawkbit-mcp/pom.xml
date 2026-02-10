@@ -22,6 +22,10 @@
     <name>hawkBit :: MCP Server (Standalone)</name>
     <description>Standalone MCP server that connects to hawkBit via REST API</description>
 
+    <properties>
+        <spring.app.class>org.eclipse.hawkbit.mcp.server.HawkbitMcpServerApplication</spring.app.class>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
@@ -120,12 +124,13 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>repackage</id>
                         <goals>
                             <goal>repackage</goal>
                         </goals>
                         <configuration>
-                            <classifier>exec</classifier>
+                            <outputDirectory>${baseDir}</outputDirectory>
+                            <mainClass>${spring.app.class}</mainClass>
+                            <layout>JAR</layout>
                         </configuration>
                     </execution>
                 </executions>
