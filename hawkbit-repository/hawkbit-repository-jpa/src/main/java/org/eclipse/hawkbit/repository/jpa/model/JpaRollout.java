@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -62,9 +61,6 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 // java:S1710 - not possible to use without group annotation
 @SuppressWarnings({ "squid:S2160", "java:S1710", "java:S1171", "java:S3599" })
 public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, EventAwareEntity {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     @OneToMany(targetEntity = JpaRolloutGroup.class, fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, mappedBy = "rollout")
     private List<JpaRolloutGroup> rolloutGroups = new ArrayList<>();

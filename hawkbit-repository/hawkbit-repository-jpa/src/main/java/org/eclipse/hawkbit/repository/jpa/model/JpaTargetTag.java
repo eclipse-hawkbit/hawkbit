@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
@@ -30,9 +28,6 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 @Entity
 @Table(name = "sp_target_tag")
 public class JpaTargetTag extends JpaTag implements TargetTag, EventAwareEntity {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     public JpaTargetTag(final String name, final String description, final String colour) {
         super(name, description, colour);

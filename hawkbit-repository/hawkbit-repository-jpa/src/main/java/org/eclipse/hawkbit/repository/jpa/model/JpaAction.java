@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import static org.eclipse.hawkbit.repository.model.BaseEntity.getIdOrNull;
 
-import java.io.Serial;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -72,13 +71,9 @@ import org.eclipse.hawkbit.repository.model.Target;
 @SuppressWarnings({ "squid:S2160", "java:S1710", "java:S1171", "java:S3599" })
 public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Action, EventAwareEntity {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
-
     @Getter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(
-            name = "distribution_set", nullable = false, updatable = false)
+    @JoinColumn(name = "distribution_set", nullable = false, updatable = false)
     @NotNull
     private JpaDistributionSet distributionSet;
 

@@ -308,7 +308,7 @@ public interface MgmtTargetRestApi {
     @Operation(summary = "Controls (confirm/deny) actions waiting for confirmation", description = """
             Either confirm or deny an action which is waiting for confirmation.
             The action will be transferred into the RUNNING state in case confirming it.
-            The action will remain in WAITING_FOR_CONFIRMATION state in case denying it. 
+            The action will remain in WAITING_FOR_CONFIRMATION state in case denying it.
             Required Permission: READ_REPOSITORY AND UPDATE_TARGET
             """)
     @PutNoContentResponses

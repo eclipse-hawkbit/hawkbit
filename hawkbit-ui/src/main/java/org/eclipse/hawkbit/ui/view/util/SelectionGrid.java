@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.ui.view.util;
 
+import java.io.Serial;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -24,7 +25,10 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 
 // id type shall have proper equals and hashCode - i.e. eligible hash set element
 @SuppressWarnings("java:S119") // better readability
-public class SelectionGrid<T, ID> extends Grid<T> {
+public final class SelectionGrid<T, ID> extends Grid<T> {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private volatile String rsqlFilter;
 

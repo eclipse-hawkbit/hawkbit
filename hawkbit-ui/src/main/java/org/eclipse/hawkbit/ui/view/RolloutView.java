@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.ui.view;
 
+import java.io.Serial;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +64,10 @@ import org.springframework.util.ObjectUtils;
 @RolesAllowed({ "ROLLOUT_READ" })
 @Uses(Icon.class)
 @SuppressWarnings({ "java:S1171", "java:S3599" })
-public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
+public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public RolloutView(final HawkbitMgmtClient hawkbitClient) {
         super(
@@ -104,6 +108,9 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
     }
 
     private static class Actions extends HorizontalLayout {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
 
         private final long rolloutId;
         private final Grid<MgmtRolloutResponseBody> grid;
@@ -189,6 +196,9 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
     }
 
     private static class RolloutDetails extends FormLayout {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
 
         private final transient HawkbitMgmtClient hawkbitClient;
 
@@ -282,6 +292,9 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
     }
 
     private static class CreateDialog extends Utils.BaseDialog<Void> {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
 
         private final TextField name;
         private final ComboBox<MgmtDistributionSet> distributionSet;

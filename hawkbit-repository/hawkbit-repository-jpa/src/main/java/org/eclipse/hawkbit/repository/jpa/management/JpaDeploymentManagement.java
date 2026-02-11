@@ -124,7 +124,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     static {
         QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED = new EnumMap<>(Database.class);
-        QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.put(Database.POSTGRESQL,
+        QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.put(
+                Database.POSTGRESQL,
                 "DELETE FROM sp_action " + "WHERE id IN (SELECT id FROM sp_action " + "WHERE tenant=" + Jpa.nativeQueryParamPrefix() + "tenant" + " AND status IN (%s)" + " AND last_modified_at<" + Jpa.nativeQueryParamPrefix() + "last_modified_at LIMIT " + ACTION_PAGE_LIMIT + ")");
     }
 

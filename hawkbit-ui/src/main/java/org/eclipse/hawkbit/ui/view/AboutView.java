@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.ui.view;
 
+import java.io.Serial;
+
 import jakarta.annotation.security.RolesAllowed;
 
 import com.vaadin.flow.component.html.H2;
@@ -24,7 +26,10 @@ import org.eclipse.hawkbit.ui.MainLayout;
 @Route(value = "about", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
 @RolesAllowed({ "ANONYMOUS" })
-public class AboutView extends VerticalLayout {
+public final class AboutView extends VerticalLayout {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public AboutView() {
         setSpacing(false);

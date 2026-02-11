@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.io.Serial;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -141,6 +142,9 @@ public class JpaConfiguration extends JpaBaseConfiguration {
     }
 
     static class CustomHibernateJpaDialect extends HibernateJpaDialect {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
 
         protected CustomHibernateJpaDialect() {
             super();

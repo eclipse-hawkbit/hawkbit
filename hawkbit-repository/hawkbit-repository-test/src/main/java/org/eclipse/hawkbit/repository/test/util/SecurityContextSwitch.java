@@ -139,6 +139,7 @@ public class SecurityContextSwitch {
         // in some cases it could be serializable, e.g. if got via {@link java.lang.reflect.AnnotatedElement} (see javadoc) or WithUserImpl,
         // and in some cases it used to be serialized, e.g. in {@link SecurityContextSerializer#JavaSerialization.serialize},
         // must not be made transient!
+        @SuppressWarnings("serial")
         private final WithUser annotation;
 
         WithUserSecurityContext(final WithUser annotation) {

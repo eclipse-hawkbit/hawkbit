@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.ui;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,10 +50,13 @@ import org.eclipse.hawkbit.ui.view.TargetView;
 /**
  * The main view is a top-level placeholder for other views.
  */
-public class MainLayout extends AppLayout {
+public final class MainLayout extends AppLayout {
 
-    static final List<Class<? extends Component>> DEFAULT_VIEW_PRIORITY = List.of(TargetView.class, DistributionSetView.class,
-            SoftwareModuleView.class, RolloutView.class);
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    static final List<Class<? extends Component>> DEFAULT_VIEW_PRIORITY = List.of(
+            TargetView.class, DistributionSetView.class, SoftwareModuleView.class, RolloutView.class);
     private final transient AuthenticatedUser authenticatedUser;
     private final AccessAnnotationChecker accessChecker;
     private H2 viewTitle;

@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -35,19 +34,9 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 @SuppressWarnings("squid:S2160")
 public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag, EventAwareEntity {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
-
     @ManyToMany(mappedBy = "tags", targetEntity = JpaDistributionSet.class, fetch = FetchType.LAZY)
     private List<DistributionSet> assignedToDistributionSet;
 
-    /**
-     * Public constructor.
-     *
-     * @param name of the {@link DistributionSetTag}
-     * @param description of the {@link DistributionSetTag}
-     * @param colour of tag in UI
-     */
     public JpaDistributionSetTag(final String name, final String description, final String colour) {
         super(name, description, colour);
     }

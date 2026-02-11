@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.exception;
 
 import java.io.Serial;
 import java.util.Collection;
-import java.util.Collections;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -33,22 +32,15 @@ public class IncompatibleTargetTypeException extends AbstractServerRtException {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private final Collection<String> targetTypeNames;
-    private final Collection<String> distributionSetTypeNames;
-
     public IncompatibleTargetTypeException(final String targetTypeName, final Collection<String> distributionSetTypeNames) {
         super(SpServerError.SP_TARGET_TYPE_INCOMPATIBLE,
-                String.format("Target of type %s is not compatible with distribution set of types %s", targetTypeName, distributionSetTypeNames)
-        );
-        this.targetTypeNames = Collections.singleton(targetTypeName);
-        this.distributionSetTypeNames = distributionSetTypeNames;
+                String.format("Target of type %s is not compatible with distribution set of types %s",
+                        targetTypeName, distributionSetTypeNames));
     }
 
     public IncompatibleTargetTypeException(final Collection<String> targetTypeNames, final String distributionSetTypeName) {
         super(SpServerError.SP_TARGET_TYPE_INCOMPATIBLE,
-                String.format("Targets of types %s are not compatible with distribution set of type %s", targetTypeNames,
-                distributionSetTypeName));
-        this.targetTypeNames = targetTypeNames;
-        this.distributionSetTypeNames = Collections.singleton(distributionSetTypeName);
+                String.format("Targets of types %s are not compatible with distribution set of type %s",
+                        targetTypeNames, distributionSetTypeName));
     }
 }

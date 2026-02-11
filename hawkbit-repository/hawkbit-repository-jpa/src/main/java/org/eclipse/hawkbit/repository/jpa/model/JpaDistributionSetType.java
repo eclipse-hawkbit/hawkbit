@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,9 +40,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaDistributionSetType extends AbstractJpaTypeEntity implements DistributionSetType, EventAwareEntity {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     @OneToMany(
             mappedBy = "dsType", targetEntity = DistributionSetTypeElement.class,
@@ -125,7 +121,8 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
                 .publishEvent(new DistributionSetTypeDeletedEvent(getTenant(), getId(), getClass()));
     }
 
-    private JpaDistributionSetType replaceOrAddModuleTypes(final Set<SoftwareModuleType> smTypes, final boolean mandatory, final boolean replace) {
+    private JpaDistributionSetType replaceOrAddModuleTypes(final Set<SoftwareModuleType> smTypes, final boolean mandatory,
+            final boolean replace) {
         if (smTypes == null) {
             return this; // do not change
         }

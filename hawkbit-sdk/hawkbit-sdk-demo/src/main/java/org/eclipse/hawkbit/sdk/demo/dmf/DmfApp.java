@@ -47,7 +47,7 @@ public class DmfApp {
     }
 
     @Bean
-    DmfTenant dmfTenant(Tenant tenant, Amqp amqp) {
+    DmfTenant dmfTenant(final Tenant tenant, final Amqp amqp) {
         return new DmfTenant(tenant, amqp);
     }
 

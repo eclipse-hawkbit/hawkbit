@@ -124,6 +124,7 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     protected static <T> T[] toArray(final Iterable<? extends T> it, final Class<T> type) {
         final List<T> list = toList(it);
+        @SuppressWarnings("unchecked")
         final T[] array = (T[]) Array.newInstance(type, list.size());
         for (int i = 0; i < array.length; i++) {
             array[i] = list.get(i);

@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.ui.view;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -63,6 +64,9 @@ import org.eclipse.hawkbit.ui.view.util.Utils;
 @RolesAllowed({ "DISTRIBUTION_SET_READ" })
 @Uses(Icon.class)
 public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public DistributionSetView(final HawkbitMgmtClient hawkbitClient) {
         super(
@@ -184,6 +188,9 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
     private static class DistributionSetDetails extends FormLayout {
 
+        @Serial
+        private static final long serialVersionUID = 1L;
+
         private final transient HawkbitMgmtClient hawkbitClient;
 
         private final TextArea description = new TextArea("Description");
@@ -237,6 +244,9 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
     }
 
     private static class CreateDialog extends Utils.BaseDialog<Void> {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
 
         private final transient HawkbitMgmtClient hawkbitClient;
 
@@ -324,6 +334,9 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
     @SuppressWarnings({ "java:S1171", "java:S3599" })
     private static class AddSoftwareModulesDialog extends Utils.BaseDialog<Void> {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
 
         private final transient Set<MgmtSoftwareModule> softwareModules = Collections.synchronizedSet(new HashSet<>());
 

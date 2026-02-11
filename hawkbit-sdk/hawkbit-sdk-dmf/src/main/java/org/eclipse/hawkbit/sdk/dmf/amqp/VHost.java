@@ -46,7 +46,7 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
  * Abstract class for sender and receiver service.
  */
 @Slf4j
-public class VHost extends DmfSender implements MessageListener {
+public final class VHost extends DmfSender implements MessageListener {
 
     private static final String REGEX_EXTRACT_ACTION_ID = "[^0-9]";
 
@@ -54,19 +54,12 @@ public class VHost extends DmfSender implements MessageListener {
     private final ConcurrentHashMap<String, DmfTenant> dmfTenants = new ConcurrentHashMap<>();
     private final Set<Long> openActions = Collections.synchronizedSet(new HashSet<>());
 
-    public VHost(final ConnectionFactory connectionFactory, final AmqpProperties amqpProperties) {
-        this(connectionFactory, amqpProperties, true);
-    }
-
     public VHost(final ConnectionFactory connectionFactory, final AmqpProperties amqpProperties, final boolean initVHost) {
         super(new RabbitTemplate(connectionFactory), amqpProperties);
 
-        // It is necessary to define rabbitTemplate as a Bean and set
-        // Jackson2JsonMessageConverter explicitly here in order to convert only
-        // OUTCOMING messages to json. In case of INCOMING messages,
-        // Jackson2JsonMessageConverter can not handle messages with NULL
-        // payload (e.g. REQUEST_ATTRIBUTES_UPDATE), so the
-        // SimpleMessageConverter is used instead per default.
+        // It is necessary to define rabbitTemplate as a Bean and set Jackson2JsonMessageConverter explicitly here in order to convert only
+        // OUTCOMING messages to JSON. In case of INCOMING messages, Jackson2JsonMessageConverter can not handle messages with NULL
+        // payload (e.g. REQUEST_ATTRIBUTES_UPDATE), so the SimpleMessageConverter is used instead per default.
         rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
 
         if (initVHost) {

@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,9 +38,6 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 @Table(name = "sp_target_type")
 @SuppressWarnings("java:S2160") // the super class equals/hashcode shall be used
 public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, EventAwareEntity {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     @ManyToMany(targetEntity = JpaDistributionSetType.class)
     @JoinTable(

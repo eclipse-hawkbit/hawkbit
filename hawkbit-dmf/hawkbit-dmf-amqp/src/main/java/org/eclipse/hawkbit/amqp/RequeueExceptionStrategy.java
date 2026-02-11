@@ -32,7 +32,7 @@ import org.springframework.util.ObjectUtils;
  */
 @ToString
 @Slf4j
-class RequeueExceptionStrategy implements FatalExceptionStrategy {
+final class RequeueExceptionStrategy implements FatalExceptionStrategy {
 
     private final List<FatalExceptionStrategy> fatalExceptionStrategies = new ArrayList<>();
 

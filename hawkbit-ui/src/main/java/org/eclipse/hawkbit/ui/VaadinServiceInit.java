@@ -10,6 +10,8 @@
 
 package org.eclipse.hawkbit.ui;
 
+import java.io.Serial;
+
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -18,6 +20,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @SpringComponent
 public class VaadinServiceInit implements VaadinServiceInitListener {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Override
     public void serviceInit(ServiceInitEvent event) {

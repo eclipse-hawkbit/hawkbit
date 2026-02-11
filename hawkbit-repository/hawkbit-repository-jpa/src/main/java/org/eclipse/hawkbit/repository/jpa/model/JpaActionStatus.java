@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -45,9 +44,6 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements ActionStatus {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     private static final int MESSAGE_ENTRY_LENGTH = 512;
 

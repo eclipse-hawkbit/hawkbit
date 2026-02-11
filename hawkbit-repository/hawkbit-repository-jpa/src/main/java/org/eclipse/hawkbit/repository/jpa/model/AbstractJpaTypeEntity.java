@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
@@ -33,9 +31,6 @@ import org.eclipse.hawkbit.repository.model.Type;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public abstract class AbstractJpaTypeEntity extends AbstractJpaNamedEntity implements Type {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     @Column(name = "type_key", nullable = false, updatable = false, length = KEY_MAX_SIZE)
     @Size(min = 1, max = KEY_MAX_SIZE)

@@ -9,11 +9,16 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rollout.condition;
 
+import java.io.Serial;
+
 /**
  * Exception indicating that a specific evaluator is missing in the application
  * context.
  */
 public class EvaluatorNotConfiguredException extends RuntimeException {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private static final String MESSAGE_FORMAT = "Cannot find any configured evaluator for action/condition '%s'. Please ensure to configure one in the application context to make use of it.";
 

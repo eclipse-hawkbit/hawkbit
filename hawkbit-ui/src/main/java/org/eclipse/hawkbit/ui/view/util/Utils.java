@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.ui.view.util;
 
+import java.io.Serial;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -58,16 +59,14 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.ui.view.Constants;
 
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE) // prevent initialization
 @Slf4j
 public class Utils {
-
-    private Utils() {
-        // prevent initialization
-    }
 
     public static final String COMBO_NAME_ALLOWED_CHARS = "[0-9a-zA-Z-_./]";
 
@@ -148,8 +147,8 @@ public class Utils {
         return layout;
     }
 
-    private static <T, ID> ConfirmDialog promptForDeleteConfirmation(Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler,
-            SelectionGrid<T, ID> selectionGrid) {
+    private static <T, ID> ConfirmDialog promptForDeleteConfirmation(
+            final Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler, final SelectionGrid<T, ID> selectionGrid) {
         final ConfirmDialog dialog = new ConfirmDialog();
         dialog.setHeader("Confirm Deletion");
         dialog.setText("Are you sure you want to delete the selected items? This action cannot be undone.");
@@ -160,9 +159,7 @@ public class Utils {
         dialog.setConfirmButtonTheme(ButtonVariant.LUMO_ERROR.getVariantName());
         dialog.setConfirmText("Delete");
         dialog.addConfirmListener(event -> {
-            removeHandler
-                    .apply(selectionGrid)
-                    .thenAccept(v -> selectionGrid.refreshGrid(false));
+            removeHandler.apply(selectionGrid).thenAccept(v -> selectionGrid.refreshGrid(false));
             dialog.close();
         });
         return dialog;
@@ -237,6 +234,9 @@ public class Utils {
     }
 
     public static class BaseDialog<T> extends Dialog {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
 
         protected final transient CompletableFuture<T> result = new CompletableFuture<>();
 

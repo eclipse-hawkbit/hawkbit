@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
 import java.util.Optional;
 
 import jakarta.persistence.Column;
@@ -45,9 +44,6 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity implements TargetFilterQuery, EventAwareEntity {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     @Column(name = "name", length = NamedEntity.NAME_MAX_SIZE, nullable = false)
     @Size(max = NamedEntity.NAME_MAX_SIZE)
@@ -113,7 +109,7 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
 
     @Override
     public void fireUpdateEvent() {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent( new TargetFilterQueryUpdatedEvent(this));
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetFilterQueryUpdatedEvent(this));
     }
 
     @Override

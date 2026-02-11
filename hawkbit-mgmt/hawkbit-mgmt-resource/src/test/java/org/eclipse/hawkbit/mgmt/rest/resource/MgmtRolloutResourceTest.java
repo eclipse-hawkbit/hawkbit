@@ -97,8 +97,6 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     private RolloutGroupManagement rolloutGroupManagement;
     @Autowired
     private RolloutTestApprovalStrategy approvalStrategy;
-    @Autowired
-    private DistributionSetManagement distributionSetManagement;
 
     /**
      * Handles the GET request of retrieving a single rollout.
@@ -1984,7 +1982,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     private long postRollout(final String name, final int groupSize, final Long distributionSetId,
             final String targetFilterQuery, final int targets, final Action.ActionType type, final Long startTime,
-            final Long forceTime, boolean isDynamic, String dynamicGroupSuffix, int dynamicGroupTargetsCount) throws Exception {
+            final Long forceTime, boolean isDynamic, final String dynamicGroupSuffix, int dynamicGroupTargetsCount) throws Exception {
         final String actionType = MgmtRestModelMapper.convertActionType(type).getName();
         final String rollout = JsonBuilder.rollout(name, "desc", groupSize, distributionSetId, targetFilterQuery,
                 new RolloutGroupConditionBuilder().withDefaults().build(), null, actionType, null, startTime, forceTime,

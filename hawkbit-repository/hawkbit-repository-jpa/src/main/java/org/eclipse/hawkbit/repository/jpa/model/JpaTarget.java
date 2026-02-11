@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -83,9 +82,6 @@ import org.springframework.util.ObjectUtils;
 // java:S1710 - not possible to use without group annotation
 @SuppressWarnings({ "squid:S2160", "java:S1710" })
 public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAwareEntity {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     @Setter
     @Getter

@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.event.remote;
 
 import java.io.Serial;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import lombok.Data;
@@ -31,12 +32,12 @@ public class RolloutStoppedEvent extends RemoteTenantAwareEvent {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private Collection<Long> rolloutGroupIds;
+    private ArrayList<Long> rolloutGroupIds;
     private long rolloutId;
 
     public RolloutStoppedEvent(final String tenant, final long rolloutId, final Collection<Long> rolloutGroupIds) {
         super(tenant, rolloutId);
         this.rolloutId = rolloutId;
-        this.rolloutGroupIds = rolloutGroupIds;
+        this.rolloutGroupIds = new ArrayList<>(rolloutGroupIds);
     }
 }

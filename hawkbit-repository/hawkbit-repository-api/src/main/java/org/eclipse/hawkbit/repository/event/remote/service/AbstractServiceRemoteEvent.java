@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.service;
 
+import java.io.Serial;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
@@ -16,6 +18,9 @@ import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
 @Getter
 @EqualsAndHashCode(callSuper = true)
 public abstract class AbstractServiceRemoteEvent<T extends AbstractRemoteEvent> extends AbstractRemoteEvent {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final T remoteEvent;
 

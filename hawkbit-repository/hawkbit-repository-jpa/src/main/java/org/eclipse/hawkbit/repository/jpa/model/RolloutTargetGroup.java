@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -35,10 +33,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 @IdClass(RolloutTargetGroupId.class)
 @Entity
 @Table(name = "sp_rollout_target_group")
-public class RolloutTargetGroup implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class RolloutTargetGroup {
 
     @Id
     @ManyToOne(optional = false, targetEntity = JpaRolloutGroup.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })

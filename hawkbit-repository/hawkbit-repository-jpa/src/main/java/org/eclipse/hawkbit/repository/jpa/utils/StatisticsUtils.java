@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.utils;
 
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +94,9 @@ public class StatisticsUtils {
 
     // Map with user-friendly toString, sorted and without the last ", "
     private static class MapUFToString extends HashMap<String, Double> {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
 
         @Override
         public String toString() {

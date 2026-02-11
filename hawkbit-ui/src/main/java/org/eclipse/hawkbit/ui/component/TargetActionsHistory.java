@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.ui.component;
 
 import static org.eclipse.hawkbit.ui.view.Constants.STATUS;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,7 +40,10 @@ import org.eclipse.hawkbit.ui.view.TargetView;
 import org.eclipse.hawkbit.ui.view.util.Utils;
 
 @Slf4j
-public class TargetActionsHistory extends Grid<TargetActionsHistory.ActionStatusEntry> {
+public final class TargetActionsHistory extends Grid<TargetActionsHistory.ActionStatusEntry> {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final transient HawkbitMgmtClient hawkbitClient;
     private transient MgmtTarget target;

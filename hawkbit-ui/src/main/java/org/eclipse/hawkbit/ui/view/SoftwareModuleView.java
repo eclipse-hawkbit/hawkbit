@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.ui.view;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -68,6 +69,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Uses(Icon.class)
 @Slf4j
 public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Autowired
     public SoftwareModuleView(final HawkbitMgmtClient hawkbitClient) {
@@ -156,6 +160,9 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
 
     private static class SoftwareModuleDetails extends FormLayout {
 
+        @Serial
+        private static final long serialVersionUID = 1L;
+
         private final transient HawkbitMgmtClient hawkbitClient;
 
         private final TextArea description = new TextArea(Constants.DESCRIPTION);
@@ -201,6 +208,9 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
     }
 
     private static class CreateDialog extends Utils.BaseDialog<Void> {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
 
         private final Select<MgmtSoftwareModuleType> type;
         private final TextField name;
@@ -336,6 +346,9 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
     }
 
     private static class AddArtifactsDialog extends Utils.BaseDialog<Void> {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
 
         private final transient Set<MgmtArtifact> artifacts = Collections.synchronizedSet(new HashSet<>());
 

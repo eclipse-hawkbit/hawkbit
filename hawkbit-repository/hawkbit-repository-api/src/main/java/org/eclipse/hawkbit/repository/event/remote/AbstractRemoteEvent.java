@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import java.io.Serial;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -22,6 +23,9 @@ import org.springframework.context.ApplicationEvent;
 @EqualsAndHashCode(callSuper = false)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class AbstractRemoteEvent extends ApplicationEvent {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final String id;
 

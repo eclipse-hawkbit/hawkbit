@@ -54,11 +54,8 @@ public class DistributedLockRepository extends DefaultLockRepository {
     // lock <-> next refresh time
     private final Map<String, Instant> lockToRefreshTime = new ConcurrentHashMap<>();
 
-    /**
-     * @param dataSource to use for managing the locks
-     */
-    public DistributedLockRepository(final DataSource dataSource, final LockProperties lockProperties,
-            final PlatformTransactionManager txManager) {
+    public DistributedLockRepository(
+            final DataSource dataSource, final LockProperties lockProperties, final PlatformTransactionManager txManager) {
         super(dataSource);
         this.txManager = txManager;
 

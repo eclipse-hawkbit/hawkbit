@@ -43,7 +43,7 @@ import org.springframework.hateoas.RepresentationModel;
              }
           }
         }""")
-public class MgmtActionId extends RepresentationModel<MgmtActionId> {
+public final class MgmtActionId extends RepresentationModel<MgmtActionId> {
 
     @Schema(description = "ID of the action")
     private long id;

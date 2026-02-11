@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.ui.view;
 
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -32,12 +33,15 @@ import org.eclipse.hawkbit.ui.MainLayout;
 @Route(value = "config", layout = MainLayout.class)
 @RolesAllowed({ "CONFIG_READ" })
 @Slf4j
-public class ConfigView extends VerticalLayout {
+public final class ConfigView extends VerticalLayout {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private static final String WIDTH = "width";
     private static final String PX_300 = "300px";
 
-    private final Map<String, MgmtSystemTenantConfigurationValueRequest> configValue = new HashMap<>();
+    private final transient Map<String, MgmtSystemTenantConfigurationValueRequest> configValue = new HashMap<>();
 
     public ConfigView(final HawkbitMgmtClient hawkbitClient) {
         setSpacing(false);

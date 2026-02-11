@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -67,9 +66,6 @@ import org.springframework.core.annotation.Order;
 public class JpaDistributionSet
         extends AbstractJpaNamedVersionedEntity
         implements DistributionSet, WithMetadata<String, String>, EventAwareEntity {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false, targetEntity = JpaDistributionSetType.class)
     @JoinColumn(name = "ds_type", nullable = false, updatable = false)

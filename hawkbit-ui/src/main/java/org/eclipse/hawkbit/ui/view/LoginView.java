@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.ui.view;
 
+import java.io.Serial;
+
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.login.LoginOverlay;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -23,7 +25,10 @@ import org.eclipse.hawkbit.ui.security.AuthenticatedUser;
 @AnonymousAllowed
 @PageTitle("Login")
 @Route(value = "login")
-public class LoginView extends LoginOverlay implements BeforeEnterObserver {
+public final class LoginView extends LoginOverlay implements BeforeEnterObserver {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final transient AuthenticatedUser authenticatedUser;
 

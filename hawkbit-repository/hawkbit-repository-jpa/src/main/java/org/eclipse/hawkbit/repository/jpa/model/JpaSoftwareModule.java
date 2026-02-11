@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -66,9 +64,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 public class JpaSoftwareModule
         extends AbstractJpaNamedVersionedEntity
         implements SoftwareModule, WithMetadata<MetadataValue, JpaSoftwareModule.JpaMetadataValue>, EventAwareEntity {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     @ManyToOne
     @JoinColumn(name = "sm_type", nullable = false, updatable = false)
@@ -178,10 +173,7 @@ public class JpaSoftwareModule
 
     @Data
     @Embeddable
-    public static class JpaMetadataValue implements MetadataValue, Serializable {
-
-        @Serial
-        private static final long serialVersionUID = 1L;
+    public static class JpaMetadataValue implements MetadataValue {
 
         @Column(name = "meta_value", length = SoftwareModule.METADATA_VALUE_MAX_SIZE)
         @Size(max = METADATA_VALUE_MAX_SIZE)

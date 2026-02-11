@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
@@ -47,9 +46,6 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGroup, EventAwareEntity {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     @Getter
     @ManyToOne(fetch = FetchType.LAZY)

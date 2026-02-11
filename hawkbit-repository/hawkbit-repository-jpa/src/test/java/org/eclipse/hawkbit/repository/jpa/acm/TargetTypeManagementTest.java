@@ -46,6 +46,7 @@ class TargetTypeManagementTest extends AbstractAccessControllerManagementTest {
     }
 
     @Test
+    @SuppressWarnings({"unchecked", "rawtypes"})
     void verifyRead() {
         // permissions to read only type1 target types
         runAs(withAuthorities(READ_TARGET_TYPE + "/id==" + targetType1.getId()), () -> {

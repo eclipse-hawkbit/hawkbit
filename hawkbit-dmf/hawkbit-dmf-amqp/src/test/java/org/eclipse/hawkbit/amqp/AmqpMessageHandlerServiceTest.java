@@ -43,7 +43,6 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -427,8 +426,8 @@ class AmqpMessageHandlerServiceTest {
      * Test next update is provided on finished action
      */
     @Test
+    @SuppressWarnings("unchecked")
     void lookupNextUpdateActionAfterFinished() {
-
         // Mock
         final Action action = createActionWithTarget(22L);
         when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.of(action));
@@ -460,7 +459,7 @@ class AmqpMessageHandlerServiceTest {
      * Test feedback code is persisted in messages when provided with DmfActionUpdateStatus
      */
     @Test
-    void feedBackCodeIsPersistedInMessages() throws IllegalAccessException {
+    void feedBackCodeIsPersistedInMessages() {
         // Mock
         final Action action = createActionWithTarget(22L);
         when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.of(action));
@@ -471,9 +470,7 @@ class AmqpMessageHandlerServiceTest {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
 
-        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(
-                23L, DmfActionStatus.RUNNING, null, 2L, null, 12);
-
+        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(23L, DmfActionStatus.RUNNING, null, 2L, null, 12);
         final Message message = createMessage(actionUpdateStatus, messageProperties);
 
         // test

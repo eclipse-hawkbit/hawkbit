@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.ui.view.util;
 
+import java.io.Serial;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -37,6 +38,9 @@ import org.eclipse.hawkbit.ui.view.Constants;
 
 @SuppressWarnings("java:S119") // better readability
 public class TableView<T, ID> extends Div implements Constants, BeforeEnterObserver {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private static final String COLOR = "color";
     private static final String VAR_LUMO_SECONDARY_TEXT_COLOR = "var(--lumo-secondary-text-color)";

@@ -9,9 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
@@ -25,10 +22,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Data
 @Embeddable
-public class DistributionSetTypeElementCompositeKey implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class DistributionSetTypeElementCompositeKey {
 
     @Column(name = "distribution_set_type", nullable = false, updatable = false)
     private Long dsType;

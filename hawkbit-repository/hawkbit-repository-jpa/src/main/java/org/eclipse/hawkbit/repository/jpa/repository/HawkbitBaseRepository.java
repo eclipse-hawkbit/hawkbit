@@ -41,7 +41,7 @@ import org.springframework.util.ObjectUtils;
  * @param <ID> the type of the id of the entity the repository manages
  */
 @SuppressWarnings("java:S119") // inherited from SimpleJpaRepository
-public class HawkbitBaseRepository<T, ID extends Serializable> extends SimpleJpaRepository<T, ID>
+public final class HawkbitBaseRepository<T, ID extends Serializable> extends SimpleJpaRepository<T, ID>
         implements JpaSpecificationEntityGraphExecutor<T>, NoCountSliceRepository<T>, ACMRepository<T> {
 
     private final EntityManager entityManager;

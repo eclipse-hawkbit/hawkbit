@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.security.controller;
 
 import static org.eclipse.hawkbit.context.AccessContext.asTenant;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -60,6 +61,9 @@ public interface Authenticator {
 
         @EqualsAndHashCode(callSuper = true)
         private static class AuthenticatedController extends AbstractAuthenticationToken {
+
+            @Serial
+            private static final long serialVersionUID = 1L;
 
             private static final Collection<GrantedAuthority> CONTROLLER_AUTHORITY =
                     List.of(new SimpleGrantedAuthority(SpRole.CONTROLLER_ROLE));

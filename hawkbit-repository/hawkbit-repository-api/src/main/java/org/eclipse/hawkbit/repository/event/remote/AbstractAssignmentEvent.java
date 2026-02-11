@@ -36,7 +36,7 @@ public abstract class AbstractAssignmentEvent extends RemoteTenantAwareEvent {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private final Map<String, ActionProperties> actions = new HashMap<>();
+    private final HashMap<String, ActionProperties> actions = new HashMap<>();
 
     protected AbstractAssignmentEvent(final Action a) {
         super(a.getTenant(), null);
@@ -45,8 +45,7 @@ public abstract class AbstractAssignmentEvent extends RemoteTenantAwareEvent {
 
     protected AbstractAssignmentEvent(final String tenant, final Object source, final List<Action> a) {
         super(tenant, source);
-        actions.putAll(a.stream()
-                .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), ActionProperties::new)));
+        actions.putAll(a.stream().collect(Collectors.toMap(action -> action.getTarget().getControllerId(), ActionProperties::new)));
     }
 
     public Optional<ActionProperties> getActionPropertiesForController(final String controllerId) {

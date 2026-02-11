@@ -987,12 +987,14 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final int noOfDeployedTargets = 4;
         final int noOfDistributionSets = 3;
 
-        final DeploymentResult deploymentResult = prepareComplexRepo(undeployedTargetPrefix, noOfUndeployedTargets,
-                deployedTargetPrefix, noOfDeployedTargets, noOfDistributionSets, "myTestDS");
+        final DeploymentResult deploymentResult = prepareComplexRepo(
+                undeployedTargetPrefix, noOfUndeployedTargets, deployedTargetPrefix, noOfDeployedTargets, noOfDistributionSets, "myTestDS");
 
         final List<Long> deployedTargetIDs = deploymentResult.getDeployedTargetIDs();
         final List<Long> undeployedTargetIDs = deploymentResult.getUndeployedTargetIDs();
+        @SuppressWarnings({"unchecked", "rawtypes"})
         final Collection<JpaTarget> savedNakedTargets = (Collection) deploymentResult.getUndeployedTargets();
+        @SuppressWarnings({"unchecked", "rawtypes"})
         final Collection<JpaTarget> savedDeployedTargets = (Collection) deploymentResult.getDeployedTargets();
 
         // retrieving all Actions created by the assignDistributionSet call

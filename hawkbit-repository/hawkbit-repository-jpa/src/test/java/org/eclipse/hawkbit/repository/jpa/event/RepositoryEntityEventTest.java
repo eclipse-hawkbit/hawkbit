@@ -150,12 +150,11 @@ class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         final String successCondition = "50";
         final String errorCondition = "80";
         final String rolloutName = "rolloutTest";
-        final String targetPrefixName = rolloutName;
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
-        testdataFactory.createTargets(amountTargetsForRollout, targetPrefixName + "-", targetPrefixName);
+        testdataFactory.createTargets(amountTargetsForRollout, rolloutName + "-", rolloutName);
 
-        final Rollout createdRollout = testdataFactory.createRolloutByVariables(rolloutName, "desc", amountGroups,
-                "controllerId==" + targetPrefixName + "-*", distributionSet, successCondition, errorCondition);
+        final Rollout createdRollout = testdataFactory.createRolloutByVariables(
+                rolloutName, "desc", amountGroups,"controllerId==" + rolloutName + "-*", distributionSet, successCondition, errorCondition);
 
         rolloutManagement.delete(createdRollout.getId());
         rolloutHandler.handleAll();

@@ -9,7 +9,12 @@
  */
 package org.eclipse.hawkbit.mcp.server.client;
 
+import java.io.Serial;
+
 public class McpAuthenticationException extends RuntimeException {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public McpAuthenticationException(String message) {
         super(message);

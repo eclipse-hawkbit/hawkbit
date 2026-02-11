@@ -10,6 +10,7 @@
 
 package org.eclipse.hawkbit.ui;
 
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -18,6 +19,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SimpleI18NProvider extends DefaultI18NProvider {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     SimpleI18NProvider() {
         super(Arrays.stream(Locale.getAvailableLocales()).toList());

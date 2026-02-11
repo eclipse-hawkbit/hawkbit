@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui;
 
 import static feign.Util.ISO_8859_1;
 
+import java.io.Serial;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Base64;
@@ -52,6 +53,9 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 @SpringBootApplication
 @Import(FeignClientsConfiguration.class)
 public class HawkbitUiApp implements AppShellConfigurator {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final RequestInterceptor AUTHORIZATION = requestTemplate -> {

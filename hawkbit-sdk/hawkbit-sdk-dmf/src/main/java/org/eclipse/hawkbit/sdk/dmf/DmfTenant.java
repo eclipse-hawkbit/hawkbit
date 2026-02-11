@@ -25,7 +25,7 @@ import org.springframework.amqp.core.Message;
 /**
  * An in-memory simulated DMF Tenant to hold the controller twins in memory and be able to retrieve them again.
  */
-public class DmfTenant {
+public final class DmfTenant {
 
     @Getter
     private final Tenant tenant;
@@ -39,8 +39,8 @@ public class DmfTenant {
 
     public DmfTenant(final Tenant tenant, final Amqp amqp, final boolean initVHost) {
         this.tenant = tenant;
-        this.vHost = amqp.getVhost(tenant.getDmf(), initVHost);
-        this.vHost.register(this);
+        vHost = amqp.getVhost(tenant.getDmf(), initVHost);
+        vHost.register(this);
     }
 
     public void destroy() {

@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -35,9 +33,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaSoftwareModuleType extends AbstractJpaTypeEntity implements SoftwareModuleType, EventAwareEntity {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     @Setter(value = lombok.AccessLevel.PRIVATE) // used via reflection
     @Column(name = "min_artifacts", nullable = false)

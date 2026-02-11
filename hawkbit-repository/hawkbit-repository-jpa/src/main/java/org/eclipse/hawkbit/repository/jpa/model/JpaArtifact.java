@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,9 +37,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Artifact {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     @ManyToOne(optional = false, cascade = { CascadeType.PERSIST }, fetch = FetchType.LAZY)
     @JoinColumn(

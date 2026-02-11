@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.ui.view.util;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +31,10 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.springframework.util.ObjectUtils;
 
-public class Filter extends Div {
+public final class Filter extends Div {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private transient Rsql rsql;
     private final transient Rsql secondaryRsql;

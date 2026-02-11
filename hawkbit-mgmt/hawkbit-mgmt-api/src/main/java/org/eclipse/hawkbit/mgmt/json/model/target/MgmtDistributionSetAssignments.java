@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
  */
 @NoArgsConstructor
 @JsonDeserialize(using = MgmtDistributionSetAssignmentsDeserializer.class)
-public class MgmtDistributionSetAssignments extends ArrayList<MgmtDistributionSetAssignment> {
+public final class MgmtDistributionSetAssignments extends ArrayList<MgmtDistributionSetAssignment> {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -37,16 +37,6 @@ public class MgmtDistributionSetAssignments extends ArrayList<MgmtDistributionSe
      */
     public MgmtDistributionSetAssignments(final MgmtDistributionSetAssignment assignment) {
         add(assignment);
-    }
-
-    /**
-     * Constructor for an object that contains multiple distribution set
-     * assignments
-     *
-     * @param assignments the assignments
-     */
-    public MgmtDistributionSetAssignments(final List<MgmtDistributionSetAssignment> assignments) {
-        super(assignments);
     }
 
     @Override

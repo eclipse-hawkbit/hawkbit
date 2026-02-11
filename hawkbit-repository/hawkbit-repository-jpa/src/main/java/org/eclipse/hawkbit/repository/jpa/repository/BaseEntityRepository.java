@@ -136,7 +136,7 @@ public interface BaseEntityRepository<T extends AbstractJpaBaseEntity>
         return Optional.empty();
     }
 
-    @SuppressWarnings("uchecked")
+    @SuppressWarnings("unchecked")
     default Class<? extends BaseEntity> getManagementClass() {
         final Class<T> domainClass = getDomainClass();
         final String domainClassSimpleName = domainClass.getSimpleName();

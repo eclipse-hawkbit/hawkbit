@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.ui.view.util;
 
+import java.io.Serial;
+
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.card.CardVariant;
 import com.vaadin.flow.component.html.Anchor;
@@ -17,25 +19,27 @@ import com.vaadin.flow.component.html.Span;
 
 public class LinkedTextArea extends Div {
 
-    String queryPrefix;
-    Card card;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    public LinkedTextArea(String title, String queryPrefix) {
-        super();
+    private final String queryPrefix;
+    private final Card card;
+
+    public LinkedTextArea(final String title, final String queryPrefix) {
+        this.queryPrefix = queryPrefix;
         card = new Card();
         card.setTitle(title);
-        this.queryPrefix = queryPrefix;
     }
 
     public void setValueWithLink(String value, String query) {
-        var span = new Span(value);
+        final Span span = new Span(value);
         span.setWhiteSpace(WhiteSpace.PRE_WRAP);
         card.add(span);
         card.addThemeVariants(CardVariant.LUMO_ELEVATED);
         if (query != null) {
-            var a = new Anchor(queryPrefix + query, card);
-            a.addClassName("nocolor");
-            add(a);
+            final Anchor anchor = new Anchor(queryPrefix + query, card);
+            anchor.addClassName("nocolor");
+            add(anchor);
         } else {
             add(card);
         }
