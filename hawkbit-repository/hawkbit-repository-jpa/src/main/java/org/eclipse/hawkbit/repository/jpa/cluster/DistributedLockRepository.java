@@ -20,7 +20,6 @@ import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DeadlockLoserDataAccessException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.integration.jdbc.lock.DefaultLockRepository;
@@ -58,7 +57,8 @@ public class DistributedLockRepository extends DefaultLockRepository {
     /**
      * @param dataSource to use for managing the locks
      */
-    public DistributedLockRepository(final DataSource dataSource, final LockProperties lockProperties, final PlatformTransactionManager txManager) {
+    public DistributedLockRepository(final DataSource dataSource, final LockProperties lockProperties,
+            final PlatformTransactionManager txManager) {
         super(dataSource);
         this.txManager = txManager;
 
@@ -91,14 +91,14 @@ public class DistributedLockRepository extends DefaultLockRepository {
             if (count < MAX_DELETE_RETRY) {
                 log.debug("Failed to delete cluster lock {}. We try again.", lock, e);
                 return delete(lock, count + 1);
-            } else {                
+            } else {
                 log.warn("Failed to delete cluster lock {}!", lock, e);
                 return false;
             }
         }
     }
 
-    @Transactional(propagation=Propagation.NOT_SUPPORTED)
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     @Override
     public boolean acquire(final String lock) {
         try {
@@ -106,14 +106,13 @@ public class DistributedLockRepository extends DefaultLockRepository {
             // because we need to know real (after transaction commit) result Ïto know if it is really successful.
             // otherwise the super.acquire will return result before been committed and could be false positive
             final boolean acquired = DeploymentHelper.runInNewTransaction(
-                txManager, "lock-acquire", Isolation.READ_COMMITTED.value(), status -> super.acquire(lock));
+                    txManager, "lock-acquire", Isolation.READ_COMMITTED.value(), status -> super.acquire(lock));
             if (acquired) {
                 // update next refresh time
-                refreshAfterMillis.ifPresent(
-                    afterMillis -> lockToRefreshTime.put(lock, Instant.now().plus(afterMillis, ChronoUnit.MILLIS)));
+                refreshAfterMillis.ifPresent(afterMillis -> lockToRefreshTime.put(lock, Instant.now().plus(afterMillis, ChronoUnit.MILLIS)));
             }
             return acquired;
-        } catch (final DataIntegrityViolationException | DeadlockLoserDataAccessException e) {
+        } catch (final DataIntegrityViolationException | PessimisticLockingFailureException e) {
             log.debug("Could not acquire cluster lock {}. I guess another node has it.", lock, e);
             return false;
         } catch (final QueryTimeoutException e) {
@@ -122,7 +121,7 @@ public class DistributedLockRepository extends DefaultLockRepository {
         }
     }
 
-    @SuppressWarnings({"java:S1066"})
+    @SuppressWarnings({ "java:S1066" })
     @Scheduled(initialDelayString = TIC_PERIOD_MS, fixedDelayString = TIC_PERIOD_MS)
     public void refresh() {
         refreshAfterMillis.ifPresentOrElse(afterMillis -> {

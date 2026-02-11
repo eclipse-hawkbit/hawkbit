@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.artifact.exception;
 
+import java.io.Serial;
+
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
@@ -20,6 +22,9 @@ import org.eclipse.hawkbit.exception.SpServerError;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class FileSizeQuotaExceededException extends AbstractServerRtException {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private static final String MAX_ARTIFACT_SIZE_EXCEEDED = "Maximum artifact size (%s) exceeded.";
     private static final SpServerError errorType = SpServerError.SP_FILE_SIZE_QUOTA_EXCEEDED;

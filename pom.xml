@@ -198,6 +198,12 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
@@ -378,6 +384,7 @@
                 -->
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
+                <version>3.2.1</version>
                 <configuration>
                     <ratchetFrom>${ratchetFrom}</ratchetFrom>
                     <java>
@@ -467,7 +474,9 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <configuration>
-                        <compilerArgument>-Xlint:all</compilerArgument>
+                        <parameters>true</parameters>
+                        <proc>full</proc>
+                        <compilerArgument>-Xlint:all,-processing</compilerArgument>
                         <showWarnings>true</showWarnings>
                         <showDeprecation>true</showDeprecation>
                     </configuration>

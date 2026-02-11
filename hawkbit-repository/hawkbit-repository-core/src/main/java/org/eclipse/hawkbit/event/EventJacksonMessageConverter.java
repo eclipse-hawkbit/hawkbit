@@ -22,7 +22,7 @@ public class EventJacksonMessageConverter extends MappingJackson2MessageConverte
 
     public EventJacksonMessageConverter() {
         super(APPLICATION_REMOTE_EVENT_JSON);
-        ObjectMapper objectMapper = new ObjectMapper();
+        final ObjectMapper objectMapper = new ObjectMapper();
         EventType.getNamedTypes().forEach(objectMapper::registerSubtypes);
         setObjectMapper(objectMapper);
     }

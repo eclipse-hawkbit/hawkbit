@@ -197,6 +197,9 @@ public class SecurityContextSwitch {
 
     private static class WithUserImpl implements WithUser, Serializable {
 
+        @Serial
+        private static final long serialVersionUID = 1L;
+
         private final String principal;
         private final String tenant;
         private final boolean autoCreateTenant;

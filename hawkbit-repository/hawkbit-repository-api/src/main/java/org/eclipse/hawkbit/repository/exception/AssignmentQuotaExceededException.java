@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
@@ -21,6 +23,9 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class AssignmentQuotaExceededException extends AbstractServerRtException {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private static final String ASSIGNMENT_QUOTA_EXCEEDED_MESSAGE = "Quota exceeded: Cannot assign %s more %s entities to %s '%s'. The maximum is %s.";
     private static final SpServerError errorType = SpServerError.SP_QUOTA_EXCEEDED;

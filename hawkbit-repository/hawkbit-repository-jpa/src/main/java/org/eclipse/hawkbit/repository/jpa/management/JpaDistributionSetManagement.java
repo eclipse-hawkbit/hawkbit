@@ -421,8 +421,8 @@ public class JpaDistributionSetManagement
 
     private List<JpaDistributionSet> updateTag(
             final Collection<Long> dsIds, final long dsTagId,
-            final BiFunction<DistributionSetTag, JpaDistributionSet, JpaDistributionSet> updater) {
-        final DistributionSetTag tag = distributionSetTagManagement.get(dsTagId);
+            final BiFunction<JpaDistributionSetTag, JpaDistributionSet, JpaDistributionSet> updater) {
+        final JpaDistributionSetTag tag = distributionSetTagManagement.get(dsTagId);
         final List<JpaDistributionSet> allDs = dsIds.size() == 1 ?
                 jpaRepository.findById(dsIds.iterator().next())
                         .map(List::of)

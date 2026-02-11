@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.ql;
 
+import java.io.Serial;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -20,10 +22,13 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class QueryException extends RuntimeException {
 
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     public enum ErrorCode {
         INVALID_SYNTAX,
         UNSUPPORTED_FIELD,
-        GENERIC // an other
+        GENERIC // another
     }
 
     @Getter

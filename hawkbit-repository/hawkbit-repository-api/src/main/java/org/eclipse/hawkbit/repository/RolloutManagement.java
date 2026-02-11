@@ -506,6 +506,7 @@ public interface RolloutManagement extends PermissionSupport {
          * The name suffix, by default "" is used.
          */
         @NotNull
+        @Builder.Default
         private String nameSuffix = "";
 
         /**
