@@ -1,9 +1,9 @@
-- Getting Started
-  - [Overview](README.md)
+- Introduction
   - [What is hawkBit](what-is-hawkbit.md)
+  - [Overview](README.md)
+- Getting Started
   - [Quick Start](quick-start.md)
-  - [Features](features.md)
-  - [Architecture](architecture.md)
+  - [Device Provisioning](device-provisioning.md)
 
 - Guides
   - [Base Setup](base-setup.md)
@@ -11,12 +11,14 @@
   - [Feign Client](feign-client.md)
   - [Clustering](clustering.md)
   
--Concepts
+- Concepts
+  - [Architecture](architecture.md)
   - [Authentication](authentication.md)
   - [Authorization](authorization.md)
   - [Data model](datamodel.md)
   - [Rollout management](rollout-management.md)
   - [Targets state](targetstate.md)
+  - [Entity definitions](entity-definitions.md)
 
 - APIs
   - [Management API](management-api.md)

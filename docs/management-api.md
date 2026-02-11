@@ -17,6 +17,9 @@ The current version of the Management API is `version 1 (v1)` with the URI `http
 - `PUT`
 - `DELETE`
 
+### Query parameter
+For filtering, sorting and paging as well as using the Feed Item Query Language (FIQL) see [Query parameters](query-parameters.md).
+
 ### Headers
 For all requests an `Authorization` header has to be set.
 - Username: `username`
@@ -32,20 +35,20 @@ Besides the relevant data (`name`, `description`, `createdBy` etc.) of a resourc
 A Distribution Set entity may have for example URIs to artifacts, Software Modules, Software Module Types and metadata.
 ```json
 "_links": {
-    "artifacts": {
-        "href": "http://localhost:8080/rest/v1/softwaremodules/83/artifacts"
-    },
-    "self": {
-        "href": "http://localhost:8080/rest/v1/softwaremodules/83"
-    },
-    "type": {
-        "href": "http://localhost:8080/rest/v1/softwaremoduletypes/43"
-    },
-    "metadata": {
-        "href": "http://localhost:8080/rest/v1/softwaremodules/83/metadata?offset=0&limit=50"
-    }
+  "artifacts": {
+    "href": "http://localhost:8080/rest/v1/softwaremodules/83/artifacts"
+  },
+  "self": {
+    "href": "http://localhost:8080/rest/v1/softwaremodules/83"
+  },
+  "type": {
+    "href": "http://localhost:8080/rest/v1/softwaremoduletypes/43"
+  },
+  "metadata": {
+  " href": "http://localhost:8080/rest/v1/softwaremodules/83/metadata?offset=0&limit=50"
+  }
+}
 ```
-
 
 ## REST Doc
 <div style="text-align: right; margin-bottom: 8px;">
