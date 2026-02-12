@@ -101,6 +101,7 @@ public class HawkbitFlywayDbInit {
                 .sqlMigrationSuffixes(SQL_MIGRATION_SUFFIXES)
                 .cleanDisabled(true)
                 .validateOnMigrate(true)
+                .ignoreMigrationPatterns("*:missing")
                 .envVars();
         if (CALLBACKS.length == 0) {
             if (callbackViaServiceLoader.length != 0) {
