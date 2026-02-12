@@ -182,12 +182,11 @@ public class DdiRootController implements DdiRootControllerRestApi {
                         ? logDownload(RequestResponseContextHolder.getHttpServletRequest(), target, module.getId())
                         : null; // range request - could have too many - so doesn't check action, don't log action status, and don't publish events
                 result = FileStreamingUtil.writeFileResponse(file, artifact.getFilename(), artifact.getCreatedAt(),
-                        RequestResponseContextHolder.getHttpServletResponse(),
-                        RequestResponseContextHolder.getHttpServletRequest(),
+                        RequestResponseContextHolder.getHttpServletRequest(), RequestResponseContextHolder.getHttpServletResponse(),
                         (length, shippedSinceLastEvent, total) -> {
                             if (actionStatus != null) {
-                                eventPublisher.publishEvent(new DownloadProgressEvent(
-                                        AccessContext.tenant(), actionStatus.getId(), shippedSinceLastEvent));
+                                eventPublisher.publishEvent(
+                                        new DownloadProgressEvent(AccessContext.tenant(), actionStatus.getId(), shippedSinceLastEvent));
                             }
                         });
             }

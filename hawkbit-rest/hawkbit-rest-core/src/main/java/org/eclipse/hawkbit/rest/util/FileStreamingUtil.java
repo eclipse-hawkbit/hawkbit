@@ -9,10 +9,21 @@
  */
 package org.eclipse.hawkbit.rest.util;
 
+import static org.springframework.http.HttpHeaders.ACCEPT_RANGES;
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
+import static org.springframework.http.HttpHeaders.CONTENT_RANGE;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpHeaders.ETAG;
+import static org.springframework.http.HttpHeaders.IF_RANGE;
+import static org.springframework.http.HttpHeaders.LAST_MODIFIED;
+import static org.springframework.http.HttpHeaders.RANGE;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,17 +35,20 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.hawkbit.artifact.model.ArtifactStream;
 import org.eclipse.hawkbit.rest.exception.FileStreamingFailedException;
-import org.springframework.http.HttpHeaders;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 /**
- * Utility class for artifact file streaming.
+ * Utility class for artifact file streaming supporting RFC-7233 range requests.
+ * <p/>
+ *
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc7233">RFC-7233</a>
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
@@ -44,93 +58,77 @@ public final class FileStreamingUtil {
 
     /**
      * <p>
-     * Write response with target relation and publishes events concerning the
-     * download progress based on given update action status.
-     * </p>
-     * <p>
-     * The request supports RFC7233 range requests.
+     * Write response with target relation and publishes events concerning the download progress based on given update action status.
      * </p>
      *
      * @param artifact the artifact
      * @param filename to be written to the client response
      * @param lastModified unix timestamp of the artifact
-     * @param response to be sent back to the requesting client
      * @param request from the client
+     * @param response to be sent back to the requesting client
      * @param progressListener to write progress updates to
-     * @return http response
+     * @return response entity containing the input stream of the artifact file (or ranges requested)
      * @throws FileStreamingFailedException if streaming fails
-     * @see <a href="https://tools.ietf.org/html/rfc7233">https://tools.ietf.org/html/rfc7233</a>
      */
+    @SuppressWarnings("java:S3776") // not so complex - linear logic at one place
     public static ResponseEntity<InputStream> writeFileResponse(
-            final ArtifactStream artifact, final String filename,
-            final long lastModified, final HttpServletResponse response, final HttpServletRequest request,
+            final ArtifactStream artifact, final String filename, final long lastModified,
+            final HttpServletRequest request, final HttpServletResponse response,
             final FileStreamingProgressListener progressListener) {
-        ResponseEntity<InputStream> result;
-
-        final String etag = artifact.getSha1Hash();
-        final long length = artifact.getSize();
-
         resetResponseExceptHeaders(response);
 
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + filename);
-        response.setHeader(HttpHeaders.ETAG, etag);
-        response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
-        // set the x-content-type options header to prevent browsers from doing
-        // MIME-sniffing when downloading an artifact, as this could cause a
-        // security vulnerability
-        response.setHeader("X-Content-Type-Options", "nosniff");
+        response.setHeader(CONTENT_DISPOSITION, "attachment;filename=" + encodeFilename(filename));
         if (lastModified > 0) {
-            response.setDateHeader(HttpHeaders.LAST_MODIFIED, lastModified);
+            response.setDateHeader(LAST_MODIFIED, lastModified);
         }
-
-        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        final String etag = '"' + artifact.getSha1Hash() + '"'; // ETag header value should be quoted as per RFC-7232, section 2.3.
+        response.setHeader(ETAG, etag);
+        response.setHeader(ACCEPT_RANGES, "bytes"); // range-unit -> bytes
+        response.setContentType(APPLICATION_OCTET_STREAM_VALUE);
+        // set the x-content-type options header to prevent browsers from doing MIME-sniffing when downloading an artifact,
+        // as this could cause a security vulnerability
+        response.setHeader("X-Content-Type-Options", "nosniff");
         response.setBufferSize(BUFFER_SIZE);
 
-        final ByteRange full = new ByteRange(0, length - 1, length);
-        final List<ByteRange> ranges = new ArrayList<>();
+        final long length = artifact.getSize();
+        // Validate and process Range (only, by spec, for GET methods) and If-Range headers.
+        final String rangeHeader = "GET".equalsIgnoreCase(request.getMethod()) ? request.getHeader(RANGE) : null;
+        final List<Range> ranges;
+        if (rangeHeader != null) {
+            log.debug("range header for filename ({}) is: {}", filename, rangeHeader);
 
-        // Validate and process Range and If-Range headers.
-        final String range = request.getHeader("Range");
-        if (lastModified > 0 && range != null) {
-            log.debug("range header for filename ({}) is: {}", filename, range);
-
-            // Range header matches"bytes=n-n,n-n,n-n..."
-            if (!range.matches("^bytes=\\d*-\\d*(,\\d*-\\d*)*+$")) {
-                response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes */" + length);
-                log.debug("range header for filename ({}) is not satisfiable: ", filename);
-                return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+            if (checkIfRangeSendAll(request, etag, lastModified)) {
+                ranges = List.of();
+            } else {
+                // it seems there are valid ranges
+                try {
+                    ranges = Range.of(rangeHeader, length);
+                } catch (final IllegalArgumentException e) {
+                    log.debug("range header ({}) for filename ({}) is not satisfiable: {}", rangeHeader, filename, e.getMessage());
+                    response.setHeader(CONTENT_RANGE, "bytes */" + length);
+                    return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+                }
             }
-
-            // RFC: if the representation is unchanged, send me the part(s) that I am requesting in
-            // Range; otherwise, send me the entire representation.
-            checkForShortcut(request, etag, lastModified, full, ranges);
-
-            // it seems there are valid ranges
-            result = extractRange(response, length, ranges, range);
-            // return if range extraction turned out to be invalid
-            if (result != null) {
-                return result;
-            }
+        } else {
+            ranges = List.of();
         }
 
         try (final InputStream inputStream = artifact) {
             // full request - no range
-            if (ranges.isEmpty() || ranges.get(0).equals(full)) {
+            if (ranges.isEmpty()) {
                 log.debug("filename ({}) results into a full request: ", filename);
-                result = handleFullFileRequest(inputStream, filename, response, progressListener, full);
+                return handleFullFileRequest(inputStream, filename, length, response, progressListener);
             } else if (ranges.size() == 1) { // standard range request
-                log.debug("filename ({}) results into a standard range request: ", filename);
-                result = handleStandardRangeRequest(inputStream, filename, response, progressListener, ranges.get(0));
+                log.debug("filename ({}) results into a single range request: ", filename);
+                return handleSingleRangeRequest(inputStream, ranges.get(0), filename, response, progressListener);
             } else { // multipart range request
                 log.debug("filename ({}) results into a multipart range request: ", filename);
-                result = handleMultipartRangeRequest(inputStream, filename, response, progressListener, ranges);
+                return handleMultipartRangeRequest(inputStream, ranges, filename, response, progressListener);
             }
         } catch (final IOException e) {
             log.error("streaming of file ({}) failed!", filename, e);
             throw new FileStreamingFailedException(filename, e);
         }
-
-        return result;
     }
 
     private static void resetResponseExceptHeaders(final HttpServletResponse response) {
@@ -139,126 +137,53 @@ public final class FileStreamingUtil {
         for (final String header : response.getHeaderNames()) {
             storedHeaders.put(header, response.getHeader(header));
         }
-        // resetting the response is needed only partially. Headers set before e.b. by
-        // the CORS security config needs to be persisted.
+        // resetting the response is needed only partially. Headers set before e.b. by the CORS security config needs to be persisted.
         response.reset();
         // restore headers again
         storedHeaders.forEach(response::addHeader);
     }
 
+    // RFC: "if the representation is unchanged, send me the part(s) that I am requesting in Range; otherwise, send me the entire representation."
+    private static boolean checkIfRangeSendAll(final HttpServletRequest request, final String etag, final long lastModified) {
+        final String ifRange = request.getHeader(IF_RANGE);
+        if (ifRange != null && !ifRange.equals(etag)) {
+            try {
+                final long ifRangeTime = request.getDateHeader(IF_RANGE);
+                if (ifRangeTime != -1 && ifRangeTime < lastModified) {
+                    return true;
+                }
+            } catch (final IllegalArgumentException e) {
+                log.info("Invalid if-range header field", e);
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static ResponseEntity<InputStream> handleFullFileRequest(
-            final InputStream inputStream, final String filename, final HttpServletResponse response,
-            final FileStreamingProgressListener progressListener, final ByteRange full) {
-        response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes " + full.getStart() + "-" + full.getEnd() + "/" + full.getTotal());
-        response.setContentLengthLong(full.getLength());
+            final InputStream inputStream, final String filename, final long length, final HttpServletResponse response,
+            final FileStreamingProgressListener progressListener) {
+        response.setContentLengthLong(length);
 
         try {
             final ServletOutputStream to = response.getOutputStream();
-            copyStreams(inputStream, to, progressListener, full.getStart(), full.getLength(), filename);
+            copyStreams(inputStream, 0, length, filename, to, progressListener);
         } catch (final IOException e) {
-            throw new FileStreamingFailedException("fullfileRequest " + filename, e);
+            throw new FileStreamingFailedException("fullFileRequest " + filename, e);
         }
 
         return ResponseEntity.ok().build();
     }
 
-    private static ResponseEntity<InputStream> extractRange(final HttpServletResponse response, final long length,
-            final List<ByteRange> ranges, final String range) {
-
-        if (ranges.isEmpty()) {
-            for (final String part : range.substring(6).split(",")) {
-                long start = sublong(part, 0, part.indexOf('-'));
-                long end = sublong(part, part.indexOf('-') + 1, part.length());
-
-                if (start == -1) {
-                    start = length - end;
-                    end = length - 1;
-                } else if (end == -1 || end > length - 1) {
-                    end = length - 1;
-                }
-
-                // Check if Range is syntactically valid. If not, then return
-                // 416.
-                if (start > end) {
-                    response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes */" + length);
-                    return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
-                }
-
-                // Add range.
-                ranges.add(new ByteRange(start, end, length));
-            }
-        }
-
-        return null;
-    }
-
-    private static long sublong(final String value, final int beginIndex, final int endIndex) {
-        final String substring = value.substring(beginIndex, endIndex);
-        return substring.isEmpty() ? -1 : Long.parseLong(substring);
-    }
-
-    private static void checkForShortcut(final HttpServletRequest request, final String etag, final long lastModified,
-            final ByteRange full, final List<ByteRange> ranges) {
-        final String ifRange = request.getHeader(HttpHeaders.IF_RANGE);
-        if (ifRange != null && !ifRange.equals(etag)) {
-            try {
-                final long ifRangeTime = request.getDateHeader(HttpHeaders.IF_RANGE);
-                if (ifRangeTime != -1 && ifRangeTime + 1000 < lastModified) {
-                    ranges.add(full);
-                }
-            } catch (final IllegalArgumentException ignored) {
-                log.info("Invalid if-range header field", ignored);
-                ranges.add(full);
-            }
-        }
-    }
-
-    private static ResponseEntity<InputStream> handleMultipartRangeRequest(
-            final InputStream inputStream, final String filename, final HttpServletResponse response,
-            final FileStreamingProgressListener progressListener, final List<ByteRange> ranges) {
-        ranges.sort((r1, r2) -> Long.compare(r1.getStart(), r2.getStart()));
-        response.setContentType("multipart/byteranges; boundary=" + ByteRange.MULTIPART_BOUNDARY);
+    private static ResponseEntity<InputStream> handleSingleRangeRequest(
+            final InputStream inputStream, final Range range, final String filename, final HttpServletResponse response,
+            final FileStreamingProgressListener progressListener) {
+        response.setHeader(CONTENT_RANGE, range.contentRange());
+        response.setContentLengthLong(range.getPartLen());
         response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 
         try {
-            final ServletOutputStream to = response.getOutputStream();
-
-            long streamPos = 0;
-            for (final ByteRange range : ranges) {
-                if (streamPos > range.getStart()) {
-                    throw new FileStreamingFailedException("Ranges are overlapping or not in order");
-                }
-
-                // Add multipart boundary and header fields for every range.
-                to.println();
-                to.println("--" + ByteRange.MULTIPART_BOUNDARY);
-                to.println(HttpHeaders.CONTENT_RANGE + ": bytes " + range.getStart() + "-" + range.getEnd() + "/" + range.getTotal());
-
-                // Copy single part range of multipart range.
-                copyStreams(inputStream, to, progressListener, range.getStart() - streamPos, range.getLength(), filename);
-                streamPos = range.getStart() + range.getLength();
-            }
-
-            // End with final multipart boundary.
-            to.println();
-            to.print("--" + ByteRange.MULTIPART_BOUNDARY + "--");
-        } catch (final IOException e) {
-            throw new FileStreamingFailedException("multipartRangeRequest " + filename, e);
-        }
-
-        return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).build();
-    }
-
-    private static ResponseEntity<InputStream> handleStandardRangeRequest(
-            final InputStream inputStream, final String filename, final HttpServletResponse response,
-            final FileStreamingProgressListener progressListener, final ByteRange range) {
-        response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes " + range.getStart() + "-" + range.getEnd() + "/" + range.getTotal());
-        response.setContentLengthLong(range.getLength());
-        response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-
-        try {
-            final ServletOutputStream to = response.getOutputStream();
-            copyStreams(inputStream, to, progressListener, range.getStart(), range.getLength(), filename);
+            copyStreams(inputStream, range.getStart(), range.getPartLen(), filename, response.getOutputStream(), progressListener);
         } catch (final IOException e) {
             log.error("standardRangeRequest of file ({}) failed!", filename, e);
             throw new FileStreamingFailedException(filename);
@@ -267,11 +192,65 @@ public final class FileStreamingUtil {
         return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).build();
     }
 
-    private static long copyStreams(
-            final InputStream from, final OutputStream to,
-            final FileStreamingProgressListener progressListener,
-            final long start, final long length,
-            final String filename) throws IOException {
+    private static final String CRLF = "\r\n";
+    private static final String DASH_DASH = "--";
+    private static final String BOUNDARY = "THIS_STRING_SEPARATES_MULTIPART"; // boundary := 0*69<bchars> bcharsnospace
+    private static final String CONTENT_TYPE_MULTIPART_BYTE_RANGES_AND_BOUNDARY = "multipart/byteranges; boundary=" + BOUNDARY;
+    private static final String DASH_BOUNDARY = DASH_DASH + BOUNDARY; // dash-boundary := "--" boundary
+    private static final String DELIMITER = CRLF + DASH_BOUNDARY; // delimiter := CRLF dash-boundary
+    private static final String CLOSE_DELIMITER = DELIMITER + DASH_DASH; // close-delimiter := delimiter "--"
+
+    // follows the RFC-2046 -> https://datatracker.ietf.org/doc/html/rfc2046#section-5.1
+    private static ResponseEntity<InputStream> handleMultipartRangeRequest(
+            final InputStream inputStream, final List<Range> ranges, final String filename, final HttpServletResponse response,
+            final FileStreamingProgressListener progressListener) {
+        // add headers
+        response.setContentType(CONTENT_TYPE_MULTIPART_BYTE_RANGES_AND_BOUNDARY);
+        response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+
+        // write multipart-body as defined in RFC-2046 (we use transport-padding is empty as per RFC-2046, don't send the optional preamble and epilogue):
+        //   multipart-body :=
+        //     dash-boundary CRLF body-part // first body-part (range, headers + content)
+        //     *encapsulation // next ranges
+        //     close-delimiter
+        //   encapsulation := delimiter CRLF body-part
+        //   body-part := MIME-part-headers [CRLF *OCTET]
+        try {
+            // println of ServletOutputStream appends CRLF, which is required for separating multipart boundaries and header fields.
+            final ServletOutputStream to = response.getOutputStream();
+            long streamPos = 0;
+            for (int i = 0; i < ranges.size(); i++) { // dash-boundary CRLF body-part or encapsulation (delimiter CRLF body-part)
+                final Range range = ranges.get(i);
+                // write body-part prefix - first body-part is prefixed with dash-boundary, the following ones with delimiter
+                to.println(i == 0 ? DASH_BOUNDARY : DELIMITER);
+                // write body-part
+                // * write MIME-part-headers
+                // If the selected representation would have had a Content-Type header field in a 200 (OK) response,
+                // the server SHOULD generate that same Content-Type field in the header area of each body part.
+                to.print(CONTENT_TYPE);
+                to.print(": ");
+                to.println(APPLICATION_OCTET_STREAM_VALUE);
+                to.print(CONTENT_RANGE);
+                to.print(": ");
+                to.println(range.contentRange());
+                // * write [CRLF *OCTET]
+                to.println();
+                copyStreams(inputStream, range.getStart() - streamPos, range.getPartLen(), filename, to, progressListener);
+                // update stream position
+                streamPos = range.getStart() + range.getPartLen();
+            }
+            // write close-delimiter
+            to.print(CLOSE_DELIMITER);
+        } catch (final IOException e) {
+            throw new FileStreamingFailedException("multipartRangeRequest " + filename, e);
+        }
+
+        return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).build();
+    }
+
+    private static void copyStreams(
+            final InputStream from, final long start, final long length, final String filename,
+            final OutputStream to, final FileStreamingProgressListener progressListener) throws IOException {
         final long startMillis = System.currentTimeMillis();
         log.trace("Start of copy-streams of file {} from {} to {}", filename, start, length);
 
@@ -318,15 +297,45 @@ public final class FileStreamingUtil {
         }
 
         final long totalTime = System.currentTimeMillis() - startMillis;
-
         if (total < length) {
             throw new FileStreamingFailedException(
                     filename + ": " + (length - total) + " bytes could not be written to client, total time on write: !" + totalTime + " ms");
         }
-
         log.trace("Finished copy-stream of file {} with length {} in {} ms", filename, length, totalTime);
+    }
 
-        return total;
+    // tspecials :=  "(" / ")" / "<" / ">" / "@" / "," / ";" / ":" / "\" / <"> / "/" / "[" / "]" / "?" / "="
+    private static final String TSPECIALS = "()<>@,;:\\\"/[]?=";
+
+    // Encodes filename for Content-Disposition header according to RFC-2183 (https://datatracker.ietf.org/doc/html/rfc2183)
+    private static String encodeFilename(String filename) {
+        if (filename.length() > 78) {
+            filename = filename.substring(0, 78); // RFC-2183: parameter values longer than 78 characters should be truncated to 78 characters
+        }
+
+        // Check if filename contains any tspecials, and only if so, quotes
+        for (int i = 0; i < filename.length(); i++) {
+            if (TSPECIALS.indexOf(filename.charAt(i)) != -1) {
+                return quotedString(filename);
+            }
+        }
+        return filename;
+    }
+
+    private static @NonNull String quotedString(final String filename) {
+        // RFC-2183: A short parameter value containing only ASCII characters, but including `tspecials' characters, SHOULD be represented as `quoted-string'
+        // RFC-822:  quoted-string = <"> *(qtext/quoted-pair) <">, quoted-pair = "\" CHAR - we need to escape " and \ inside the quoted string
+        final StringBuilder quoted = new StringBuilder("\"");
+        for (int i = 0; i < filename.length(); i++) {
+            final char c = filename.charAt(i);
+            // Escape backslash and quote characters
+            if (c == '"' || c == '\\') {
+                quoted.append('\\');
+            }
+            quoted.append(c);
+        }
+        quoted.append('"');
+        return quoted.toString();
     }
 
     /**
@@ -345,78 +354,73 @@ public final class FileStreamingUtil {
         void progress(long requestedBytes, long shippedBytesSinceLast, long shippedBytesOverall);
     }
 
-    private static final class ByteRange {
+    @Value
+    private static class Range {
 
-        private static final String MULTIPART_BOUNDARY = "THIS_STRING_SEPARATES_MULTIPART";
+        // byte-content-range  = bytes-unit SP ( byte-range-resp / unsatisfied-range )
+        // byte-range-resp     = byte-range "/" ( complete-length / "*" )
+        // byte-range          = first-byte-pos "-" last-byte-pos
+        private static final String CONTENT_RANGE_FORMAT = "bytes %d-%d/%d";
 
-        private final long start;
-        private final long end;
-        private final long length;
-        private final long total;
+        long start; // first-byte-pos
+        long end; // last-byte-pos
+        long completeLen; // complete-length
+        long partLen; // partial, range length (end - start + 1)
 
-        private ByteRange(final long start, final long end, final long total) {
+        private Range(final long start, final long end, final long completeLen) {
             this.start = start;
             this.end = end;
-            length = end - start + 1;
-            this.total = total;
+            this.completeLen = completeLen;
+            partLen = end - start + 1;
         }
 
-        @Override
-        // Generated code
-        @SuppressWarnings("squid:S864")
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + (int) (end ^ (end >>> 32));
-            result = prime * result + (int) (length ^ (length >>> 32));
-            result = prime * result + (int) (start ^ (start >>> 32));
-            result = prime * result + (int) (total ^ (total >>> 32));
-            return result;
+        // throws IllegalArgumentException if the header doesn't conform the expected format and constraints (like non-overlapping)
+        // return validated, ordered and non-overlapping ranges
+        private static List<Range> of(final String rangeHeader, final long length) {
+            // Range header matches"bytes=n-n,n-n,n-n..."
+            if (!rangeHeader.matches("^bytes=\\d*-\\d*(,\\d*-\\d*)*+$")) {
+                throw new IllegalArgumentException("Doesn't match pattern");
+            }
+
+            final List<Range> ranges = new ArrayList<>();
+            // parse range header
+            for (final String part : rangeHeader.substring(6).split(",")) {
+                final int index = part.indexOf('-');
+                final long start;
+                final long end;
+                if (index == 0) { // -n, means last n bytes
+                    start = length - Long.parseLong(part.substring(index + 1));
+                    end = length - 1;
+                } else {
+                    start = Long.parseLong(part.substring(0, index));
+                    end = index == part.length() - 1 ? length - 1 : Math.min(Long.parseLong(part.substring(index + 1)), length - 1);
+                }
+                // Check if Range is syntactically valid. If not, then return 416.
+                if (start > end) {
+                    throw new IllegalArgumentException("Start bigger then end");
+                }
+                // Add range.
+                ranges.add(new Range(start, end, length));
+            }
+            // ranges must not be empty
+            if (ranges.isEmpty()) {
+                throw new IllegalArgumentException("Empty range list");
+            }
+            // order ranges by start position
+            ranges.sort(Comparator.comparingLong(Range::getStart));
+            // validate ranges, we don't allow overlapping, as this would make the streaming logic more complex and computational expensive.
+            long streamPos = 0;
+            for (final Range range : ranges) {
+                if (streamPos > range.getStart()) {
+                    throw new IllegalArgumentException("Ranges are overlapping or not in order");
+                }
+                streamPos = range.getStart() + range.getPartLen();
+            }
+            return ranges;
         }
 
-        @Override
-        // Generated code
-        @SuppressWarnings("squid:S1126")
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final ByteRange other = (ByteRange) obj;
-            if (end != other.end) {
-                return false;
-            }
-            if (length != other.length) {
-                return false;
-            }
-            if (start != other.start) {
-                return false;
-            }
-            if (total != other.total) {
-                return false;
-            }
-            return true;
-        }
-
-        private long getStart() {
-            return start;
-        }
-
-        private long getEnd() {
-            return end;
-        }
-
-        private long getLength() {
-            return length;
-        }
-
-        private long getTotal() {
-            return total;
+        private String contentRange() {
+            return String.format(CONTENT_RANGE_FORMAT, start, end, completeLen);
         }
     }
 }

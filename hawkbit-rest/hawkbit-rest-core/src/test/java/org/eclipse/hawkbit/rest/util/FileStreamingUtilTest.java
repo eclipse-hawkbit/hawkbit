@@ -53,19 +53,21 @@ class FileStreamingUtilTest {
 
         Mockito.when(servletResponse.getOutputStream()).thenReturn(outputStream);
         final HttpServletRequest servletRequest = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(servletRequest.getMethod()).thenReturn("GET");
         Mockito.when(servletRequest.getHeader("Range")).thenReturn("bytes=0-10,11-15,16-");
         long lastModified = System.currentTimeMillis();
 
         final ResponseEntity<InputStream> responseEntity = FileStreamingUtil.writeFileResponse(
-                TEST_ARTIFACT.get(), "test.file", lastModified, servletResponse, servletRequest, null);
+                TEST_ARTIFACT.get(), "test.file", lastModified, servletRequest, servletResponse, null);
 
         assertThat(responseEntity).isNotNull();
         verify(servletResponse).setDateHeader(HttpHeaders.LAST_MODIFIED, lastModified);
         final ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<Integer> lenCaptor = ArgumentCaptor.forClass(Integer.class);
 
-        verify(outputStream).print(stringCaptor.capture());
-        assertThat(stringCaptor.getValue()).contains("--THIS_STRING_SEPARATES_MULTIPART--");
+        verify(outputStream, times(3 * 4 + 1)).print(stringCaptor.capture());
+        verify(outputStream, times(3 * 3)).println(stringCaptor.capture());
+        verify(outputStream, times(3)).println();
         verify(outputStream, times(3)).write(any(), anyInt(), lenCaptor.capture());
         assertThat(lenCaptor.getAllValues()).containsExactly(11, 5, 39); // Range lengths
     }
@@ -78,10 +80,11 @@ class FileStreamingUtilTest {
         Mockito.when(servletResponse.getOutputStream()).thenReturn(outputStream);
 
         final HttpServletRequest servletRequest = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(servletRequest.getMethod()).thenReturn("GET");
         Mockito.when(servletRequest.getHeader("Range")).thenReturn("bytes=0-10***,9-15,16-");
 
         final ResponseEntity<InputStream> responseEntity = FileStreamingUtil.writeFileResponse(
-                TEST_ARTIFACT.get(), "test.file", lastModified, servletResponse, servletRequest, null);
+                TEST_ARTIFACT.get(), "test.file", lastModified, servletRequest, servletResponse, null);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
         verify(outputStream, times(0)).print(anyString());

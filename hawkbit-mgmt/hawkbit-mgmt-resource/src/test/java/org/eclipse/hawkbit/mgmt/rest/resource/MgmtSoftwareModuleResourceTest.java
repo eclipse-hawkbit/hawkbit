@@ -1537,16 +1537,13 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .as("wrong metadata of the filename").isEqualTo("origFilename");
     }
 
-    private void downloadAndVerify(final SoftwareModule sm, final byte[] random, final Artifact artifact)
-            throws Exception {
+    private void downloadAndVerify(final SoftwareModule sm, final byte[] random, final Artifact artifact) throws Exception {
         final MvcResult result = mvc
-                .perform(
-                        get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", sm.getId(), artifact.getId()))
+                .perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download", sm.getId(), artifact.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
-                .andExpect(header().string("ETag", artifact.getSha1Hash()))
+                .andExpect(header().string("ETag", '"' + artifact.getSha1Hash() + '"'))
                 .andReturn();
-
         assertArrayEquals(result.getResponse().getContentAsByteArray(), random, "Wrong response content");
     }
 

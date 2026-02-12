@@ -69,6 +69,6 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
         }
 
         return FileStreamingUtil.writeFileResponse(file, artifact.getFilename(), artifact.getCreatedAt(),
-                RequestResponseContextHolder.getHttpServletResponse(), request, null);
+                request, RequestResponseContextHolder.getHttpServletResponse(), null);
     }
 }
