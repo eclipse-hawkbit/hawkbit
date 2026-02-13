@@ -1,14 +1,26 @@
+/**
+ * Copyright (c) 2026 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
 package org.eclipse.hawkbit.ui.view;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -16,8 +28,11 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.tabs.TabSheet;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -37,6 +52,7 @@ import org.eclipse.hawkbit.ui.view.util.Utils;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 @PageTitle("Target Filter Queries")
 @Route(value = "target_filter_queries", layout = MainLayout.class)
@@ -46,17 +62,17 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
     public TargetFilterQueryView(final HawkbitMgmtClient hawkbitClient) {
         super(
                 new TargetFilterQueryFilter(),
+                null,
                 new SelectionGrid.EntityRepresentation<>(TargetFilterQueryGridItem.class, TargetFilterQueryGridItem::getId) {
 
                     @Override
                     protected void addColumns(final Grid<TargetFilterQueryGridItem> grid) {
                         grid.addColumn(MgmtTargetFilterQuery::getId).setHeader(Constants.ID).setAutoWidth(true).setKey("id").setSortable(true);
                         grid.addColumn(MgmtTargetFilterQuery::getName).setHeader(Constants.NAME).setAutoWidth(true).setKey("name").setSortable(true).setResizable(true);
-                        grid.addColumn(MgmtTargetFilterQuery::getCreatedBy).setHeader(Constants.CREATED_BY).setKey("createdBy").setSortable(true).setAutoWidth(true);
-                        grid.addColumn(Utils.localDateTimeRenderer(MgmtTargetFilterQuery::getCreatedAt)).setHeader(Constants.CREATED_AT).setKey("createdAt").setSortable(true).setAutoWidth(true);
-                        grid.addColumn(MgmtTargetFilterQuery::getLastModifiedBy).setHeader(Constants.LAST_MODIFIED_BY).setKey("lastModifiedBy").setSortable(true).setAutoWidth(true);
-                        grid.addColumn(Utils.localDateTimeRenderer(MgmtTargetFilterQuery::getLastModifiedAt)).setHeader(Constants.LAST_MODIFIED_AT).setKey("lastModifiedAt").setSortable(true).setAutoWidth(true);
-                        grid.addColumn(new ComponentRenderer<>(DistributionSetCell::new)).setHeader(Constants.DISTRIBUTION_SET).setAutoWidth(true).setFlexGrow(0);
+                        grid.addColumn(new ComponentRenderer<>(QueryCell::new)).setHeader("Query").setAutoWidth(true).setKey("query").setResizable(true);
+                        grid.addColumn(Utils.localDateTimeRenderer(MgmtTargetFilterQuery::getLastModifiedAt)).setHeader(Constants.LAST_MODIFIED_AT).setKey("lastModifiedAt")
+                                .setSortable(true).setAutoWidth(true).setResizable(true);
+                        grid.addColumn(new ComponentRenderer<>(DistributionSetCell::new)).setHeader(Constants.DISTRIBUTION_SET).setAutoWidth(true).setResizable(true);
 
                         grid.addComponentColumn(rollout -> new Actions(rollout, grid, hawkbitClient)).setHeader(
                                 Constants.ACTIONS).setAutoWidth(true);
@@ -75,6 +91,11 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
                     selectionGrid.getSelectedItems()
                             .forEach(toDelete -> hawkbitClient.getTargetFilterQueryRestApi().deleteFilter(toDelete.getId()));
                     return CompletableFuture.completedFuture(null);
+                },
+                filterQuery -> {
+                    final TargetFilterQueryDetailedView detailedView = new TargetFilterQueryDetailedView();
+                    detailedView.setItem(filterQuery);
+                    return detailedView;
                 }
         );
     }
@@ -101,15 +122,38 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
         }
     }
 
+    private static class QueryCell extends Div {
+
+        private QueryCell(final TargetFilterQueryGridItem filterQuery) {
+            String query = filterQuery.getQuery();
+            if (query != null) {
+                setText(query);
+                setTitle(query);
+            }
+            getStyle().setOverflow(Style.Overflow.HIDDEN);
+            getStyle().set("text-overflow", "ellipsis");
+            setWhiteSpace(WhiteSpace.NOWRAP);
+            setMaxWidth(400, Unit.PIXELS);
+        }
+    }
+
     private static class DistributionSetCell extends HorizontalLayout {
 
         private DistributionSetCell(final TargetFilterQueryGridItem filterQuery) {
             filterQuery.getDs().ifPresent(ds -> {
                 Icon icon = getActionTypeIcon(filterQuery.getAutoAssignActionType());
+                icon.getStyle().setFlexShrink("0");
+
                 Span dsName = new Span(ds.getName() + ":" + ds.getVersion());
+                dsName.getStyle().setOverflow(Style.Overflow.HIDDEN);
+                dsName.getStyle().set("text-overflow", "ellipsis");
+                dsName.getStyle().setWhiteSpace(Style.WhiteSpace.NOWRAP);
 
                 add(icon, dsName);
             });
+            setAlignItems(Alignment.CENTER);
+            setSpacing(true);
+            getStyle().setFlexWrap(Style.FlexWrap.NOWRAP);
         }
 
         private Icon getActionTypeIcon(MgmtActionType actionType) {
@@ -138,43 +182,37 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
 
         private void init(final MgmtTargetFilterQuery filter) {
             if (filter.getAutoAssignDistributionSet() == null) {
-                add(Utils.tooltip(new Button(VaadinIcon.LINK.create()) {
-                    {
-                        addClickListener(v -> {
-                            new AutoAssignDialog(filter.getId(), hawkbitClient, () -> refresh(filter.getId())).open();
-                        });
-                    }
-                }, "Auto assign"));
+                Button autoAssignButton = new Button(VaadinIcon.LINK.create());
+                autoAssignButton.addClickListener(e ->
+                        new AutoAssignDialog(filter.getId(), hawkbitClient, () -> refresh(filter.getId())).open()
+                );
+                add(Utils.tooltip(autoAssignButton, "Auto assign"));
             } else {
-                add(Utils.tooltip(new Button(VaadinIcon.UNLINK.create()) {
-                    {
-                        addClickListener(v -> {
-                            ConfirmDialog dialog = Utils.confirmDialog("Unassign Distribution Set",
-                                    "Are you sure you want to unassign the distribution set of target filter query '" + filter.getName() + "'?",
-                                    "Unassign",
-                                    () -> {
-                                        hawkbitClient.getTargetFilterQueryRestApi().deleteAssignedDistributionSet(filter.getId());
-                                        refresh(filter.getId());
-                                    });
-                            dialog.open();
-                        });
-                    }
-                }, "Unassign"));
+                Button unassignButton = new Button(VaadinIcon.UNLINK.create());
+                unassignButton.addClickListener(e -> {
+                    ConfirmDialog dialog = Utils.confirmDialog("Unassign Distribution Set",
+                            "Are you sure you want to unassign the distribution set of target filter query '" + filter.getName() + "'?",
+                            "Unassign",
+                            () -> {
+                                hawkbitClient.getTargetFilterQueryRestApi().deleteAssignedDistributionSet(filter.getId());
+                                refresh(filter.getId());
+                            });
+                    dialog.open();
+                });
+                add(Utils.tooltip(unassignButton, "Unassign"));
             }
-            add(Utils.tooltip(new Button(VaadinIcon.TRASH.create()) {
-                {
-                    addClickListener(v -> {
-                        ConfirmDialog dialog = Utils.confirmDialog("Delete Target Filter Query",
-                                "Are you sure you want to delete the target filter query '" + filter.getName() + "'?",
-                                "Delete",
-                                () -> {
-                                    hawkbitClient.getTargetFilterQueryRestApi().deleteFilter(filter.getId());
-                                    grid.getDataProvider().refreshAll();
-                                });
-                        dialog.open();
-                    });
-                }
-            }, "Delete"));
+            Button deleteButton = new Button(VaadinIcon.TRASH.create());
+            deleteButton.addClickListener(e -> {
+                ConfirmDialog dialog = Utils.confirmDialog("Delete Target Filter Query",
+                        "Are you sure you want to delete the target filter query '" + filter.getName() + "'?",
+                        "Delete",
+                        () -> {
+                            hawkbitClient.getTargetFilterQueryRestApi().deleteFilter(filter.getId());
+                            grid.getDataProvider().refreshAll();
+                        });
+                dialog.open();
+            });
+            add(Utils.tooltip(deleteButton, "Delete"));
         }
 
         private void refresh(Long filterId) {
@@ -250,6 +288,81 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
                 onSuccess.run();
                 close();
             });
+        }
+    }
+
+    private static class TargetFilterQueryDetailedView extends VerticalLayout {
+
+        private final Span filterName;
+        private final TargetFilterQueryDetails details;
+
+        private TargetFilterQueryDetailedView() {
+            filterName = new Span();
+            details = new TargetFilterQueryDetails();
+            setWidthFull();
+
+            add(filterName);
+            final TabSheet tabSheet = new TabSheet();
+            tabSheet.setWidthFull();
+            tabSheet.add("Details", details);
+            add(tabSheet);
+        }
+
+        private void setItem(final TargetFilterQueryGridItem filterQuery) {
+            this.filterName.setText(filterQuery.getName());
+            this.details.setItem(filterQuery);
+        }
+    }
+
+    private static class TargetFilterQueryDetails extends FormLayout {
+
+        private final TextField name = Utils.textField(Constants.NAME);
+        private final TextArea query = new TextArea("Query");
+        private final TextField createdBy = Utils.textField(Constants.CREATED_BY);
+        private final TextField createdAt = Utils.textField(Constants.CREATED_AT);
+        private final TextField lastModifiedBy = Utils.textField(Constants.LAST_MODIFIED_BY);
+        private final TextField lastModifiedAt = Utils.textField(Constants.LAST_MODIFIED_AT);
+        private final TextField autoAssignDistributionSet = Utils.textField("Auto Assign Distribution Set");
+        private final TextField autoAssignActionType = Utils.textField("Auto Assign Action Type");
+        private final TextField autoAssignWeight = Utils.textField("Auto Assign Weight");
+        private final TextField confirmationRequired = Utils.textField("Confirmation Required");
+
+        private TargetFilterQueryDetails() {
+            query.setMinLength(2);
+            Stream.of(
+                    name, query,
+                    createdBy, createdAt,
+                    lastModifiedBy, lastModifiedAt,
+                    autoAssignDistributionSet, autoAssignActionType,
+                    autoAssignWeight, confirmationRequired
+            )
+                    .forEach(field -> {
+                        field.setReadOnly(true);
+                        add(field);
+                    });
+
+            setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2));
+            setColspan(query, 2);
+        }
+
+        private void setItem(final TargetFilterQueryGridItem filterQuery) {
+            name.setValue(filterQuery.getName() != null ? filterQuery.getName() : "");
+            query.setValue(filterQuery.getQuery() != null ? filterQuery.getQuery() : "");
+            createdBy.setValue(filterQuery.getCreatedBy() != null ? filterQuery.getCreatedBy() : "");
+            createdAt.setValue(Utils.localDateTimeFromTs(filterQuery.getCreatedAt()));
+            lastModifiedBy.setValue(filterQuery.getLastModifiedBy() != null ? filterQuery.getLastModifiedBy() : "");
+            lastModifiedAt.setValue(Utils.localDateTimeFromTs(filterQuery.getLastModifiedAt()));
+
+            filterQuery.getDs().ifPresentOrElse(
+                    ds -> autoAssignDistributionSet.setValue(ds.getName() + ":" + ds.getVersion()),
+                    () -> autoAssignDistributionSet.setValue("")
+            );
+            autoAssignActionType.setValue(filterQuery.getAutoAssignActionType() != null ?
+                    filterQuery.getAutoAssignActionType().getName() : "");
+            autoAssignWeight.setValue(filterQuery.getAutoAssignWeight() != null ?
+                    filterQuery.getAutoAssignWeight().toString() : "");
+            confirmationRequired.setValue(filterQuery.getConfirmationRequired() != null ?
+                    filterQuery.getConfirmationRequired().toString() : "");
         }
     }
 
