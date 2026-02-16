@@ -22,17 +22,13 @@ import org.eclipse.hawkbit.mcp.server.config.HawkbitMcpProperties;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTenantManagementRestApi;
 import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.Tenant;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 
 /**
  * Validates authentication credentials against hawkBit REST API using the SDK.
  * This validator is conditionally created when {@code hawkbit.mcp.validation.enabled=true}.
  */
 @Slf4j
-@Component
-@ConditionalOnProperty(name = "hawkbit.mcp.validation.enabled", havingValue = "true", matchIfMissing = true)
 public class HawkbitAuthenticationValidator implements AuthenticationValidator {
 
     private final HawkbitClient hawkbitClient;

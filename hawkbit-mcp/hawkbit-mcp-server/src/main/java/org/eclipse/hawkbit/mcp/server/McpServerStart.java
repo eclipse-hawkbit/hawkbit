@@ -9,10 +9,8 @@
  */
 package org.eclipse.hawkbit.mcp.server;
 
-import org.eclipse.hawkbit.mcp.server.config.HawkbitMcpProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 
 /**
@@ -23,7 +21,6 @@ import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServic
  * </p>
  */
 @SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
-@EnableConfigurationProperties(HawkbitMcpProperties.class)
 public class McpServerStart {
 
     public static void main(final String[] args) {

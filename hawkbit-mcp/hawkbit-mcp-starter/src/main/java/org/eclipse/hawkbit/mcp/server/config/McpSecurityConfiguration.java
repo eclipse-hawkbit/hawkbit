@@ -63,6 +63,7 @@ public class McpSecurityConfiguration {
     @SuppressWarnings("java:S4502") // CSRF protection is not needed for stateless REST APIs using Authorization header
     public SecurityFilterChain mcpSecurityFilterChain(final HttpSecurity http) throws Exception {
         http
+                .securityMatcher("/mcp/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
