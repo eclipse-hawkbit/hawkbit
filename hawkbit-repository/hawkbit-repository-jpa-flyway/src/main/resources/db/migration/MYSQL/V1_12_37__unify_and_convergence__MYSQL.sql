@@ -1,12 +1,30 @@
+UPDATE sp_software_module SET name = '' WHERE name IS NULL;
+UPDATE sp_software_module_type SET name = '' WHERE name IS NULL;
+UPDATE sp_distribution_set SET name = '' WHERE name IS NULL;
+UPDATE sp_distribution_set_type SET name = '' WHERE name IS NULL;
+UPDATE sp_distribution_set_tag SET name = '' WHERE name IS NULL;
+UPDATE sp_target SET name = '' WHERE name IS NULL;
+UPDATE sp_target_type SET name = '' WHERE name IS NULL;
+UPDATE sp_target_tag SET name = '' WHERE name IS NULL;
+UPDATE sp_target_filter_query SET name = '' WHERE name IS NULL;
+UPDATE sp_rollout SET name = '' WHERE name IS NULL;
+UPDATE sp_rollout_group SET name = '' WHERE name IS NULL;
+UPDATE sp_target SET controller_id = '' WHERE controller_id IS NULL;
+
 ALTER TABLE sp_action
     MODIFY active TINYINT(1);
 
 ALTER TABLE sp_distribution_set
+    MODIFY name VARCHAR(128) NOT NULL,
     MODIFY deleted TINYINT(1),
     MODIFY required_migration_step TINYINT(1);
 
 ALTER TABLE sp_distribution_set_type
+    MODIFY name VARCHAR(128) NOT NULL,
     MODIFY deleted TINYINT(1);
+
+ALTER TABLE sp_distribution_set_tag
+    MODIFY name VARCHAR(128) NOT NULL;
 
 ALTER TABLE sp_ds_type_element
     MODIFY mandatory TINYINT(1);
@@ -15,13 +33,35 @@ ALTER TABLE sp_sm_metadata
     MODIFY target_visible TINYINT(1);
 
 ALTER TABLE sp_software_module
+    MODIFY name VARCHAR(128) NOT NULL,
     MODIFY deleted TINYINT(1);
 
 ALTER TABLE sp_software_module_type
+    MODIFY name VARCHAR(128) NOT NULL,
     MODIFY deleted TINYINT(1);
 
 ALTER TABLE sp_target
+    MODIFY name VARCHAR(128) NOT NULL,
+    MODIFY controller_id VARCHAR(256) NOT NULL,
     MODIFY request_controller_attributes TINYINT(1) NOT NULL;
+
+ALTER TABLE sp_target_type
+    MODIFY name VARCHAR(128) NOT NULL,
+    ALTER COLUMN type_key DROP DEFAULT;
+
+ALTER TABLE sp_target_tag
+    MODIFY name VARCHAR(128) NOT NULL;
+
+ALTER TABLE sp_target_filter_query
+    MODIFY name VARCHAR(128) NOT NULL;
+
+ALTER TABLE sp_rollout
+    MODIFY name VARCHAR(128) NOT NULL,
+    DROP COLUMN group_theshold;
+
+ALTER TABLE sp_rollout_group
+    MODIFY name VARCHAR(128) NOT NULL,
+    DROP INDEX sp_idx_rollout_group_parent;
 
 
 SET FOREIGN_KEY_CHECKS=0;
