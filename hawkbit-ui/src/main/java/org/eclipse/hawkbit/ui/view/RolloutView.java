@@ -115,6 +115,13 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
         private final long rolloutId;
         private final Grid<MgmtRolloutResponseBody> grid;
         private final transient HawkbitMgmtClient hawkbitClient;
+        /**
+         * Mirrored from RolloutManagement.ROLLOUT_STATUS_STOPPABLE
+         * @see org.eclipse.hawkbit.repository.jpa.management.JpaRolloutManagement
+         */
+        private static final List<String> ROLLOUT_STATUS_STOPPABLE = List.of(
+                "creating", "ready", "waiting_for_approval", "starting", "running",
+                "paused", "approval_denied");
 
         private Actions(final MgmtRolloutResponseBody rollout, final Grid<MgmtRolloutResponseBody> grid,
                 final HawkbitMgmtClient hawkbitClient) {
@@ -156,15 +163,33 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
                     }
                 }, "Resume"));
             }
+            if (ROLLOUT_STATUS_STOPPABLE.contains(rollout.getStatus())) {
+                add(Utils.tooltip(new Button(VaadinIcon.STOP.create()) {
+                    {
+                        addClickListener(v -> Utils.confirmDialog("Confirm Stopping",
+                                "Are you sure you want to stop the selected rollout? This action cannot be undone.",
+                                "Stop",
+                                () -> {
+                                    hawkbitClient.getRolloutRestApi().stop(rollout.getId());
+                                    grid.getDataProvider().refreshAll();
+                                }).open()
+                        );
+                    }
+                }, "Stop"));
+            }
             add(Utils.tooltip(new Button(VaadinIcon.TRASH.create()) {
-
                 {
-                    addClickListener(v -> {
-                        hawkbitClient.getRolloutRestApi().delete(rollout.getId());
-                        grid.getDataProvider().refreshAll();
-                    });
+
+                    addClickListener(v -> Utils.confirmDialog("Confirm deletion",
+                            "Are you sure you want to delete the selected rollout? This action cannot be undone.",
+                            "Delete",
+                            () -> {
+                                hawkbitClient.getRolloutRestApi().delete(rollout.getId());
+                                grid.getDataProvider().refreshAll();
+                            }).open()
+                    );
                 }
-            }, "Cancel and Remove"));
+            }, "Cancel and remove"));
         }
 
         private void refresh() {

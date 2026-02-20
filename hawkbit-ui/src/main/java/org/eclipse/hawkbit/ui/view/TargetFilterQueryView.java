@@ -50,7 +50,11 @@ import org.eclipse.hawkbit.ui.view.util.SelectionGrid;
 import org.eclipse.hawkbit.ui.view.util.TableView;
 import org.eclipse.hawkbit.ui.view.util.Utils;
 
-import java.util.*;
+import java.io.Serial;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -59,6 +63,10 @@ import java.util.stream.Stream;
 @RolesAllowed({ "TARGET_READ" })
 @Uses(Icon.class)
 public class TargetFilterQueryView extends TableView<TargetFilterQueryView.TargetFilterQueryGridItem, Long>  {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     public TargetFilterQueryView(final HawkbitMgmtClient hawkbitClient) {
         super(
                 new TargetFilterQueryFilter(),
@@ -203,7 +211,7 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
             }
             Button deleteButton = new Button(VaadinIcon.TRASH.create());
             deleteButton.addClickListener(e -> {
-                ConfirmDialog dialog = Utils.confirmDialog("Delete Target Filter Query",
+                ConfirmDialog dialog = Utils.confirmDialog("Confirm Deletion",
                         "Are you sure you want to delete the target filter query '" + filter.getName() + "'?",
                         "Delete",
                         () -> {
