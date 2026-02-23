@@ -111,3 +111,5 @@ ALTER INDEX sp_idx_action_status_02_sp_action_status RENAME TO sp_idx_action_sta
 
 -- rename index
 ALTER TABLE sp_tenant RENAME CONSTRAINT fk_sp_tenant_default_ds_type TO fk_tenant_default_ds_type;
+
+ALTER TABLE sp_rollout_group ALTER COLUMN target_percentage FLOAT;
