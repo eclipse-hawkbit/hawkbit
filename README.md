@@ -41,7 +41,7 @@ The following vendors offer free trial accounts for their hawkBit compatible pro
 
 # Device Integration (Client libraries)
 
-hawkBit exposes HTTP/JSON based [Direct Device Integration (API) API](https://www.eclipse.org/hawkbit/apis/ddi_api/)
+hawkBit exposes HTTP/JSON based [Direct Device Integration (API) API](https://hawkbit.eclipse.dev/#/direct-device-integration-api)
 that allow any update client to integrate quite easily.
 
 The [Eclipse Hara subproject](https://projects.eclipse.org/projects/iot.hawkbit.hara) aims to provide a reference agent

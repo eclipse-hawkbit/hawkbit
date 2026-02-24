@@ -108,7 +108,7 @@
         <sonar.branch.name>LOCAL_SCAN</sonar.branch.name>
         <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
         <sonar.qualitygate.timeout>600</sonar.qualitygate.timeout>
-        <sonar.links.homepage>https://www.eclipse.org/hawkbit</sonar.links.homepage>
+        <sonar.links.homepage>https://hawkbit.eclipse.dev/</sonar.links.homepage>
         <sonar.links.ci>https://github.com/eclipse-hawkbit/hawkbit/actions</sonar.links.ci>
         <sonar.coverage.exclusions>
             **/*Configuration.java,

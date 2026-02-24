@@ -10,5 +10,5 @@ ______     _ _                  _                    _    ____  _ _     _____  _
 Eclipse hawkBit DDI Server ${application.formatted-version}
 using Spring Boot ${spring-boot.formatted-version}
 
-Go to https://www.eclipse.org/hawkbit for more information.
+Go to https://hawkbit.eclipse.dev for more information.
         
