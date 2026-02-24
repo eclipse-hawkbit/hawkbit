@@ -31,8 +31,6 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
 @Slf4j
 public class CleanupTestExecutionListener extends AbstractTestExecutionListener {
 
-    private static final Pageable PAGE = PageRequest.of(0, 400, Sort.by(Sort.Direction.ASC, "id"));
-
     @Override
     public void afterTestMethod(@NotNull final TestContext testContext) throws Exception {
         SecurityContextSwitch.asPrivileged(() -> {

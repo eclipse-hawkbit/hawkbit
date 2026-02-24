@@ -78,7 +78,7 @@ public final class SpRole {
             TENANT_ADMIN + IMPLIES + SpPermission.TENANT_CONFIGURATION + LINE_BREAK;
     public static final String SYSTEM_ROLE_HIERARCHY =
             SYSTEM_ROLE + IMPLIES + TENANT_ADMIN + LINE_BREAK +
-            SYSTEM_ROLE + IMPLIES + SpPermission.SYSTEM_ADMIN + LINE_BREAK;
+            SYSTEM_ROLE + IMPLIES + CONTROLLER_ROLE + LINE_BREAK;
 
     public static final String DEFAULT_ROLE_HIERARCHY =
             TARGET_ADMIN_HIERARCHY +

@@ -29,14 +29,12 @@ import org.eclipse.hawkbit.repository.qfields.TargetTagFields;
 // utility class to validate authorities when ACM is enabled
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AuthorityChecker {
+;
 
-    private static final Set<String> ALL_AUTHORITIES = SpPermission.getAllTenantAuthorities();
-
-    public static String[] validateAuthorities(final String... authorities) {
+    public static void validateAuthorities(final String... authorities) {
         for (final String authority : authorities) {
             validateAuthority(authority);
         }
-        return authorities;
     }
 
     public static void validateAuthority(final String authority) {
@@ -45,7 +43,7 @@ public final class AuthorityChecker {
         if (index > 0) {
             validateScope(group(unscopedPermission), authority.substring(index + 1), authority);
         }
-        if (!ALL_AUTHORITIES.contains(unscopedPermission)) {
+        if (!SpPermission.getAllAuthorities().contains(unscopedPermission)) {
             throw new IllegalArgumentException(
                     "Unknown permission: " + unscopedPermission + (index > 0 ? " (unscoped of " + authority + ")" : ""));
         }

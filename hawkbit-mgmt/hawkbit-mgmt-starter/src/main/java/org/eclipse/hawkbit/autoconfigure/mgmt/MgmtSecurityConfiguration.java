@@ -111,10 +111,8 @@ public class MgmtSecurityConfiguration {
             @Autowired(required = false) @Qualifier("hawkbitHttpSecurityCustomizer") final Customizer<HttpSecurity> httpSecurityCustomizer,
             final SystemManagement systemManagement) throws Exception {
         http
-                .securityMatcher(MgmtRestConstants.REST + "/**", "/system/admin/**")
+                .securityMatcher(MgmtRestConstants.REST + "/**")
                 .authorizeHttpRequests(amrmRegistry -> amrmRegistry
-                        .requestMatchers("/system/admin/**")
-                        .hasAnyAuthority(SpPermission.SYSTEM_ADMIN)
                         .anyRequest()
                         .authenticated())
                 .anonymous(AbstractHttpConfigurer::disable)

@@ -96,9 +96,6 @@ public final class SpPermission {
     /** Permission to start/stop/resume a rollout. */
     public static final String HANDLE_ROLLOUT = "HANDLE_" + ROLLOUT;
 
-    /** Permission to administrate the system on a global, i.e. tenant independent scale. That includes the deletion of tenants. */
-    public static final String SYSTEM_ADMIN = "SYSTEM_ADMIN";
-
     public static final String IMPLY = " > ";
     public static final String IMPLY_CREATE = IMPLY + CREATE_PREFIX;
     public static final String IMPLY_READ = IMPLY + READ_PREFIX;
@@ -128,12 +125,11 @@ public final class SpPermission {
             TENANT_CONFIGURATION + IMPLY_UPDATE + TENANT_CONFIGURATION + LINE_BREAK +
             TENANT_CONFIGURATION + IMPLY_DELETE + TENANT_CONFIGURATION + LINE_BREAK +
             TENANT_CONFIGURATION + IMPLY + READ_GATEWAY_SECURITY_TOKEN + LINE_BREAK;
-
     // @formatter:on
-    private static final SingletonSupplier<Set<String>> ALL_AUTHORITIES = SingletonSupplier.of(() -> getAuthorities(false));
-    private static final SingletonSupplier<Set<String>> ALL_TENANT_AUTHORITIES = SingletonSupplier.of(() -> getAuthorities(true));
 
-    private static Set<String> getAuthorities(final boolean tenant) {
+    private static final SingletonSupplier<Set<String>> ALL_TENANT_AUTHORITIES = SingletonSupplier.of(SpPermission::getAuthorities);
+
+    private static Set<String> getAuthorities() {
         final Set<String> allPermissions = new HashSet<>();
 
         // groups with access, canonical
@@ -155,19 +151,10 @@ public final class SpPermission {
 
         allPermissions.add(TENANT_CONFIGURATION);
 
-        if (!tenant) {
-            // system permission, (!) take care with
-            allPermissions.add(SYSTEM_ADMIN);
-        }
-
         return Collections.unmodifiableSet(allPermissions);
     }
 
     public static Set<String> getAllAuthorities() {
-        return ALL_AUTHORITIES.get();
-    }
-
-    public static Set<String> getAllTenantAuthorities() {
         return ALL_TENANT_AUTHORITIES.get();
     }
 

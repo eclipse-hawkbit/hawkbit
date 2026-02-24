@@ -78,6 +78,6 @@ public interface SystemManagement {
      *
      * @param tenant to delete
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
+    @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     void deleteTenant(@NotNull String tenant);
 }

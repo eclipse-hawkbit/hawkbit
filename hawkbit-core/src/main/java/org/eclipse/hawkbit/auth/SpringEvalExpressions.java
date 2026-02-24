@@ -37,7 +37,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public final class SpringEvalExpressions {
 
     public static final String IS_SYSTEM_CODE = "hasAuthority('ROLE_SYSTEM_CODE')";
-    public static final String HAS_AUTH_SYSTEM_ADMIN = "hasAuthority('SYSTEM_ADMIN')";
 
     public static final String PERMISSION_GROUP_PLACEHOLDER = "${permissionGroup}";
     // evaluated to <permission>_<permissionGroup> (e.g. CREATE_DISTRIBUTION_SET)
