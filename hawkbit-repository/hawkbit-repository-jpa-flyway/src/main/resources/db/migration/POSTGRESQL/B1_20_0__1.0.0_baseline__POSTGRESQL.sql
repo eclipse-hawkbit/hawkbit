@@ -111,7 +111,7 @@ CREATE TABLE sp_tenant_configuration (
     optlock_revision BIGINT,
     tenant VARCHAR(40) NOT NULL,
     conf_key VARCHAR(128) NOT NULL,
-    conf_value VARCHAR(512) NOT NULL,
+    conf_value TEXT NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX uk_tenant_configuration ON sp_tenant_configuration (conf_key, tenant);
@@ -244,7 +244,7 @@ CREATE TABLE sp_rollout (
     approval_decided_by VARCHAR(64),
     approval_remark VARCHAR(255),
     weight INTEGER NOT NULL,
-    access_control_context VARCHAR(4096),
+    access_control_context TEXT,
     is_dynamic BOOLEAN,
     PRIMARY KEY (id)
 );
@@ -305,7 +305,7 @@ CREATE TABLE sp_target_filter_query (
     auto_assign_weight INTEGER NOT NULL,
     auto_assign_initiated_by VARCHAR(64),
     confirmation_required BOOLEAN,
-    access_control_context VARCHAR(4096),
+    access_control_context TEXT,
     PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX uk_target_filter_query ON sp_target_filter_query (name, tenant);

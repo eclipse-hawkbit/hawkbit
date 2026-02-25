@@ -9,9 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -42,9 +42,8 @@ public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity imp
     @NotNull
     private String key;
 
-    @Column(name = "conf_value", length = TenantConfiguration.VALUE_MAX_SIZE, nullable = false)
-    @Basic
-    @Size(max = TenantConfiguration.VALUE_MAX_SIZE)
+    @Column(name = "conf_value", nullable = false)
+    @Lob
     @NotNull
     private String value;
 

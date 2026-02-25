@@ -22,6 +22,7 @@ import jakarta.persistence.Converter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
@@ -147,6 +148,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     @Setter
     @Column(name = "access_control_context")
+    @Lob
     private String accessControlContext;
 
     @Setter
