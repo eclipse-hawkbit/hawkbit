@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.tenancy;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
 import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 
@@ -18,7 +19,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -84,6 +87,35 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         final Page<? extends Target> findTargetsForTenant = findTargetsForTenant(anotherTenant);
         // another tenant should have targets
         assertThat(findTargetsForTenant).hasSize(1);
+    }
+
+    /**
+     * Ensures that tenant with proper permissions can read and delete other tenants.
+     */
+    @Test
+    @WithUser(tenantId = "mytenant", allSpPermissions = true)
+    void deleteAnotherTenantNotPossibleWithTenantPermissions() throws Exception {
+        // create target for another tenant
+        final String anotherTenant = "anotherTenant";
+        final String controllerAnotherTenant = "anotherController";
+        createTargetForTenant(controllerAnotherTenant, anotherTenant);
+
+        assertThat(listTenants()).as("Expected number if tenants before deletion is").hasSize(3);
+        assertThatExceptionOfType(InsufficientPermissionException.class).isThrownBy(() -> systemManagement.deleteTenant(anotherTenant));
+        assertThat(listTenants()).as("Expected number if tenants after deletion is").hasSize(3);
+    }
+
+    @Test
+    @WithUser(tenantId = "mytenant", authorities = { SpRole.SYSTEM_ROLE })
+    void deleteAnotherTenantPossibleWithSystemRole() throws Exception {
+        // create target for another tenant
+        final String anotherTenant = "anotherTenant";
+        final String controllerAnotherTenant = "anotherController";
+        createTargetForTenant(controllerAnotherTenant, anotherTenant);
+
+        assertThat(listTenants()).as("Expected number if tenants before deletion is").hasSize(3);
+        systemManagement.deleteTenant(anotherTenant);
+        assertThat(listTenants()).as("Expected number if tenants after deletion is").hasSize(2);
     }
 
     /**
