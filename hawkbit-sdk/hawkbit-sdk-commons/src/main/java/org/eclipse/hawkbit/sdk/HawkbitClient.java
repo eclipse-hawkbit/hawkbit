@@ -44,7 +44,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Contract;
 import feign.Feign;
 import feign.FeignException;
@@ -85,6 +84,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @Builder
@@ -264,7 +264,7 @@ public class HawkbitClient {
     private Object callMultipartFormDataRequest(
             final Method method, final Object[] args,
             final Tenant tenant, final Controller controller,
-            final Class<?>[] parameterTypes, final ObjectMapper objectMapper) throws URISyntaxException, IOException {
+            final Class<?>[] parameterTypes, final ObjectMapper objectMapper) throws IOException, URISyntaxException {
         final PostMapping postMapping = method.getAnnotation(PostMapping.class);
         final Annotation[][] parametersAnnotations = method.getParameterAnnotations();
         // build path - replace @PathVariables
@@ -322,11 +322,11 @@ public class HawkbitClient {
 
         return method.getReturnType() == ResponseEntity.class
                 ? new ResponseEntity<>(
-                    deserialize(
-                            conn.getInputStream(),
-                            (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0],
-                            objectMapper),
-                    HttpStatusCode.valueOf(responseCode))
+                deserialize(
+                        conn.getInputStream(),
+                        (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0],
+                        objectMapper),
+                HttpStatusCode.valueOf(responseCode))
                 : deserialize(conn.getInputStream(), method.getReturnType(), objectMapper);
     }
 
@@ -360,7 +360,7 @@ public class HawkbitClient {
         }
     }
 
-    private static Object deserialize(final InputStream is, final Class<?> type, final ObjectMapper objectMapper) throws IOException {
+    private static Object deserialize(final InputStream is, final Class<?> type, final ObjectMapper objectMapper) {
         return type == void.class || type == Void.class ? null : objectMapper.readValue(is, type);
     }
 
