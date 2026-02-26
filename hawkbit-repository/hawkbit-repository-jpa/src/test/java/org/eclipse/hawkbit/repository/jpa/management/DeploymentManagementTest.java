@@ -211,7 +211,6 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     void assertMaxActionsPerTargetQuotaIsEnforced() {
-
         final int maxActions = quotaManagement.getMaxActionsPerTarget();
         final Target testTarget = testdataFactory.createTarget();
         final List<Long> dsIds = new ArrayList<>();

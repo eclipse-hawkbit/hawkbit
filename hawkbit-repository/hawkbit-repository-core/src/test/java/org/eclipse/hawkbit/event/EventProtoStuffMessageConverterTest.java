@@ -21,12 +21,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.MessageConversionException;
+import org.springframework.messaging.converter.MessageConverter;
 
 @ExtendWith(MockitoExtension.class)
 class EventProtoStuffMessageConverterTest extends AbstractEventMessageConverterTest {
 
-    EventProtoStuffMessageConverterTest() {
-        super(new EventProtoStuffMessageConverter());
+    private static final EventProtoStuffMessageConverter MESSAGE_CONVERTER = new EventProtoStuffMessageConverter();
+
+    protected MessageConverter messageConverter() {
+        return MESSAGE_CONVERTER;
     }
 
     /**
@@ -39,7 +42,7 @@ class EventProtoStuffMessageConverterTest extends AbstractEventMessageConverterT
 
         assertThatExceptionOfType(MessageConversionException.class)
                 .as("Missing MessageConversationException for un-defined event-type")
-                .isThrownBy(() -> ((EventProtoStuffMessageConverter)messageConverter).convertToInternal(dummyEvent, messageHeaders, null));
+                .isThrownBy(() -> MESSAGE_CONVERTER.convertToInternal(dummyEvent, messageHeaders, null));
     }
 
     /**
