@@ -751,7 +751,6 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         // retrieve action and ensure that it is in Running state
         final Action action = deploymentManagement.findAction(actionId).orElseThrow(() -> new AssertionError("Action not found!"));
         assertThat(action.getStatus()).isEqualTo(Status.RUNNING);
-
     }
 
     /**

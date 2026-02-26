@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
@@ -17,6 +18,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 /**
  * Request Body of DistributionSet for assignment operations (ID only).
  */
+@NoArgsConstructor
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)

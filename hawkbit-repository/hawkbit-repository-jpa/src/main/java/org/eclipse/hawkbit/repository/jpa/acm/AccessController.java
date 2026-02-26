@@ -11,9 +11,14 @@ package org.eclipse.hawkbit.repository.jpa.acm;
 
 import java.util.Optional;
 
+import jakarta.persistence.criteria.Root;
+
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.springframework.data.jpa.domain.DeleteSpecification;
+import org.springframework.data.jpa.domain.PredicateSpecification;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.Nullable;
+import org.springframework.data.jpa.domain.UpdateSpecification;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Interface of an extended access control by providing means or fine-grained access control.
@@ -49,6 +54,20 @@ public interface AccessController<T> {
                 .orElse(specification);
     }
 
+    default UpdateSpecification<T> appendAccessRules(final Operation operation, @Nullable final UpdateSpecification<T> specification) {
+        return getAccessRules(operation)
+                .map(this::predicateSpec)
+                .map(accessRules -> specification == null ? UpdateSpecification.where(accessRules) : specification.and(accessRules))
+                .orElse(specification);
+    }
+
+    default DeleteSpecification<T> appendAccessRules(final Operation operation, @Nullable final DeleteSpecification<T> specification) {
+        return getAccessRules(operation)
+                .map(this::predicateSpec)
+                .map(accessRules -> specification == null ? DeleteSpecification.where(accessRules) : specification.and(accessRules))
+                .orElse(specification);
+    }
+
     /**
      * Verify if the given {@link Operation} is permitted for the provided entity.
      *
@@ -66,6 +85,11 @@ public interface AccessController<T> {
         for (final T entity : entities) {
             assertOperationAllowed(operation, entity);
         }
+    }
+
+    @Deprecated
+    default PredicateSpecification<T> predicateSpec(final Specification<T> spec) {
+        return (from, cb) -> spec.toPredicate((Root<T>) from, cb.createQuery(), cb);
     }
 
     /**
