@@ -246,7 +246,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         log.debug("handleDeleteRollout called for {}", rollout.getId());
 
         // check if there are actions beyond schedule
-        boolean hardDeleteRolloutGroups = !actionRepository.existsByRolloutIdAndStatusNotIn(rollout.getId(),
+        boolean hardDeleteRolloutGroups = !actionRepository.existsByRolloutIdAndStatusNot(rollout.getId(),
                 Status.SCHEDULED);
         if (hardDeleteRolloutGroups) {
             log.debug("Rollout {} has no actions other than scheduled -> hard delete", rollout.getId());
@@ -321,7 +321,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private void handleReadyRollout(final Rollout rollout) {
-        if (rollout.getStartAt() != null && rollout.getStartAt() <= java.lang.System.currentTimeMillis()) {
+        if (rollout.getStartAt() != null && rollout.getStartAt() <= System.currentTimeMillis()) {
             log.debug("handleReadyRollout called for rollout {} with autostart beyond define time. Switch to STARTING", rollout.getId());
             rolloutManagement.start(rollout.getId());
         }
@@ -627,7 +627,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     // return if group change is made
     private boolean fillDynamicRolloutGroupsWithTargets(final JpaRollout rollout) {
         final AtomicLong lastFill = lastDynamicGroupFill.computeIfAbsent(rollout.getId(), id -> new AtomicLong(0));
-        final long now = java.lang.System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
         if (now - lastFill.get() < repositoryProperties.getDynamicRolloutsMinInvolvePeriodMS()) {
             // too early to make another dynamic involvement attempt
             return false;

@@ -9,12 +9,10 @@
  */
 package org.eclipse.hawkbit.event;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.fasterxml.jackson.databind.jsontype.NamedType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -71,15 +69,14 @@ import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesReque
 import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetUpdatedServiceEvent;
+import tools.jackson.databind.jsontype.NamedType;
 
 /**
- * The {@link EventType} class declares the event-type and it's corresponding
- * encoding value in the payload of an remote header. The event-type is encoded
- * into the payload of the message which is distributed.
- *
- * To encode and decode the event class type we need some conversation mapping
- * between the actual class and the corresponding integer value which is the
- * encoded value in the byte-payload.
+ * The {@link EventType} class declares the event-type, and it's corresponding encoding value in the payload of a remote header.
+ * The event-type is encoded into the payload of the message which is distributed.
+ * <p/>
+ * To encode and decode the event class type we need some conversation mapping between the actual class and the corresponding integer value
+ * which is the encoded value in the byte-payload.
  */
 // for marshalling and unmarshalling.
 @NoArgsConstructor
@@ -92,8 +89,7 @@ public class EventType {
 
     private int value;
 
-    // The associated event-type-value must remain the same as initially
-    // declared. Otherwise, messages cannot correctly de-serialized.
+    // The associated event-type-value must remain the same as initially declared. Otherwise, messages cannot correctly de-serialized.
     static {
         // target
         TYPES.put(1, TargetCreatedEvent.class);
@@ -213,9 +209,9 @@ public class EventType {
         return TYPES.get(value);
     }
 
-    public static Collection<NamedType> getNamedTypes() {
+    public static NamedType[] getNamedTypes() {
         return TYPES.entrySet().stream()
                 .map(e -> new NamedType(e.getValue(), String.valueOf(e.getKey())))
-                .toList();
+                .toArray(NamedType[]::new);
     }
 }

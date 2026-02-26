@@ -1,3 +1,4 @@
+org.eclipse.hawkbit.HawkbitAutoConfiguration
 org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration
 org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration.WebConfig
 org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration.RepositoryConfig

@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import java.io.Serial;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -24,6 +25,7 @@ public class DistributionSetTagCreatedEvent extends RemoteEntityEvent<Distributi
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @JsonIgnore
     public DistributionSetTagCreatedEvent(final DistributionSetTag distributionSetTag) {
         super(distributionSetTag);
     }
