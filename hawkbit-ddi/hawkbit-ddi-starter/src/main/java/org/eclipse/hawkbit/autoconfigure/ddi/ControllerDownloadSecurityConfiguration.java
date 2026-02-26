@@ -76,7 +76,7 @@ class ControllerDownloadSecurityConfiguration {
 
     @Bean
     @Order(300) // higher priority than HawkBit DDI security, so that the DDI DL security is applied first
-    protected SecurityFilterChain filterChainDDIDL(final HttpSecurity http) throws Exception {
+    protected SecurityFilterChain filterChainDDIDL(final HttpSecurity http) {
         http
                 .securityMatcher(DDI_DL_ANT_MATCHER)
                 .authorizeHttpRequests(amrmRegistry -> amrmRegistry.anyRequest().authenticated())

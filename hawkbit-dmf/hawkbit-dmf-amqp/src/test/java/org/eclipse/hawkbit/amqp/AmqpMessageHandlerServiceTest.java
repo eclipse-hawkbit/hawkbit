@@ -54,7 +54,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.amqp.support.converter.MessageConverter;
 
@@ -108,7 +108,7 @@ class AmqpMessageHandlerServiceTest {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     void before() {
         TenantConfigHelper.setTenantConfigurationManagement(tenantConfigurationManagement);
-        messageConverter = new Jackson2JsonMessageConverter();
+        messageConverter = new JacksonJsonMessageConverter();
         lenient().when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(

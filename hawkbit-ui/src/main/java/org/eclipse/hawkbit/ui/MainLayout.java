@@ -13,6 +13,8 @@ import java.io.Serial;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.annotation.security.RolesAllowed;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
@@ -51,17 +53,23 @@ import org.eclipse.hawkbit.ui.view.TargetView;
 /**
  * The main view is a top-level placeholder for other views.
  */
-public final class MainLayout extends AppLayout {
+@RolesAllowed({ "ANONYMOUS" })
+public class MainLayout extends AppLayout {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    static final List<Class<? extends Component>> DEFAULT_VIEW_PRIORITY = List.of(
-            TargetView.class, DistributionSetView.class, SoftwareModuleView.class, RolloutView.class);
+    private static final List<Class<? extends Component>> DEFAULT_VIEW_PRIORITY = List.of(
+            TargetView.class,
+            DistributionSetView.class,
+            SoftwareModuleView.class,
+            RolloutView.class,
+            ConfigView.class,
+            AboutView.class);
     private final transient AuthenticatedUser authenticatedUser;
     private final AccessAnnotationChecker accessChecker;
     private H2 viewTitle;
-    private transient Optional<Class<? extends Component>> defaultView;
+    private transient Class<? extends Component> defaultView;
 
     public MainLayout(final AuthenticatedUser authenticatedUser, final AccessAnnotationChecker accessChecker) {
         this.authenticatedUser = authenticatedUser;
@@ -81,8 +89,8 @@ public final class MainLayout extends AppLayout {
                         .map(c -> c.getClass().getAnnotation(PageTitle.class))
                         .map(PageTitle::value)
                         .orElse(""));
-        if (UI.getCurrent().getActiveViewLocation().getPath().isEmpty()) {
-            defaultView.ifPresent(c -> UI.getCurrent().navigate(c));
+        if (defaultView != null && UI.getCurrent().getActiveViewLocation().getPath().isEmpty()) {
+            UI.getCurrent().navigate(defaultView);
         }
     }
 
@@ -133,10 +141,10 @@ public final class MainLayout extends AppLayout {
         if (accessChecker.hasAccess(ConfigView.class)) {
             nav.addItem(new SideNavItem("Config", ConfigView.class, VaadinIcon.COG.create()));
         }
-        if (accessChecker.hasAccess(AboutView.class)) {
-            nav.addItem(new SideNavItem("About", AboutView.class, VaadinIcon.INFO_CIRCLE.create()));
-        }
-        defaultView = DEFAULT_VIEW_PRIORITY.stream().filter(accessChecker::hasAccess).findFirst();
+//        if (accessChecker.hasAccess(AboutView.class)) {
+//            nav.addItem(new SideNavItem("About", AboutView.class, VaadinIcon.INFO_CIRCLE.create()));
+//        }
+        defaultView = DEFAULT_VIEW_PRIORITY.stream().filter(accessChecker::hasAccess).findFirst().orElse(null);
         return nav;
     }
 
