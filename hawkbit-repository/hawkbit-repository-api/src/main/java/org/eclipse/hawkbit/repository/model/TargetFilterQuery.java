@@ -47,6 +47,11 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
     int QUERY_MAX_SIZE = 1024;
 
     /**
+     * Maximum length of access control context.
+     */
+    int ACCESS_CONTROL_CONTEXT_MAX_SIZE = 32768;
+
+    /**
      * Allowed values for auto-assign action type
      */
     Set<ActionType> ALLOWED_AUTO_ASSIGN_ACTION_TYPES = Collections

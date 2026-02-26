@@ -35,6 +35,11 @@ public interface Rollout extends NamedEntity {
     int APPROVAL_REMARK_MAX_SIZE = 255;
 
     /**
+     * Maximum length of access control context.
+     */
+    int ACCESS_CONTROL_CONTEXT_MAX_SIZE = 32768;
+
+    /**
      * @return <code>true</code> if the rollout is deleted and only kept for
      *         history purposes.
      */

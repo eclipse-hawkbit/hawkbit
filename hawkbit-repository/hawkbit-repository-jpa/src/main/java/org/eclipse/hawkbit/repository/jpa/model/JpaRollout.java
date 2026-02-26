@@ -149,6 +149,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Setter
     @Column(name = "access_control_context")
     @Lob
+    @Size(max = Rollout.ACCESS_CONTROL_CONTEXT_MAX_SIZE)
     private String accessControlContext;
 
     @Setter

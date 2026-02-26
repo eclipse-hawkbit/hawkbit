@@ -75,6 +75,7 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
 
     @Column(name = "access_control_context")
     @Lob
+    @Size(max = TargetFilterQuery.ACCESS_CONTROL_CONTEXT_MAX_SIZE)
     private String accessControlContext;
 
     public JpaTargetFilterQuery(final String name, final String query, final DistributionSet autoAssignDistributionSet,

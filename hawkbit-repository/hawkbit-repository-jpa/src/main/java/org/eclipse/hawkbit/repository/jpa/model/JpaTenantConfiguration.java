@@ -44,6 +44,7 @@ public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity imp
 
     @Column(name = "conf_value", nullable = false)
     @Lob
+    @Size(max = TenantConfiguration.VALUE_MAX_SIZE)
     @NotNull
     private String value;
 
