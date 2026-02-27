@@ -39,6 +39,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.jayway.jsonpath.JsonPath;
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
@@ -836,7 +837,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
      * Ensures that multiple DS requested are listed with expected payload.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void getDistributionSets() throws Exception {
         // prepare test data
         assertThat(distributionSetManagement.findAll(PAGE)).isEmpty();
@@ -879,7 +880,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
      * Ensures that single DS requested by ID is listed with expected payload.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void getDistributionSet() throws Exception {
         final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
 
@@ -915,7 +916,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
      * Ensures that multiple DS posted to API are created in the repository.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void createDistributionSets() throws Exception {
         assertThat(distributionSetManagement.findAll(PAGE)).isEmpty();
         final SoftwareModule ah = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_APP);

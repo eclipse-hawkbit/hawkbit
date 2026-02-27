@@ -482,7 +482,7 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
      * Checks that target type for a target can be created, updated and unassigned.
      */
     @Test
-    @WithUser(allSpPermissions = true)
+    @WithUser(authorities = SpRole.TENANT_ADMIN)
     void createAndUpdateTargetTypeInTarget() {
         // create a target type
         final List<? extends TargetType> targetTypes = testdataFactory.createTargetTypes("targettype", 2);
@@ -519,7 +519,7 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
      * Checks that target type to a target can be assigned.
      */
     @Test
-    @WithUser(allSpPermissions = true)
+    @WithUser(authorities = SpRole.TENANT_ADMIN)
     void assignTargetTypeInTarget() {
         // create a target
         final Target target = testdataFactory.createTarget("target1", "testtarget");
@@ -547,7 +547,7 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
      * Tests the assignment of types to multiple targets.
      */
     @Test
-    @WithUser(allSpPermissions = true)
+    @WithUser(authorities = SpRole.TENANT_ADMIN)
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 20),
             @Expect(type = TargetTypeCreatedEvent.class, count = 2),
@@ -577,7 +577,7 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
      * Checks that target type can be unassigned from target.
      */
     @Test
-    @WithUser(allSpPermissions = true)
+    @WithUser(authorities = SpRole.TENANT_ADMIN)
     void unAssignTargetTypeFromTarget() {
         // create a target type
         final TargetType targetType = testdataFactory.findOrCreateTargetType("targettype");
@@ -827,7 +827,7 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
     }
 
     @Test
-    @WithUser(allSpPermissions = true)
+    @WithUser(authorities = SpRole.TENANT_ADMIN)
     void failToAssignInvalidTargetTypeToTarget() {
         // create a target
         final Target target = testdataFactory.createTarget("target1", "testtarget");

@@ -27,10 +27,9 @@ import org.springframework.util.function.SingletonSupplier;
 
 /**
  * <p>
- * Software provisioning permissions that are technically available as {@linkplain GrantedAuthority} based on
+ * Tenant software provisioning permissions that are technically available as {@linkplain GrantedAuthority} based on
  * the authenticated users identity context.
  * </p>
- *
  * <p>
  * The permissions cover CRUD operations for various areas within eclipse hawkBit, like targets, software-artifacts,
  * distribution sets, config-options etc.
@@ -127,7 +126,7 @@ public final class SpPermission {
             TENANT_CONFIGURATION + IMPLY + READ_GATEWAY_SECURITY_TOKEN + LINE_BREAK;
     // @formatter:on
 
-    private static final SingletonSupplier<Set<String>> ALL_TENANT_AUTHORITIES = SingletonSupplier.of(SpPermission::getAuthorities);
+    private static final SingletonSupplier<Set<String>> ALL_AUTHORITIES = SingletonSupplier.of(SpPermission::getAuthorities);
 
     private static Set<String> getAuthorities() {
         final Set<String> allPermissions = new HashSet<>();
@@ -155,7 +154,7 @@ public final class SpPermission {
     }
 
     public static Set<String> getAllAuthorities() {
-        return ALL_TENANT_AUTHORITIES.get();
+        return ALL_AUTHORITIES.get();
     }
 
     @SuppressWarnings("java:S3776") // java:S3776 - better in one place for better readability

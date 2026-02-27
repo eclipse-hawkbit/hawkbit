@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.ddi.rest.resource.DdiArtifactDownloadTest.DownloadTestConfiguration;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -157,7 +158,7 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
      * Tests valid downloads through the artifact resource by identifying the artifact not by ID but file name.
      */
     @Test
-    @WithUser(principal = "4712", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
+    @WithUser(principal = "4712", authorities = { SpRole.CONTROLLER_ROLE, SpRole.TENANT_ADMIN })
     void downloadArtifactThroughFileName() throws Exception {
         synchronized (DdiArtifactDownloadTest.class) {
             downloadProgress = 1;
@@ -231,7 +232,7 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
      * Test various HTTP range requests for artifact download, e.g. chunk download or download resume.
      */
     @Test
-    @WithUser(principal = TestdataFactory.DEFAULT_CONTROLLER_ID, authorities = "ROLE_CONTROLLER", allSpPermissions = true)
+    @WithUser(principal = TestdataFactory.DEFAULT_CONTROLLER_ID, authorities = { SpRole.CONTROLLER_ROLE, SpRole.TENANT_ADMIN })
     void rangeDownloadArtifact() throws Exception {
         // create target
         final Target target = testdataFactory.createTarget();

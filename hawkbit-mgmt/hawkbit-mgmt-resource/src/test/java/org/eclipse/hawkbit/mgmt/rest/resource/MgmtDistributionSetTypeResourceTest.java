@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.jayway.jsonpath.JsonPath;
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssignment;
@@ -61,7 +62,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
      * Checks the correct behaviour of /rest/v1/distributionsettypes GET requests.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void getDistributionSetTypes() throws Exception {
         DistributionSetType testType = distributionSetTypeManagement.create(
                 DistributionSetTypeManagement.Create.builder()
@@ -103,7 +104,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
      * Checks the correct behaviour of /rest/v1/distributionsettypes GET requests with sorting by KEY.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void getDistributionSetTypesSortedByKey() throws Exception {
         DistributionSetType testType = distributionSetTypeManagement.create(
                 DistributionSetTypeManagement.Create.builder()
@@ -156,7 +157,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
      * Checks the correct behaviour of /rest/v1/distributionsettypes POST requests.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void createDistributionSetTypes() throws Exception {
         final MvcResult mvcResult = runPostDistributionSetType(createTestDistributionSetTestTypes());
         verifyCreatedDistributionSetTypes(mvcResult);
@@ -166,7 +167,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
      * Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes POST requests.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void addMandatoryModuleToDistributionSetType() throws Exception {
         DistributionSetType testType = distributionSetTypeManagement.create(
                 DistributionSetTypeManagement.Create.builder()
@@ -192,7 +193,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
      * Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes POST requests.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void addOptionalModuleToDistributionSetType() throws Exception {
         DistributionSetType testType = distributionSetTypeManagement.create(
                 DistributionSetTypeManagement.Create.builder()
@@ -218,7 +219,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
      * Verifies quota enforcement for /rest/v1/distributionsettypes/{ID}/optionalmoduletypes POST requests.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void assignModuleTypesToDistributionSetTypeUntilQuotaExceeded() throws Exception {
         // create software module types
         final int maxSoftwareModuleTypes = quotaManagement.getMaxSoftwareModuleTypesPerDistributionSetType();
@@ -278,7 +279,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
      * Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes GET requests.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void getMandatoryModulesOfDistributionSetType() throws Exception {
         final DistributionSetType testType = generateTestType();
 
@@ -297,7 +298,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
      * Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes GET requests.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void getOptionalModulesOfDistributionSetType() throws Exception {
         final DistributionSetType testType = generateTestType();
 
@@ -316,7 +317,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
      * Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes/{ID} GET requests.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void getMandatoryModuleOfDistributionSetType() throws Exception {
         final DistributionSetType testType = generateTestType();
 
@@ -337,7 +338,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
      * Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes/{ID} GET requests.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void getOptionalModuleOfDistributionSetType() throws Exception {
         final DistributionSetType testType = generateTestType();
 
@@ -358,7 +359,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
      * Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes/{ID} DELETE requests.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void removeMandatoryModuleToDistributionSetType() throws Exception {
         DistributionSetType testType = generateTestType();
 
@@ -377,7 +378,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
      * Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes/{ID} DELETE requests.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void removeOptionalModuleToDistributionSetType() throws Exception {
         DistributionSetType testType = generateTestType();
 
@@ -396,7 +397,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
      * Checks the correct behaviour of /rest/v1/distributionsettypes/{ID} GET requests.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void getDistributionSetType() throws Exception {
         DistributionSetType testType = distributionSetTypeManagement.create(DistributionSetTypeManagement.Create.builder()
                 .key("test123").name("TestName123").description("Desc123").build());
@@ -431,7 +432,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
      * Checks the correct behaviour of /rest/v1/DistributionSetTypes/{ID} DELETE requests (hard delete scenario).
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void deleteDistributionSetTypeUnused() throws Exception {
         final DistributionSetType testType = distributionSetTypeManagement.create(
                 DistributionSetTypeManagement.Create.builder()
@@ -460,7 +461,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
      * Checks the correct behaviour of /rest/v1/DistributionSetTypes/{ID} DELETE requests (soft delete scenario).
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void deleteDistributionSetTypeUsed() throws Exception {
         final DistributionSetType testType = distributionSetTypeManagement.create(
                 DistributionSetTypeManagement.Create.builder()

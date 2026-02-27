@@ -9,19 +9,20 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import static org.eclipse.hawkbit.auth.SpRole.CONTROLLER_ROLE;
+import static org.eclipse.hawkbit.auth.SpRole.SYSTEM_ROLE;
+import static org.eclipse.hawkbit.auth.SpRole.TENANT_ADMIN;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.auth.SpPermission;
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAwareUser;
@@ -38,8 +39,8 @@ public class SecurityContextSwitch {
     private static final SecurityContextSwitch INSTANCE = new SecurityContextSwitch();
 
     public static final String DEFAULT_TENANT = "DEFAULT";
-    private static final WithUser PRIVILEGED_USER = createWithUser(
-            "bumlux", DEFAULT_TENANT, false, true, false, "ROLE_CONTROLLER", "ROLE_SYSTEM_CODE");
+    private static final WithUser PRIVILEGED_USER = new WithUserImpl(
+            DEFAULT_TENANT, "bumlux", new String[] {TENANT_ADMIN, CONTROLLER_ROLE, SYSTEM_ROLE}, false, false);
 
     private static SystemManagement systemManagement;
 
@@ -92,21 +93,21 @@ public class SecurityContextSwitch {
     }
 
     public static WithUser withController(final String principal, final String... authorities) {
-        return withUserAndTenant(principal, DEFAULT_TENANT, true, false, true, authorities);
+        return withUserAndTenant(DEFAULT_TENANT, principal, authorities, true, true);
     }
 
     public static WithUser withUser(final String principal, final String... authorities) {
-        return withUserAndTenant(principal, DEFAULT_TENANT, true, false, false, authorities);
+        return withUserAndTenant(DEFAULT_TENANT, principal, authorities, false, true);
     }
 
     public static WithUser withUserAndTenantAllSpPermissions(final String principal, final String tenant) {
-        return withUserAndTenant(principal, tenant, true, true, false);
+        return withUserAndTenant(tenant, principal, new String[] { SpRole.TENANT_ADMIN }, false, true);
     }
 
-    public static WithUser withUserAndTenant(final String principal, final String tenant,
-            final boolean autoCreateTenant, final boolean allSpPermission, final boolean controller,
-            final String... authorities) {
-        return createWithUser(principal, tenant, autoCreateTenant, allSpPermission, controller, authorities);
+    public static WithUser withUserAndTenant(
+            final String tenant, final String principal, final String[] authorities,
+            final boolean controller, final boolean autoCreateTenant) {
+        return new WithUserImpl(tenant, principal, authorities, controller, autoCreateTenant);
     }
 
     private static void setSecurityContext(final WithUser annotation) {
@@ -121,12 +122,6 @@ public class SecurityContextSwitch {
         } finally {
             SecurityContextHolder.setContext(oldContext);
         }
-    }
-
-    private static WithUser createWithUser(
-            final String principal, final String tenant, final boolean autoCreateTenant,
-            final boolean allSpPermission, final boolean controller, final String... authorities) {
-        return new WithUserImpl(principal, tenant, autoCreateTenant, allSpPermission, controller, authorities);
     }
 
     // should be used only for test purposes and taking in account 'annotation' non-transient field in a Serializable
@@ -151,15 +146,9 @@ public class SecurityContextSwitch {
 
         @Override
         public Authentication getAuthentication() {
-            final String[] authorities;
-            if (annotation.allSpPermissions()) {
-                authorities = getAllAuthorities(annotation.authorities(), annotation.removeFromAllPermission());
-            } else {
-                authorities = annotation.authorities();
-            }
             final TestingAuthenticationToken testingAuthenticationToken = new TestingAuthenticationToken(
                     new TenantAwareUser(annotation.principal(), "***", null, annotation.tenantId()),
-                    annotation.credentials(), authorities);
+                    annotation.credentials(), annotation.authorities());
             testingAuthenticationToken.setDetails(
                     new TenantAwareAuthenticationDetails(annotation.tenantId(), annotation.controller()));
             return testingAuthenticationToken;
@@ -183,17 +172,6 @@ public class SecurityContextSwitch {
                 return false;
             }
         }
-
-        private String[] getAllAuthorities(final String[] additionalAuthorities, final String[] notInclude) {
-            final List<String> permissions = new ArrayList<>(SpPermission.getAllAuthorities()); // list is unmodifiable
-            if (notInclude != null) {
-                permissions.removeAll(Arrays.asList(notInclude));
-            }
-            if (additionalAuthorities != null) {
-                permissions.addAll(Arrays.asList(additionalAuthorities));
-            }
-            return permissions.toArray(new String[0]);
-        }
     }
 
     private static class WithUserImpl implements WithUser, Serializable {
@@ -201,27 +179,30 @@ public class SecurityContextSwitch {
         @Serial
         private static final long serialVersionUID = 1L;
 
-        private final String principal;
         private final String tenant;
-        private final boolean autoCreateTenant;
-        private final boolean allSpPermission;
-        private final boolean controller;
+        private final String principal;
         private final String[] authorities;
+        private final boolean controller;
+        private final boolean autoCreateTenant;
 
         private WithUserImpl(
-                final String principal, final String tenant, final boolean autoCreateTenant,
-                final boolean allSpPermission, final boolean controller, final String... authorities) {
-            this.principal = principal;
+                final String tenant, final String principal, final String[] authorities,
+                final boolean controller, final boolean autoCreateTenant) {
             this.tenant = tenant;
-            this.autoCreateTenant = autoCreateTenant;
-            this.allSpPermission = allSpPermission;
-            this.controller = controller;
+            this.principal = principal;
             this.authorities = authorities;
+            this.controller = controller;
+            this.autoCreateTenant = autoCreateTenant;
         }
 
         @Override
         public Class<? extends Annotation> annotationType() {
             return WithUser.class;
+        }
+
+        @Override
+        public String tenantId() {
+            return tenant;
         }
 
         @Override
@@ -235,33 +216,18 @@ public class SecurityContextSwitch {
         }
 
         @Override
-        public String tenantId() {
-            return tenant;
-        }
-
-        @Override
-        public boolean autoCreateTenant() {
-            return autoCreateTenant;
-        }
-
-        @Override
         public String[] authorities() {
             return authorities;
         }
 
         @Override
-        public boolean allSpPermissions() {
-            return allSpPermission;
-        }
-
-        @Override
-        public String[] removeFromAllPermission() {
-            return new String[0];
-        }
-
-        @Override
         public boolean controller() {
             return controller;
+        }
+
+        @Override
+        public boolean autoCreateTenant() {
+            return autoCreateTenant;
         }
     }
 }

@@ -29,6 +29,13 @@ import org.springframework.security.test.context.support.WithSecurityContextFact
 public @interface WithUser {
 
     /**
+     * Gets the test tenant id.
+     *
+     * @return test tenant id
+     */
+    String tenantId() default "DEFAULT";
+
+    /**
      * Gets the test principal.
      *
      * @return test principal
@@ -43,20 +50,6 @@ public @interface WithUser {
     String credentials() default "TestCredentials";
 
     /**
-     * Gets the test tenant id.
-     *
-     * @return test tenant id
-     */
-    String tenantId() default "DEFAULT";
-
-    /**
-     * Should tenant auto created.
-     *
-     * @return <code>true</code> = auto create <code>false</code> not create
-     */
-    boolean autoCreateTenant() default true;
-
-    /**
      * Gets the test authorities.
      *
      * @return authorities
@@ -64,18 +57,11 @@ public @interface WithUser {
     String[] authorities() default {};
 
     /**
-     * Gets the test all permissions.
+     * Should tenant auto created.
      *
-     * @return permissions
+     * @return <code>true</code> = auto create <code>false</code> not create
      */
-    boolean allSpPermissions() default false;
-
-    /**
-     * Gets the test removeFromAllPermission.
-     *
-     * @return removeFromAllPermission
-     */
-    String[] removeFromAllPermission() default {};
+    boolean autoCreateTenant() default true;
 
     boolean controller() default false;
 

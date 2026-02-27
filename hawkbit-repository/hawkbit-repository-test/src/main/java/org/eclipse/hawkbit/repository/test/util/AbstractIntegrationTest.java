@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.hawkbit.auth.SpPermission.READ_TENANT_CONFIGURATION;
 import static org.eclipse.hawkbit.auth.SpRole.CONTROLLER_ROLE;
 import static org.eclipse.hawkbit.auth.SpRole.SYSTEM_ROLE;
+import static org.eclipse.hawkbit.auth.SpRole.TENANT_ADMIN;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +38,7 @@ import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionFactory;
 import org.eclipse.hawkbit.artifact.ArtifactStorage;
 import org.eclipse.hawkbit.artifact.exception.ArtifactStoreException;
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -103,7 +105,7 @@ import org.springframework.test.context.TestPropertySource;
 @Slf4j
 @ActiveProfiles({ "test" })
 @ExtendWith({ TestLoggerExtension.class, SharedSqlTestDatabaseExtension.class })
-@WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
+@WithUser(principal = "bumlux", authorities = { TENANT_ADMIN, CONTROLLER_ROLE, SYSTEM_ROLE })
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ContextConfiguration(classes = { TestConfiguration.class })
 // destroy the context after each test class because otherwise we get problem when context is

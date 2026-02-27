@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.jayway.jsonpath.JsonPath;
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
@@ -52,7 +53,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
      * Checks the correct behaviour of /rest/v1/softwaremoduletypes GET requests.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     public void getSoftwareModuleTypes() throws Exception {
         final SoftwareModuleType testType = createTestType();
 
@@ -98,7 +99,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
      * Handles the GET request of retrieving all software module types within SP with parameters. In this case the first 10 result in ascending order by name where the name starts with 'a'.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     public void getSoftwareModuleTypesWithParameters() throws Exception {
         final SoftwareModuleType testType = testdataFactory.findOrCreateSoftwareModuleType("test123");
         softwareModuleTypeManagement
@@ -115,7 +116,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
      * Checks the correct behaviour of /rest/v1/softwaremoduletypes GET requests with sorting by MAXASSIGNMENTS field.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     public void getSoftwareModuleTypesSortedByMaxAssignments() throws Exception {
         final SoftwareModuleType testType = createTestType();
 
@@ -159,7 +160,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
      * Checks the correct behaviour of /rest/v1/softwaremoduletypes POST requests when max assignment is smaller than 1
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     public void createSoftwareModuleTypesInvalidAssignmentBadRequest() throws Exception {
 
         final List<SoftwareModuleTypeManagement.Create> types = new ArrayList<>();
@@ -183,7 +184,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
      * Checks the correct behaviour of /rest/v1/softwaremoduletypes POST requests.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     public void createSoftwareModuleTypes() throws Exception {
 
         final List<SoftwareModuleTypeManagement.Create> types = Arrays.asList(
@@ -236,7 +237,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
      * Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} GET requests.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     public void getSoftwareModuleType() throws Exception {
         final SoftwareModuleType testType = createTestType();
 
@@ -259,7 +260,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
      * Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} DELETE requests (hard delete scenario).
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     public void deleteSoftwareModuleTypeUnused() throws Exception {
         final SoftwareModuleType testType = createTestType();
 
@@ -286,7 +287,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
      * Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} DELETE requests (soft delete scenario).
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     public void deleteSoftwareModuleTypeUsed() throws Exception {
         final SoftwareModuleType testType = createTestType();
         softwareModuleManagement.create(SoftwareModuleManagement.Create.builder().type(testType).name("name").version("version").build());

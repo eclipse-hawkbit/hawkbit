@@ -413,7 +413,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
      * Ensures that security token is not returned if user does not have READ_TARGET_SEC_TOKEN permission.
      */
     @Test
-    @WithUser(allSpPermissions = false, authorities = { SpPermission.READ_TARGET, SpPermission.CREATE_TARGET })
+    @WithUser(authorities = { SpPermission.READ_TARGET, SpPermission.CREATE_TARGET })
     void securityTokenIsNotInResponseIfMissingPermission() throws Exception {
 
         final String knownControllerId = "knownControllerId";
@@ -428,10 +428,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
      * Ensures that security token is returned if user does have READ_TARGET_SEC_TOKEN permission.
      */
     @Test
-    @WithUser(allSpPermissions = false, authorities = { SpPermission.READ_TARGET, SpPermission.CREATE_TARGET,
-            SpPermission.READ_TARGET_SECURITY_TOKEN })
+    @WithUser(authorities = { SpPermission.READ_TARGET, SpPermission.CREATE_TARGET, SpPermission.READ_TARGET_SECURITY_TOKEN })
     void securityTokenIsInResponseWithCorrectPermission() throws Exception {
-
         final String knownControllerId = "knownControllerId";
         final Target createTarget = testdataFactory.createTarget(knownControllerId);
         mvc.perform(get(TARGETS_V1 + "/{targetId}", knownControllerId))

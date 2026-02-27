@@ -385,24 +385,34 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
      * Loads an artifact binary based on given ID.
      */
     @Test
-    void loadStreamOfArtifact() throws IOException {
+    void downloadStreamOfArtifact() throws IOException {
         final int artifactSize = 5 * 1024;
         final byte[] randomBytes = randomBytes(artifactSize);
         try (final InputStream input = new ByteArrayInputStream(randomBytes)) {
             final SoftwareModule smOs = testdataFactory.createSoftwareModuleOs();
             final Artifact artifact = createArtifactForSoftwareModule("file1", smOs.getId(), artifactSize, input);
-            assertEqualFileContents(
-                    artifactManagement.getArtifactStream(artifact.getSha1Hash(), smOs.getId(), smOs.isEncrypted()), randomBytes);
+            SecurityContextSwitch.runAs(
+                    SecurityContextSwitch.withUser("test_user", SpPermission.READ_SOFTWARE_MODULE_ARTIFACT),
+                    () -> assertEqualFileContents(
+                            artifactManagement.getArtifactStream(artifact.getSha1Hash(), smOs.getId(), smOs.isEncrypted()), randomBytes));
+            SecurityContextSwitch.runAs(
+                    SecurityContextSwitch.withUser("test_user", SpRole.CONTROLLER_ROLE),
+                    () -> assertEqualFileContents(
+                            artifactManagement.getArtifactStream(artifact.getSha1Hash(), smOs.getId(), smOs.isEncrypted()), randomBytes));
+            SecurityContextSwitch.runAs(
+                    SecurityContextSwitch.withUser("test_user", SpRole.CONTROLLER_ROLE_ANONYMOUS),
+                    () -> assertEqualFileContents(
+                            artifactManagement.getArtifactStream(artifact.getSha1Hash(), smOs.getId(), smOs.isEncrypted()), randomBytes));
+            SecurityContextSwitch.runAs(
+                    SecurityContextSwitch.withUser("test_user", SpPermission.READ_PREFIX + SpPermission.SOFTWARE_MODULE),
+                    () -> assertThatExceptionOfType(InsufficientPermissionException.class)
+                            .as("Should not have worked with missing permission.")
+                            .isThrownBy(() -> artifactManagement.getArtifactStream("123", 1, false)));
         }
     }
 
-    /**
-     * Trys and fails to load an artifact without required permission. Checks if expected InsufficientPermissionException is thrown.
-     */
     @Test
-    @WithUser(allSpPermissions = true, removeFromAllPermission = {
-            SpPermission.READ_SOFTWARE_MODULE_ARTIFACT,
-            SpRole.CONTROLLER_ROLE, SpRole.CONTROLLER_ROLE_ANONYMOUS })
+    @WithUser(authorities = {})
     void getArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
         assertThatExceptionOfType(InsufficientPermissionException.class)
                 .as("Should not have worked with missing permission.")
@@ -543,11 +553,13 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(runAsTenant(tenant, () -> artifactRepository.findAll())).hasSize(count);
     }
 
-    private void assertEqualFileContents(final ArtifactStream artifact, final byte[] randomBytes) throws IOException {
+    private void assertEqualFileContents(final ArtifactStream artifact, final byte[] randomBytes) {
         try (final InputStream inputStream = artifact) {
             assertTrue(
                     IOUtils.contentEquals(new ByteArrayInputStream(randomBytes), inputStream),
                     "The stored binary matches the given binary");
+        } catch (final IOException e) {
+            throw new AssertionError(e);
         }
     }
 }

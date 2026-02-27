@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withUserAndTenant;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -55,7 +56,8 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
 
         for (int i = 0; i < tenants; i++) {
             final String tenantname = "TENANT" + i;
-            SecurityContextSwitch.getAs(SecurityContextSwitch.withUserAndTenant("bumlux", tenantname, true, true, false, SpRole.SYSTEM_ROLE),
+            SecurityContextSwitch.getAs(
+                    withUserAndTenant(tenantname, "bumlux", new String[] { SpRole.SYSTEM_ROLE }, true, true),
                     () -> {
                         systemManagement.getTenantMetadataWithoutDetails();
                         if (artifactSize > 0) {

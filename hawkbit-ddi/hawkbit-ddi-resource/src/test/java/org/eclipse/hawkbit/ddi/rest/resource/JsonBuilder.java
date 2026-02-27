@@ -18,7 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Builder class for building certain json strings.
+ * Builder class for building certain JSON strings.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j

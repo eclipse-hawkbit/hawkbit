@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionFactory;
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -342,21 +343,6 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errorCode", equalTo("hawkbit.server.error.rest.body.notReadable")));
-    }
-
-    /**
-     * Testing that creating rollout with insufficient permission returns forbidden
-     */
-    @Test
-    @WithUser(allSpPermissions = true, removeFromAllPermission = "CREATE_ROLLOUT")
-    void createRolloutWithInsufficientPermissionReturnsForbidden() throws Exception {
-        final DistributionSet dsA = testdataFactory.createDistributionSet("");
-        mvc.perform(post("/rest/v1/rollouts")
-                        .content(JsonBuilder.rollout("name", "desc", 10, dsA.getId(), "name==test", null))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().is(403))
-                .andReturn();
     }
 
     /**

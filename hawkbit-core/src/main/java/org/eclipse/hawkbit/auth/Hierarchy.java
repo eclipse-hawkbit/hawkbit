@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.auth;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 
@@ -25,11 +26,8 @@ public class Hierarchy {
             SpRole.DEFAULT_ROLE_HIERARCHY;
     // @formatter:on
 
+    @Getter
     private static RoleHierarchy roleHierarchy;
-
-    public static RoleHierarchy getRoleHierarchy() {
-        return roleHierarchy;
-    }
 
     public static void setRoleHierarchy(final RoleHierarchy roleHierarchy) {
         Hierarchy.roleHierarchy = roleHierarchy;

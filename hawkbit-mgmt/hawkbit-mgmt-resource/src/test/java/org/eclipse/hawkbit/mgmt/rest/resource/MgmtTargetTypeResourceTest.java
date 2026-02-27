@@ -31,6 +31,7 @@ import java.util.Set;
 
 import com.jayway.jsonpath.JsonPath;
 import org.eclipse.hawkbit.auth.SpPermission;
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
@@ -43,6 +44,7 @@ import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONObject;
@@ -71,22 +73,25 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * GET targettypes returns Forbidden when permission is missing
      */
     @Test
-    @WithUser(
-            principal = "targetTypeTester", allSpPermissions = true,
-            removeFromAllPermission = {
-                    SpPermission.CREATE_TARGET, SpPermission.READ_TARGET, SpPermission.UPDATE_TARGET, SpPermission.DELETE_TARGET,
-                    SpPermission.READ_TARGET_TYPE })
     void getTargetTypesWithoutPermission() throws Exception {
-        mvc.perform(get(TARGETTYPES_ENDPOINT).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden());
+        SecurityContextSwitch.callAs(
+                SecurityContextSwitch.withUser("test", SpPermission.READ_TARGET_TYPE),
+                () -> mvc.perform(get(TARGETTYPES_ENDPOINT).accept(MediaType.APPLICATION_JSON))
+                        .andDo(MockMvcResultPrinter.print())
+                        .andExpect(status().isOk()));
+        SecurityContextSwitch.callAs(
+                SecurityContextSwitch.withUser("test", SpPermission.READ_SOFTWARE_MODULE_ARTIFACT),
+                () -> mvc.perform(get(TARGETTYPES_ENDPOINT).accept(MediaType.APPLICATION_JSON))
+                        .andDo(MockMvcResultPrinter.print())
+                        .andExpect(status().isForbidden()));
+
     }
 
     /**
      * Checks the correct behaviour of /rest/v1/targettypes/{id} GET request.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void getTargetType() throws Exception {
         String typeName = "TestTypeGET";
         TargetType testType = createTestTargetTypeInDB(typeName);
@@ -115,7 +120,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Checks the correct behaviour of /rest/v1/targettypes GET requests.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void getTargetTypes() throws Exception {
         String typeName = "TestTypeGET";
         int count = 5;
@@ -155,7 +160,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Checks the correct behaviour of /rest/v1/targettypes GET requests without prior created target types.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void getDefaultTargetTypes() throws Exception {
 
         // 0 types overall (no default types are created)
@@ -172,7 +177,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Checks the correct behaviour of /rest/v1/targettypes GET requests with sorting by name.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void getTargetTypesSortedByName() throws Exception {
         String typeNameA = "ATestTypeGETsorted";
         String typeNameB = "BTestTypeGETsorted";
@@ -238,7 +243,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Checks the correct behaviour of /rest/v1/targettypes GET requests with paging.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void getTargetTypesWithPagingLimitRequestParameter() throws Exception {
         final String typePrefix = "TestTypeGETPaging";
         final int count = 10;
@@ -258,7 +263,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Checks the correct behaviour of /rest/v1/targettypes GET requests with paging and offset.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void getTargetTypesWithPagingLimitAndOffsetRequestParameter() throws Exception {
         final int count = 10;
         final int offset = 2;
@@ -280,7 +285,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Checks the correct behaviour of /rest/v1/targettypes/{ID} PUT requests.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void updateTargetType() throws Exception {
         String typeName = "TestTypePUT";
         final TargetType testType = createTestTargetTypeInDB(typeName);
@@ -302,7 +307,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Checks the correct behaviour of /rest/v1/targettypes/{id} GET requests.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void getUpdatedTargetType() throws Exception {
         final String initialTypeName = "TestTypeGET";
         TargetType testType = createTestTargetTypeInDB(initialTypeName);
@@ -330,7 +335,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Checks the correct behaviour of /rest/v1/targettypes POST requests.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void createTargetTypes() throws Exception {
         String typeName = "TestTypePOST";
         final List<Create> types = buildTestTargetTypesWithoutDsTypes(typeName, 5);
@@ -342,7 +347,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Checks the correct behaviour of /rest/v1/targettypes/{ID}/compatibledistributionsettypes POST requests.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void addDistributionSetTypeToTargetType() throws Exception {
         String typeName = "TestTypeAddDs";
         TargetType testType = createTestTargetTypeInDB(typeName);
@@ -363,7 +368,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Checks the correct behaviour of /rest/v1/targettypes/{ID}/compatibledistributionsettypes GET requests.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void getDistributionSetsOfTargetType() throws Exception {
         String typeName = "TestTypeGetDs";
         final TargetType testType = createTestTargetTypeInDB(typeName, Set.of(standardDsType));
@@ -383,7 +388,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Checks the correct behaviour of /rest/v1/targettypes/{ID}/compatibledistributionsettypes/{ID} GET requests.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void getDistributionSetOfTargetTypeReturnsNotAllowed() throws Exception {
         String typeName = "TestTypeAddDs";
         final TargetType testType = createTestTargetTypeInDB(typeName);
@@ -399,7 +404,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Checks the correct behaviour of /rest/v1/targettypes/{ID}/compatibledistributionsettypes/{ID} DELETE requests.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void removeDsTypeFromTargetType() throws Exception {
         String typeName = "TestTypeRemoveDs";
         TargetType testType = createTestTargetTypeInDB(typeName, Set.of(standardDsType));
@@ -419,7 +424,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Checks the correct behaviour of /rest/v1/distributionsettypes/{ID} DELETE requests.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void deletingDsTypeRemovesAssignmentFromTargetType() throws Exception {
         TargetType testType = createTestTargetTypeInDB("TestTypeRemoveDs", Set.of(standardDsType));
         assertThat(testType.getDistributionSetTypes()).hasSize(1);
@@ -440,7 +445,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Checks the correct behaviour of /rest/v1/targettypes/{ID} DELETE requests - Deletion when not in use.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void deleteTargetTypeUnused() throws Exception {
         String typeName = "TestTypeUnusedDelete";
         final TargetType testType = createTestTargetTypeInDB(typeName);
@@ -458,7 +463,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Checks the correct behaviour of /rest/v1/targettypes/{ID} DELETE requests - Deletion not possible when in use.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void deleteTargetTypeUsed() throws Exception {
         String typeName = "TestTypeUsedDelete";
         final TargetType testType = createTestTargetTypeInDB(typeName);
@@ -481,7 +486,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Ensures that target type deletion request to API on an entity that does not exist results in NOT_FOUND.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void deleteTargetTypeThatDoesNotExistLeadsToNotFound() throws Exception {
         mvc.perform(delete(TARGETTYPE_SINGLE_ENDPOINT, 1234))
                 .andDo(MockMvcResultPrinter.print())
@@ -492,7 +497,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Tests the update of the deletion flag. It is verified that the target type can't be marked as deleted through update operation.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void updateTargetTypeDeletedFlag() throws Exception {
         String typeName = "TestTypePUT";
         final TargetType testType = createTestTargetTypeInDB(typeName);
@@ -630,7 +635,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
      * Verifies quota enforcement for /rest/v1/targettypes/{ID}/compatibledistributionsettypes POST requests.
      */
     @Test
-    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @WithUser(principal = TEST_USER, authorities = SpRole.TENANT_ADMIN)
     void assignDistributionSetTypeToTargetTypeUntilQuotaExceeded() throws Exception {
         final TargetType testType = createTestTargetTypeInDB("TestTypeQuota");
 

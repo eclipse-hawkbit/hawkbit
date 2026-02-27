@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.artifact.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.artifact.exception.FileSizeQuotaExceededException;
 import org.eclipse.hawkbit.artifact.exception.StorageQuotaExceededException;
 import org.eclipse.hawkbit.artifact.model.ArtifactStream;
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
@@ -219,7 +220,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
      * Tests the update of software module metadata. It is verified that only the selected fields for the update are really updated and the modification values are filled (i.e. updated by and at).
      */
     @Test
-    @WithUser(principal = "smUpdateTester", allSpPermissions = true)
+    @WithUser(principal = "smUpdateTester", authorities = SpRole.TENANT_ADMIN)
     void updateSoftwareModuleOnlyDescriptionAndVendorNameUntouched() throws Exception {
         final String knownSWName = "name1";
         final String knownSWVersion = "version1";
@@ -272,7 +273,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
      * Tests the update of the deletion flag. It is verified that the software module can't be marked as deleted through update operation.
      */
     @Test
-    @WithUser(principal = "smUpdateTester", allSpPermissions = true)
+    @WithUser(principal = "smUpdateTester", authorities = SpRole.TENANT_ADMIN)
     void updateSoftwareModuleDeletedFlag() throws Exception {
         final String knownSWName = "name1";
         final String knownSWVersion = "version1";
@@ -307,7 +308,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
      * Tests the lock. It is verified that the software module can be marked as locked through update operation.
      */
     @Test
-    @WithUser(principal = "smUpdateTester", allSpPermissions = true)
+    @WithUser(principal = "smUpdateTester", authorities = SpRole.TENANT_ADMIN)
     void lockSoftwareModule() throws Exception {
         final SoftwareModule sm = softwareModuleManagement.create(
                 SoftwareModuleManagement.Create.builder().type(osType).name("name1").version("version1").build());
@@ -338,7 +339,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
      * Tests the unlock.
      */
     @Test
-    @WithUser(principal = "smUpdateTester", allSpPermissions = true)
+    @WithUser(principal = "smUpdateTester", authorities = SpRole.TENANT_ADMIN)
     void unlockSoftwareModule() throws Exception {
         final SoftwareModule sm = softwareModuleManagement.create(
                 SoftwareModuleManagement.Create.builder().type(osType).name("name1").version("version1").build());
@@ -1105,7 +1106,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
      * Test retrieval of all software modules the user has access to.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void getSoftwareModules() throws Exception {
         final SoftwareModule os = testdataFactory.createSoftwareModuleOs();
         final SoftwareModule app = testdataFactory.createSoftwareModuleApp();
@@ -1231,7 +1232,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
      * Tests GET request on /rest/v1/softwaremodules/{smId}.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void getSoftwareModule() throws Exception {
         final SoftwareModule os = testdataFactory.createSoftwareModuleOs();
 
@@ -1261,7 +1262,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
      * Verifies that the create request actually results in the creation of the modules in the repository.
      */
     @Test
-    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @WithUser(principal = "uploadTester", authorities = SpRole.TENANT_ADMIN)
     void createSoftwareModules() throws Exception {
         final MgmtSoftwareModuleRequestBodyPost os = new MgmtSoftwareModuleRequestBodyPost()
                 .setType(osType.getKey())
