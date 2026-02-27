@@ -41,7 +41,6 @@ import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtRestModelMapper;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement.Create;
@@ -346,6 +345,37 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     /**
+     * Testing that creating rollout with insufficient permission returns forbidden
+     */
+    @Test
+    @WithUser(principal = "bumlux", authorities = {SpRole.TARGET_ADMIN, SpRole.REPOSITORY_ADMIN, "CREATE_ROLLOUT"})
+    void createRolloutWithSufficientPermissionsIsOk() throws Exception {
+        createRolloutWithPermissions("rollout-suff", 201);
+    }
+
+    @Test
+    @WithUser(authorities = {SpRole.TARGET_ADMIN, SpRole.REPOSITORY_ADMIN})
+    void createRolloutWithInsufficientPermissionReturnsForbidden() throws Exception {
+        createRolloutWithPermissions("rollout-insuff", 403);
+    }
+
+    private void createRolloutWithPermissions(final String name, final int expectedStatus) throws Exception {
+        testdataFactory.createTargets(20, "target", "rollout");
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+        final String actionType = MgmtRestModelMapper.convertActionType(Action.ActionType.FORCED).getName();
+        final String rollout = JsonBuilder.rollout(name, "desc", 5, dsA.getId(), "id==target*",
+                new RolloutGroupConditionBuilder().withDefaults().build(), null, actionType, null, null, null,
+                null, false, null, 0);
+
+        mvc.perform(post("/rest/v1/rollouts")
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
+                        .content(rollout))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().is(expectedStatus))
+                .andReturn();
+    }
+
+    /**
      * Testing that creating rollout with not existing distribution set returns not found
      */
     @Test
@@ -377,9 +407,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
      */
     @Test
     void missingTargetFilterQueryInRollout() throws Exception {
-
         final String targetFilterQuery = null;
-
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         mvc.perform(post("/rest/v1/rollouts")
                         .content(JsonBuilder.rollout("rollout1", "desc", 10, dsA.getId(), targetFilterQuery, null))
@@ -397,7 +425,6 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     void createRollout() throws Exception {
         testdataFactory.createTargets(20, "target", "rollout");
-
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         postRollout("rollout1", 5, dsA.getId(), "id==target*", 20, Action.ActionType.FORCED);
     }

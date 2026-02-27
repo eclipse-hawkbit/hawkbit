@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository;
 
 import org.eclipse.hawkbit.auth.SpRole;
-import org.eclipse.hawkbit.auth.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.model.report.TenantUsage;
 import org.springframework.security.access.prepost.PreAuthorize;
 

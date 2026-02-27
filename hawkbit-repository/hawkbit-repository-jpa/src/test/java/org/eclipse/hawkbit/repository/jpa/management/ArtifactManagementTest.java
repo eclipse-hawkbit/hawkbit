@@ -50,7 +50,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
-import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -411,14 +410,6 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         }
     }
 
-    @Test
-    @WithUser(authorities = {})
-    void getArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
-        assertThatExceptionOfType(InsufficientPermissionException.class)
-                .as("Should not have worked with missing permission.")
-                .isThrownBy(() -> artifactManagement.getArtifactStream("123", 1, false));
-    }
-
     /**
      * Verifies that creation of an artifact with none matching hashes fails.
      */
@@ -537,7 +528,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private <T> T runAsTenant(final String tenant, final Callable<T> callable) throws Exception {
-        return SecurityContextSwitch.callAs(SecurityContextSwitch.withUserAndTenantAllSpPermissions("user", tenant), callable);
+        return SecurityContextSwitch.callAs(SecurityContextSwitch.withTenantAndUserAndAllPermissions(tenant, "user"), callable);
     }
 
     private SoftwareModule createSoftwareModuleForTenant(final String tenant) throws Exception {

@@ -67,7 +67,7 @@ public class SecurityContextSwitch {
         setSecurityContext(withUser);
         try {
             if (withUser.autoCreateTenant()) {
-                createTenant(withUser.tenantId());
+                createTenant(withUser.tenant());
             }
             return callable.call();
         } finally {
@@ -93,18 +93,18 @@ public class SecurityContextSwitch {
     }
 
     public static WithUser withController(final String principal, final String... authorities) {
-        return withUserAndTenant(DEFAULT_TENANT, principal, authorities, true, true);
+        return withTenantAndUser(DEFAULT_TENANT, principal, authorities, true, true);
     }
 
     public static WithUser withUser(final String principal, final String... authorities) {
-        return withUserAndTenant(DEFAULT_TENANT, principal, authorities, false, true);
+        return withTenantAndUser(DEFAULT_TENANT, principal, authorities, false, true);
     }
 
-    public static WithUser withUserAndTenantAllSpPermissions(final String principal, final String tenant) {
-        return withUserAndTenant(tenant, principal, new String[] { SpRole.TENANT_ADMIN }, false, true);
+    public static WithUser withTenantAndUserAndAllPermissions(final String tenant, final String principal) {
+        return withTenantAndUser(tenant, principal, new String[] { SpRole.TENANT_ADMIN }, false, true);
     }
 
-    public static WithUser withUserAndTenant(
+    public static WithUser withTenantAndUser(
             final String tenant, final String principal, final String[] authorities,
             final boolean controller, final boolean autoCreateTenant) {
         return new WithUserImpl(tenant, principal, authorities, controller, autoCreateTenant);
@@ -114,11 +114,11 @@ public class SecurityContextSwitch {
         SecurityContextHolder.setContext(new WithUserSecurityContext(annotation));
     }
 
-    private static void createTenant(final String tenantId) {
+    private static void createTenant(final String tenant) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         setSecurityContext(PRIVILEGED_USER);
         try {
-            systemManagement.createTenantMetadata(tenantId);
+            systemManagement.createTenantMetadata(tenant);
         } finally {
             SecurityContextHolder.setContext(oldContext);
         }
@@ -140,17 +140,17 @@ public class SecurityContextSwitch {
         WithUserSecurityContext(final WithUser annotation) {
             this.annotation = annotation;
             if (annotation.autoCreateTenant()) {
-                createTenant(annotation.tenantId());
+                createTenant(annotation.tenant());
             }
         }
 
         @Override
         public Authentication getAuthentication() {
             final TestingAuthenticationToken testingAuthenticationToken = new TestingAuthenticationToken(
-                    new TenantAwareUser(annotation.principal(), "***", null, annotation.tenantId()),
+                    new TenantAwareUser(annotation.principal(), "***", null, annotation.tenant()),
                     annotation.credentials(), annotation.authorities());
             testingAuthenticationToken.setDetails(
-                    new TenantAwareAuthenticationDetails(annotation.tenantId(), annotation.controller()));
+                    new TenantAwareAuthenticationDetails(annotation.tenant(), annotation.controller()));
             return testingAuthenticationToken;
         }
 
@@ -201,7 +201,7 @@ public class SecurityContextSwitch {
         }
 
         @Override
-        public String tenantId() {
+        public String tenant() {
             return tenant;
         }
 

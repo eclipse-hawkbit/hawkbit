@@ -415,7 +415,6 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     @WithUser(authorities = { SpPermission.READ_TARGET, SpPermission.CREATE_TARGET })
     void securityTokenIsNotInResponseIfMissingPermission() throws Exception {
-
         final String knownControllerId = "knownControllerId";
         testdataFactory.createTarget(knownControllerId);
         mvc.perform(get(TARGETS_V1 + "/{targetId}", knownControllerId))

@@ -33,7 +33,7 @@ public @interface WithUser {
      *
      * @return test tenant id
      */
-    String tenantId() default "DEFAULT";
+    String tenant() default "DEFAULT";
 
     /**
      * Gets the test principal.
