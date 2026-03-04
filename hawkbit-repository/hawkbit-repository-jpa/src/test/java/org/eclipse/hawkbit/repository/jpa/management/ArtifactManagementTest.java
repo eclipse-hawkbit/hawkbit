@@ -399,10 +399,6 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
                     () -> assertEqualFileContents(
                             artifactManagement.getArtifactStream(artifact.getSha1Hash(), smOs.getId(), smOs.isEncrypted()), randomBytes));
             SecurityContextSwitch.runAs(
-                    SecurityContextSwitch.withUser("test_user", SpRole.CONTROLLER_ROLE_ANONYMOUS),
-                    () -> assertEqualFileContents(
-                            artifactManagement.getArtifactStream(artifact.getSha1Hash(), smOs.getId(), smOs.isEncrypted()), randomBytes));
-            SecurityContextSwitch.runAs(
                     SecurityContextSwitch.withUser("test_user", SpPermission.READ_PREFIX + SpPermission.SOFTWARE_MODULE),
                     () -> assertThatExceptionOfType(InsufficientPermissionException.class)
                             .as("Should not have worked with missing permission.")

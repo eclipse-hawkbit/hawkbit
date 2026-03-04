@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ddi.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.hawkbit.auth.SpPermission.TENANT_CONFIGURATION;
-import static org.eclipse.hawkbit.auth.SpRole.CONTROLLER_ROLE_ANONYMOUS;
+import static org.eclipse.hawkbit.auth.SpRole.CONTROLLER_ROLE;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.callAs;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.getAs;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.withController;
@@ -34,7 +34,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.auth.SpPermission;
@@ -131,13 +130,12 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final Target findTargetByControllerID = targetManagement.getByControllerId(knownTargetControllerId);
         assertThat(findTargetByControllerID.getCreatedBy()).isEqualTo(knownCreatedBy);
         // make a poll, audit information should not be changed, run as controller principal!
-        callAs(withController("controller", CONTROLLER_ROLE_ANONYMOUS),
-                () -> {
-                    mvc.perform(get(CONTROLLER_BASE, AccessContext.tenant(), knownTargetControllerId))
-                            .andDo(MockMvcResultPrinter.print())
-                            .andExpect(status().isOk());
-                    return null;
-                });
+        callAs(withController("controller", CONTROLLER_ROLE), () -> {
+            mvc.perform(get(CONTROLLER_BASE, AccessContext.tenant(), knownTargetControllerId))
+                    .andDo(MockMvcResultPrinter.print())
+                    .andExpect(status().isOk());
+            return null;
+        });
         // verify that audit information has not changed
         final Target targetVerify = targetManagement.getByControllerId(knownTargetControllerId);
         assertThat(targetVerify.getCreatedBy()).isEqualTo(findTargetByControllerID.getCreatedBy());
@@ -203,16 +201,14 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1),
             @Expect(type = TenantConfigurationDeletedEvent.class, count = 1) })
     void pollWithModifiedGlobalPollingTime() throws Exception {
-        withPollingTime("00:02:00", () -> callAs(
-                withUser("controller", CONTROLLER_ROLE_ANONYMOUS),
-                () -> {
-                    mvc.perform(get(CONTROLLER_BASE, AccessContext.tenant(), 4711))
-                            .andDo(MockMvcResultPrinter.print())
-                            .andExpect(status().isOk())
-                            .andExpect(content().contentType(MediaTypes.HAL_JSON))
-                            .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:02:00")));
-                    return null;
-                }));
+        withPollingTime("00:02:00", () -> callAs(withUser("controller", CONTROLLER_ROLE), () -> {
+            mvc.perform(get(CONTROLLER_BASE, AccessContext.tenant(), 4711))
+                    .andDo(MockMvcResultPrinter.print())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                    .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:02:00")));
+            return null;
+        }));
     }
 
     /**
@@ -234,8 +230,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         });
 
         withPollingTime("00:02:00, controllerid == 4711 -> 00:01:00, group == 'Europe' -> 00:05:05", () -> callAs(
-                withUser("controller", CONTROLLER_ROLE_ANONYMOUS),
-                () -> {
+                withUser("controller", CONTROLLER_ROLE), () -> {
                     mvc.perform(get(CONTROLLER_BASE, AccessContext.tenant(), 4711))
                             .andDo(MockMvcResultPrinter.print())
                             .andExpect(status().isOk())
@@ -381,13 +376,12 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final String knownControllerId1 = "0815";
         final long create = System.currentTimeMillis();
         // make a poll, audit information should be set on plug and play
-        callAs(withController("controller", CONTROLLER_ROLE_ANONYMOUS),
-                () -> {
-                    mvc.perform(get(CONTROLLER_BASE, AccessContext.tenant(), knownControllerId1))
-                            .andDo(MockMvcResultPrinter.print())
-                            .andExpect(status().isOk());
-                    return null;
-                });
+        callAs(withController("controller", CONTROLLER_ROLE), () -> {
+            mvc.perform(get(CONTROLLER_BASE, AccessContext.tenant(), knownControllerId1))
+                    .andDo(MockMvcResultPrinter.print())
+                    .andExpect(status().isOk());
+            return null;
+        });
         // verify
         assertThat(targetManagement.getByControllerId(knownControllerId1)).satisfies(target -> {
             assertThat(target.getAddress()).isEqualTo(IpUtil.createHttpUri("127.0.0.1").toString());
