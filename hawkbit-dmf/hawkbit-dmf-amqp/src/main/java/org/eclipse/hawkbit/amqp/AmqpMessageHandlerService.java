@@ -172,7 +172,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private static void setTenantSecurityContext(final String tenant) {
         final AnonymousAuthenticationToken authenticationToken = new AnonymousAuthenticationToken(
                 UUID.randomUUID().toString(), "AMQP-Controller",
-                List.of(new SimpleGrantedAuthority(SpRole.CONTROLLER_ROLE_ANONYMOUS)));
+                List.of(new SimpleGrantedAuthority(SpRole.CONTROLLER_ROLE)));
         authenticationToken.setDetails(new TenantAwareAuthenticationDetails(tenant, true));
         setSecurityContext(authenticationToken);
     }

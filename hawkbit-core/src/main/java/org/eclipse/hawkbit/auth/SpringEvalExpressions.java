@@ -36,7 +36,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SpringEvalExpressions {
 
-    public static final String IS_SYSTEM_CODE = "hasAuthority('ROLE_SYSTEM_CODE')";
+    public static final String IS_SYSTEM_CODE = "hasAuthority('" + SpRole.SYSTEM_ROLE + "')";
+    public static final String IS_CONTROLLER = "hasAuthority('" + SpRole.CONTROLLER_ROLE + "')";
 
     public static final String PERMISSION_GROUP_PLACEHOLDER = "${permissionGroup}";
     // evaluated to <permission>_<permissionGroup> (e.g. CREATE_DISTRIBUTION_SET)
@@ -44,6 +45,4 @@ public final class SpringEvalExpressions {
     public static final String HAS_READ_REPOSITORY = "hasPermission(#root, 'READ_${permissionGroup}')";
     public static final String HAS_UPDATE_REPOSITORY = "hasPermission(#root, 'UPDATE_${permissionGroup}')";
     public static final String HAS_DELETE_REPOSITORY = "hasPermission(#root, 'DELETE_${permissionGroup}')";
-
-    public static final String IS_CONTROLLER = "hasAnyRole('" + SpRole.CONTROLLER_ROLE_ANONYMOUS + "', '" + SpRole.CONTROLLER_ROLE + "')";
 }

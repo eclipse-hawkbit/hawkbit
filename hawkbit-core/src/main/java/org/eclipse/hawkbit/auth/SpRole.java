@@ -29,8 +29,6 @@ public final class SpRole {
     public static final String SYSTEM_ROLE = "ROLE_SYSTEM_CODE";
     /** The role which contains in the spring security context in case a controller is authenticated */
     public static final String CONTROLLER_ROLE = "ROLE_CONTROLLER";
-    /** The role which contained in the spring security context in case that a controller is authenticated, but only as 'anonymous'. */
-    public static final String CONTROLLER_ROLE_ANONYMOUS = "ROLE_CONTROLLER_ANONYMOUS";
 
     private static final String IMPLIES = " > ";
     private static final String LINE_BREAK = "\n";

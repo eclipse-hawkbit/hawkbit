@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
-
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.Column;
@@ -49,9 +47,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     protected static final int USERNAME_FIELD_LENGTH = 64;
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     @Setter // should be used just for test purposes
     @Getter

@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
 import java.util.Objects;
 
 import jakarta.persistence.Column;
@@ -40,9 +39,6 @@ import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
 @TenantDiscriminatorColumn(name = "tenant", length = 40)
 @Multitenant(MultitenantType.SINGLE_TABLE)
 public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEntity implements TenantAwareBaseEntity {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     @Column(name = "tenant", nullable = false, insertable = false, updatable = false, length = 40)
     @Size(min = 1, max = 40)

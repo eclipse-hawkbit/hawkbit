@@ -13,7 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.eclipse.hawkbit.auth.SpRole.CONTROLLER_ROLE;
-import static org.eclipse.hawkbit.auth.SpRole.CONTROLLER_ROLE_ANONYMOUS;
 import static org.eclipse.hawkbit.context.AccessContext.asSystem;
 import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
@@ -108,7 +107,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final int allowedAttributes = quotaManagement.getMaxAttributeEntriesPerTarget();
         testdataFactory.createTarget(controllerId);
 
-        final WithUser withController = SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS);
+        final WithUser withController = SecurityContextSwitch.withController("controller", CONTROLLER_ROLE);
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> runAs(withController, () -> writeAttributes(controllerId, allowedAttributes + 1, "key", "value")))
                 .withMessageContaining("" + allowedAttributes);
@@ -184,7 +183,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createTargetAndAssignDs();
 
         SecurityContextSwitch
-                .getAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+                .getAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE), () -> {
                     // Fails as one entry is already in there from the assignment
                     assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                             .isThrownBy(() -> writeStatus(actionId, allowStatusEntries))
@@ -1161,9 +1160,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final String controllerId = "test123";
         final Target target = testdataFactory.createTarget(controllerId);
 
-        SecurityContextSwitch.getAs(SecurityContextSwitch.withController(
-                "controller",
-                CONTROLLER_ROLE_ANONYMOUS, SpPermission.READ_TARGET), () -> {
+        SecurityContextSwitch.getAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE, SpPermission.READ_TARGET), () -> {
             addAttributeAndVerify(controllerId);
             addSecondAttributeAndVerify(controllerId);
             updateAttributeAndVerify(controllerId);
