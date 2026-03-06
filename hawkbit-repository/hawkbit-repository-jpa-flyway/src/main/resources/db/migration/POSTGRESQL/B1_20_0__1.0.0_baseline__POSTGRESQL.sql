@@ -383,6 +383,7 @@ CREATE TABLE sp_rollout_group (
     PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX uk_rollout_group ON sp_rollout_group (name, rollout, tenant);
+CREATE INDEX sp_idx_rollout_group_parent ON sp_rollout_group (parent);
 ALTER TABLE sp_rollout_group
     ADD CONSTRAINT fk_rollout_group_rollout FOREIGN KEY (rollout) REFERENCES sp_rollout (id) ON DELETE CASCADE;
 
