@@ -134,7 +134,7 @@ maven/mavencentral/io.github.openfeign/feign-core/13.6, Apache-2.0, approved, cl
 maven/mavencentral/io.github.openfeign/feign-form-spring/13.6, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.github.openfeign/feign-form/13.6, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.github.openfeign/feign-hc5/13.6, Apache-2.0, approved, #21983
-maven/mavencentral/io.github.openfeign/feign-hc5/13.9.1, , restricted, clearlydefined
+maven/mavencentral/io.github.openfeign/feign-hc5/13.9.1, Apache-2.0, approved, #26412
 maven/mavencentral/io.github.openfeign/feign-slf4j/13.6, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.methvin/directory-watcher/0.19.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/io.micrometer/context-propagation/1.1.4, Apache-2.0, approved, #26109
