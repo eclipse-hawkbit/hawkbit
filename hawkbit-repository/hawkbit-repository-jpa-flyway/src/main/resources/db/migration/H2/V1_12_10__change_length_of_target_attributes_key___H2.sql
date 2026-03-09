@@ -1,1 +1,0 @@
-ALTER TABLE sp_target_attributes ALTER COLUMN attribute_key VARCHAR(128);
