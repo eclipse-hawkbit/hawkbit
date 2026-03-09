@@ -1,1 +1,0 @@
-CREATE INDEX sp_idx_rollout_status_tenant ON sp_rollout (tenant, status);
