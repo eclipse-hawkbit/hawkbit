@@ -69,9 +69,9 @@ public class TenantConfigurationProperties {
          */
         public static final String AUTHENTICATION_HEADER_ENABLED = "authentication.header.enabled";
         /**
-         * Header based authentication authority name.
+         * Header based authentication authority(-ies, could be list).
          */
-        public static final String AUTHENTICATION_HEADER_AUTHORITY_NAME = "authentication.header.authority";
+        public static final String AUTHENTICATION_HEADER_AUTHORITY = "authentication.header.authority";
         /**
          * Target token based authentication enabled.
          */

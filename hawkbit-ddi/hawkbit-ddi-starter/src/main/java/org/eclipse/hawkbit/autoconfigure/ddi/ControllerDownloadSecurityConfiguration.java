@@ -83,8 +83,7 @@ class ControllerDownloadSecurityConfiguration {
                 .anonymous(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(new AuthenticationFilters.SecurityHeaderAuthenticationFilter(
-                        new SecurityHeaderAuthenticator(
-                                ddiSecurityConfiguration.getRp().getCnHeader(), ddiSecurityConfiguration.getRp().getSslIssuerHashHeader()),
+                        new SecurityHeaderAuthenticator(ddiSecurityConfiguration.getRp()),
                         ddiSecurityConfiguration), AuthorizationFilter.class)
                 .addFilterBefore(new AuthenticationFilters.SecurityTokenAuthenticationFilter(
                         new SecurityTokenAuthenticator(controllerManagement),

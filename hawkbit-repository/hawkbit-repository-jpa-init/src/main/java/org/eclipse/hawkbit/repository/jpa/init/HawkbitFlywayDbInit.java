@@ -90,7 +90,7 @@ public class HawkbitFlywayDbInit {
         log.info("Start ({}): {}@{}, table: {}, locations: {}, sql-migration-suffixes: {}",
                 MODE, USER, URL, TABLE, LOCATIONS, SQL_MIGRATION_SUFFIXES);
 
-        // configured via system properties callbacks are with prority. If not confiured - try to load via service loader
+        // configured via system properties callbacks are with priority. If not configured - try to load via service loader
         final Callback[] callbackViaServiceLoader = CALLBACKS.length == 0 ? ServiceLoader.load(Callback.class).stream()
                 .map(ServiceLoader.Provider::get)
                 .toArray(Callback[]::new) : new Callback[0];

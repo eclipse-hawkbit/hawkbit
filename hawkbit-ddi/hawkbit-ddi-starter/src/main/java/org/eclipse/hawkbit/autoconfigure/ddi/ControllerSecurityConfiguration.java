@@ -91,9 +91,7 @@ class ControllerSecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(
                         new AuthenticationFilters.SecurityHeaderAuthenticationFilter(
-                                new SecurityHeaderAuthenticator(
-                                        ddiSecurityConfiguration.getRp().getCnHeader(),
-                                        ddiSecurityConfiguration.getRp().getSslIssuerHashHeader()), ddiSecurityConfiguration),
+                                new SecurityHeaderAuthenticator(ddiSecurityConfiguration.getRp()), ddiSecurityConfiguration),
                         AuthorizationFilter.class)
                 .addFilterBefore(
                         new AuthenticationFilters.SecurityTokenAuthenticationFilter(
