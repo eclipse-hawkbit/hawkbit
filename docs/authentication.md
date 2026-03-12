@@ -118,8 +118,8 @@ server.forward-headers-strategy=NATIVE
 ```
 
 2. In Hawkbit's UI section, under system configuration, make sure to select *Allow targets to authenticate via a
-   certificate authenticated by a reverse proxy* and input the fixed issuer hash as "Hawkbit". This can be whetever you
-   have configured in the nginx configuration in `proxy_set_header X-Ssl-Issuer-Hash-1` below.
+   certificate authenticated by a reverse proxy* and input the fixed issuer hash as "Hawkbit". This can be whenever you
+   have configured in the nginx configuration in `proxy_set_header X-Authority-1` below.
 
 3. After placing your certificates and keys, you need to deploy your proxy server and apply the provided configurations.
    You can apply mutual TLS specifically to the URL given below to implement the process only for devices using the
@@ -184,8 +184,8 @@ server {
 
         # Client certificate Common Name and Issuer Hash is required
         # for auth in hawkbit. 
-        proxy_set_header X-Ssl-Client-Cn $ssl_client_s_dn_cn;
-        proxy_set_header X-Ssl-Issuer-Hash-1 Hawkbit;
+        proxy_set_header X-Controller-Id $ssl_client_s_dn_cn;
+        proxy_set_header X-Authority-1 Hawkbit;
 
         # These are required for clients to upload and download software. 
         proxy_request_buffering off;

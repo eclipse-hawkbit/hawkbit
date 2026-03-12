@@ -29,14 +29,6 @@ public class DdiSecurityProperties {
     private final Rp rp = new Rp();
     private final Authentication authentication = new Authentication();
 
-    public Authentication getAuthentication() {
-        return authentication;
-    }
-
-    public Rp getRp() {
-        return rp;
-    }
-
     /**
      * Reverse proxy configuration. Defines the security properties for
      * authenticating controllers behind a reverse proxy which terminates the
@@ -47,16 +39,19 @@ public class DdiSecurityProperties {
     public static class Rp {
 
         /**
-         * HTTP header field for common name of a DDI target client certificate.
+         * HTTP header field for controller ID (e.g. CN of the controller certificate) of a DDI target client certificate.
          */
-        private String cnHeader = "X-Ssl-Client-Cn";
+        private String controllerIdHeader = "X-Controller-Id";
         /**
-         * HTTP header field for issuer hash of a DDI target client certificate.
+         * HTTP header field for authority(ies) (e.g. SHA-256 fingerprints of issuer certificates) of a DDI target client certificate.
          */
-        private String sslIssuerHashHeader = "X-Ssl-Issuer-Hash-%d";
+        private String authorityHeader = "X-Authority";
         /**
-         * List of trusted (reverse proxy) IP addresses for performing DDI
-         * client certificate auth.
+         * Regular expression for authorities list separator
+         */
+        private String authoritiesSeparatorRegex = "[;,]";
+        /**
+         * List of trusted (reverse proxy) IP addresses for performing DDI client certificate auth.
          */
         private List<String> trustedIPs;
     }
@@ -67,14 +62,14 @@ public class DdiSecurityProperties {
     @Data
     public static class Authentication {
 
-        private final Targettoken targettoken = new Targettoken();
-        private final Gatewaytoken gatewaytoken = new Gatewaytoken();
+        private final TargetToken targettoken = new TargetToken();
+        private final GatewayToken gatewaytoken = new GatewayToken();
 
         /**
          * Target token auth. Tokens are defined per target.
          */
         @Data
-        public static class Targettoken {
+        public static class TargetToken {
 
             /**
              * Set to true to enable target token auth.
@@ -86,7 +81,7 @@ public class DdiSecurityProperties {
          * Gateway token auth. Tokens are defined per tenant. Use with care!
          */
         @Data
-        public static class Gatewaytoken {
+        public static class GatewayToken {
 
             /**
              * Gateway token based authentication enabled.
