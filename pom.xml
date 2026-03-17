@@ -180,11 +180,7 @@
     <pluginRepositories>
         <pluginRepository>
             <id>dash-licenses</id>
-            <!--
-                After the planed Nexus2 to Nexus3 migration (on Thursday, March 12 at 09:00 CET),
-                the repository should be changed to dash-licenses-maven2-release.
-            -->
-            <url>https://repo.eclipse.org/content/repositories/dash-licenses-releases</url>
+            <url>https://repo.eclipse.org/content/repositories/dash-maven2-releases</url>
         </pluginRepository>
     </pluginRepositories>
 
