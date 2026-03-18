@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -51,6 +50,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
@@ -99,19 +99,6 @@ public class DmfApiConfiguration {
     }
 
     /**
-     * Create a {@link RabbitAdmin} and ignore declaration exceptions.
-     * {@link RabbitAdmin#setIgnoreDeclarationExceptions(boolean)}
-     *
-     * @return the bean
-     */
-    @Bean
-    public RabbitAdmin rabbitAdmin() {
-        final RabbitAdmin rabbitAdmin = new RabbitAdmin(rabbitConnectionFactory);
-        rabbitAdmin.setIgnoreDeclarationExceptions(true);
-        return rabbitAdmin;
-    }
-
-    /**
      * @return {@link RabbitTemplate} with automatic retry, published confirms and {@link Jackson2JsonMessageConverter}.
      */
     @Bean
@@ -132,84 +119,6 @@ public class DmfApiConfiguration {
         });
 
         return rabbitTemplate;
-    }
-
-    /**
-     * Create the DMF API receiver queue for retrieving DMF messages.
-     *
-     * @return the receiver queue
-     */
-    @Bean
-    public Queue dmfReceiverQueue() {
-        return new Queue(
-                amqpProperties.getReceiverQueue(),
-                true, false, false,
-                amqpDeadletterProperties.getDeadLetterExchangeArgs(amqpProperties.getDeadLetterExchange()));
-    }
-
-    /**
-     * Create the DMF API receiver queue for authentication requests called by 3rd
-     * party artifact storages for download authorization by devices.
-     *
-     * @return the receiver queue
-     */
-    @Bean
-    public Queue authenticationReceiverQueue() {
-        return QueueBuilder.nonDurable(amqpProperties.getAuthenticationReceiverQueue())
-                .autoDelete()
-                .withArguments(getTTLMaxArgsAuthenticationQueue())
-                .build();
-    }
-
-    /**
-     * Create DMF exchange.
-     *
-     * @return the fanout exchange
-     */
-    @Bean
-    public FanoutExchange dmfSenderExchange() {
-        return new FanoutExchange(AmqpSettings.DMF_EXCHANGE);
-    }
-
-    /**
-     * Create the Binding {@link DmfApiConfiguration#dmfReceiverQueue()} to
-     * {@link DmfApiConfiguration#dmfSenderExchange()}.
-     *
-     * @return the binding and create the queue and exchange
-     */
-    @Bean
-    public Binding bindDmfSenderExchangeToDmfQueue() {
-        return BindingBuilder.bind(dmfReceiverQueue()).to(dmfSenderExchange());
-    }
-
-    /**
-     * Create dead letter queue.
-     *
-     * @return the queue
-     */
-    @Bean
-    public Queue deadLetterQueue() {
-        return amqpDeadletterProperties.createDeadletterQueue(amqpProperties.getDeadLetterQueue());
-    }
-
-    /**
-     * Create the dead letter fanout exchange.
-     *
-     * @return the fanout exchange
-     */
-    @Bean
-    public FanoutExchange deadLetterExchange() {
-        return new FanoutExchange(amqpProperties.getDeadLetterExchange());
-    }
-
-    /**
-     * Create the Binding deadLetterQueue to deadLetterExchange.
-     *
-     * @return the binding
-     */
-    @Bean
-    public Binding bindDeadLetterQueueToDeadLetterExchange() {
-        return BindingBuilder.bind(deadLetterQueue()).to(deadLetterExchange());
     }
 
     /**
@@ -271,13 +180,6 @@ public class DmfApiConfiguration {
                 deploymentManagement);
     }
 
-    private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {
-        final Map<String, Object> args = new HashMap<>(2);
-        args.put("x-message-ttl", Duration.ofSeconds(30).toMillis());
-        args.put("x-max-length", 1_000);
-        return args;
-    }
-
     @ToString
     private static class SqlFatalExceptionStrategy implements FatalExceptionStrategy {
 
@@ -310,6 +212,124 @@ public class DmfApiConfiguration {
                 }
             }
             return false;
+        }
+    }
+
+    /**
+     * Auto-declaration of DMF AMQP infrastructure (queues, exchanges, bindings and {@link RabbitAdmin}).
+     */
+    @Configuration
+    @ConditionalOnProperty(prefix = "hawkbit.dmf.rabbitmq", name = "auto-declare", matchIfMissing = true)
+    static class DmfAmqpDeclarationConfiguration {
+
+        private final AmqpProperties amqpProperties;
+        private final AmqpDeadletterProperties amqpDeadletterProperties;
+        private final ConnectionFactory rabbitConnectionFactory;
+
+        DmfAmqpDeclarationConfiguration(
+                final AmqpProperties amqpProperties,
+                final AmqpDeadletterProperties amqpDeadletterProperties,
+                final ConnectionFactory rabbitConnectionFactory) {
+            this.amqpProperties = amqpProperties;
+            this.amqpDeadletterProperties = amqpDeadletterProperties;
+            this.rabbitConnectionFactory = rabbitConnectionFactory;
+        }
+
+        /**
+         * Create a {@link RabbitAdmin} and ignore declaration exceptions.
+         * {@link RabbitAdmin#setIgnoreDeclarationExceptions(boolean)}
+         *
+         * @return the bean
+         */
+        @Bean
+        public RabbitAdmin rabbitAdmin() {
+            final RabbitAdmin rabbitAdmin = new RabbitAdmin(rabbitConnectionFactory);
+            rabbitAdmin.setIgnoreDeclarationExceptions(true);
+            return rabbitAdmin;
+        }
+
+        /**
+         * Create the DMF API receiver queue for retrieving DMF messages.
+         *
+         * @return the receiver queue
+         */
+        @Bean
+        public Queue dmfReceiverQueue() {
+            return new Queue(
+                    amqpProperties.getReceiverQueue(),
+                    true, false, false,
+                    amqpDeadletterProperties.getDeadLetterExchangeArgs(amqpProperties.getDeadLetterExchange()));
+        }
+
+        /**
+         * Create the DMF API receiver queue for authentication requests called by 3rd
+         * party artifact storages for download authorization by devices.
+         *
+         * @return the receiver queue
+         */
+        @Bean
+        public Queue authenticationReceiverQueue() {
+            return QueueBuilder.nonDurable(amqpProperties.getAuthenticationReceiverQueue())
+                    .autoDelete()
+                    .withArguments(getTTLMaxArgsAuthenticationQueue())
+                    .build();
+        }
+
+        /**
+         * Create DMF exchange.
+         *
+         * @return the fanout exchange
+         */
+        @Bean
+        public FanoutExchange dmfSenderExchange() {
+            return new FanoutExchange(AmqpSettings.DMF_EXCHANGE);
+        }
+
+        /**
+         * Create the Binding dmfReceiverQueue to dmfSenderExchange.
+         *
+         * @return the binding and create the queue and exchange
+         */
+        @Bean
+        public Binding bindDmfSenderExchangeToDmfQueue() {
+            return BindingBuilder.bind(dmfReceiverQueue()).to(dmfSenderExchange());
+        }
+
+        /**
+         * Create dead letter queue.
+         *
+         * @return the queue
+         */
+        @Bean
+        public Queue deadLetterQueue() {
+            return amqpDeadletterProperties.createDeadletterQueue(amqpProperties.getDeadLetterQueue());
+        }
+
+        /**
+         * Create the dead letter fanout exchange.
+         *
+         * @return the fanout exchange
+         */
+        @Bean
+        public FanoutExchange deadLetterExchange() {
+            return new FanoutExchange(amqpProperties.getDeadLetterExchange());
+        }
+
+        /**
+         * Create the Binding deadLetterQueue to deadLetterExchange.
+         *
+         * @return the binding
+         */
+        @Bean
+        public Binding bindDeadLetterQueueToDeadLetterExchange() {
+            return BindingBuilder.bind(deadLetterQueue()).to(deadLetterExchange());
+        }
+
+        private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {
+            final Map<String, Object> args = new HashMap<>(2);
+            args.put("x-message-ttl", Duration.ofSeconds(30).toMillis());
+            args.put("x-max-length", 1_000);
+            return args;
         }
     }
 }
