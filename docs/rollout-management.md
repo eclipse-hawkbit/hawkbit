@@ -47,13 +47,13 @@ The cascading execution of the deployment groups is based on two thresholds that
 
 ### State Machine on Rollout
 
-<p align="center">
-  <img src="images/rollout-state-machine.png" alt="Clustering Diagram" width="1200"/>
+<p>
+  <img src="images/rollout-state-machine.png" alt="Rollout state machine diagram" width="1200"/>
 </p>
+
 
 ### State Machine on Rollout Deployment Group
-<p align="center">
-  <img src="images/deploymnet-group-state-machine.png" alt="Clustering Diagram" width="1200"/>
-</p>
 
----
+<p>
+  <img src="images/deploymnet-group-state-machine.png"  alt="Deployment group state machine diagram" width="1200"/>
+</p>
