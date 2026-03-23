@@ -1,4 +1,4 @@
-<img src=hawkbit_logo.png width=533 height=246 />
+<img alt="hawkBit" src=docs/images/hawkbit_logo.png width=530/>
 
 # Eclipse hawkBit™ - Update Server
 
@@ -117,7 +117,7 @@ at [guide](https://www.eclipse.org/hawkbit/guides/runhawkbit/) -> _Configure Rab
 # hawkBit (Spring boot) starters
 
 Next to the [Update Server](hawkbit-monolith/hawkbit-update-server) we are also providing a set
-of [Spring Boot Starters](hawkbit-starters) to quick start your
+of [Spring Boot Starters](hawkbit-monolith) to quick start your
 own [Spring Boot](https://projects.spring.io/spring-boot/) based application.
 
 # Clone, build and run hawkBit

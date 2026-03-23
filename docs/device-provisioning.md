@@ -28,29 +28,30 @@ In this scenario, an administrator or backend system first provision the device 
 ### Workflow
 ```mermaid
  %%{init: {'theme':'base', 'themeVariables': {
-    'primaryColor':'#6BAF4A',
-    'primaryTextColor':'#000',
-    'primaryBorderColor':'#6BAF4A',
-    'lineColor':'#4A2C5C',
-    'secondaryColor':'#E8D5F2',
-    'tertiaryColor':'#6BAF4A',
-    'noteBkgColor':'#F5F5F5',
-    'noteTextColor':'#000',
-    'noteBorderColor':'#6BAF4A',
-    'actorBorder':'#4A2C5C',
-    'actorBkg':'#6BAF4A',
-    'actorTextColor':'#000',
-    'actorLineColor':'#4A2C5C',
-    'signalColor':'#4A2C5C',
-    'signalTextColor':'#000',
-    'labelBoxBkgColor':'#E8D5F2',
-    'labelBoxBorderColor':'#6BAF4A',
-    'labelTextColor':'#000',
-    'loopTextColor':'#000',
-    'activationBorderColor':'#4A2C5C',
-    'activationBkgColor':'#F5F5F5',
-    'sequenceNumberColor':'#FFF'
-  }}}%%
+      'primaryColor':'#027ABE',
+      'primaryTextColor':'#FFF',
+      'primaryBorderColor':'#015585',
+      'lineColor':'#43464A',
+      'secondaryColor':'#9ABFDB',
+      'tertiaryColor':'#027ABE',
+      'noteBkgColor':'#F0EEEA',
+      'noteTextColor':'#43464A',
+      'noteBorderColor':'#015585',
+      'actorBorder':'#015585',
+      'actorBkg':'#027ABE',
+      'actorTextColor':'#FFF',
+      'actorLineColor':'#43464A',
+      'signalColor':'#43464A',
+      'signalTextColor':'#43464A',
+      'labelBoxBkgColor':'#9ABFDB',
+      'labelBoxBorderColor':'#015585',
+      'labelTextColor':'#015585',
+      'loopTextColor':'#43464A',
+      'activationBorderColor':'#015585',
+      'activationBkgColor':'#F0EEEA',
+      'sequenceNumberColor':'#FFF'
+    }}}%%
+
 sequenceDiagram
     participant Admin as Admin/Backend System
     participant MgmtAPI as Management API<br/>(REST)
@@ -256,29 +257,29 @@ see [Configuration Properties](#configuration-properties) below for details on h
 ### Workflow
 ```mermaid
  %%{init: {'theme':'base', 'themeVariables': {
-    'primaryColor':'#6BAF4A',
-    'primaryTextColor':'#000',
-    'primaryBorderColor':'#6BAF4A',
-    'lineColor':'#4A2C5C',
-    'secondaryColor':'#E8D5F2',
-    'tertiaryColor':'#6BAF4A',
-    'noteBkgColor':'#F5F5F5',
-    'noteTextColor':'#000',
-    'noteBorderColor':'#6BAF4A',
-    'actorBorder':'#4A2C5C',
-    'actorBkg':'#6BAF4A',
-    'actorTextColor':'#000',
-    'actorLineColor':'#4A2C5C',
-    'signalColor':'#4A2C5C',
-    'signalTextColor':'#000',
-    'labelBoxBkgColor':'#E8D5F2',
-    'labelBoxBorderColor':'#6BAF4A',
-    'labelTextColor':'#000',
-    'loopTextColor':'#000',
-    'activationBorderColor':'#4A2C5C',
-    'activationBkgColor':'#F5F5F5',
-    'sequenceNumberColor':'#FFF'
-  }}}%%
+      'primaryColor':'#027ABE',
+      'primaryTextColor':'#FFF',
+      'primaryBorderColor':'#015585',
+      'lineColor':'#43464A',
+      'secondaryColor':'#9ABFDB',
+      'tertiaryColor':'#027ABE',
+      'noteBkgColor':'#F0EEEA',
+      'noteTextColor':'#43464A',
+      'noteBorderColor':'#015585',
+      'actorBorder':'#015585',
+      'actorBkg':'#027ABE',
+      'actorTextColor':'#FFF',
+      'actorLineColor':'#43464A',
+      'signalColor':'#43464A',
+      'signalTextColor':'#43464A',
+      'labelBoxBkgColor':'#9ABFDB',
+      'labelBoxBorderColor':'#015585',
+      'labelTextColor':'#015585',
+      'loopTextColor':'#43464A',
+      'activationBorderColor':'#015585',
+      'activationBkgColor':'#F0EEEA',
+      'sequenceNumberColor':'#FFF'
+    }}}%%
 sequenceDiagram
     participant Device as Device
     participant DDIAPI as DDI API<br/>(REST)
