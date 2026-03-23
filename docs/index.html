@@ -17,6 +17,7 @@ SPDX-License-Identifier: EPL-2.0
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="description" content="Description">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <link rel="icon" href="images/hawkbit.svg" type="image/svg+xml">
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
 </head>
 
@@ -62,17 +63,39 @@ SPDX-License-Identifier: EPL-2.0
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-http.min.js"></script>
     <!-- Latest v2.x.x -->
     <script src="https://unpkg.com/docsify-copy-code@2"></script>
+    <!-- Mermaid -->
+    <script src="//cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script src="//unpkg.com/docsify-mermaid@2.0.1/dist/docsify-mermaid.js"></script>
+    <script>mermaid.initialize({ startOnLoad: false, theme: 'default' });</script>
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 
 <style>
-  .sidebar .sidebar-sep {
-    margin: 12px 0;
-    border: 0;
-    height: 1px;
-    background: #0ea5ea;
+
+  body, input {
+      background-color: #f0eeea;
   }
+
+  .sidebar-sep {
+      margin: 12px 0;
+      border: 0;
+      height: 1px;
+  }
+
+  .sidebar, .sidebar-toggle, .sidebar ul li a {
+      background-color: #43464A;
+      color: #f0eeea;
+  }
+
+  .sidebar ul li.active>a {
+      color: #027abe;
+  }
+
+  .sidebar h1 {
+      font-weight: 700;
+  }
+
 </style>
     
 <style>
