@@ -32,19 +32,21 @@ public class TargetPollEvent extends RemoteTenantAwareEvent {
     private static final long serialVersionUID = 1L;
 
     private String targetAddress;
+    private long lastTargetPoll;
     private List<String> controllerIds;
 
-    public TargetPollEvent(final List<String> controllerIds,final String tenant) {
+    public TargetPollEvent(final List<String> controllerIds, final long lastTargetPoll, final String tenant) {
         super(tenant, tenant); // source is tenant
+        this.lastTargetPoll = lastTargetPoll;
         this.controllerIds = Collections.unmodifiableList(controllerIds);
     }
 
-    public TargetPollEvent(final String controllerId, final String tenant) {
-        this(List.of(controllerId), tenant);
+    public TargetPollEvent(final String controllerId, final long timestamp, final String tenant) {
+        this(List.of(controllerId), timestamp, tenant);
     }
 
     public TargetPollEvent(final Target target) {
-        this(List.of(target.getControllerId()), target.getTenant());
+        this(List.of(target.getControllerId()), target.getLastTargetQuery(), target.getTenant()); // here expect last target query to be already set
         this.targetAddress = target.getAddress();
     }
 }

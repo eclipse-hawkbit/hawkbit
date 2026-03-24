@@ -712,9 +712,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 Constants.MAX_ENTRIES_IN_STATEMENT);
 
         pollChunks.forEach(chunk -> {
-            setLastTargetQuery(tenant, java.lang.System.currentTimeMillis(), chunk);
+            final long lastTargetQuery = java.lang.System.currentTimeMillis();
+            setLastTargetQuery(tenant, lastTargetQuery, chunk);
             afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
-                    .publishEvent(new TargetPollEvent(chunk, tenant)));
+                    .publishEvent(new TargetPollEvent(chunk, lastTargetQuery, tenant)));
         });
 
         return null;
