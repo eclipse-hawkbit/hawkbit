@@ -30,8 +30,7 @@ SPDX-License-Identifier: EPL-2.0
                  errorText: 'Error',
                  successText: 'Copied',
                 },
-                name: '<span>hawkBit</span>',
-//                repo: 'eclipse-hawkbit/hawkbit',
+                name: ' ',
                 themeColor: '#0ea5ea',
                 coverpage: true,    
                 auto2top: true,
@@ -47,6 +46,29 @@ SPDX-License-Identifier: EPL-2.0
                     depth: 3
                 }
             }
+    </script>
+    <script>
+    (function () {
+      function logoPlugin(hook) {
+        hook.ready(function () {
+          fetch('images/hawkbit_logo.svg')
+            .then(function (r) { return r.text(); })
+            .then(function (svg) {
+              var el = document.querySelector('.app-name');
+              if (!el) return;
+              var div = document.createElement('div');
+              div.innerHTML = svg;
+              var svgEl = div.querySelector('svg');
+              svgEl.setAttribute('width', '200');
+              svgEl.removeAttribute('height');
+              svgEl.style.setProperty('--logo-color', '#F0EEEA');
+              el.innerHTML = '';
+              el.appendChild(svgEl);
+            });
+        });
+      }
+      window.$docsify.plugins = [].concat(logoPlugin, window.$docsify.plugins || []);
+    })();
     </script>
     <!-- Docsify v4 -->
     <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
@@ -90,10 +112,6 @@ SPDX-License-Identifier: EPL-2.0
 
   .sidebar ul li.active>a {
       color: #027abe;
-  }
-
-  .sidebar h1 {
-      font-weight: 700;
   }
 
   thead tr {
