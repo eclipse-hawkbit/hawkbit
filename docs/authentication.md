@@ -93,7 +93,7 @@ of simplification we assume that there are not intermediate certificates and the
 - client has the client.crt, client.key and server_ca.crt
 - server (in this case reverse proxy) has the server.crt, server.key and client_ca.crt
 
-<p align="center">
+<p>
   <img src="images/exampleReverseProxyArchitecture.png" alt="eclipse foundation logo" width="1400">
 </p>
 

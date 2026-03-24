@@ -6,7 +6,7 @@ concepts and how to setup your own cluster. You can find additional information 
 ---
 
 ### Big picture
-<p align="center">
+<p>
   <img src="images/clustering_overview.png" alt="Clustering Diagram" width="1100"/>
 </p>
 
@@ -19,7 +19,7 @@ There are different [binder implementations](https://docs.spring.io/spring-cloud
 Every node gets its own queue to receive cluster events, the default payload is JSON.
 
 
-<p align="center">
+<p>
   <img src="images/eventing-within-cluster.png" alt="Clustering Diagram" width="1100"/>
 </p>
 

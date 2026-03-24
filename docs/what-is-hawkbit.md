@@ -2,7 +2,7 @@
 
 Eclipse **hawkBit™** is a domain-independent back-end framework for rolling out software updates to constrained edge devices as well as more powerful controllers and gateways connected to IP-based networking infrastructure.
 
-<p align="center">
+<p>
   <img src="images/hawkbit_logo.svg" alt="eclipse foundation logo" width="800">
 </p>
 
