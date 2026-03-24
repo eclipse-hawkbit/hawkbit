@@ -455,7 +455,7 @@ Authorization: GatewayToken mySecureToken987654321
 | **Pre-assignment** | Possible before device connects | Only after first poll |
 | **Scalability** | Manual or scripted bulk creation | Automatic, scales infinitely |
 | **Device Attributes** | Must be set via separate request | Device sends on first connection |
-| **Audit Trail** | `createdBy: admin` | `createdBy: system` |
+| **Audit Trail** | createdBy: admin | createdBy: system |
 
 ---
 

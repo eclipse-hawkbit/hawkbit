@@ -16,6 +16,6 @@ provisioning".
 | REGISTERED | Target registered at the update server but no _Distribution Set_ assigned. Is the initial starting point for plug-and-play devices.                                         |
 
 ## Transitions
-<p align="center">
-  <img src="images/targetStatusStates.png" alt="Clustering Diagram" width="1100"/>
+<p>
+  <img src="images/targetStatusStates.png" alt="Clustering Diagram" width="800"/>
 </p>

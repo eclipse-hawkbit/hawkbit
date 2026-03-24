@@ -22,16 +22,16 @@ It is possible that in the future hawkBit will fully leverage these additional s
 
 The *DDI* API allows the device to provide the following feedback messages:
 
-| **DDI `status.execution` type** | **Handling by update server** | **Mapped ActionStatus type** |
-|--------------------------------|--------------------------------|-------------------------------|
-| CANCELED    | This is sent by the target as confirmation of a cancellation request by the update server. | CANCELED |
-| REJECTED    | This is sent by the target in case an update or cancellation is rejected, i.e. cannot be fulfilled at this point in time. Note: the target should send a CLOSED→ERROR if it believes it will not be able to proceed the action at all. | WARNING |
-| CLOSED      | Target completes the action either with [`status.result.finished`](../status-result-finished.md) SUCCESS or FAILURE as result. Note: DDI defines also a status NONE which will not be interpreted by the update server and handled like SUCCESS. | **ERROR** (DDI FAILURE) or **FINISHED** (DDI SUCCESS or NONE) |
-| DOWNLOAD    | This can be used by the target to inform that it is downloading artifacts of the action. | DOWNLOAD |
-| DOWNLOADED  | This can be used by the target to inform that it has downloaded artifacts of the action. | DOWNLOADED |
-| PROCEEDING  | This can be used by the target to inform that it is working on the action. | RUNNING |
-| SCHEDULED   | This can be used by the target to inform that it scheduled the action. | RUNNING |
-| RESUMED     | This can be used by the target to inform that it continued to work on the action. | RUNNING |
+| DDI status.execution type | Handling by update server | Mapped ActionStatus type                                      |
+|-------------------------------|----------------------------|---------------------------------------------------------------|
+| CANCELED                      | This is sent by the target as confirmation of a cancellation request by the update server. | CANCELED                                                      |
+| REJECTED                      | This is sent by the target in case an update or cancellation is rejected, i.e. cannot be fulfilled at this point in time. Note: the target should send a CLOSED→ERROR if it believes it will not be able to proceed the action at all. | WARNING                                                       |
+| CLOSED                        | Target completes the action either with **status.result.finished** SUCCESS or FAILURE as result. Note: DDI defines also a status NONE which will not be interpreted by the update server and handled like SUCCESS. | **ERROR** (DDI FAILURE) or **FINISHED** (DDI SUCCESS or NONE) |
+| DOWNLOAD                      | This can be used by the target to inform that it is downloading artifacts of the action. | DOWNLOAD                                                      |
+| DOWNLOADED                    | This can be used by the target to inform that it has downloaded artifacts of the action. | DOWNLOADED                                                    |
+| PROCEEDING                    | This can be used by the target to inform that it is working on the action. | RUNNING                                                       |
+| SCHEDULED                     | This can be used by the target to inform that it scheduled the action. | RUNNING                                                       |
+| RESUMED                       | This can be used by the target to inform that it continued to work on the action. | RUNNING                                                       |
 
 ---
 
