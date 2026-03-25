@@ -10,6 +10,8 @@
 package org.eclipse.hawkbit.repository.event.remote;
 
 import java.io.Serial;
+import java.util.Collections;
+import java.util.List;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -29,16 +31,22 @@ public class TargetPollEvent extends RemoteTenantAwareEvent {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String controllerId;
     private String targetAddress;
+    private long lastTargetPoll;
+    private List<String> controllerIds;
 
-    public TargetPollEvent(final String controllerId, final String tenant) {
-        super(tenant, controllerId);
-        this.controllerId = controllerId;
+    public TargetPollEvent(final List<String> controllerIds, final long lastTargetPoll, final String tenant) {
+        super(tenant, tenant); // source is tenant
+        this.lastTargetPoll = lastTargetPoll;
+        this.controllerIds = Collections.unmodifiableList(controllerIds);
+    }
+
+    public TargetPollEvent(final String controllerId, final long timestamp, final String tenant) {
+        this(List.of(controllerId), timestamp, tenant);
     }
 
     public TargetPollEvent(final Target target) {
-        this(target.getControllerId(), target.getTenant());
+        this(List.of(target.getControllerId()), target.getLastTargetQuery(), target.getTenant()); // here expect last target query to be already set
         this.targetAddress = target.getAddress();
     }
 }
