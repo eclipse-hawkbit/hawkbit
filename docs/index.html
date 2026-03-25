@@ -62,8 +62,12 @@ SPDX-License-Identifier: EPL-2.0
               svgEl.setAttribute('width', '200');
               svgEl.removeAttribute('height');
               svgEl.style.setProperty('--logo-color', '#F0EEEA');
+              var link = el.querySelector('a') || document.createElement('a');
+              link.href = '#/';
+              link.innerHTML = '';
+              link.appendChild(svgEl);
               el.innerHTML = '';
-              el.appendChild(svgEl);
+              el.appendChild(link);
             });
         });
       }
