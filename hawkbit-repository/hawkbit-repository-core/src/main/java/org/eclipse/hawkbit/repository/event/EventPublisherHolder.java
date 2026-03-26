@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
@@ -74,7 +75,8 @@ public final class EventPublisherHolder {
             CancelTargetAssignmentEvent.class,
             TargetAttributesRequestedEvent.class,
             ActionCreatedEvent.class,
-            ActionUpdatedEvent.class
+            ActionUpdatedEvent.class,
+            TargetPollEvent.class
     );
 
     @Autowired
