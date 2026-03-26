@@ -70,6 +70,7 @@ import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistribut
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetPollServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetUpdatedServiceEvent;
 
 /**
@@ -181,6 +182,7 @@ public class EventType {
         TYPES.put(1005, CancelTargetAssignmentServiceEvent.class);
         TYPES.put(1008, ActionCreatedServiceEvent.class);
         TYPES.put(1009, ActionUpdatedServiceEvent.class);
+        TYPES.put(1010, TargetPollServiceEvent.class);
     }
 
     /**
