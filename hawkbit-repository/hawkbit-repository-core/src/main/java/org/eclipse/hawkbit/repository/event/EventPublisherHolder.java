@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
@@ -31,6 +32,7 @@ import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistribut
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetPollServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetUpdatedServiceEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -74,7 +76,8 @@ public final class EventPublisherHolder {
             CancelTargetAssignmentEvent.class,
             TargetAttributesRequestedEvent.class,
             ActionCreatedEvent.class,
-            ActionUpdatedEvent.class
+            ActionUpdatedEvent.class,
+            TargetPollEvent.class
     );
 
     @Autowired
@@ -181,6 +184,8 @@ public final class EventPublisherHolder {
                 return new ActionCreatedServiceEvent(actionCreatedEvent);
             } else if (event instanceof ActionUpdatedEvent actionUpdatedEvent) {
                 return new ActionUpdatedServiceEvent(actionUpdatedEvent);
+            } else if (event instanceof TargetPollEvent targetPollEvent) {
+                return new TargetPollServiceEvent(targetPollEvent);
             }
             return null;
         }

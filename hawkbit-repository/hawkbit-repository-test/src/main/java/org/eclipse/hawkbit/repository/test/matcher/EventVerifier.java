@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
@@ -49,6 +50,7 @@ import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistribut
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetPollServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetUpdatedServiceEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
@@ -180,6 +182,8 @@ public class EventVerifier extends AbstractTestExecutionListener {
             modifiedEvents.add(new DynamicExpect(ActionCreatedServiceEvent.class, event.count()));
         } else if (type.isAssignableFrom(ActionUpdatedEvent.class)) {
             modifiedEvents.add(new DynamicExpect(ActionUpdatedServiceEvent.class, event.count()));
+        } else if (type.isAssignableFrom(TargetPollEvent.class)) {
+            modifiedEvents.add(new DynamicExpect(TargetPollServiceEvent.class, event.count()));
         }
     }
 

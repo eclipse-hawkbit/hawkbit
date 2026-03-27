@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.event.remote.service.TargetAssignDistribut
 import org.eclipse.hawkbit.repository.event.remote.service.TargetAttributesRequestedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetCreatedServiceEvent;
 import org.eclipse.hawkbit.repository.event.remote.service.TargetDeletedServiceEvent;
+import org.eclipse.hawkbit.repository.event.remote.service.TargetPollServiceEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -78,7 +79,8 @@ class ServiceEventsTest {
                 CancelTargetAssignmentEvent.class,
                 TargetAttributesRequestedEvent.class,
                 ActionCreatedEvent.class,
-                ActionUpdatedEvent.class
+                ActionUpdatedEvent.class,
+                TargetPollEvent.class
         );
         assertEquals(EventPublisherHolder.SERVICE_EVENTS, expected);
     }
@@ -128,6 +130,14 @@ class ServiceEventsTest {
 
         verify(streamBridge).send("fanout", event);
         verify(streamBridge).send(eq("group"), any(CancelTargetAssignmentServiceEvent.class));
+    }
+
+    @Test
+    void testTargetPollEventIsSent() {
+        TargetPollEvent event = new TargetPollEvent();
+        publisher.publishEvent(event);
+        verify(streamBridge).send("fanout", event);
+        verify(streamBridge).send(eq("group"), any(TargetPollServiceEvent.class));
     }
 
     private Action mockAction() {
