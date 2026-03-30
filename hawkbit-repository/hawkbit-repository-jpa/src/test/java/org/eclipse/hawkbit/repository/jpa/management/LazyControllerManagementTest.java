@@ -11,9 +11,10 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -21,7 +22,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 
 /**
@@ -32,9 +32,6 @@ import org.springframework.test.context.TestPropertySource;
         "hawkbit.server.repository.eagerPollPersistence=false",
         "hawkbit.server.repository.pollPersistenceFlushTime=1000" })
 class LazyControllerManagementTest extends AbstractJpaIntegrationTest {
-
-    @Autowired
-    private RepositoryProperties repositoryProperties;
 
     /**
      * Verifies that lazy target poll update is executed as specified.
@@ -49,11 +46,15 @@ class LazyControllerManagementTest extends AbstractJpaIntegrationTest {
 
         TimeUnit.MILLISECONDS.sleep(10);
         controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
-        TimeUnit.MILLISECONDS.sleep(repositoryProperties.getPollPersistenceFlushTime() + 10);
 
-        final Target updated = targetManagement.find(target.getId()).get();
-
-        assertThat(updated.getOptLockRevision()).isEqualTo(target.getOptLockRevision());
-        assertThat(updated.getLastTargetQuery()).isGreaterThan(target.getLastTargetQuery());
+        Awaitility.await()
+                .pollInSameThread()
+                .pollInterval(Duration.ofMillis(100))
+                .atMost(Duration.ofSeconds(5))
+                .untilAsserted(() -> {
+                    final Target updated = targetManagement.find(target.getId()).get();
+                    assertThat(updated.getOptLockRevision()).isEqualTo(target.getOptLockRevision());
+                    assertThat(updated.getLastTargetQuery()).isGreaterThan(target.getLastTargetQuery());
+                });
     }
 }
