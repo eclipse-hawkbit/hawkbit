@@ -9,7 +9,7 @@ These versions of Eclipse hawkBit are currently being supported with security up
 
 | Version | Supported          |
 |---------| ------------------ |
-| 1.0.x   | ✅                 |
+| 1.0.x   | :white_check_mark: |
 
 ## Reporting a Vulnerability
 
