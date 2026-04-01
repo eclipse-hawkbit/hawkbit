@@ -23,12 +23,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           ref: ${{ inputs.ref }}
 
       - name: Set up JDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v5.2.0
         with:
           distribution: "temurin"
           java-version: 21
@@ -43,7 +43,7 @@ jobs:
           cd ../../..
 
       - name: Scan hawkbit-ddi-server
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1  # v0.35.0
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: 'hawkbit/hawkbit-ddi-server:latest'
           ignore-unfixed: true
@@ -54,7 +54,7 @@ jobs:
           output: 'scans/hawkbit-ddi-server.sarif'
 
       - name: Scan hawkbit-dmf-server
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1  # v0.35.0
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: 'hawkbit/hawkbit-dmf-server:latest'
           ignore-unfixed: true
@@ -65,7 +65,7 @@ jobs:
           output: 'scans/hawkbit-dmf-server.sarif'
 
       - name: Scan hawkbit-mgmt-server
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1  # v0.35.0
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: 'hawkbit/hawkbit-mgmt-server:latest'
           ignore-unfixed: true
@@ -76,7 +76,7 @@ jobs:
           output: 'scans/hawkbit-mgmt-server.sarif'
 
       - name: Scan hawkbit-ui
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1  # v0.35.0
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: 'hawkbit/hawkbit-ui:latest'
           ignore-unfixed: true
@@ -87,7 +87,7 @@ jobs:
           output: 'scans/hawkbit-ui.sarif'
 
       - name: Scan hawkbit-update-server
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1  # v0.33.1
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: 'hawkbit/hawkbit-update-server:latest'
           ignore-unfixed: true
@@ -98,7 +98,7 @@ jobs:
           output: 'scans/hawkbit-update-server.sarif'
 
       - name: Scan hawkbit-repository-jpa-init
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1  # v0.33.1
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: 'hawkbit/hawkbit-repository-jpa-init:latest'
           ignore-unfixed: true
@@ -110,39 +110,39 @@ jobs:
 
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-ddi-server
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v4.35.1
         with:
           sarif_file: 'scans/hawkbit-ddi-server.sarif'
           category: "Container Images (hawkbit-ddi-server)"
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-dmf-server
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v4.35.1
         with:
           sarif_file: 'scans/hawkbit-dmf-server.sarif'
           category: "Container Images (hawkbit-dmf-server)"
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-mgmt-server
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v4.35.1
         with:
           sarif_file: 'scans/hawkbit-mgmt-server.sarif'
           category: "Container Images (hawkbit-mgmt-server)"
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-ui
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v4.35.1
         with:
           sarif_file: 'scans/hawkbit-ui.sarif'
           category: "Container Images (hawkbit-ui)"
 
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-update-server
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v4.35.1
         with:
           sarif_file: 'scans/hawkbit-update-server.sarif'
           category: "Container Images (hawkbit-update-server)"
 
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-repository-jpa-init
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v4.35.1
         with:
           sarif_file: 'scans/hawkbit-repository-jpa-init.sarif'
           category: "Container Images (hawkbit-repository-jpa-init)"
