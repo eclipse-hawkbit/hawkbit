@@ -92,7 +92,7 @@ jobs:
           - 5672:5672
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6.0.2
         with:
           ref: ${{ inputs.revision == '0-SNAPSHOT' && github.ref || inputs.revision }}
 
@@ -109,7 +109,7 @@ jobs:
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
       - name: Cache local Maven repository
-        uses: actions/cache@v5
+        uses: actions/cache@v5.0.4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
