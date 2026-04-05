@@ -41,13 +41,11 @@ class MgmtTargetAssignmentResponseBodyTest {
 
         assertThat(jsonNode.has("assigned")).as("the assigned targets count").isTrue();
         assertThat(jsonNode.get("assigned").isNumber()).as("the assigned targets count").isTrue();
-        assertThat(jsonNode.get("assigned").asLong()).as("the assigned targets count")
-                .isEqualTo(ASSIGNED_ACTIONS.size());
+        assertThat(jsonNode.get("assigned").asLong()).as("the assigned targets count").isEqualTo(ASSIGNED_ACTIONS.size());
 
         assertThat(jsonNode.has("alreadyAssigned")).as("the already assigned targets count").isTrue();
         assertThat(jsonNode.get("alreadyAssigned").isNumber()).as("the already assigned targets count").isTrue();
-        assertThat(jsonNode.get("alreadyAssigned").asLong()).as("the already assigned targets count")
-                .isEqualTo(ALREADY_ASSIGNED_COUNT);
+        assertThat(jsonNode.get("alreadyAssigned").asLong()).as("the already assigned targets count").isEqualTo(ALREADY_ASSIGNED_COUNT);
 
         assertThat(jsonNode.has("total")).as("the total targets count").isTrue();
         assertThat(jsonNode.get("total").isNumber()).as("the total targets count").isTrue();

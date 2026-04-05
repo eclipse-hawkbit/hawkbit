@@ -27,7 +27,7 @@ public abstract class AbstractRemoteEvent extends ApplicationEvent {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private final String id;
+    private String id; // not a final - jackson 3 doesn't override finals
 
     // for serialization libs like jackson
     protected AbstractRemoteEvent() {

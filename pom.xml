@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.13</version>
+        <version>4.0.5</version>
     </parent>
 
     <groupId>org.eclipse.hawkbit</groupId>
@@ -45,7 +45,7 @@
         <!-- Override vulnerable commons-fileupload used by feign-form-spring (via spring-cloud-starter-openfeign) -->
         <commons-fileupload.version>1.6.0</commons-fileupload.version>
         <!-- Override commons-lang3 version since 3.17 is vulnerable -->
-        <commons-lang-version>3.20.0</commons-lang-version>
+        <commons-lang.version>3.20.0</commons-lang.version>
         <!-- Overrides END -->
 
         <revision>0-SNAPSHOT</revision>
@@ -56,9 +56,13 @@
         <java.client.version>17</java.client.version>
 
         <!-- must be the same as the parent version -->
-        <spring.boot.version>3.5.13</spring.boot.version>
-        <spring.cloud.version>2025.0.1</spring.cloud.version>
-        <springdoc-openapi.version>2.8.16</springdoc-openapi.version>
+        <spring.boot.version>4.0.5</spring.boot.version>
+        <spring.cloud.version>2025.1.1</spring.cloud.version>
+        <springdoc-openapi.version>3.0.2</springdoc-openapi.version>
+
+        <!-- openfeign versions -->
+        <spring-cloud-openfeign.version>5.0.1</spring-cloud-openfeign.version>
+        <openfeign-hc5.version>13.11</openfeign-hc5.version>
 
         <!-- Spring boot version overrides (should be reviewed with every Spring boot upgrade) - START -->
         <!-- Newer versions needed than defined in the Spring boot -->
@@ -66,7 +70,10 @@
         <!-- Spring boot version overrides - END -->
 
         <!-- Eclipselink - START -->
-        <eclipselink.version>4.0.9</eclipselink.version>
+        <!--
+          Ethlo plugin uses 4.x dependencies - since it only does static weaving - it should be fine - but should eventually upgrade its dependencies.
+        -->
+        <eclipselink.version>5.0.0</eclipselink.version>
         <eclipselink.maven.plugin.version>3.0.2</eclipselink.maven.plugin.version>
         <!-- Eclipselink - END -->
 
@@ -98,6 +105,7 @@
         <license.maven.plugin.version>5.0.0</license.maven.plugin.version>
         <central.publishing.maven.plugin.version>0.10.0</central.publishing.maven.plugin.version>
         <maven.gpg.plugin.version>3.2.8</maven.gpg.plugin.version>
+        <spotless-maven-plugin.version>3.4.0</spotless-maven-plugin.version>
         <!-- Maven Plugin versions - END -->
 
         <!-- Test - START -->
@@ -222,7 +230,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>${commons-lang-version}</version>
+                <version>${commons-lang.version}</version>
             </dependency>
             <!-- Overrides END -->
 
@@ -261,25 +269,6 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-web</artifactId>
-                <version>${spring.boot.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.datatype</groupId>
-                        <artifactId>jackson-datatype-jdk8</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.datatype</groupId>
-                        <artifactId>jackson-datatype-jsr310</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.module</groupId>
-                        <artifactId>jackson-module-parameter-names</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter</artifactId>
                 <version>${spring.boot.version}</version>
                 <exclusions>
@@ -289,11 +278,49 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-jpa</artifactId>
+                <version>${spring.boot.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hibernate.orm</groupId>
+                        <artifactId>hibernate-core</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+                <version>${springdoc-openapi.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc-openapi.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-openfeign</artifactId>
+                <version>${spring-cloud-openfeign.version}</version>
+                <!--
+                  CVE-2025-48976: override commons-fileupload dependency - 1.5 -> 1.6.0,
+                  remove it when spring-cloud-openfeign start bringing it down,
+                  commons-fileupload 1.6.0(+) shall be added explicitly if needed
+                -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-fileupload</groupId>
+                        <artifactId>commons-fileupload</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-hc5</artifactId>
+                <version>${openfeign-hc5.version}</version>
             </dependency>
 
             <!-- Protostuff Io -->
@@ -386,7 +413,7 @@
                 -->
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>${spotless-maven-plugin.version}</version>
                 <configuration>
                     <ratchetFrom>${ratchetFrom}</ratchetFrom>
                     <java>

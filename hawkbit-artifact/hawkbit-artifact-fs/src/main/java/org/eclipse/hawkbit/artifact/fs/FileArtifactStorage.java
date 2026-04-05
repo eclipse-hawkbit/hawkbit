@@ -19,7 +19,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.hawkbit.artifact.AbstractArtifactStorage;
 import org.eclipse.hawkbit.artifact.ArtifactStorage;
 import org.eclipse.hawkbit.artifact.exception.ArtifactBinaryNotFoundException;
@@ -47,7 +46,7 @@ public class FileArtifactStorage extends AbstractArtifactStorage {
 
     @Override
     public void deleteBySha1(final String tenant, final String sha1) {
-        FileUtils.deleteQuietly(getFile(tenant, sha1));
+        deleteSilent(getFile(tenant, sha1));
     }
 
     @Override
@@ -65,7 +64,7 @@ public class FileArtifactStorage extends AbstractArtifactStorage {
 
     @Override
     public void deleteByTenant(final String tenant) {
-        FileUtils.deleteQuietly(Paths.get(artifactResourceProperties.getPath(), sanitizeTenant(tenant)).toFile());
+        deleteSilent(Paths.get(artifactResourceProperties.getPath(), sanitizeTenant(tenant)).toFile());
     }
 
     @Override
@@ -78,7 +77,7 @@ public class FileArtifactStorage extends AbstractArtifactStorage {
             throws IOException {
         final File fileSHA1Naming = getFile(tenant, base16Hashes.sha1());
         if (fileSHA1Naming.exists()) {
-            FileUtils.deleteQuietly(tempFile);
+            deleteSilent(tempFile);
         } else {
             Files.move(tempFile.toPath(), fileSHA1Naming.toPath());
         }
@@ -106,5 +105,25 @@ public class FileArtifactStorage extends AbstractArtifactStorage {
         final String folder1 = sha1.substring(length - 4, length - 2);
         final String folder2 = sha1.substring(length - 2, length);
         return Paths.get(artifactResourceProperties.getPath(), sanitizeTenant(tenant), folder1, folder2);
+    }
+
+    @SuppressWarnings({ "java:S899", "java:S4042" }) // just ignore the result - silent
+    private static void deleteSilent(final File file) {
+        if (file.exists()) {
+            if (file.isDirectory()) {
+                // delete children
+                final File[] children = file.listFiles();
+                if (children != null) {
+                    for (final File child : children) {
+                        deleteSilent(child);
+                    }
+                }
+            }
+            try {
+                file.delete(); // silent
+            } catch (final Exception ignored) {
+                // ignore
+            }
+        }
     }
 }
