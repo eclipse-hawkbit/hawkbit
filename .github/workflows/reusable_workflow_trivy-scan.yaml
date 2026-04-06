@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: aquasecurity/trivy-action@v0.35.0
+        uses: actions/checkout@v6.0.2
         with:
           ref: ${{ inputs.ref }}
 
