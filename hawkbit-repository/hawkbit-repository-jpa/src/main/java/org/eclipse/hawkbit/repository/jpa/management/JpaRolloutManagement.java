@@ -607,7 +607,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                         "SET t.assigned_distribution_set = ( " +
                         "SELECT a.distribution_set" +
                         "   FROM sp_action a" +
-                        "   WHERE a.target = t.id AND a.active = 1" +
+                        "   WHERE a.target = t.id AND a.active = TRUE" +
                         "   ORDER BY a.id ASC" +
                         "   LIMIT 1" +
                         ") " +
