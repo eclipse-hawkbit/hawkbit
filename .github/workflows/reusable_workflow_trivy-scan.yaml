@@ -42,6 +42,9 @@ jobs:
           ./build_dev.sh && \
           cd ../../..
 
+      - name: Create scan output directory
+        run: mkdir -p scans
+
       - name: Scan hawkbit-ddi-server
         uses: aquasecurity/trivy-action@v0.35.0
         with:
