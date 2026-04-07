@@ -604,7 +604,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     private int updateTargetAssignedDsWithFirstActiveAction(List<Long> targetIds) {
         final Query updateQuery = entityManager.createNativeQuery(
                 "UPDATE sp_target t " +
-                        "SET t.assigned_distribution_set = ( " +
+                        "SET assigned_distribution_set = ( " +
                         "SELECT a.distribution_set" +
                         "   FROM sp_action a" +
                         "   WHERE a.target = t.id AND a.active = TRUE" +
@@ -623,7 +623,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     private int updateTargetAssignedDsWithInstalledIfNoActiveActions(List<Long> targetIds) {
         final Query updateQuery = entityManager.createNativeQuery(
                 "UPDATE sp_target t " +
-                        "SET t.assigned_distribution_set = t.installed_distribution_set, t.update_status = 1 " +
+                        "SET assigned_distribution_set = t.installed_distribution_set, update_status = 1 " +
                         "WHERE t.id IN (" + Jpa.formatNativeQueryInClause("tid", targetIds) + ") " +
                         "    AND (SELECT count(*) FROM sp_action a " +
                         "        WHERE a.target = t.id and a.active = TRUE) = 0"
