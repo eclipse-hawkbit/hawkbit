@@ -626,7 +626,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                         "SET t.assigned_distribution_set = t.installed_distribution_set, t.update_status = 1 " +
                         "WHERE t.id IN (" + Jpa.formatNativeQueryInClause("tid", targetIds) + ") " +
                         "    AND (SELECT count(*) FROM sp_action a " +
-                        "        WHERE a.target=t.id and a.active=1) = 0"
+                        "        WHERE a.target = t.id and a.active = TRUE) = 0"
         );
         Jpa.setNativeQueryInParameter(updateQuery, "tid", targetIds);
         final int updated = updateQuery.executeUpdate();
