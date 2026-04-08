@@ -217,7 +217,7 @@ class TargetManagementTest extends AbstractRepositoryManagementWithMetadataTest<
 
         createTargetWithAttributes("4711");
 
-        final long current = java.lang.System.currentTimeMillis();
+        final long current = System.currentTimeMillis();
         controllerManagement.findOrRegisterTargetIfItDoesNotExist("4711", LOCALHOST);
 
         final DistributionSetAssignmentResult result = assignDistributionSet(testDs1.getId(), "4711");

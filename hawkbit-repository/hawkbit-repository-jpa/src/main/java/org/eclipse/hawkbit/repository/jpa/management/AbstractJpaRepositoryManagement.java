@@ -9,9 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
-import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_DELAY;
-import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -47,6 +44,7 @@ import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
+import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.repository.BaseEntityRepository;
@@ -56,8 +54,7 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.security.authorization.method.HandleAuthorizationDenied;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -131,14 +128,14 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public T create(final C create) {
         return jpaRepository.save(AccessController.Operation.CREATE, jpaEntity(create));
     }
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public List<T> create(final Collection<C> create) {
         return jpaRepository.saveAll(AccessController.Operation.CREATE, create.stream().map(this::jpaEntity).toList());
     }
@@ -189,7 +186,7 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
 
     @Override
     public long count() {
-        return jpaRepository.count(isNotDeleted().orElse(null));
+        return jpaRepository.count(isNotDeleted().orElseGet(Specification::unrestricted));
     }
 
     @Override
@@ -210,7 +207,7 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     @SuppressWarnings("java:S1066") // javaS1066 - better readable that way
     public T update(final U update) {
         final T entity = getValid(update.getId());
@@ -225,7 +222,7 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     @SuppressWarnings("java:S1066") // javaS1066 - better readable that way
     public Map<Long, T> update(final Collection<U> update) {
         final Map<Long, T> toUpdate = findAllById(update.stream().map(Identifiable::getId).toList(), true)
@@ -261,14 +258,14 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void delete(final long id) {
         delete0(List.of(id));
     }
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void delete(final Collection<Long> ids) {
         delete0(ids);
     }
