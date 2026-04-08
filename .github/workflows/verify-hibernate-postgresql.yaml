@@ -1,18 +1,6 @@
 name: Verify (Hibernate + PostgreSQL)
 
 on:
-  push:
-    branches:
-      - master
-    paths-ignore:
-      - '.3rd-party/**'
-      - 'docs/**'
-      - '**.md'
-  pull_request:
-    paths-ignore:
-      - '.3rd-party/**'
-      - 'docs/**'
-      - '**.md'
   workflow_dispatch:
 
 permissions:
