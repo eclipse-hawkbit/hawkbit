@@ -33,6 +33,19 @@ jobs:
         ports:
           - 15672:15672
           - 5672:5672
+      postgresql:
+        image: postgres:16.5
+        env:
+          POSTGRES_DB: hawkbit
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: admin
+        options: >-
+          --health-cmd "pg_isready -d hawkbit -U postgres"
+          --health-interval 20s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
 
     steps:
       - name: Parameters
