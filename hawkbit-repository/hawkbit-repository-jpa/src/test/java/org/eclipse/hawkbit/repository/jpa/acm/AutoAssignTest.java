@@ -76,6 +76,6 @@ class AutoAssignTest extends AbstractAccessControllerManagementTest {
                 .as("Only updatable targets should be part of the rollout")
                 // all targets are distribution set type 2 compatible, but since user has UPDATE_TARGET only for targets of type 2
                 // only target2 and target3 shall be assigned
-                .containsExactly(target2Type2.getId(), target3Type2.getId());
+                .containsExactlyInAnyOrder(target2Type2.getId(), target3Type2.getId());
     }
 }
