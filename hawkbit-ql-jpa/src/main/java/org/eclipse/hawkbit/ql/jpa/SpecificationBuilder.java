@@ -31,7 +31,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import jakarta.annotation.Nonnull;
-import jakarta.persistence.PersistenceException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
@@ -373,41 +372,29 @@ public class SpecificationBuilder<T> {
             }
         }
 
-        @SuppressWarnings("java:S1872") // java:S1872 - sometimes class could be unavailable at runtime
         private Predicate like(final Path<String> fieldPath, final String sqlValue) {
-            try {
-                if (caseWise(fieldPath)) {
-                    return cb.like(cb.upper(fieldPath), sqlValue.toUpperCase(), ESCAPE_CHAR);
-                } else {
-                    return cb.like(fieldPath, sqlValue, ESCAPE_CHAR);
-                }
-            } catch (final PersistenceException e) {
-                if ("%".equals(sqlValue) && fieldPath.getJavaType() != String.class &&
-                        "org.hibernate.type.descriptor.java.CoercionException".equals(e.getClass().getName())) {
-                    // hibernate throws an exception if we try to do == on non-string field with wildcard only
-                    return fieldPath.isNotNull();
-                } else {
-                    throw e;
-                }
+            // LIKE on non-String fields (e.g. bigint) with wildcard-only value is equivalent to IS NOT NULL.
+            // Must be checked before building the SQL predicate because some databases (PostgreSQL, YugabyteDB)
+            // reject LIKE on non-text columns at the SQL level, before any JPA-provider-level validation.
+            if ("%".equals(sqlValue) && fieldPath.getJavaType() != String.class) {
+                return fieldPath.isNotNull();
+            }
+            if (caseWise(fieldPath)) {
+                return cb.like(cb.upper(fieldPath), sqlValue.toUpperCase(), ESCAPE_CHAR);
+            } else {
+                return cb.like(fieldPath, sqlValue, ESCAPE_CHAR);
             }
         }
 
-        @SuppressWarnings("java:S1872") // java:S1872 - sometimes class could be unavailable at runtime
         private Predicate notLike(final Path<String> fieldPath, final String sqlValue) {
-            try {
-                if (caseWise(fieldPath)) {
-                    return cb.notLike(cb.upper(fieldPath), sqlValue.toUpperCase(), ESCAPE_CHAR);
-                } else {
-                    return cb.notLike(fieldPath, sqlValue, ESCAPE_CHAR);
-                }
-            } catch (final PersistenceException e) {
-                if ("%".equals(sqlValue) && fieldPath.getJavaType() != String.class &&
-                        "org.hibernate.type.descriptor.java.CoercionException".equals(e.getClass().getName())) {
-                    // hibernate throws an exception if we try to do == on non-string field with wildcard only
-                    return fieldPath.isNull();
-                } else {
-                    throw e;
-                }
+            // NOT LIKE on non-String fields with wildcard-only value is equivalent to IS NULL.
+            if ("%".equals(sqlValue) && fieldPath.getJavaType() != String.class) {
+                return fieldPath.isNull();
+            }
+            if (caseWise(fieldPath)) {
+                return cb.notLike(cb.upper(fieldPath), sqlValue.toUpperCase(), ESCAPE_CHAR);
+            } else {
+                return cb.notLike(fieldPath, sqlValue, ESCAPE_CHAR);
             }
         }
 
