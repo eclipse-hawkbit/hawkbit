@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.ui.security;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -29,6 +32,7 @@ public class OidcClientProperties {
         public static class Client {
 
             private boolean enabled = false;
+            private Map<String, String> customHeaders = new HashMap<>();
         }
     }
 }
