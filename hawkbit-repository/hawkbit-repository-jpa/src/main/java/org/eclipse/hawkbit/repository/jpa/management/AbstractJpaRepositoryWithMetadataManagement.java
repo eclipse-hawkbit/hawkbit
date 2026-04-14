@@ -9,9 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
-import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_DELAY;
-import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
@@ -28,13 +25,13 @@ import org.eclipse.hawkbit.ql.QueryField;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.MetadataSupport;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.WithMetadata;
 import org.eclipse.hawkbit.repository.jpa.repository.BaseEntityRepository;
 import org.eclipse.hawkbit.utils.ObjectCopyUtil;
 import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 
 @SuppressWarnings("java:S119") // java:S119 - better self explainable
@@ -76,7 +73,7 @@ abstract class AbstractJpaRepositoryWithMetadataManagement<T extends AbstractJpa
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void createMetadata(final Long id, final String key, final MV value) {
         final T jpaEntity = getValid(id);
         final Map<String, MVI> metadataValueMap = jpaEntity.getMetadata();
@@ -91,7 +88,7 @@ abstract class AbstractJpaRepositoryWithMetadataManagement<T extends AbstractJpa
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void createMetadata(final Long id, final Map<String, ? extends MV> metadata) {
         final T jpaEntity = getValid(id);
         final Map<String, MVI> metadataValueMap = jpaEntity.getMetadata();
@@ -126,7 +123,7 @@ abstract class AbstractJpaRepositoryWithMetadataManagement<T extends AbstractJpa
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = TX_RT_MAX, backoff = @Backoff(delay = TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void deleteMetadata(final Long id, final String key) {
         final T jpaEntity = getValid(id);
         final Map<String, MVI> metadataValueMap = jpaEntity.getMetadata();
