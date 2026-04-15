@@ -66,7 +66,7 @@ public final class HawkbitBaseRepository<T, ID extends Serializable> extends Sim
 
     @Override
     public Slice<T> findAllWithoutCount(@Nullable final Specification<T> spec, final Pageable pageable) {
-        final TypedQuery<T> query = getQuery(spec, pageable);
+        final TypedQuery<T> query = getQuery(spec == null ? Specification.unrestricted() : spec, pageable);
         return pageable.isUnpaged() ? new PageImpl<>(query.getResultList()) : readPageWithoutCount(query, pageable);
     }
 
@@ -104,7 +104,7 @@ public final class HawkbitBaseRepository<T, ID extends Serializable> extends Sim
 
     @Override
     public long count(@Nullable final Operation operation, @Nullable final Specification<T> spec) {
-        return count(spec);
+        return spec == null ? count() : count(spec);
     }
 
     @Override
