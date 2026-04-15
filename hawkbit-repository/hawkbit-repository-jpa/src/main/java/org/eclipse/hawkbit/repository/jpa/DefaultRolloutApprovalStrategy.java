@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 import lombok.AccessLevel;
@@ -37,9 +35,9 @@ public class DefaultRolloutApprovalStrategy implements RolloutApprovalStrategy {
      */
     @Override
     public boolean isApprovalNeeded(final Rollout rollout) {
-        return TenantConfigHelper.getAsSystem(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class)
-                && hasNoApproveRolloutPermission(getCurrentAuthentication().map(Authentication::getAuthorities).orElseGet(List::of).stream()
-                .map(GrantedAuthority::getAuthority).toList());
+        return TenantConfigHelper.getAsSystem(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class) // if approval enabled for tenant
+                && !getCurrentAuthentication().map(Authentication::getAuthorities).map(grantedAuthorities -> grantedAuthorities.stream()
+                .map(GrantedAuthority::getAuthority).anyMatch(SpPermission.APPROVE_ROLLOUT::equals)).orElse(false);
     }
 
     @Override
@@ -54,9 +52,5 @@ public class DefaultRolloutApprovalStrategy implements RolloutApprovalStrategy {
 
     private static Optional<Authentication> getCurrentAuthentication() {
         return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
-    }
-
-    private static boolean hasNoApproveRolloutPermission(final Collection<String> authorities) {
-        return authorities.stream().noneMatch(SpPermission.APPROVE_ROLLOUT::equals);
     }
 }

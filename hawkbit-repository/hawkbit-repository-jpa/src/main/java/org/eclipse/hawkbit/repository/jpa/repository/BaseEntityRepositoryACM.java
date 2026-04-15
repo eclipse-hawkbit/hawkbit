@@ -266,7 +266,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
     @NonNull
     public List<T> findAll(final Operation operation, @Nullable final Specification<T> spec) {
         if (operation == null) {
-            return repository.findAll(spec);
+            return spec == null ? repository.findAll() : repository.findAll(spec);
         } else {
             return repository.findAll(accessController.appendAccessRules(operation, spec));
         }

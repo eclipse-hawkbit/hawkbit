@@ -46,41 +46,42 @@ public final class ConfigView extends VerticalLayout {
     public ConfigView(final HawkbitMgmtClient hawkbitClient) {
         setSpacing(false);
         final Button saveButton = new Button("Save");
-        Optional.ofNullable(
-                hawkbitClient.getTenantManagementRestApi().getTenantConfiguration().getBody()).ifPresent(config ->
+        Optional.ofNullable(hawkbitClient.getTenantManagementRestApi().getTenantConfiguration().getBody()).ifPresent(config ->
                 config.forEach((k, v) -> {
-                    if (v.getValue() instanceof String strValue) {
-                        final TextField tf = new TextField(k, strValue, event -> {
-                            final MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
-                            vre.setValue(event.getValue());
-                            configValue.put(k, vre);
-                        });
-                        tf.getElement().getStyle().set(WIDTH, PX_300);
-                        add(tf);
-                    } else if (v.getValue() instanceof Boolean boolValue) {
-                        add(new Checkbox(k, boolValue, event -> {
+                    switch (v.getValue()) {
+                        case String strValue -> {
+                            final TextField tf = new TextField(k, strValue, event -> {
+                                final MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
+                                vre.setValue(event.getValue());
+                                configValue.put(k, vre);
+                            });
+                            tf.getElement().getStyle().set(WIDTH, PX_300);
+                            add(tf);
+                        }
+                        case Boolean boolValue -> add(new Checkbox(k, boolValue, event -> {
                             final MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
                             vre.setValue(event.getValue());
                             configValue.put(k, vre);
                         }));
-                    } else if (v.getValue() instanceof Long longValue) {
-                        final NumberField nf = new NumberField(k, (double) longValue, event -> {
-                            final MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
-                            vre.setValue(event.getValue());
-                            configValue.put(k, vre);
-                        });
-                        nf.getElement().getStyle().set(WIDTH, PX_300);
-                        add(nf);
-                    } else if (v.getValue() instanceof Integer intValue) {
-                        final NumberField nf = new NumberField(k, (double) intValue, event -> {
-                            MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
-                            vre.setValue(event.getValue());
-                            configValue.put(k, vre);
-                        });
-                        nf.getElement().getStyle().set(WIDTH, PX_300);
-                        add(nf);
-                    } else {
-                        log.debug("Unexpected value type: {} -> {} (class: {})",
+                        case Long longValue -> {
+                            final NumberField nf = new NumberField(k, (double) longValue, event -> {
+                                final MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
+                                vre.setValue(event.getValue());
+                                configValue.put(k, vre);
+                            });
+                            nf.getElement().getStyle().set(WIDTH, PX_300);
+                            add(nf);
+                        }
+                        case Integer intValue -> {
+                            final NumberField nf = new NumberField(k, (double) intValue, event -> {
+                                MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
+                                vre.setValue(event.getValue());
+                                configValue.put(k, vre);
+                            });
+                            nf.getElement().getStyle().set(WIDTH, PX_300);
+                            add(nf);
+                        }
+                        default -> log.debug("Unexpected value type: {} -> {} (class: {})",
                                 k, v.getValue(), v.getValue() == null ? "null" : v.getValue().getClass());
                     }
                 }));

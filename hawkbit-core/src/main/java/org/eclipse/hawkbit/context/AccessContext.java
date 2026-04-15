@@ -66,10 +66,10 @@ public class AccessContext {
      * @return the current tenant
      */
     public static String tenant() {
-        final SecurityContext context = SecurityContextHolder.getContext();
-        if (context.getAuthentication() != null) {
-            final Object principal = context.getAuthentication().getPrincipal();
-            if (context.getAuthentication().getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails) {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            final Object principal = authentication.getPrincipal();
+            if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails) {
                 return tenantAwareAuthenticationDetails.tenant();
             } else if (principal instanceof TenantAwareUser tenantAwareUser) {
                 return tenantAwareUser.getTenant();
@@ -283,7 +283,7 @@ public class AccessContext {
         if (principal instanceof OidcUser oidcUser) {
             return oidcUser.getPreferredUsername();
         }
-        return principal.toString();
+        return principal == null ? null : principal.toString();
     }
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -337,7 +337,9 @@ public class AccessContext {
         private String[] authorities;
 
         private SecCtxInfo(final SecurityContext securityContext) {
-            final Authentication authentication = securityContext.getAuthentication();
+            final Authentication authentication = Objects.requireNonNull(
+                    securityContext.getAuthentication(),
+                    "Authentication must be non-null to serialize security context");
             if (!authentication.isAuthenticated()) {
                 throw new IllegalStateException("Only authenticated context could be serialized");
             }
@@ -361,8 +363,7 @@ public class AccessContext {
             final SecurityContext ctx = SecurityContextHolder.createEmptyContext();
             final Object details = tenant == null ? null : new TenantAwareAuthenticationDetails(tenant, false);
             final ActorAware principal = () -> auditor;
-            final Collection<? extends GrantedAuthority> grantedAuthorities =
-                    Stream.of(authorities).map(SimpleGrantedAuthority::new).toList();
+            final Collection<? extends GrantedAuthority> grantedAuthorities = Stream.of(authorities).map(SimpleGrantedAuthority::new).toList();
             ctx.setAuthentication(new Authentication() {
 
                 @Override
