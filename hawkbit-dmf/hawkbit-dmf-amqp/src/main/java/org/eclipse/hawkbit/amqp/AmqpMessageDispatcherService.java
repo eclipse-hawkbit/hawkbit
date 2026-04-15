@@ -182,6 +182,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 updateAttributesEvent.getTargetAddress());
     }
 
+    @SuppressWarnings("java:S4449") // false positive - setCorrelationId param is @Nullable - but in spring - can't annotate it
     protected void sendPingResponseToDmfReceiver(final Message ping, final String tenant, final String virtualHost) {
         final Message message = MessageBuilder
                 .withBody(String.valueOf(System.currentTimeMillis()).getBytes())
@@ -200,10 +201,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        final DmfActionRequest actionRequest = new DmfActionRequest(actionId);
         final Message message = getMessageConverter().toMessage(
-                actionRequest,
-                createConnectorMessagePropertiesEvent(tenant, controllerId, EventTopic.CANCEL_DOWNLOAD));
+                new DmfActionRequest(actionId), createConnectorMessagePropertiesEvent(tenant, controllerId, EventTopic.CANCEL_DOWNLOAD));
 
         amqpSenderService.sendMessage(message, address);
     }

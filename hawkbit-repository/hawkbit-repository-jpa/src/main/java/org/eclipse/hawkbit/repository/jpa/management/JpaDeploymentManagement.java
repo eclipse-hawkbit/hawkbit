@@ -394,8 +394,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         log.info("Deleting actions matching rsql {}", rsql);
         actionRepository.delete(DeleteSpecification.where(predicateSpec(QLSupport.getInstance().buildSpec(rsql, ActionFields.class))));
     }
-    @Deprecated
-    static <T> PredicateSpecification<T> predicateSpec(final Specification<T> spec) {
+    // TODO - since Spring 4.x migration, reconsider if it is the best way
+    private static <T> PredicateSpecification<T> predicateSpec(final Specification<T> spec) {
         return (from, cb) -> spec.toPredicate((Root<T>) from, cb.createQuery(), cb);
     }
 

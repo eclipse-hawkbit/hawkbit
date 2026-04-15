@@ -15,6 +15,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
 
 import org.eclipse.hawkbit.artifact.ArtifactStorage;
 import org.eclipse.hawkbit.artifact.fs.FileArtifactProperties;
@@ -96,7 +97,7 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    LockRegistry lockRegistry() {
+    LockRegistry<Lock> lockRegistry() {
         return new DefaultLockRegistry();
     }
 

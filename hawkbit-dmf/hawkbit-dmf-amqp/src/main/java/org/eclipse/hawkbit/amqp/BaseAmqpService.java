@@ -18,7 +18,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
+import org.springframework.amqp.support.converter.DefaultJacksonJavaTypeMapper;
 import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.util.ObjectUtils;
@@ -50,16 +50,17 @@ public class BaseAmqpService {
     @SuppressWarnings("unchecked")
     public <T> T convertMessage(@NotNull final Message message, final Class<T> clazz) {
         checkMessageBody(message);
-        message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME, clazz.getName());
+        message.getMessageProperties().getHeaders().put(DefaultJacksonJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME, clazz.getName());
         return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
     }
 
+    @SuppressWarnings("java:S2589") // messageProperties.getContentType() could be null via setContentType
     protected static void checkContentTypeJson(final Message message) {
         final MessageProperties messageProperties = message.getMessageProperties();
-        if (messageProperties.getContentType() != null && messageProperties.getContentType().contains("json")) {
-            return;
+        final String contentType = messageProperties.getContentType();
+        if (contentType == null || !contentType.contains("json")) {
+            throw new AmqpRejectAndDontRequeueException("Content-Type is not JSON compatible");
         }
-        throw new AmqpRejectAndDontRequeueException("Content-Type is not JSON compatible");
     }
 
     protected static boolean isMessageBodyEmpty(final Message message) {
@@ -101,6 +102,6 @@ public class BaseAmqpService {
      * @param message the message to cleaned up
      */
     protected void cleanMessageHeaderProperties(final Message message) {
-        message.getMessageProperties().getHeaders().remove(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
+        message.getMessageProperties().getHeaders().remove(DefaultJacksonJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
     }
 }

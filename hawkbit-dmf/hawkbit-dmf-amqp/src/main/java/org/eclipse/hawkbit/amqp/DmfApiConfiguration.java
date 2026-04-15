@@ -90,7 +90,7 @@ public class DmfApiConfiguration {
     }
 
     /**
-     * @return {@link RabbitTemplate} with automatic retry, published confirms and {@link Jackson2JsonMessageConverter}.
+     * @return {@link RabbitTemplate} with automatic retry, published confirms and {@link JacksonJsonMessageConverter}.
      */
     @Bean
     public RabbitTemplate rabbitTemplate(final JsonMapper jsonMapper) {

@@ -136,7 +136,7 @@ public class MgmtSecurityConfiguration {
         }
 
         if (securityProperties.isRequireSsl()) {
-            http.requiresChannel(crmRegistry -> crmRegistry.anyRequest().requiresSecure());
+            http.redirectToHttps(Customizer.withDefaults());
         }
 
         if (oauth2ResourceServerCustomizer != null) {

@@ -41,8 +41,6 @@ import org.jspecify.annotations.Nullable;
 public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements BaseEntityRepository<T> {
 
     private static final String SPEC_MUST_NOT_BE_NULL = "Specification must not be null";
-    private static final String APPENDED_ACCESS_RULES_SPEC_OF_NON_NULL_SPEC_MUST_NOT_BE_NULL =
-            "Appended access rules specification of non-null specification must not be null";
 
     private final BaseEntityRepository<T> repository;
     private final AccessController<T> accessController;
@@ -160,11 +158,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
     @NonNull
     public Optional<T> findOne(final Specification<T> spec) {
         Objects.requireNonNull(spec, SPEC_MUST_NOT_BE_NULL);
-        return repository.findOne(
-                // spec shall be non-null and the result of appending rules shall be non-null
-                Objects.requireNonNull(
-                        accessController.appendAccessRules(Operation.READ, spec),
-                        APPENDED_ACCESS_RULES_SPEC_OF_NON_NULL_SPEC_MUST_NOT_BE_NULL));
+        return repository.findOne(accessController.appendAccessRules(Operation.READ, spec));
     }
 
     @Override
@@ -175,51 +169,45 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
 
     @Override
     @NonNull
-    public Page<T> findAll(final Specification<T> spec, @NonNull final Pageable pageable) {
+    public Page<T> findAll(@Nullable final Specification<T> spec, @NonNull final Pageable pageable) {
         return repository.findAll(accessController.appendAccessRules(Operation.READ, spec), pageable);
     }
 
     @Override
-    public Page<T> findAll(final Specification<T> spec, final Specification<T> countSpec, final Pageable pageable) {
+    public Page<T> findAll(@Nullable final Specification<T> spec, @NonNull final Specification<T> countSpec, @NonNull final Pageable pageable) {
         return repository.findAll(accessController.appendAccessRules(Operation.READ, spec), countSpec, pageable);
     }
 
     @Override
     @NonNull
-    public List<T> findAll(final Specification<T> spec, @NonNull final Sort sort) {
+    public List<T> findAll(@Nullable final Specification<T> spec, @NonNull final Sort sort) {
         return repository.findAll(accessController.appendAccessRules(Operation.READ, spec), sort);
     }
 
     @Override
-    public long count(final Specification<T> spec) {
+    public long count(@Nullable final Specification<T> spec) {
         return repository.count(accessController.appendAccessRules(Operation.READ, spec));
     }
 
     @Override
     public boolean exists(@NonNull final Specification<T> spec) {
-        return repository.exists(
-                Objects.requireNonNull(accessController.appendAccessRules(Operation.READ, spec)));
+        return repository.exists(accessController.appendAccessRules(Operation.READ, Objects.requireNonNull(spec, SPEC_MUST_NOT_BE_NULL)));
     }
 
     @Override
-    public long update(final UpdateSpecification<T> spec) {
+    public long update(@Nullable final UpdateSpecification<T> spec) {
         return repository.update(accessController.appendAccessRules(Operation.UPDATE, spec));
     }
 
     @Override
-    public long delete(final DeleteSpecification<T> spec) {
+    public long delete(@Nullable final DeleteSpecification<T> spec) {
         return repository.delete(accessController.appendAccessRules(Operation.DELETE, spec));
     }
 
     @Override
-    public <S extends T, R> R findBy(final Specification<T> spec, final Function<? super SpecificationFluentQuery<S>, R> queryFunction) {
+    public <S extends T, R> R findBy(@NonNull final Specification<T> spec, final Function<? super SpecificationFluentQuery<S>, R> queryFunction) {
         Objects.requireNonNull(spec, SPEC_MUST_NOT_BE_NULL);
-        return repository.findBy(
-                // spec shall be non-null and the result of appending rules shall be non-null
-                Objects.requireNonNull(
-                        accessController.appendAccessRules(Operation.READ, spec),
-                        APPENDED_ACCESS_RULES_SPEC_OF_NON_NULL_SPEC_MUST_NOT_BE_NULL),
-                queryFunction);
+        return repository.findBy(accessController.appendAccessRules(Operation.READ, spec), queryFunction);
     }
 
     @Override
@@ -270,11 +258,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
         if (operation == null) {
             return repository.findOne(spec);
         } else {
-            return repository.findOne(
-                    // spec shall be non-null and the result of appending rules shall be non-null
-                    Objects.requireNonNull(
-                            accessController.appendAccessRules(operation, spec),
-                            APPENDED_ACCESS_RULES_SPEC_OF_NON_NULL_SPEC_MUST_NOT_BE_NULL));
+            return repository.findOne(accessController.appendAccessRules(operation, spec));
         }
     }
 
@@ -289,20 +273,19 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
     }
 
     @Override
-    @NonNull
     public boolean exists(final Operation operation, Specification<T> spec) {
+        Objects.requireNonNull(spec, SPEC_MUST_NOT_BE_NULL);
         if (operation == null) {
             return repository.exists(spec);
         } else {
-            return repository.exists(
-                    Objects.requireNonNull(accessController.appendAccessRules(operation, spec)));
+            return repository.exists(accessController.appendAccessRules(operation, spec));
         }
     }
 
     @Override
     public long count(final Operation operation, @Nullable final Specification<T> spec) {
         if (operation == null) {
-            return repository.count(spec);
+            return spec == null ? repository.count() : repository.count(spec);
         } else {
             return repository.count(accessController.appendAccessRules(operation, spec));
         }
@@ -326,29 +309,25 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
 
     @Override
     public Optional<T> findOne(final Specification<T> spec, final String entityGraph) {
-        return repository.findOne(
-                accessController.appendAccessRules(Operation.READ, spec), entityGraph);
+        return repository.findOne(accessController.appendAccessRules(Operation.READ, spec), entityGraph);
     }
 
     @Override
     public List<T> findAll(final Specification<T> spec, final String entityGraph) {
-        return repository.findAll(
-                accessController.appendAccessRules(Operation.READ, spec), entityGraph);
+        return repository.findAll(accessController.appendAccessRules(Operation.READ, spec), entityGraph);
     }
 
     @Override
     public Page<T> findAll(final Specification<T> spec, final String entityGraph, final Pageable pageable) {
-        return repository.findAll(
-                accessController.appendAccessRules(Operation.READ, spec), entityGraph, pageable);
+        return repository.findAll(accessController.appendAccessRules(Operation.READ, spec), entityGraph, pageable);
     }
 
     @Override
     public List<T> findAll(final Specification<T> spec, final String entityGraph, final Sort sort) {
-        return repository.findAll(
-                accessController.appendAccessRules(Operation.READ, spec), entityGraph, sort);
+        return repository.findAll(accessController.appendAccessRules(Operation.READ, spec), entityGraph, sort);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "java:S3776"}) // java:S3776 - better readable in one places
     static <T extends AbstractJpaBaseEntity, R extends BaseEntityRepository<T>> R of(
             final R repository, @NonNull final AccessController<T> accessController) {
         Objects.requireNonNull(repository);
