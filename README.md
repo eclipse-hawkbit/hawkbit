@@ -78,7 +78,7 @@ There are clients outside of the Eclipse IoT eco system as well, e.g.:
 
 # Runtime dependencies and support
 
-## Java Runtime Environment: 17
+## Java Runtime Environment: 21
 
 ## SQL database
 
