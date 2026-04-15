@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6
 
       # should work with actions/checkout@v6 with fetch-tags: true, BUT it doesn't work as expected!
       # See https://github.com/actions/checkout/issues/1471.
