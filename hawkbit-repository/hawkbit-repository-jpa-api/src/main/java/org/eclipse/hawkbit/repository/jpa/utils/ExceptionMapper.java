@@ -36,7 +36,7 @@ import org.springframework.transaction.TransactionSystemException;
 @Slf4j
 public class ExceptionMapper {
 
-    private static final Map<String, String> EXCEPTION_MAPPING = new HashMap<>(4);
+    private static final Map<String, String> EXCEPTION_MAPPING = HashMap.newHashMap(4);
 
     // this is required to enable a certain order of exception and to select the most specific mappable exception according to the type
     // hierarchy of the exception

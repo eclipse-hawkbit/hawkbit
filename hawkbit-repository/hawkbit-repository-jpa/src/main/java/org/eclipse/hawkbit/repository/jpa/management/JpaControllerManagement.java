@@ -678,7 +678,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
         log.debug("{} events in flushUpdateQueue.", size);
 
-        final Set<TargetPoll> events = new HashSet<>(queue.size());
+        final Set<TargetPoll> events = HashSet.newHashSet(queue.size());
         final int drained = queue.drainTo(events);
 
         if (drained <= 0) {

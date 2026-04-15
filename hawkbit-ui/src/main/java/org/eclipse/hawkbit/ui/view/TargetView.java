@@ -255,9 +255,8 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
         }
 
         private static List<MgmtTargetFilterQuery> listFilters(HawkbitMgmtClient hawkbitClient) {
-            return Optional.ofNullable(hawkbitClient.getTargetFilterQueryRestApi()
-                            .getFilters(null, 0, 30, null, null).getBody())
-                    .map(PagedList<MgmtTargetFilterQuery>::getContent)
+            return Optional.ofNullable(hawkbitClient.getTargetFilterQueryRestApi().getFilters(null, 0, 30, null, null).getBody())
+                    .map(PagedList::getContent)
                     .orElseGet(List::of);
         }
 
