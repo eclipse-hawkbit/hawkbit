@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.ui.security;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-import com.vaadin.flow.spring.security.VaadinAwareSecurityContextHolderStrategyConfiguration;
 import com.vaadin.flow.spring.security.VaadinSecurityConfigurer;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ui.view.LoginView;
@@ -21,7 +20,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -37,7 +35,6 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 @Configuration
 @EnableConfigurationProperties(OidcClientProperties.class)
 @Slf4j
-@Import(VaadinAwareSecurityContextHolderStrategyConfiguration.class)
 public class SecurityConfiguration {
 
     private Customizer<OAuth2LoginConfigurer<HttpSecurity>> oAuth2LoginConfigurerCustomizer;
@@ -64,7 +61,7 @@ public class SecurityConfiguration {
     SecurityFilterChain securityFilterChain(
             final HttpSecurity http,
             final UserDetailsSetter userDetailsSetter,
-            @Autowired(required = false) InMemoryClientRegistrationRepository clientRegistrationRepository) throws Exception {
+            @Autowired(required = false) InMemoryClientRegistrationRepository clientRegistrationRepository) {
         http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/images/*.png").permitAll());
         http.addFilterAfter(userDetailsSetter, AuthorizationFilter.class);
         return http.with(VaadinSecurityConfigurer.vaadin(), configurer -> {

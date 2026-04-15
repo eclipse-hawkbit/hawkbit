@@ -58,7 +58,7 @@ class AutoAssignHandlerTest {
     private PlatformTransactionManager transactionManager;
 
     @Mock
-    LockRegistry lockRegistry;
+    LockRegistry<Lock> lockRegistry;
 
     private JpaAutoAssignHandler autoAssignHandler;
 

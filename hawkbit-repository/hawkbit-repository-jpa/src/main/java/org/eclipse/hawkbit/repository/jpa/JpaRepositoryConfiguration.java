@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.locks.Lock;
 
 import javax.sql.DataSource;
 
@@ -87,6 +88,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -111,7 +113,6 @@ import org.springframework.integration.jdbc.lock.JdbcLockRegistry;
 import org.springframework.integration.jdbc.lock.LockRepository;
 import org.springframework.integration.support.locks.DefaultLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
-import org.jspecify.annotations.NonNull;
 import org.springframework.resilience.annotation.EnableResilientMethods;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -209,8 +210,9 @@ public class JpaRepositoryConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public LockRegistry lockRegistry(final Optional<LockRepository> lockRepository) {
-        return lockRepository.<LockRegistry> map(JdbcLockRegistry::new).orElseGet(DefaultLockRegistry::new);
+    @SuppressWarnings("java:S1452") // it could be any LockRegistry<? extends Lock>
+    public LockRegistry<? extends Lock> lockRegistry(final Optional<LockRepository> lockRepository) {
+        return lockRepository.<LockRegistry<? extends Lock>> map(JdbcLockRegistry::new).orElseGet(DefaultLockRegistry::new);
     }
 
     @Bean
@@ -302,7 +304,7 @@ public class JpaRepositoryConfiguration {
     @Bean
     @ConditionalOnMissingBean
     RolloutHandler rolloutHandler(final RolloutManagement rolloutManagement,
-            final RolloutExecutor rolloutExecutor, final LockRegistry lockRegistry,
+            final RolloutExecutor rolloutExecutor, final LockRegistry<? extends Lock> lockRegistry,
             final PlatformTransactionManager txManager, final Optional<MeterRegistry> meterRegistry) {
         return new JpaRolloutHandler(rolloutManagement, rolloutExecutor, lockRegistry, txManager, meterRegistry);
     }
@@ -354,7 +356,7 @@ public class JpaRepositoryConfiguration {
     AutoAssignScheduler autoAssignScheduler(
             final SystemManagement systemManagement, final AutoAssignHandler autoAssignHandler,
             @Value("${hawkbit.autoassign.executor.thread-pool.size:1}") final int threadPoolSize,
-            final LockRegistry lockRegistry, final Optional<MeterRegistry> meterRegistry) {
+            final Optional<MeterRegistry> meterRegistry) {
         return new AutoAssignScheduler(systemManagement, autoAssignHandler, threadPoolSize, meterRegistry);
     }
 
@@ -377,7 +379,7 @@ public class JpaRepositoryConfiguration {
     @ConditionalOnProperty(prefix = "hawkbit.autocleanup.scheduler", name = "enabled", matchIfMissing = true)
     AutoCleanupScheduler autoCleanupScheduler(
             final List<AutoCleanupScheduler.CleanupTask> cleanupTasks,
-            final SystemManagement systemManagement, final LockRegistry lockRegistry) {
+            final SystemManagement systemManagement, final LockRegistry<? extends Lock> lockRegistry) {
         return new AutoCleanupScheduler(cleanupTasks, systemManagement, lockRegistry);
     }
 

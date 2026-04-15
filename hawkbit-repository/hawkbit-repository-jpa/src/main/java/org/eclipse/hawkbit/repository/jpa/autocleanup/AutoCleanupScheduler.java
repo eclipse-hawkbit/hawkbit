@@ -30,7 +30,7 @@ public class AutoCleanupScheduler {
     private static final String PROP_AUTO_CLEANUP_INTERVAL = "${hawkbit.autocleanup.scheduler.fixedDelay:86400000}";
 
     private final SystemManagement systemManagement;
-    private final LockRegistry lockRegistry;
+    private final LockRegistry<? extends Lock> lockRegistry;
     private final List<CleanupTask> cleanupTasks;
 
     /**
@@ -42,7 +42,7 @@ public class AutoCleanupScheduler {
      */
     public AutoCleanupScheduler(
             final List<CleanupTask> cleanupTasks,
-            final SystemManagement systemManagement, final LockRegistry lockRegistry) {
+            final SystemManagement systemManagement, final LockRegistry<? extends Lock> lockRegistry) {
         this.systemManagement = systemManagement;
         this.lockRegistry = lockRegistry;
         this.cleanupTasks = cleanupTasks;

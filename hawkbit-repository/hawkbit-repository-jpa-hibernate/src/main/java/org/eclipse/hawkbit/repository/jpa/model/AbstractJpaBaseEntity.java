@@ -36,6 +36,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
@@ -159,13 +160,13 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
             return false;
         }
         final BaseEntity other = (BaseEntity) obj;
-        final Long id = getId();
+        final Long thisId = getId();
         final Long otherId = other.getId();
-        if (id == null) {
+        if (thisId == null) {
             if (otherId != null) {
                 return false;
             }
-        } else if (!id.equals(otherId)) {
+        } else if (!thisId.equals(otherId)) {
             return false;
         }
         return getOptLockRevision() == other.getOptLockRevision();
@@ -203,9 +204,9 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     }
 
     protected boolean isController() {
-        return SecurityContextHolder.getContext().getAuthentication() != null
-                && SecurityContextHolder.getContext().getAuthentication()
-                .getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null
+                && authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails
                 && tenantAwareDetails.controller();
     }
 }

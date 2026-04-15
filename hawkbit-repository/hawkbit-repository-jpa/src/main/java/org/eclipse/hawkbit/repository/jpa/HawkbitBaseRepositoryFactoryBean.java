@@ -23,6 +23,7 @@ import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.jpa.repository.HawkbitBaseRepository;
 import org.eclipse.hawkbit.repository.jpa.utils.ExceptionMapper;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
@@ -103,7 +104,7 @@ public class HawkbitBaseRepositoryFactoryBean<T extends Repository<S, ID>, S, ID
     private @Nullable BeanFactory beanFactory;
 
     @Override
-    public void setBeanFactory(final BeanFactory beanFactory) {
+    public void setBeanFactory(@NonNull final BeanFactory beanFactory) {
         this.beanFactory = beanFactory;
         super.setBeanFactory(beanFactory);
     }
@@ -132,7 +133,7 @@ public class HawkbitBaseRepositoryFactoryBean<T extends Repository<S, ID>, S, ID
     }
 
     @PersistenceContext
-    public void setEntityManager(final EntityManager entityManager) {
+    public void setEntityManager(@NonNull final EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
@@ -144,18 +145,19 @@ public class HawkbitBaseRepositoryFactoryBean<T extends Repository<S, ID>, S, ID
     }
 
     @Override
-    public void setMappingContext(final MappingContext<?, ?> mappingContext) {
+    public void setMappingContext(@NonNull final MappingContext<?, ?> mappingContext) {
         super.setMappingContext(mappingContext);
     }
 
+    @SuppressWarnings("java:S3776") // this way is more readable
     @Override
-    protected RepositoryFactorySupport doCreateRepositoryFactory() {
+    protected @NonNull RepositoryFactorySupport doCreateRepositoryFactory() {
         Objects.requireNonNull(entityManager, "EntityManager must not be null");
         final JpaRepositoryFactory jpaRepositoryFactory = new JpaRepositoryFactory(entityManager) {
 
             @Override
-            protected JpaRepositoryImplementation<?, ?> getTargetRepository(
-                    final RepositoryInformation information, final EntityManager entityManager) {
+            protected @NonNull JpaRepositoryImplementation<?, ?> getTargetRepository(
+                    @NonNull final RepositoryInformation information, @NonNull final EntityManager entityManager) {
                 final JpaRepositoryImplementation<?, ?> jpaRepositoryImplementation = super.getTargetRepository(information, entityManager);
                 return (JpaRepositoryImplementation<?, ?>) Proxy.newProxyInstance(
                         jpaRepositoryImplementation.getClass().getClassLoader(),
