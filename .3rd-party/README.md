@@ -12,5 +12,5 @@ $ cd .. && mvn license-tool:license-check -Ddash.fail=false -PcheckLicense
 
 Note: Some projects (e.g. test artifacts) could be excluded with *--projects* parameter, e.g:
 ```shell
-$ cd .. && mvn license-tool:license-check -Ddash.fail=false -PcheckLicense \ --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test'
+$ cd .. && mvn license-tool:license-check -Ddash.fail=false -PcheckLicense --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test'
 ```

@@ -58,7 +58,7 @@
             <plugin>
                 <groupId>com.ethlo.persistence.tools</groupId>
                 <artifactId>eclipselink-maven-plugin</artifactId>
-                <version>${eclipselink.maven.plugin.version}</version>
+                <version>${eclipselink-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>process-classes</phase>

@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 
 import jakarta.annotation.security.RolesAllowed;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
@@ -86,6 +85,7 @@ import org.eclipse.hawkbit.ui.view.util.TableView;
 import org.eclipse.hawkbit.ui.view.util.Utils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
+import tools.jackson.databind.ObjectMapper;
 
 @PageTitle("Targets")
 @Route(value = "targets", layout = MainLayout.class)

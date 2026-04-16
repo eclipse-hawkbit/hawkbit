@@ -11,10 +11,9 @@ package org.eclipse.hawkbit.mgmt.json.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Feature: Unit Tests - Management API<br/>
@@ -23,7 +22,7 @@ import org.junit.jupiter.api.Test;
 class AuditFieldSerializationTest {
 
     @Test
-    void assertAuditingFields() throws JsonProcessingException {
+    void assertAuditingFields() {
         final MgmtTarget mgmtTarget = new MgmtTarget();
         mgmtTarget.setCreatedBy("user");
         mgmtTarget.setCreatedAt(System.currentTimeMillis() - 1_000_000);

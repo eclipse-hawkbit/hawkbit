@@ -11,13 +11,12 @@ package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Feature: Tests for the MgmtTargetAssignmentResponseBody<br/>
@@ -33,7 +32,7 @@ class MgmtTargetAssignmentResponseBodyTest {
      * Tests that the ActionIds are serialized correctly in MgmtTargetAssignmentResponseBody
      */
     @Test
-    void testActionIdsSerialization() throws IOException {
+    void testActionIdsSerialization() {
         final MgmtTargetAssignmentResponseBody responseBody = generateResponseBody();
         final ObjectMapper objectMapper = new ObjectMapper();
         final String responseBodyAsString = objectMapper.writeValueAsString(responseBody);
