@@ -56,8 +56,9 @@
         <java.client.version>17</java.client.version>
 
         <!-- must be the same as the parent version -->
-        <spring.boot.version>4.0.5</spring.boot.version>
-        <spring.cloud.version>2025.1.1</spring.cloud.version>
+        <spring-boot.version>4.0.5</spring-boot.version>
+        <spring-cloud.version>2025.1.1</spring-cloud.version>
+        <spring-ai.version>1.1.4</spring-ai.version>
         <springdoc-openapi.version>3.0.3</springdoc-openapi.version>
 
         <!-- openfeign versions -->
@@ -74,11 +75,8 @@
           Ethlo plugin uses 4.x dependencies - since it only does static weaving - it should be fine - but should eventually upgrade its dependencies.
         -->
         <eclipselink.version>5.0.0</eclipselink.version>
-        <eclipselink.maven.plugin.version>3.0.2</eclipselink.maven.plugin.version>
+        <eclipselink-maven-plugin.version>3.0.2</eclipselink-maven-plugin.version>
         <!-- Eclipselink - END -->
-
-        <!-- Spring AI for MCP support -->
-        <spring-ai.version>1.1.4</spring-ai.version>
 
         <!-- Misc libraries versions - START -->
         <cron-utils.version>9.2.1</cron-utils.version>
@@ -87,24 +85,26 @@
         <commons-io.version>2.21.0</commons-io.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
         <io-protostuff.version>1.8.0</io-protostuff.version>
+        <!-- the version should be `synchronized` with version used by springdoc-openapi -->
+        <swagger-annotations-jakarta.version>2.2.47</swagger-annotations-jakarta.version>
 
         <!-- test -->
-        <rabbitmq.http-client.version>5.5.0</rabbitmq.http-client.version>
+        <rabbitmq-http-client.version>5.5.0</rabbitmq-http-client.version>
         <classgraph.version>4.8.184</classgraph.version>
         <awaitility.version>4.3.0</awaitility.version>
         <!-- Misc libraries versions - END -->
 
         <!-- Maven Plugin versions - START -->
-        <maven.enforcer.plugin.version>3.6.2</maven.enforcer.plugin.version>
-        <flatten.maven.plugin.version>1.7.3</flatten.maven.plugin.version>
+        <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
+        <flatten-maven-plugin.version>1.7.3</flatten-maven-plugin.version>
 
-        <maven.surefire.plugin.version>3.5.5</maven.surefire.plugin.version>
-        <jacoco.maven.plugin.version>0.8.14</jacoco.maven.plugin.version>
+        <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
+        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
 
-        <license.tool.plugin.version>1.1.0</license.tool.plugin.version>
-        <license.maven.plugin.version>5.0.0</license.maven.plugin.version>
-        <central.publishing.maven.plugin.version>0.10.0</central.publishing.maven.plugin.version>
-        <maven.gpg.plugin.version>3.2.8</maven.gpg.plugin.version>
+        <license-tool-plugin.version>1.1.0</license-tool-plugin.version>
+        <license-maven-plugin.version>5.0.0</license-maven-plugin.version>
+        <central-publishing-maven-plugin.version>0.10.0</central-publishing-maven-plugin.version>
+        <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
         <spotless-maven-plugin.version>3.4.0</spotless-maven-plugin.version>
         <!-- Maven Plugin versions - END -->
 
@@ -238,7 +238,7 @@
             <dependency>
                 <groupId>com.rabbitmq</groupId>
                 <artifactId>http-client</artifactId>
-                <version>${rabbitmq.http-client.version}</version>
+                <version>${rabbitmq-http-client.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.cronutils</groupId>
@@ -255,7 +255,7 @@
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring.cloud.version}</version>
+                <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -270,7 +270,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter</artifactId>
-                <version>${spring.boot.version}</version>
+                <version>${spring-boot.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.logging.log4j</groupId>
@@ -281,7 +281,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-data-jpa</artifactId>
-                <version>${spring.boot.version}</version>
+                <version>${spring-boot.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.hibernate.orm</groupId>
@@ -430,7 +430,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>${maven.enforcer.plugin.version}</version>
+                    <version>${maven-enforcer-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>enforce-maven-and-java</id>
@@ -476,7 +476,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>flatten-maven-plugin</artifactId>
-                    <version>${flatten.maven.plugin.version}</version>
+                    <version>${flatten-maven-plugin.version}</version>
                     <configuration>
                         <flattenMode>resolveCiFriendliesOnly</flattenMode>
                         <updatePomFile>true</updatePomFile>
@@ -533,7 +533,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco.maven.plugin.version}</version>
+                    <version>${jacoco-maven-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>prepare-ut-agent</id>
@@ -574,7 +574,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>${maven.surefire.plugin.version}</version>
+                    <version>${maven-surefire-plugin.version}</version>
                     <configuration>
                         <reuseForks>true</reuseForks>
                         <forkCount>${surefire.forkcount}</forkCount>
@@ -596,7 +596,7 @@
                     <plugin>
                         <groupId>com.mycila</groupId>
                         <artifactId>license-maven-plugin</artifactId>
-                        <version>${license.maven.plugin.version}</version>
+                        <version>${license-maven-plugin.version}</version>
                         <configuration>
                             <licenseSets>
                                 <licenseSet>
@@ -653,7 +653,7 @@
                     <plugin>
                         <groupId>org.eclipse.dash</groupId>
                         <artifactId>license-tool-plugin</artifactId>
-                        <version>${license.tool.plugin.version}</version>
+                        <version>${license-tool-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>license-check</id>
@@ -693,7 +693,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>${maven.gpg.plugin.version}</version>
+                        <version>${maven-gpg-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -707,7 +707,7 @@
                     <plugin>
                         <groupId>org.sonatype.central</groupId>
                         <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>${central.publishing.maven.plugin.version}</version>
+                        <version>${central-publishing-maven-plugin.version}</version>
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>
@@ -738,7 +738,7 @@
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-surefire-report-plugin</artifactId>
-                            <version>${maven.surefire.plugin.version}</version>
+                            <version>${maven-surefire-plugin.version}</version>
                             <executions>
                                 <execution>
                                     <id>generate-surefire-report</id>

@@ -25,8 +25,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.eclipse.hawkbit.amqp.AmqpMessageHandlerService;
 import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -73,6 +71,8 @@ import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Feature: Component Tests - Device Management Federation API<br/>
@@ -1103,7 +1103,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         assertActionStatusList(actionId, 2, Status.WAIT_FOR_CONFIRMATION);
     }
 
-    private static String getActionIdFromBody(final byte[] body) throws IOException {
+    private static String getActionIdFromBody(final byte[] body) {
         final ObjectMapper objectMapper = new ObjectMapper();
         final ObjectNode node = objectMapper.readValue(new String(body, Charset.defaultCharset()), ObjectNode.class);
         assertThat(node.has("actionId")).isTrue();
@@ -1130,8 +1130,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
     private void updateAttributesWithUpdateModeMerge() {
         // get the current attributes
-        final Map<String, String> attributes = new HashMap<>(
-                targetManagement.getControllerAttributes(DMF_ATTR_TEST_CONTROLLER_ID));
+        final Map<String, String> attributes = new HashMap<>(targetManagement.getControllerAttributes(DMF_ATTR_TEST_CONTROLLER_ID));
 
         // send an update message with update mode MERGE
         final Map<String, String> mergeAttributes = new HashMap<>();

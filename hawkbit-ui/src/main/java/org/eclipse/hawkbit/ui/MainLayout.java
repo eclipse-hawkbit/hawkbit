@@ -109,7 +109,7 @@ public class MainLayout extends AppLayout {
         final HorizontalLayout layout = new HorizontalLayout();
         layout.setPadding(true);
         layout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-        final Image icon = new Image("images/header_icon.png", "hawkBit icon");
+        final Image icon = new Image("images/hawkbit.png", "hawkBit icon");
         icon.setMaxHeight(24, Unit.PIXELS);
         icon.setMaxWidth(24, Unit.PIXELS);
         appName.addClassNames(LumoUtility.AlignItems.BASELINE, LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
@@ -141,9 +141,9 @@ public class MainLayout extends AppLayout {
         if (accessChecker.hasAccess(ConfigView.class)) {
             nav.addItem(new SideNavItem("Config", ConfigView.class, VaadinIcon.COG.create()));
         }
-//        if (accessChecker.hasAccess(AboutView.class)) {
-//            nav.addItem(new SideNavItem("About", AboutView.class, VaadinIcon.INFO_CIRCLE.create()));
-//        }
+        if (accessChecker.hasAccess(AboutView.class)) {
+            nav.addItem(new SideNavItem("About", AboutView.class, VaadinIcon.INFO_CIRCLE.create()));
+        }
         defaultView = DEFAULT_VIEW_PRIORITY.stream().filter(accessChecker::hasAccess).findFirst().orElse(null);
         return nav;
     }

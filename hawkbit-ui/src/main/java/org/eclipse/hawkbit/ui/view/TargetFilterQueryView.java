@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.ui.view;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Unit;
@@ -49,6 +48,7 @@ import org.eclipse.hawkbit.ui.view.util.Filter;
 import org.eclipse.hawkbit.ui.view.util.SelectionGrid;
 import org.eclipse.hawkbit.ui.view.util.TableView;
 import org.eclipse.hawkbit.ui.view.util.Utils;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.Serial;
 import java.util.List;
@@ -374,7 +374,7 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
         }
     }
 
-    // todo change /targetfilters api to reduce api calls ?
+    // TODO - change /targetfilters api to reduce api calls ?
     @Getter
     public static class TargetFilterQueryGridItem extends MgmtTargetFilterQuery {
 
@@ -383,10 +383,10 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
         }
 
         private Optional<MgmtDistributionSet> ds;
-        static ObjectMapper objectMapper = new ObjectMapper();
+        private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
         public static TargetFilterQueryGridItem from(final HawkbitMgmtClient hawkbitClient, MgmtTargetFilterQuery filter) {
-            TargetFilterQueryGridItem filterGridItem = objectMapper.convertValue(filter, TargetFilterQueryGridItem.class);
+            TargetFilterQueryGridItem filterGridItem = OBJECT_MAPPER.convertValue(filter, TargetFilterQueryGridItem.class);
 
             if (filterGridItem.getAutoAssignDistributionSet() != null) {
                 filterGridItem.ds = Optional.ofNullable(
