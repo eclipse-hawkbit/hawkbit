@@ -22,10 +22,7 @@ import java.util.Objects;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
-import feign.Contract;
 import feign.RequestInterceptor;
-import feign.codec.Decoder;
-import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.sdk.HawkbitClient;
@@ -88,9 +85,9 @@ public class HawkbitUiApp implements AppShellConfigurator {
     }
 
     @Bean
-    HawkbitClient hawkbitClient(final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract) {
+    HawkbitClient hawkbitClient(final HawkbitServer hawkBitServer) {
         return new HawkbitClient(
-                hawkBitServer, encoder, decoder, contract,
+                hawkBitServer, null, null, null,
                 ERROR_DECODER,
                 (tenant, controller) -> controller == null
                         ? AUTHORIZATION

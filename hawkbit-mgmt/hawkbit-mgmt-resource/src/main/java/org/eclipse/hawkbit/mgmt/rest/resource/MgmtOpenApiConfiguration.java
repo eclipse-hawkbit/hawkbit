@@ -41,6 +41,7 @@ public class MgmtOpenApiConfiguration {
             havingValue = "true",
             matchIfMissing = true)
     public GroupedOpenApi mgmtApi(@Value("${hawkbit.server.openapi.mgmt.tenant-endpoint.enabled:false}") final boolean tenantEndpointEnabled) {
+        // @formatter:off
         return GroupedOpenApi
                 .builder()
                 .group("Management API")
@@ -56,10 +57,10 @@ public class MgmtOpenApiConfiguration {
                                                 """))
                                 .servers(tenantEndpointEnabled
                                         ? List.of(
-                                        new Server()
-                                        .url("/{tenant}/")
-                                        .variables(new ServerVariables().addServerVariable("tenant", tenantSeverVariable())),
-                                        new Server().url("/"))
+                                            new Server()
+                                                    .url("/{tenant}/")
+                                                    .variables(new ServerVariables().addServerVariable("tenant", tenantSeverVariable())),
+                                            new Server().url("/"))
                                         : List.of(new Server().url("/")))
                                 .addSecurityItem(new SecurityRequirement()
                                         .addList(BASIC_AUTH_SEC_SCHEME_NAME)
@@ -80,6 +81,7 @@ public class MgmtOpenApiConfiguration {
                                                                 .scheme("bearer")))
                                 .tags(sort(openApi.getTags())))
                 .build();
+        // @formatter:on
     }
 
     private static ServerVariable tenantSeverVariable() {

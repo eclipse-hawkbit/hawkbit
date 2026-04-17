@@ -42,6 +42,10 @@
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-hc5</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-jackson</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>tools.jackson.core</groupId>

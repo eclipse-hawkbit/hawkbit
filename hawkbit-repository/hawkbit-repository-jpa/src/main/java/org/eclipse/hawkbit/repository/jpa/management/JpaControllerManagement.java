@@ -24,7 +24,6 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +35,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -294,19 +292,26 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     public Optional<Action> findActiveActionWithHighestWeight(final String controllerId) {
-        return Stream.concat(
-                        // get the highest action with weight
-                        actionRepository.findAll(
-                                ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, false),
-                                PageRequest.of(
-                                        0, 1,
-                                        Sort.by(Sort.Order.desc(JpaAction_.WEIGHT), Sort.Order.asc(AbstractJpaBaseEntity_.ID)))).stream(),
-                        // get the oldest action without weight
-                        actionRepository.findAll(
-                                ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, false),
-                                PageRequest.of(0, 1, Sort.by(Sort.Order.asc(AbstractJpaBaseEntity_.ID)))).stream())
-                .min(Comparator.comparingInt(this::getWeightConsideringDefault).reversed().thenComparing(Action::getId))
-                .map(Action.class::cast);
+        // get the highest action with weight
+        final Action withHighestWeight = actionRepository.findAll(
+                        ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, false),
+                        PageRequest.of(0, 1, Sort.by(Sort.Order.desc(JpaAction_.WEIGHT), Sort.Order.asc(AbstractJpaBaseEntity_.ID)))).stream()
+                .findFirst().orElse(null);
+        // get the oldest action without weight
+        final JpaAction oldestWithoutWeight = actionRepository.findAll(
+                        ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, true),
+                        PageRequest.of(0, 1, Sort.by(Sort.Order.asc(AbstractJpaBaseEntity_.ID)))).stream()
+                .findFirst().orElse(null);
+        if (withHighestWeight == null) {
+            return Optional.ofNullable(oldestWithoutWeight);
+        } else {
+            if (oldestWithoutWeight == null
+                    || getWeightConsideringDefault(oldestWithoutWeight) < getWeightConsideringDefault(withHighestWeight)) {
+                return Optional.of(withHighestWeight);
+            } else {
+                return Optional.of(oldestWithoutWeight);
+            }
+        }
     }
 
     @Override

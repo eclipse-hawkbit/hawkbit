@@ -12,9 +12,6 @@ package org.eclipse.hawkbit.sdk.demo.device;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 
-import feign.Contract;
-import feign.codec.Decoder;
-import feign.codec.Encoder;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.sdk.Controller;
 import org.eclipse.hawkbit.sdk.HawkbitClient;
@@ -44,8 +41,8 @@ public class DeviceApp {
     }
 
     @Bean
-    HawkbitClient hawkbitClient(final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract) {
-        return new HawkbitClient(hawkBitServer, encoder, decoder, contract);
+    HawkbitClient hawkbitClient(final HawkbitServer hawkBitServer) {
+        return new HawkbitClient(hawkBitServer);
     }
 
     @Bean
@@ -78,8 +75,8 @@ public class DeviceApp {
                             .controllerId(controllerId)
                             .securityToken(ObjectUtils.isEmpty(securityToken)
                                     ? (ObjectUtils.isEmpty(ddiTenant.getTenant().getGatewayToken())
-                                    ? AuthenticationSetupHelper.randomToken()
-                                    : securityToken)
+                                       ? AuthenticationSetupHelper.randomToken()
+                                       : securityToken)
                                     : securityToken)
                             .build(),
                     updateHandler.orElse(null)).setOverridePollMillis(10_000);
