@@ -42,7 +42,7 @@
             <groupId>org.springdoc</groupId> <!-- register openapi doc -->
             <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
         </dependency>
-        <dependency> <!-- if we depend on springdoc, it by default requires hateoas too -->
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-hateoas</artifactId>
         </dependency>

@@ -12,9 +12,6 @@ package org.eclipse.hawkbit.sdk.demo.multidevice;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 
-import feign.Contract;
-import feign.codec.Decoder;
-import feign.codec.Encoder;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.sdk.Controller;
 import org.eclipse.hawkbit.sdk.HawkbitClient;
@@ -43,9 +40,8 @@ public class MultiDeviceApp {
     }
 
     @Bean
-    HawkbitClient hawkbitClient(
-            final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract) {
-        return new HawkbitClient(hawkBitServer, encoder, decoder, contract);
+     HawkbitClient hawkbitClient(final HawkbitServer hawkBitServer) {
+        return new HawkbitClient(hawkBitServer);
     }
 
     @Bean
