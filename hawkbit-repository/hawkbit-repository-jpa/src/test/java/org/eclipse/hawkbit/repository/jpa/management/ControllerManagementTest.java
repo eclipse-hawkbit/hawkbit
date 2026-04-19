@@ -1440,10 +1440,9 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 root.get(JpaAction_.externalRef).in(allExternalRef),
                 cb.equal(root.get(JpaAction_.active), true)
         )).stream().map(Action.class::cast).toList();
-        assertThat(foundAction).isNotNull();
-        for (int i = 0; i < numberOfActions; i++) {
-            assertThat(foundAction.get(i).getId()).isEqualTo(allActionId.get(i));
-        }
+        assertThat(foundAction).isNotNull().hasSize(numberOfActions);
+        assertThat(foundAction).extracting(Action::getId)
+                .containsExactlyInAnyOrderElementsOf(allActionId);
     }
 
     /**
