@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.HawkbitServer;
 import org.eclipse.hawkbit.sdk.Tenant;
 import org.eclipse.hawkbit.ui.view.util.Utils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -41,7 +42,10 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
 @Slf4j
 @Theme("hawkbit")
@@ -56,22 +60,32 @@ public class HawkbitUiApp implements AppShellConfigurator {
     private static final long serialVersionUID = 1L;
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final RequestInterceptor AUTHORIZATION = requestTemplate -> {
-        final Authentication authentication = Objects.requireNonNull(
-                SecurityContextHolder.getContext().getAuthentication(), "No authentication available in security context!");
-        final Object principal = Objects.requireNonNull(authentication.getPrincipal(), "User is null!");
-        if (principal instanceof OidcUser oidcUser) {
-            requestTemplate.header(
-                    AUTHORIZATION_HEADER,
-                    "Bearer " + oidcUser.getIdToken().getTokenValue());
-        } else {
-            final String user = String.valueOf(principal);
-            final Object pass = Objects.requireNonNull(authentication.getCredentials(), "Password is not available!");
-            requestTemplate.header(
-                    AUTHORIZATION_HEADER,
-                    "Basic " + Base64.getEncoder().encodeToString((user + ":" + pass).getBytes(ISO_8859_1)));
-        }
-    };
+
+    private static RequestInterceptor authorizationInterceptor(final OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager) {
+        return requestTemplate -> {
+            final Authentication authentication = Objects.requireNonNull(
+                    SecurityContextHolder.getContext().getAuthentication(), "No authentication available in security context!");
+            if (authentication instanceof OAuth2AuthenticationToken oauth2Token) {
+                // line from /org/springframework/security/oauth2/client/web/client/OAuth2ClientHttpRequestInterceptor.java#authorizeClient
+                OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest.withClientRegistrationId(oauth2Token
+                        .getAuthorizedClientRegistrationId()).principal(authentication).build();
+                OAuth2AuthorizedClient authorizedClient = oAuth2AuthorizedClientManager.authorize(authorizeRequest);
+                if (authorizedClient != null) {
+                    requestTemplate.header(AUTHORIZATION_HEADER, "Bearer " + authorizedClient.getAccessToken().getTokenValue());
+                } else {
+                    log.warn("No authorized client found for principal {} — request will be sent without Authorization header", oauth2Token
+                            .getName());
+                }
+            } else {
+                final Object principal = Objects.requireNonNull(authentication.getPrincipal(), "User is null!");
+                final String user = String.valueOf(principal);
+                final Object pass = Objects.requireNonNull(authentication.getCredentials(), "Password is not available!");
+                requestTemplate.header(
+                        AUTHORIZATION_HEADER,
+                        "Basic " + Base64.getEncoder().encodeToString((user + ":" + pass).getBytes(ISO_8859_1)));
+            }
+        };
+    }
 
     private static final ErrorDecoder DEFAULT_ERROR_DECODER = new ErrorDecoder.Default();
     private static final ErrorDecoder ERROR_DECODER = (methodKey, response) -> {
@@ -85,12 +99,14 @@ public class HawkbitUiApp implements AppShellConfigurator {
     }
 
     @Bean
-    HawkbitClient hawkbitClient(final HawkbitServer hawkBitServer) {
+    HawkbitClient hawkbitClient(final HawkbitServer hawkBitServer,
+            @Autowired(required = false) final OAuth2AuthorizedClientManager authorizedClientManager) {
+        final RequestInterceptor authorization = authorizationInterceptor(authorizedClientManager);
         return new HawkbitClient(
                 hawkBitServer, null, null, null,
                 ERROR_DECODER,
                 (tenant, controller) -> controller == null
-                        ? AUTHORIZATION
+                        ? authorization
                         : HawkbitClient.DEFAULT_REQUEST_INTERCEPTOR_FN.apply(tenant, controller));
     }
 

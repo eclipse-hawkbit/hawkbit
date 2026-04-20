@@ -62,18 +62,67 @@ information on password encoders in Spring Security.
 
 ### OpenID Connect
 
-hawkbit supports authentication providers which use the OpenID Connect standard, an authentication layer built on top of
-the OAuth 2.0 protocol.
-An example configuration is given below.
+HawkBit supports authentication providers which use the OpenID Connect standard, an authentication layer built on top of
+the OAuth 2.0 protocol. OIDC integration can be enabled on UI and in server:
+
+- **Hawkbit UI** — redirects users to an OIDC provider for authentication
+- **Hawkbit Management Server** — validates JWT bearer tokens on Management API requests
+
+#### Hawkbit UI
+
+Enable OIDC login for the UI and register the provider using standard Spring Boot OAuth2 client properties:
 
 ```properties
-spring.security.oauth2.client.registration.oidc.client-id=clientID
-spring.security.oauth2.client.provider.oidc.issuer-uri=https://oidc-provider/issuer-uri
-spring.security.oauth2.client.provider.oidc.jwk-set-uri=https://oidc-provider/jwk-set-uri
+# Enable hawkBit OIDC UI login
+hawkbit.server.security.oauth2.client.enabled=true
+
+# Register the provider (replace "myidp" with any name)
+spring.security.oauth2.client.provider.myidp.issuer-uri=https://idp.example.com/
+spring.security.oauth2.client.registration.myidp.client-id=my-client-id
+spring.security.oauth2.client.registration.myidp.client-secret=my-client-secret
+spring.security.oauth2.client.registration.myidp.scope=openid,email,profile
+spring.security.oauth2.client.registration.myidp.provider=myidp
 ```
 
-Note: at the moment only DEFAULT tenant is supported. By default the resource_access/<client id>/roles claim is mapped
-to hawkBit permissions.
+Some providers (e.g. Auth0) require additional parameters in the authorization request. Use `custom-headers` to pass
+them:
+
+```properties
+# Add extra parameters to the OAuth2 authorization request
+hawkbit.server.security.oauth2.client.custom-headers.audience=https://my-api-audience
+```
+
+#### Hawkbit Management Server
+
+Enable JWT bearer token validation for the Management REST API:
+
+```properties
+# Enable hawkBit default JWT resource server
+hawkbit.server.security.oauth2.resourceserver.enabled=true
+    
+# JWK issuer URI for token signature verification
+spring.security.oauth2.resourceserver.jwt.issuer-uri=https://idp.example.com/
+```
+
+hawkBit maps JWT claims to the username, tenant, and permissions of the authenticated user. The claim paths are
+configurable and support dot-notation for nested claims (e.g. `resource_access.my-client.roles`):
+
+```properties
+# Claim path for the hawkBit username (default: preferred_username)
+hawkbit.server.security.oauth2.resourceserver.jwt.claim.username=preferred_username
+
+# Claim path for hawkBit roles/permissions (default: roles)
+hawkbit.server.security.oauth2.resourceserver.jwt.claim.roles=roles
+
+# Claim path for the hawkBit tenant (default: DEFAULT)
+hawkbit.server.security.oauth2.resourceserver.jwt.claim.tenant=tenant
+```
+
+To allow HTTP Basic authentication alongside OAuth2:
+
+```properties
+hawkbit.server.security.allow-http-basic-on-o-auth-enabled=true
+```
 
 ### Permissions
 
