@@ -20,8 +20,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -36,6 +34,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * A 'static' class providing methods related to access context:
@@ -67,10 +66,10 @@ public class AccessContext {
      * @return the current tenant
      */
     public static String tenant() {
-        final SecurityContext context = SecurityContextHolder.getContext();
-        if (context.getAuthentication() != null) {
-            final Object principal = context.getAuthentication().getPrincipal();
-            if (context.getAuthentication().getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails) {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            final Object principal = authentication.getPrincipal();
+            if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails) {
                 return tenantAwareAuthenticationDetails.tenant();
             } else if (principal instanceof TenantAwareUser tenantAwareUser) {
                 return tenantAwareUser.getTenant();
@@ -284,7 +283,7 @@ public class AccessContext {
         if (principal instanceof OidcUser oidcUser) {
             return oidcUser.getPreferredUsername();
         }
-        return principal.toString();
+        return principal == null ? null : principal.toString();
     }
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -298,11 +297,7 @@ public class AccessContext {
     @SuppressWarnings("java:S112") // java:S112 - generic method
     private static String serialize(final SecurityContext securityContext) {
         Objects.requireNonNull(securityContext);
-        try {
-            return OBJECT_MAPPER.writeValueAsString(new SecCtxInfo(securityContext));
-        } catch (final JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return OBJECT_MAPPER.writeValueAsString(new SecCtxInfo(securityContext));
     }
 
     /**
@@ -314,12 +309,7 @@ public class AccessContext {
     @SuppressWarnings("java:S112") // java:S112 - generic method
     private static SecurityContext deserialize(final String securityContextString) {
         Objects.requireNonNull(securityContextString);
-        final String securityContextTrimmed = securityContextString.trim();
-        try {
-            return OBJECT_MAPPER.readerFor(SecCtxInfo.class).<SecCtxInfo> readValue(securityContextTrimmed).toSecurityContext();
-        } catch (final JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return OBJECT_MAPPER.readerFor(SecCtxInfo.class).<SecCtxInfo> readValue(securityContextString.trim()).toSecurityContext();
     }
 
     private static boolean isAuthenticationInvalid(final Authentication authentication) {
@@ -347,7 +337,9 @@ public class AccessContext {
         private String[] authorities;
 
         private SecCtxInfo(final SecurityContext securityContext) {
-            final Authentication authentication = securityContext.getAuthentication();
+            final Authentication authentication = Objects.requireNonNull(
+                    securityContext.getAuthentication(),
+                    "Authentication must be non-null to serialize security context");
             if (!authentication.isAuthenticated()) {
                 throw new IllegalStateException("Only authenticated context could be serialized");
             }
@@ -371,8 +363,7 @@ public class AccessContext {
             final SecurityContext ctx = SecurityContextHolder.createEmptyContext();
             final Object details = tenant == null ? null : new TenantAwareAuthenticationDetails(tenant, false);
             final ActorAware principal = () -> auditor;
-            final Collection<? extends GrantedAuthority> grantedAuthorities =
-                    Stream.of(authorities).map(SimpleGrantedAuthority::new).toList();
+            final Collection<? extends GrantedAuthority> grantedAuthorities = Stream.of(authorities).map(SimpleGrantedAuthority::new).toList();
             ctx.setAuthentication(new Authentication() {
 
                 @Override

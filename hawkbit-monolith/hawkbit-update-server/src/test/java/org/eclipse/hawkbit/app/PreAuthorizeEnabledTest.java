@@ -16,13 +16,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestPropertySource;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Feature: Integration Test - Security<br/>
@@ -98,7 +98,7 @@ class PreAuthorizeEnabledTest extends AbstractSecurityTest {
         mvc.perform(get("/rest/v1/system/configs")).andExpect(result -> {
             // returns default DS type because of READ_TARGET
             assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
-            assertThat((Map<?, ?>) new ObjectMapper().reader().readValue(result.getResponse().getContentAsString(), HashMap.class)).hasSize(1);
+            assertThat((Map<?, ?>) new ObjectMapper().readValue(result.getResponse().getContentAsString(), HashMap.class)).hasSize(1);
         });
     }
 

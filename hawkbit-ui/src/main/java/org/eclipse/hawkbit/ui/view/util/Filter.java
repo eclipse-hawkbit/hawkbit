@@ -149,18 +149,18 @@ public final class Filter extends Div {
             return null;
         }
 
-        if (value instanceof Collection<?> coll) {
-            final StringBuilder sb = new StringBuilder();
-            coll.stream().forEach(next -> sb.append(key).append("==").append(next).append(','));
-            return sb.substring(0, sb.length() - 1);
-        } else if (value instanceof Optional<?> opt) {
-            if (opt.isEmpty()) {
-                return null;
-            } else {
-                return key + "==" + opt.get();
+        switch (value) {
+            case Collection<?> coll -> {
+                final StringBuilder sb = new StringBuilder();
+                coll.stream().forEach(next -> sb.append(key).append("==").append(next).append(','));
+                return sb.substring(0, sb.length() - 1);
             }
-        } else {
-            return key + "==" + value;
+            case Optional<?> opt -> {
+                return opt.map(o -> key + "==" + o).orElse(null);
+            }
+            default -> {
+                return key + "==" + value;
+            }
         }
     }
 

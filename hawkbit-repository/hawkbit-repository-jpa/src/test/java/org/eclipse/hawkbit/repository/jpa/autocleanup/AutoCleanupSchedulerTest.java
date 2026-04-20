@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
 
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.autocleanup.AutoCleanupScheduler.CleanupTask;
@@ -33,7 +34,7 @@ class AutoCleanupSchedulerTest extends AbstractJpaIntegrationTest {
     private final AtomicInteger counter = new AtomicInteger();
 
     @Autowired
-    private LockRegistry lockRegistry;
+    private LockRegistry<Lock> lockRegistry;
 
     @BeforeEach
     void setUp() {

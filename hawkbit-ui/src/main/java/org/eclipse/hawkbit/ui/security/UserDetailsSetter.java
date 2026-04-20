@@ -44,9 +44,9 @@ class UserDetailsSetter extends OncePerRequestFilter {
     protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain)
             throws ServletException, IOException {
         final Authentication authentication = securityContextHolderStrategy.getContext().getAuthentication();
-        final Authentication newAuthentication;
 
-        if (!(authentication instanceof AnonymousAuthenticationToken) && authentication.isAuthenticated()) {
+        final Authentication newAuthentication;
+        if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken) && authentication.isAuthenticated()) {
             final Collection<? extends GrantedAuthority> grantedAuthorities = grantedAuthoritiesService.getGrantedAuthorities(authentication);
             if (authentication instanceof OAuth2AuthenticationToken oAuth2AuthenticationToken) {
                 newAuthentication = new OAuth2AuthenticationToken(

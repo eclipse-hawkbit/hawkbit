@@ -12,9 +12,6 @@ package org.eclipse.hawkbit.sdk.demo.device;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 
-import feign.Contract;
-import feign.codec.Decoder;
-import feign.codec.Encoder;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.sdk.Controller;
 import org.eclipse.hawkbit.sdk.HawkbitClient;
@@ -28,8 +25,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.core.command.annotation.Command;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -44,8 +41,8 @@ public class DeviceApp {
     }
 
     @Bean
-    HawkbitClient hawkbitClient(final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract) {
-        return new HawkbitClient(hawkBitServer, encoder, decoder, contract);
+    HawkbitClient hawkbitClient(final HawkbitServer hawkBitServer) {
+        return new HawkbitClient(hawkBitServer);
     }
 
     @Bean
@@ -58,7 +55,7 @@ public class DeviceApp {
         return new AuthenticationSetupHelper(tenant, hawkbitClient);
     }
 
-    @ShellComponent
+    @Component
     public static class Shell {
 
         private final DdiTenant ddiTenant;
@@ -78,25 +75,25 @@ public class DeviceApp {
                             .controllerId(controllerId)
                             .securityToken(ObjectUtils.isEmpty(securityToken)
                                     ? (ObjectUtils.isEmpty(ddiTenant.getTenant().getGatewayToken())
-                                        ? AuthenticationSetupHelper.randomToken()
-                                        : securityToken)
+                                       ? AuthenticationSetupHelper.randomToken()
+                                       : securityToken)
                                     : securityToken)
                             .build(),
                     updateHandler.orElse(null)).setOverridePollMillis(10_000);
         }
 
-        @ShellMethod(key = "setup")
+        @Command(name = "setup")
         public void setup() {
             mgmtApi.setupTargetAuthentication();
             mgmtApi.setupTargetSecureToken(device.getController().getControllerId(), device.getTargetSecurityToken());
         }
 
-        @ShellMethod(key = "start")
+        @Command(name = "start")
         public void start() {
             device.start(Executors.newSingleThreadScheduledExecutor());
         }
 
-        @ShellMethod(key = "stop")
+        @Command(name = "stop")
         public void stop() {
             device.stop();
         }

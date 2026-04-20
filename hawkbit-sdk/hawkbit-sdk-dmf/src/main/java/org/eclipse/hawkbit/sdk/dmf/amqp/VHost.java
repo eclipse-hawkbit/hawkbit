@@ -39,8 +39,8 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
-import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.DefaultJacksonJavaTypeMapper;
+import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 
 /**
  * Abstract class for sender and receiver service.
@@ -57,10 +57,10 @@ public final class VHost extends DmfSender implements MessageListener {
     public VHost(final ConnectionFactory connectionFactory, final AmqpProperties amqpProperties, final boolean initVHost) {
         super(new RabbitTemplate(connectionFactory), amqpProperties);
 
-        // It is necessary to define rabbitTemplate as a Bean and set Jackson2JsonMessageConverter explicitly here in order to convert only
-        // OUTCOMING messages to JSON. In case of INCOMING messages, Jackson2JsonMessageConverter can not handle messages with NULL
+        // It is necessary to define rabbitTemplate as a Bean and set JacksonJsonMessageConverter explicitly here in order to convert only
+        // OUTCOMING messages to JSON. In case of INCOMING messages, JacksonJsonMessageConverter can not handle messages with NULL
         // payload (e.g. REQUEST_ATTRIBUTES_UPDATE), so the SimpleMessageConverter is used instead per default.
-        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
+        rabbitTemplate.setMessageConverter(new JacksonJsonMessageConverter());
 
         if (initVHost) {
             final RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
@@ -157,20 +157,20 @@ public final class VHost extends DmfSender implements MessageListener {
      *
      * @param message the message to get validated
      */
+    @SuppressWarnings("java:S2589") // messageProperties.getContentType() could be null via setContentType
     private static void checkContentTypeJson(final Message message) {
         if (message.getBody().length == 0) {
             return;
         }
         final MessageProperties messageProperties = message.getMessageProperties();
         final String headerContentType = (String) messageProperties.getHeaders().get("content-type");
-        if (null != headerContentType) {
+        if (headerContentType != null) {
             messageProperties.setContentType(headerContentType);
         }
         final String contentType = messageProperties.getContentType();
-        if (contentType != null && contentType.contains("json")) {
-            return;
+        if (contentType == null || !contentType.contains("json")) {
+            throw new AmqpRejectAndDontRequeueException("Content-Type is not JSON compatible");
         }
-        throw new AmqpRejectAndDontRequeueException("Content-Type is not JSON compatible");
     }
 
     private void handleEventMessage(final Message message, final String thingId) {
@@ -260,11 +260,11 @@ public final class VHost extends DmfSender implements MessageListener {
     }
 
     /**
-     * Convert a message body to a given class and set the message header AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME for Jackson converter.
+     * Convert a message body to a given class and set the message header DefaultJacksonJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME for Jackson converter.
      */
     @SuppressWarnings("unchecked")
     private <T> T convertMessage(final Message message, final Class<T> clazz) {
-        message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME, clazz.getTypeName());
+        message.getMessageProperties().getHeaders().put(DefaultJacksonJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME, clazz.getTypeName());
         return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
     }
 }

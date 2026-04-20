@@ -11,11 +11,12 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -25,7 +26,6 @@ import java.util.concurrent.Callable;
 
 import jakarta.validation.ConstraintViolationException;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.hawkbit.artifact.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.artifact.exception.FileSizeQuotaExceededException;
 import org.eclipse.hawkbit.artifact.exception.StorageQuotaExceededException;
@@ -81,12 +81,12 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         final int artifactSize = artifactData.length();
         verifyThrownExceptionBy(
                 () -> artifactManagement.create(new ArtifactUpload(
-                        IOUtils.toInputStream(artifactData, "UTF-8"),
+                        new ByteArrayInputStream(artifactData.getBytes(StandardCharsets.UTF_8)),
                         null, artifactSize, null, NOT_EXIST_IDL, "xxx", false)), "SoftwareModule");
 
         verifyThrownExceptionBy(
                 () -> artifactManagement.create(new ArtifactUpload(
-                        IOUtils.toInputStream(artifactData, "UTF-8"),
+                        new ByteArrayInputStream(artifactData.getBytes(StandardCharsets.UTF_8)),
                         null, artifactSize, null, NOT_EXIST_IDL, "xxx", false)), "SoftwareModule");
 
         verifyThrownExceptionBy(() -> artifactManagement.delete(NOT_EXIST_IDL), "Artifact");
@@ -143,7 +143,8 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         final long smID = softwareModuleRepository.save(new JpaSoftwareModule(osType, "smIllegalFilenameTest", "1.0")).getId();
         final ArtifactUpload artifactUpload = new ArtifactUpload(
-                IOUtils.toInputStream(artifactData, "UTF-8"), null, artifactSize, null, smID, illegalFilename, false);
+                new ByteArrayInputStream(artifactData.getBytes(StandardCharsets.UTF_8)), null, artifactSize, null, smID, illegalFilename,
+                false);
         assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(() -> artifactManagement.create(artifactUpload));
         assertThat(softwareModuleManagement.get(smID).getArtifacts()).isEmpty();
     }
@@ -542,9 +543,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     private void assertEqualFileContents(final ArtifactStream artifact, final byte[] randomBytes) {
         try (final InputStream inputStream = artifact) {
-            assertTrue(
-                    IOUtils.contentEquals(new ByteArrayInputStream(randomBytes), inputStream),
-                    "The stored binary matches the given binary");
+            assertArrayEquals(inputStream.readAllBytes(), randomBytes);
         } catch (final IOException e) {
             throw new AssertionError(e);
         }

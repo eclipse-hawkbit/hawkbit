@@ -20,7 +20,8 @@ import java.util.regex.Pattern;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.eclipse.hawkbit.tenancy.TenantAwareUserProperties;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.jspecify.annotations.NonNull;
+import org.springframework.boot.security.autoconfigure.SecurityProperties;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -44,7 +45,8 @@ public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
     }
 
     @Override
-    protected Authentication createSuccessAuthentication(final Object principal, final Authentication authentication, final UserDetails user) {
+    protected @NonNull Authentication createSuccessAuthentication(
+            @NonNull final Object principal, final Authentication authentication, final UserDetails user) {
         final UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(
                 principal, authentication.getCredentials(), user.getAuthorities());
         result.setDetails(user instanceof TenantAwareUser tenantAwareUser
@@ -58,15 +60,13 @@ public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
         final List<User> userPrincipals = new ArrayList<>();
         tenantAwareUserProperties.getUser().forEach((username, user) -> {
             final String password = password(user.getPassword());
-
-            final List<GrantedAuthority> credentials =
-                    createAuthorities(user.getRoles(), user.getPermissions(), Collections::emptyList);
+            final List<GrantedAuthority> credentials = createAuthorities(user.getRoles(), user.getPermissions(), Collections::emptyList);
             userPrincipals.add(ObjectUtils.isEmpty(user.getTenant())
                     ? new User(username, password, credentials)
                     : new TenantAwareUser(username, password, credentials, user.getTenant()));
         });
 
-        if (securityProperties != null && securityProperties.getUser() != null && !securityProperties.getUser().isPasswordGenerated()) {
+        if (securityProperties != null && !securityProperties.getUser().isPasswordGenerated()) {
             // explicitly setup system user - add is as a regular (non-tenant scoped) user
             userPrincipals.add(new User(
                     securityProperties.getUser().getName(),
@@ -119,7 +119,7 @@ public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
         }
 
         @Override
-        public UserDetails loadUserByUsername(final String username) {
+        public @NonNull UserDetails loadUserByUsername(@NonNull final String username) {
             final User user = userMap.get(username);
             if (user == null) {
                 throw new UsernameNotFoundException("No such user");

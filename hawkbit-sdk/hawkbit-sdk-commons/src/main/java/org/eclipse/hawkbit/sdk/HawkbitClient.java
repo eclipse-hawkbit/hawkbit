@@ -10,15 +10,18 @@
 package org.eclipse.hawkbit.sdk;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.lang.annotation.Annotation;
 import java.lang.ref.Cleaner;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -44,13 +47,15 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import feign.Contract;
 import feign.Feign;
 import feign.FeignException;
 import feign.Request;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
+import feign.Response;
+import feign.Util;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
@@ -73,7 +78,12 @@ import org.apache.hc.client5.http.ssl.TrustAllStrategy;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.apache.hc.core5.util.TimeValue;
+import org.jspecify.annotations.NonNull;
+import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
+import org.springframework.cloud.openfeign.support.SpringMvcContract;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.mediatype.hal.HalJacksonModule;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -85,6 +95,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 @Builder
@@ -110,12 +125,6 @@ public class HawkbitClient {
                         } // else do not send authentication, no authentication or certificate based
                     };
     // @formatter:on
-    private static final ErrorDecoder DEFAULT_ERROR_DECODER_0 = new ErrorDecoder.Default();
-    public static final ErrorDecoder DEFAULT_ERROR_DECODER = (methodKey, response) -> {
-        final Exception e = DEFAULT_ERROR_DECODER_0.decode(methodKey, response);
-        log.trace("REST API call failed!", e);
-        return e;
-    };
 
     private static final HttpRequestRetryStrategy DEFAULT_HTTP_REQUEST_RETRY_STRATEGY =
             new DefaultHttpRequestRetryStrategy(
@@ -134,6 +143,10 @@ public class HawkbitClient {
 
     private final HttpRequestRetryStrategy httpRequestRetryStrategy;
 
+    public HawkbitClient(final HawkbitServer hawkBitServer) {
+        this(hawkBitServer, null, null, null, null, null);
+    }
+
     public HawkbitClient(final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract) {
         this(hawkBitServer, encoder, decoder, contract, null, null);
     }
@@ -149,9 +162,9 @@ public class HawkbitClient {
             final ErrorDecoder errorDecoder, final BiFunction<Tenant, Controller, RequestInterceptor> requestInterceptorFn,
             final HttpRequestRetryStrategy httpRequestRetryStrategy) {
         this.hawkBitServer = hawkBitServer;
-        this.encoder = encoder;
-        this.decoder = decoder;
-        this.contract = contract;
+        this.encoder = encoder == null ? DEFAULT_ENCODER : encoder;
+        this.decoder = decoder == null ? DEFAULT_DECODER : decoder;
+        this.contract = contract == null ? DEFAULT_CONTRACT : contract;
 
         this.errorDecoder = errorDecoder == null ? DEFAULT_ERROR_DECODER : errorDecoder;
         this.requestInterceptorFn = requestInterceptorFn == null ? DEFAULT_REQUEST_INTERCEPTOR_FN : requestInterceptorFn;
@@ -264,7 +277,7 @@ public class HawkbitClient {
     private Object callMultipartFormDataRequest(
             final Method method, final Object[] args,
             final Tenant tenant, final Controller controller,
-            final Class<?>[] parameterTypes, final ObjectMapper objectMapper) throws URISyntaxException, IOException {
+            final Class<?>[] parameterTypes, final ObjectMapper objectMapper) throws IOException, URISyntaxException {
         final PostMapping postMapping = method.getAnnotation(PostMapping.class);
         final Annotation[][] parametersAnnotations = method.getParameterAnnotations();
         // build path - replace @PathVariables
@@ -322,11 +335,11 @@ public class HawkbitClient {
 
         return method.getReturnType() == ResponseEntity.class
                 ? new ResponseEntity<>(
-                    deserialize(
-                            conn.getInputStream(),
-                            (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0],
-                            objectMapper),
-                    HttpStatusCode.valueOf(responseCode))
+                deserialize(
+                        conn.getInputStream(),
+                        (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0],
+                        objectMapper),
+                HttpStatusCode.valueOf(responseCode))
                 : deserialize(conn.getInputStream(), method.getReturnType(), objectMapper);
     }
 
@@ -360,7 +373,7 @@ public class HawkbitClient {
         }
     }
 
-    private static Object deserialize(final InputStream is, final Class<?> type, final ObjectMapper objectMapper) throws IOException {
+    private static Object deserialize(final InputStream is, final Class<?> type, final ObjectMapper objectMapper) {
         return type == void.class || type == Void.class ? null : objectMapper.readValue(is, type);
     }
 
@@ -510,4 +523,84 @@ public class HawkbitClient {
             }
         }
     }
+
+    public static final Encoder DEFAULT_ENCODER = new Encoder() {
+
+        private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder()
+                .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+                .configure(SerializationFeature.INDENT_OUTPUT, true)
+                .build();
+
+        @Override
+        public void encode(final Object object, final Type bodyType, final RequestTemplate template) {
+            final JavaType javaType = OBJECT_MAPPER.getTypeFactory().constructType(bodyType);
+            template.body(OBJECT_MAPPER.writerFor(javaType).writeValueAsBytes(object), Util.UTF_8);
+        }
+    };
+
+    /**
+     * A decorator for the {@link ResponseEntityDecoder} that extends it whit hal-json and octet streams support.
+     */
+    public static final Decoder DEFAULT_DECODER = new Decoder() {
+
+        private static final String OCTET_STREAM = "[application/octet-stream]";
+        private static final String OCTET_STREAM_UTF8 = "[application/octet-stream;charset=UTF-8]";
+        private static final String TEXT_PLAIN = "[text/plain]";
+        private static final String TEXT_PLAIN_UTF8 = "[text/plain;charset=UTF-8]";
+
+        private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .addModule(new HalJacksonModule())
+                .build();
+
+        private final ResponseEntityDecoder delegate = new ResponseEntityDecoder((response, type) -> {
+            if (response.status() == 404 || response.status() == 204) {
+                return Util.emptyValueOf(type);
+            } else if (response.body() == null) {
+                return null;
+            } else {
+                final Reader reader = markSupportedReader(response.body().asReader(response.charset()));
+                reader.mark(1);
+                if (reader.read() == -1) {
+                    return null;
+                }
+                reader.reset();
+                return OBJECT_MAPPER.readValue(reader, OBJECT_MAPPER.constructType(type));
+            }
+        });
+
+        @Override
+        public Object decode(final Response response, final Type type) throws IOException {
+            if (type instanceof ParameterizedType parameterizedType && parameterizedType.getRawType() == ResponseEntity.class) {
+                final String contentType = String.valueOf(response.headers().get(HttpHeaders.CONTENT_TYPE));
+                if (contentType.equals(OCTET_STREAM) || contentType.equals(OCTET_STREAM_UTF8)) {
+                    final byte[] bodyData = Util.toByteArray(response.body().asInputStream());
+                    final InputStream convertedInputStream = response.toBuilder().body(bodyData).build().body().asInputStream();
+                    if (parameterizedType.getActualTypeArguments()[0] instanceof Class<?> clazz
+                            && InputStreamResource.class.isAssignableFrom(clazz)) {
+                        return new ResponseEntity<>(new InputStreamResource(convertedInputStream), HttpStatus.valueOf(response.status()));
+                    } else {
+                        return new ResponseEntity<>(convertedInputStream, HttpStatus.valueOf(response.status()));
+                    }
+                } else if (contentType.equals(TEXT_PLAIN) || contentType.equals(TEXT_PLAIN_UTF8)) {
+                    final byte[] bodyData = Util.toByteArray(response.body().asInputStream());
+                    return new ResponseEntity<>(new String(bodyData), HttpStatus.valueOf(response.status()));
+                }
+            }
+            return delegate.decode(response, type);
+        }
+
+        private static @NonNull Reader markSupportedReader(final Reader reader) {
+            return reader.markSupported() ? reader : new BufferedReader(reader, 1);
+        }
+    };
+
+    public static final Contract DEFAULT_CONTRACT = new SpringMvcContract();
+
+    private static final ErrorDecoder DEFAULT_ERROR_DECODER_0 = new ErrorDecoder.Default();
+    public static final ErrorDecoder DEFAULT_ERROR_DECODER = (methodKey, response) -> {
+        final Exception e = DEFAULT_ERROR_DECODER_0.decode(methodKey, response);
+        log.trace("REST API call failed!", e);
+        return e;
+    };
 }

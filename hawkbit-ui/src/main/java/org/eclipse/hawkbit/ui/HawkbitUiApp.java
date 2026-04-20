@@ -13,6 +13,7 @@ import static feign.Util.ISO_8859_1;
 
 import java.io.Serial;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.util.Base64;
 import java.util.Collections;
@@ -21,10 +22,7 @@ import java.util.Objects;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
-import feign.Contract;
 import feign.RequestInterceptor;
-import feign.codec.Decoder;
-import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.sdk.HawkbitClient;
@@ -59,15 +57,19 @@ public class HawkbitUiApp implements AppShellConfigurator {
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final RequestInterceptor AUTHORIZATION = requestTemplate -> {
-        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.getPrincipal() instanceof OidcUser oidcUser) {
-            requestTemplate.header(AUTHORIZATION_HEADER, "Bearer " + oidcUser.getIdToken().getTokenValue());
-        } else {
+        final Authentication authentication = Objects.requireNonNull(
+                SecurityContextHolder.getContext().getAuthentication(), "No authentication available in security context!");
+        final Object principal = Objects.requireNonNull(authentication.getPrincipal(), "User is null!");
+        if (principal instanceof OidcUser oidcUser) {
             requestTemplate.header(
-                    AUTHORIZATION_HEADER, "Basic " + Base64.getEncoder().encodeToString(
-                            (Objects.requireNonNull(authentication.getPrincipal(), "User is null!") + ":" + Objects.requireNonNull(
-                                    authentication.getCredentials(), "Password is not available!")).getBytes(ISO_8859_1))
-            );
+                    AUTHORIZATION_HEADER,
+                    "Bearer " + oidcUser.getIdToken().getTokenValue());
+        } else {
+            final String user = String.valueOf(principal);
+            final Object pass = Objects.requireNonNull(authentication.getCredentials(), "Password is not available!");
+            requestTemplate.header(
+                    AUTHORIZATION_HEADER,
+                    "Basic " + Base64.getEncoder().encodeToString((user + ":" + pass).getBytes(ISO_8859_1)));
         }
     };
 
@@ -83,19 +85,13 @@ public class HawkbitUiApp implements AppShellConfigurator {
     }
 
     @Bean
-    HawkbitClient hawkbitClient(
-            final HawkbitServer hawkBitServer,
-            final Encoder encoder,
-            final Decoder decoder,
-            final Contract contract
-    ) {
+    HawkbitClient hawkbitClient(final HawkbitServer hawkBitServer) {
         return new HawkbitClient(
-                hawkBitServer, encoder, decoder, contract,
+                hawkBitServer, null, null, null,
                 ERROR_DECODER,
                 (tenant, controller) -> controller == null
                         ? AUTHORIZATION
-                        : HawkbitClient.DEFAULT_REQUEST_INTERCEPTOR_FN.apply(tenant, controller)
-        );
+                        : HawkbitClient.DEFAULT_REQUEST_INTERCEPTOR_FN.apply(tenant, controller));
     }
 
     @Bean
@@ -119,8 +115,7 @@ public class HawkbitUiApp implements AppShellConfigurator {
 
                 @Override
                 public void eraseCredentials() {
-                    // don't erase credentials because they will be used
-                    // to authenticate to the hawkBit update server / mgmt server
+                    // don't erase credentials because they will be used to authenticate to the hawkBit update server / mgmt server
                 }
             };
         };
@@ -128,7 +123,7 @@ public class HawkbitUiApp implements AppShellConfigurator {
 
     public static boolean isAuthenticated(String username, String password, String mgmtUrl) {
         try {
-            final URL url = new URL(mgmtUrl + "/rest/v1/rollouts");
+            final URL url = new URI(mgmtUrl + "/rest/v1/rollouts").toURL();
             final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 

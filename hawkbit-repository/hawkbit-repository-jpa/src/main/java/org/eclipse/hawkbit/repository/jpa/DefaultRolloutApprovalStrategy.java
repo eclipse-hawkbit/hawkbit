@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.Collection;
+import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -35,9 +35,9 @@ public class DefaultRolloutApprovalStrategy implements RolloutApprovalStrategy {
      */
     @Override
     public boolean isApprovalNeeded(final Rollout rollout) {
-        return TenantConfigHelper.getAsSystem(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class) &&
-                hasNoApproveRolloutPermission(
-                        getCurrentAuthentication().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList());
+        return TenantConfigHelper.getAsSystem(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class) // if approval enabled for tenant
+                && !getCurrentAuthentication().map(Authentication::getAuthorities).map(grantedAuthorities -> grantedAuthorities.stream()
+                .map(GrantedAuthority::getAuthority).anyMatch(SpPermission.APPROVE_ROLLOUT::equals)).orElse(false);
     }
 
     @Override
@@ -47,14 +47,10 @@ public class DefaultRolloutApprovalStrategy implements RolloutApprovalStrategy {
 
     @Override
     public String getApprovalUser(final Rollout rollout) {
-        return getCurrentAuthentication().getName();
+        return getCurrentAuthentication().map(Authentication::getName).orElse(null);
     }
 
-    private static Authentication getCurrentAuthentication() {
-        return SecurityContextHolder.getContext().getAuthentication();
-    }
-
-    private static boolean hasNoApproveRolloutPermission(final Collection<String> authorities) {
-        return authorities.stream().noneMatch(SpPermission.APPROVE_ROLLOUT::equals);
+    private static Optional<Authentication> getCurrentAuthentication() {
+        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
     }
 }

@@ -104,29 +104,33 @@ public class SpecificationBuilder<T> {
         }
 
         public Predicate build(final Node node) {
-            if (node instanceof Comparison comparison) {
-                return predicate(comparison);
-            } else if (node instanceof Logical logical) {
-                final Logical.Operator op = Objects.requireNonNull(logical.getOp());
-                if (op == Logical.Operator.AND) {
-                    return cb.and(logical.getChildren().stream()
-                            .map(this::build)
-                            .toList()
-                            .toArray(PREDICATES_ARRAY_0));
-                } else if (op == Logical.Operator.OR) {
-                    final Map<String, Integer> state = pathResolver.getState();
-                    return cb.or(logical.getChildren().stream()
-                            .map(child -> {
-                                pathResolver.reset(state);
-                                return build(child); // for or path resolver joins could be reused
-                            })
-                            .toList()
-                            .toArray(PREDICATES_ARRAY_0));
-                } else {
-                    throw new IllegalArgumentException("Unsupported logical operator: " + op);
+            switch (node) {
+                case Comparison comparison -> {
+                    return predicate(comparison);
                 }
-            } else {
-                throw new IllegalArgumentException("Unsupported node type: " + node.getClass());
+                case Logical logical -> {
+                    final Logical.Operator op = Objects.requireNonNull(logical.getOp());
+                    switch (op) {
+                        case Logical.Operator.AND -> {
+                            return cb.and(logical.getChildren().stream()
+                                    .map(this::build)
+                                    .toList()
+                                    .toArray(PREDICATES_ARRAY_0));
+                        }
+                        case Logical.Operator.OR -> {
+                            final Map<String, Integer> state = pathResolver.getState();
+                            return cb.or(logical.getChildren().stream()
+                                    .map(child -> {
+                                        pathResolver.reset(state);
+                                        return build(child); // for or path resolver joins could be reused
+                                    })
+                                    .toList()
+                                    .toArray(PREDICATES_ARRAY_0));
+                        }
+                        default -> throw new IllegalArgumentException("Unsupported logical operator: " + op);
+                    }
+                }
+                default -> throw new IllegalArgumentException("Unsupported node type: " + node.getClass());
             }
         }
 

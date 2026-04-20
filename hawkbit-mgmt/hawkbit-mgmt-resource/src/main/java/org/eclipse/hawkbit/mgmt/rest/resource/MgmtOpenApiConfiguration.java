@@ -9,7 +9,10 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
@@ -17,6 +20,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
+import io.swagger.v3.oas.models.tags.Tag;
 import org.eclipse.hawkbit.rest.OpenApi;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +41,7 @@ public class MgmtOpenApiConfiguration {
             havingValue = "true",
             matchIfMissing = true)
     public GroupedOpenApi mgmtApi(@Value("${hawkbit.server.openapi.mgmt.tenant-endpoint.enabled:false}") final boolean tenantEndpointEnabled) {
+        // @formatter:off
         return GroupedOpenApi
                 .builder()
                 .group("Management API")
@@ -74,8 +79,9 @@ public class MgmtOpenApiConfiguration {
                                                                 .type(SecurityScheme.Type.HTTP)
                                                                 .bearerFormat("JWT")
                                                                 .scheme("bearer")))
-                                .tags(OpenApi.sort(openApi.getTags())))
+                                .tags(sort(openApi.getTags())))
                 .build();
+        // @formatter:on
     }
 
     private static ServerVariable tenantSeverVariable() {
@@ -83,5 +89,36 @@ public class MgmtOpenApiConfiguration {
         tenantServerVariable.setDescription("AccessContext identifier");
         tenantServerVariable.setDefault("DEFAULT");
         return tenantServerVariable;
+    }
+
+    private static final String ORDER = "order";
+    private static final Comparator<Tag> TAG_COMPARATOR = new Comparator<>() {
+
+        @Override
+        public int compare(final Tag o1, final Tag o2) {
+            final int o1Order = order(o1);
+            final int o2Order = order(o2);
+            if (o1Order == o2Order) {
+                return o1.getName().compareTo(o2.getName());
+            } else {
+                return Integer.compare(o1Order, o2Order);
+            }
+        }
+
+        private static int order(final Tag tag) {
+            return Optional.ofNullable(tag.getExtensions())
+                    .map(extensions -> extensions.get(OpenApi.X_HAWKBIT))
+                    .filter(extension -> Map.class.isAssignableFrom(extension.getClass()))
+                    .map(Map.class::cast)
+                    .map(propertiesMap -> propertiesMap.get(ORDER))
+                    .map(String.class::cast)
+                    .map(Integer::parseInt)
+                    .orElse(0);
+        }
+    };
+
+    private static List<Tag> sort(final List<Tag> tags) {
+        tags.sort(TAG_COMPARATOR);
+        return tags;
     }
 }
