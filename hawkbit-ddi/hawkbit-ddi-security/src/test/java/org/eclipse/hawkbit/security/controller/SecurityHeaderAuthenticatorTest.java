@@ -14,6 +14,7 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_HEADER_ENABLED;
 import static org.mockito.Mockito.when;
 
+import org.eclipse.hawkbit.context.Principal;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
@@ -77,7 +78,7 @@ class SecurityHeaderAuthenticatorTest {
 
         assertThat(authenticator.authenticate(securityToken))
                 .isNotNull()
-                .hasFieldOrPropertyWithValue("principal", CA_COMMON_NAME_VALUE);
+                .hasFieldOrPropertyWithValue("principal", new Principal("DEFAULT", CA_COMMON_NAME_VALUE));
     }
 
     /**
@@ -92,13 +93,13 @@ class SecurityHeaderAuthenticatorTest {
 
         assertThat(authenticator.authenticate(prepareSecurityToken(SINGLE_AUTHORITY)))
                 .isNotNull()
-                .hasFieldOrPropertyWithValue("principal", CA_COMMON_NAME_VALUE);
+                .hasFieldOrPropertyWithValue("principal", new Principal("DEFAULT", CA_COMMON_NAME_VALUE));
         assertThat(authenticator.authenticate(prepareSecurityToken(SECOND_AUTHORITY)))
                 .isNotNull()
-                .hasFieldOrPropertyWithValue("principal", CA_COMMON_NAME_VALUE);
+                .hasFieldOrPropertyWithValue("principal", new Principal("DEFAULT", CA_COMMON_NAME_VALUE));
         assertThat(authenticator.authenticate(prepareSecurityToken(THIRD_AUTHORITY)))
                 .isNotNull()
-                .hasFieldOrPropertyWithValue("principal", CA_COMMON_NAME_VALUE);
+                .hasFieldOrPropertyWithValue("principal", new Principal("DEFAULT", CA_COMMON_NAME_VALUE));
     }
 
     /**

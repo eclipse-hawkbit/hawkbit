@@ -21,8 +21,8 @@ import java.util.Optional;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.context.Mdc;
+import org.eclipse.hawkbit.context.Principal;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.oidc.OidcProperties;
 import org.eclipse.hawkbit.oidc.OidcProperties.Oauth2.ResourceServer.Jwt.Claim;
@@ -30,8 +30,6 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.rest.SecurityManagedConfiguration;
 import org.eclipse.hawkbit.rest.security.DosFilter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
-import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -84,9 +82,7 @@ public class MgmtSecurityConfiguration {
     public FilterRegistrationBean<DosFilter> dosFilterREST() {
         final FilterRegistrationBean<DosFilter> filterRegBean = SecurityManagedConfiguration.dosFilter(null,
                 securityProperties.getDos().getFilter(), securityProperties.getClients());
-        filterRegBean.setUrlPatterns(List.of(
-                MgmtRestConstants.REST + "/*",
-                "/system/admin/*"));
+        filterRegBean.setUrlPatterns(List.of(MgmtRestConstants.REST + "/*", "/system/admin/*"));
         filterRegBean.setOrder(SecurityManagedConfiguration.DOS_FILTER_ORDER);
         filterRegBean.setName("dosMgmtFilter");
 
@@ -179,7 +175,7 @@ public class MgmtSecurityConfiguration {
                                 .map(GrantedAuthority.class::cast)
                                 .toList())
                         .orElseGet(Collections::emptyList);
-                return new HawkbitJwtAuthenticationToken(jwt, new TenantAwareUser(username, username, authorities, tenant), authorities);
+                return new HawkbitJwtAuthenticationToken(jwt, new Principal(tenant, username), authorities);
             }));
         }
 
@@ -218,9 +214,8 @@ public class MgmtSecurityConfiguration {
 
             private final String name;
 
-            private HawkbitJwtAuthenticationToken(final Jwt jwt, TenantAwareUser user, final Collection<GrantedAuthority> authorities) {
-                super(jwt, user, jwt, authorities);
-                setDetails(new TenantAwareAuthenticationDetails(user.getTenant(), false));
+            private HawkbitJwtAuthenticationToken(final Jwt jwt, Principal principal, final Collection<GrantedAuthority> authorities) {
+                super(jwt, principal, jwt, authorities);
                 name = jwt.getSubject();
                 setAuthenticated(true);
             }

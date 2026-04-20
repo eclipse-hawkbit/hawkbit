@@ -384,7 +384,7 @@ class ManagementSecurityTest extends AbstractJpaIntegrationTest {
                 } catch (final NoSuchMethodException | IllegalAccessException | InvocationTargetException e1) {
                     log.debug("{} is not a builder. Throws could not instantiate", clazz.getName());
                 }
-                log.error("Could not instantiate {}", clazz.getName(), e);
+                log.debug("Could not instantiate {} (but if inside instance, could be fine)", clazz.getName(), e);
                 throw e;
             }
         }
@@ -401,12 +401,12 @@ class ManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     @SneakyThrows
     protected void assertPermissionsCheck(final Method managementInterfaceMethod, final Object managementObject, final String... permissions) {
+        final Object[] params = new Object[managementInterfaceMethod.getParameterCount()];
+        for (int i = 0; i < params.length; i++) {
+            params[i] = instance(managementInterfaceMethod.getParameterTypes()[i]);
+        }
         final Callable<?> callable = () -> {
             try {
-                final Object[] params = new Object[managementInterfaceMethod.getParameterCount()];
-                for (int i = 0; i < params.length; i++) {
-                    params[i] = instance(managementInterfaceMethod.getParameterTypes()[i]);
-                }
                 return managementInterfaceMethod.invoke(managementObject, params);
             } catch (final InvocationTargetException e) {
                 if (e.getCause() instanceof RuntimeException re) {

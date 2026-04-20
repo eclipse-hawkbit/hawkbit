@@ -9,9 +9,16 @@
  */
 package org.eclipse.hawkbit.auth;
 
+import java.util.Collection;
+import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * Software provisioning roles that implies set of permissions and reflects high-level roles.
@@ -29,6 +36,7 @@ public final class SpRole {
     public static final String SYSTEM_ROLE = "ROLE_SYSTEM_CODE";
     /** The role which contains in the spring security context in case a controller is authenticated */
     public static final String CONTROLLER_ROLE = "ROLE_CONTROLLER";
+    public static final Collection<GrantedAuthority> CONTROLLER_AUTHORITIES = List.of(new SimpleGrantedAuthority(CONTROLLER_ROLE));
 
     private static final String IMPLIES = " > ";
     private static final String LINE_BREAK = "\n";
@@ -85,4 +93,16 @@ public final class SpRole {
             TENANT_ADMIN_HIERARCHY +
             SYSTEM_ROLE_HIERARCHY;
     // @formatter:on
+
+    public static boolean isController() {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return false;
+        }
+        final Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        if (authorities == CONTROLLER_AUTHORITIES) {
+            return true;
+        }
+        return authorities.size() == 1 && CONTROLLER_ROLE.equals(authorities.iterator().next().getAuthority());
+    }
 }

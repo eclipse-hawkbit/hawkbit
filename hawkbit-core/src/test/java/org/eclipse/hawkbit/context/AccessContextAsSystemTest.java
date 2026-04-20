@@ -15,7 +15,6 @@ import static org.eclipse.hawkbit.context.AccessContext.asSystemAsTenant;
 import java.util.List;
 
 import org.eclipse.hawkbit.auth.SpRole;
-import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -66,7 +65,6 @@ class AccessContextAsSystemTest {
             assertThat(currentAuth.getClass().getSimpleName()).isEqualTo("SystemCodeAuthentication");
             assertThat(currentAuth.getCredentials()).isNull();
             assertThat(currentAuth.getAuthorities()).isEqualTo(List.of(new SimpleGrantedAuthority(SpRole.SYSTEM_ROLE)));
-            assertThat(currentAuth.getDetails()).isEqualTo(new TenantAwareAuthenticationDetails("tenant", false));
         });
         SecurityContextHolder.clearContext();
     }

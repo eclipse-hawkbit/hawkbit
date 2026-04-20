@@ -122,6 +122,7 @@ public abstract class AbstractIntegrationTest {
     protected static final Pageable PAGE = PageRequest.of(0, 500, Sort.by(Direction.ASC, "id"));
     protected static final Pageable UNPAGED = Pageable.unpaged();
 
+    protected static final String CONTROLLER_PLUG_AND_PLAY = "CONTROLLER_PLUG_AND_PLAY";
     protected static final URI LOCALHOST = URI.create("http://127.0.0.1");
     protected static final Random RND = TestdataFactory.RND;
 

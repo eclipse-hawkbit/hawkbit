@@ -133,7 +133,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     void registerTargetWithName() {
         final String controllerId = TARGET_PREFIX + "registerTargetWithName";
         final String name = "NonDefaultTargetName";
-        registerAndAssertTargetWithExistingTenant(controllerId, name, 1, TargetUpdateStatus.REGISTERED, CREATED_BY, null);
+        registerAndAssertTargetWithExistingTenant(controllerId, name, 1, TargetUpdateStatus.REGISTERED, CONTROLLER_PLUG_AND_PLAY, null);
         registerSameTargetAndAssertBasedOnVersion(controllerId, name + "_updated", 1, TargetUpdateStatus.REGISTERED, null);
 
         Mockito.verifyNoInteractions(getDeadletterListener());
@@ -153,7 +153,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         attributes.put("testKey1", "testValue1");
         attributes.put("testKey2", "testValue2");
 
-        registerAndAssertTargetWithExistingTenant(controllerId, null, 1, TargetUpdateStatus.REGISTERED, CREATED_BY, attributes);
+        registerAndAssertTargetWithExistingTenant(controllerId, null, 1, TargetUpdateStatus.REGISTERED, CONTROLLER_PLUG_AND_PLAY, attributes);
 
         attributes.put("testKey3", "testValue3");
         registerSameTargetAndAssertBasedOnVersion(controllerId, null, 1, TargetUpdateStatus.REGISTERED, attributes);
@@ -176,7 +176,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         final Map<String, String> attributes = new HashMap<>();
         attributes.put("testKey1", "testValue1");
         attributes.put("testKey2", "testValue2");
-        registerAndAssertTargetWithExistingTenant(controllerId, name, 1, TargetUpdateStatus.REGISTERED, CREATED_BY, attributes);
+        registerAndAssertTargetWithExistingTenant(controllerId, name, 1, TargetUpdateStatus.REGISTERED, CONTROLLER_PLUG_AND_PLAY, attributes);
 
         attributes.put("testKey3", "testValue3");
         registerSameTargetAndAssertBasedOnVersion(controllerId, name + "_updated", 1, TargetUpdateStatus.REGISTERED, attributes);

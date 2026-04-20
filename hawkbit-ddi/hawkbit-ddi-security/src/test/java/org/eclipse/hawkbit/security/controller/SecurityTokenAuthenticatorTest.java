@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import org.eclipse.hawkbit.context.Principal;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
@@ -72,7 +73,7 @@ class SecurityTokenAuthenticatorTest {
 
         assertThat(authenticator.authenticate(securityToken))
                 .isNotNull()
-                .hasFieldOrPropertyWithValue("principal", CONTROLLER_ID);
+                .hasFieldOrPropertyWithValue("principal", new Principal("DEFAULT", CONTROLLER_ID));
     }
 
     /**

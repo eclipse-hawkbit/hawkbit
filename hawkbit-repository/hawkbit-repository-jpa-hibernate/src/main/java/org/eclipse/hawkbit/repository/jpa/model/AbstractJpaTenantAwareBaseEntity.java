@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.io.Serial;
 import java.util.Objects;
 
 import jakarta.persistence.Column;
@@ -35,9 +34,6 @@ import org.hibernate.annotations.TenantId;
 @Getter
 @MappedSuperclass
 public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEntity implements TenantAwareBaseEntity {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     @Column(name = "tenant", nullable = false, insertable = true, updatable = false, length = 40)
     @Size(min = 1, max = 40)
@@ -86,9 +82,7 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
         final String currentTenant = AccessContext.tenant();
         if (currentTenant == null) {
             throw new TenantNotExistException(
-                    String.format(
-                            "AccessContext %s does not exists, cannot create entity %s with id %d",
-                            AccessContext.tenant(), getClass(), getId()));
+                    String.format("Tenant not found in the context, cannot create entity %s with id %d", getClass(), getId()));
         }
         setTenant(currentTenant.toUpperCase());
     }

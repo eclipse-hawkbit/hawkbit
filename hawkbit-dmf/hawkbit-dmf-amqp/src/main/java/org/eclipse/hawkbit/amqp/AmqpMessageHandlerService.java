@@ -24,6 +24,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.auth.SpRole;
+import org.eclipse.hawkbit.context.Principal;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -47,7 +48,6 @@ import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.utils.IpUtil;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
@@ -170,11 +170,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private static void setTenantSecurityContext(final String tenant) {
-        final AnonymousAuthenticationToken authenticationToken = new AnonymousAuthenticationToken(
-                UUID.randomUUID().toString(), "AMQP-Controller",
-                List.of(new SimpleGrantedAuthority(SpRole.CONTROLLER_ROLE)));
-        authenticationToken.setDetails(new TenantAwareAuthenticationDetails(tenant, true));
-        setSecurityContext(authenticationToken);
+        setSecurityContext(new AnonymousAuthenticationToken(
+                UUID.randomUUID().toString(), new Principal(tenant, "AMQP-Controller"),
+                List.of(new SimpleGrantedAuthority(SpRole.CONTROLLER_ROLE))));
     }
 
     private static boolean isOptionalMessageBodyEmpty(final Message message) {

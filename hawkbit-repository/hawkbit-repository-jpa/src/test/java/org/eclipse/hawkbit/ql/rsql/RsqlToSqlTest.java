@@ -33,7 +33,7 @@ import org.springframework.test.context.ContextConfiguration;
         "hawkbit.rsql.caseInsensitiveDB=true",
         "spring.main.allow-bean-definition-overriding=true",
         "spring.main.banner-mode=off",
-        "logging.level.root=ERROR" })
+        "logging.level.root=WARN" })
 @ContextConfiguration(classes = { JpaRepositoryConfiguration.class, TestConfiguration.class })
 @Disabled("For manual run only, while playing around with RSQL to SQL")
 @SuppressWarnings("java:S2699") // java:S2699 - manual test, don't actually does assertions

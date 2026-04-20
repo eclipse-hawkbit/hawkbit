@@ -130,7 +130,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final Target findTargetByControllerID = targetManagement.getByControllerId(knownTargetControllerId);
         assertThat(findTargetByControllerID.getCreatedBy()).isEqualTo(knownCreatedBy);
         // make a poll, audit information should not be changed, run as controller principal!
-        callAs(withController("controller", CONTROLLER_ROLE), () -> {
+        callAs(withController("controller"), () -> {
             mvc.perform(get(CONTROLLER_BASE, AccessContext.tenant(), knownTargetControllerId))
                     .andDo(MockMvcResultPrinter.print())
                     .andExpect(status().isOk());
@@ -376,7 +376,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final String knownControllerId1 = "0815";
         final long create = System.currentTimeMillis();
         // make a poll, audit information should be set on plug and play
-        callAs(withController("controller", CONTROLLER_ROLE), () -> {
+        callAs(withController("controller"), () -> {
             mvc.perform(get(CONTROLLER_BASE, AccessContext.tenant(), knownControllerId1))
                     .andDo(MockMvcResultPrinter.print())
                     .andExpect(status().isOk());
@@ -385,9 +385,9 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         // verify
         assertThat(targetManagement.getByControllerId(knownControllerId1)).satisfies(target -> {
             assertThat(target.getAddress()).isEqualTo(IpUtil.createHttpUri("127.0.0.1").toString());
-            assertThat(target.getCreatedBy()).isEqualTo("CONTROLLER_PLUG_AND_PLAY");
+            assertThat(target.getCreatedBy()).isEqualTo(CONTROLLER_PLUG_AND_PLAY);
             assertThat(target.getCreatedAt()).isGreaterThanOrEqualTo(create);
-            assertThat(target.getLastModifiedBy()).isEqualTo("CONTROLLER_PLUG_AND_PLAY");
+            assertThat(target.getLastModifiedBy()).isEqualTo(CONTROLLER_PLUG_AND_PLAY);
             assertThat(target.getLastModifiedAt()).isGreaterThanOrEqualTo(create);
         });
     }

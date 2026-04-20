@@ -36,7 +36,6 @@ import jakarta.validation.ConstraintViolationException;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.auth.SpPermission;
-import org.eclipse.hawkbit.ql.jpa.SpecificationBuilder;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
@@ -108,7 +107,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final int allowedAttributes = quotaManagement.getMaxAttributeEntriesPerTarget();
         testdataFactory.createTarget(controllerId);
 
-        final WithUser withController = SecurityContextSwitch.withController("controller", CONTROLLER_ROLE);
+        final WithUser withController = SecurityContextSwitch.withController("controller");
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> runAs(withController, () -> writeAttributes(controllerId, allowedAttributes + 1, "key", "value")))
                 .withMessageContaining("" + allowedAttributes);
@@ -184,7 +183,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createTargetAndAssignDs();
 
         SecurityContextSwitch
-                .getAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE), () -> {
+                .getAs(SecurityContextSwitch.withController("controller"), () -> {
                     // Fails as one entry is already in there from the assignment
                     assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                             .isThrownBy(() -> writeStatus(actionId, allowStatusEntries))
@@ -243,7 +242,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionId1).isNotNull();
         final ActionStatusCreateBuilder status = ActionStatusCreate.builder().actionId(actionId1).status(Status.WARNING);
         for (int i = 0; i < maxStatusEntries; i++) {
-            controllerManagement.addInformationalActionStatus(status.messages(List.of("Msg " + i)).timestamp(System.currentTimeMillis()).build());
+            controllerManagement.addInformationalActionStatus(
+                    status.messages(List.of("Msg " + i)).timestamp(System.currentTimeMillis()).build());
         }
         final ActionStatusCreate actionStatusCreate = status.build();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
@@ -255,7 +255,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionId2).isNotEqualTo(actionId1);
         final ActionStatusCreateBuilder statusWarning = ActionStatusCreate.builder().actionId(actionId2).status(Status.WARNING);
         for (int i = 0; i < maxStatusEntries; i++) {
-            controllerManagement.addUpdateActionStatus(statusWarning.messages(List.of("Msg " + i)).timestamp(System.currentTimeMillis()).build());
+            controllerManagement.addUpdateActionStatus(
+                    statusWarning.messages(List.of("Msg " + i)).timestamp(System.currentTimeMillis()).build());
         }
         final ActionStatusCreate actionStatusCreateQE = statusWarning.build();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
@@ -663,7 +664,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 new ByteArrayInputStream(random), null, artifactSize, null,
                 findFirstModuleByType(ds, osType).orElseThrow().getId(), "file1", false));
         final Artifact artifact2 = artifactManagement.create(new ArtifactUpload(
-                new ByteArrayInputStream(random), null,  artifactSize, null,
+                new ByteArrayInputStream(random), null, artifactSize, null,
                 findFirstModuleByType(ds2, osType).orElseThrow().getId(), "file1", false));
         assertThat(artifact.getSha1Hash()).isEqualTo(artifact2.getSha1Hash());
 
@@ -867,7 +868,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                     .as("Expected an ConcurrencyFailureException to be thrown!")
                     .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST));
 
-            verify(mockTargetRepository, times(10 /* default retry max */+ 1)).findOne(any(Specification.class));
+            verify(mockTargetRepository, times(10 /* default retry max */ + 1)).findOne(any(Specification.class));
         } finally {
             // revert
             ((JpaControllerManagement) controllerManagement).setTargetRepository(targetRepository);
@@ -1161,7 +1162,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final String controllerId = "test123";
         final Target target = testdataFactory.createTarget(controllerId);
 
-        SecurityContextSwitch.getAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE, SpPermission.READ_TARGET), () -> {
+        SecurityContextSwitch.getAs(SecurityContextSwitch.withController("controller"), () -> {
             addAttributeAndVerify(controllerId);
             addSecondAttributeAndVerify(controllerId);
             updateAttributeAndVerify(controllerId);
@@ -1769,7 +1770,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testData.put("test1", "testdata1");
         controllerManagement.updateControllerAttributes(controllerId, testData, null);
 
-        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong").isEqualTo(testData);
+        SecurityContextSwitch.getAs(SecurityContextSwitch.withUser("bumlux", SpPermission.READ_TARGET), () ->
+                assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong").isEqualTo(testData));
     }
 
     private void addSecondAttributeAndVerify(final String controllerId) {
@@ -1778,8 +1780,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         controllerManagement.updateControllerAttributes(controllerId, testData, null);
 
         testData.put("test1", "testdata1");
-        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
-                .isEqualTo(testData);
+        SecurityContextSwitch.getAs(SecurityContextSwitch.withUser("bumlux", SpPermission.READ_TARGET), () ->
+                assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong").isEqualTo(testData));
     }
 
     private void updateAttributeAndVerify(final String controllerId) {
@@ -1789,8 +1791,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         controllerManagement.updateControllerAttributes(controllerId, testData, null);
 
         testData.put("test2", "testdata20");
-        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
-                .isEqualTo(testData);
+        SecurityContextSwitch.getAs(SecurityContextSwitch.withUser("bumlux", SpPermission.READ_TARGET), () ->
+                assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong").isEqualTo(testData));
     }
 
     private void updateTargetAttributesWithUpdateModeRemove(final String controllerId) {
