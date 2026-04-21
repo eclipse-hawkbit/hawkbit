@@ -63,7 +63,7 @@
 
         <!-- openfeign versions -->
         <spring-cloud-openfeign.version>5.0.1</spring-cloud-openfeign.version>
-        <openfeign-hc5.version>13.11</openfeign-hc5.version>
+        <openfeign-hc5.version>13.12</openfeign-hc5.version>
 
         <!-- Spring boot version overrides (should be reviewed with every Spring boot upgrade) - START -->
         <!-- Newer versions needed than defined in the Spring boot -->
