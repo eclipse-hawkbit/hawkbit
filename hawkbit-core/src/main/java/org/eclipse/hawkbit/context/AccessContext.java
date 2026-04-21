@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.context;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -25,8 +24,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.auth.SpRole;
-import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.tenancy.TenantAwareUser;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -57,7 +55,7 @@ public class AccessContext {
      * @return could be empty if there is nothing to serialize or context aware is not supported.
      */
     public static Optional<String> securityContext() {
-        return Optional.ofNullable(SecurityContextHolder.getContext()).map(AccessContext::serialize);
+        return Optional.of(SecurityContextHolder.getContext()).map(AccessContext::serialize);
     }
 
     /**
@@ -69,9 +67,7 @@ public class AccessContext {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             final Object principal = authentication.getPrincipal();
-            if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails) {
-                return tenantAwareAuthenticationDetails.tenant();
-            } else if (principal instanceof TenantAwareUser tenantAwareUser) {
+            if (principal instanceof Principal tenantAwareUser) {
                 return tenantAwareUser.getTenant();
             }
         }
@@ -270,12 +266,9 @@ public class AccessContext {
     }
 
     private static String resolve(final Authentication authentication) {
-        if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails && tenantAwareDetails.controller()) {
-            return "CONTROLLER_PLUG_AND_PLAY";
-        }
         final Object principal = authentication.getPrincipal();
-        if (principal instanceof ActorAware actorAware) {
-            return actorAware.getActor();
+        if (principal instanceof Principal hawkbitPrincipal) {
+            return hawkbitPrincipal.getActor();
         }
         if (principal instanceof UserDetails userDetails) {
             return userDetails.getUsername();
@@ -316,11 +309,6 @@ public class AccessContext {
         return authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal() == null;
     }
 
-    public interface ActorAware {
-
-        String getActor();
-    }
-
     // simplified info for the security context keeping just the basic info needed for background execution of
     // controller authentication is not supported - always is false
     // only authenticated user is supported
@@ -343,16 +331,12 @@ public class AccessContext {
             if (!authentication.isAuthenticated()) {
                 throw new IllegalStateException("Only authenticated context could be serialized");
             }
-            if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails) {
-                if (tenantAwareDetails.controller()) {
-                    throw new IllegalStateException("Controller authentication context is not supported");
-                }
-                tenant = tenantAwareDetails.tenant();
-            } else if (authentication.getPrincipal() instanceof TenantAwareUser tenantAwareUser) {
-                tenant = tenantAwareUser.getTenant();
+
+            if (authentication.getPrincipal() instanceof Principal principal) {
+                tenant = principal.getTenant();
             }
 
-            // keep the auditor, ofr audit purposes,
+            // keep the auditor, for audit purposes,
             // sets principal to the resolved auditor and then deserialized authentication will return it as principal
             // since the class is not known to auditor aware - it shall used default - principal as auditor
             auditor = resolve(authentication);
@@ -361,8 +345,7 @@ public class AccessContext {
 
         private SecurityContext toSecurityContext() {
             final SecurityContext ctx = SecurityContextHolder.createEmptyContext();
-            final Object details = tenant == null ? null : new TenantAwareAuthenticationDetails(tenant, false);
-            final ActorAware principal = () -> auditor;
+            final Principal principal = new Principal(tenant, auditor);
             final Collection<? extends GrantedAuthority> grantedAuthorities = Stream.of(authorities).map(SimpleGrantedAuthority::new).toList();
             ctx.setAuthentication(new Authentication() {
 
@@ -372,7 +355,7 @@ public class AccessContext {
                 }
 
                 @Override
-                public Collection<? extends GrantedAuthority> getAuthorities() {
+                public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
                     return grantedAuthorities;
                 }
 
@@ -383,7 +366,7 @@ public class AccessContext {
 
                 @Override
                 public Object getDetails() {
-                    return details;
+                    return null;
                 }
 
                 @Override
@@ -417,12 +400,10 @@ public class AccessContext {
 
         private static final List<SimpleGrantedAuthority> AUTHORITIES = List.of(new SimpleGrantedAuthority(SpRole.SYSTEM_ROLE));
 
-        private final TenantAwareAuthenticationDetails details;
-        private final TenantAwareUser principal;
+        private final Principal principal;
 
         private SystemCodeAuthentication(final String tenant) {
-            details = new TenantAwareAuthenticationDetails(tenant, false);
-            principal = new TenantAwareUser(SYSTEM_ACTOR, SYSTEM_ACTOR, AUTHORITIES, tenant);
+            principal = new Principal(tenant, SYSTEM_ACTOR);
         }
 
         @Override
@@ -431,7 +412,7 @@ public class AccessContext {
         }
 
         @Override
-        public Collection<? extends GrantedAuthority> getAuthorities() {
+        public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
             return AUTHORITIES;
         }
 
@@ -442,7 +423,7 @@ public class AccessContext {
 
         @Override
         public Object getDetails() {
-            return details;
+            return null;
         }
 
         @Override
@@ -471,13 +452,11 @@ public class AccessContext {
         private static final long serialVersionUID = 1L;
 
         private final Authentication delegate;
-        private final TenantAwareUser principal;
-        private final TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails;
+        private final Principal principal;
 
         private AuthenticationDelegate(final String tenant, final String username, final Authentication delegate) {
             this.delegate = delegate;
-            principal = new TenantAwareUser(username, username, delegate == null ? Collections.emptyList() : delegate.getAuthorities(), tenant);
-            tenantAwareAuthenticationDetails = new TenantAwareAuthenticationDetails(tenant, false);
+            principal = new Principal(tenant, username);
         }
 
         @Override
@@ -489,8 +468,7 @@ public class AccessContext {
         public boolean equals(final Object another) {
             if (another instanceof Authentication anotherAuthentication) {
                 return Objects.equals(delegate, anotherAuthentication) &&
-                        Objects.equals(principal, anotherAuthentication.getPrincipal()) &&
-                        Objects.equals(tenantAwareAuthenticationDetails, anotherAuthentication.getDetails());
+                        Objects.equals(principal, anotherAuthentication.getPrincipal());
             } else {
                 return false;
             }
@@ -507,8 +485,8 @@ public class AccessContext {
         }
 
         @Override
-        public Collection<? extends GrantedAuthority> getAuthorities() {
-            return principal.getAuthorities();
+        public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
+            return delegate.getAuthorities();
         }
 
         @Override
@@ -518,7 +496,7 @@ public class AccessContext {
 
         @Override
         public Object getDetails() {
-            return tenantAwareAuthenticationDetails;
+            return delegate.getDetails();
         }
 
         @Override

@@ -26,16 +26,14 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
-import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * Base hawkBit entity class containing the common attributes for EclipseLink.
@@ -95,7 +93,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @LastModifiedBy
     public void setLastModifiedBy(final String lastModifiedBy) {
-        if (this.lastModifiedBy != null && isController()) {
+        if (this.lastModifiedBy != null && SpRole.isController()) {
             // initialized and controller = doesn't update
             return;
         }
@@ -110,7 +108,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @LastModifiedDate
     public void setLastModifiedAt(final long lastModifiedAt) {
-        if (this.lastModifiedAt != 0 && isController()) {
+        if (this.lastModifiedAt != 0 && SpRole.isController()) {
             // initialized and controller = doesn't update
             return;
         }
@@ -196,12 +194,5 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     protected static void doNotify(final Runnable runnable) {
         // fire events onl AFTER transaction commit
         AfterTransactionCommitExecutor.afterCommit(runnable);
-    }
-
-    protected boolean isController() {
-        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null
-                && authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails
-                && tenantAwareDetails.controller();
     }
 }

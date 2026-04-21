@@ -15,6 +15,7 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_GATEWAY_SECURITY_TOKEN_KEY;
 import static org.mockito.Mockito.when;
 
+import org.eclipse.hawkbit.context.Principal;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
@@ -66,7 +67,7 @@ class GatewayTokenAuthenticatorTest {
 
         assertThat(authenticator.authenticate(securityToken))
                 .isNotNull()
-                .hasFieldOrPropertyWithValue("principal", CONTROLLER_ID);
+                .hasFieldOrPropertyWithValue("principal", new Principal("DEFAULT", CONTROLLER_ID));
     }
 
     /**

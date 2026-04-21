@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.autoconfigure.security;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.audit.AuditLoggingAspect;
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RepositoryConfiguration;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
@@ -47,7 +48,7 @@ public class SecurityAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public AuditorAware<String> auditorAware() {
-        return () -> Optional.ofNullable(AccessContext.actor());
+        return () -> Optional.ofNullable(SpRole.isController() ? "CONTROLLER_PLUG_AND_PLAY" : AccessContext.actor());
     }
 
     @Bean
