@@ -14,6 +14,7 @@ import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.auth.SpPermission;
+import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -47,7 +48,7 @@ public class DefaultRolloutApprovalStrategy implements RolloutApprovalStrategy {
 
     @Override
     public String getApprovalUser(final Rollout rollout) {
-        return getCurrentAuthentication().map(Authentication::getName).orElse(null);
+        return AccessContext.actor();
     }
 
     private static Optional<Authentication> getCurrentAuthentication() {
