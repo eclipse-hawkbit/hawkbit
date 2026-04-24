@@ -67,8 +67,8 @@ public class AccessContext {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             final Object principal = authentication.getPrincipal();
-            if (principal instanceof Principal tenantAwareUser) {
-                return tenantAwareUser.getTenant();
+            if (principal instanceof Principal hawkbitPrincipal) {
+                return hawkbitPrincipal.getTenant();
             }
         }
         return null;
