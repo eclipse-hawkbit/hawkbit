@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
@@ -165,8 +166,10 @@ public class MgmtSecurityConfiguration {
             final String tenantClaim = claim.getTenant();
             final String rolesClaim = claim.getRoles();
             oauth2ResourceServerConfigurer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
-                final String username = followPathInJwtClaims(jwt, usernameClaim, String.class);
-                final String tenant = tenantClaim == null ? "DEFAULT" : followPathInJwtClaims(jwt, tenantClaim, String.class);
+                final String username = Objects.requireNonNull(followPathInJwtClaims(jwt, usernameClaim, String.class));
+                final String tenant = tenantClaim == null
+                        ? "DEFAULT"
+                        : Objects.requireNonNull(followPathInJwtClaims(jwt, tenantClaim, String.class));
                 final Collection<GrantedAuthority> authorities = Optional
                         .ofNullable(followPathInJwtClaims(jwt, rolesClaim, Collection.class))
                         .map(resourceRoles -> ((Collection<String>) resourceRoles).stream()
@@ -189,8 +192,10 @@ public class MgmtSecurityConfiguration {
             for (final String chunk : chunks) {
                 if (current instanceof Map<?, ?> map) {
                     current = map.get(chunk);
-                } else if (current == null) {
-                    return null;
+                    if (current == null) {
+                        log.warn("Path {} not found in claim", path);
+                        return null;
+                    }
                 } else {
                     log.warn("Unexpected claim type for path {} (chunk {})! Expected a Map but got {}", path, chunk, current.getClass());
                     return null;
