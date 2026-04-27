@@ -17,6 +17,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.lang.annotation.Annotation;
 import java.lang.ref.Cleaner;
+import java.lang.ref.Reference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -245,7 +246,7 @@ public class HawkbitClient {
         final HttpClientKey key = new HttpClientKey(
                 url.startsWith("https://"), controller == null ? null : controller.getCertificate(), tenant.getTenantCA());
         final HttpClient httpClient = httpClient(key);
-        final T service = Feign.builder()
+        final T rawService = Feign.builder()
                 .client(new ApacheHttp5Client(httpClient))
                 .encoder(encoder)
                 .decoder(decoder)
@@ -253,8 +254,29 @@ public class HawkbitClient {
                 .contract(contract)
                 .requestInterceptor(requestInterceptorFn.apply(tenant, controller))
                 .target(serviceType, url);
-        CLEANER.register(service, key::release);
-        return service;
+        // JIT can consider a local proxy variable dead before the HTTP call it dispatched
+        // returns, causing CLEANER to fire mid-request and close the connection pool.
+        // Wrapping in a dynamic proxy and calling Reference.reachabilityFence(proxy) in
+        // every method's finally block prevents that: the proxy is provably live for the
+        // full duration of each call, so CLEANER only fires after the call completes.
+        final T wrapped = wrapWithReachabilityFence(serviceType, rawService);
+        CLEANER.register(wrapped, key::release);
+        return wrapped;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T wrapWithReachabilityFence(final Class<T> serviceType, final T delegate) {
+        return (T) Proxy.newProxyInstance(
+                delegate.getClass().getClassLoader(), new Class<?>[]{ serviceType },
+                (proxy, method, args) -> {
+                    try {
+                        return method.invoke(delegate, args);
+                    } catch (final InvocationTargetException e) {
+                        throw e.getTargetException() == null ? e : e.getTargetException();
+                    } finally {
+                        Reference.reachabilityFence(proxy);
+                    }
+                });
     }
 
     @SuppressWarnings("unchecked")
