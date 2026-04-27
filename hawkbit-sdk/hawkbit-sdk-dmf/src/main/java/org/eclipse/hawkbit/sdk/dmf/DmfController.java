@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.sdk.Controller;
+import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.Tenant;
 import org.eclipse.hawkbit.sdk.dmf.amqp.DmfSender;
 
@@ -39,6 +40,7 @@ public class DmfController {
     private final Controller controller;
     private final UpdateHandler updateHandler;
     private final DmfSender dmfSender;
+    private final HawkbitClient hawkbitClient;
 
     @Getter
     private final Map<String, String> attributes = new HashMap<>();
@@ -60,11 +62,13 @@ public class DmfController {
     DmfController(
             final Tenant tenant, final Controller controller,
             final UpdateHandler updateHandler,
-            final DmfSender dmfSender) {
+            final DmfSender dmfSender,
+            final HawkbitClient hawkbitClient) {
         this.tenant = tenant;
         this.controller = controller;
         this.updateHandler = updateHandler == null ? UpdateHandler.SKIP : updateHandler;
         this.dmfSender = dmfSender;
+        this.hawkbitClient = hawkbitClient;
     }
 
     public String getTenantId() {

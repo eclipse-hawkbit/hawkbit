@@ -35,13 +35,14 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -60,11 +61,10 @@ import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
 import feign.hc5.ApacheHttp5Client;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.HttpRequestRetryStrategy;
+import org.springframework.beans.factory.DisposableBean;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
@@ -103,7 +103,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 @Builder
-public class HawkbitClient {
+public class HawkbitClient implements AutoCloseable, DisposableBean {
 
     private static final String AUTHORIZATION = "Authorization";
     // @formatter:off
@@ -143,6 +143,9 @@ public class HawkbitClient {
 
     private final HttpRequestRetryStrategy httpRequestRetryStrategy;
 
+    private final ConcurrentHashMap<HttpClientKey, CloseableHttpClient> httpClientMap = new ConcurrentHashMap<>();
+    private final AtomicBoolean closed = new AtomicBoolean(false);
+
     public HawkbitClient(final HawkbitServer hawkBitServer) {
         this(hawkBitServer, null, null, null, null, null);
     }
@@ -170,6 +173,32 @@ public class HawkbitClient {
         this.requestInterceptorFn = requestInterceptorFn == null ? DEFAULT_REQUEST_INTERCEPTOR_FN : requestInterceptorFn;
 
         this.httpRequestRetryStrategy = httpRequestRetryStrategy == null ? DEFAULT_HTTP_REQUEST_RETRY_STRATEGY : httpRequestRetryStrategy;
+
+        final AtomicBoolean closedRef = this.closed;
+        CLEANER.register(this, () -> {
+            if (!closedRef.get()) {
+                log.warn("HawkbitClient was garbage-collected without close() being called");
+            }
+        });
+    }
+
+    @Override
+    public void close() {
+        if (closed.compareAndSet(false, true)) {
+            httpClientMap.forEach((key, client) -> {
+                try {
+                    client.close();
+                } catch (final IOException e) {
+                    log.error("Failed to close HTTP client", e);
+                }
+            });
+            httpClientMap.clear();
+        }
+    }
+
+    @Override
+    public void destroy() {
+        close();
     }
 
     public <T> T mgmtService(final Class<T> serviceType, final Tenant tenantProperties) {
@@ -184,44 +213,41 @@ public class HawkbitClient {
      * Downloads a link. After the handler is called, the steam and all resources are closed.
      */
     @SuppressWarnings("unchecked")
-    public static <T, R> R getLink(
+    public <T, R> R getLink(
             final Link link, final Class<T> linkType, final Tenant tenant, final Controller controller,
             final Function<T, R> handler) throws IOException {
         final String url = link.getHref();
         final HttpClientKey key = new HttpClientKey(
                 url.startsWith("https://"), controller == null ? null : controller.getCertificate(), tenant.getTenantCA());
         final HttpClient httpClient = httpClient(key);
-        try {
-            final HttpGet request = new HttpGet(url);
-            final String gatewayToken = tenant.getGatewayToken();
-            if (StringUtils.hasLength(gatewayToken)) {
-                request.addHeader(HttpHeaders.AUTHORIZATION, "GatewayToken " + gatewayToken);
+
+        final HttpGet request = new HttpGet(url);
+        final String gatewayToken = tenant.getGatewayToken();
+        if (StringUtils.hasLength(gatewayToken)) {
+            request.addHeader(HttpHeaders.AUTHORIZATION, "GatewayToken " + gatewayToken);
+        } else {
+            final String targetToken = controller == null ? null : controller.getSecurityToken();
+            if (StringUtils.hasLength(targetToken)) {
+                request.addHeader(HttpHeaders.AUTHORIZATION, "TargetToken " + targetToken);
+            }
+        } // else not authenticated or certificate based
+
+        return httpClient.execute(request, response -> {
+            if (response.getCode() != HttpStatus.OK.value()) {
+                throw new IllegalStateException("Unexpected status code: " + response.getCode());
+            }
+
+            final T result;
+            if (linkType.isAssignableFrom(ClassicHttpResponse.class)) {
+                result = (T) response;
+            } else if (linkType == InputStream.class) {
+                result = (T) response.getEntity().getContent();
             } else {
-                final String targetToken = controller == null ? null : controller.getSecurityToken();
-                if (StringUtils.hasLength(targetToken)) {
-                    request.addHeader(HttpHeaders.AUTHORIZATION, "TargetToken " + targetToken);
-                }
-            } // else not authenticated or certificate based
+                result = new ObjectMapper().readValue(response.getEntity().getContent(), linkType);
+            }
 
-            return httpClient.execute(request, response -> {
-                if (response.getCode() != HttpStatus.OK.value()) {
-                    throw new IllegalStateException("Unexpected status code: " + response.getCode());
-                }
-
-                final T result;
-                if (linkType.isAssignableFrom(ClassicHttpResponse.class)) {
-                    result = (T) response;
-                } else if (linkType == InputStream.class) {
-                    result = (T) response.getEntity().getContent();
-                } else {
-                    result = new ObjectMapper().readValue(response.getEntity().getContent(), linkType);
-                }
-
-                return handler.apply(result);
-            });
-        } finally {
-            key.release();
-        }
+            return handler.apply(result);
+        });
     }
 
     private <T> T service(final Class<T> serviceType, final Tenant tenant, final Controller controller) {
@@ -244,17 +270,15 @@ public class HawkbitClient {
         final String url = controller == null ? hawkBitServer.getMgmtUrl() : hawkBitServer.getDdiUrl();
         final HttpClientKey key = new HttpClientKey(
                 url.startsWith("https://"), controller == null ? null : controller.getCertificate(), tenant.getTenantCA());
-        final HttpClient httpClient = httpClient(key);
-        final T service = Feign.builder()
-                .client(new ApacheHttp5Client(httpClient))
+
+        return Feign.builder()
+                .client(new ApacheHttp5Client(httpClient(key)))
                 .encoder(encoder)
                 .decoder(decoder)
                 .errorDecoder(errorDecoder)
                 .contract(contract)
                 .requestInterceptor(requestInterceptorFn.apply(tenant, controller))
                 .target(serviceType, url);
-        CLEANER.register(service, key::release);
-        return service;
     }
 
     @SuppressWarnings("unchecked")
@@ -421,36 +445,28 @@ public class HawkbitClient {
         return null;
     }
 
-    private static final Map<HttpClientKey, HttpClientWrapper> HTTP_CLIENTS = new HashMap<>();
-
-    private static HttpClient httpClient(final HttpClientKey key) {
-        synchronized (HTTP_CLIENTS) {
-            final HttpClientWrapper httpClientWrapper = HTTP_CLIENTS.get(key);
-            HttpClient client = httpClientWrapper == null ? null : httpClientWrapper.get();
-            if (client == null) { // create
-                final HttpClientBuilder builder = HttpClients.custom().setRetryStrategy(DEFAULT_HTTP_REQUEST_RETRY_STRATEGY);
-
-                if (key.isHttps()) {
-                    // mTLS could be used / setup
-                    try {
-                        builder.setConnectionManager(
-                                PoolingHttpClientConnectionManagerBuilder.create()
-                                        .setTlsSocketStrategy(getTlsSocketStrategy(key.getClientCertificate(), key.getServerCertificates()))
-                                        .build());
-                    } catch (final RuntimeException e) {
-                        throw e;
-                    } catch (final Exception e) {
-                        throw new IllegalStateException("Failed to create mTLS client", e);
-                    }
-                }
-
-                final CloseableHttpClient newClient = builder.build();
-                HTTP_CLIENTS.put(key, new HttpClientWrapper(key, newClient));
-                return newClient;
-            } else {
-                return client; // reuse
-            }
+    private CloseableHttpClient httpClient(final HttpClientKey key) {
+        if (closed.get()) {
+            throw new IllegalStateException("HawkbitClient is closed");
         }
+        return httpClientMap.computeIfAbsent(key, k -> {
+            final HttpClientBuilder builder = HttpClients.custom().setRetryStrategy(httpRequestRetryStrategy);
+
+            if (k.https) {
+                try {
+                    builder.setConnectionManager(
+                            PoolingHttpClientConnectionManagerBuilder.create()
+                                    .setTlsSocketStrategy(getTlsSocketStrategy(k.clientCertificate, k.serverCertificates))
+                                    .build());
+                } catch (final RuntimeException e) {
+                    throw e;
+                } catch (final Exception e) {
+                    throw new IllegalStateException("Failed to create mTLS client", e);
+                }
+            }
+
+            return builder.build();
+        });
     }
 
     private static final Random SECURE_RND = new SecureRandom();
@@ -479,48 +495,34 @@ public class HawkbitClient {
         return new DefaultClientTlsStrategy(sslContextBuilder.build());
     }
 
-    @AllArgsConstructor
-    @Data
-    private static class HttpClientKey {
+    private static final class HttpClientKey {
 
         private final boolean https;
         private final Certificate clientCertificate;
         private final X509Certificate[] serverCertificates;
 
-        private void release() {
-            synchronized (HTTP_CLIENTS) {
-                HTTP_CLIENTS.get(this).release();
-            }
-        }
-    }
-
-    private static class HttpClientWrapper {
-
-        private final HttpClientKey key;
-        private final CloseableHttpClient closeableHttpClient;
-        private final AtomicLong pointers = new AtomicLong(1); // one use at create
-
-        private HttpClientWrapper(final HttpClientKey key, final CloseableHttpClient closeableHttpClient) {
-            this.key = key;
-            this.closeableHttpClient = closeableHttpClient;
+        private HttpClientKey(final boolean https, final Certificate clientCertificate, final X509Certificate[] serverCertificates) {
+            this.https = https;
+            this.clientCertificate = clientCertificate;
+            this.serverCertificates = serverCertificates;
         }
 
-        private HttpClient get() {
-            pointers.incrementAndGet();
-            return closeableHttpClient;
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            final HttpClientKey that = (HttpClientKey) o;
+            return https == that.https
+                    && Objects.equals(clientCertificate, that.clientCertificate)
+                    && Arrays.deepEquals(serverCertificates, that.serverCertificates);
         }
 
-        private void release() {
-            if (pointers.decrementAndGet() <= 0) {
-                synchronized (HTTP_CLIENTS) {
-                    HTTP_CLIENTS.remove(key);
-                }
-                try {
-                    closeableHttpClient.close();
-                } catch (final IOException e) {
-                    log.error("Failed to close http client", e);
-                }
-            }
+        @Override
+        public int hashCode() {
+            int result = Boolean.hashCode(https);
+            result = 31 * result + Objects.hashCode(clientCertificate);
+            result = 31 * result + Arrays.deepHashCode(serverCertificates);
+            return result;
         }
     }
 

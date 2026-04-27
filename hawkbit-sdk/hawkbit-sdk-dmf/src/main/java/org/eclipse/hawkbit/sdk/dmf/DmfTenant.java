@@ -17,6 +17,7 @@ import java.util.function.BiConsumer;
 
 import lombok.Getter;
 import org.eclipse.hawkbit.sdk.Controller;
+import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.Tenant;
 import org.eclipse.hawkbit.sdk.dmf.amqp.Amqp;
 import org.eclipse.hawkbit.sdk.dmf.amqp.VHost;
@@ -32,13 +33,15 @@ public final class DmfTenant {
 
     private final Map<String, DmfController> controllers = new ConcurrentHashMap<>();
     private final VHost vHost;
+    private final HawkbitClient hawkbitClient;
 
-    public DmfTenant(final Tenant tenant, final Amqp amqp) {
-        this(tenant, amqp, true);
+    public DmfTenant(final Tenant tenant, final Amqp amqp, final HawkbitClient hawkbitClient) {
+        this(tenant, amqp, true, hawkbitClient);
     }
 
-    public DmfTenant(final Tenant tenant, final Amqp amqp, final boolean initVHost) {
+    public DmfTenant(final Tenant tenant, final Amqp amqp, final boolean initVHost, final HawkbitClient hawkbitClient) {
         this.tenant = tenant;
+        this.hawkbitClient = hawkbitClient;
         vHost = amqp.getVhost(tenant.getDmf(), initVHost);
         vHost.register(this);
     }
@@ -49,7 +52,7 @@ public final class DmfTenant {
     }
 
     public DmfController createController(final Controller controller, final UpdateHandler updateHandler) {
-        final DmfController dmfController = new DmfController(tenant, controller, updateHandler, vHost);
+        final DmfController dmfController = new DmfController(tenant, controller, updateHandler, vHost, hawkbitClient);
         controllers.put(controller.getControllerId(), dmfController);
         return dmfController;
     }

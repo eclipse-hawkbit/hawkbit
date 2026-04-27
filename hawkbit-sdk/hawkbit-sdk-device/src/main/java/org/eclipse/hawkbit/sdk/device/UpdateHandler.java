@@ -27,7 +27,7 @@ import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifactHash;
 import org.eclipse.hawkbit.ddi.json.model.DdiChunk;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeployment;
-import org.eclipse.hawkbit.sdk.HawkbitClient;
+
 import org.eclipse.hawkbit.sdk.spi.ArtifactHandler;
 import org.springframework.hateoas.Link;
 import org.springframework.util.CollectionUtils;
@@ -267,7 +267,7 @@ public interface UpdateHandler {
             final Validator hashValidator = hashValidator(hash);
             final String href = link.getHref();
             final ArtifactHandler.DownloadHandler downloadHandler = artifactHandler.getDownloadHandler(href);
-            return HawkbitClient.getLink(link, InputStream.class, ddiController.getTenant(), ddiController.getController(), is -> {
+            return ddiController.getHawkbitClient().getLink(link, InputStream.class, ddiController.getTenant(), ddiController.getController(), is -> {
                 try {
                     final byte[] buff = new byte[32 * 1024];
                     for (int read; (read = is.read(buff)) != -1; ) {

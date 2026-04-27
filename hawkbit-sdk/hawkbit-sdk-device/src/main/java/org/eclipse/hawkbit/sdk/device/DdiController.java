@@ -64,6 +64,7 @@ public class DdiController {
     private final Tenant tenant;
     private final Controller controller;
     private final UpdateHandler updateHandler;
+    private final HawkbitClient hawkbitClient;
     private final DdiRootControllerRestApi ddiApi;
 
     // configuration
@@ -95,6 +96,7 @@ public class DdiController {
         this.targetSecurityToken = controller.getSecurityToken();
         this.certificate = controller.getCertificate();
         this.updateHandler = updateHandler == null ? UpdateHandler.SKIP : updateHandler;
+        this.hawkbitClient = hawkbitClient;
         ddiApi = hawkbitClient.ddiService(DdiRootControllerRestApi.class, tenant, controller);
     }
 

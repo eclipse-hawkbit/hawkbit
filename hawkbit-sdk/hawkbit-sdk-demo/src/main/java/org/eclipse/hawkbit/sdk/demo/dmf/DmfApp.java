@@ -14,6 +14,8 @@ import java.util.concurrent.Executors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.sdk.Controller;
+import org.eclipse.hawkbit.sdk.HawkbitClient;
+import org.eclipse.hawkbit.sdk.HawkbitServer;
 import org.eclipse.hawkbit.sdk.Tenant;
 import org.eclipse.hawkbit.sdk.dmf.DmfController;
 import org.eclipse.hawkbit.sdk.dmf.DmfTenant;
@@ -47,8 +49,13 @@ public class DmfApp {
     }
 
     @Bean
-    DmfTenant dmfTenant(final Tenant tenant, final Amqp amqp) {
-        return new DmfTenant(tenant, amqp);
+    HawkbitClient hawkbitClient(final HawkbitServer hawkBitServer) {
+        return new HawkbitClient(hawkBitServer);
+    }
+
+    @Bean
+    DmfTenant dmfTenant(final Tenant tenant, final Amqp amqp, final HawkbitClient hawkbitClient) {
+        return new DmfTenant(tenant, amqp, hawkbitClient);
     }
 
     @Component

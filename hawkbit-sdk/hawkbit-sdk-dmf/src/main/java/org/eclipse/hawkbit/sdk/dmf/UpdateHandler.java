@@ -29,7 +29,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfArtifact;
 import org.eclipse.hawkbit.dmf.json.model.DmfArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
-import org.eclipse.hawkbit.sdk.HawkbitClient;
+
 import org.eclipse.hawkbit.sdk.spi.ArtifactHandler;
 import org.springframework.hateoas.Link;
 import org.springframework.util.CollectionUtils;
@@ -265,7 +265,7 @@ public interface UpdateHandler {
             final Validator hashValidator = hashValidator(hash);
             final String href = link.getHref();
             final ArtifactHandler.DownloadHandler downloadHandler = artifactHandler.getDownloadHandler(href);
-            return HawkbitClient.getLink(link, InputStream.class, dmfController.getTenant(), dmfController.getController(), is -> {
+            return dmfController.getHawkbitClient().getLink(link, InputStream.class, dmfController.getTenant(), dmfController.getController(), is -> {
                 try {
                     final byte[] buff = new byte[32 * 1024];
                     for (int read; (read = is.read(buff)) != -1; ) {
