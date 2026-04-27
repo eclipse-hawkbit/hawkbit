@@ -58,7 +58,7 @@
         <!-- must be the same as the parent version -->
         <spring-boot.version>4.0.6</spring-boot.version>
         <spring-cloud.version>2025.1.1</spring-cloud.version>
-        <spring-ai.version>1.1.4</spring-ai.version>
+        <spring-ai.version>1.1.5</spring-ai.version>
         <springdoc-openapi.version>3.0.3</springdoc-openapi.version>
 
         <!-- openfeign versions -->
