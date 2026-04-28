@@ -257,8 +257,8 @@ public class HawkbitClient {
         // JIT can consider a local proxy variable dead before the HTTP call it dispatched
         // returns, causing CLEANER to fire mid-request and close the connection pool.
         // Wrapping in a dynamic proxy and calling Reference.reachabilityFence(proxy) in
-        // every method's finally block prevents that: the proxy is provably live for the
-        // full duration of each call, so CLEANER only fires after the call completes.
+        // every method's finally block prevents that: the proxy is live for the
+        // full duration of each call, so CLEANER only fires after the call completes, after 'finally' block.
         final T wrapped = wrapWithReachabilityFence(serviceType, rawService);
         CLEANER.register(wrapped, key::release);
         return wrapped;
@@ -267,7 +267,7 @@ public class HawkbitClient {
     @SuppressWarnings("unchecked")
     private static <T> T wrapWithReachabilityFence(final Class<T> serviceType, final T delegate) {
         return (T) Proxy.newProxyInstance(
-                delegate.getClass().getClassLoader(), new Class<?>[]{ serviceType },
+                delegate.getClass().getClassLoader(), new Class<?>[] { serviceType },
                 (proxy, method, args) -> {
                     try {
                         return method.invoke(delegate, args);
@@ -538,6 +538,7 @@ public class HawkbitClient {
                     HTTP_CLIENTS.remove(key);
                 }
                 try {
+                    log.debug("Closing http client for {} - no pointers left", key);
                     closeableHttpClient.close();
                 } catch (final IOException e) {
                     log.error("Failed to close http client", e);
