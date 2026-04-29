@@ -86,7 +86,7 @@
         <commons-collections4.version>4.5.0</commons-collections4.version>
         <io-protostuff.version>1.8.0</io-protostuff.version>
         <!-- the version should be `synchronized` with version used by springdoc-openapi -->
-        <swagger-annotations-jakarta.version>2.2.48</swagger-annotations-jakarta.version>
+        <swagger-annotations-jakarta.version>2.2.49</swagger-annotations-jakarta.version>
 
         <!-- test -->
         <rabbitmq-http-client.version>5.5.0</rabbitmq-http-client.version>
