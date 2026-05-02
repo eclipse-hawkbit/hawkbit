@@ -44,6 +44,13 @@ public class ArtifactStream extends InputStream {
         return inputStream.read(b, off, len);
     }
 
+    // Delegate so wrappers backed by a seekable stream (e.g. FileInputStream) actually seek
+    // instead of reading bytes through the default InputStream.skip implementation.
+    @Override
+    public long skip(final long n) throws IOException {
+        return inputStream.skip(n);
+    }
+
     @Override
     public void close() throws IOException {
         inputStream.close();

@@ -37,7 +37,6 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.eclipse.hawkbit.artifact.model.ArtifactStream;
 import org.eclipse.hawkbit.rest.exception.FileStreamingFailedException;
 import org.jspecify.annotations.NonNull;
@@ -260,7 +259,9 @@ public final class FileStreamingUtil {
         long total = 0;
         int progressPercent = 1;
 
-        IOUtils.skipFully(from, start);
+        // Use InputStream.skipNBytes so seekable backends (FileInputStream → lseek) advance in O(1)
+        // instead of reading and discarding 'start' bytes through a 2KB scratch buffer.
+        from.skipNBytes(start);
 
         long toRead = length;
         boolean toContinue = true;
