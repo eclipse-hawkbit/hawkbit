@@ -10,11 +10,14 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.OAuthFlow;
+import io.swagger.v3.oas.models.security.OAuthFlows;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
@@ -22,11 +25,17 @@ import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.eclipse.hawkbit.rest.OpenApi;
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 
 @Configuration
 @ConditionalOnProperty(value = OpenApi.HAWKBIT_SERVER_OPENAPI_ENABLED, havingValue = "true", matchIfMissing = true)
@@ -37,10 +46,37 @@ public class MgmtOpenApiConfiguration {
 
     @Bean
     @ConditionalOnProperty(
-            value = "hawkbit.server.openapi.mgmt.enabled",
-            havingValue = "true",
-            matchIfMissing = true)
-    public GroupedOpenApi mgmtApi(@Value("${hawkbit.server.openapi.mgmt.tenant-endpoint.enabled:false}") final boolean tenantEndpointEnabled) {
+            value = "hawkbit.server.openapi.mgmt.enabled", havingValue = "true", matchIfMissing = true)
+    public GroupedOpenApi mgmtApi(
+            @Value("${hawkbit.server.openapi.mgmt.tenant-endpoint.enabled:false}") final boolean tenantEndpointEnabled,
+            @Value("${springdoc.oauth-flow.authorizationUrl:}") final String authorizationUrl,
+            @Value("${springdoc.oauth-flow.tokenUrl:}") final String tokenUrl,
+            @Autowired(required = false) @Qualifier("hawkbitOAuth2ResourceServerCustomizer") final Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> oauth2ResourceServerCustomizer,
+            final HawkbitSecurityProperties hawkbitSecurityProperties
+    ) {
+        boolean oauth2Enabled = oauth2ResourceServerCustomizer != null;
+        Map<String, SecurityScheme> securitySchemeMap = new HashMap<>();
+        final SecurityRequirement securityRequirement = new SecurityRequirement();
+        if (!oauth2Enabled || hawkbitSecurityProperties.isAllowHttpBasicOnOAuthEnabled()) {
+            securityRequirement.addList(BASIC_AUTH_SEC_SCHEME_NAME);
+            securitySchemeMap.put(BASIC_AUTH_SEC_SCHEME_NAME,
+                    new SecurityScheme()
+                            .description(BASIC_AUTH_SEC_SCHEME_NAME + " Authentication")
+                            .type(SecurityScheme.Type.HTTP)
+                            .scheme("basic"));
+        }
+        if (oauth2Enabled) {
+            securityRequirement.addList(BEARER_AUTH_SEC_SCHEME_NAME);
+            securitySchemeMap.put(BEARER_AUTH_SEC_SCHEME_NAME,
+                    new SecurityScheme()
+                            .description(BEARER_AUTH_SEC_SCHEME_NAME + " Authentication")
+                            .type(SecurityScheme.Type.OAUTH2)
+                            .flows(new OAuthFlows()
+                                    .authorizationCode(new OAuthFlow().authorizationUrl(authorizationUrl).tokenUrl(tokenUrl))
+                                    .clientCredentials(new OAuthFlow().tokenUrl(tokenUrl)))
+                            .bearerFormat("JWT")
+                            .scheme("bearer"));
+        }
         // @formatter:off
         return GroupedOpenApi
                 .builder()
@@ -62,23 +98,11 @@ public class MgmtOpenApiConfiguration {
                                                     .variables(new ServerVariables().addServerVariable("tenant", tenantSeverVariable())),
                                             new Server().url("/"))
                                         : List.of(new Server().url("/")))
-                                .addSecurityItem(new SecurityRequirement()
-                                        .addList(BASIC_AUTH_SEC_SCHEME_NAME)
-                                        .addList(BEARER_AUTH_SEC_SCHEME_NAME))
+                                .addSecurityItem(securityRequirement)
                                 .components(
                                         openApi
                                                 .getComponents()
-                                                .addSecuritySchemes(BASIC_AUTH_SEC_SCHEME_NAME,
-                                                        new SecurityScheme()
-                                                                .description(BASIC_AUTH_SEC_SCHEME_NAME + " Authentication")
-                                                                .type(SecurityScheme.Type.HTTP)
-                                                                .scheme("basic"))
-                                                .addSecuritySchemes(BEARER_AUTH_SEC_SCHEME_NAME,
-                                                        new SecurityScheme()
-                                                                .description(BEARER_AUTH_SEC_SCHEME_NAME + " Authentication")
-                                                                .type(SecurityScheme.Type.HTTP)
-                                                                .bearerFormat("JWT")
-                                                                .scheme("bearer")))
+                                                .securitySchemes(securitySchemeMap))
                                 .tags(sort(openApi.getTags())))
                 .build();
         // @formatter:on
