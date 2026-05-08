@@ -113,39 +113,39 @@ jobs:
 
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-ddi-server
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4.35.1
+        uses: github/codeql-action/upload-sarif@v4.35.3
         with:
           sarif_file: 'scans/hawkbit-ddi-server.sarif'
           category: "Container Images (hawkbit-ddi-server)"
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-dmf-server
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4.35.1
+        uses: github/codeql-action/upload-sarif@v4.35.3
         with:
           sarif_file: 'scans/hawkbit-dmf-server.sarif'
           category: "Container Images (hawkbit-dmf-server)"
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-mgmt-server
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4.35.1
+        uses: github/codeql-action/upload-sarif@v4.35.3
         with:
           sarif_file: 'scans/hawkbit-mgmt-server.sarif'
           category: "Container Images (hawkbit-mgmt-server)"
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-ui
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4.35.1
+        uses: github/codeql-action/upload-sarif@v4.35.3
         with:
           sarif_file: 'scans/hawkbit-ui.sarif'
           category: "Container Images (hawkbit-ui)"
 
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-update-server
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4.35.1
+        uses: github/codeql-action/upload-sarif@v4.35.3
         with:
           sarif_file: 'scans/hawkbit-update-server.sarif'
           category: "Container Images (hawkbit-update-server)"
 
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-repository-jpa-init
         if: ${{ inputs.upload }}
-        uses: github/codeql-action/upload-sarif@v4.35.1
+        uses: github/codeql-action/upload-sarif@v4.35.3
         with:
           sarif_file: 'scans/hawkbit-repository-jpa-init.sarif'
           category: "Container Images (hawkbit-repository-jpa-init)"
