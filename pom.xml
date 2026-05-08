@@ -71,7 +71,7 @@
         <!-- Eclipselink - END -->
 
         <!-- Spring AI for MCP support -->
-        <spring-ai.version>1.1.4</spring-ai.version>
+        <spring-ai.version>1.1.5</spring-ai.version>
 
         <!-- Misc libraries versions - START -->
         <cron-utils.version>9.2.1</cron-utils.version>
