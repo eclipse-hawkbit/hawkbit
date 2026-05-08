@@ -46,6 +46,8 @@
         <commons-fileupload.version>1.6.0</commons-fileupload.version>
         <!-- Override commons-lang3 version since 3.17 is vulnerable -->
         <commons-lang.version>3.20.0</commons-lang.version>
+        <!-- Override Netty 4.2.12 due to CVE -->
+        <netty.version>4.2.13.Final</netty.version>
         <!-- Overrides END -->
 
         <revision>0-SNAPSHOT</revision>
