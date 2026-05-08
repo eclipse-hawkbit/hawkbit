@@ -46,7 +46,7 @@ jobs:
         run: mkdir -p scans
 
       - name: Scan hawkbit-ddi-server
-        uses: aquasecurity/trivy-action@v0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: 'hawkbit/hawkbit-ddi-server:latest'
           ignore-unfixed: true
@@ -57,7 +57,7 @@ jobs:
           output: 'scans/hawkbit-ddi-server.sarif'
 
       - name: Scan hawkbit-dmf-server
-        uses: aquasecurity/trivy-action@v0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: 'hawkbit/hawkbit-dmf-server:latest'
           ignore-unfixed: true
@@ -68,7 +68,7 @@ jobs:
           output: 'scans/hawkbit-dmf-server.sarif'
 
       - name: Scan hawkbit-mgmt-server
-        uses: aquasecurity/trivy-action@v0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: 'hawkbit/hawkbit-mgmt-server:latest'
           ignore-unfixed: true
@@ -79,7 +79,7 @@ jobs:
           output: 'scans/hawkbit-mgmt-server.sarif'
 
       - name: Scan hawkbit-ui
-        uses: aquasecurity/trivy-action@v0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: 'hawkbit/hawkbit-ui:latest'
           ignore-unfixed: true
@@ -90,7 +90,7 @@ jobs:
           output: 'scans/hawkbit-ui.sarif'
 
       - name: Scan hawkbit-update-server
-        uses: aquasecurity/trivy-action@v0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: 'hawkbit/hawkbit-update-server:latest'
           ignore-unfixed: true
@@ -101,7 +101,7 @@ jobs:
           output: 'scans/hawkbit-update-server.sarif'
 
       - name: Scan hawkbit-repository-jpa-init
-        uses: aquasecurity/trivy-action@v0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: 'hawkbit/hawkbit-repository-jpa-init:latest'
           ignore-unfixed: true
