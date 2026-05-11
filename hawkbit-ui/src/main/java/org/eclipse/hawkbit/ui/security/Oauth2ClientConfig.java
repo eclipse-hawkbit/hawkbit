@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.ui.security;
 
+import java.util.Map;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -16,13 +18,32 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.client.OAuth2LoginConfigurer;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 
 @Configuration
+@ConditionalOnProperty(prefix = "hawkbit.server.security.oauth2.client", name = "enabled")
 public class Oauth2ClientConfig {
+
     @Bean(name = "hawkbitOAuth2ClientCustomizer")
-    @ConditionalOnProperty(prefix = "hawkbit.server.security.oauth2.client", name = "enabled")
     @ConditionalOnMissingBean(name = "hawkbitOAuth2ClientCustomizer")
     Customizer<OAuth2LoginConfigurer<HttpSecurity>> defaultOAuth2ClientCustomizer() {
         return Customizer.withDefaults();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public OAuth2AuthorizationRequestResolver authorizationRequestResolver(
+            ClientRegistrationRepository repo,
+            OidcClientProperties properties) {
+
+        final Map<String, String> additionalQueryStringParams = properties.getOauth2().getClient().getAdditionalQueryStringParams();
+        final DefaultOAuth2AuthorizationRequestResolver resolver = new DefaultOAuth2AuthorizationRequestResolver(repo,
+                OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI);
+        resolver.setAuthorizationRequestCustomizer(
+                customizer -> customizer.additionalParameters(params -> params.putAll(additionalQueryStringParams)));
+        return resolver;
     }
 }
