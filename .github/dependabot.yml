@@ -34,6 +34,8 @@ updates:
         update-types: ["version-update:semver-minor"]
       - dependency-name: "org.springframework.cloud:spring-cloud-starter-openfeign"
         versions: [ ">= 5.0.0" ]
+      - dependency-name: "org.springframework.shell:*"
+        update-types: ["version-update:semver-major"]
       - dependency-name: "org.springframework.ai:*"
         update-types: ["version-update:semver-major"]
       - dependency-name: "org.eclipse.persistence:org.eclipse.persistence.jpa"
