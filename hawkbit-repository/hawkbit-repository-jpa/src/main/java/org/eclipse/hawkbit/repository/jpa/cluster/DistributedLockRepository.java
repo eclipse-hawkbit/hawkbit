@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.cluster;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
@@ -95,17 +96,16 @@ public class DistributedLockRepository extends DefaultLockRepository {
         }
     }
 
+    // Spring Integration 7.0 calls acquire(String, Duration) directly; the deprecated acquire(String) is no longer invoked
+    // by JdbcLockRegistry. Override the new method to populate lockToRefreshTime for the refresh mechanism.
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     @Override
-    public boolean acquire(final String lock) {
+    public boolean acquire(final String lock, final Duration ttl) {
         try {
-            // real acquisition (made by super.acquire) is made in a new transaction 
-            // because we need to know real (after transaction commit) result Ïto know if it is really successful.
-            // otherwise the super.acquire will return result before been committed and could be false positive
+            // run in a new transaction so we know the committed result before updating lockToRefreshTime
             final boolean acquired = DeploymentHelper.runInNewTransaction(
-                    txManager, "lock-acquire", Isolation.READ_COMMITTED.value(), status -> super.acquire(lock));
+                    txManager, "lock-acquire", Isolation.READ_COMMITTED.value(), status -> super.acquire(lock, ttl));
             if (acquired) {
-                // update next refresh time
                 refreshAfterMillis.ifPresent(afterMillis -> lockToRefreshTime.put(lock, Instant.now().plus(afterMillis, ChronoUnit.MILLIS)));
             }
             return acquired;
