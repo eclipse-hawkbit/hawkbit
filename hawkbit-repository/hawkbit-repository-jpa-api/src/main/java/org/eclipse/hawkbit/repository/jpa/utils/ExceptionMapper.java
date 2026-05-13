@@ -44,7 +44,6 @@ public class ExceptionMapper {
 
     static {
         MAPPED_EXCEPTION_ORDER.add(DuplicateKeyException.class);
-        MAPPED_EXCEPTION_ORDER.add(OptimisticLockingFailureException.class);
         MAPPED_EXCEPTION_ORDER.add(AccessDeniedException.class);
 
         EXCEPTION_MAPPING.put(DuplicateKeyException.class.getName(), EntityAlreadyExistsException.class.getName());
