@@ -202,9 +202,8 @@ public class JpaRepositoryConfiguration {
     @Bean
     @ConditionalOnProperty(name = "hawkbit.lock", havingValue = "distributed", matchIfMissing = true)
     @ConditionalOnMissingBean
-    LockRepository lockRepository(final DataSource dataSource, final LockProperties lockProperties,
-            final PlatformTransactionManager txManager) {
-        final DefaultLockRepository repository = new DistributedLockRepository(dataSource, lockProperties, txManager);
+    LockRepository lockRepository(final DataSource dataSource, final LockProperties lockProperties) {
+        final DefaultLockRepository repository = new DistributedLockRepository(dataSource, lockProperties);
         repository.setPrefix("SP_");
         return repository;
     }
