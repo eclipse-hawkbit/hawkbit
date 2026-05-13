@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.exception.GenericSpServerException;
 import org.eclipse.hawkbit.ql.QueryException;
+import org.eclipse.hawkbit.repository.exception.ConcurrentModificationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
@@ -36,7 +37,7 @@ import org.springframework.transaction.TransactionSystemException;
 @Slf4j
 public class ExceptionMapper {
 
-    private static final Map<String, String> EXCEPTION_MAPPING = HashMap.newHashMap(4);
+    private static final Map<String, String> EXCEPTION_MAPPING = HashMap.newHashMap(5);
 
     // this is required to enable a certain order of exception and to select the most specific mappable exception according to the type
     // hierarchy of the exception
@@ -48,6 +49,7 @@ public class ExceptionMapper {
         MAPPED_EXCEPTION_ORDER.add(AccessDeniedException.class);
 
         EXCEPTION_MAPPING.put(DuplicateKeyException.class.getName(), EntityAlreadyExistsException.class.getName());
+        EXCEPTION_MAPPING.put(OptimisticLockingFailureException.class.getName(), ConcurrentModificationException.class.getName());
         EXCEPTION_MAPPING.put(AccessDeniedException.class.getName(), InsufficientPermissionException.class.getName());
 
         EXCEPTION_MAPPING.put("org.hibernate.exception.ConstraintViolationException", EntityAlreadyExistsException.class.getName());
