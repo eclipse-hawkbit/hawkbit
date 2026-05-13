@@ -27,6 +27,10 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
+      - name: Get checked-out SHA
+        id: get-sha
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
       - name: Set up JDK
         uses: actions/setup-java@v5.2.0
         with:
@@ -115,24 +119,32 @@ jobs:
         if: ${{ inputs.upload }}
         uses: github/codeql-action/upload-sarif@v4.35.1
         with:
+          ref: refs/heads/${{ inputs.ref }}
+          sha: ${{ steps.get-sha.outputs.sha }}
           sarif_file: 'scans/hawkbit-ddi-server.sarif'
           category: "Container Images (hawkbit-ddi-server)"
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-dmf-server
         if: ${{ inputs.upload }}
         uses: github/codeql-action/upload-sarif@v4.35.1
         with:
+          ref: refs/heads/${{ inputs.ref }}
+          sha: ${{ steps.get-sha.outputs.sha }}
           sarif_file: 'scans/hawkbit-dmf-server.sarif'
           category: "Container Images (hawkbit-dmf-server)"
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-mgmt-server
         if: ${{ inputs.upload }}
         uses: github/codeql-action/upload-sarif@v4.35.1
         with:
+          ref: refs/heads/${{ inputs.ref }}
+          sha: ${{ steps.get-sha.outputs.sha }}
           sarif_file: 'scans/hawkbit-mgmt-server.sarif'
           category: "Container Images (hawkbit-mgmt-server)"
       - name: Upload Docker image scan results to GitHub Security tab hawkbit-ui
         if: ${{ inputs.upload }}
         uses: github/codeql-action/upload-sarif@v4.35.1
         with:
+          ref: refs/heads/${{ inputs.ref }}
+          sha: ${{ steps.get-sha.outputs.sha }}
           sarif_file: 'scans/hawkbit-ui.sarif'
           category: "Container Images (hawkbit-ui)"
 
@@ -140,6 +152,8 @@ jobs:
         if: ${{ inputs.upload }}
         uses: github/codeql-action/upload-sarif@v4.35.1
         with:
+          ref: refs/heads/${{ inputs.ref }}
+          sha: ${{ steps.get-sha.outputs.sha }}
           sarif_file: 'scans/hawkbit-update-server.sarif'
           category: "Container Images (hawkbit-update-server)"
 
@@ -147,5 +161,7 @@ jobs:
         if: ${{ inputs.upload }}
         uses: github/codeql-action/upload-sarif@v4.35.1
         with:
+          ref: refs/heads/${{ inputs.ref }}
+          sha: ${{ steps.get-sha.outputs.sha }}
           sarif_file: 'scans/hawkbit-repository-jpa-init.sarif'
           category: "Container Images (hawkbit-repository-jpa-init)"
