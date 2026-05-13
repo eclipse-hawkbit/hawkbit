@@ -53,7 +53,11 @@ import org.springframework.http.ResponseEntity;
 @Slf4j
 public final class FileStreamingUtil {
 
-    private static final int BUFFER_SIZE = 0x2000; // 8k
+    // 8 KiB: matches the Tomcat output buffer size set via response.setBufferSize(BUFFER_SIZE) below, so each read
+    // corresponds to a single downstream flush. Larger read buffers split into multiple Tomcat flushes and add
+    // per-request heap pressure under concurrency without improving throughput (end-to-end tests with 80 parallel
+    // 100 MiB range requests measured ~6x worse latency at 256 KiB versus 8 KiB).
+    private static final int BUFFER_SIZE = 0x2000;
 
     /**
      * <p>
