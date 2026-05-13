@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
@@ -211,8 +212,10 @@ public class JpaRepositoryConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @SuppressWarnings("java:S1452") // it could be any LockRegistry<? extends Lock>
-    public LockRegistry<? extends Lock> lockRegistry(final Optional<LockRepository> lockRepository) {
-        return lockRepository.<LockRegistry<? extends Lock>> map(JdbcLockRegistry::new).orElseGet(DefaultLockRegistry::new);
+    public LockRegistry<? extends Lock> lockRegistry(final Optional<LockRepository> lockRepository, final LockProperties lockProperties) {
+        return lockRepository.<LockRegistry<? extends Lock>> map(repo ->
+                new JdbcLockRegistry(repo, Duration.ofMillis(lockProperties.getTtl()))
+        ).orElseGet(DefaultLockRegistry::new);
     }
 
     @Bean
