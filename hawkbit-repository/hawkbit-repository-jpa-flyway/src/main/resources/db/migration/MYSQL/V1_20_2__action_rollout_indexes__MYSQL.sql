@@ -17,7 +17,7 @@ SET @stmt := IF(
         WHERE table_schema = DATABASE()
           AND table_name = 'sp_action'
           AND index_name = 'sp_idx_action_rollout_group') = 0,
-    'CREATE INDEX sp_idx_action_rollout_group ON sp_action (tenant, rollout_group)',
+    'CREATE INDEX sp_idx_action_rollout_group ON sp_action (tenant, rollout_group, status)',
     'SELECT 1');
 PREPARE _create_idx FROM @stmt;
 EXECUTE _create_idx;
