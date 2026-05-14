@@ -14,10 +14,7 @@
 --     the parent rollout for the requested status.
 --
 -- No CREATE INDEX IF NOT EXISTS / INFORMATION_SCHEMA guard: a pre-existing index
--- with the same name but a different column set (e.g. created out-of-band by a
--- downstream fork) would be silently kept and this improvement would be lost.
--- Failing the migration is the safer signal. Forks that pre-create these
--- indexes should use a fork-specific prefix (e.g. fork_idx_action_rollout_*) to
--- avoid the collision and let the upstream-named indexes land on next sync.
+-- with the same name but a different column set would be silently kept and this
+-- improvement would be lost. Failing the migration is the safer signal.
 CREATE INDEX sp_idx_action_rollout_status       ON sp_action (tenant, rollout, status);
 CREATE INDEX sp_idx_action_rollout_group_status ON sp_action (tenant, rollout_group, status);
