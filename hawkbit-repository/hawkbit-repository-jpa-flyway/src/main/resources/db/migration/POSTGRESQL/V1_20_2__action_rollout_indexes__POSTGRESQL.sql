@@ -1,20 +1,2 @@
--- Add indexes covering rollout-monitoring queries on sp_action.
---
--- existsByRolloutId, getStatusCountByRolloutId, getStatusCountByRolloutGroupId
--- (and similar JPA queries) filter by rollout / rollout_group; the baseline did
--- not index either column, so Postgres falls back to Seq Scan over sp_action on
--- every monitoring poll. With 16k action rows the group-count query takes
--- ~500 ms without the index and ~27 ms with it (Index Only Scan, Heap Fetches: 0).
---
--- status is included in both indexes so that:
---   * getStatusCountByRolloutId / getStatusCountByRolloutGroupId can satisfy
---     their GROUP BY rollout(_group), status purely from the index, and
---   * countByRolloutIdAndRolloutGroupIdAndStatus picks the rollout_group index
---     directly on (rollout_group, status) rather than scanning all actions of
---     the parent rollout for the requested status.
---
--- No CREATE INDEX IF NOT EXISTS / INFORMATION_SCHEMA guard: a pre-existing index
--- with the same name but a different column set would be silently kept and this
--- improvement would be lost. Failing the migration is the safer signal.
 CREATE INDEX sp_idx_action_rollout_status       ON sp_action (tenant, rollout, status);
 CREATE INDEX sp_idx_action_rollout_group_status ON sp_action (tenant, rollout_group, status);
