@@ -155,10 +155,9 @@ public class SpecificationBuilder<T> {
                                 String.format("Operator %s is not supported for map fields with value null", op));
                     };
                 } else {
-                    final MapJoin<?, ?, ?> mapPath = (MapJoin<?, ?, ?>) pathResolver.getPath(attribute);
-                    return isNot(op)
-                            ? compare(comparison, toMapValuePath(pathResolver.getJoinOnInner(attribute, split[1])))
-                            : cb.and(equal(mapPath.key(), split[1]), compare(comparison, toMapValuePath(mapPath)));
+                    // map entry with key not null (exist) - use left join per key, key/value filtered in where
+                    final MapJoin<?, ?, ?> mapJoin = pathResolver.getJoinForWhere(attribute, split[1]);
+                    return cb.and(equal(mapJoin.key(), split[1]), compare(comparison, toMapValuePath(mapJoin)));
                 }
             } else if (attribute instanceof SetAttribute<?, ?> setAttribute) {
                 if (split.length < 2 || ObjectUtils.isEmpty(split[1])) {
@@ -437,8 +436,8 @@ public class SpecificationBuilder<T> {
                 return getCollectionPathResolver(attribute.getName()).getJoinOn(value);
             }
 
-            private MapJoin<?, ?, ?> getJoinOnInner(final Attribute<?, ?> attribute, final Object value) {
-                return getCollectionPathResolver(attribute.getName()).getJoinOnInner(value);
+            private MapJoin<?, ?, ?> getJoinForWhere(final Attribute<?, ?> attribute, final Object mapKeyName) {
+                return getCollectionPathResolver(attribute.getName()).getJoinForWhere(mapKeyName);
             }
 
             private Map<String, Integer> getState() {
@@ -463,7 +462,7 @@ public class SpecificationBuilder<T> {
                 @Setter
                 private int pos;
                 private final Map<Object, MapJoin<?, ?, ?>> joinOnCache = new HashMap<>();
-                private final Map<Object, MapJoin<?, ?, ?>> joinOnInnerCache = new HashMap<>();
+                private final Map<Object, MapJoin<?, ?, ?>> joinForWhereCache = new HashMap<>();
 
                 private CollectionPathResolver(final String attributeName) {
                     this.attributeName = attributeName;
@@ -488,12 +487,9 @@ public class SpecificationBuilder<T> {
                     });
                 }
 
-                private MapJoin<?, ?, ?> getJoinOnInner(final Object value) {
-                    return joinOnInnerCache.computeIfAbsent(value, k -> {
-                        final MapJoin<?, ?, ?> mapPath = (MapJoin<?, ?, ?>) root.join(attributeName, JoinType.INNER);
-                        mapPath.on(equal(mapPath.key(), k));
-                        return mapPath;
-                    });
+                private MapJoin<?, ?, ?> getJoinForWhere(final Object mapKeyName) {
+                    return joinForWhereCache.computeIfAbsent(mapKeyName, k ->
+                            (MapJoin<?, ?, ?>) root.join(attributeName, JoinType.LEFT));
                 }
             }
         }
