@@ -1026,6 +1026,144 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         assertThat(distributionSetManagement.findAll(PAGE)).isEmpty();
     }
 
+    @Test
+    void getDistributionSetsFilteredBySoftDeletedMode() throws Exception {
+        final DistributionSet activeDs = testdataFactory.createDistributionSet("active");
+
+        final DistributionSet deletedDs = testdataFactory.createDistributionSet("deleted");
+        testdataFactory.createTarget("dsTarget");
+        assignDistributionSet(deletedDs.getId(), "dsTarget");
+        distributionSetManagement.delete(deletedDs.getId());
+
+        // default — only active
+        mvc.perform(get("/rest/v1/distributionsets").accept(APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo(activeDs.getName())))
+                .andExpect(jsonPath("content[0].deleted", equalTo(false)));
+
+        // soft_deleted — only deleted
+        mvc.perform(get("/rest/v1/distributionsets")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "soft_deleted")
+                        .accept(APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo(deletedDs.getName())))
+                .andExpect(jsonPath("content[0].deleted", equalTo(true)));
+
+        // all — both
+        mvc.perform(get("/rest/v1/distributionsets")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "all")
+                        .accept(APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.total", equalTo(2)));
+
+        // not_soft_deleted — explicit, same as default
+        mvc.perform(get("/rest/v1/distributionsets")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "not_soft_deleted")
+                        .accept(APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].deleted", equalTo(false)));
+    }
+
+    @Test
+    void getDistributionSetsFilteredBySoftDeletedModeWithRsql() throws Exception {
+        final DistributionSet activeDs = testdataFactory.createDistributionSet("rsqlActive");
+
+        final DistributionSet deletedDs = testdataFactory.createDistributionSet("rsqlDeleted");
+        testdataFactory.createTarget("rsqlDsTarget");
+        assignDistributionSet(deletedDs.getId(), "rsqlDsTarget");
+        distributionSetManagement.delete(deletedDs.getId());
+
+        // rsql + soft_deleted — find deleted by name
+        mvc.perform(get("/rest/v1/distributionsets")
+                        .param("q", "name==" + deletedDs.getName())
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "soft_deleted")
+                        .accept(APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo(deletedDs.getName())))
+                .andExpect(jsonPath("content[0].deleted", equalTo(true)));
+
+        // rsql + not_soft_deleted — deleted not found
+        mvc.perform(get("/rest/v1/distributionsets")
+                        .param("q", "name==" + deletedDs.getName())
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "not_soft_deleted")
+                        .accept(APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andExpect(jsonPath("$.total", equalTo(0)));
+
+        // rsql + all — filter by name narrows to one
+        mvc.perform(get("/rest/v1/distributionsets")
+                        .param("q", "name==" + activeDs.getName())
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "all")
+                        .accept(APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo(activeDs.getName())));
+    }
+
+    @Test
+    void updateSoftDeletedDistributionSetRejected() throws Exception {
+        final DistributionSet ds = testdataFactory.createDistributionSet("toDelete");
+        testdataFactory.createTarget("updateTarget");
+        assignDistributionSet(ds.getId(), "updateTarget");
+        distributionSetManagement.delete(ds.getId());
+
+        final String body = new JSONObject().put("description", "updated").toString();
+        mvc.perform(put("/rest/v1/distributionsets/{dsId}", ds.getId()).content(body)
+                        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.deleted")));
+    }
+
+    @Test
+    void lockSoftDeletedDistributionSetRejected() throws Exception {
+        final DistributionSet ds = testdataFactory.createDistributionSet("toDelete");
+        testdataFactory.createTarget("lockTarget");
+        assignDistributionSet(ds.getId(), "lockTarget");
+        distributionSetManagement.delete(ds.getId());
+
+        final String body = new JSONObject().put("locked", true).toString();
+        mvc.perform(put("/rest/v1/distributionsets/{dsId}", ds.getId()).content(body)
+                        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.deleted")));
+    }
+
+    @Test
+    void assignSoftwareModuleToSoftDeletedDistributionSetRejected() throws Exception {
+        final DistributionSet ds = testdataFactory.createDistributionSet("toDelete");
+        testdataFactory.createTarget("assignSmTarget");
+        assignDistributionSet(ds.getId(), "assignSmTarget");
+        distributionSetManagement.delete(ds.getId());
+
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs("newModule");
+        mvc.perform(post("/rest/v1/distributionsets/{dsId}/assignedSM", ds.getId())
+                        .content("[{\"id\":" + sm.getId() + "}]")
+                        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.deleted")));
+    }
+
     /**
      * Ensures that DS property update request to API is reflected by the repository.
      */

@@ -134,6 +134,16 @@ public interface RepositoryManagement<T extends BaseEntity, C, U extends Identif
     long count();
 
     /**
+     * Counts {@link BaseEntity}s in the repository filtered by their soft-deleted state.
+     * If the {@link BaseEntity} is non-soft deletable, fallbacks to {@link #count()}.
+     *
+     * @param softDeletedFilter the filter defining which entities to count based on their soft-deleted status
+     * @return number of {@link BaseEntity}s matching the given soft-deleted filter
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    long count(@NotNull SoftDeletedFilter softDeletedFilter);
+
+    /**
      * Counts the number of {@link BaseEntity}s matching the given RSQL filter.
      *
      * @param rsql filter definition in RSQL syntax

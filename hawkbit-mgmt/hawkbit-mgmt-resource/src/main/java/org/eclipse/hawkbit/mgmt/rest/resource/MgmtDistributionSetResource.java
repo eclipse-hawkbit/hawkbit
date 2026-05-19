@@ -51,6 +51,7 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.SoftDeletedFilter;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -112,16 +113,18 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtDistributionSet>> getDistributionSets(
-            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
+            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String softDeletedModeParam) {
         if (rsqlParam != null && rsqlParam.toLowerCase().contains("complete")) {
             LogUtility.logDeprecated("Usage of MgmtDistributionSetResource.getActions with 'complete': 'complete' distribution set search field is limited and may be removed.");
         }
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
+        final SoftDeletedFilter softDeletedFilter = SoftDeletedFilter.fromValue(softDeletedModeParam)
+                .orElse(SoftDeletedFilter.NOT_SOFT_DELETED);
         final Page<? extends DistributionSet> findDsPage;
         if (rsqlParam != null) {
-            findDsPage = distributionSetManagement.findByRsql(rsqlParam, pageable);
+            findDsPage = distributionSetManagement.findByRsql(rsqlParam, softDeletedFilter, pageable);
         } else {
-            findDsPage = distributionSetManagement.findAll(pageable);
+            findDsPage = distributionSetManagement.findAll(softDeletedFilter, pageable);
         }
 
         final List<MgmtDistributionSet> rest = MgmtDistributionSetMapper.toResponseFromDsList(findDsPage.getContent());

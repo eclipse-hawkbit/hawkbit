@@ -457,16 +457,16 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
         if (resolvableType.getRawClass() == targetSuperClass) {
             return Optional.of(resolvableType);
         }
-        final Optional<ResolvableType> inInterfaces = Arrays.stream(resolvableType.getInterfaces())
-                .filter(superInterface -> superInterface.getRawClass() == targetSuperClass)
-                .findAny();
-        if (inInterfaces.isPresent()) {
-            return inInterfaces;
-        } else if (resolvableType.getSuperType() != ResolvableType.NONE) {
-            return findGenericSuperType(resolvableType.getSuperType(), targetSuperClass);
-        } else {
-            return Optional.empty();
+        for (final ResolvableType superInterface : resolvableType.getInterfaces()) {
+            final Optional<ResolvableType> found = findGenericSuperType(superInterface, targetSuperClass);
+            if (found.isPresent()) {
+                return found;
+            }
         }
+        if (resolvableType.getSuperType() != ResolvableType.NONE) {
+            return findGenericSuperType(resolvableType.getSuperType(), targetSuperClass);
+        }
+        return Optional.empty();
     }
 
     private void assertEquals(final Object actual, final Object expected, final Deque<String> path) {

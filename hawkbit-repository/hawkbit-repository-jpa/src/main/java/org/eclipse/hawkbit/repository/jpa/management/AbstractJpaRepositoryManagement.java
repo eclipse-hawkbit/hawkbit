@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
+import org.eclipse.hawkbit.repository.SoftDeletedFilter;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.Jpa;
@@ -187,6 +188,20 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
     @Override
     public long count() {
         return jpaRepository.count(isNotDeleted().orElseGet(Specification::unrestricted));
+    }
+
+    @Override
+    public long count(SoftDeletedFilter softDeletedFilter) {
+        if (!supportSoftDelete()) {
+            // non-soft-deletable entity - silently ignore
+            return this.count();
+        } else {
+            return switch (softDeletedFilter) {
+                case NOT_SOFT_DELETED -> this.count();
+                case SOFT_DELETED -> jpaRepository.count(isSoftDeleted().orElseGet(Specification::unrestricted));
+                case ALL -> jpaRepository.count();
+            };
+        }
     }
 
     @Override
@@ -382,7 +397,13 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
 
     private final Supplier<Optional<Specification<T>>> isNotDeletedSupplier = SingletonSupplier.of(this::isNotDeleted0);
 
-    private Optional<Specification<T>> isNotDeleted() {
+    protected Optional<Specification<T>> isSoftDeleted() {
+        return supportSoftDelete()
+                ? Optional.of((root, query, cb) -> cb.equal(root.get(DELETED), true))
+                : Optional.empty();
+    }
+
+    protected Optional<Specification<T>> isNotDeleted() {
         return isNotDeletedSupplier.get();
     }
 

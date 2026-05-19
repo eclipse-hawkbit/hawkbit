@@ -493,6 +493,142 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
         assertThat(distributionSetTypeManagement.count()).isEqualTo(DEFAULT_DS_TYPES);
     }
 
+    @Test
+    void getDistributionSetTypesFilteredBySoftDeletedMode() throws Exception {
+        final DistributionSetType activeType = distributionSetTypeManagement.create(
+                DistributionSetTypeManagement.Create.builder()
+                        .key("activeKey").name("activeType").build());
+
+        // create type + DS using it, then delete type → soft-delete
+        final DistributionSetType deletedType = distributionSetTypeManagement.create(
+                DistributionSetTypeManagement.Create.builder()
+                        .key("deletedKey").name("deletedType").build());
+        distributionSetManagement.create(DistributionSetManagement.Create.builder()
+                .type(deletedType).name("ds").version("1.0").build());
+        distributionSetTypeManagement.delete(deletedType.getId());
+
+        // default — built-in + activeType, no deletedType
+        mvc.perform(get("/rest/v1/distributionsettypes").accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(DEFAULT_DS_TYPES + 1)))
+                .andExpect(jsonPath("$.total", equalTo(DEFAULT_DS_TYPES + 1)))
+                .andExpect(jsonPath("$.content.[?(@.key=='deletedKey')]").doesNotExist());
+
+        // soft_deleted — only deletedType
+        mvc.perform(get("/rest/v1/distributionsettypes")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "soft_deleted")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo("deletedType")))
+                .andExpect(jsonPath("content[0].deleted", equalTo(true)));
+
+        // all — everything
+        mvc.perform(get("/rest/v1/distributionsettypes")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "all")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(DEFAULT_DS_TYPES + 2)))
+                .andExpect(jsonPath("$.total", equalTo(DEFAULT_DS_TYPES + 2)));
+
+        // not_soft_deleted — explicit, same as default
+        mvc.perform(get("/rest/v1/distributionsettypes")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "not_soft_deleted")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(DEFAULT_DS_TYPES + 1)))
+                .andExpect(jsonPath("$.total", equalTo(DEFAULT_DS_TYPES + 1)))
+                .andExpect(jsonPath("$.content.[?(@.key=='deletedKey')]").doesNotExist());
+    }
+
+    @Test
+    void getDistributionSetTypesFilteredBySoftDeletedModeWithRsql() throws Exception {
+        distributionSetTypeManagement.create(
+                DistributionSetTypeManagement.Create.builder()
+                        .key("rsqlActiveKey").name("rsqlActiveType").build());
+
+        final DistributionSetType deletedType = distributionSetTypeManagement.create(
+                DistributionSetTypeManagement.Create.builder()
+                        .key("rsqlDeletedKey").name("rsqlDeletedType").build());
+        distributionSetManagement.create(DistributionSetManagement.Create.builder()
+                .type(deletedType).name("ds").version("1.0").build());
+        distributionSetTypeManagement.delete(deletedType.getId());
+
+        // rsql + soft_deleted — find deleted by name
+        mvc.perform(get("/rest/v1/distributionsettypes")
+                        .param("q", "name==rsqlDeletedType")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "soft_deleted")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo("rsqlDeletedType")))
+                .andExpect(jsonPath("content[0].deleted", equalTo(true)));
+
+        // rsql + not_soft_deleted — deleted not found
+        mvc.perform(get("/rest/v1/distributionsettypes")
+                        .param("q", "name==rsqlDeletedType")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "not_soft_deleted")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andExpect(jsonPath("$.total", equalTo(0)));
+
+        // rsql + all — filter by name narrows to one
+        mvc.perform(get("/rest/v1/distributionsettypes")
+                        .param("q", "name==rsqlActiveType")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "all")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo("rsqlActiveType")));
+    }
+
+    @Test
+    void updateSoftDeletedDistributionSetTypeRejected() throws Exception {
+        final DistributionSetType deletedType = distributionSetTypeManagement.create(
+                DistributionSetTypeManagement.Create.builder()
+                        .key("delKey").name("delType").build());
+        distributionSetManagement.create(DistributionSetManagement.Create.builder()
+                .type(deletedType).name("ds").version("1.0").build());
+        distributionSetTypeManagement.delete(deletedType.getId());
+
+        final String body = new JSONObject().put("description", "updated").toString();
+        mvc.perform(put("/rest/v1/distributionsettypes/{dstId}", deletedType.getId()).content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.deleted")));
+    }
+
+    @Test
+    void assignSmTypeToSoftDeletedDistributionSetTypeRejected() throws Exception {
+        final DistributionSetType deletedType = distributionSetTypeManagement.create(
+                DistributionSetTypeManagement.Create.builder()
+                        .key("delKey2").name("delType2").build());
+        distributionSetManagement.create(DistributionSetManagement.Create.builder()
+                .type(deletedType).name("ds2").version("1.0").build());
+        distributionSetTypeManagement.delete(deletedType.getId());
+
+        final SoftwareModuleType smType = softwareModuleTypeManagement.create(
+                SoftwareModuleTypeManagement.Create.builder().key("newSmType").name("newSmType").build());
+        mvc.perform(post("/rest/v1/distributionsettypes/{dstId}/mandatorymoduletypes", deletedType.getId())
+                        .content("{\"id\":" + smType.getId() + "}")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.deleted")));
+    }
+
     /**
      * Checks the correct behaviour of /rest/v1/distributionsettypes/{ID} PUT requests.
      */

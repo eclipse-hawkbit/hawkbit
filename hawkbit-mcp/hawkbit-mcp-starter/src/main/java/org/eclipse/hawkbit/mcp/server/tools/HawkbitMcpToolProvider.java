@@ -131,6 +131,7 @@ public class HawkbitMcpToolProvider {
                 request.getOffsetOrDefault(),
                 request.getLimitOrDefault(),
                 null,
+                null,
                 null);
 
         return toPagedResponse(response.getBody(), request);
@@ -148,6 +149,7 @@ public class HawkbitMcpToolProvider {
                 request.getRsqlOrNull(),
                 request.getOffsetOrDefault(),
                 request.getLimitOrDefault(),
+                null,
                 null);
 
         return toPagedResponse(response.getBody(), request);
@@ -183,7 +185,7 @@ public class HawkbitMcpToolProvider {
                 request.getRsqlOrNull(),
                 request.getOffsetOrDefault(),
                 request.getLimitOrDefault(),
-                null);
+                null, null);
 
         return toPagedResponse(response.getBody(), request);
     }

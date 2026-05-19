@@ -22,9 +22,13 @@ import java.util.stream.Collectors;
 import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.artifact.encryption.ArtifactEncryptionService;
+import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.SoftDeletedFilter;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.exception.DeletedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.IncompleteSoftwareModuleException;
 import org.eclipse.hawkbit.repository.exception.LockedException;
@@ -45,6 +49,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProp
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,6 +61,7 @@ public class JpaSoftwareModuleManagement extends
         AbstractJpaRepositoryWithMetadataManagement<JpaSoftwareModule, SoftwareModuleManagement.Create, SoftwareModuleManagement.Update, SoftwareModuleRepository, SoftwareModuleFields, MetadataValue, JpaSoftwareModule.JpaMetadataValue>
         implements SoftwareModuleManagement<JpaSoftwareModule> {
 
+    private final SoftwareModuleRepository softwareModuleRepository;
     private final DistributionSetRepository distributionSetRepository;
     private final ArtifactManagement artifactManagement;
     private final QuotaManagement quotaManagement;
@@ -64,6 +70,7 @@ public class JpaSoftwareModuleManagement extends
             final DistributionSetRepository distributionSetRepository, final ArtifactManagement artifactManagement,
             final QuotaManagement quotaManagement) {
         super(softwareModuleRepository, entityManager);
+        this.softwareModuleRepository = softwareModuleRepository;
         this.distributionSetRepository = distributionSetRepository;
         this.artifactManagement = artifactManagement;
         this.quotaManagement = quotaManagement;
@@ -94,6 +101,25 @@ public class JpaSoftwareModuleManagement extends
         }
 
         return createdModule;
+    }
+
+    @Override
+    @Transactional
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public JpaSoftwareModule update(final Update update) {
+        final JpaSoftwareModule softwareModule = softwareModuleRepository.getById(update.getId());
+        assertSoftwareModuleIsNotDeleted(softwareModule);
+        return super.update(update);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public Map<Long, JpaSoftwareModule> update(final Collection<SoftwareModuleManagement.Update> updates) {
+        final List<Long> ids = updates.stream().map(Identifiable::getId).toList();
+
+        softwareModuleRepository.findAllById(ids).forEach(this::assertSoftwareModuleIsNotDeleted);
+        return super.update(updates);
     }
 
     @Override
@@ -138,6 +164,7 @@ public class JpaSoftwareModuleManagement extends
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public JpaSoftwareModule lock(final SoftwareModule softwareModule) {
         final JpaSoftwareModule jpaSoftwareModule = toJpaSoftwareModule(softwareModule);
+        assertSoftwareModuleIsNotDeleted(jpaSoftwareModule);
         if (jpaSoftwareModule.isLocked()) {
             return jpaSoftwareModule;
         } else {
@@ -154,12 +181,37 @@ public class JpaSoftwareModuleManagement extends
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public JpaSoftwareModule unlock(final SoftwareModule softwareModule) {
         final JpaSoftwareModule jpaSoftwareModule = toJpaSoftwareModule(softwareModule);
+        assertSoftwareModuleIsNotDeleted(jpaSoftwareModule);
         if (softwareModule.isLocked()) {
             jpaSoftwareModule.unlock();
             return jpaRepository.save(jpaSoftwareModule);
         } else {
             return jpaSoftwareModule;
         }
+    }
+
+    @Override
+    public Page<JpaSoftwareModule> findAll(SoftDeletedFilter softDeletedFilter, Pageable pageable) {
+        if (softDeletedFilter != SoftDeletedFilter.ALL) {
+            Specification<JpaSoftwareModule> softDeletedSpec =
+                    SoftwareModuleSpecification.isDeleted(softDeletedFilter == SoftDeletedFilter.SOFT_DELETED);
+            return softwareModuleRepository.findAll(softDeletedSpec, pageable);
+        }
+
+        return softwareModuleRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<JpaSoftwareModule> findByRsql(String rsql, SoftDeletedFilter softDeletedFilter, Pageable pageable) {
+        final Specification<JpaSoftwareModule> rsqlSpec = QLSupport.getInstance().buildSpec(rsql, SoftwareModuleFields.class);
+        if (softDeletedFilter != SoftDeletedFilter.ALL) {
+            final Specification<JpaSoftwareModule> softDeletedSpec =
+                    SoftwareModuleSpecification.isDeleted(softDeletedFilter == SoftDeletedFilter.SOFT_DELETED);
+            return softwareModuleRepository.findAll(
+                    JpaManagementHelper.combineWithAnd(List.of(rsqlSpec, softDeletedSpec)), pageable);
+        }
+
+        return softwareModuleRepository.findAll(rsqlSpec, pageable);
     }
 
     @Override
@@ -199,6 +251,12 @@ public class JpaSoftwareModuleManagement extends
     private void assertDistributionSetExists(final long distributionSetId) {
         if (!distributionSetRepository.existsById(distributionSetId)) {
             throw new EntityNotFoundException(DistributionSet.class, distributionSetId);
+        }
+    }
+
+    private void assertSoftwareModuleIsNotDeleted(final SoftwareModule softwareModule) {
+        if (softwareModule.isDeleted()) {
+            throw new DeletedException(SoftwareModule.class, softwareModule.getId());
         }
     }
 }

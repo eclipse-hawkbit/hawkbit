@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement.Create;
 import org.eclipse.hawkbit.repository.RolloutManagement.GroupCreate;
+import org.eclipse.hawkbit.repository.SoftDeletedFilter;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
@@ -78,7 +79,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     @Override
     public ResponseEntity<PagedList<MgmtRolloutResponseBody>> getRollouts(
             final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam,
-            final String representationModeParam) {
+            final String representationModeParam, final String softDeletedModeParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeRolloutSortParam(sortParam));
         final boolean isFullMode = parseRepresentationMode(representationModeParam) == MgmtRepresentationMode.FULL;
 
@@ -90,9 +91,11 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
                     : rolloutManagement.findByRsqlWithDetailedStatus(rsqlParam, false, pageable);
             rest = MgmtRolloutMapper.toResponseRolloutWithDetails(rollouts.getContent());
         } else {
+            final SoftDeletedFilter softDeletedFilter = SoftDeletedFilter.fromValue(softDeletedModeParam)
+                    .orElse(SoftDeletedFilter.NOT_SOFT_DELETED);
             rollouts = rsqlParam == null
-                    ? rolloutManagement.findAll(false, pageable)
-                    : rolloutManagement.findByRsql(rsqlParam, false, pageable);
+                    ? rolloutManagement.findAll(softDeletedFilter, pageable)
+                    : rolloutManagement.findByRsql(rsqlParam, softDeletedFilter, pageable);
             rest = MgmtRolloutMapper.toResponseRollout(rollouts.getContent());
         }
         return ResponseEntity.ok(new PagedList<>(rest, rollouts.getTotalElements()));

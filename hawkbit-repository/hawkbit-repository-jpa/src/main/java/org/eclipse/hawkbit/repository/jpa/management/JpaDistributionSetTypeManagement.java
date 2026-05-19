@@ -11,15 +11,21 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
 
+import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.SoftDeletedFilter;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.DeletedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
@@ -38,6 +44,9 @@ import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.cache.Cache;
 import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +57,7 @@ public class JpaDistributionSetTypeManagement
         extends AbstractJpaRepositoryManagement<JpaDistributionSetType, DistributionSetTypeManagement.Create, DistributionSetTypeManagement.Update, DistributionSetTypeRepository, DistributionSetTypeFields>
         implements DistributionSetTypeManagement<JpaDistributionSetType> {
 
+    private final DistributionSetTypeRepository distributionSetTypeRepository;
     private final SoftwareModuleTypeRepository softwareModuleTypeRepository;
     private final DistributionSetRepository distributionSetRepository;
     private final TargetTypeRepository targetTypeRepository;
@@ -60,6 +70,7 @@ public class JpaDistributionSetTypeManagement
             final DistributionSetRepository distributionSetRepository, final TargetTypeRepository targetTypeRepository,
             final QuotaManagement quotaManagement) {
         super(distributionSetTypeRepository, entityManager);
+        this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
         this.distributionSetRepository = distributionSetRepository;
         this.targetTypeRepository = targetTypeRepository;
@@ -117,9 +128,51 @@ public class JpaDistributionSetTypeManagement
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public JpaDistributionSetType unassignSoftwareModuleType(final long id, final long softwareModuleTypeId) {
         final JpaDistributionSetType type = jpaRepository.getById(id);
+        assertDistributionSetTypeIsNotDeleted(type);
         checkDistributionSetTypeNotAssigned(id);
         type.removeModuleType(softwareModuleTypeRepository.getById(softwareModuleTypeId));
         return jpaRepository.save(type);
+    }
+
+    @Override
+    public Page<JpaDistributionSetType> findAll(SoftDeletedFilter softDeletedFilter, Pageable pageable) {
+        if (softDeletedFilter != SoftDeletedFilter.ALL) {
+            final Specification<JpaDistributionSetType> deletedSpec =
+                    DistributionSetTypeSpecification.isDeleted(softDeletedFilter == SoftDeletedFilter.SOFT_DELETED);
+
+            return distributionSetTypeRepository.findAll(deletedSpec, pageable);
+        }
+        return distributionSetTypeRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<JpaDistributionSetType> findByRsql(String rsql, SoftDeletedFilter softDeletedFilter, Pageable pageable) {
+        final Specification<JpaDistributionSetType> rsqlSpec = QLSupport.getInstance().buildSpec(rsql, DistributionSetTypeFields.class);
+        if (softDeletedFilter != SoftDeletedFilter.ALL) {
+            final Specification<JpaDistributionSetType> deletedSpec =
+                    DistributionSetTypeSpecification.isDeleted(softDeletedFilter == SoftDeletedFilter.SOFT_DELETED);
+
+            return distributionSetTypeRepository.findAll(JpaManagementHelper.combineWithAnd(List.of(rsqlSpec, deletedSpec)), pageable);
+        }
+        return distributionSetTypeRepository.findAll(rsqlSpec, pageable);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public JpaDistributionSetType update(final DistributionSetTypeManagement.Update update) {
+        final JpaDistributionSetType distributionSetType = distributionSetTypeRepository.getById(update.getId());
+        assertDistributionSetTypeIsNotDeleted(distributionSetType);
+        return super.update(update);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public Map<Long, JpaDistributionSetType> update(final Collection<DistributionSetTypeManagement.Update> updates) {
+        final List<Long> ids = updates.stream().map(Identifiable::getId).toList();
+        distributionSetTypeRepository.findAllById(ids).forEach(this::assertDistributionSetTypeIsNotDeleted);
+        return super.update(updates);
     }
 
     private JpaDistributionSetType assignSoftwareModuleTypes(
@@ -132,6 +185,7 @@ public class JpaDistributionSetTypeManagement
 
         final JpaDistributionSetType type = jpaRepository.getById(dsTypeId);
 
+        assertDistributionSetTypeIsNotDeleted(type);
         checkDistributionSetTypeNotAssigned(dsTypeId);
         assertSoftwareModuleTypeQuota(dsTypeId, softwareModulesTypeIds.size());
 
@@ -166,6 +220,12 @@ public class JpaDistributionSetTypeManagement
         if (distributionSetRepository.countByTypeId(id) > 0) {
             throw new EntityReadOnlyException(String.format(
                     "Distribution set type %s is already assigned to distribution sets and cannot be changed!", id));
+        }
+    }
+
+    private void assertDistributionSetTypeIsNotDeleted(final DistributionSetType distributionSetType){
+        if (distributionSetType.isDeleted()) {
+            throw new DeletedException(DistributionSetType.class, distributionSetType.getId());
         }
     }
 }

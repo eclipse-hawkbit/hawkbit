@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.api;
 
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE_DEFAULT;
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT;
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET;
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT;
@@ -186,7 +188,14 @@ public interface MgmtSoftwareModuleRestApi {
             @Schema(description = "The query parameter sort allows to define the sort order for the result of a query. " +
                     "A sort criteria consists of the name of a field and the sort direction (ASC for ascending and DESC descending)." +
                     "The sequence of the sort criteria (multiple can be used) defines the sort order of the entities in the result.")
-            String sortParam);
+            String sortParam,
+            @RequestParam(value = REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, defaultValue = REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE_DEFAULT, required = false)
+            @Schema(description = "Controls whether soft-deleted software modules are included in the result. " +
+                    "Possible values: 'not_soft_deleted' (default) - returns only active (non-deleted) software modules; " +
+                    "'soft_deleted' - returns only soft-deleted software modules; " +
+                    "'all' - returns both active and soft-deleted software modules.",
+                    allowableValues = { "not_soft_deleted", "soft_deleted", "all" })
+            String softDeletedMode);
 
     /**
      * Handles the GET request of retrieving a single software module.
