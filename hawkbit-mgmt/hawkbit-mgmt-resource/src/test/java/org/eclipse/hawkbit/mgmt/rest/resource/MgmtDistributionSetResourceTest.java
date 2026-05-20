@@ -1076,6 +1076,40 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     }
 
     @Test
+    void getDistributionSetsSortedByDeleted() throws Exception {
+        final DistributionSet activeDs = testdataFactory.createDistributionSet("sortActive");
+
+        final DistributionSet deletedDs = testdataFactory.createDistributionSet("sortDeleted");
+        testdataFactory.createTarget("sortDsTarget");
+        assignDistributionSet(deletedDs.getId(), "sortDsTarget");
+        distributionSetManagement.delete(deletedDs.getId());
+
+        // ascending — active (false) first, then deleted (true)
+        mvc.perform(get("/rest/v1/distributionsets")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "all")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "DELETED:ASC")
+                        .accept(APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.total", equalTo(2)))
+                .andExpect(jsonPath("content[0].deleted", equalTo(false)))
+                .andExpect(jsonPath("content[1].deleted", equalTo(true)));
+
+        // descending — deleted (true) first, then active (false)
+        mvc.perform(get("/rest/v1/distributionsets")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "all")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "DELETED:DESC")
+                        .accept(APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.total", equalTo(2)))
+                .andExpect(jsonPath("content[0].deleted", equalTo(true)))
+                .andExpect(jsonPath("content[1].deleted", equalTo(false)));
+    }
+
+    @Test
     void getDistributionSetsFilteredBySoftDeletedModeWithRsql() throws Exception {
         final DistributionSet activeDs = testdataFactory.createDistributionSet("rsqlActive");
 

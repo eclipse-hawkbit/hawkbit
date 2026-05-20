@@ -544,6 +544,40 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     }
 
     @Test
+    void getSoftwareModuleTypesSortedByDeleted() throws Exception {
+        final int builtInTypes = 3;
+
+        softwareModuleTypeManagement.create(
+                SoftwareModuleTypeManagement.Create.builder().key("sortActiveKey").name("sortActiveType").build());
+
+        final SoftwareModuleType deletedType = softwareModuleTypeManagement.create(
+                SoftwareModuleTypeManagement.Create.builder().key("sortDeletedKey").name("sortDeletedType").build());
+        softwareModuleManagement.create(
+                SoftwareModuleManagement.Create.builder().type(deletedType).name("sm").version("1.0").build());
+        softwareModuleTypeManagement.delete(deletedType.getId());
+
+        // ascending — active (false) first, then deleted (true)
+        mvc.perform(get("/rest/v1/softwaremoduletypes")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "all")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "DELETED:ASC")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.[0].deleted", equalTo(false)))
+                .andExpect(jsonPath("$.content.[?(@.key=='sortDeletedKey')].deleted", hasItem(true)));
+
+        // descending — deleted (true) first, then active (false)
+        mvc.perform(get("/rest/v1/softwaremoduletypes")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "all")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "DELETED:DESC")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.[0].deleted", equalTo(true)))
+                .andExpect(jsonPath("$.content.[0].key", equalTo("sortDeletedKey")));
+    }
+
+    @Test
     void getSoftwareModuleTypesFilteredBySoftDeletedModeWithRsql() throws Exception {
         softwareModuleTypeManagement.create(
                 SoftwareModuleTypeManagement.Create.builder().key("rsqlActiveKey").name("rsqlActiveType").build());

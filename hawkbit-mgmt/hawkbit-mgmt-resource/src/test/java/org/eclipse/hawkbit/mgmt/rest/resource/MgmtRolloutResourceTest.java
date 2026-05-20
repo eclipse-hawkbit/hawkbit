@@ -1552,6 +1552,45 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
+    void getRolloutsSortedByDeleted() throws Exception {
+        testdataFactory.createTargets(20, "rolloutSort", "rolloutSort");
+        final DistributionSet dsA = testdataFactory.createDistributionSet("sortDs");
+
+        final Rollout rollout1 = createRollout("sortActive", 4, dsA, "controllerId==rolloutSort*");
+        final Rollout rollout2 = createRollout("sortDeleted", 4, dsA, "controllerId==rolloutSort*");
+
+        // start and soft-delete rollout2
+        rolloutManagement.start(rollout2.getId());
+        rolloutHandler.handleAll();
+        rolloutManagement.delete(rollout2.getId());
+        rolloutHandler.handleAll();
+
+        // ascending — active (false) first, then deleted (true)
+        mvc.perform(get("/rest/v1/rollouts")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "all")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "DELETED:ASC")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.total", equalTo(2)))
+                .andExpect(jsonPath("content[0].deleted", equalTo(false)))
+                .andExpect(jsonPath("content[1].deleted", equalTo(true)));
+
+        // descending — deleted (true) first, then active (false)
+        mvc.perform(get("/rest/v1/rollouts")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "all")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "DELETED:DESC")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.total", equalTo(2)))
+                .andExpect(jsonPath("content[0].deleted", equalTo(true)))
+                .andExpect(jsonPath("content[1].deleted", equalTo(false)));
+    }
+
+    @Test
     void getRolloutsFilteredBySoftDeletedModeWithRsql() throws Exception {
         testdataFactory.createTargets(20, "rolloutRsql", "rolloutRsql");
         final DistributionSet dsA = testdataFactory.createDistributionSet("rsqlDs");

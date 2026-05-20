@@ -547,6 +547,40 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
     }
 
     @Test
+    void getDistributionSetTypesSortedByDeleted() throws Exception {
+        distributionSetTypeManagement.create(
+                DistributionSetTypeManagement.Create.builder()
+                        .key("sortActiveKey").name("sortActiveType").build());
+
+        final DistributionSetType deletedType = distributionSetTypeManagement.create(
+                DistributionSetTypeManagement.Create.builder()
+                        .key("sortDeletedKey").name("sortDeletedType").build());
+        distributionSetManagement.create(DistributionSetManagement.Create.builder()
+                .type(deletedType).name("ds").version("1.0").build());
+        distributionSetTypeManagement.delete(deletedType.getId());
+
+        // ascending — active (false) first, then deleted (true)
+        mvc.perform(get("/rest/v1/distributionsettypes")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "all")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "DELETED:ASC")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.[0].deleted", equalTo(false)))
+                .andExpect(jsonPath("$.content.[?(@.key=='sortDeletedKey')].deleted", hasItem(true)));
+
+        // descending — deleted (true) first, then active (false)
+        mvc.perform(get("/rest/v1/distributionsettypes")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "all")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "DELETED:DESC")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.[0].deleted", equalTo(true)))
+                .andExpect(jsonPath("$.content.[0].key", equalTo("sortDeletedKey")));
+    }
+
+    @Test
     void getDistributionSetTypesFilteredBySoftDeletedModeWithRsql() throws Exception {
         distributionSetTypeManagement.create(
                 DistributionSetTypeManagement.Create.builder()

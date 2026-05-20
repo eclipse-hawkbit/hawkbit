@@ -32,7 +32,8 @@ public enum SoftwareModuleFields implements QueryField {
     CREATEDAT("createdAt"),
     CREATEDBY("createdBy"),
     LASTMODIFIEDAT("lastModifiedAt"),
-    LASTMODIFIEDBY("lastModifiedBy");
+    LASTMODIFIEDBY("lastModifiedBy"),
+    DELETED("deleted");
 
     private final String name;
     private final List<String> subEntityAttributes;
