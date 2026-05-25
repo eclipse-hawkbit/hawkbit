@@ -104,10 +104,10 @@ maven/mavencentral/io.micrometer/micrometer-commons/1.16.5, Apache-2.0 AND (Apac
 maven/mavencentral/io.micrometer/micrometer-core/1.16.5, Apache-2.0 AND (Apache-2.0 AND MIT), approved, #24722
 maven/mavencentral/io.micrometer/micrometer-jakarta9/1.16.5, Apache-2.0, approved, #25608
 maven/mavencentral/io.micrometer/micrometer-observation/1.16.5, Apache-2.0, approved, #24713
-maven/mavencentral/io.modelcontextprotocol.sdk/mcp-core/0.18.2, , restricted, clearlydefined
-maven/mavencentral/io.modelcontextprotocol.sdk/mcp-json-jackson2/0.18.2, , restricted, clearlydefined
-maven/mavencentral/io.modelcontextprotocol.sdk/mcp-spring-webmvc/0.18.2, , restricted, clearlydefined
-maven/mavencentral/io.modelcontextprotocol.sdk/mcp/0.18.2, , restricted, clearlydefined
+maven/mavencentral/io.modelcontextprotocol.sdk/mcp-core/0.18.2, MIT, approved, #28176
+maven/mavencentral/io.modelcontextprotocol.sdk/mcp-json-jackson2/0.18.2, MIT, approved, #28181
+maven/mavencentral/io.modelcontextprotocol.sdk/mcp-spring-webmvc/0.18.2, MIT, approved, #28179
+maven/mavencentral/io.modelcontextprotocol.sdk/mcp/0.18.2, MIT AND Apache-2.0, approved, #28178
 maven/mavencentral/io.netty/netty-buffer/4.2.13.Final, Apache-2.0, approved, #16116
 maven/mavencentral/io.netty/netty-codec-base/4.2.13.Final, Apache-2.0, approved, #21322
 maven/mavencentral/io.netty/netty-codec-classes-quic/4.2.13.Final, Apache-2.0, approved, #21311
@@ -205,7 +205,7 @@ maven/mavencentral/org.reactivestreams/reactive-streams/1.0.4, CC0-1.0, approved
 maven/mavencentral/org.skyscreamer/jsonassert/1.5.3, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.slf4j/jul-to-slf4j/2.0.17, MIT, approved, #7698
 maven/mavencentral/org.slf4j/slf4j-api/2.0.17, MIT, approved, #5915
-maven/mavencentral/org.springaicommunity/mcp-annotations/0.9.0, , restricted, clearlydefined
+maven/mavencentral/org.springaicommunity/mcp-annotations/0.9.0, MIT AND Apache-2.0, approved, #28177
 maven/mavencentral/org.springdoc/springdoc-openapi-starter-common/3.0.3, Apache-2.0, approved, #25648
 maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-api/3.0.3, Apache-2.0, approved, #25723
 maven/mavencentral/org.springdoc/springdoc-openapi-starter-webmvc-ui/3.0.3, Apache-2.0, approved, #27667
@@ -263,7 +263,7 @@ maven/mavencentral/org.springframework.boot/spring-boot-starter-jdbc/4.0.6, Apac
 maven/mavencentral/org.springframework.boot/spring-boot-starter-json/4.0.6, Apache-2.0, approved, #27591
 maven/mavencentral/org.springframework.boot/spring-boot-starter-logging/4.0.6, Apache-2.0, approved, #25602
 maven/mavencentral/org.springframework.boot/spring-boot-starter-micrometer-metrics/4.0.6, Apache-2.0, approved, #26120
-maven/mavencentral/org.springframework.boot/spring-boot-starter-oauth2-resource-server/4.0.6, , restricted, clearlydefined
+maven/mavencentral/org.springframework.boot/spring-boot-starter-oauth2-resource-server/4.0.6, Apache-2.0, approved, #28180
 maven/mavencentral/org.springframework.boot/spring-boot-starter-reactor-netty/4.0.6, Apache-2.0, approved, #26130
 maven/mavencentral/org.springframework.boot/spring-boot-starter-security-oauth2-client/4.0.6, Apache-2.0, approved, #26192
 maven/mavencentral/org.springframework.boot/spring-boot-starter-security/4.0.6, Apache-2.0, approved, #25630
