@@ -16,6 +16,10 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
+import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
@@ -24,6 +28,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Test class for {@link AutoActionCleanup}.
@@ -36,6 +42,12 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     private AutoActionCleanup autoActionCleanup;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Autowired
+    private PlatformTransactionManager txManager;
 
     /**
      * Verifies that running actions are not cleaned up.
@@ -160,10 +172,9 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
      * Verifies that canceled and failed actions are cleaned up once they expired.
      */
     @Test
-    @SuppressWarnings("squid:S2925")
-    void canceledAndFailedActionsAreCleanedUpWhenExpired() throws InterruptedException {
-        // cleanup config for this test case
-        setupCleanupConfiguration(500, Action.Status.CANCELED, Action.Status.ERROR);
+    void canceledAndFailedActionsAreCleanedUpWhenExpired() {
+        final long expiryMs = 3_600_000L; // 1 hour - large to avoid timing issues
+        setupCleanupConfiguration(expiryMs, Action.Status.CANCELED, Action.Status.ERROR);
 
         final Target trg1 = testdataFactory.createTarget("trg1");
         final Target trg2 = testdataFactory.createTarget("trg2");
@@ -181,14 +192,23 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         setActionToCanceled(action1);
         setActionToFailed(action2);
 
+        // actions have not expired yet (last_modified_at is recent)
         waitNextMillis();
         autoActionCleanup.run();
-
-        // actions have not expired yet
         assertThat(actionRepository.count()).isEqualTo(3);
 
-        // wait for expiry to elapse
-        waitMillis(800);
+        // simulate expiry by backdating last_modified_at via native SQL to bypass @LastModifiedDate
+        final long expired = System.currentTimeMillis() - expiryMs - 1000;
+        final char prefix = Jpa.nativeQueryParamPrefix();
+        new TransactionTemplate(txManager).executeWithoutResult(status -> {
+            entityManager.createNativeQuery(
+                            "UPDATE sp_action SET last_modified_at = " + prefix + "ts WHERE id IN (" + prefix + "id1, " + prefix + "id2)")
+                    .setParameter("ts", expired)
+                    .setParameter("id1", action1)
+                    .setParameter("id2", action2)
+                    .executeUpdate();
+            entityManager.flush();
+        });
 
         autoActionCleanup.run();
 
