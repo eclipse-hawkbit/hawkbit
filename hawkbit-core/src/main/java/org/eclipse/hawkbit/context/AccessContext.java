@@ -461,7 +461,7 @@ public class AccessContext {
 
         @Override
         public int hashCode() {
-            return delegate != null ? delegate.hashCode() : -1;
+            return delegate == null ? -1 : delegate.hashCode();
         }
 
         @Override
@@ -486,7 +486,7 @@ public class AccessContext {
 
         @Override
         public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
-            return delegate.getAuthorities();
+            return delegate == null ? List.of() : delegate.getAuthorities();
         }
 
         @Override
@@ -496,7 +496,7 @@ public class AccessContext {
 
         @Override
         public Object getDetails() {
-            return delegate.getDetails();
+            return delegate == null ? null : delegate.getDetails();
         }
 
         @Override
