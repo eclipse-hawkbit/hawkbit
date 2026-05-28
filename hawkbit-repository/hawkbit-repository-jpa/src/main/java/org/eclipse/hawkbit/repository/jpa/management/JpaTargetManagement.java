@@ -31,6 +31,7 @@ import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.criteria.MapJoin;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.MapAttribute;
 import jakarta.validation.constraints.NotEmpty;
 
@@ -342,7 +343,7 @@ public class JpaTargetManagement
         if (isEclipseLink()) {
             // EclipseLink: use subquery approach — applying predicate directly to the UPDATE root
             // fails for NOT EXISTS due to UpdateAllQuery's @Id resolution bug
-            final jakarta.persistence.criteria.Subquery<Long> subquery = criteriaUpdateQuery.subquery(Long.class);
+            final Subquery<Long> subquery = criteriaUpdateQuery.subquery(Long.class);
             final Root<JpaTarget> subRoot = subquery.from(JpaTarget.class);
             subquery.select(subRoot.get("id"));
             subquery.where(rsqlSpecification.toPredicate(subRoot, cb.createQuery(JpaTarget.class), cb));
