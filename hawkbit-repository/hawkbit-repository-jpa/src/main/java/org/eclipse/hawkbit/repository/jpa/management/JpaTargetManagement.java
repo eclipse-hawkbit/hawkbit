@@ -336,12 +336,18 @@ public class JpaTargetManagement
 
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaUpdate<JpaTarget> criteriaUpdateQuery = cb.createCriteriaUpdate(JpaTarget.class);
-        final Root<JpaTarget> root = criteriaUpdateQuery.getRoot();
+        final Root<JpaTarget> updateRoot = criteriaUpdateQuery.getRoot();
         criteriaUpdateQuery.set("group", group);
-        // get predicate from rsql specification using a dummy query in order to execute batch update
-        final Predicate predicate = rsqlSpecification.toPredicate(root, entityManager.getCriteriaBuilder().createQuery(JpaTarget.class), cb);
-        criteriaUpdateQuery.where(predicate);
 
+        // Use a subquery to find matching IDs — avoids JOINs directly in UPDATE context
+        // which EclipseLink's UpdateAllQuery doesn't handle properly for anti-joins
+        final jakarta.persistence.criteria.Subquery<Long> subquery = criteriaUpdateQuery.subquery(Long.class);
+        final Root<JpaTarget> subRoot = subquery.from(JpaTarget.class);
+        subquery.select(subRoot.get("id"));
+        final Predicate subPredicate = rsqlSpecification.toPredicate(subRoot, cb.createQuery(JpaTarget.class), cb);
+        subquery.where(subPredicate);
+
+        criteriaUpdateQuery.where(updateRoot.get("id").in(subquery));
         entityManager.createQuery(criteriaUpdateQuery).executeUpdate();
     }
 

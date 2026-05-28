@@ -22,6 +22,8 @@ import java.util.List;
 
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetGroupRestApi;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -228,5 +230,31 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
                 .andExpect(jsonPath("content.[0].controllerId", Matchers.equalTo("target1")))
                 .andExpect(jsonPath("content.[1].controllerId", Matchers.equalTo("target2")))
                 .andExpect(jsonPath("content.[2].controllerId", Matchers.equalTo("target3")));
+    }
+
+    @Test
+    void shouldAssignGroupToTargetsFilteredByTagNotEqual() throws Exception {
+        targetManagement.create(builder().controllerId("target1").build());
+        targetManagement.create(builder().controllerId("target2").build());
+        targetManagement.create(builder().controllerId("target3").build());
+
+        final TargetTag tag1 = targetTagManagement.create(TargetTagManagement.Create.builder().name("tag1").build());
+        final TargetTag tag2 = targetTagManagement.create(TargetTagManagement.Create.builder().name("tag2").build());
+
+        targetManagement.assignTag(List.of("target1"), tag1.getId());
+        targetManagement.assignTag(List.of("target2"), tag1.getId());
+        targetManagement.assignTag(List.of("target3"), tag2.getId());
+
+        mvc.perform(put(MgmtTargetGroupRestApi.TARGETGROUPS_V1 + "/FilteredGroup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("q", "tag!=tag1"))
+                .andExpect(status().isNoContent());
+
+        mvc.perform(get(MgmtTargetGroupRestApi.TARGETGROUPS_V1 + "/FilteredGroup/assigned")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("content", Matchers.hasSize(1)))
+                .andExpect(jsonPath("content.[0].controllerId", Matchers.equalTo("target3")));
     }
 }
