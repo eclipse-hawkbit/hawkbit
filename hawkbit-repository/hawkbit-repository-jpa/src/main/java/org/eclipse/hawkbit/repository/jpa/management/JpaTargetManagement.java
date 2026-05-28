@@ -339,15 +339,21 @@ public class JpaTargetManagement
         final Root<JpaTarget> updateRoot = criteriaUpdateQuery.getRoot();
         criteriaUpdateQuery.set("group", group);
 
-        // Use a subquery to find matching IDs — avoids JOINs directly in UPDATE context
-        // which EclipseLink's UpdateAllQuery doesn't handle properly for anti-joins
-        final jakarta.persistence.criteria.Subquery<Long> subquery = criteriaUpdateQuery.subquery(Long.class);
-        final Root<JpaTarget> subRoot = subquery.from(JpaTarget.class);
-        subquery.select(subRoot.get("id"));
-        final Predicate subPredicate = rsqlSpecification.toPredicate(subRoot, cb.createQuery(JpaTarget.class), cb);
-        subquery.where(subPredicate);
+        if (isEclipseLink()) {
+            // EclipseLink: use subquery approach — applying predicate directly to the UPDATE root
+            // fails for NOT EXISTS due to UpdateAllQuery's @Id resolution bug
+            final jakarta.persistence.criteria.Subquery<Long> subquery = criteriaUpdateQuery.subquery(Long.class);
+            final Root<JpaTarget> subRoot = subquery.from(JpaTarget.class);
+            subquery.select(subRoot.get("id"));
+            subquery.where(rsqlSpecification.toPredicate(subRoot, cb.createQuery(JpaTarget.class), cb));
+            criteriaUpdateQuery.where(updateRoot.get("id").in(subquery));
+        } else {
+            // Hibernate: apply predicate directly to the UPDATE root — Hibernate handles
+            // NOT EXISTS subqueries correctly in CriteriaUpdate context
+            final Predicate predicate = rsqlSpecification.toPredicate(updateRoot, cb.createQuery(JpaTarget.class), cb);
+            criteriaUpdateQuery.where(predicate);
+        }
 
-        criteriaUpdateQuery.where(updateRoot.get("id").in(subquery));
         entityManager.createQuery(criteriaUpdateQuery).executeUpdate();
     }
 
@@ -439,6 +445,10 @@ public class JpaTargetManagement
         }
 
         jpaRepository.save(target);
+    }
+
+    private boolean isEclipseLink() {
+        return entityManager.getDelegate().getClass().getName().startsWith("org.eclipse.persistence");
     }
 
     private Map<String, String> getMap(final String controllerId, final MapAttribute<JpaTarget, String, String> mapAttribute) {
