@@ -9,18 +9,20 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rollout.condition;
 
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
-/**
- * Evaluates if the {@link RolloutGroup#getErrorConditionExp()} is reached.
- */
 @Slf4j
 public class ThresholdRolloutGroupErrorCondition
         implements RolloutGroupConditionEvaluator<RolloutGroup.RolloutGroupErrorCondition> {
+
+    // Both ERROR and CANCELED are terminal failure statuses: the DS was not installed.
+    private static final List<Action.Status> ERROR_STATUSES = List.of(Action.Status.ERROR, Action.Status.CANCELED);
 
     private final ActionRepository actionRepository;
 
@@ -36,8 +38,8 @@ public class ThresholdRolloutGroupErrorCondition
     @Override
     public boolean eval(final Rollout rollout, final RolloutGroup rolloutGroup, final String expression) {
         final long totalGroup = rolloutGroup.getTotalTargets();
-        final Long error = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rollout.getId(),
-                rolloutGroup.getId(), Action.Status.ERROR);
+        final long error = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatusIn(rollout.getId(),
+                rolloutGroup.getId(), ERROR_STATUSES);
         try {
             final int threshold = Integer.parseInt(expression);
 
