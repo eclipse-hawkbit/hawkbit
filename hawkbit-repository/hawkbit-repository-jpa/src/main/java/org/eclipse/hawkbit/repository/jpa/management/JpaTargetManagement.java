@@ -40,9 +40,11 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
@@ -340,14 +342,14 @@ public class JpaTargetManagement
         final Root<JpaTarget> updateRoot = criteriaUpdateQuery.getRoot();
         criteriaUpdateQuery.set("group", group);
 
-        if (isEclipseLink()) {
+        if (Jpa.JPA_VENDOR == Jpa.JpaVendor.ECLIPSELINK) {
             // EclipseLink: use subquery approach — applying predicate directly to the UPDATE root
             // fails for NOT EXISTS due to UpdateAllQuery's @Id resolution bug
             final Subquery<Long> subquery = criteriaUpdateQuery.subquery(Long.class);
             final Root<JpaTarget> subRoot = subquery.from(JpaTarget.class);
-            subquery.select(subRoot.get("id"));
+            subquery.select(subRoot.get(AbstractJpaBaseEntity_.ID));
             subquery.where(rsqlSpecification.toPredicate(subRoot, cb.createQuery(JpaTarget.class), cb));
-            criteriaUpdateQuery.where(updateRoot.get("id").in(subquery));
+            criteriaUpdateQuery.where(updateRoot.get(AbstractJpaBaseEntity_.ID).in(subquery));
         } else {
             // Hibernate: apply predicate directly to the UPDATE root — Hibernate handles
             // NOT EXISTS subqueries correctly in CriteriaUpdate context
@@ -446,10 +448,6 @@ public class JpaTargetManagement
         }
 
         jpaRepository.save(target);
-    }
-
-    private boolean isEclipseLink() {
-        return entityManager.getDelegate().getClass().getName().startsWith("org.eclipse.persistence");
     }
 
     private Map<String, String> getMap(final String controllerId, final MapAttribute<JpaTarget, String, String> mapAttribute) {
