@@ -67,7 +67,7 @@
 
         <!-- Eclipselink - START -->
         <eclipselink.version>4.0.9</eclipselink.version>
-        <eclipselink.maven.plugin.version>3.0.2</eclipselink.maven.plugin.version>
+        <eclipselink.maven.plugin.version>4.0.2</eclipselink.maven.plugin.version>
         <!-- Eclipselink - END -->
 
         <!-- Spring AI for MCP support -->
