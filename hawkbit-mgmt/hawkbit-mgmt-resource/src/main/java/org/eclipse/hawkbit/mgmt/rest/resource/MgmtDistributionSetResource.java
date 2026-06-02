@@ -51,6 +51,7 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftDeletedMode;
 import org.eclipse.hawkbit.repository.SoftDeletedMode;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -118,8 +119,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             LogUtility.logDeprecated("Usage of MgmtDistributionSetResource.getActions with 'complete': 'complete' distribution set search field is limited and may be removed.");
         }
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
-        final SoftDeletedMode softDeletedMode = SoftDeletedMode.fromValue(softDeletedModeParam)
-                .orElse(SoftDeletedMode.EXCLUDE_SOFT_DELETED);
+        final SoftDeletedMode softDeletedMode = SoftDeletedMode.valueOf(
+                MgmtSoftDeletedMode.fromValue(softDeletedModeParam)
+                        .orElse(MgmtSoftDeletedMode.EXCLUDE_SOFT_DELETED).name());
         final Page<? extends DistributionSet> findDsPage;
         if (rsqlParam != null) {
             findDsPage = distributionSetManagement.findByRsql(rsqlParam, softDeletedMode, pageable);

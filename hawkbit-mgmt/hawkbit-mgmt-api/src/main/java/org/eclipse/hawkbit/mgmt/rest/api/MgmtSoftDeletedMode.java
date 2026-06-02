@@ -7,20 +7,28 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository;
+package org.eclipse.hawkbit.mgmt.rest.api;
 
 import java.util.Arrays;
 import java.util.Optional;
 
-public enum SoftDeletedMode {
+public enum MgmtSoftDeletedMode {
+
     ONLY_SOFT_DELETED("only_soft_deleted"),
     EXCLUDE_SOFT_DELETED("exclude_soft_deleted"),
     INCLUDE_SOFT_DELETED("include_soft_deleted");
 
     private final String mode;
 
-    SoftDeletedMode(String mode) {
+    MgmtSoftDeletedMode(final String mode) {
         this.mode = mode;
+    }
+
+    public static Optional<MgmtSoftDeletedMode> fromValue(final String value) {
+        if (value == null) {
+            return Optional.empty();
+        }
+        return Arrays.stream(MgmtSoftDeletedMode.values()).filter(v -> v.mode.equalsIgnoreCase(value)).findFirst();
     }
 
     @Override

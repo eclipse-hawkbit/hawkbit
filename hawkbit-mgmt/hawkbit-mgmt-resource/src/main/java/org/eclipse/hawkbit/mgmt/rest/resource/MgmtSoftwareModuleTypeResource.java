@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModule
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtSoftwareModuleTypeMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftDeletedMode;
 import org.eclipse.hawkbit.repository.SoftDeletedMode;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -48,8 +49,9 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
     public ResponseEntity<PagedList<MgmtSoftwareModuleType>> getTypes(
             final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String softDeletedModeParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeSoftwareModuleTypeSortParam(sortParam));
-        final SoftDeletedMode softDeletedMode = SoftDeletedMode.fromValue(softDeletedModeParam)
-                .orElse(SoftDeletedMode.EXCLUDE_SOFT_DELETED);
+        final SoftDeletedMode softDeletedMode = SoftDeletedMode.valueOf(
+                MgmtSoftDeletedMode.fromValue(softDeletedModeParam)
+                        .orElse(MgmtSoftDeletedMode.EXCLUDE_SOFT_DELETED).name());
         final Slice<? extends SoftwareModuleType> findModuleTypessAll;
         final long countModulesAll;
         if (rsqlParam != null) {

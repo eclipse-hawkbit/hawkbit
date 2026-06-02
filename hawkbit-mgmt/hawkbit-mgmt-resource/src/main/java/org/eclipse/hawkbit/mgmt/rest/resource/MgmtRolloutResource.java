@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement.Create;
 import org.eclipse.hawkbit.repository.RolloutManagement.GroupCreate;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftDeletedMode;
 import org.eclipse.hawkbit.repository.SoftDeletedMode;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -91,8 +92,9 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
                     : rolloutManagement.findByRsqlWithDetailedStatus(rsqlParam, false, pageable);
             rest = MgmtRolloutMapper.toResponseRolloutWithDetails(rollouts.getContent());
         } else {
-            final SoftDeletedMode softDeletedMode = SoftDeletedMode.fromValue(softDeletedModeParam)
-                    .orElse(SoftDeletedMode.EXCLUDE_SOFT_DELETED);
+            final SoftDeletedMode softDeletedMode = SoftDeletedMode.valueOf(
+                    MgmtSoftDeletedMode.fromValue(softDeletedModeParam)
+                            .orElse(MgmtSoftDeletedMode.EXCLUDE_SOFT_DELETED).name());
             rollouts = rsqlParam == null
                     ? rolloutManagement.findAll(softDeletedMode, pageable)
                     : rolloutManagement.findByRsql(rsqlParam, softDeletedMode, pageable);
