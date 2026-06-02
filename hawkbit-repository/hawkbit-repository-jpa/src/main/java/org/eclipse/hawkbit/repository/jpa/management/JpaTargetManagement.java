@@ -345,6 +345,7 @@ public class JpaTargetManagement
         if (Jpa.JPA_VENDOR == Jpa.JpaVendor.ECLIPSELINK) {
             // EclipseLink: use subquery approach — applying predicate directly to the UPDATE root
             // fails for NOT EXISTS due to UpdateAllQuery's @Id resolution bug
+            // BUG Reported: https://github.com/eclipse-ee4j/eclipselink/issues/2757
             final Subquery<Long> subquery = criteriaUpdateQuery.subquery(Long.class);
             final Root<JpaTarget> subRoot = subquery.from(JpaTarget.class);
             subquery.select(subRoot.get(AbstractJpaBaseEntity_.ID));
