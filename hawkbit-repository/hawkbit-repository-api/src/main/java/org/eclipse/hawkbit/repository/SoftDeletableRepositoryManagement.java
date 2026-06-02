@@ -30,22 +30,22 @@ public interface SoftDeletableRepositoryManagement<T extends BaseEntity, C, U ex
     /**
      * Retrieves a {@link Page} of all {@link BaseEntity}s filtered by their soft-deleted state.
      *
-     * @param softDeletedFilter the filter defining which entities to return based on their soft-deleted status
+     * @param softDeletedMode the filter defining which entities to return based on their soft-deleted status
      * @param pageable the page request to sort and limit the result
      * @return a page of found entities matching the given soft-deleted filter
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Page<T> findAll(@NotNull SoftDeletedFilter softDeletedFilter, @NotNull Pageable pageable);
+    Page<T> findAll(@NotNull SoftDeletedMode softDeletedMode, @NotNull Pageable pageable);
 
     /**
      * Retrieves a {@link Page} of {@link BaseEntity}s matching the given RSQL filter,
      * filtered by their soft-deleted state.
      *
      * @param rsql filter definition in RSQL syntax
-     * @param softDeletedFilter the filter defining which entities to return based on their soft-deleted status
+     * @param softDeletedMode the filter defining which entities to return based on their soft-deleted status
      * @param pageable the page request to sort and limit the result
      * @return a page of found entities matching both the RSQL filter and the soft-deleted filter
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Page<T> findByRsql(@NotNull String rsql, @NotNull SoftDeletedFilter softDeletedFilter, @NotNull Pageable pageable);
+    Page<T> findByRsql(@NotNull String rsql, @NotNull SoftDeletedMode softDeletedMode, @NotNull Pageable pageable);
 }

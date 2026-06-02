@@ -36,8 +36,7 @@ public enum DistributionSetFields implements QueryField {
     MODULE("modules", SoftwareModuleFields.ID.getName(), SoftwareModuleFields.NAME.getName()),
     TAG("tags", "name"),
     METADATA("metadata"),
-    VALID("valid"),
-    DELETED("deleted");
+    VALID("valid");
 
     private final String name;
     private final List<String> subEntityAttributes;

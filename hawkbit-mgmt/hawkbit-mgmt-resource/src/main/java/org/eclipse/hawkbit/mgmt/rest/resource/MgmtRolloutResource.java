@@ -36,7 +36,7 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement.Create;
 import org.eclipse.hawkbit.repository.RolloutManagement.GroupCreate;
-import org.eclipse.hawkbit.repository.SoftDeletedFilter;
+import org.eclipse.hawkbit.repository.SoftDeletedMode;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
@@ -91,11 +91,11 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
                     : rolloutManagement.findByRsqlWithDetailedStatus(rsqlParam, false, pageable);
             rest = MgmtRolloutMapper.toResponseRolloutWithDetails(rollouts.getContent());
         } else {
-            final SoftDeletedFilter softDeletedFilter = SoftDeletedFilter.fromValue(softDeletedModeParam)
-                    .orElse(SoftDeletedFilter.NOT_SOFT_DELETED);
+            final SoftDeletedMode softDeletedMode = SoftDeletedMode.fromValue(softDeletedModeParam)
+                    .orElse(SoftDeletedMode.EXCLUDE_SOFT_DELETED);
             rollouts = rsqlParam == null
-                    ? rolloutManagement.findAll(softDeletedFilter, pageable)
-                    : rolloutManagement.findByRsql(rsqlParam, softDeletedFilter, pageable);
+                    ? rolloutManagement.findAll(softDeletedMode, pageable)
+                    : rolloutManagement.findByRsql(rsqlParam, softDeletedMode, pageable);
             rest = MgmtRolloutMapper.toResponseRollout(rollouts.getContent());
         }
         return ResponseEntity.ok(new PagedList<>(rest, rollouts.getTotalElements()));

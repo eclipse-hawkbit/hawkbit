@@ -26,8 +26,7 @@ public enum DistributionSetTypeFields implements QueryField {
     CREATEDAT("createdAt"),
     CREATEDBY("createdBy"),
     LASTMODIFIEDAT("lastModifiedAt"),
-    LASTMODIFIEDBY("lastModifiedBy"),
-    DELETED("deleted");
+    LASTMODIFIEDBY("lastModifiedBy");
 
     private final String name;
 

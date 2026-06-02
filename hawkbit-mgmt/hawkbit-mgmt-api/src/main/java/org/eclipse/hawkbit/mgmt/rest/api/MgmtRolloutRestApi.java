@@ -98,10 +98,10 @@ public interface MgmtRolloutRestApi {
             String representationModeParam,
             @RequestParam(value = REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, defaultValue = REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE_DEFAULT, required = false)
             @Schema(description = "Controls whether soft-deleted rollouts are included in the result. " +
-                    "Possible values: 'not_soft_deleted' (default) - returns only non-deleted rollouts; " +
-                    "'soft_deleted' - returns only soft-deleted rollouts; " +
-                    "'all' - returns both active and soft-deleted rollouts.",
-                    allowableValues = { "not_soft_deleted", "soft_deleted", "all" })
+                    "Possible values: 'exclude_soft_deleted' (default) - returns only non-deleted rollouts; " +
+                    "'only_soft_deleted' - returns only soft-deleted rollouts; " +
+                    "'include_soft_deleted' - returns both active and soft-deleted rollouts.",
+                    allowableValues = { "exclude_soft_deleted", "only_soft_deleted", "include_soft_deleted" })
             String softDeletedMode);
 
     /**

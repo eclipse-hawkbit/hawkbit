@@ -41,7 +41,7 @@ import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutHelper;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
-import org.eclipse.hawkbit.repository.SoftDeletedFilter;
+import org.eclipse.hawkbit.repository.SoftDeletedMode;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
@@ -268,13 +268,13 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public Page<Rollout> findAll(final SoftDeletedFilter softDeletedFilter, Pageable pageable) {
-        return switch (softDeletedFilter) {
-            case NOT_SOFT_DELETED -> JpaManagementHelper.convertPage(
+    public Page<Rollout> findAll(final SoftDeletedMode softDeletedMode, Pageable pageable) {
+        return switch (softDeletedMode) {
+            case EXCLUDE_SOFT_DELETED -> JpaManagementHelper.convertPage(
                     rolloutRepository.findAll(RolloutSpecification.isDeleted(false, pageable.getSort()), pageable), pageable);
-            case SOFT_DELETED -> JpaManagementHelper.convertPage(
+            case ONLY_SOFT_DELETED -> JpaManagementHelper.convertPage(
                     rolloutRepository.findAll(RolloutSpecification.isDeleted(true, pageable.getSort()), pageable), pageable);
-            case ALL -> JpaManagementHelper.convertPage(
+            case INCLUDE_SOFT_DELETED -> JpaManagementHelper.convertPage(
                     rolloutRepository.findAll(Specification.unrestricted(), pageable), pageable);
         };
     }
@@ -295,12 +295,12 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public Page<Rollout> findByRsql(String rsql, SoftDeletedFilter softDeletedFilter, Pageable pageable) {
+    public Page<Rollout> findByRsql(String rsql, SoftDeletedMode softDeletedMode, Pageable pageable) {
         final Specification<JpaRollout> rsqlSpec = QLSupport.getInstance().buildSpec(rsql, RolloutFields.class);
 
-        if (softDeletedFilter != SoftDeletedFilter.ALL) {
+        if (softDeletedMode != SoftDeletedMode.INCLUDE_SOFT_DELETED) {
             final Specification<JpaRollout> deletedSpec = RolloutSpecification.isDeleted(
-                    softDeletedFilter == SoftDeletedFilter.SOFT_DELETED, pageable.getSort());
+                    softDeletedMode == SoftDeletedMode.ONLY_SOFT_DELETED, pageable.getSort());
             return JpaManagementHelper.convertPage(
                     rolloutRepository.findAll(JpaManagementHelper.combineWithAnd(List.of(rsqlSpec, deletedSpec)), pageable), pageable);
         } else {

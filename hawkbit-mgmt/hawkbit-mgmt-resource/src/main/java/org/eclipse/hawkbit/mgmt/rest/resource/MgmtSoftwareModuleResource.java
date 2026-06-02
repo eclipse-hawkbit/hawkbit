@@ -37,7 +37,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtSoftwareModuleMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.SoftDeletedFilter;
+import org.eclipse.hawkbit.repository.SoftDeletedMode;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -167,17 +167,17 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     public ResponseEntity<PagedList<MgmtSoftwareModule>> getSoftwareModules(
             final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String softDeletedModeParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeSoftwareModuleSortParam(sortParam));
-        final SoftDeletedFilter softDeletedFilter = SoftDeletedFilter.fromValue(softDeletedModeParam)
-                .orElse(SoftDeletedFilter.NOT_SOFT_DELETED);
+        final SoftDeletedMode softDeletedMode = SoftDeletedMode.fromValue(softDeletedModeParam)
+                .orElse(SoftDeletedMode.EXCLUDE_SOFT_DELETED);
         final Slice<? extends SoftwareModule> findModulesAll;
         final long countModulesAll;
         if (rsqlParam != null) {
             findModulesAll = softwareModuleManagement.findByRsql(
-                    rsqlParam, softDeletedFilter, pageable);
+                    rsqlParam, softDeletedMode, pageable);
             countModulesAll = ((Page<?>) findModulesAll).getTotalElements();
         } else {
-            findModulesAll = softwareModuleManagement.findAll(softDeletedFilter, pageable);
-            countModulesAll = softwareModuleManagement.count(softDeletedFilter);
+            findModulesAll = softwareModuleManagement.findAll(softDeletedMode, pageable);
+            countModulesAll = softwareModuleManagement.count(softDeletedMode);
         }
 
         final List<MgmtSoftwareModule> rest = MgmtSoftwareModuleMapper.toResponse(findModulesAll.getContent());

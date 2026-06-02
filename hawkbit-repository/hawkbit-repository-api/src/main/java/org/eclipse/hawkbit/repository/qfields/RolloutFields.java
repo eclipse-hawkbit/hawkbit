@@ -28,7 +28,6 @@ public enum RolloutFields implements QueryField {
     CREATEDBY("createdBy"),
     LASTMODIFIEDAT("lastModifiedAt"),
     LASTMODIFIEDBY("lastModifiedBy"),
-    DELETED("deleted"),
     DISTRIBUTIONSET(
             "distributionSet",
             DistributionSetFields.ID.getName(),

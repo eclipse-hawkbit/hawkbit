@@ -13,7 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -516,9 +515,9 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
                 .andExpect(jsonPath("$.total", equalTo(DEFAULT_DS_TYPES + 1)))
                 .andExpect(jsonPath("$.content.[?(@.key=='deletedKey')]").doesNotExist());
 
-        // soft_deleted — only deletedType
+        // only_soft_deleted — only deletedType
         mvc.perform(get("/rest/v1/distributionsettypes")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "only_soft_deleted")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -527,58 +526,24 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
                 .andExpect(jsonPath("content[0].name", equalTo("deletedType")))
                 .andExpect(jsonPath("content[0].deleted", equalTo(true)));
 
-        // all — everything
+        // include_soft_deleted — everything
         mvc.perform(get("/rest/v1/distributionsettypes")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "all")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "include_soft_deleted")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(DEFAULT_DS_TYPES + 2)))
                 .andExpect(jsonPath("$.total", equalTo(DEFAULT_DS_TYPES + 2)));
 
-        // not_soft_deleted — explicit, same as default
+        // exclude_soft_deleted — explicit, same as default
         mvc.perform(get("/rest/v1/distributionsettypes")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "not_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "exclude_soft_deleted")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(DEFAULT_DS_TYPES + 1)))
                 .andExpect(jsonPath("$.total", equalTo(DEFAULT_DS_TYPES + 1)))
                 .andExpect(jsonPath("$.content.[?(@.key=='deletedKey')]").doesNotExist());
-    }
-
-    @Test
-    void getDistributionSetTypesSortedByDeleted() throws Exception {
-        distributionSetTypeManagement.create(
-                DistributionSetTypeManagement.Create.builder()
-                        .key("sortActiveKey").name("sortActiveType").build());
-
-        final DistributionSetType deletedType = distributionSetTypeManagement.create(
-                DistributionSetTypeManagement.Create.builder()
-                        .key("sortDeletedKey").name("sortDeletedType").build());
-        distributionSetManagement.create(DistributionSetManagement.Create.builder()
-                .type(deletedType).name("ds").version("1.0").build());
-        distributionSetTypeManagement.delete(deletedType.getId());
-
-        // ascending — active (false) first, then deleted (true)
-        mvc.perform(get("/rest/v1/distributionsettypes")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "all")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "DELETED:ASC")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.[0].deleted", equalTo(false)))
-                .andExpect(jsonPath("$.content.[?(@.key=='sortDeletedKey')].deleted", hasItem(true)));
-
-        // descending — deleted (true) first, then active (false)
-        mvc.perform(get("/rest/v1/distributionsettypes")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "all")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "DELETED:DESC")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.[0].deleted", equalTo(true)))
-                .andExpect(jsonPath("$.content.[0].key", equalTo("sortDeletedKey")));
     }
 
     @Test
@@ -597,7 +562,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
         // rsql + soft_deleted — find deleted by name
         mvc.perform(get("/rest/v1/distributionsettypes")
                         .param("q", "name==rsqlDeletedType")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "only_soft_deleted")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -609,17 +574,17 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
         // rsql + not_soft_deleted — deleted not found
         mvc.perform(get("/rest/v1/distributionsettypes")
                         .param("q", "name==rsqlDeletedType")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "not_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "exclude_soft_deleted")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)))
                 .andExpect(jsonPath("$.total", equalTo(0)));
 
-        // rsql + all — filter by name narrows to one
+        // rsql + include_soft_deleted — filter by name narrows to one
         mvc.perform(get("/rest/v1/distributionsettypes")
                         .param("q", "name==rsqlActiveType")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "all")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "include_soft_deleted")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())

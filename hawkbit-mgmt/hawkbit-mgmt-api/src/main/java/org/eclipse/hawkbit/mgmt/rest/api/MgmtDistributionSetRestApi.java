@@ -108,10 +108,10 @@ public interface MgmtDistributionSetRestApi {
             String sortParam,
             @RequestParam(value = REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, defaultValue = REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE_DEFAULT, required = false)
             @Schema(description = "Controls whether soft-deleted distribution sets are included in the result. " +
-                    "Possible values: 'not_soft_deleted' (default) - returns only active (non-deleted) distribution sets; " +
-                    "'soft_deleted' - returns only soft-deleted distribution sets; " +
-                    "'all' - returns both active and soft-deleted distribution sets.",
-                    allowableValues = { "not_soft_deleted", "soft_deleted", "all" })
+                    "Possible values: 'exclude_soft_deleted' (default) - returns only active (non-deleted) distribution sets; " +
+                    "'only_soft_deleted' - returns only soft-deleted distribution sets; " +
+                    "'include_soft_deleted' - returns both active and soft-deleted distribution sets.",
+                    allowableValues = { "exclude_soft_deleted", "only_soft_deleted", "include_soft_deleted" })
             String softDeletedMode);
 
     /**

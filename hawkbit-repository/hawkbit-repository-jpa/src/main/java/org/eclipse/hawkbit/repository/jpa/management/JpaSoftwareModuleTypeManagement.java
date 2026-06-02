@@ -18,7 +18,7 @@ import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.Identifiable;
-import org.eclipse.hawkbit.repository.SoftDeletedFilter;
+import org.eclipse.hawkbit.repository.SoftDeletedMode;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.exception.DeletedException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
@@ -73,10 +73,10 @@ public class JpaSoftwareModuleTypeManagement
     }
 
     @Override
-    public Page<JpaSoftwareModuleType> findAll(SoftDeletedFilter softDeletedFilter, Pageable pageable) {
-        if (softDeletedFilter != SoftDeletedFilter.ALL) {
+    public Page<JpaSoftwareModuleType> findAll(SoftDeletedMode softDeletedMode, Pageable pageable) {
+        if (softDeletedMode != SoftDeletedMode.INCLUDE_SOFT_DELETED) {
             final Specification<JpaSoftwareModuleType> deletedSpec =
-                    SoftwareModuleTypeSpecification.isDeleted(softDeletedFilter == SoftDeletedFilter.SOFT_DELETED);
+                    SoftwareModuleTypeSpecification.isDeleted(softDeletedMode == SoftDeletedMode.ONLY_SOFT_DELETED);
 
             return softwareModuleTypeRepository.findAll(deletedSpec, pageable);
         }
@@ -84,11 +84,11 @@ public class JpaSoftwareModuleTypeManagement
     }
 
     @Override
-    public Page<JpaSoftwareModuleType> findByRsql(String rsql, SoftDeletedFilter softDeletedFilter, Pageable pageable) {
+    public Page<JpaSoftwareModuleType> findByRsql(String rsql, SoftDeletedMode softDeletedMode, Pageable pageable) {
         final Specification<JpaSoftwareModuleType> rsqlSpec = QLSupport.getInstance().buildSpec(rsql, SoftwareModuleTypeFields.class);
-        if (softDeletedFilter != SoftDeletedFilter.ALL) {
+        if (softDeletedMode != SoftDeletedMode.INCLUDE_SOFT_DELETED) {
             final Specification<JpaSoftwareModuleType> deletedSpec =
-                    SoftwareModuleTypeSpecification.isDeleted(softDeletedFilter == SoftDeletedFilter.SOFT_DELETED);
+                    SoftwareModuleTypeSpecification.isDeleted(softDeletedMode == SoftDeletedMode.ONLY_SOFT_DELETED);
 
             return softwareModuleTypeRepository.findAll(JpaManagementHelper.combineWithAnd(List.of(rsqlSpec, deletedSpec)), pageable);
         }

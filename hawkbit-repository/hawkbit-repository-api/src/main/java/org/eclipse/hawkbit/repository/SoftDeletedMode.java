@@ -12,22 +12,22 @@ package org.eclipse.hawkbit.repository;
 import java.util.Arrays;
 import java.util.Optional;
 
-public enum SoftDeletedFilter {
-    SOFT_DELETED("soft_deleted"),
-    NOT_SOFT_DELETED("not_soft_deleted"),
-    ALL("all");
+public enum SoftDeletedMode {
+    ONLY_SOFT_DELETED("only_soft_deleted"),
+    EXCLUDE_SOFT_DELETED("exclude_soft_deleted"),
+    INCLUDE_SOFT_DELETED("include_soft_deleted");
 
     private final String mode;
 
-    SoftDeletedFilter(String mode) {
+    SoftDeletedMode(String mode) {
         this.mode = mode;
     }
 
-    public static Optional<SoftDeletedFilter> fromValue(final String value) {
+    public static Optional<SoftDeletedMode> fromValue(final String value) {
         if (value == null) {
             return Optional.empty();
         }
-        return Arrays.stream(SoftDeletedFilter.values()).filter(v -> v.mode.equalsIgnoreCase(value)).findFirst();
+        return Arrays.stream(SoftDeletedMode.values()).filter(v -> v.mode.equalsIgnoreCase(value)).findFirst();
     }
 
     @Override

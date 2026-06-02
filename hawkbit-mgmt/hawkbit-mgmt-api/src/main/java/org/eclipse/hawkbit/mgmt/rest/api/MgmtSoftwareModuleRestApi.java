@@ -191,10 +191,10 @@ public interface MgmtSoftwareModuleRestApi {
             String sortParam,
             @RequestParam(value = REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, defaultValue = REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE_DEFAULT, required = false)
             @Schema(description = "Controls whether soft-deleted software modules are included in the result. " +
-                    "Possible values: 'not_soft_deleted' (default) - returns only active (non-deleted) software modules; " +
-                    "'soft_deleted' - returns only soft-deleted software modules; " +
-                    "'all' - returns both active and soft-deleted software modules.",
-                    allowableValues = { "not_soft_deleted", "soft_deleted", "all" })
+                    "Possible values: 'exclude_soft_deleted' (default) - returns only active (non-deleted) software modules; " +
+                    "'only_soft_deleted' - returns only soft-deleted software modules; " +
+                    "'include_soft_deleted' - returns both active and soft-deleted software modules.",
+                    allowableValues = { "exclude_soft_deleted", "only_soft_deleted", "include_soft_deleted" })
             String softDeletedMode);
 
     /**

@@ -33,7 +33,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
-import org.eclipse.hawkbit.repository.SoftDeletedFilter;
+import org.eclipse.hawkbit.repository.SoftDeletedMode;
 import org.eclipse.hawkbit.repository.exception.DeletedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
@@ -107,17 +107,17 @@ public class JpaDistributionSetManagement
     @Override
     @SuppressWarnings("java:S3776") // java:S3776 - just too complex
     public Page<JpaDistributionSet> findByRsql(final String rsql, final Pageable pageable) {
-        return findByRsqlAndDeleted(rsql, SoftDeletedFilter.NOT_SOFT_DELETED, pageable);
+        return findByRsqlAndDeleted(rsql, SoftDeletedMode.EXCLUDE_SOFT_DELETED, pageable);
     }
 
     @Override
-    public Page<JpaDistributionSet> findByRsql(String rsql, SoftDeletedFilter softDeletedFilter, Pageable pageable) {
-        return findByRsqlAndDeleted(rsql, softDeletedFilter, pageable);
+    public Page<JpaDistributionSet> findByRsql(String rsql, SoftDeletedMode softDeletedMode, Pageable pageable) {
+        return findByRsqlAndDeleted(rsql, softDeletedMode, pageable);
     }
 
     @Override
-    public Page<JpaDistributionSet> findAll(SoftDeletedFilter softDeletedFilter, Pageable pageable) {
-        return jpaRepository.findAll(deletedSpecification(softDeletedFilter), pageable);
+    public Page<JpaDistributionSet> findAll(SoftDeletedMode softDeletedMode, Pageable pageable) {
+        return jpaRepository.findAll(deletedSpecification(softDeletedMode), pageable);
     }
 
     @Override
@@ -371,7 +371,7 @@ public class JpaDistributionSetManagement
         QuotaHelper.assertAssignmentQuota(requested, maxMetaData, String.class, DistributionSet.class);
     }
 
-    private Page<JpaDistributionSet> findByRsqlAndDeleted(String rsql, SoftDeletedFilter deletedMode, Pageable pageable) {
+    private Page<JpaDistributionSet> findByRsqlAndDeleted(String rsql, SoftDeletedMode deletedMode, Pageable pageable) {
         if (rsql != null && rsql.toLowerCase().contains(COMPLETE)) {
             // limited support for 'complete' - could be removed in future
             final Node node = QLSupport.getInstance().parse(rsql);
@@ -416,13 +416,13 @@ public class JpaDistributionSetManagement
         return JpaManagementHelper.findAllWithCountBySpec(jpaRepository, specList, pageable);
     }
 
-    private Specification<JpaDistributionSet> deletedSpecification(final SoftDeletedFilter softDeletedFilter) {
-        return switch (softDeletedFilter) {
-            case SOFT_DELETED ->
+    private Specification<JpaDistributionSet> deletedSpecification(final SoftDeletedMode softDeletedMode) {
+        return switch (softDeletedMode) {
+            case ONLY_SOFT_DELETED ->
                     (root, query, cb) -> cb.equal(root.get(DELETED), true);
-            case NOT_SOFT_DELETED ->
+            case EXCLUDE_SOFT_DELETED ->
                     (root, query, cb) -> cb.equal(root.get(DELETED), false);
-            case ALL ->
+            case INCLUDE_SOFT_DELETED ->
                     Specification.unrestricted();
         };
     }

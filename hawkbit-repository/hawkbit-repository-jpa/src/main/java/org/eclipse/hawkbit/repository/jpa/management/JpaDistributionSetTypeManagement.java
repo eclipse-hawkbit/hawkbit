@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.QuotaManagement;
-import org.eclipse.hawkbit.repository.SoftDeletedFilter;
+import org.eclipse.hawkbit.repository.SoftDeletedMode;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.DeletedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -135,10 +135,10 @@ public class JpaDistributionSetTypeManagement
     }
 
     @Override
-    public Page<JpaDistributionSetType> findAll(SoftDeletedFilter softDeletedFilter, Pageable pageable) {
-        if (softDeletedFilter != SoftDeletedFilter.ALL) {
+    public Page<JpaDistributionSetType> findAll(SoftDeletedMode softDeletedMode, Pageable pageable) {
+        if (softDeletedMode != SoftDeletedMode.INCLUDE_SOFT_DELETED) {
             final Specification<JpaDistributionSetType> deletedSpec =
-                    DistributionSetTypeSpecification.isDeleted(softDeletedFilter == SoftDeletedFilter.SOFT_DELETED);
+                    DistributionSetTypeSpecification.isDeleted(softDeletedMode == SoftDeletedMode.ONLY_SOFT_DELETED);
 
             return distributionSetTypeRepository.findAll(deletedSpec, pageable);
         }
@@ -146,11 +146,11 @@ public class JpaDistributionSetTypeManagement
     }
 
     @Override
-    public Page<JpaDistributionSetType> findByRsql(String rsql, SoftDeletedFilter softDeletedFilter, Pageable pageable) {
+    public Page<JpaDistributionSetType> findByRsql(String rsql, SoftDeletedMode softDeletedMode, Pageable pageable) {
         final Specification<JpaDistributionSetType> rsqlSpec = QLSupport.getInstance().buildSpec(rsql, DistributionSetTypeFields.class);
-        if (softDeletedFilter != SoftDeletedFilter.ALL) {
+        if (softDeletedMode != SoftDeletedMode.INCLUDE_SOFT_DELETED) {
             final Specification<JpaDistributionSetType> deletedSpec =
-                    DistributionSetTypeSpecification.isDeleted(softDeletedFilter == SoftDeletedFilter.SOFT_DELETED);
+                    DistributionSetTypeSpecification.isDeleted(softDeletedMode == SoftDeletedMode.ONLY_SOFT_DELETED);
 
             return distributionSetTypeRepository.findAll(JpaManagementHelper.combineWithAnd(List.of(rsqlSpec, deletedSpec)), pageable);
         }

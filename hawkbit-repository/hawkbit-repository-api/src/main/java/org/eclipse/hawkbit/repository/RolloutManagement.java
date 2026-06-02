@@ -172,7 +172,7 @@ public interface RolloutManagement extends PermissionSupport {
      * @return a page of found rollouts
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Page<Rollout> findAll(SoftDeletedFilter softDeletedMode, @NotNull Pageable pageable);
+    Page<Rollout> findAll(SoftDeletedMode softDeletedMode, @NotNull Pageable pageable);
 
     /**
      * Get count of targets in different status in rollout.
@@ -202,7 +202,7 @@ public interface RolloutManagement extends PermissionSupport {
      * Retrieves all rollouts matching the given RSQL filter, filtered by their soft-deleted state.
      *
      * @param rsql the specification to filter rollouts
-     * @param softDeletedFilter the filter defining which rollouts to return based on their soft-deleted status
+     * @param softDeletedMode the filter defining which rollouts to return based on their soft-deleted status
      * @param pageable the page request to sort and limit the result
      * @return a page of found rollouts
      * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the given
@@ -210,7 +210,7 @@ public interface RolloutManagement extends PermissionSupport {
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Page<Rollout> findByRsql(@NotNull String rsql, SoftDeletedFilter softDeletedFilter, @NotNull Pageable pageable);
+    Page<Rollout> findByRsql(@NotNull String rsql, SoftDeletedMode softDeletedMode, @NotNull Pageable pageable);
 
     /**
      * Finds rollouts by given text in name or description.
