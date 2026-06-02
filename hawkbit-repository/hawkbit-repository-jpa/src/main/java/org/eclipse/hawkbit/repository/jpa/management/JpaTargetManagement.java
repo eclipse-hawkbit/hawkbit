@@ -31,6 +31,7 @@ import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.criteria.MapJoin;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.MapAttribute;
 import jakarta.validation.constraints.NotEmpty;
 
@@ -39,9 +40,11 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
@@ -336,11 +339,24 @@ public class JpaTargetManagement
 
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaUpdate<JpaTarget> criteriaUpdateQuery = cb.createCriteriaUpdate(JpaTarget.class);
-        final Root<JpaTarget> root = criteriaUpdateQuery.getRoot();
+        final Root<JpaTarget> updateRoot = criteriaUpdateQuery.getRoot();
         criteriaUpdateQuery.set("group", group);
-        // get predicate from rsql specification using a dummy query in order to execute batch update
-        final Predicate predicate = rsqlSpecification.toPredicate(root, entityManager.getCriteriaBuilder().createQuery(JpaTarget.class), cb);
-        criteriaUpdateQuery.where(predicate);
+
+        if (Jpa.JPA_VENDOR == Jpa.JpaVendor.ECLIPSELINK) {
+            // EclipseLink: use subquery approach — applying predicate directly to the UPDATE root
+            // fails for NOT EXISTS due to UpdateAllQuery's @Id resolution bug
+            // BUG Reported: https://github.com/eclipse-ee4j/eclipselink/issues/2757
+            final Subquery<Long> subquery = criteriaUpdateQuery.subquery(Long.class);
+            final Root<JpaTarget> subRoot = subquery.from(JpaTarget.class);
+            subquery.select(subRoot.get(AbstractJpaBaseEntity_.ID));
+            subquery.where(rsqlSpecification.toPredicate(subRoot, cb.createQuery(JpaTarget.class), cb));
+            criteriaUpdateQuery.where(updateRoot.get(AbstractJpaBaseEntity_.ID).in(subquery));
+        } else {
+            // Hibernate: apply predicate directly to the UPDATE root — Hibernate handles
+            // NOT EXISTS subqueries correctly in CriteriaUpdate context
+            final Predicate predicate = rsqlSpecification.toPredicate(updateRoot, cb.createQuery(JpaTarget.class), cb);
+            criteriaUpdateQuery.where(predicate);
+        }
 
         entityManager.createQuery(criteriaUpdateQuery).executeUpdate();
     }
