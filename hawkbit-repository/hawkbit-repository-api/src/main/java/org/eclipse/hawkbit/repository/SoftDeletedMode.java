@@ -9,9 +9,6 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.util.Arrays;
-import java.util.Optional;
-
 public enum SoftDeletedMode {
     ONLY_SOFT_DELETED("only_soft_deleted"),
     EXCLUDE_SOFT_DELETED("exclude_soft_deleted"),
