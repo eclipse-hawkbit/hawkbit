@@ -93,8 +93,7 @@ public interface MgmtSoftwareModuleTypeRestApi {
             @Schema(description = "Controls whether soft-deleted software module types are included in the result. " +
                     "Possible values: 'exclude_soft_deleted' (default) - returns only active (non-deleted) software module types; " +
                     "'only_soft_deleted' - returns only soft-deleted software module types; " +
-                    "'include_soft_deleted' - returns both active and soft-deleted software module types.",
-                    allowableValues = { "exclude_soft_deleted", "only_soft_deleted", "include_soft_deleted" })
+                    "'include_soft_deleted' - returns both active and soft-deleted software module types.")
             MgmtSoftDeletedMode softDeletedMode);
 
     /**

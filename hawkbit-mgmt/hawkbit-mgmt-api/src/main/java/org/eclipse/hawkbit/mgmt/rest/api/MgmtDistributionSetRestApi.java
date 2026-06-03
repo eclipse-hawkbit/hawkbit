@@ -110,8 +110,7 @@ public interface MgmtDistributionSetRestApi {
             @Schema(description = "Controls whether soft-deleted distribution sets are included in the result. " +
                     "Possible values: 'exclude_soft_deleted' (default) - returns only active (non-deleted) distribution sets; " +
                     "'only_soft_deleted' - returns only soft-deleted distribution sets; " +
-                    "'include_soft_deleted' - returns both active and soft-deleted distribution sets.",
-                    allowableValues = { "exclude_soft_deleted", "only_soft_deleted", "include_soft_deleted" })
+                    "'include_soft_deleted' - returns both active and soft-deleted distribution sets.")
             MgmtSoftDeletedMode softDeletedMode);
 
     /**

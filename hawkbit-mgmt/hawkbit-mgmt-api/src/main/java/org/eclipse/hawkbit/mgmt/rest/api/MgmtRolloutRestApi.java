@@ -100,8 +100,7 @@ public interface MgmtRolloutRestApi {
             @Schema(description = "Controls whether soft-deleted rollouts are included in the result. " +
                     "Possible values: 'exclude_soft_deleted' (default) - returns only non-deleted rollouts; " +
                     "'only_soft_deleted' - returns only soft-deleted rollouts; " +
-                    "'include_soft_deleted' - returns both active and soft-deleted rollouts.",
-                    allowableValues = { "exclude_soft_deleted", "only_soft_deleted", "include_soft_deleted" })
+                    "'include_soft_deleted' - returns both active and soft-deleted rollouts.")
             MgmtSoftDeletedMode softDeletedMode);
 
     /**
