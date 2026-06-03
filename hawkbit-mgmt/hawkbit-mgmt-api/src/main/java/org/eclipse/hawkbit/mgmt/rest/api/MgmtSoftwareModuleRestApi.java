@@ -195,7 +195,7 @@ public interface MgmtSoftwareModuleRestApi {
                     "'only_soft_deleted' - returns only soft-deleted software modules; " +
                     "'include_soft_deleted' - returns both active and soft-deleted software modules.",
                     allowableValues = { "exclude_soft_deleted", "only_soft_deleted", "include_soft_deleted" })
-            String softDeletedMode);
+            MgmtSoftDeletedMode softDeletedMode);
 
     /**
      * Handles the GET request of retrieving a single software module.

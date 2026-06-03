@@ -114,14 +114,12 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtDistributionSet>> getDistributionSets(
-            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String softDeletedModeParam) {
+            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final MgmtSoftDeletedMode softDeletedModeParam) {
         if (rsqlParam != null && rsqlParam.toLowerCase().contains("complete")) {
             LogUtility.logDeprecated("Usage of MgmtDistributionSetResource.getActions with 'complete': 'complete' distribution set search field is limited and may be removed.");
         }
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
-        final SoftDeletedMode softDeletedMode = SoftDeletedMode.valueOf(
-                MgmtSoftDeletedMode.fromValue(softDeletedModeParam)
-                        .orElse(MgmtSoftDeletedMode.EXCLUDE_SOFT_DELETED).name());
+        final SoftDeletedMode softDeletedMode = SoftDeletedMode.valueOf(softDeletedModeParam.name());
         final Page<? extends DistributionSet> findDsPage;
         if (rsqlParam != null) {
             findDsPage = distributionSetManagement.findByRsql(rsqlParam, softDeletedMode, pageable);

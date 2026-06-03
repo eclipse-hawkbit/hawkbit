@@ -166,11 +166,9 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtSoftwareModule>> getSoftwareModules(
-            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String softDeletedModeParam) {
+            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final MgmtSoftDeletedMode softDeletedModeParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeSoftwareModuleSortParam(sortParam));
-        final SoftDeletedMode softDeletedMode = SoftDeletedMode.valueOf(
-                MgmtSoftDeletedMode.fromValue(softDeletedModeParam)
-                        .orElse(MgmtSoftDeletedMode.EXCLUDE_SOFT_DELETED).name());
+        final SoftDeletedMode softDeletedMode = SoftDeletedMode.valueOf(softDeletedModeParam.name());
         final Slice<? extends SoftwareModule> findModulesAll;
         final long countModulesAll;
         if (rsqlParam != null) {

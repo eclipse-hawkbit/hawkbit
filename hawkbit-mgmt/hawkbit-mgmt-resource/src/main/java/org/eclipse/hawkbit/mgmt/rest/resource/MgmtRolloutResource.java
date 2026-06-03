@@ -80,7 +80,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     @Override
     public ResponseEntity<PagedList<MgmtRolloutResponseBody>> getRollouts(
             final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam,
-            final String representationModeParam, final String softDeletedModeParam) {
+            final String representationModeParam, final MgmtSoftDeletedMode softDeletedModeParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeRolloutSortParam(sortParam));
         final boolean isFullMode = parseRepresentationMode(representationModeParam) == MgmtRepresentationMode.FULL;
 
@@ -92,9 +92,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
                     : rolloutManagement.findByRsqlWithDetailedStatus(rsqlParam, false, pageable);
             rest = MgmtRolloutMapper.toResponseRolloutWithDetails(rollouts.getContent());
         } else {
-            final SoftDeletedMode softDeletedMode = SoftDeletedMode.valueOf(
-                    MgmtSoftDeletedMode.fromValue(softDeletedModeParam)
-                            .orElse(MgmtSoftDeletedMode.EXCLUDE_SOFT_DELETED).name());
+            final SoftDeletedMode softDeletedMode = SoftDeletedMode.valueOf(softDeletedModeParam.name());
             rollouts = rsqlParam == null
                     ? rolloutManagement.findAll(softDeletedMode, pageable)
                     : rolloutManagement.findByRsql(rsqlParam, softDeletedMode, pageable);

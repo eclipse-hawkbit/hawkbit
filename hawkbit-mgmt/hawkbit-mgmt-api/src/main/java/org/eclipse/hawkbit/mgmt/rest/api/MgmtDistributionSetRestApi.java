@@ -112,7 +112,7 @@ public interface MgmtDistributionSetRestApi {
                     "'only_soft_deleted' - returns only soft-deleted distribution sets; " +
                     "'include_soft_deleted' - returns both active and soft-deleted distribution sets.",
                     allowableValues = { "exclude_soft_deleted", "only_soft_deleted", "include_soft_deleted" })
-            String softDeletedMode);
+            MgmtSoftDeletedMode softDeletedMode);
 
     /**
      * Handles the GET request of retrieving a single DistributionSet .

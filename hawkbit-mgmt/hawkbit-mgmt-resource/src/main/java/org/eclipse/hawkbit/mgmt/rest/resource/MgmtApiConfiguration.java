@@ -9,12 +9,14 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftDeletedMode;
 import org.eclipse.hawkbit.rest.OpenApi;
 import org.eclipse.hawkbit.rest.RestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -28,4 +30,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @ComponentScan
 @Import({ RestConfiguration.class, OpenApi.class })
 @PropertySource("classpath:/hawkbit-mgmt-api-defaults.properties")
-public class MgmtApiConfiguration implements WebMvcConfigurer {}
+public class MgmtApiConfiguration implements WebMvcConfigurer {
+
+    @Override
+    public void addFormatters(final FormatterRegistry registry) {
+        registry.addConverter(String.class, MgmtSoftDeletedMode.class,
+                source -> MgmtSoftDeletedMode.fromValue(source)
+                        .orElse(MgmtSoftDeletedMode.EXCLUDE_SOFT_DELETED));
+    }
+}
