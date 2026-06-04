@@ -41,14 +41,14 @@ class RolloutGroupConditionTest extends AbstractJpaIntegrationTest {
 
     @SneakyThrows
     @Test
-    void canceledActionCountedAsError() {
-        final String targetPrefix = "bug3cancel";
-        final DistributionSet ds = testdataFactory.createDistributionSetLocked("bug3cancelDs");
+    void canceledActionIgnoredGroupCompletionTriggersSuccessAction() {
+        final String targetPrefix = "cancelTarget";
+        final DistributionSet ds = testdataFactory.createDistributionSetLocked("cancelTargetDs");
         testdataFactory.createTargets(targetPrefix, 5);
 
         final Rollout rollout = callAs(
-                withUser("bug3User", "READ_DISTRIBUTION_SET", "READ_TARGET", "READ_ROLLOUT", "CREATE_ROLLOUT"),
-                () -> testdataFactory.createRolloutByVariables("bug3cancelRollout", "bug3", 1,
+                withUser("user", "READ_DISTRIBUTION_SET", "READ_TARGET", "READ_ROLLOUT", "CREATE_ROLLOUT"),
+                () -> testdataFactory.createRolloutByVariables("cancelTargetRollout", "bug3", 1,
                         "controllerid==" + targetPrefix + "*", ds, "100", "10", null, null, false));
 
         final RolloutGroup group = rolloutGroupManagement.findByRollout(
@@ -64,8 +64,11 @@ class RolloutGroupConditionTest extends AbstractJpaIntegrationTest {
 
         rolloutHandler.handleAll();
 
-        assertRollout(rollout, false, RolloutStatus.PAUSED, 1, 5);
-        assertGroup(group, false, RolloutGroupStatus.ERROR, 5);
+        // CANCELED not counted as ERROR → error condition not triggered (0/5 = 0% < 10%)
+        // success condition not triggered (4/5 = 80% < 100%)
+        // group complete (CANCELED is terminal) → groupCompleted=true → Success Action (NEXTGROUP) fires
+        assertRollout(rollout, false, RolloutStatus.FINISHED, 1, 5);
+        assertGroup(group, false, RolloutGroupStatus.FINISHED, 5);
     }
 
     @SneakyThrows
@@ -162,6 +165,40 @@ class RolloutGroupConditionTest extends AbstractJpaIntegrationTest {
         // correct denominator=4: 1/4=25% > 20% → error fires → PAUSED
         assertRollout(rollout, false, RolloutStatus.PAUSED, 1, 4);
         assertGroup(group, false, RolloutGroupStatus.ERROR, 4);
+    }
+
+    @SneakyThrows
+    @Test
+    void successConditionMetBeforeGroupFinishedTriggersNextGroup() {
+        // 10 targets → 2 groups of 5. Success threshold 60%: fires when 3 of 5 finish, while 2 still running.
+        final String targetPrefix = "sc1";
+        final DistributionSet ds = testdataFactory.createDistributionSetLocked("sc1Ds");
+        testdataFactory.createTargets(targetPrefix, 10);
+
+        final Rollout rollout = callAs(
+                withUser("sc1User", "READ_DISTRIBUTION_SET", "READ_TARGET", "READ_ROLLOUT", "CREATE_ROLLOUT"),
+                () -> testdataFactory.createRolloutByVariables("sc1Rollout", "sc1", 2,
+                        "controllerid==" + targetPrefix + "*", ds, "60", "90", null, null, false));
+
+        final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(
+                rollout.getId(), new OffsetBasedPageRequest(0, 10, Sort.by(Direction.ASC, "id"))).getContent();
+
+        rolloutManagement.start(rollout.getId());
+        rolloutHandler.handleAll();
+
+        // only group 1 is RUNNING — 5 actions
+        final List<JpaAction> group1Actions = assertAndGetRunning(rollout, 5).getContent();
+
+        // finish 3 of 5 → 60% meets 60% success threshold; 2 still RUNNING in group 1
+        group1Actions.subList(0, 3).forEach(this::finishAction);
+
+        rolloutHandler.handleAll();
+
+        // success condition met (3/5 = 60%) before group 1 finishes → NEXTGROUP fires → group 2 starts
+        // group 1 stays RUNNING (2 actions still in progress, group not complete)
+        assertGroup(groups.get(0), false, RolloutGroupStatus.RUNNING, 5);
+        assertGroup(groups.get(1), false, RolloutGroupStatus.RUNNING, 5);
+        assertRollout(rollout, false, RolloutStatus.RUNNING, 2, 10);
     }
 
     private void setCanceled(final JpaAction action) {

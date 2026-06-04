@@ -449,7 +449,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 // 'success' is either group completed or success condition reached - execute 'success' Action
                 boolean groupCompleted = !(rolloutGroup == lastGroup && rolloutGroup.isDynamic()) && isRolloutGroupComplete(rollout, rolloutGroup);
                 checkSuccessCondition(rollout, rolloutGroup, evalProxy, rolloutGroup.getSuccessCondition(), groupCompleted);
-                if (groupCompleted) {// if
+                if (groupCompleted) {
                     rolloutGroup.setStatus(RolloutGroupStatus.FINISHED);
                     rolloutGroupRepository.save(rolloutGroup);
                 }

@@ -12,8 +12,6 @@ package org.eclipse.hawkbit.repository.jpa.rollout.condition;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
-
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -29,7 +27,6 @@ class ThresholdRolloutGroupErrorConditionTest {
 
     private static final long ROLLOUT_ID = 1L;
     private static final long GROUP_ID = 10L;
-    private static final List<Action.Status> ERROR_STATUSES = List.of(Action.Status.ERROR, Action.Status.CANCELED);
 
     @Mock
     private ActionRepository actionRepository;
@@ -51,41 +48,27 @@ class ThresholdRolloutGroupErrorConditionTest {
     @Test
     void errorStatusExceedsThreshold() {
         // 2 ERROR / 5 = 40% > 10%
-        when(actionRepository.countByRolloutIdAndRolloutGroupIdAndStatusIn(ROLLOUT_ID, GROUP_ID, ERROR_STATUSES)).thenReturn(2L);
+        when(actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(ROLLOUT_ID, GROUP_ID, Action.Status.ERROR)).thenReturn(2L);
         assertThat(condition.eval(rollout, rolloutGroup, "10")).isTrue();
     }
 
     @Test
-    void canceledStatusExceedsThreshold() {
-        // Bug 3: 1 CANCELED / 5 = 20% > 10% must fire
-        when(actionRepository.countByRolloutIdAndRolloutGroupIdAndStatusIn(ROLLOUT_ID, GROUP_ID, ERROR_STATUSES)).thenReturn(1L);
-        assertThat(condition.eval(rollout, rolloutGroup, "10")).isTrue();
-    }
-
-    @Test
-    void errorAndCanceledCombinedExceedThreshold() {
-        // 3 combined (ERROR+CANCELED) / 5 = 60% > 50%
-        when(actionRepository.countByRolloutIdAndRolloutGroupIdAndStatusIn(ROLLOUT_ID, GROUP_ID, ERROR_STATUSES)).thenReturn(3L);
-        assertThat(condition.eval(rollout, rolloutGroup, "50")).isTrue();
-    }
-
-    @Test
-    void canceledStatusBelowThreshold() {
-        // 1 CANCELED / 5 = 20% < 50%
-        when(actionRepository.countByRolloutIdAndRolloutGroupIdAndStatusIn(ROLLOUT_ID, GROUP_ID, ERROR_STATUSES)).thenReturn(1L);
+    void errorStatusBelowThreshold() {
+        // 1 ERROR / 5 = 20% < 50%
+        when(actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(ROLLOUT_ID, GROUP_ID, Action.Status.ERROR)).thenReturn(1L);
         assertThat(condition.eval(rollout, rolloutGroup, "50")).isFalse();
     }
 
     @Test
-    void noErrorsOrCanceledDoesNotFire() {
-        when(actionRepository.countByRolloutIdAndRolloutGroupIdAndStatusIn(ROLLOUT_ID, GROUP_ID, ERROR_STATUSES)).thenReturn(0L);
+    void noErrorsDoesNotFire() {
+        when(actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(ROLLOUT_ID, GROUP_ID, Action.Status.ERROR)).thenReturn(0L);
         assertThat(condition.eval(rollout, rolloutGroup, "10")).isFalse();
     }
 
     @Test
     void exactlyAtThresholdDoesNotFire() {
         // strict >: 1/5 = 20%, threshold=20% → not exceeded
-        when(actionRepository.countByRolloutIdAndRolloutGroupIdAndStatusIn(ROLLOUT_ID, GROUP_ID, ERROR_STATUSES)).thenReturn(1L);
+        when(actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(ROLLOUT_ID, GROUP_ID, Action.Status.ERROR)).thenReturn(1L);
         assertThat(condition.eval(rollout, rolloutGroup, "20")).isFalse();
     }
 
@@ -97,7 +80,7 @@ class ThresholdRolloutGroupErrorConditionTest {
 
     @Test
     void invalidThresholdExpressionDoesNotFire() {
-        when(actionRepository.countByRolloutIdAndRolloutGroupIdAndStatusIn(ROLLOUT_ID, GROUP_ID, ERROR_STATUSES)).thenReturn(1L);
+        when(actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(ROLLOUT_ID, GROUP_ID, Action.Status.ERROR)).thenReturn(1L);
         assertThat(condition.eval(rollout, rolloutGroup, "notANumber")).isFalse();
     }
 }

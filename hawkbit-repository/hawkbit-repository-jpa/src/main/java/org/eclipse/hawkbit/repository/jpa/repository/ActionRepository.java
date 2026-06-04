@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -178,18 +177,6 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * @return the count of actions referring to a rollout, rollout group and are in a given status
      */
     Long countByRolloutIdAndRolloutGroupIdAndStatus(Long rolloutId, Long rolloutGroupId, Action.Status status);
-
-    /**
-     * Counts all actions referring to a given rollout, rollout group and one of the given statuses.
-     * <p/>
-     * No access control applied
-     *
-     * @param rolloutId the ID of rollout the actions belong to
-     * @param rolloutGroupId the ID rollout group the actions belong to
-     * @param statuses the statuses to match
-     * @return the count of actions referring to a rollout, rollout group and are in any of the given statuses
-     */
-    Long countByRolloutIdAndRolloutGroupIdAndStatusIn(Long rolloutId, Long rolloutGroupId, Collection<Action.Status> statuses);
 
     /**
      * Counts all actions referring to a given rollout and status.

@@ -1004,10 +1004,9 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         rolloutOne = reloadRollout(rolloutOne);
         changeStatusForRunningActions(rolloutOne, Status.ERROR, 2);
-        changeStatusForRunningActions(rolloutOne, Status.FINISHED, 3);
+        changeStatusForRunningActions(rolloutOne, Status.FINISHED, 1);
         rolloutHandler.handleAll();
-        // verify: 40% error and 60% finished -> should not move to next group
-        // because successCondition 80%
+        // verify: 2 RUNNING remain → group not complete → success action not triggered regardless of thresholds
         final List<RolloutGroup> rolloutGruops = rolloutGroupManagement.findByRollout(rolloutOne.getId(), PAGE)
                 .getContent();
         final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
@@ -1675,11 +1674,11 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutHandler.handleAll();
         assertRolloutGroup(rolloutGroupIds.get(0), RolloutGroupStatus.FINISHED, true, amountTargetsInGroup1,
                 Status.CANCELED);
-        assertRolloutGroup(rolloutGroupIds.get(1), RolloutGroupStatus.SCHEDULED, false, amountTargetsInGroup2,
-                Status.SCHEDULED);
+        // group 1 complete (all CANCELED) → success action fires immediately → group 2 starts in same cycle
+        assertRolloutGroup(rolloutGroupIds.get(1), RolloutGroupStatus.RUNNING, false, amountTargetsInGroup2,
+                Status.RUNNING);
 
-        // verify actions of second rule are directly in RUNNING state, since
-        // confirmation is not required for this group
+        // verify state is stable across another scheduler cycle
         rolloutHandler.handleAll();
         assertRolloutGroup(rolloutGroupIds.get(0), RolloutGroupStatus.FINISHED, true, amountTargetsInGroup1,
                 Status.CANCELED);
