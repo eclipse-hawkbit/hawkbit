@@ -29,18 +29,16 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.criteria.MapJoin;
-import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.MapAttribute;
 import jakarta.validation.constraints.NotEmpty;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -58,6 +56,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.qfields.TargetFields;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -72,6 +71,7 @@ import org.springframework.validation.annotation.Validated;
 /**
  * JPA implementation of {@link TargetManagement}.
  */
+@Slf4j
 @Transactional(readOnly = true)
 @Validated
 @Service
@@ -84,6 +84,9 @@ public class JpaTargetManagement
     private final QuotaManagement quotaManagement;
     private final TargetTypeRepository targetTypeRepository;
     private final TargetTagRepository targetTagRepository;
+
+    @Value("${hawkbit.target-group.assign.chunk-size:1000}")
+    private int assignTargetGroupChunkSize;
 
     @SuppressWarnings("java:S107")
     protected JpaTargetManagement(
@@ -335,30 +338,62 @@ public class JpaTargetManagement
     @Transactional
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void assignTargetGroupWithRsql(String group, String rsql) {
-        final Specification<JpaTarget> rsqlSpecification = QLSupport.getInstance().buildSpec(rsql, TargetFields.class);
 
-        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        final CriteriaUpdate<JpaTarget> criteriaUpdateQuery = cb.createCriteriaUpdate(JpaTarget.class);
-        final Root<JpaTarget> updateRoot = criteriaUpdateQuery.getRoot();
-        criteriaUpdateQuery.set("group", group);
-
-        if (Jpa.JPA_VENDOR == Jpa.JpaVendor.ECLIPSELINK) {
-            // EclipseLink: use subquery approach — applying predicate directly to the UPDATE root
-            // fails for NOT EXISTS due to UpdateAllQuery's @Id resolution bug
-            // BUG Reported: https://github.com/eclipse-ee4j/eclipselink/issues/2757
-            final Subquery<Long> subquery = criteriaUpdateQuery.subquery(Long.class);
-            final Root<JpaTarget> subRoot = subquery.from(JpaTarget.class);
-            subquery.select(subRoot.get(AbstractJpaBaseEntity_.ID));
-            subquery.where(rsqlSpecification.toPredicate(subRoot, cb.createQuery(JpaTarget.class), cb));
-            criteriaUpdateQuery.where(updateRoot.get(AbstractJpaBaseEntity_.ID).in(subquery));
+        // Switch back to UpdateAllQuery if switching back to hibernate. (EclipseLink does not work well with UpdateAllQuery)
+        // EclipseLink: using subquery approach — applying predicate directly to the UPDATE root
+        // fails for NOT EXISTS due to UpdateAllQuery's @Id resolution bug
+        // BUG Reported: https://github.com/eclipse-ee4j/eclipselink/issues/2757
+        // Hibernate: applies predicate directly to the UPDATE root — Hibernate handles
+        // NOT EXISTS subqueries correctly in CriteriaUpdate context. So this problem does not exist there.
+        if (containsNegation(rsql)) {
+            log.debug("Assigning group {} with rsql {} on chunks.", group, rsql);
+            assignTargetGroupOnChunks(group, rsql);
         } else {
-            // Hibernate: apply predicate directly to the UPDATE root — Hibernate handles
-            // NOT EXISTS subqueries correctly in CriteriaUpdate context
-            final Predicate predicate = rsqlSpecification.toPredicate(updateRoot, cb.createQuery(JpaTarget.class), cb);
-            criteriaUpdateQuery.where(predicate);
+            log.debug("Assigning group {} with rsql {} with batch update", group, rsql);
+            assignTargetGroupDirect(group, rsql);
         }
+    }
 
-        entityManager.createQuery(criteriaUpdateQuery).executeUpdate();
+    private static boolean containsNegation(final String rsql) {
+        return rsql.contains("!=") || rsql.contains("=out=") || rsql.contains("=notlike=");
+    }
+
+    private void assignTargetGroupDirect(final String group, final String rsql) {
+        final Specification<JpaTarget> rsqlSpecification = QLSupport.getInstance().buildSpec(rsql, TargetFields.class);
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        final CriteriaUpdate<JpaTarget> update = cb.createCriteriaUpdate(JpaTarget.class);
+        final Root<JpaTarget> root = update.getRoot();
+        update.set("group", group);
+        update.where(rsqlSpecification.toPredicate(root, cb.createQuery(JpaTarget.class), cb));
+        entityManager.createQuery(update).executeUpdate();
+    }
+
+    private void assignTargetGroupOnChunks(final String group, final String rsql) {
+        final Specification<JpaTarget> spec = QLSupport.getInstance().buildSpec(rsql, TargetFields.class);
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        // SELECT Target IDs
+        final CriteriaQuery<Long> select = cb.createQuery(Long.class);
+        final Root<JpaTarget> root = select.from(JpaTarget.class);
+        select.select(root.get(AbstractJpaBaseEntity_.ID));
+        select.where(spec.toPredicate(root, select, cb));
+
+        List<Long> chunk;
+        int offset = 0;
+        final int CHUNK_SIZE = assignTargetGroupChunkSize;
+        do {
+            chunk = entityManager.createQuery(select)
+                    .setFirstResult(offset)
+                    .setMaxResults(CHUNK_SIZE)
+                    .getResultList();
+
+            if (!chunk.isEmpty()) {
+                final CriteriaUpdate<JpaTarget> update = cb.createCriteriaUpdate(JpaTarget.class);
+                update.set("group", group);
+                update.where(update.getRoot().get(AbstractJpaBaseEntity_.ID).in(chunk));
+                entityManager.createQuery(update).executeUpdate();
+            }
+            offset += CHUNK_SIZE;
+        } while (chunk.size() == CHUNK_SIZE);
     }
 
     @Override

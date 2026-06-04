@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.test.util.ReflectionTestUtils;
 
 public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegrationTest {
 
@@ -256,5 +257,36 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("content", Matchers.hasSize(1)))
                 .andExpect(jsonPath("content.[0].controllerId", Matchers.equalTo("target3")));
+    }
+
+    @Test
+    void shouldAssignGroupInChunksWhenTargetCountExceedsChunkSize() throws Exception {
+        // create 5 targets, use chunk size of 2 to force multiple batches
+        for (int i = 1; i <= 5; i++) {
+            targetManagement.create(builder().controllerId("chunked-" + i).build());
+        }
+
+        // override chunk size to 2 for this test
+        ReflectionTestUtils.setField(targetManagement, "assignTargetGroupChunkSize", 2);
+        try {
+            mvc.perform(put(MgmtTargetGroupRestApi.TARGETGROUPS_V1 + "/ChunkedGroup")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("q", "controllerId==chunked*"))
+                    .andExpect(status().isNoContent());
+
+            mvc.perform(get(MgmtTargetGroupRestApi.TARGETGROUPS_V1 + "/ChunkedGroup/assigned")
+                            .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("content", Matchers.hasSize(5)))
+                    .andExpect(jsonPath("content.[0].controllerId", Matchers.equalTo("chunked-1")))
+                    .andExpect(jsonPath("content.[1].controllerId", Matchers.equalTo("chunked-2")))
+                    .andExpect(jsonPath("content.[2].controllerId", Matchers.equalTo("chunked-3")))
+                    .andExpect(jsonPath("content.[3].controllerId", Matchers.equalTo("chunked-4")))
+                    .andExpect(jsonPath("content.[4].controllerId", Matchers.equalTo("chunked-5")));
+        } finally {
+            // restore default
+            ReflectionTestUtils.setField(targetManagement, "assignTargetGroupChunkSize", 1000);
+        }
     }
 }
