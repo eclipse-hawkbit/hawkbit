@@ -386,14 +386,15 @@ public class JpaTargetManagement
                     .setMaxResults(CHUNK_SIZE)
                     .getResultList();
 
-            if (!chunk.isEmpty()) {
-                final CriteriaUpdate<JpaTarget> update = cb.createCriteriaUpdate(JpaTarget.class);
-                update.set("group", group);
-                update.where(update.getRoot().get(AbstractJpaBaseEntity_.ID).in(chunk));
-                entityManager.createQuery(update).executeUpdate();
+            if (chunk.isEmpty()) {
+                break;
             }
-            offset += CHUNK_SIZE;
-        } while (chunk.size() == CHUNK_SIZE);
+            final CriteriaUpdate<JpaTarget> update = cb.createCriteriaUpdate(JpaTarget.class);
+            update.set("group", group);
+            update.where(update.getRoot().get(AbstractJpaBaseEntity_.ID).in(chunk));
+            entityManager.createQuery(update).executeUpdate();
+            offset += chunk.size();
+        } while (true);
     }
 
     @Override
