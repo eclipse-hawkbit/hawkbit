@@ -107,10 +107,7 @@ public interface MgmtDistributionSetRestApi {
                     "The sequence of the sort criteria (multiple can be used) defines the sort order of the entities in the result.")
             String sortParam,
             @RequestParam(value = REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, defaultValue = REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE_DEFAULT, required = false)
-            @Schema(description = "Controls whether soft-deleted distribution sets are included in the result. " +
-                    "Possible values: 'exclude_soft_deleted' (default) - returns only active (non-deleted) distribution sets; " +
-                    "'only_soft_deleted' - returns only soft-deleted distribution sets; " +
-                    "'include_soft_deleted' - returns both active and soft-deleted distribution sets.")
+            @Schema(description = "Controls whether soft-deleted distribution sets are included in the result.")
             MgmtSoftDeletedMode softDeletedMode);
 
     /**

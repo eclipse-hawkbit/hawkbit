@@ -190,10 +190,7 @@ public interface MgmtSoftwareModuleRestApi {
                     "The sequence of the sort criteria (multiple can be used) defines the sort order of the entities in the result.")
             String sortParam,
             @RequestParam(value = REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, defaultValue = REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE_DEFAULT, required = false)
-            @Schema(description = "Controls whether soft-deleted software modules are included in the result. " +
-                    "Possible values: 'exclude_soft_deleted' (default) - returns only active (non-deleted) software modules; " +
-                    "'only_soft_deleted' - returns only soft-deleted software modules; " +
-                    "'include_soft_deleted' - returns both active and soft-deleted software modules.")
+            @Schema(description = "Controls whether soft-deleted software modules are included in the result.")
             MgmtSoftDeletedMode softDeletedMode);
 
     /**

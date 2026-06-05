@@ -10,18 +10,7 @@
 package org.eclipse.hawkbit.repository;
 
 public enum SoftDeletedMode {
-    ONLY_SOFT_DELETED("only_soft_deleted"),
-    EXCLUDE_SOFT_DELETED("exclude_soft_deleted"),
-    INCLUDE_SOFT_DELETED("include_soft_deleted");
-
-    private final String mode;
-
-    SoftDeletedMode(String mode) {
-        this.mode = mode;
-    }
-
-    @Override
-    public String toString() {
-        return mode;
-    }
+    ONLY_SOFT_DELETED,
+    EXCLUDE_SOFT_DELETED,
+    INCLUDE_SOFT_DELETED
 }
