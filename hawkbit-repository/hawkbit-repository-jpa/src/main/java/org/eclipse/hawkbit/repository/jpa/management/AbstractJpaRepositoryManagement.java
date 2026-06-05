@@ -191,20 +191,6 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
     }
 
     @Override
-    public long count(SoftDeletedMode softDeletedMode) {
-        if (!supportSoftDelete()) {
-            // non-soft-deletable entity - silently ignore
-            return this.count();
-        } else {
-            return switch (softDeletedMode) {
-                case EXCLUDE_SOFT_DELETED -> this.count();
-                case ONLY_SOFT_DELETED -> jpaRepository.count(isSoftDeleted().orElseGet(Specification::unrestricted));
-                case INCLUDE_SOFT_DELETED -> jpaRepository.count();
-            };
-        }
-    }
-
-    @Override
     public long countByRsql(String rsql) {
         return jpaRepository.count(JpaManagementHelper.combineWithAnd(rsqlSpec(rsql)));
     }

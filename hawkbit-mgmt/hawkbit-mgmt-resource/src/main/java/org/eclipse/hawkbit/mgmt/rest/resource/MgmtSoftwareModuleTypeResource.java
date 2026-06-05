@@ -50,18 +50,15 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
             final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final MgmtSoftDeletedMode softDeletedModeParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeSoftwareModuleTypeSortParam(sortParam));
         final SoftDeletedMode softDeletedMode = SoftDeletedMode.valueOf(softDeletedModeParam.name());
-        final Slice<? extends SoftwareModuleType> findModuleTypessAll;
-        final long countModulesAll;
+        final Page<? extends SoftwareModuleType> findModuleTypessAll;
         if (rsqlParam != null) {
             findModuleTypessAll = softwareModuleTypeManagement.findByRsql(rsqlParam, softDeletedMode, pageable);
-            countModulesAll = ((Page<?>) findModuleTypessAll).getTotalElements();
         } else {
             findModuleTypessAll = softwareModuleTypeManagement.findAll(softDeletedMode, pageable);
-            countModulesAll = softwareModuleTypeManagement.count(softDeletedMode);
         }
 
         final List<MgmtSoftwareModuleType> rest = MgmtSoftwareModuleTypeMapper.toTypesResponse(findModuleTypessAll.getContent());
-        return ResponseEntity.ok(new PagedList<>(rest, countModulesAll));
+        return ResponseEntity.ok(new PagedList<>(rest, findModuleTypessAll.getTotalElements()));
     }
 
     @Override

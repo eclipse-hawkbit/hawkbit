@@ -65,18 +65,15 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
         final Pageable pageable = PagingUtility.toPageable(
                 pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetTypeSortParam(sortParam));
         final SoftDeletedMode softDeletedMode = SoftDeletedMode.valueOf(softDeletedModeParam.name());
-        final Slice<? extends DistributionSetType> findModuleTypesAll;
-        long countModulesAll;
+        final Page<? extends DistributionSetType> findModuleTypesAll;
         if (rsqlParam != null) {
             findModuleTypesAll = distributionSetTypeManagement.findByRsql(rsqlParam, softDeletedMode, pageable);
-            countModulesAll = ((Page<?>) findModuleTypesAll).getTotalElements();
         } else {
             findModuleTypesAll = distributionSetTypeManagement.findAll(softDeletedMode, pageable);
-            countModulesAll = distributionSetTypeManagement.count(softDeletedMode);
         }
 
         final List<MgmtDistributionSetType> rest = MgmtDistributionSetTypeMapper.toListResponse(findModuleTypesAll.getContent());
-        return ResponseEntity.ok(new PagedList<>(rest, countModulesAll));
+        return ResponseEntity.ok(new PagedList<>(rest, findModuleTypesAll.getTotalElements()));
     }
 
     @Override
