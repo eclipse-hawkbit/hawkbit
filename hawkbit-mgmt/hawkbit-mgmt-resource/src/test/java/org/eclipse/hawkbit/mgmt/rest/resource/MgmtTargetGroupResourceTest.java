@@ -261,17 +261,22 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
 
     @Test
     void shouldAssignGroupInChunksWhenTargetCountExceedsChunkSize() throws Exception {
-        // create 5 targets, use chunk size of 2 to force multiple batches
+        // create 5 targets with tag "exclude", 2 without — chunk size 2 forces multiple batches
+        final TargetTag excludeTag = targetTagManagement.create(TargetTagManagement.Create.builder().name("exclude").build());
         for (int i = 1; i <= 5; i++) {
             targetManagement.create(builder().controllerId("chunked-" + i).build());
         }
+        targetManagement.create(builder().controllerId("excluded-1").build());
+        targetManagement.create(builder().controllerId("excluded-2").build());
+        targetManagement.assignTag(List.of("excluded-1", "excluded-2"), excludeTag.getId());
 
         // override chunk size to 2 for this test
         ReflectionTestUtils.setField(targetManagement, "assignTargetGroupChunkSize", 2);
         try {
+            // tag!=exclude triggers chunked path and should assign only non-tagged targets
             mvc.perform(put(MgmtTargetGroupRestApi.TARGETGROUPS_V1 + "/ChunkedGroup")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .param("q", "controllerId==chunked*"))
+                            .param("q", "tag!=exclude"))
                     .andExpect(status().isNoContent());
 
             mvc.perform(get(MgmtTargetGroupRestApi.TARGETGROUPS_V1 + "/ChunkedGroup/assigned")
