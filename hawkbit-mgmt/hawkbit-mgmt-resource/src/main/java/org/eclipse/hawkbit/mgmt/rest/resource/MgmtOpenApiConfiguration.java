@@ -10,7 +10,7 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -43,6 +43,8 @@ public class MgmtOpenApiConfiguration {
 
     private static final String BASIC_AUTH_SEC_SCHEME_NAME = "Basic";
     private static final String BEARER_AUTH_SEC_SCHEME_NAME = "Bearer";
+    private static final String OAUTH2_AUTH_SEC_SCHEME_NAME = "OAuth2";
+    private static final String DESCRIPTION_SUFFIX = " Authentication";
 
     @Bean
     @ConditionalOnProperty(
@@ -54,28 +56,36 @@ public class MgmtOpenApiConfiguration {
             @Autowired(required = false) @Qualifier("hawkbitOAuth2ResourceServerCustomizer") final Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> oauth2ResourceServerCustomizer,
             final HawkbitSecurityProperties hawkbitSecurityProperties
     ) {
-        boolean oauth2Enabled = oauth2ResourceServerCustomizer != null;
-        Map<String, SecurityScheme> securitySchemeMap = new HashMap<>();
+        final boolean oauth2Enabled = oauth2ResourceServerCustomizer != null;
+        final Map<String, SecurityScheme> securitySchemeMap = new LinkedHashMap<>(); // linked map to keep the order
         final SecurityRequirement securityRequirement = new SecurityRequirement();
         if (!oauth2Enabled || hawkbitSecurityProperties.isAllowHttpBasicOnOAuthEnabled()) {
             securityRequirement.addList(BASIC_AUTH_SEC_SCHEME_NAME);
-            securitySchemeMap.put(BASIC_AUTH_SEC_SCHEME_NAME,
-                    new SecurityScheme()
-                            .description(BASIC_AUTH_SEC_SCHEME_NAME + " Authentication")
-                            .type(SecurityScheme.Type.HTTP)
-                            .scheme("basic"));
+            securitySchemeMap.put(BASIC_AUTH_SEC_SCHEME_NAME, new SecurityScheme()
+                    .description(BASIC_AUTH_SEC_SCHEME_NAME + DESCRIPTION_SUFFIX)
+                    .type(SecurityScheme.Type.HTTP)
+                    .scheme("basic"));
         }
         if (oauth2Enabled) {
             securityRequirement.addList(BEARER_AUTH_SEC_SCHEME_NAME);
-            securitySchemeMap.put(BEARER_AUTH_SEC_SCHEME_NAME,
-                    new SecurityScheme()
-                            .description(BEARER_AUTH_SEC_SCHEME_NAME + " Authentication")
-                            .type(SecurityScheme.Type.OAUTH2)
-                            .flows(new OAuthFlows()
-                                    .authorizationCode(new OAuthFlow().authorizationUrl(authorizationUrl).tokenUrl(tokenUrl))
-                                    .clientCredentials(new OAuthFlow().tokenUrl(tokenUrl)))
-                            .bearerFormat("JWT")
-                            .scheme("bearer"));
+            securitySchemeMap.put(BEARER_AUTH_SEC_SCHEME_NAME, new SecurityScheme()
+                    .description(BEARER_AUTH_SEC_SCHEME_NAME + DESCRIPTION_SUFFIX)
+                    .type(SecurityScheme.Type.HTTP)
+                    .bearerFormat("JWT")
+                    .scheme("bearer"));
+            if (!tokenUrl.isBlank()) {
+                securityRequirement.addList(BEARER_AUTH_SEC_SCHEME_NAME);
+                securitySchemeMap.put(OAUTH2_AUTH_SEC_SCHEME_NAME, new SecurityScheme()
+                        .description(OAUTH2_AUTH_SEC_SCHEME_NAME + DESCRIPTION_SUFFIX)
+                        .type(SecurityScheme.Type.OAUTH2)
+                        .flows(authorizationUrl.isBlank()
+                                ? new OAuthFlows().clientCredentials(new OAuthFlow().tokenUrl(tokenUrl))
+                                : new OAuthFlows()
+                                        .authorizationCode(new OAuthFlow().tokenUrl(tokenUrl).authorizationUrl(authorizationUrl))
+                                        .clientCredentials(new OAuthFlow().tokenUrl(tokenUrl)))
+                        .bearerFormat("JWT")
+                        .scheme("bearer"));
+            }
         }
         // @formatter:off
         return GroupedOpenApi
@@ -99,10 +109,7 @@ public class MgmtOpenApiConfiguration {
                                             new Server().url("/"))
                                         : List.of(new Server().url("/")))
                                 .addSecurityItem(securityRequirement)
-                                .components(
-                                        openApi
-                                                .getComponents()
-                                                .securitySchemes(securitySchemeMap))
+                                .components(openApi.getComponents().securitySchemes(securitySchemeMap))
                                 .tags(sort(openApi.getTags())))
                 .build();
         // @formatter:on
