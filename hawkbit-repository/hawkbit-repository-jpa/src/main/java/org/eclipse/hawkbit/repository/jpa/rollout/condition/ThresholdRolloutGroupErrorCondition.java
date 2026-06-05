@@ -15,9 +15,6 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
-/**
- * Evaluates if the {@link RolloutGroup#getErrorConditionExp()} is reached.
- */
 @Slf4j
 public class ThresholdRolloutGroupErrorCondition
         implements RolloutGroupConditionEvaluator<RolloutGroup.RolloutGroupErrorCondition> {
