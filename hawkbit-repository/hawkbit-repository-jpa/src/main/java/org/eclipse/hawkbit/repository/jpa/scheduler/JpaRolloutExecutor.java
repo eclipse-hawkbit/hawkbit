@@ -447,7 +447,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 callErrorAction(rollout, rolloutGroup);
             } else {// not in error so check success condition and group completed
                 // 'success' is either group completed or success condition reached - execute 'success' Action
-                boolean groupCompleted = !(rolloutGroup == lastGroup && rolloutGroup.isDynamic()) && isRolloutGroupComplete(rollout, rolloutGroup);
+                final boolean groupCompleted = !(rolloutGroup == lastGroup && rolloutGroup.isDynamic()) && isRolloutGroupComplete(rollout, rolloutGroup);
                 checkSuccessCondition(rollout, rolloutGroup, evalProxy, rolloutGroup.getSuccessCondition(), groupCompleted);
                 if (groupCompleted) {
                     rolloutGroup.setStatus(RolloutGroupStatus.FINISHED);
@@ -509,11 +509,10 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final RolloutGroupSuccessCondition successCondition, final boolean groupCompleted) {
         log.trace("Checking finish condition {} on rolloutgroup {}", successCondition, rolloutGroup);
         try {
-            final boolean isSuccessEvaluation = evaluationManager
+            if (groupCompleted || evaluationManager
                     .getSuccessConditionEvaluator(successCondition)
-                    .eval(rollout, evalProxy, rolloutGroup.getSuccessConditionExp());
-            if (isSuccessEvaluation || groupCompleted) {
-                log.debug("Rollout group {} is finished, executing Success Action", rolloutGroup);
+                    .eval(rollout, evalProxy, rolloutGroup.getSuccessConditionExp())) {
+                log.debug("Rollout group {} fulfills SuccessCondition or is Finished, executing Success Action", rolloutGroup);
                 evaluationManager.getSuccessActionEvaluator(rolloutGroup.getSuccessAction()).exec(rollout, rolloutGroup);
             } else {
                 log.debug("Rollout group {} is still running", rolloutGroup);
