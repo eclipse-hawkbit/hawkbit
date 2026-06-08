@@ -42,13 +42,13 @@ public final class MgmtRestConstants {
 
     /**
      * The request parameter for specifying the soft deletion listing of entities. The value of this parameter
-     * can be only_soft_deleted, exclude_soft_deleted or include_soft_deleted
+     * can be ONLY_SOFT_DELETED, EXCLUDE_SOFT_DELETED or INCLUDE_SOFT_DELETED
      */
     public static final String REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE = "soft_deleted_mode";
     /**
      * Default value of the soft deleted mode parameter.
      */
-    public static final String REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE_DEFAULT = "exclude_soft_deleted";
+    public static final String REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE_DEFAULT = "EXCLUDE_SOFT_DELETED";
 
     /**
      * The default representation mode.

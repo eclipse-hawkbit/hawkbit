@@ -1249,7 +1249,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         // only_soft_deleted — only deleted
         mvc.perform(get("/rest/v1/softwaremodules")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "only_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "ONLY_SOFT_DELETED")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -1260,7 +1260,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         // include_soft_deleted — both
         mvc.perform(get("/rest/v1/softwaremodules")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "include_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "INCLUDE_SOFT_DELETED")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -1269,7 +1269,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         // exclude_soft_deleted — explicit, same as default
         mvc.perform(get("/rest/v1/softwaremodules")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "exclude_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "EXCLUDE_SOFT_DELETED")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -1291,7 +1291,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         // rsql + soft_deleted — find deleted by name
         mvc.perform(get("/rest/v1/softwaremodules")
                         .param("q", "name==rsqlDeleted")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "only_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "ONLY_SOFT_DELETED")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -1303,7 +1303,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         // rsql + not_soft_deleted — deleted not found
         mvc.perform(get("/rest/v1/softwaremodules")
                         .param("q", "name==rsqlDeleted")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "exclude_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "EXCLUDE_SOFT_DELETED")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -1313,7 +1313,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         // rsql + include_soft_deleted — filter by name narrows to one
         mvc.perform(get("/rest/v1/softwaremodules")
                         .param("q", "name==rsqlActive")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "include_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "INCLUDE_SOFT_DELETED")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())

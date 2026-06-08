@@ -1521,7 +1521,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // soft_deleted_mode=only_soft_deleted — only deleted rollout
         mvc.perform(get("/rest/v1/rollouts")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "only_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "ONLY_SOFT_DELETED")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -1532,7 +1532,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // soft_deleted_mode=include_soft_deleted — both rollouts
         mvc.perform(get("/rest/v1/rollouts")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "include_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "INCLUDE_SOFT_DELETED")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -1541,7 +1541,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // exclude_soft_deleted — explicit, same as default
         mvc.perform(get("/rest/v1/rollouts")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "exclude_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "EXCLUDE_SOFT_DELETED")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -1568,7 +1568,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         // rsql + only_soft_deleted — find deleted rollout by name
         mvc.perform(get("/rest/v1/rollouts")
                         .param("q", "name==rsqlDeleted")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "only_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "ONLY_SOFT_DELETED")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -1580,7 +1580,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         // rsql + not_soft_deleted — deleted rollout not found
         mvc.perform(get("/rest/v1/rollouts")
                         .param("q", "name==rsqlDeleted")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "exclude_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "EXCLUDE_SOFT_DELETED")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -1590,7 +1590,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         // rsql + include_soft_deleted — both visible, filter by name narrows to one
         mvc.perform(get("/rest/v1/rollouts")
                         .param("q", "name==rsqlActive")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "include_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "INCLUDE_SOFT_DELETED")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())

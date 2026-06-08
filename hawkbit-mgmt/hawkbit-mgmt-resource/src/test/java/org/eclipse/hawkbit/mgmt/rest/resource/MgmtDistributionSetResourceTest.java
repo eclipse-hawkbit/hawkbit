@@ -1046,7 +1046,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
         // only_soft_deleted — only deleted
         mvc.perform(get("/rest/v1/distributionsets")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "only_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "ONLY_SOFT_DELETED")
                         .accept(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -1057,7 +1057,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
         // include_soft_deleted — both
         mvc.perform(get("/rest/v1/distributionsets")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "include_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "INCLUDE_SOFT_DELETED")
                         .accept(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -1066,7 +1066,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
 
         // exclude_soft_deleted — explicit, same as default
         mvc.perform(get("/rest/v1/distributionsets")
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "exclude_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "EXCLUDE_SOFT_DELETED")
                         .accept(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -1087,7 +1087,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         // rsql + soft_deleted — find deleted by name
         mvc.perform(get("/rest/v1/distributionsets")
                         .param("q", "name==" + deletedDs.getName())
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "only_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "ONLY_SOFT_DELETED")
                         .accept(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -1099,7 +1099,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         // rsql + not_soft_deleted — deleted not found
         mvc.perform(get("/rest/v1/distributionsets")
                         .param("q", "name==" + deletedDs.getName())
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "exclude_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "EXCLUDE_SOFT_DELETED")
                         .accept(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -1109,7 +1109,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         // rsql + include_soft_deleted — filter by name narrows to one
         mvc.perform(get("/rest/v1/distributionsets")
                         .param("q", "name==" + activeDs.getName())
-                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "include_soft_deleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "INCLUDE_SOFT_DELETED")
                         .accept(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
