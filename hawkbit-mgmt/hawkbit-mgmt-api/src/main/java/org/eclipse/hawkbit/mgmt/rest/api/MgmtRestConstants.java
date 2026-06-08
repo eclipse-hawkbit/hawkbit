@@ -39,6 +39,17 @@ public final class MgmtRestConstants {
      * The request parameter for specifying the representation mode. The value of this parameter can either be "full" or "compact".
      */
     public static final String REQUEST_PARAMETER_REPRESENTATION_MODE = "representation";
+
+    /**
+     * The request parameter for specifying the soft deletion listing of entities. The value of this parameter
+     * can be ONLY_SOFT_DELETED, EXCLUDE_SOFT_DELETED or INCLUDE_SOFT_DELETED
+     */
+    public static final String REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE = "soft_deleted_mode";
+    /**
+     * Default value of the soft deleted mode parameter.
+     */
+    public static final String REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE_DEFAULT = "EXCLUDE_SOFT_DELETED";
+
     /**
      * The default representation mode.
      */

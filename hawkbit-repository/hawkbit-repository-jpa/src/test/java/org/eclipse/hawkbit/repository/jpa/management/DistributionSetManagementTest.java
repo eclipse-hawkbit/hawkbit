@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement.Update;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.Identifiable;
+import org.eclipse.hawkbit.repository.exception.DeletedException;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
@@ -935,5 +936,20 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("entity with too short version should not be updated")
                 .isThrownBy(() -> distributionSetManagement.update(distributionSetUpdate2));
+    }
+
+    @Test
+    void bulkUpdateSoftDeletedDistributionSetRejected() {
+        final DistributionSet active = testdataFactory.createDistributionSet("active");
+        final DistributionSet toDelete = testdataFactory.createDistributionSet("toDelete");
+        testdataFactory.createTarget("bulkTarget");
+        assignDistributionSet(toDelete.getId(), "bulkTarget");
+        distributionSetManagement.delete(toDelete.getId());
+
+        final List<Update> updates = List.of(
+                Update.builder().id(active.getId()).description("ok").build(),
+                Update.builder().id(toDelete.getId()).description("should fail").build());
+        assertThatThrownBy(() -> distributionSetManagement.update(updates))
+                .isInstanceOf(DeletedException.class);
     }
 }

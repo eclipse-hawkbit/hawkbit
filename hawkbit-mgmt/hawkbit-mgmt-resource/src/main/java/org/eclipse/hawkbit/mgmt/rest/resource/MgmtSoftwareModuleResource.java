@@ -37,6 +37,8 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtSoftwareModuleMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftDeletedMode;
+import org.eclipse.hawkbit.repository.SoftDeletedMode;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -164,20 +166,19 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtSoftwareModule>> getSoftwareModules(
-            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
+            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final MgmtSoftDeletedMode softDeletedModeParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeSoftwareModuleSortParam(sortParam));
-        final Slice<? extends SoftwareModule> findModulesAll;
-        final long countModulesAll;
+        final SoftDeletedMode softDeletedMode = SoftDeletedMode.valueOf(softDeletedModeParam.name());
+        final Page<? extends SoftwareModule> findModulesAll;
         if (rsqlParam != null) {
-            findModulesAll = softwareModuleManagement.findByRsql(rsqlParam, pageable);
-            countModulesAll = ((Page<?>) findModulesAll).getTotalElements();
+            findModulesAll = softwareModuleManagement.findByRsql(
+                    rsqlParam, softDeletedMode, pageable);
         } else {
-            findModulesAll = softwareModuleManagement.findAll(pageable);
-            countModulesAll = softwareModuleManagement.count();
+            findModulesAll = softwareModuleManagement.findAll(softDeletedMode, pageable);
         }
 
         final List<MgmtSoftwareModule> rest = MgmtSoftwareModuleMapper.toResponse(findModulesAll.getContent());
-        return ResponseEntity.ok(new PagedList<>(rest, countModulesAll));
+        return ResponseEntity.ok(new PagedList<>(rest, findModulesAll.getTotalElements()));
     }
 
     @Override

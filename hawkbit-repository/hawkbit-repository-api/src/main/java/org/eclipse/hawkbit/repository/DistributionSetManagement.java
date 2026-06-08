@@ -50,7 +50,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * Management service for {@link DistributionSet}s.
  */
 public interface DistributionSetManagement<T extends DistributionSet>
-        extends RepositoryManagement<T, DistributionSetManagement.Create, DistributionSetManagement.Update>, MetadataSupport<String> {
+        extends SoftDeletableRepositoryManagement<T, DistributionSetManagement.Create, DistributionSetManagement.Update>, MetadataSupport<String> {
 
     @Override
     default String permissionGroup() {

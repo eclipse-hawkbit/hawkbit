@@ -30,8 +30,10 @@ import org.eclipse.hawkbit.ql.Node;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
+import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.repository.SoftDeletedMode;
 import org.eclipse.hawkbit.repository.exception.DeletedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
@@ -105,46 +107,23 @@ public class JpaDistributionSetManagement
     @Override
     @SuppressWarnings("java:S3776") // java:S3776 - just too complex
     public Page<JpaDistributionSet> findByRsql(final String rsql, final Pageable pageable) {
-        if (rsql != null && rsql.toLowerCase().contains(COMPLETE)) {
-            // limited support for 'complete' - could be removed in future
-            final Node node = QLSupport.getInstance().parse(rsql);
-            final Specification<JpaDistributionSet> notDeleted = (root, query, cb) -> cb.equal(root.get(DELETED), false);
-            final List<Specification<JpaDistributionSet>> specList = new ArrayList<>();
-            specList.add(notDeleted);
-            final AtomicReference<Node.Comparison> completedComparison = new AtomicReference<>();
-            if (node instanceof Node.Comparison comparison && COMPLETE.equalsIgnoreCase(comparison.getKey())) {
-                // all not deleted, won't add anything to spec
-                completedComparison.set(comparison);
-            } else if (node instanceof Node.Logical logical && logical.getOp() == Node.Logical.Operator.AND) {
-                final List<Node> sanitizedChildren = new ArrayList<>();
-                logical.getChildren().forEach(child -> {
-                    if (child instanceof Node.Comparison comparison && COMPLETE.equalsIgnoreCase(comparison.getKey())) {
-                        if (completedComparison.get() != null) {
-                            throw new RSQLParameterSyntaxException("Multiple 'complete' comparisons are not supported");
-                        }
-                        completedComparison.set(comparison);
-                    } else {
-                        sanitizedChildren.add(child);
-                    }
-                });
-                specList.add(QLSupport.getInstance().buildSpec(
-                        sanitizedChildren.size() == 1
-                                ? sanitizedChildren.get(0)
-                                : new Node.Logical(Node.Logical.Operator.AND, sanitizedChildren),
-                        DistributionSetFields.class));
-            }
-            if (completedComparison.get() != null) { // really a comparison
-                log.warn("Usage of 'complete' is limited and may be removed: {}", node);
-                final boolean completed = completeComparison(completedComparison);
-                return filter(JpaManagementHelper.findAllWithCountBySpec(jpaRepository, specList, pageable), completed);
-            }
-        }
+        return findByRsqlAndDeleted(rsql, SoftDeletedMode.EXCLUDE_SOFT_DELETED, pageable);
+    }
 
-        return super.findByRsql(rsql, pageable);
+    @Override
+    public Page<JpaDistributionSet> findByRsql(String rsql, SoftDeletedMode softDeletedMode, Pageable pageable) {
+        return findByRsqlAndDeleted(rsql, softDeletedMode, pageable);
+    }
+
+    @Override
+    public Page<JpaDistributionSet> findAll(SoftDeletedMode softDeletedMode, Pageable pageable) {
+        return jpaRepository.findAll(deletedSpecification(softDeletedMode), pageable);
     }
 
     @Override
     public JpaDistributionSet update(final Update update) {
+        assertDistributionSetIsNotDeleted(jpaRepository.getById(update.getId()));
+
         final JpaDistributionSet updated = super.update(update);
         if (Boolean.TRUE.equals(update.getLocked())) {
             lockSoftwareModules(updated);
@@ -154,6 +133,10 @@ public class JpaDistributionSetManagement
 
     @Override
     public Map<Long, JpaDistributionSet> update(final Collection<Update> updates) {
+        final List<Long> ids = updates.stream().map(Identifiable::getId).toList();
+        jpaRepository.findAllById(ids)
+                .forEach(this::assertDistributionSetIsNotDeleted);
+
         final Map<Long, JpaDistributionSet> updated = super.update(updates);
         for (final Update update : updates) {
             final JpaDistributionSet updatedSet = updated.get(update.getId());
@@ -228,6 +211,8 @@ public class JpaDistributionSetManagement
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public JpaDistributionSet lock(final DistributionSet distributionSet) {
         final JpaDistributionSet jpaDistributionSet = toJpaDistributionSet(distributionSet);
+        assertDistributionSetIsNotDeleted(jpaDistributionSet);
+
         if (distributionSet.isLocked()) {
             return jpaDistributionSet;
         } else {
@@ -245,6 +230,8 @@ public class JpaDistributionSetManagement
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public JpaDistributionSet unlock(final DistributionSet distributionSet) {
         final JpaDistributionSet jpaDistributionSet = toJpaDistributionSet(distributionSet);
+        assertDistributionSetIsNotDeleted(jpaDistributionSet);
+
         if (jpaDistributionSet.isLocked()) {
             jpaDistributionSet.setLocked(false);
             return jpaRepository.save(jpaDistributionSet);
@@ -257,6 +244,7 @@ public class JpaDistributionSetManagement
     @Transactional
     public JpaDistributionSet invalidate(final DistributionSet distributionSet) {
         final JpaDistributionSet jpaDistributionSet = toJpaDistributionSet(distributionSet);
+        assertDistributionSetIsNotDeleted(jpaDistributionSet);
         jpaDistributionSet.invalidate();
         return jpaRepository.save(jpaDistributionSet);
     }
@@ -296,6 +284,7 @@ public class JpaDistributionSetManagement
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public List<JpaDistributionSet> assignTag(final Collection<Long> ids, final long dsTagId) {
         return updateTag(ids, dsTagId, (tag, distributionSet) -> {
+            assertDistributionSetIsNotDeleted(distributionSet);
             if (distributionSet.getTags().contains(tag)) {
                 return distributionSet;
             } else {
@@ -310,6 +299,7 @@ public class JpaDistributionSetManagement
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public List<JpaDistributionSet> unassignTag(final Collection<Long> ids, final long dsTagId) {
         return updateTag(ids, dsTagId, (tag, distributionSet) -> {
+            assertDistributionSetIsNotDeleted(distributionSet);
             if (distributionSet.getTags().contains(tag)) {
                 distributionSet.removeTag(tag);
                 return jpaRepository.save(distributionSet);
@@ -331,9 +321,6 @@ public class JpaDistributionSetManagement
         if (!distributionSet.isComplete()) {
             throw new IncompleteDistributionSetException(
                     "Distribution set of type " + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
-        }
-        if (distributionSet.isDeleted()) {
-            throw new DeletedException(DistributionSet.class, id);
         }
         return distributionSet;
     }
@@ -384,6 +371,62 @@ public class JpaDistributionSetManagement
         QuotaHelper.assertAssignmentQuota(requested, maxMetaData, String.class, DistributionSet.class);
     }
 
+    private Page<JpaDistributionSet> findByRsqlAndDeleted(String rsql, SoftDeletedMode deletedMode, Pageable pageable) {
+        if (rsql != null && rsql.toLowerCase().contains(COMPLETE)) {
+            // limited support for 'complete' - could be removed in future
+            final Node node = QLSupport.getInstance().parse(rsql);
+            final Specification<JpaDistributionSet> deletedSpec = deletedSpecification(deletedMode);
+            final List<Specification<JpaDistributionSet>> specList = new ArrayList<>();
+            specList.add(deletedSpec);
+            final AtomicReference<Node.Comparison> completedComparison = new AtomicReference<>();
+            if (node instanceof Node.Comparison comparison && COMPLETE.equalsIgnoreCase(comparison.getKey())) {
+                // all not deleted, won't add anything to spec
+                completedComparison.set(comparison);
+            } else if (node instanceof Node.Logical logical && logical.getOp() == Node.Logical.Operator.AND) {
+                final List<Node> sanitizedChildren = new ArrayList<>();
+                logical.getChildren().forEach(child -> {
+                    if (child instanceof Node.Comparison comparison && COMPLETE.equalsIgnoreCase(comparison.getKey())) {
+                        if (completedComparison.get() != null) {
+                            throw new RSQLParameterSyntaxException("Multiple 'complete' comparisons are not supported");
+                        }
+                        completedComparison.set(comparison);
+                    } else {
+                        sanitizedChildren.add(child);
+                    }
+                });
+                specList.add(QLSupport.getInstance().buildSpec(
+                        sanitizedChildren.size() == 1
+                                ? sanitizedChildren.get(0)
+                                : new Node.Logical(Node.Logical.Operator.AND, sanitizedChildren),
+                        DistributionSetFields.class));
+            }
+            if (completedComparison.get() != null) { // really a comparison
+                log.warn("Usage of 'complete' is limited and may be removed: {}", node);
+                final boolean completed = completeComparison(completedComparison);
+                return filter(JpaManagementHelper.findAllWithCountBySpec(jpaRepository, specList, pageable), completed);
+            }
+        }
+
+        // fallback
+        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>();
+        final Specification<JpaDistributionSet> rslqSpec =
+                rsql != null ? QLSupport.getInstance().buildSpec(rsql, DistributionSetFields.class) : Specification.unrestricted();
+        specList.add(deletedSpecification(deletedMode));
+        specList.add(rslqSpec);
+        return JpaManagementHelper.findAllWithCountBySpec(jpaRepository, specList, pageable);
+    }
+
+    private Specification<JpaDistributionSet> deletedSpecification(final SoftDeletedMode softDeletedMode) {
+        return switch (softDeletedMode) {
+            case ONLY_SOFT_DELETED ->
+                    (root, query, cb) -> cb.equal(root.get(DELETED), true);
+            case EXCLUDE_SOFT_DELETED ->
+                    (root, query, cb) -> cb.equal(root.get(DELETED), false);
+            case INCLUDE_SOFT_DELETED ->
+                    Specification.unrestricted();
+        };
+    }
+
     private static boolean completeComparison(final AtomicReference<Node.Comparison> completeComparison) {
         final Node.Comparison comparison = completeComparison.get();
         if (comparison.getOp() == Node.Comparison.Operator.EQ) {
@@ -410,6 +453,7 @@ public class JpaDistributionSetManagement
 
     private JpaDistributionSet getValid0(final long id) {
         final JpaDistributionSet distributionSet = jpaRepository.getById(id);
+        assertDistributionSetIsNotDeleted(distributionSet);
         if (!distributionSet.isValid()) {
             throw new InvalidDistributionSetException(
                     "Distribution set of type " + distributionSet.getType().getKey() + " is invalid: " + distributionSet.getId());
@@ -471,6 +515,12 @@ public class JpaDistributionSetManagement
     private void assertDsTagExists(final Long tagId) {
         if (!distributionSetTagRepository.existsById(tagId)) {
             throw new EntityNotFoundException(DistributionSetTag.class, tagId);
+        }
+    }
+
+    private void assertDistributionSetIsNotDeleted(final JpaDistributionSet jpaDistributionSet) {
+        if (jpaDistributionSet.isDeleted()) {
+            throw new DeletedException(DistributionSet.class, jpaDistributionSet.getId());
         }
     }
 }

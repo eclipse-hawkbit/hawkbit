@@ -869,7 +869,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
                     "Distribution Set",
                     this::readyToAssign,
                     query -> hawkbitClient.getDistributionSetRestApi()
-                            .getDistributionSets(query.getFilter().orElse(null), query.getOffset(), query.getPageSize(), Constants.NAME_ASC)
+                            .getDistributionSets(query.getFilter().orElse(null), query.getOffset(), query.getPageSize(), Constants.NAME_ASC, null)
                             .getBody().getContent().stream());
             distributionSet.setRequiredIndicatorVisible(true);
             distributionSet.setItemLabelGenerator(distributionSetO -> distributionSetO.getName() + ":" + distributionSetO.getVersion());

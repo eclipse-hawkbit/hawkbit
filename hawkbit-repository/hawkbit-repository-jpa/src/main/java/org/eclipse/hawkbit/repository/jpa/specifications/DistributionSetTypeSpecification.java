@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTypeEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.springframework.data.jpa.domain.Specification;
@@ -33,5 +34,10 @@ public final class DistributionSetTypeSpecification {
      */
     public static Specification<JpaDistributionSetType> byKey(final String key) {
         return (targetRoot, query, cb) -> cb.equal(targetRoot.get(AbstractJpaTypeEntity_.key), key);
+    }
+
+    public static Specification<JpaDistributionSetType> isDeleted(final Boolean isDeleted) {
+        return (root, query, cb) ->
+                cb.equal(root.<Boolean> get(JpaDistributionSetType_.deleted), isDeleted);
     }
 }

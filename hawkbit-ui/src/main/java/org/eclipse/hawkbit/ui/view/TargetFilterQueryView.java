@@ -256,7 +256,8 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
                                     query.getFilter().orElse(null),
                                     query.getOffset(),
                                     query.getLimit(),
-                                    Constants.NAME_ASC)
+                                    Constants.NAME_ASC,
+                                    null)
                             .getBody()).stream().flatMap(body -> body.getContent().stream()));
             distributionSet.setItemLabelGenerator(ds -> ds.getName() + ":" + ds.getVersion());
             distributionSet.focus();

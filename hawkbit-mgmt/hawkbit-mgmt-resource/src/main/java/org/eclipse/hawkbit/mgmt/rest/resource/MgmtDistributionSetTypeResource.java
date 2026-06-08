@@ -26,6 +26,8 @@ import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtDistributionSetTypeMapp
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtSoftwareModuleTypeMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftDeletedMode;
+import org.eclipse.hawkbit.repository.SoftDeletedMode;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.SoftwareModuleTypeNotInDistributionSetTypeException;
@@ -59,21 +61,19 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
 
     @Override
     public ResponseEntity<PagedList<MgmtDistributionSetType>> getDistributionSetTypes(
-            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
+            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final MgmtSoftDeletedMode softDeletedModeParam) {
         final Pageable pageable = PagingUtility.toPageable(
                 pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetTypeSortParam(sortParam));
-        final Slice<? extends DistributionSetType> findModuleTypesAll;
-        long countModulesAll;
+        final SoftDeletedMode softDeletedMode = SoftDeletedMode.valueOf(softDeletedModeParam.name());
+        final Page<? extends DistributionSetType> findModuleTypesAll;
         if (rsqlParam != null) {
-            findModuleTypesAll = distributionSetTypeManagement.findByRsql(rsqlParam, pageable);
-            countModulesAll = ((Page<?>) findModuleTypesAll).getTotalElements();
+            findModuleTypesAll = distributionSetTypeManagement.findByRsql(rsqlParam, softDeletedMode, pageable);
         } else {
-            findModuleTypesAll = distributionSetTypeManagement.findAll(pageable);
-            countModulesAll = distributionSetTypeManagement.count();
+            findModuleTypesAll = distributionSetTypeManagement.findAll(softDeletedMode, pageable);
         }
 
         final List<MgmtDistributionSetType> rest = MgmtDistributionSetTypeMapper.toListResponse(findModuleTypesAll.getContent());
-        return ResponseEntity.ok(new PagedList<>(rest, countModulesAll));
+        return ResponseEntity.ok(new PagedList<>(rest, findModuleTypesAll.getTotalElements()));
     }
 
     @Override
