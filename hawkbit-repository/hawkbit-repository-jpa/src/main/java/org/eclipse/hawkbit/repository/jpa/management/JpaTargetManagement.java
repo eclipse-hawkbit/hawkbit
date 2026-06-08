@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -345,7 +346,7 @@ public class JpaTargetManagement
         // BUG Reported: https://github.com/eclipse-ee4j/eclipselink/issues/2757
         // Hibernate: applies predicate directly to the UPDATE root — Hibernate handles
         // NOT EXISTS subqueries correctly in CriteriaUpdate context. So this problem does not exist there.
-        if (containsNegation(rsql)) {
+        if (Jpa.JPA_VENDOR == Jpa.JpaVendor.ECLIPSELINK && containsNegation(rsql)) {
             log.debug("Assigning group {} with rsql {} on chunks.", group, rsql);
             assignTargetGroupOnChunks(group, rsql);
         } else {
@@ -379,11 +380,10 @@ public class JpaTargetManagement
 
         List<Long> chunk;
         int offset = 0;
-        final int CHUNK_SIZE = assignTargetGroupChunkSize;
         do {
             chunk = entityManager.createQuery(select)
                     .setFirstResult(offset)
-                    .setMaxResults(CHUNK_SIZE)
+                    .setMaxResults(assignTargetGroupChunkSize)
                     .getResultList();
 
             if (chunk.isEmpty()) {
