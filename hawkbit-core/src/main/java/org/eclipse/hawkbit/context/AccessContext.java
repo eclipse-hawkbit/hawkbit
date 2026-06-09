@@ -309,6 +309,139 @@ public class AccessContext {
         return authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal() == null;
     }
 
+    /**
+     * An {@link Authentication} implementation to delegate to an existing {@link Authentication} object except setting the details
+     * specifically for a specific tenant and user.
+     */
+    public static final class AuthenticationDelegate implements Authentication {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        private final Principal principal;
+        private final Authentication delegate;
+
+        public AuthenticationDelegate(final String tenant, final String username, final Authentication delegate) {
+            this(new Principal(tenant, username), delegate);
+        }
+
+        public AuthenticationDelegate(final Principal principal, final Authentication delegate) {
+            this.principal = principal;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public int hashCode() {
+            return delegate == null ? -1 : delegate.hashCode();
+        }
+
+        @Override
+        public boolean equals(final Object another) {
+            if (another instanceof Authentication anotherAuthentication) {
+                return Objects.equals(delegate, anotherAuthentication) &&
+                        Objects.equals(principal, anotherAuthentication.getPrincipal());
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return delegate == null ? null : delegate.toString();
+        }
+
+        @Override
+        public String getName() {
+            return delegate == null ? null : delegate.getName();
+        }
+
+        @Override
+        public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
+            return delegate == null ? List.of() : delegate.getAuthorities();
+        }
+
+        @Override
+        public Object getCredentials() {
+            return delegate == null ? null : delegate.getCredentials();
+        }
+
+        @Override
+        public Object getDetails() {
+            return delegate == null ? null : delegate.getDetails();
+        }
+
+        @Override
+        public Object getPrincipal() {
+            return principal;
+        }
+
+        @Override
+        public boolean isAuthenticated() {
+            return delegate != null && delegate.isAuthenticated();
+        }
+
+        @Override
+        public void setAuthenticated(final boolean isAuthenticated) {
+            if (delegate != null) {
+                delegate.setAuthenticated(isAuthenticated);
+            }
+        }
+    }
+
+    /**
+     * An implementation of the Spring's {@link Authentication} object which is used within a system security code block and
+     * wraps the original authentication object. The wrapped object contains the necessary {@link SpRole#SYSTEM_ROLE}
+     * which is allowed to execute all secured methods.
+     */
+    static final class SystemCodeAuthentication implements Authentication {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        private static final List<SimpleGrantedAuthority> AUTHORITIES = List.of(new SimpleGrantedAuthority(SpRole.SYSTEM_ROLE));
+
+        private final Principal principal;
+
+        private SystemCodeAuthentication(final String tenant) {
+            principal = new Principal(tenant, SYSTEM_ACTOR);
+        }
+
+        @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
+        public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
+            return AUTHORITIES;
+        }
+
+        @Override
+        public Object getCredentials() {
+            return null;
+        }
+
+        @Override
+        public Object getDetails() {
+            return null;
+        }
+
+        @Override
+        public Object getPrincipal() {
+            return principal;
+        }
+
+        @Override
+        public boolean isAuthenticated() {
+            return true;
+        }
+
+        @Override
+        public void setAuthenticated(final boolean isAuthenticated) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
     // simplified info for the security context keeping just the basic info needed for background execution of
     // controller authentication is not supported - always is false
     // only authenticated user is supported
@@ -385,135 +518,6 @@ public class AccessContext {
                 }
             });
             return ctx;
-        }
-    }
-
-    /**
-     * An implementation of the Spring's {@link Authentication} object which is used within a system security code block and
-     * wraps the original authentication object. The wrapped object contains the necessary {@link SpRole#SYSTEM_ROLE}
-     * which is allowed to execute all secured methods.
-     */
-    static final class SystemCodeAuthentication implements Authentication {
-
-        @Serial
-        private static final long serialVersionUID = 1L;
-
-        private static final List<SimpleGrantedAuthority> AUTHORITIES = List.of(new SimpleGrantedAuthority(SpRole.SYSTEM_ROLE));
-
-        private final Principal principal;
-
-        private SystemCodeAuthentication(final String tenant) {
-            principal = new Principal(tenant, SYSTEM_ACTOR);
-        }
-
-        @Override
-        public String getName() {
-            return null;
-        }
-
-        @Override
-        public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
-            return AUTHORITIES;
-        }
-
-        @Override
-        public Object getCredentials() {
-            return null;
-        }
-
-        @Override
-        public Object getDetails() {
-            return null;
-        }
-
-        @Override
-        public Object getPrincipal() {
-            return principal;
-        }
-
-        @Override
-        public boolean isAuthenticated() {
-            return true;
-        }
-
-        @Override
-        public void setAuthenticated(final boolean isAuthenticated) {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    /**
-     * An {@link Authentication} implementation to delegate to an existing {@link Authentication} object except setting the details
-     * specifically for a specific tenant and user.
-     */
-    private static final class AuthenticationDelegate implements Authentication {
-
-        @Serial
-        private static final long serialVersionUID = 1L;
-
-        private final Authentication delegate;
-        private final Principal principal;
-
-        private AuthenticationDelegate(final String tenant, final String username, final Authentication delegate) {
-            this.delegate = delegate;
-            principal = new Principal(tenant, username);
-        }
-
-        @Override
-        public int hashCode() {
-            return delegate == null ? -1 : delegate.hashCode();
-        }
-
-        @Override
-        public boolean equals(final Object another) {
-            if (another instanceof Authentication anotherAuthentication) {
-                return Objects.equals(delegate, anotherAuthentication) &&
-                        Objects.equals(principal, anotherAuthentication.getPrincipal());
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public String toString() {
-            return delegate == null ? null : delegate.toString();
-        }
-
-        @Override
-        public String getName() {
-            return delegate == null ? null : delegate.getName();
-        }
-
-        @Override
-        public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
-            return delegate == null ? List.of() : delegate.getAuthorities();
-        }
-
-        @Override
-        public Object getCredentials() {
-            return delegate == null ? null : delegate.getCredentials();
-        }
-
-        @Override
-        public Object getDetails() {
-            return delegate == null ? null : delegate.getDetails();
-        }
-
-        @Override
-        public Object getPrincipal() {
-            return principal;
-        }
-
-        @Override
-        public boolean isAuthenticated() {
-            return delegate != null && delegate.isAuthenticated();
-        }
-
-        @Override
-        public void setAuthenticated(final boolean isAuthenticated) {
-            if (delegate != null) {
-                delegate.setAuthenticated(isAuthenticated);
-            }
         }
     }
 }
