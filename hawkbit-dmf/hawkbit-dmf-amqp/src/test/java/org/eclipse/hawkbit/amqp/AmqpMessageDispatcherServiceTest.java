@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
+import org.eclipse.hawkbit.rabbitmq.test.AmqpTestConfiguration;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
@@ -60,10 +61,10 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.DefaultJacksonJavaTypeMapper;
-import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Feature: Component Tests - Device Management Federation API<br/>
@@ -94,7 +95,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                 Create.builder().controllerId(CONTROLLER_ID).securityToken(TEST_TOKEN).address(AMQP_URI.toString()).build());
 
         this.rabbitTemplate = Mockito.mock(RabbitTemplate.class);
-        when(rabbitTemplate.getMessageConverter()).thenReturn(new JacksonJsonMessageConverter());
+        when(rabbitTemplate.getMessageConverter()).thenReturn(AmqpTestConfiguration.messageConverter(new JsonMapper()));
 
         senderService = Mockito.mock(DefaultAmqpMessageSenderService.class);
 
