@@ -417,8 +417,8 @@ public abstract class AbstractRepositoryManagementTest<T extends BaseEntity, C, 
         });
         return new RepoMan<T, C, U>(
                 fields.stream()
-                        .peek(field -> System.out.println("Found RepositoryManagement field: " + field.getName() + "-> " + Arrays.toString(
-                                genericTypes(field.getType(), RepositoryManagement.class))))
+                        .peek(field -> log.debug("Found RepositoryManagement field: {} -> {}",
+                                field.getName(), Arrays.toString(genericTypes(field.getType(), RepositoryManagement.class))))
                         .filter(field -> Arrays.equals(genericTypes(field.getType(), RepositoryManagement.class), abstractTestTypeArgs))
                         .map(field -> {
                             field.setAccessible(true);
