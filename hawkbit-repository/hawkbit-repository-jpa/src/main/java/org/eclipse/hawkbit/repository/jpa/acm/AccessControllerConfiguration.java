@@ -40,11 +40,13 @@ import org.eclipse.hawkbit.repository.qfields.TargetFields;
 import org.eclipse.hawkbit.repository.qfields.TargetTypeFields;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Role;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.security.access.PermissionEvaluator;
@@ -62,12 +64,14 @@ import org.springframework.util.function.SingletonSupplier;
 public class AccessControllerConfiguration {
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @ConditionalOnProperty(name = "hawkbit.acm.access-controller.target.enabled", havingValue = "true", matchIfMissing = true)
     AccessController<JpaTarget> targetAccessController() {
         return new DefaultAccessController<>(TargetFields.class, SpPermission.TARGET);
     }
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @ConditionalOnProperty(name = "hawkbit.acm.access-controller.action.enabled", havingValue = "true", matchIfMissing = true)
     AccessController<JpaAction> actionAccessController(final AccessController<JpaTarget> targetAccessController) {
         return new AccessController<>() {
@@ -110,30 +114,35 @@ public class AccessControllerConfiguration {
     }
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @ConditionalOnProperty(name = "hawkbit.acm.access-controller.target-type.enabled", havingValue = "true", matchIfMissing = true)
     AccessController<JpaTargetType> targetTypeAccessController() {
         return new DefaultAccessController<>(TargetTypeFields.class, SpPermission.TARGET_TYPE);
     }
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @ConditionalOnProperty(name = "hawkbit.acm.access-controller.software-module.enabled", havingValue = "true", matchIfMissing = true)
     AccessController<JpaSoftwareModule> softwareModuleAccessController() {
         return new DefaultAccessController<>(SoftwareModuleFields.class, SpPermission.SOFTWARE_MODULE);
     }
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @ConditionalOnProperty(name = "hawkbit.acm.access-controller.software-module-type.enabled", havingValue = "true", matchIfMissing = true)
     AccessController<JpaSoftwareModuleType> softwareModuleTypeAccessController() {
         return new DefaultAccessController<>(SoftwareModuleTypeFields.class, SpPermission.SOFTWARE_MODULE_TYPE);
     }
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @ConditionalOnProperty(name = "hawkbit.acm.access-controller.distribution-set.enabled", havingValue = "true", matchIfMissing = true)
     AccessController<JpaDistributionSet> distributionSetAccessController() {
         return new DefaultAccessController<>(DistributionSetFields.class, SpPermission.DISTRIBUTION_SET);
     }
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @ConditionalOnProperty(name = "hawkbit.acm.access-controller.distribution-set-type.enabled", havingValue = "true", matchIfMissing = true)
     AccessController<JpaDistributionSetType> distributionSetTypeAccessController() {
         return new DefaultAccessController<>(DistributionSetTypeFields.class, SpPermission.DISTRIBUTION_SET_TYPE);
