@@ -10,7 +10,7 @@
 package org.eclipse.hawkbit.autoconfigure.dmf.amqp;
 
 import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
-import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
+import org.springframework.amqp.listener.ConditionalRejectingErrorHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;

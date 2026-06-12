@@ -495,16 +495,13 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
 
     @Test
     void getDistributionSetTypesFilteredBySoftDeletedMode() throws Exception {
-        final DistributionSetType activeType = distributionSetTypeManagement.create(
-                DistributionSetTypeManagement.Create.builder()
-                        .key("activeKey").name("activeType").build());
+         distributionSetTypeManagement.create(DistributionSetTypeManagement.Create.builder().key("activeKey").name("activeType").build());
 
         // create type + DS using it, then delete type → soft-delete
         final DistributionSetType deletedType = distributionSetTypeManagement.create(
-                DistributionSetTypeManagement.Create.builder()
-                        .key("deletedKey").name("deletedType").build());
-        distributionSetManagement.create(DistributionSetManagement.Create.builder()
-                .type(deletedType).name("ds").version("1.0").build());
+                DistributionSetTypeManagement.Create.builder().key("deletedKey").name("deletedType").build());
+        distributionSetManagement.create(
+                DistributionSetManagement.Create.builder().type(deletedType).name("ds").version("1.0").build());
         distributionSetTypeManagement.delete(deletedType.getId());
 
         // default — built-in + activeType, no deletedType

@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
-import org.springframework.amqp.rabbit.listener.FatalExceptionStrategy;
+import org.springframework.amqp.listener.FatalExceptionStrategy;
 import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.handler.invocation.MethodArgumentResolutionException;
