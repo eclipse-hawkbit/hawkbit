@@ -54,9 +54,9 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.amqp.support.converter.MessageConverter;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Feature: Component Tests - Device Management Federation API<br/>
@@ -108,7 +108,7 @@ class AmqpMessageHandlerServiceTest {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     void before() {
         TenantConfigHelper.setTenantConfigurationManagement(tenantConfigurationManagement);
-        messageConverter = new JacksonJsonMessageConverter();
+        messageConverter = DmfApiConfiguration.messageConverter(new JsonMapper());
         lenient().when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(

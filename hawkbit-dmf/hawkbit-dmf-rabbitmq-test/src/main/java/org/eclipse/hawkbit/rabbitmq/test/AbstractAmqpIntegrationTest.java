@@ -25,12 +25,12 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.junit.RabbitAvailable;
-import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 @RabbitAvailable
@@ -88,7 +88,7 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
 
     private RabbitTemplate createDmfClient() {
         final RabbitTemplate template = new RabbitTemplate(connectionFactory);
-        template.setMessageConverter(new JacksonJsonMessageConverter());
+        template.setMessageConverter(AmqpTestConfiguration.messageConverter(new JsonMapper()));
         template.setReceiveTimeout(TimeUnit.SECONDS.toMillis(3));
         template.setReplyTimeout(TimeUnit.SECONDS.toMillis(3));
         template.setExchange(getExchange());

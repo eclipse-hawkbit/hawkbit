@@ -14,6 +14,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
@@ -24,6 +27,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
+import tools.jackson.databind.json.JsonMapper;
 
 @Configuration
 public class AmqpTestConfiguration {
@@ -32,7 +36,7 @@ public class AmqpTestConfiguration {
     @Primary
     public RabbitTemplate rabbitTemplateForTest(final ConnectionFactory connectionFactory) {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMessageConverter(new JacksonJsonMessageConverter());
+        rabbitTemplate.setMessageConverter(messageConverter(new JsonMapper()));
         rabbitTemplate.setReplyTimeout(TimeUnit.SECONDS.toMillis(3));
         rabbitTemplate.setReceiveTimeout(TimeUnit.SECONDS.toMillis(3));
         return rabbitTemplate;
@@ -66,5 +70,20 @@ public class AmqpTestConfiguration {
     @Bean
     RabbitMqSetupService rabbitMqSetupService() {
         return new RabbitMqSetupService();
+    }
+
+    // note - it MUST be the same as DmfApiConfiguration#messageConverter for the test to work properly (to test the real AMQP)
+    public static @NonNull JacksonJsonMessageConverter messageConverter(final JsonMapper jsonMapper) {
+        return new JacksonJsonMessageConverter(jsonMapper, "org.eclipse.hawkbit.dmf.json.model") {
+
+            @Override
+            public @NonNull Object fromMessage(@NonNull final Message message, final @Nullable Object conversionHint) {
+                if (message.getBody().length == 0) {
+                    return message.getBody();
+                } else {
+                    return super.fromMessage(message, conversionHint);
+                }
+            }
+        };
     }
 }
