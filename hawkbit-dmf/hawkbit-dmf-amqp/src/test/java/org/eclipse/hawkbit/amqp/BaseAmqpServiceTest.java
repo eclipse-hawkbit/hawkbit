@@ -28,7 +28,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConversionException;
 
 /**
@@ -54,7 +53,7 @@ class BaseAmqpServiceTest {
     @Test
     void convertMessageTest() {
         final DmfActionUpdateStatus actionUpdateStatus = createActionStatus();
-        when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());
+        when(rabbitTemplate.getMessageConverter()).thenReturn(DmfApiConfiguration.messageConverter());
 
         final Message message = rabbitTemplate.getMessageConverter().toMessage(actionUpdateStatus, createJsonProperties());
         final DmfActionUpdateStatus convertedActionUpdateStatus = baseAmqpService.convertMessage(message, DmfActionUpdateStatus.class);
@@ -91,7 +90,7 @@ class BaseAmqpServiceTest {
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void updateActionStatusWithInvalidJsonContent() {
         final Message message = createMessage("Invalid Json".getBytes());
-        when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());
+        when(rabbitTemplate.getMessageConverter()).thenReturn(DmfApiConfiguration.messageConverter());
 
         assertThatExceptionOfType(MessageConversionException.class)
                 .as("Expected MessageConversionException for invalid JSON")
