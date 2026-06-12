@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
@@ -26,6 +27,9 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
@@ -33,6 +37,8 @@ import org.springframework.amqp.rabbit.listener.FatalExceptionStrategy;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -91,9 +97,18 @@ public class DmfApiConfiguration {
      * @return {@link RabbitTemplate} with automatic retry, published confirms and {@link Jackson2JsonMessageConverter}.
      */
     @Bean
-    public RabbitTemplate rabbitTemplate() {
+    @ConditionalOnMissingBean(name = "amqpMessageConverter") // override it if needed to add / edit trusted packages or need other customization
+    public MessageConverter amqpMessageConverter() {
+        return DmfApiConfiguration.messageConverter();
+    }
+
+    /**
+     * @return {@link RabbitTemplate} with automatic retry, published confirms and {@link MessageConverter}.
+     */
+    @Bean
+    public RabbitTemplate rabbitTemplate(@Qualifier("amqpMessageConverter") final MessageConverter amqpMessageConverter) {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(rabbitConnectionFactory);
-        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
+        rabbitTemplate.setMessageConverter(amqpMessageConverter);
 
         final RetryTemplate retryTemplate = new RetryTemplate();
         retryTemplate.setBackOffPolicy(new ExponentialBackOffPolicy());
@@ -136,8 +151,8 @@ public class DmfApiConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public AmqpMessageSenderService amqpSenderServiceBean() {
-        return new DefaultAmqpMessageSenderService(rabbitTemplate());
+    public AmqpMessageSenderService amqpSenderServiceBean(final RabbitTemplate rabbitTemplate) {
+        return new DefaultAmqpMessageSenderService(rabbitTemplate);
     }
 
     /**
@@ -163,10 +178,36 @@ public class DmfApiConfiguration {
             final SystemManagement systemManagement,
             final TargetManagement<? extends Target> targetManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
-            final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement, final DeploymentManagement deploymentManagement) {
+            final SoftwareModuleManagement<? extends SoftwareModule> softwareModuleManagement,
+            final DeploymentManagement deploymentManagement) {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
                 systemManagement, targetManagement, softwareModuleManagement, distributionSetManagement,
                 deploymentManagement);
+    }
+
+    // since spring-amqp 3.2.11 not all packages are assumed trusted for type converter (only java.land and java.util)
+    // so e need to add hawkbit (and eventual extension packages as trusted
+    // also (again since spring-amqp 3.2.11) the conversion from empty payload fail (which probably is fine since it is JSON)
+    // however, (for backward compatibility, e.g. THING_REMOVED doesn't define payload and could be empty byte[]) we assume that
+    // empty payload is empty byte[] and not try to convert it to Object (which fail since it is not JSON)
+    static @NonNull Jackson2JsonMessageConverter messageConverter() {
+        return messageConverter("org.eclipse.hawkbit.dmf.json.model");
+    }
+
+    public static @NonNull Jackson2JsonMessageConverter messageConverter(final String... trustedPackages) {
+        return new Jackson2JsonMessageConverter(trustedPackages) {
+
+            @Override
+            public @NonNull Object fromMessage(@NonNull final Message message, final @Nullable Object conversionHint) {
+                // default converter tries to convert empty body payload to Object (since rabbit 4.0.4)
+                // which probably is correct since it has to be JSON - however, in this case we assume - empty byte[]
+                if (message.getBody().length == 0) {
+                    return message.getBody();
+                } else {
+                    return super.fromMessage(message, conversionHint);
+                }
+            }
+        };
     }
 
     @ToString
@@ -203,5 +244,4 @@ public class DmfApiConfiguration {
             return false;
         }
     }
-
 }
