@@ -61,10 +61,6 @@ public class DistributedLockRepository extends DefaultLockRepository {
                 timeToLive * lockProperties.getRefreshOnRemainPercent() / 100);
         final int refreshAfterMS = timeToLive - triggerOnRemainMS;
         refreshAfterMillis = refreshAfterMS <= 0 ? null : refreshAfterMS;
-
-        // to ensure that deprecated acquire and renew will use the lockProperties ttl. none shall call them but anyway - for sure
-        // to be removed when the #setTimeToLive method is removed from DefaultLockRepository
-        setTimeToLive(lockProperties.getTtl());
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
