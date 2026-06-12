@@ -494,8 +494,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
         // 3 built-in types exist (os, runtime, application)
         final int builtInTypes = 3;
 
-        final SoftwareModuleType activeType = softwareModuleTypeManagement.create(
-                SoftwareModuleTypeManagement.Create.builder().key("activeKey").name("activeType").build());
+        softwareModuleTypeManagement.create(SoftwareModuleTypeManagement.Create.builder().key("activeKey").name("activeType").build());
 
         // create type + SM using it, then delete type → soft-delete
         final SoftwareModuleType deletedType = softwareModuleTypeManagement.create(

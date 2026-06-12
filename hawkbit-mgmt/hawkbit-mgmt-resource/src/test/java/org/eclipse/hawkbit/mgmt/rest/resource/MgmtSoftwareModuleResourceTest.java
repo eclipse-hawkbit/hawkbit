@@ -1230,8 +1230,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     void getSoftwareModulesFilteredBySoftDeletedMode() throws Exception {
-        final SoftwareModule activeSm = softwareModuleManagement.create(
-                SoftwareModuleManagement.Create.builder().type(osType).name("activeSm").version("1.0").build());
+        softwareModuleManagement.create(SoftwareModuleManagement.Create.builder().type(osType).name("activeSm").version("1.0").build());
 
         SoftwareModule deletedSm = softwareModuleManagement.create(
                 SoftwareModuleManagement.Create.builder().type(osType).name("deletedSm").version("1.0").build());
