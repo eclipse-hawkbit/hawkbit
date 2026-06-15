@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.dmf.DmfMessageConverter;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
@@ -29,7 +30,6 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.MessageConversionException;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Feature: Component Tests - Device Management Federation API<br/>
@@ -54,7 +54,7 @@ class BaseAmqpServiceTest {
     @Test
     void convertMessageTest() {
         final DmfActionUpdateStatus actionUpdateStatus = createActionStatus();
-        when(rabbitTemplate.getMessageConverter()).thenReturn(DmfApiConfiguration.messageConverter(new JsonMapper()));
+        when(rabbitTemplate.getMessageConverter()).thenReturn(new DmfMessageConverter());
 
         final Message message = rabbitTemplate.getMessageConverter().toMessage(actionUpdateStatus, createJsonProperties());
         final DmfActionUpdateStatus convertedActionUpdateStatus = baseAmqpService.convertMessage(message, DmfActionUpdateStatus.class);
@@ -91,7 +91,7 @@ class BaseAmqpServiceTest {
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void updateActionStatusWithInvalidJsonContent() {
         final Message message = createMessage("Invalid Json".getBytes());
-        when(rabbitTemplate.getMessageConverter()).thenReturn(DmfApiConfiguration.messageConverter(new JsonMapper()));
+        when(rabbitTemplate.getMessageConverter()).thenReturn(new DmfMessageConverter());
 
         assertThatExceptionOfType(MessageConversionException.class)
                 .as("Expected MessageConversionException for invalid JSON")
@@ -111,5 +111,4 @@ class BaseAmqpServiceTest {
     private DmfActionUpdateStatus createActionStatus() {
         return new DmfActionUpdateStatus(1L, DmfActionStatus.RUNNING, null, 2L, List.of("Message 1", "Message 2"), 2);
     }
-
 }

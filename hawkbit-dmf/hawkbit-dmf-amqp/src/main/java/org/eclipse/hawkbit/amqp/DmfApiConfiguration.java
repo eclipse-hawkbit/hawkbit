@@ -9,14 +9,18 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import static org.eclipse.hawkbit.dmf.DmfMessageConverter.DMF_JSON_MODEL_PACKAGE;
+
 import java.sql.SQLException;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;
+import org.eclipse.hawkbit.dmf.DmfMessageConverter;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -27,9 +31,6 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
-import org.springframework.amqp.core.Message;
 import org.springframework.amqp.listener.ConditionalRejectingErrorHandler;
 import org.springframework.amqp.listener.FatalExceptionStrategy;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -95,18 +96,20 @@ public class DmfApiConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(name = "amqpMessageConverter") // override it if needed to add / edit trusted packages or need other customization
-    public MessageConverter amqpMessageConverter(final JsonMapper jsonMapper) {
-        return DmfApiConfiguration.messageConverter(jsonMapper);
+    @ConditionalOnMissingBean(name = "dmfMessageConverter") // override it if needed to add / edit trusted packages or need other customization
+    public MessageConverter dmfMessageConverter(
+            final JsonMapper jsonMapper,
+            @Value("${hawkbit.dmf.trusted-packages:" + DMF_JSON_MODEL_PACKAGE + "}") final String trustedPackages) {
+        return new DmfMessageConverter(jsonMapper, Arrays.stream(trustedPackages.split(",")).map(String::trim).toArray(String[]::new));
     }
 
     /**
      * @return {@link RabbitTemplate} with automatic retry, published confirms and {@link JacksonJsonMessageConverter}.
      */
     @Bean
-    public RabbitTemplate rabbitTemplate(@Qualifier("amqpMessageConverter") final MessageConverter amqpMessageConverter) {
+    public RabbitTemplate rabbitTemplate(@Qualifier("dmfMessageConverter") final MessageConverter dmfMessageConverter) {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(rabbitConnectionFactory);
-        rabbitTemplate.setMessageConverter(amqpMessageConverter);
+        rabbitTemplate.setMessageConverter(dmfMessageConverter);
 
         // the same policy the previously used default ExponentialBackOffPolicy applied
         rabbitTemplate.setRetryTemplate(new RetryTemplate(RetryPolicy.builder()
@@ -184,31 +187,6 @@ public class DmfApiConfiguration {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
                 systemManagement, targetManagement, softwareModuleManagement, distributionSetManagement,
                 deploymentManagement);
-    }
-
-    // since spring-amqp 4.0.4 not all packages are assumed trusted for type converter (only java.land and java.util)
-    // so e need to add hawkbit (and eventual extension packages as trusted
-    // also (again since spring-amqp 4.0.4) the conversion from empty payload fail (which probably is fine since it is JSON)
-    // however, (for backward compatibility, e.g. THING_REMOVED doesn't define payload and could be empty byte[]) we assume that
-    // empty payload is empty byte[] and not try to convert it to Object (which fail since it is not JSON)
-    static @NonNull JacksonJsonMessageConverter messageConverter(final JsonMapper jsonMapper) {
-        return messageConverter(jsonMapper, "org.eclipse.hawkbit.dmf.json.model");
-    }
-
-    public static @NonNull JacksonJsonMessageConverter messageConverter(final JsonMapper jsonMapper, final String... trustedPackages) {
-        return new JacksonJsonMessageConverter(jsonMapper, trustedPackages) {
-
-            @Override
-            public @NonNull Object fromMessage(@NonNull final Message message, final @Nullable Object conversionHint) {
-                // default converter tries to convert empty body payload to Object (since rabbit 4.0.4)
-                // which probably is correct since it has to be JSON - however, in this case we assume - empty byte[]
-                if (message.getBody().length == 0) {
-                    return message.getBody();
-                } else {
-                    return super.fromMessage(message, conversionHint);
-                }
-            }
-        };
     }
 
     @ToString

@@ -24,6 +24,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.hawkbit.dmf.DmfMessageConverter;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -56,7 +57,6 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.amqp.support.converter.MessageConverter;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Feature: Component Tests - Device Management Federation API<br/>
@@ -108,7 +108,7 @@ class AmqpMessageHandlerServiceTest {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     void before() {
         TenantConfigHelper.setTenantConfigurationManagement(tenantConfigurationManagement);
-        messageConverter = DmfApiConfiguration.messageConverter(new JsonMapper());
+        messageConverter = new DmfMessageConverter();
         lenient().when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(
