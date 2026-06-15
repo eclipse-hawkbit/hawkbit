@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.dmf.DmfMessageConverter;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -40,7 +41,6 @@ import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.DefaultJacksonJavaTypeMapper;
-import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 
 /**
  * Abstract class for sender and receiver service.
@@ -60,7 +60,7 @@ public final class VHost extends DmfSender implements MessageListener {
         // It is necessary to define rabbitTemplate as a Bean and set JacksonJsonMessageConverter explicitly here in order to convert only
         // OUTCOMING messages to JSON. In case of INCOMING messages, JacksonJsonMessageConverter can not handle messages with NULL
         // payload (e.g. REQUEST_ATTRIBUTES_UPDATE), so the SimpleMessageConverter is used instead per default.
-        rabbitTemplate.setMessageConverter(new JacksonJsonMessageConverter());
+        rabbitTemplate.setMessageConverter(new DmfMessageConverter());
 
         if (initVHost) {
             final RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
