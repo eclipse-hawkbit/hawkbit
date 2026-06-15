@@ -160,10 +160,6 @@ public class SpecificationBuilder<T> {
                     return cb.and(equal(mapJoin.key(), split[1]), compare(comparison, toMapValuePath(mapJoin)));
                 }
             } else if (attribute instanceof SetAttribute<?, ?> setAttribute) {
-                // Option 4 : make autoConfirmation Set in Jpa Target and add check & logic here :
-//                if (split.length == 1) {
-//                    // existence check
-//                }
                 if (split.length < 2 || ObjectUtils.isEmpty(split[1])) {
                     throw new QueryException(
                             UNSUPPORTED_FIELD,
@@ -183,8 +179,11 @@ public class SpecificationBuilder<T> {
                     return compare(comparison, deepGetPath(pathResolver.getPath(attribute), split[1]));
                 }
             } else if (attribute.getPersistentAttributeType() == Attribute.PersistentAttributeType.ONE_TO_MANY
-                    && split.length == 1) { // OR ? attribute instanceof PluralAttribute<?,?,?>
-                // boolean filtering on ONE_TO_MANY relationship presence
+                    && split.length == 1 && "autoConfirmationStatus".equalsIgnoreCase(split[0])) {
+                // Target autoConfirm case - handle autoConfirm == true/false since autoconfirm is
+                // represented as List in JpaTarget just to enforce Lazy Loading with eclipse link
+                // (not enforced otherwise) so here support for boolean filtering on
+                // ONE_TO_MANY relationship presence is added
                 final Path<?> joinPath = pathResolver.getPath(attribute);
                 final String value = String.valueOf(comparison.getValue());
                 final boolean exists;
