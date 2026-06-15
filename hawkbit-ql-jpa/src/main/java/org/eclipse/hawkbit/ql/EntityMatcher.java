@@ -60,85 +60,87 @@ public class EntityMatcher {
 
     @SuppressWarnings({ "java:S3776", "java:S3358", "java:S1125", "java:S6541" }) // better readable this way
     private <T> boolean match(final T t, final Node node) {
-        if (node instanceof Node.Comparison comparison) {
-            final String[] split = comparison.getKey().split("\\.", 2);
-            try {
-                final Getter fieldGetter = getGetter(t.getClass(), split[0]);
-                final Object fieldValue = fieldGetter.get(t);
-                final Operator op = comparison.getOp();
-                if (Map.class.isAssignableFrom(getReturnType(fieldGetter))) {
-                    if ((op == NE || op == NOT_IN || op == NOT_LIKE)
-                            && (fieldValue == null || !((Map<?, ?>) fieldValue).containsKey(split[1]))) {
-                        // TODO / recheck - when missing entity shall it be included or not in != or =out=? - now it's not
-                        return false;
-                    }
-                    return compareIgnoreCaseAware(
-                            fieldValue == null ? null : ((Map<?, ?>) fieldValue).get(split[1]),
-                            op,
-                            map(
-                                    comparison.getValue(),
-                                    (Class<?>) ((ParameterizedType) fieldGetter.type()).getActualTypeArguments()[1]));
-                } else if (Collection.class.isAssignableFrom(getReturnType(fieldGetter))) { // Set / List
-                    final Object value;
-                    final BiPredicate<Object, Operator> compare;
-                    if (split.length == 1) {
-                        value = map(comparison.getValue(), getReturnType(fieldGetter));
-                        compare = (e, operator) -> compareIgnoreCaseAware(e, operator, value);
-                    } else {
-                        final Getter valueGetter = getGetter(
-                                (Class<?>) ((ParameterizedType) fieldGetter.type()).getActualTypeArguments()[0], split[1]);
-                        value = map(comparison.getValue(), getReturnType(valueGetter));
-                        compare = (e, operator) -> {
-                            try {
-                                return compareIgnoreCaseAware(
-                                        map(e == null ? null : valueGetter.get(e), getReturnType(valueGetter)), operator, value);
-                            } catch (final IllegalAccessException | InvocationTargetException ex) {
-                                throw new IllegalArgumentException(ex);
-                            }
-                        };
-                    }
-                    final Collection<?> set = (Collection<?>) fieldValue;
-                    return switch (op) {
-                        case EQ, GT, GTE, LT, LTE, IN, LIKE -> set == null
-                                ? false
-                                : set.stream().anyMatch(e -> compare.test(e, op));
-                        case NE, NOT_IN, NOT_LIKE -> set == null
-                                ? true
-                                : set.stream().noneMatch(e -> compare.test(e, op == NE ? EQ : op == NOT_IN ? IN : LIKE));
-                    };
-                } else {
-                    if (split.length == 1) {
-                        return compareIgnoreCaseAware(fieldValue, op, map(comparison.getValue(), getReturnType(fieldGetter)));
-                    } else {
-                        if (split[1].contains(".")) {
-                            // nested field access
-                            final String[] nestedSplit = split[1].split("\\.", 2);
-                            final Getter nestedFieldGetter = getGetter(getReturnType(fieldGetter), nestedSplit[0]);
-                            final Getter valueGetter = getGetter(getReturnType(nestedFieldGetter), nestedSplit[1]);
-                            final Object nestedFieldValue = fieldValue == null ? null : nestedFieldGetter.get(fieldValue);
-                            return compareIgnoreCaseAware(
-                                    nestedFieldValue == null ? null : valueGetter.get(nestedFieldValue),
-                                    op,
-                                    map(comparison.getValue(), getReturnType(valueGetter)));
+        switch (node) {
+            case Node.Comparison comparison -> {
+                final String[] split = comparison.getKey().split("\\.", 2);
+                try {
+                    final Getter fieldGetter = getGetter(t.getClass(), split[0]);
+                    final Object fieldValue = fieldGetter.get(t);
+                    final Operator op = comparison.getOp();
+                    if (Map.class.isAssignableFrom(getReturnType(fieldGetter))) {
+                        if ((op == NE || op == NOT_IN || op == NOT_LIKE)
+                                && (fieldValue == null || !((Map<?, ?>) fieldValue).containsKey(split[1]))) {
+                            // TODO / recheck - when missing entity shall it be included or not in != or =out=? - now it's not
+                            return false;
+                        }
+                        return compareIgnoreCaseAware(
+                                fieldValue == null ? null : ((Map<?, ?>) fieldValue).get(split[1]),
+                                op,
+                                map(
+                                        comparison.getValue(),
+                                        (Class<?>) ((ParameterizedType) fieldGetter.type()).getActualTypeArguments()[1]));
+                    } else if (Collection.class.isAssignableFrom(getReturnType(fieldGetter))) { // Set / List
+                        final Object value;
+                        final BiPredicate<Object, Operator> compare;
+                        if (split.length == 1) {
+                            value = map(comparison.getValue(), getReturnType(fieldGetter));
+                            compare = (e, operator) -> compareIgnoreCaseAware(e, operator, value);
                         } else {
-                            final Getter valueGetter = getGetter(getReturnType(fieldGetter), split[1]);
-                            return compareIgnoreCaseAware(
-                                    fieldValue == null ? null : valueGetter.get(fieldValue),
-                                    op,
-                                    map(comparison.getValue(), getReturnType(valueGetter)));
+                            final Getter valueGetter = getGetter(
+                                    (Class<?>) ((ParameterizedType) fieldGetter.type()).getActualTypeArguments()[0], split[1]);
+                            value = map(comparison.getValue(), getReturnType(valueGetter));
+                            compare = (e, operator) -> {
+                                try {
+                                    return compareIgnoreCaseAware(
+                                            map(e == null ? null : valueGetter.get(e), getReturnType(valueGetter)), operator, value);
+                                } catch (final IllegalAccessException | InvocationTargetException ex) {
+                                    throw new IllegalArgumentException(ex);
+                                }
+                            };
+                        }
+                        final Collection<?> set = (Collection<?>) fieldValue;
+                        return switch (op) {
+                            case EQ, GT, GTE, LT, LTE, IN, LIKE -> set == null
+                                    ? false
+                                    : set.stream().anyMatch(e -> compare.test(e, op));
+                            case NE, NOT_IN, NOT_LIKE -> set == null
+                                    ? true
+                                    : set.stream().noneMatch(e -> compare.test(e, op == NE ? EQ : op == NOT_IN ? IN : LIKE));
+                        };
+                    } else {
+                        if (split.length == 1) {
+                            return compareIgnoreCaseAware(fieldValue, op, map(comparison.getValue(), getReturnType(fieldGetter)));
+                        } else {
+                            if (split[1].contains(".")) {
+                                // nested field access
+                                final String[] nestedSplit = split[1].split("\\.", 2);
+                                final Getter nestedFieldGetter = getGetter(getReturnType(fieldGetter), nestedSplit[0]);
+                                final Getter valueGetter = getGetter(getReturnType(nestedFieldGetter), nestedSplit[1]);
+                                final Object nestedFieldValue = fieldValue == null ? null : nestedFieldGetter.get(fieldValue);
+                                return compareIgnoreCaseAware(
+                                        nestedFieldValue == null ? null : valueGetter.get(nestedFieldValue),
+                                        op,
+                                        map(comparison.getValue(), getReturnType(valueGetter)));
+                            } else {
+                                final Getter valueGetter = getGetter(getReturnType(fieldGetter), split[1]);
+                                return compareIgnoreCaseAware(
+                                        fieldValue == null ? null : valueGetter.get(fieldValue),
+                                        op,
+                                        map(comparison.getValue(), getReturnType(valueGetter)));
+                            }
                         }
                     }
+                } catch (final NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    throw new IllegalArgumentException(e);
                 }
-            } catch (final NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                throw new IllegalArgumentException(e);
             }
-        } else if (node instanceof Node.Logical logical) {
-            return switch (logical.getOp()) {
-                case AND -> logical.getChildren().stream().allMatch(child -> match(t, child));
-                case OR -> logical.getChildren().stream().anyMatch(child -> match(t, child));
-            };
-        } else {
-            throw new IllegalArgumentException("Unsupported node type: " + node.getClass());
+            case Node.Logical logical -> {
+                return switch (logical.getOp()) {
+                    case AND -> logical.getChildren().stream().allMatch(child -> match(t, child));
+                    case OR -> logical.getChildren().stream().anyMatch(child -> match(t, child));
+                };
+            }
+            default -> throw new IllegalArgumentException("Unsupported node type: " + node.getClass());
         }
     }
 
@@ -151,13 +153,11 @@ public class EntityMatcher {
             return o;
         }
         // if here - ignoreCase in true and we have non-null value
-        if (o instanceof String str) {
-            return str.toLowerCase();
-        } else if (o instanceof Collection<?> collection) {
-            return collection.stream().map(this::ignoreCase).toList();
-        } else {
-            return o;
-        }
+        return switch (o) {
+            case String str -> str.toLowerCase();
+            case Collection<?> collection -> collection.stream().map(this::ignoreCase).toList();
+            default -> o;
+        };
     }
 
     // java:S3011 uses reflection to private members anyway

@@ -48,7 +48,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     private final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
     private final PlatformTransactionManager txManager;
     private final RepositoryProperties repositoryProperties;
-    private final LockRegistry lockRegistry;
+    private final LockRegistry<? extends Lock> lockRegistry;
 
     @SuppressWarnings("java:S107")
     protected JpaDistributionSetInvalidationManagement(
@@ -56,7 +56,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
             final RolloutManagement rolloutManagement, final DeploymentManagement deploymentManagement,
             final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
             final PlatformTransactionManager txManager, final RepositoryProperties repositoryProperties,
-            final LockRegistry lockRegistry) {
+            final LockRegistry<? extends Lock> lockRegistry) {
         this.distributionSetManagement = distributionSetManagement;
         this.rolloutManagement = rolloutManagement;
         this.deploymentManagement = deploymentManagement;

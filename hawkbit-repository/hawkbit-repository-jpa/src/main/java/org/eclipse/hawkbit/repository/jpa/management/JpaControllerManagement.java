@@ -24,7 +24,6 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +35,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -118,8 +116,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
@@ -229,8 +226,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Action addCancelActionStatus(final ActionStatusCreate create) {
         final JpaAction action = actionRepository.getById(create.getActionId());
         if (!action.isCancelingOrCanceled()) {
@@ -275,8 +271,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public ActionStatus addInformationalActionStatus(final ActionStatusCreate create) {
         final JpaAction action = actionRepository.getById(create.getActionId());
         assertActionStatusQuota(create, action);
@@ -290,27 +285,33 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Action addUpdateActionStatus(final ActionStatusCreate statusCreate) {
         return addActionStatus(statusCreate);
     }
 
     @Override
     public Optional<Action> findActiveActionWithHighestWeight(final String controllerId) {
-        return Stream.concat(
-                        // get the highest action with weight
-                        actionRepository.findAll(
-                                ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, false),
-                                PageRequest.of(
-                                        0, 1,
-                                        Sort.by(Sort.Order.desc(JpaAction_.WEIGHT), Sort.Order.asc(AbstractJpaBaseEntity_.ID)))).stream(),
-                        // get the oldest action without weight
-                        actionRepository.findAll(
-                                ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, false),
-                                PageRequest.of(0, 1, Sort.by(Sort.Order.asc(AbstractJpaBaseEntity_.ID)))).stream())
-                .min(Comparator.comparingInt(this::getWeightConsideringDefault).reversed().thenComparing(Action::getId))
-                .map(Action.class::cast);
+        // get the highest action with weight
+        final Action withHighestWeight = actionRepository.findAll(
+                        ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, false),
+                        PageRequest.of(0, 1, Sort.by(Sort.Order.desc(JpaAction_.WEIGHT), Sort.Order.asc(AbstractJpaBaseEntity_.ID)))).stream()
+                .findFirst().orElse(null);
+        // get the oldest action without weight
+        final JpaAction oldestWithoutWeight = actionRepository.findAll(
+                        ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, true),
+                        PageRequest.of(0, 1, Sort.by(Sort.Order.asc(AbstractJpaBaseEntity_.ID)))).stream()
+                .findFirst().orElse(null);
+        if (withHighestWeight == null) {
+            return Optional.ofNullable(oldestWithoutWeight);
+        } else {
+            if (oldestWithoutWeight == null
+                    || getWeightConsideringDefault(oldestWithoutWeight) < getWeightConsideringDefault(withHighestWeight)) {
+                return Optional.of(withHighestWeight);
+            } else {
+                return Optional.of(oldestWithoutWeight);
+            }
+        }
     }
 
     @Override
@@ -334,14 +335,14 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(retryFor = ConcurrencyFailureException.class, noRetryFor = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, excludes = EntityAlreadyExistsException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address) {
         return findOrRegisterTargetIfItDoesNotExist0(controllerId, address, null, null);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(retryFor = ConcurrencyFailureException.class, noRetryFor = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, excludes = EntityAlreadyExistsException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address, final String name, final String type) {
         return findOrRegisterTargetIfItDoesNotExist0(controllerId, address, name, type);
     }
@@ -425,16 +426,14 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void registerRetrieved(final long actionId, final String message) {
         handleRegisterRetrieved(actionId, message);
     }
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Target updateControllerAttributes(final String controllerId, final Map<String, String> data, final UpdateMode mode) {
         // Constraints on attribute keys & values are not validated by EclipseLink. Hence, they are validated here.
         if (data.entrySet().stream().anyMatch(e -> !isAttributeEntryValid(e))) {
@@ -518,7 +517,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             jpaAction.setStatus(Status.CANCELING);
             // document that the status has been retrieved
             actionStatusRepository.save(
-                    new JpaActionStatus(jpaAction, Status.CANCELING, java.lang.System.currentTimeMillis(), "manual cancelation requested"));
+                    new JpaActionStatus(jpaAction, Status.CANCELING, System.currentTimeMillis(), "manual cancelation requested"));
             final Action saveAction = actionRepository.save(jpaAction);
 
             cancelAssignDistributionSetEvent(jpaAction);
@@ -651,7 +650,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         jpaTarget.setName((StringUtils.hasText(name) ? name : controllerId));
         jpaTarget.setSecurityToken(SecurityTokenGenerator.generateToken());
         jpaTarget.setUpdateStatus(TargetUpdateStatus.REGISTERED);
-        jpaTarget.setLastTargetQuery(java.lang.System.currentTimeMillis());
+        jpaTarget.setLastTargetQuery(System.currentTimeMillis());
         jpaTarget.setAddress(Optional.ofNullable(address).map(URI::toString).orElse(null));
 
         if (StringUtils.hasText(type)) {
@@ -684,7 +683,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
         log.debug("{} events in flushUpdateQueue.", size);
 
-        final Set<TargetPoll> events = new HashSet<>(queue.size());
+        final Set<TargetPoll> events = HashSet.newHashSet(queue.size());
         final int drained = queue.drainTo(events);
 
         if (drained <= 0) {
@@ -712,7 +711,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 Constants.MAX_ENTRIES_IN_STATEMENT);
 
         pollChunks.forEach(chunk -> {
-            final long lastTargetQuery = java.lang.System.currentTimeMillis();
+            final long lastTargetQuery = System.currentTimeMillis();
             setLastTargetQuery(tenant, lastTargetQuery, chunk);
             afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher()
                     .publishEvent(new TargetPollEvent(chunk, lastTargetQuery, tenant)));
@@ -774,7 +773,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             if (isStatusUnknown(toUpdate.getUpdateStatus())) {
                 toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
             }
-            toUpdate.setLastTargetQuery(java.lang.System.currentTimeMillis());
+            toUpdate.setLastTargetQuery(System.currentTimeMillis());
             afterCommit(() -> EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetPollEvent(toUpdate)));
             return targetRepository.save(toUpdate);
         }
@@ -901,7 +900,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         // case controller retrieves a action multiple times.
         if (resultList.isEmpty() || (Status.RETRIEVED != resultList.get(0)[1])) {
             // document that the status has been retrieved
-            actionStatusRepository.save(new JpaActionStatus(action, Status.RETRIEVED, java.lang.System.currentTimeMillis(), message));
+            actionStatusRepository.save(new JpaActionStatus(action, Status.RETRIEVED, System.currentTimeMillis(), message));
 
             // don't change the action status itself in case the action is in
             // canceling state otherwise

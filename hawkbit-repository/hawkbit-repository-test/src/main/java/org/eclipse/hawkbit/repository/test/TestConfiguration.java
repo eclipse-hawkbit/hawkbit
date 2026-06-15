@@ -15,6 +15,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
 
 import org.eclipse.hawkbit.artifact.ArtifactStorage;
 import org.eclipse.hawkbit.artifact.fs.FileArtifactProperties;
@@ -22,6 +23,7 @@ import org.eclipse.hawkbit.artifact.fs.FileArtifactStorage;
 import org.eclipse.hawkbit.artifact.urlresolver.PropertyBasedArtifactUrlResolver;
 import org.eclipse.hawkbit.artifact.urlresolver.PropertyBasedArtifactUrlResolverProperties;
 import org.eclipse.hawkbit.auth.Hierarchy;
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RepositoryConfiguration;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
@@ -96,7 +98,7 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    LockRegistry lockRegistry() {
+    LockRegistry<Lock> lockRegistry() {
         return new DefaultLockRegistry();
     }
 
@@ -137,7 +139,7 @@ public class TestConfiguration implements AsyncConfigurer {
 
     @Bean
     AuditorAware<String> auditorAware() {
-        return () -> Optional.ofNullable(AccessContext.actor());
+        return () -> Optional.ofNullable(SpRole.isController() ? "CONTROLLER_PLUG_AND_PLAY" : AccessContext.actor());
     }
 
     @Bean

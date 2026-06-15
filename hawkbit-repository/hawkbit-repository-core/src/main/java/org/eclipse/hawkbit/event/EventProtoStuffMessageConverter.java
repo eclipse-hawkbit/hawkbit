@@ -17,6 +17,8 @@ import io.protostuff.Schema;
 import io.protostuff.runtime.RuntimeSchema;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEvent;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.AbstractMessageConverter;
@@ -46,18 +48,20 @@ public class EventProtoStuffMessageConverter extends AbstractMessageConverter {
     public static final MimeType APPLICATION_BINARY_PROTOSTUFF = new MimeType("application", "binary+protostuff");
     private static final int HEADER_LENGTH_PREFIX_SIZE = 4;
 
-
     public EventProtoStuffMessageConverter() {
         super(APPLICATION_BINARY_PROTOSTUFF);
     }
 
     @Override
+    @NullMarked
     protected boolean supports(final Class<?> aClass) {
         return AbstractRemoteEvent.class.isAssignableFrom(aClass);
     }
 
     @Override
-    protected Object convertFromInternal(final Message<?> message, final Class<?> targetClass, final Object conversionHint) {
+    @NullMarked
+    @Nullable
+    protected Object convertFromInternal(final Message<?> message, final Class<?> targetClass, @Nullable final Object conversionHint) {
         final Object objectPayload = message.getPayload();
         if (objectPayload instanceof byte[] payload) {
             final byte[] clazzHeader = extractClazzHeader(payload);
@@ -112,7 +116,6 @@ public class EventProtoStuffMessageConverter extends AbstractMessageConverter {
         return content;
     }
 
-
     private static EventType readClassHeader(final byte[] typeInformation) {
         final Schema<EventType> schema = RuntimeSchema.getSchema(EventType.class);
         final EventType deserializedType = schema.newMessage();
@@ -134,8 +137,7 @@ public class EventProtoStuffMessageConverter extends AbstractMessageConverter {
             throw new MessageConversionException("Missing EventType for given class : " + clazz);
         }
 
-        @SuppressWarnings("unchecked")
-        final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema((Class<?>) EventType.class);
+        @SuppressWarnings("unchecked") final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema((Class<?>) EventType.class);
         final LinkedBuffer buffer = LinkedBuffer.allocate();
         byte[] typeBytes = ProtobufIOUtil.toByteArray(clazzEventType, schema, buffer);
 

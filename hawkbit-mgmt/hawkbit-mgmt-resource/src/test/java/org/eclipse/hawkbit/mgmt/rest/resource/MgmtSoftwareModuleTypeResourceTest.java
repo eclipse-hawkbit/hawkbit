@@ -489,6 +489,120 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
 
     }
 
+    @Test
+    void getSoftwareModuleTypesFilteredBySoftDeletedMode() throws Exception {
+        // 3 built-in types exist (os, runtime, application)
+        final int builtInTypes = 3;
+
+        softwareModuleTypeManagement.create(SoftwareModuleTypeManagement.Create.builder().key("activeKey").name("activeType").build());
+
+        // create type + SM using it, then delete type → soft-delete
+        final SoftwareModuleType deletedType = softwareModuleTypeManagement.create(
+                SoftwareModuleTypeManagement.Create.builder().key("deletedKey").name("deletedType").build());
+        softwareModuleManagement.create(
+                SoftwareModuleManagement.Create.builder().type(deletedType).name("sm").version("1.0").build());
+        softwareModuleTypeManagement.delete(deletedType.getId());
+
+        // default — built-in + activeType, no deletedType
+        mvc.perform(get("/rest/v1/softwaremoduletypes").accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(builtInTypes + 1)))
+                .andExpect(jsonPath("$.total", equalTo(builtInTypes + 1)))
+                .andExpect(jsonPath("$.content.[?(@.key=='deletedKey')]").doesNotExist());
+
+        // only_soft_deleted — only deletedType
+        mvc.perform(get("/rest/v1/softwaremoduletypes")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "ONLY_SOFT_DELETED")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo("deletedType")))
+                .andExpect(jsonPath("content[0].deleted", equalTo(true)));
+
+        // include_soft_deleted — everything
+        mvc.perform(get("/rest/v1/softwaremoduletypes")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "INCLUDE_SOFT_DELETED")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(builtInTypes + 2)))
+                .andExpect(jsonPath("$.total", equalTo(builtInTypes + 2)));
+
+        // exclude_soft_deleted — explicit, same as default
+        mvc.perform(get("/rest/v1/softwaremoduletypes")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "EXCLUDE_SOFT_DELETED")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(builtInTypes + 1)))
+                .andExpect(jsonPath("$.total", equalTo(builtInTypes + 1)))
+                .andExpect(jsonPath("$.content.[?(@.key=='deletedKey')]").doesNotExist());
+    }
+
+    @Test
+    void getSoftwareModuleTypesFilteredBySoftDeletedModeWithRsql() throws Exception {
+        softwareModuleTypeManagement.create(
+                SoftwareModuleTypeManagement.Create.builder().key("rsqlActiveKey").name("rsqlActiveType").build());
+
+        final SoftwareModuleType deletedType = softwareModuleTypeManagement.create(
+                SoftwareModuleTypeManagement.Create.builder().key("rsqlDeletedKey").name("rsqlDeletedType").build());
+        softwareModuleManagement.create(
+                SoftwareModuleManagement.Create.builder().type(deletedType).name("sm").version("1.0").build());
+        softwareModuleTypeManagement.delete(deletedType.getId());
+
+        // rsql + soft_deleted — find deleted by name
+        mvc.perform(get("/rest/v1/softwaremoduletypes")
+                        .param("q", "name==rsqlDeletedType")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "ONLY_SOFT_DELETED")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo("rsqlDeletedType")))
+                .andExpect(jsonPath("content[0].deleted", equalTo(true)));
+
+        // rsql + not_soft_deleted — deleted not found
+        mvc.perform(get("/rest/v1/softwaremoduletypes")
+                        .param("q", "name==rsqlDeletedType")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "EXCLUDE_SOFT_DELETED")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andExpect(jsonPath("$.total", equalTo(0)));
+
+        // rsql + include_soft_deleted — filter by name narrows to one
+        mvc.perform(get("/rest/v1/softwaremoduletypes")
+                        .param("q", "name==rsqlActiveType")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "INCLUDE_SOFT_DELETED")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo("rsqlActiveType")));
+    }
+
+    @Test
+    void updateSoftDeletedSoftwareModuleTypeRejected() throws Exception {
+        final SoftwareModuleType deletedType = softwareModuleTypeManagement.create(
+                SoftwareModuleTypeManagement.Create.builder().key("delKey").name("delType").build());
+        softwareModuleManagement.create(
+                SoftwareModuleManagement.Create.builder().type(deletedType).name("sm").version("1.0").build());
+        softwareModuleTypeManagement.delete(deletedType.getId());
+
+        final String body = new JSONObject().put("description", "updated").toString();
+        mvc.perform(put("/rest/v1/softwaremoduletypes/{smtId}", deletedType.getId()).content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.deleted")));
+    }
+
     private SoftwareModuleType createTestType() {
         final SoftwareModuleType testType = softwareModuleTypeManagement.create(SoftwareModuleTypeManagement.Create.builder()
                 .key("test123").name("TestName123").description("Desc123").colour("colour").maxAssignments(5).build());

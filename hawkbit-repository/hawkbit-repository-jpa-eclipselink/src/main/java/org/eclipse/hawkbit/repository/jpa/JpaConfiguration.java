@@ -17,10 +17,10 @@ import javax.sql.DataSource;
 import lombok.Data;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
-import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jpa.autoconfigure.JpaBaseConfiguration;
+import org.springframework.boot.jpa.autoconfigure.JpaProperties;
+import org.springframework.boot.transaction.autoconfigure.TransactionManagerCustomizers;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -38,7 +38,7 @@ import org.springframework.transaction.jta.JtaTransactionManager;
 public class JpaConfiguration extends JpaBaseConfiguration {
 
     @Data
-    @ConfigurationProperties // predix is "/" intentionally
+    @ConfigurationProperties // prefix is "/" intentionally
     protected static class Properties {
 
         private final Map<String, String> eclipselink = new HashMap<>();
@@ -81,7 +81,7 @@ public class JpaConfiguration extends JpaBaseConfiguration {
 
     @Override
     protected Map<String, Object> getVendorProperties(final DataSource dataSource) {
-        final Map<String, Object> properties = new HashMap<>(7);
+        final Map<String, Object> properties = HashMap.newHashMap(7);
         // Turn off dynamic weaving to disable LTW lookup in static weaving mode
         properties.put(PersistenceUnitProperties.WEAVING, "false");
         // needed for reports

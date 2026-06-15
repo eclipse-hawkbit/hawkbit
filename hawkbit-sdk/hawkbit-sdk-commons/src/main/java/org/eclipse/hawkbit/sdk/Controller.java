@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.sdk;
 
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 @Data
 @Builder

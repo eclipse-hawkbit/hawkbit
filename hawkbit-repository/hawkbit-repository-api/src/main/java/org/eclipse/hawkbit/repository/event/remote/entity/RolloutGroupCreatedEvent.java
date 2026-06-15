@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import java.io.Serial;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -25,6 +26,7 @@ public class RolloutGroupCreatedEvent extends AbstractRolloutGroupEvent implemen
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @JsonIgnore
     public RolloutGroupCreatedEvent(final RolloutGroup rolloutGroup, final Long rolloutId) {
         super(rolloutGroup, rolloutId);
     }

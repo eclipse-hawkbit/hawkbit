@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement.Create;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement.Update;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.exception.DeletedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteSoftwareModuleException;
 import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.jpa.RandomGeneratedInputStream;
@@ -484,6 +485,22 @@ class SoftwareModuleManagementTest
             assertThat(result.getId()).isNotNull();
             assertThat(artifactStorage.getBySha1(AccessContext.tenant(), result.getSha1Hash())).isNotNull();
         }
+    }
+
+    @Test
+    void bulkUpdateSoftDeletedSoftwareModuleRejected() {
+        final SoftwareModule active = softwareModuleManagement.create(
+                Create.builder().type(osType).name("active").version("1.0").build());
+        SoftwareModule toDelete = softwareModuleManagement.create(
+                Create.builder().type(osType).name("toDelete").version("1.0").build());
+        testdataFactory.createDistributionSet(List.of(toDelete));
+        softwareModuleManagement.delete(toDelete.getId());
+
+        final List<Update> updates = List.of(
+                Update.builder().id(active.getId()).description("ok").build(),
+                Update.builder().id(toDelete.getId()).description("should fail").build());
+        assertThatExceptionOfType(DeletedException.class)
+                .isThrownBy(() -> softwareModuleManagement.update(updates));
     }
 
     private void assertArtifactDoesntExist(final Artifact... results) {

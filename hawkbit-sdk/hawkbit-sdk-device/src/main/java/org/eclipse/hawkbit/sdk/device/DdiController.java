@@ -88,7 +88,8 @@ public class DdiController {
      * @param controller the controller
      * @param hawkbitClient a factory for creating to {@link DdiRootControllerRestApi} (and used) for communication to hawkBit
      */
-    public DdiController(final Tenant tenant, final Controller controller, final UpdateHandler updateHandler, final HawkbitClient hawkbitClient) {
+    public DdiController(
+            final Tenant tenant, final Controller controller, final UpdateHandler updateHandler, final HawkbitClient hawkbitClient) {
         this.tenant = tenant;
         this.controller = controller;
         this.targetSecurityToken = controller.getSecurityToken();
@@ -100,7 +101,7 @@ public class DdiController {
     public String getTenantId() {
         return tenant.getTenantId();
     }
-    
+
     public String getControllerId() {
         return controller.getControllerId();
     }
@@ -173,8 +174,7 @@ public class DdiController {
                             final Optional<Link> confirmationBaseLink = getRequiredLink(controllerBase, CONFIRMATION_BASE_LINK);
                             if (confirmationBaseLink.isPresent()) {
                                 final long actionId = getActionId(confirmationBaseLink.get());
-                                log.info(LOG_PREFIX + "Confirmation is required for action {}!", getTenantId(),
-                                        getControllerId(), actionId);
+                                log.info(LOG_PREFIX + "Confirmation is required for action {}!", getTenantId(), getControllerId(), actionId);
                                 // TODO - confirmation handler
                                 sendConfirmationFeedback(actionId);
                                 executor.schedule(this::poll, IMMEDIATE_MS, TimeUnit.MILLISECONDS);
@@ -187,8 +187,8 @@ public class DdiController {
                                             } else if (currentActionId != actionId) {
                                                 // currentActionId had failed to be processed and new one had been initiated
                                                 // try cancel current and process new one
-                                                log.info(LOG_PREFIX + "Action {} is canceled while in process (new {})!", getTenantId(),
-                                                        getControllerId(), currentActionId, actionId);
+                                                log.info(LOG_PREFIX + "Action {} is canceled while in process (new {})!",
+                                                        getTenantId(), getControllerId(), currentActionId, actionId);
                                                 cancelActionByCancellationLink(controllerBase, currentActionId);
                                                 currentActionId = null;
                                                 // then process the new one
@@ -206,15 +206,15 @@ public class DdiController {
                                 executor.schedule(this::poll, DEFAULT_POLL_MS, TimeUnit.MILLISECONDS)));
     }
 
-    private void processAction(final long actionId, final Map.Entry<Long,DdiDeploymentBase> actionWithDeployment, final ScheduledExecutorService executor) {
+    private void processAction(
+            final long actionId, final Map.Entry<Long, DdiDeploymentBase> actionWithDeployment, final ScheduledExecutorService executor) {
         if (lastActionId != null && lastActionId == actionId) {
             log.info(LOG_PREFIX + "Still receive the last action {}",
                     getTenantId(), getControllerId(), actionId);
             return;
         }
 
-        log.info(LOG_PREFIX + "Process action {}", getTenantId(), getControllerId(),
-                actionId);
+        log.info(LOG_PREFIX + "Process action {}", getTenantId(), getControllerId(), actionId);
         final DdiDeployment deployment = actionWithDeployment.getValue().getDeployment();
         final DdiDeployment.HandlingType updateType = deployment.getUpdate();
         final List<DdiChunk> modules = deployment.getChunks();
@@ -241,13 +241,18 @@ public class DdiController {
         return Optional.ofNullable(poll.getBody());
     }
 
-    private void cancelActionByCancellationLink(DdiControllerBase controllerBase, long actionToBeCanceled) {
+    private void cancelActionByCancellationLink(final DdiControllerBase controllerBase, final long actionToBeCanceled) {
         getRequiredLink(controllerBase, CANCEL_ACTION_LINK).ifPresentOrElse(link -> {
-                // action is in CANCELING state - send cancel feedback
-                final long actionId = actionToBeCanceled == -1 ? getActionIdFromCancellationLink(link) : actionToBeCanceled;
-                log.info(LOG_PREFIX + "Cancelling current action {}", getTenantId(), getControllerId(), actionId);
-                sendCancelFeedback(actionId);
-            }, () -> log.info(LOG_PREFIX + "Action {} is canceled while in process (not returned)!", getTenantId(), getControllerId(), getCurrentActionId())
+                    // action is in CANCELING state - send cancel feedback
+                    final long actionId = actionToBeCanceled == -1 ? getActionIdFromCancellationLink(link) : actionToBeCanceled;
+                    log.info(LOG_PREFIX + "Cancelling current action {}", getTenantId(), getControllerId(), actionId);
+                    sendCancelFeedback(actionId);
+                }, () -> {
+                    if (actionToBeCanceled != -1) {
+                        log.info(LOG_PREFIX + "Action {} is canceled while in process (not returned)!",
+                                getTenantId(), getControllerId(), actionToBeCanceled);
+                    }
+                }
         );
     }
 

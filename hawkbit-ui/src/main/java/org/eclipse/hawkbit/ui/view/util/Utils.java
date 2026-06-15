@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.ui.view.util;
 
+import static java.time.format.FormatStyle.MEDIUM;
+import static java.time.format.FormatStyle.SHORT;
+
 import java.io.Serial;
 import java.time.Duration;
 import java.time.Instant;
@@ -31,6 +34,7 @@ import java.util.function.ToLongFunction;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
@@ -48,12 +52,14 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.page.ExtendedClientDetails;
+import com.vaadin.flow.component.page.Page.ExtendedClientDetailsReceiver;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.CallbackDataProvider.FetchCallback;
+import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
@@ -106,13 +112,13 @@ public class Utils {
             final String label,
             final Consumer<HasValue.ValueChangeEvent<T>> changeListener,
             final FetchCallback<T, String> listHandler) {
-        final ComboBox<T> combo = new ComboBox<T>(label, changeListener::accept);
+        final ComboBox<T> combo = new ComboBox<>(label, changeListener::accept);
         combo.setAllowedCharPattern(Utils.COMBO_NAME_ALLOWED_CHARS);
         combo.setItemsWithFilterConverter(listHandler, nameFilter -> "name==*" + nameFilter + "*");
         return combo;
     }
 
-    public static Button deleteButton(String tooltipText, Runnable deleteAction) {
+    public static Button deleteButton(final String tooltipText, final Runnable deleteAction) {
         final Button button = Utils.tooltip(new Button(VaadinIcon.TRASH.create()), tooltipText);
         button.addClickListener(e -> {
             ConfirmDialog dialog = Utils.deleteConfirmDialog(deleteAction);
@@ -140,16 +146,12 @@ public class Utils {
         if (addHandler != null) {
             final Button addBtn = tooltip(new Button(VaadinIcon.PLUS.create()), "Add");
             addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            addBtn.addClickListener(e -> addHandler
-                    .apply(selectionGrid)
-                    .thenAccept(v -> selectionGrid.refreshGrid(true)));
+            addBtn.addClickListener(e -> addHandler.apply(selectionGrid).thenAccept(v -> selectionGrid.refreshGrid(true)));
             layout.add(addBtn);
         }
         if (removeHandler != null) {
             final ConfirmDialog dialog = deleteConfirmDialog(
-                    () -> removeHandler
-                            .apply(selectionGrid)
-                            .thenAccept(v -> selectionGrid.refreshGrid(false)));
+                    () -> removeHandler.apply(selectionGrid).thenAccept(v -> selectionGrid.refreshGrid(false)));
             final Button removeBtn = tooltip(new Button(VaadinIcon.MINUS.create()), "Remove");
             removeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_CONTRAST);
             removeBtn.addClickListener(e -> dialog.open());
@@ -190,11 +192,7 @@ public class Utils {
     public static <T> void remove(final Collection<T> remove, final Set<T> from, final Function<T, ?> idFn) {
         remove.forEach(toRemove -> {
             final Object id = idFn.apply(toRemove);
-            for (final Iterator<T> i = from.iterator(); i.hasNext();) {
-                if (idFn.apply(i.next()).equals(id)) {
-                    i.remove();
-                }
-            }
+            from.removeIf(t -> idFn.apply(t).equals(id));
         });
     }
 
@@ -220,24 +218,23 @@ public class Utils {
     }
 
     public static <T extends Component> T tooltip(final T component, final String text) {
-        Tooltip.forComponent(component)
-                .withText(text)
-                .withPosition(Tooltip.TooltipPosition.TOP_START);
+        Tooltip.forComponent(component).withText(text).withPosition(Tooltip.TooltipPosition.TOP_START);
         return component;
     }
 
     public static Icon iconColored(final IconFactory component, final String text, final String color) {
-        var icon = tooltip(component.create(), text);
+        final Icon icon = tooltip(component.create(), text);
         icon.setColor(color);
         return icon;
     }
 
-    public static Select<MgmtActionType> actionTypeControls(MgmtActionType defaultValue, DateTimePicker forceTime) {
+    public static Select<MgmtActionType> actionTypeControls(final MgmtActionType defaultValue, final DateTimePicker forceTime) {
         return actionTypeControls(MgmtActionType.values(), defaultValue, forceTime);
     }
 
-    public static Select<MgmtActionType> actionTypeControls(MgmtActionType[] displayedValues, MgmtActionType defaultValue, DateTimePicker forceTime) {
-        Select<MgmtActionType> actionType = new Select<>();
+    public static Select<MgmtActionType> actionTypeControls(
+            final MgmtActionType[] displayedValues, final MgmtActionType defaultValue, final DateTimePicker forceTime) {
+        final Select<MgmtActionType> actionType = new Select<>();
         actionType.setLabel(Constants.ACTION_TYPE);
         actionType.setItems(displayedValues);
         actionType.setValue(defaultValue);
@@ -269,7 +266,7 @@ public class Utils {
             setHeaderTitle(headerTitle);
             setMinWidth(640, Unit.PIXELS);
 
-            setModal(true);
+            setModality(ModalityMode.STRICT);
             setDraggable(true);
             setResizable(true);
 
@@ -298,30 +295,38 @@ public class Utils {
     }
 
     private static ZoneId getZoneId() {
-        CompletableFuture<ZoneId> zoneId = new CompletableFuture<>();
-        UI.getCurrent().getPage().retrieveExtendedClientDetails(details -> zoneId.complete(ZoneId.of(details.getTimeZoneId())));
-        try {
-            return zoneId.get(1, TimeUnit.SECONDS);
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } catch (TimeoutException | ExecutionException ignored) {
-            log.warn("failed to get zone");
+        final ExtendedClientDetails details = UI.getCurrent().getPage().getExtendedClientDetails();
+        if (details.getScreenWidth() != -1) {
+            // fetched and complete
+            return ZoneId.of(details.getTimeZoneId());
+        } else {
+            // need to refresh
+            final CompletableFuture<ZoneId> zoneId = new CompletableFuture<>();
+            final ExtendedClientDetailsReceiver receiver = refreshedDetails -> zoneId.complete(ZoneId.of(refreshedDetails.getTimeZoneId()));
+            // Placeholder with default values, trigger refresh
+            details.refresh(receiver::receiveDetails);
+            try {
+                return zoneId.get(1, TimeUnit.SECONDS);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (TimeoutException | ExecutionException ignored) {
+                log.warn("failed to get zone");
+            }
+            return ZoneId.systemDefault();
         }
-        return ZoneId.systemDefault();
     }
 
     public static <G> LocalDateTimeRenderer<G> localDateTimeRenderer(ToLongFunction<G> f) {
 
-        return new LocalDateTimeRenderer<>((e) -> LocalDateTime.ofInstant(Instant.ofEpochMilli(f.applyAsLong(e)), getZoneId()),
-                () -> DateTimeFormatter.ofLocalizedDateTime(
-                        FormatStyle.SHORT,
-                        FormatStyle.MEDIUM).withLocale(UI.getCurrent().getLocale()));
+        return new LocalDateTimeRenderer<>(e -> LocalDateTime.ofInstant(
+                Instant.ofEpochMilli(f.applyAsLong(e)), getZoneId()),
+                () -> DateTimeFormatter.ofLocalizedDateTime(SHORT, MEDIUM).withLocale(UI.getCurrent().getLocale()));
     }
 
     public static String localDateTimeFromTs(long timestamp) {
-        return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), getZoneId()).format(DateTimeFormatter.ofLocalizedDateTime(
-                FormatStyle.SHORT,
-                FormatStyle.MEDIUM).withLocale(UI.getCurrent().getLocale()));
+        return LocalDateTime.ofInstant(
+                Instant.ofEpochMilli(timestamp),
+                getZoneId()).format(DateTimeFormatter.ofLocalizedDateTime(SHORT, MEDIUM).withLocale(UI.getCurrent().getLocale()));
     }
 
     public static String getSortParam(List<QuerySortOrder> querySortOrders) {
@@ -338,8 +343,8 @@ public class Utils {
     }
 
     public static String durationFromMillis(Long time) {
-        var duration = Duration.between(Instant.ofEpochMilli(time), Instant.now());
-        var day = duration.toDaysPart();
+        final Duration duration = Duration.between(Instant.ofEpochMilli(time), Instant.now());
+        final long day = duration.toDaysPart();
         if (day > 2) {
             return day + "d";
         }

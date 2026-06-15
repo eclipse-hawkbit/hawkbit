@@ -25,8 +25,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.eclipse.hawkbit.amqp.AmqpMessageHandlerService;
 import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -73,6 +71,8 @@ import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Feature: Component Tests - Device Management Federation API<br/>
@@ -133,7 +133,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     void registerTargetWithName() {
         final String controllerId = TARGET_PREFIX + "registerTargetWithName";
         final String name = "NonDefaultTargetName";
-        registerAndAssertTargetWithExistingTenant(controllerId, name, 1, TargetUpdateStatus.REGISTERED, CREATED_BY, null);
+        registerAndAssertTargetWithExistingTenant(controllerId, name, 1, TargetUpdateStatus.REGISTERED, CONTROLLER_PLUG_AND_PLAY, null);
         registerSameTargetAndAssertBasedOnVersion(controllerId, name + "_updated", 1, TargetUpdateStatus.REGISTERED, null);
 
         Mockito.verifyNoInteractions(getDeadletterListener());
@@ -153,7 +153,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         attributes.put("testKey1", "testValue1");
         attributes.put("testKey2", "testValue2");
 
-        registerAndAssertTargetWithExistingTenant(controllerId, null, 1, TargetUpdateStatus.REGISTERED, CREATED_BY, attributes);
+        registerAndAssertTargetWithExistingTenant(controllerId, null, 1, TargetUpdateStatus.REGISTERED, CONTROLLER_PLUG_AND_PLAY, attributes);
 
         attributes.put("testKey3", "testValue3");
         registerSameTargetAndAssertBasedOnVersion(controllerId, null, 1, TargetUpdateStatus.REGISTERED, attributes);
@@ -176,7 +176,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         final Map<String, String> attributes = new HashMap<>();
         attributes.put("testKey1", "testValue1");
         attributes.put("testKey2", "testValue2");
-        registerAndAssertTargetWithExistingTenant(controllerId, name, 1, TargetUpdateStatus.REGISTERED, CREATED_BY, attributes);
+        registerAndAssertTargetWithExistingTenant(controllerId, name, 1, TargetUpdateStatus.REGISTERED, CONTROLLER_PLUG_AND_PLAY, attributes);
 
         attributes.put("testKey3", "testValue3");
         registerSameTargetAndAssertBasedOnVersion(controllerId, name + "_updated", 1, TargetUpdateStatus.REGISTERED, attributes);
@@ -751,7 +751,6 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         // retrieve action and ensure that it is in Running state
         final Action action = deploymentManagement.findAction(actionId).orElseThrow(() -> new AssertionError("Action not found!"));
         assertThat(action.getStatus()).isEqualTo(Status.RUNNING);
-
     }
 
     /**
@@ -1104,7 +1103,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         assertActionStatusList(actionId, 2, Status.WAIT_FOR_CONFIRMATION);
     }
 
-    private static String getActionIdFromBody(final byte[] body) throws IOException {
+    private static String getActionIdFromBody(final byte[] body) {
         final ObjectMapper objectMapper = new ObjectMapper();
         final ObjectNode node = objectMapper.readValue(new String(body, Charset.defaultCharset()), ObjectNode.class);
         assertThat(node.has("actionId")).isTrue();
@@ -1131,8 +1130,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
     private void updateAttributesWithUpdateModeMerge() {
         // get the current attributes
-        final Map<String, String> attributes = new HashMap<>(
-                targetManagement.getControllerAttributes(DMF_ATTR_TEST_CONTROLLER_ID));
+        final Map<String, String> attributes = new HashMap<>(targetManagement.getControllerAttributes(DMF_ATTR_TEST_CONTROLLER_ID));
 
         // send an update message with update mode MERGE
         final Map<String, String> mergeAttributes = new HashMap<>();

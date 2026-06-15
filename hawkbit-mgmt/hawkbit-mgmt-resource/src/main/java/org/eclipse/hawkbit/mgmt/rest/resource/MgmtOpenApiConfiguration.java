@@ -9,20 +9,33 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.OAuthFlow;
+import io.swagger.v3.oas.models.security.OAuthFlows;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
+import io.swagger.v3.oas.models.tags.Tag;
 import org.eclipse.hawkbit.rest.OpenApi;
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 
 @Configuration
 @ConditionalOnProperty(value = OpenApi.HAWKBIT_SERVER_OPENAPI_ENABLED, havingValue = "true", matchIfMissing = true)
@@ -30,13 +43,51 @@ public class MgmtOpenApiConfiguration {
 
     private static final String BASIC_AUTH_SEC_SCHEME_NAME = "Basic";
     private static final String BEARER_AUTH_SEC_SCHEME_NAME = "Bearer";
+    private static final String OAUTH2_AUTH_SEC_SCHEME_NAME = "OAuth2";
+    private static final String DESCRIPTION_SUFFIX = " Authentication";
 
     @Bean
     @ConditionalOnProperty(
-            value = "hawkbit.server.openapi.mgmt.enabled",
-            havingValue = "true",
-            matchIfMissing = true)
-    public GroupedOpenApi mgmtApi(@Value("${hawkbit.server.openapi.mgmt.tenant-endpoint.enabled:false}") final boolean tenantEndpointEnabled) {
+            value = "hawkbit.server.openapi.mgmt.enabled", havingValue = "true", matchIfMissing = true)
+    public GroupedOpenApi mgmtApi(
+            @Value("${hawkbit.server.openapi.mgmt.tenant-endpoint.enabled:false}") final boolean tenantEndpointEnabled,
+            @Value("${springdoc.oauth-flow.authorizationUrl:}") final String authorizationUrl,
+            @Value("${springdoc.oauth-flow.tokenUrl:}") final String tokenUrl,
+            @Autowired(required = false) @Qualifier("hawkbitOAuth2ResourceServerCustomizer") final Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> oauth2ResourceServerCustomizer,
+            final HawkbitSecurityProperties hawkbitSecurityProperties
+    ) {
+        final boolean oauth2Enabled = oauth2ResourceServerCustomizer != null;
+        final Map<String, SecurityScheme> securitySchemeMap = new LinkedHashMap<>(); // linked map to keep the order
+        final SecurityRequirement securityRequirement = new SecurityRequirement();
+        if (!oauth2Enabled || hawkbitSecurityProperties.isAllowHttpBasicOnOAuthEnabled()) {
+            securityRequirement.addList(BASIC_AUTH_SEC_SCHEME_NAME);
+            securitySchemeMap.put(BASIC_AUTH_SEC_SCHEME_NAME, new SecurityScheme()
+                    .description(BASIC_AUTH_SEC_SCHEME_NAME + DESCRIPTION_SUFFIX)
+                    .type(SecurityScheme.Type.HTTP)
+                    .scheme("basic"));
+        }
+        if (oauth2Enabled) {
+            securityRequirement.addList(BEARER_AUTH_SEC_SCHEME_NAME);
+            securitySchemeMap.put(BEARER_AUTH_SEC_SCHEME_NAME, new SecurityScheme()
+                    .description(BEARER_AUTH_SEC_SCHEME_NAME + DESCRIPTION_SUFFIX)
+                    .type(SecurityScheme.Type.HTTP)
+                    .bearerFormat("JWT")
+                    .scheme("bearer"));
+            if (!tokenUrl.isBlank()) {
+                securityRequirement.addList(BEARER_AUTH_SEC_SCHEME_NAME);
+                securitySchemeMap.put(OAUTH2_AUTH_SEC_SCHEME_NAME, new SecurityScheme()
+                        .description(OAUTH2_AUTH_SEC_SCHEME_NAME + DESCRIPTION_SUFFIX)
+                        .type(SecurityScheme.Type.OAUTH2)
+                        .flows(authorizationUrl.isBlank()
+                                ? new OAuthFlows().clientCredentials(new OAuthFlow().tokenUrl(tokenUrl))
+                                : new OAuthFlows()
+                                        .authorizationCode(new OAuthFlow().tokenUrl(tokenUrl).authorizationUrl(authorizationUrl))
+                                        .clientCredentials(new OAuthFlow().tokenUrl(tokenUrl)))
+                        .bearerFormat("JWT")
+                        .scheme("bearer"));
+            }
+        }
+        // @formatter:off
         return GroupedOpenApi
                 .builder()
                 .group("Management API")
@@ -57,25 +108,11 @@ public class MgmtOpenApiConfiguration {
                                                     .variables(new ServerVariables().addServerVariable("tenant", tenantSeverVariable())),
                                             new Server().url("/"))
                                         : List.of(new Server().url("/")))
-                                .addSecurityItem(new SecurityRequirement()
-                                        .addList(BASIC_AUTH_SEC_SCHEME_NAME)
-                                        .addList(BEARER_AUTH_SEC_SCHEME_NAME))
-                                .components(
-                                        openApi
-                                                .getComponents()
-                                                .addSecuritySchemes(BASIC_AUTH_SEC_SCHEME_NAME,
-                                                        new SecurityScheme()
-                                                                .description(BASIC_AUTH_SEC_SCHEME_NAME + " Authentication")
-                                                                .type(SecurityScheme.Type.HTTP)
-                                                                .scheme("basic"))
-                                                .addSecuritySchemes(BEARER_AUTH_SEC_SCHEME_NAME,
-                                                        new SecurityScheme()
-                                                                .description(BEARER_AUTH_SEC_SCHEME_NAME + " Authentication")
-                                                                .type(SecurityScheme.Type.HTTP)
-                                                                .bearerFormat("JWT")
-                                                                .scheme("bearer")))
-                                .tags(OpenApi.sort(openApi.getTags())))
+                                .addSecurityItem(securityRequirement)
+                                .components(openApi.getComponents().securitySchemes(securitySchemeMap))
+                                .tags(sort(openApi.getTags())))
                 .build();
+        // @formatter:on
     }
 
     private static ServerVariable tenantSeverVariable() {
@@ -83,5 +120,36 @@ public class MgmtOpenApiConfiguration {
         tenantServerVariable.setDescription("AccessContext identifier");
         tenantServerVariable.setDefault("DEFAULT");
         return tenantServerVariable;
+    }
+
+    private static final String ORDER = "order";
+    private static final Comparator<Tag> TAG_COMPARATOR = new Comparator<>() {
+
+        @Override
+        public int compare(final Tag o1, final Tag o2) {
+            final int o1Order = order(o1);
+            final int o2Order = order(o2);
+            if (o1Order == o2Order) {
+                return o1.getName().compareTo(o2.getName());
+            } else {
+                return Integer.compare(o1Order, o2Order);
+            }
+        }
+
+        private static int order(final Tag tag) {
+            return Optional.ofNullable(tag.getExtensions())
+                    .map(extensions -> extensions.get(OpenApi.X_HAWKBIT))
+                    .filter(extension -> Map.class.isAssignableFrom(extension.getClass()))
+                    .map(Map.class::cast)
+                    .map(propertiesMap -> propertiesMap.get(ORDER))
+                    .map(String.class::cast)
+                    .map(Integer::parseInt)
+                    .orElse(0);
+        }
+    };
+
+    private static List<Tag> sort(final List<Tag> tags) {
+        tags.sort(TAG_COMPARATOR);
+        return tags;
     }
 }

@@ -246,7 +246,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         log.debug("handleDeleteRollout called for {}", rollout.getId());
 
         // check if there are actions beyond schedule
-        boolean hardDeleteRolloutGroups = !actionRepository.existsByRolloutIdAndStatusNotIn(rollout.getId(),
+        boolean hardDeleteRolloutGroups = !actionRepository.existsByRolloutIdAndStatusNot(rollout.getId(),
                 Status.SCHEDULED);
         if (hardDeleteRolloutGroups) {
             log.debug("Rollout {} has no actions other than scheduled -> hard delete", rollout.getId());
@@ -321,7 +321,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private void handleReadyRollout(final Rollout rollout) {
-        if (rollout.getStartAt() != null && rollout.getStartAt() <= java.lang.System.currentTimeMillis()) {
+        if (rollout.getStartAt() != null && rollout.getStartAt() <= System.currentTimeMillis()) {
             log.debug("handleReadyRollout called for rollout {} with autostart beyond define time. Switch to STARTING", rollout.getId());
             rolloutManagement.start(rollout.getId());
         }
@@ -445,10 +445,11 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             if (isError) {
                 log.info("Rollout {} {} has error, calling error action", rollout.getName(), rollout.getId());
                 callErrorAction(rollout, rolloutGroup);
-            } else {
-                // not in error so check finished state, do we need to start the next group?
-                checkSuccessCondition(rollout, rolloutGroup, evalProxy, rolloutGroup.getSuccessCondition());
-                if (!(rolloutGroup == lastGroup && rolloutGroup.isDynamic()) && isRolloutGroupComplete(rollout, rolloutGroup)) {
+            } else {// not in error so check success condition and group completed
+                // 'success' is either group completed or success condition reached - execute 'success' Action
+                final boolean groupCompleted = !(rolloutGroup == lastGroup && rolloutGroup.isDynamic()) && isRolloutGroupComplete(rollout, rolloutGroup);
+                checkSuccessCondition(rollout, rolloutGroup, evalProxy, rolloutGroup.getSuccessCondition(), groupCompleted);
+                if (groupCompleted) {
                     rolloutGroup.setStatus(RolloutGroupStatus.FINISHED);
                     rolloutGroupRepository.save(rolloutGroup);
                 }
@@ -466,11 +467,9 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private long countTargetsFrom(final JpaRolloutGroup rolloutGroup) {
-        if (rolloutGroup.isDynamic()) {
-            return countByActionsInRolloutGroup(rolloutGroup.getId());
-        } else {
-            return rolloutGroupManagement.countTargetsOfRolloutsGroup(rolloutGroup.getId());
-        }
+        // Use action-based count for all groups: deleting an action removes the target from the count,
+        // keeping totalTargets consistent with the actual denominator used by condition evaluators.
+        return countByActionsInRolloutGroup(rolloutGroup.getId());
     }
 
     private void callErrorAction(final Rollout rollout, final RolloutGroup rolloutGroup) {
@@ -507,14 +506,13 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private void checkSuccessCondition(final Rollout rollout, final RolloutGroup rolloutGroup, final RolloutGroup evalProxy,
-            final RolloutGroupSuccessCondition successCondition) {
+            final RolloutGroupSuccessCondition successCondition, final boolean groupCompleted) {
         log.trace("Checking finish condition {} on rolloutgroup {}", successCondition, rolloutGroup);
         try {
-            final boolean isFinished = evaluationManager
+            if (groupCompleted || evaluationManager
                     .getSuccessConditionEvaluator(successCondition)
-                    .eval(rollout, evalProxy, rolloutGroup.getSuccessConditionExp());
-            if (isFinished) {
-                log.debug("Rollout group {} is finished, starting next group", rolloutGroup);
+                    .eval(rollout, evalProxy, rolloutGroup.getSuccessConditionExp())) {
+                log.debug("Rollout group {} fulfills SuccessCondition or is Finished, executing Success Action", rolloutGroup);
                 evaluationManager.getSuccessActionEvaluator(rolloutGroup.getSuccessAction()).exec(rollout, rolloutGroup);
             } else {
                 log.debug("Rollout group {} is still running", rolloutGroup);
@@ -627,7 +625,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     // return if group change is made
     private boolean fillDynamicRolloutGroupsWithTargets(final JpaRollout rollout) {
         final AtomicLong lastFill = lastDynamicGroupFill.computeIfAbsent(rollout.getId(), id -> new AtomicLong(0));
-        final long now = java.lang.System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
         if (now - lastFill.get() < repositoryProperties.getDynamicRolloutsMinInvolvePeriodMS()) {
             // too early to make another dynamic involvement attempt
             return false;

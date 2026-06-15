@@ -16,10 +16,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.io.IOException;
 import java.util.Collections;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.exc.MismatchedInputException;
 
 /**
  * Test serialization of DDI api model 'DdiActionFeedback'
@@ -74,15 +73,15 @@ class DdiActionFeedbackTest {
     void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiActionFeedback = """
-            {
-              "timestamp" : "1627997501890",
-              "status" : {
-                "execution" : "[closed]",
-                "result" : null,
-                "details" : []
-              }
-            }
-            """;
+                {
+                  "timestamp" : "1627997501890",
+                  "status" : {
+                    "execution" : "[closed]",
+                    "result" : null,
+                    "details" : []
+                  }
+                }
+                """;
         assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
                 () -> mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class));
     }
@@ -91,19 +90,19 @@ class DdiActionFeedbackTest {
      * Verify that deserialization works if optional fields are not parsed
      */
     @Test
-    void shouldConvertItWithoutOptionalFieldTimestamp() throws JsonProcessingException {
+    void shouldConvertItWithoutOptionalFieldTimestamp() {
         // Setup
         final String serializedDdiActionFeedback = """
-            {
-              "status" : {
-                "result" : {
-                  "finished" : "none"
-                },
-                "execution" : "download",
-                "details" : [ "Some message" ]
-              }
-            }
-            """;
+                {
+                  "status" : {
+                    "result" : {
+                      "finished" : "none"
+                    },
+                    "execution" : "download",
+                    "details" : [ "Some message" ]
+                  }
+                }
+                """;
 
         assertThat(mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class)).satisfies(deserializedDdiActionFeedback -> {
             assertThat(deserializedDdiActionFeedback.getTimestamp()).isNotNull();

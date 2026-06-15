@@ -11,11 +11,10 @@ package org.eclipse.hawkbit.mgmt.json.model.target;
 
 import java.io.Serial;
 import java.util.ArrayList;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.NoArgsConstructor;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Class to hold multiple distribution set assignments. A JSON object

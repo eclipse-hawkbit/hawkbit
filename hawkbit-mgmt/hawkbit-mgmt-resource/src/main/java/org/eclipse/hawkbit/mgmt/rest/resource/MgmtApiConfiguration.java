@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * Enable {@link ComponentScan} in the resource package to set up all {@link Controller} annotated classes and set up the REST-Resources
@@ -27,4 +28,4 @@ import org.springframework.stereotype.Controller;
 @ComponentScan
 @Import({ RestConfiguration.class, OpenApi.class })
 @PropertySource("classpath:/hawkbit-mgmt-api-defaults.properties")
-public class MgmtApiConfiguration {}
+public class MgmtApiConfiguration implements WebMvcConfigurer {}

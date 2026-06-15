@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.context;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -20,15 +19,12 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.auth.SpRole;
-import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.tenancy.TenantAwareUser;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -36,6 +32,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * A 'static' class providing methods related to access context:
@@ -58,7 +55,7 @@ public class AccessContext {
      * @return could be empty if there is nothing to serialize or context aware is not supported.
      */
     public static Optional<String> securityContext() {
-        return Optional.ofNullable(SecurityContextHolder.getContext()).map(AccessContext::serialize);
+        return Optional.of(SecurityContextHolder.getContext()).map(AccessContext::serialize);
     }
 
     /**
@@ -67,13 +64,11 @@ public class AccessContext {
      * @return the current tenant
      */
     public static String tenant() {
-        final SecurityContext context = SecurityContextHolder.getContext();
-        if (context.getAuthentication() != null) {
-            final Object principal = context.getAuthentication().getPrincipal();
-            if (context.getAuthentication().getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails) {
-                return tenantAwareAuthenticationDetails.tenant();
-            } else if (principal instanceof TenantAwareUser tenantAwareUser) {
-                return tenantAwareUser.getTenant();
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            final Object principal = authentication.getPrincipal();
+            if (principal instanceof Principal hawkbitPrincipal) {
+                return hawkbitPrincipal.getTenant();
             }
         }
         return null;
@@ -271,12 +266,9 @@ public class AccessContext {
     }
 
     private static String resolve(final Authentication authentication) {
-        if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails && tenantAwareDetails.controller()) {
-            return "CONTROLLER_PLUG_AND_PLAY";
-        }
         final Object principal = authentication.getPrincipal();
-        if (principal instanceof ActorAware actorAware) {
-            return actorAware.getActor();
+        if (principal instanceof Principal hawkbitPrincipal) {
+            return hawkbitPrincipal.getActor();
         }
         if (principal instanceof UserDetails userDetails) {
             return userDetails.getUsername();
@@ -284,7 +276,7 @@ public class AccessContext {
         if (principal instanceof OidcUser oidcUser) {
             return oidcUser.getPreferredUsername();
         }
-        return principal.toString();
+        return principal == null ? null : principal.toString();
     }
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -298,11 +290,7 @@ public class AccessContext {
     @SuppressWarnings("java:S112") // java:S112 - generic method
     private static String serialize(final SecurityContext securityContext) {
         Objects.requireNonNull(securityContext);
-        try {
-            return OBJECT_MAPPER.writeValueAsString(new SecCtxInfo(securityContext));
-        } catch (final JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return OBJECT_MAPPER.writeValueAsString(new SecCtxInfo(securityContext));
     }
 
     /**
@@ -314,103 +302,89 @@ public class AccessContext {
     @SuppressWarnings("java:S112") // java:S112 - generic method
     private static SecurityContext deserialize(final String securityContextString) {
         Objects.requireNonNull(securityContextString);
-        final String securityContextTrimmed = securityContextString.trim();
-        try {
-            return OBJECT_MAPPER.readerFor(SecCtxInfo.class).<SecCtxInfo> readValue(securityContextTrimmed).toSecurityContext();
-        } catch (final JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return OBJECT_MAPPER.readerFor(SecCtxInfo.class).<SecCtxInfo> readValue(securityContextString.trim()).toSecurityContext();
     }
 
     private static boolean isAuthenticationInvalid(final Authentication authentication) {
         return authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal() == null;
     }
 
-    public interface ActorAware {
-
-        String getActor();
-    }
-
-    // simplified info for the security context keeping just the basic info needed for background execution of
-    // controller authentication is not supported - always is false
-    // only authenticated user is supported
-    @NoArgsConstructor
-    @Data
-    private static class SecCtxInfo implements Serializable {
+    /**
+     * An {@link Authentication} implementation to delegate to an existing {@link Authentication} object except setting the details
+     * specifically for a specific tenant and user.
+     */
+    public static final class AuthenticationDelegate implements Authentication {
 
         @Serial
         private static final long serialVersionUID = 1L;
 
-        private String tenant;
-        private String auditor = "n/a"; // default value "n/a" is used only on deserialization if field is missing
-        @JsonProperty(required = true)
-        private String[] authorities;
+        private final Principal principal;
+        private final Authentication delegate;
 
-        private SecCtxInfo(final SecurityContext securityContext) {
-            final Authentication authentication = securityContext.getAuthentication();
-            if (!authentication.isAuthenticated()) {
-                throw new IllegalStateException("Only authenticated context could be serialized");
-            }
-            if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails) {
-                if (tenantAwareDetails.controller()) {
-                    throw new IllegalStateException("Controller authentication context is not supported");
-                }
-                tenant = tenantAwareDetails.tenant();
-            } else if (authentication.getPrincipal() instanceof TenantAwareUser tenantAwareUser) {
-                tenant = tenantAwareUser.getTenant();
-            }
-
-            // keep the auditor, ofr audit purposes,
-            // sets principal to the resolved auditor and then deserialized authentication will return it as principal
-            // since the class is not known to auditor aware - it shall used default - principal as auditor
-            auditor = resolve(authentication);
-            authorities = authentication.getAuthorities().stream().map(Object::toString).toArray(String[]::new);
+        public AuthenticationDelegate(final String tenant, final String username, final Authentication delegate) {
+            this(new Principal(tenant, username), delegate);
         }
 
-        private SecurityContext toSecurityContext() {
-            final SecurityContext ctx = SecurityContextHolder.createEmptyContext();
-            final Object details = tenant == null ? null : new TenantAwareAuthenticationDetails(tenant, false);
-            final ActorAware principal = () -> auditor;
-            final Collection<? extends GrantedAuthority> grantedAuthorities =
-                    Stream.of(authorities).map(SimpleGrantedAuthority::new).toList();
-            ctx.setAuthentication(new Authentication() {
+        public AuthenticationDelegate(final Principal principal, final Authentication delegate) {
+            this.principal = principal;
+            this.delegate = delegate;
+        }
 
-                @Override
-                public Object getPrincipal() {
-                    return principal;
-                }
+        @Override
+        public int hashCode() {
+            return delegate == null ? -1 : delegate.hashCode();
+        }
 
-                @Override
-                public Collection<? extends GrantedAuthority> getAuthorities() {
-                    return grantedAuthorities;
-                }
+        @Override
+        public boolean equals(final Object another) {
+            if (another instanceof Authentication anotherAuthentication) {
+                return Objects.equals(delegate, anotherAuthentication) &&
+                        Objects.equals(principal, anotherAuthentication.getPrincipal());
+            } else {
+                return false;
+            }
+        }
 
-                @Override
-                public boolean isAuthenticated() {
-                    return true;
-                }
+        @Override
+        public String toString() {
+            return delegate == null ? null : delegate.toString();
+        }
 
-                @Override
-                public Object getDetails() {
-                    return details;
-                }
+        @Override
+        public String getName() {
+            return delegate == null ? null : delegate.getName();
+        }
 
-                @Override
-                public Object getCredentials() {
-                    return null;
-                }
+        @Override
+        public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
+            return delegate == null ? List.of() : delegate.getAuthorities();
+        }
 
-                @Override
-                public void setAuthenticated(final boolean isAuthenticated) throws IllegalArgumentException {
-                    throw new UnsupportedOperationException();
-                }
+        @Override
+        public Object getCredentials() {
+            return delegate == null ? null : delegate.getCredentials();
+        }
 
-                @Override
-                public String getName() {
-                    return auditor;
-                }
-            });
-            return ctx;
+        @Override
+        public Object getDetails() {
+            return delegate == null ? null : delegate.getDetails();
+        }
+
+        @Override
+        public Object getPrincipal() {
+            return principal;
+        }
+
+        @Override
+        public boolean isAuthenticated() {
+            return delegate != null && delegate.isAuthenticated();
+        }
+
+        @Override
+        public void setAuthenticated(final boolean isAuthenticated) {
+            if (delegate != null) {
+                delegate.setAuthenticated(isAuthenticated);
+            }
         }
     }
 
@@ -426,12 +400,10 @@ public class AccessContext {
 
         private static final List<SimpleGrantedAuthority> AUTHORITIES = List.of(new SimpleGrantedAuthority(SpRole.SYSTEM_ROLE));
 
-        private final TenantAwareAuthenticationDetails details;
-        private final TenantAwareUser principal;
+        private final Principal principal;
 
         private SystemCodeAuthentication(final String tenant) {
-            details = new TenantAwareAuthenticationDetails(tenant, false);
-            principal = new TenantAwareUser(SYSTEM_ACTOR, SYSTEM_ACTOR, AUTHORITIES, tenant);
+            principal = new Principal(tenant, SYSTEM_ACTOR);
         }
 
         @Override
@@ -440,7 +412,7 @@ public class AccessContext {
         }
 
         @Override
-        public Collection<? extends GrantedAuthority> getAuthorities() {
+        public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
             return AUTHORITIES;
         }
 
@@ -451,7 +423,7 @@ public class AccessContext {
 
         @Override
         public Object getDetails() {
-            return details;
+            return null;
         }
 
         @Override
@@ -470,81 +442,82 @@ public class AccessContext {
         }
     }
 
-    /**
-     * An {@link Authentication} implementation to delegate to an existing {@link Authentication} object except setting the details
-     * specifically for a specific tenant and user.
-     */
-    private static final class AuthenticationDelegate implements Authentication {
+    // simplified info for the security context keeping just the basic info needed for background execution of
+    // controller authentication is not supported - always is false
+    // only authenticated user is supported
+    @NoArgsConstructor
+    @Data
+    private static class SecCtxInfo implements Serializable {
 
         @Serial
         private static final long serialVersionUID = 1L;
 
-        private final Authentication delegate;
-        private final TenantAwareUser principal;
-        private final TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails;
+        private String tenant;
+        private String auditor = "n/a"; // default value "n/a" is used only on deserialization if field is missing
+        @JsonProperty(required = true)
+        private String[] authorities;
 
-        private AuthenticationDelegate(final String tenant, final String username, final Authentication delegate) {
-            this.delegate = delegate;
-            principal = new TenantAwareUser(username, username, delegate == null ? Collections.emptyList() : delegate.getAuthorities(), tenant);
-            tenantAwareAuthenticationDetails = new TenantAwareAuthenticationDetails(tenant, false);
-        }
-
-        @Override
-        public int hashCode() {
-            return delegate != null ? delegate.hashCode() : -1;
-        }
-
-        @Override
-        public boolean equals(final Object another) {
-            if (another instanceof Authentication anotherAuthentication) {
-                return Objects.equals(delegate, anotherAuthentication) &&
-                        Objects.equals(principal, anotherAuthentication.getPrincipal()) &&
-                        Objects.equals(tenantAwareAuthenticationDetails, anotherAuthentication.getDetails());
-            } else {
-                return false;
+        private SecCtxInfo(final SecurityContext securityContext) {
+            final Authentication authentication = Objects.requireNonNull(
+                    securityContext.getAuthentication(),
+                    "Authentication must be non-null to serialize security context");
+            if (!authentication.isAuthenticated()) {
+                throw new IllegalStateException("Only authenticated context could be serialized");
             }
-        }
 
-        @Override
-        public String toString() {
-            return delegate == null ? null : delegate.toString();
-        }
-
-        @Override
-        public String getName() {
-            return delegate == null ? null : delegate.getName();
-        }
-
-        @Override
-        public Collection<? extends GrantedAuthority> getAuthorities() {
-            return principal.getAuthorities();
-        }
-
-        @Override
-        public Object getCredentials() {
-            return delegate == null ? null : delegate.getCredentials();
-        }
-
-        @Override
-        public Object getDetails() {
-            return tenantAwareAuthenticationDetails;
-        }
-
-        @Override
-        public Object getPrincipal() {
-            return principal;
-        }
-
-        @Override
-        public boolean isAuthenticated() {
-            return delegate != null && delegate.isAuthenticated();
-        }
-
-        @Override
-        public void setAuthenticated(final boolean isAuthenticated) {
-            if (delegate != null) {
-                delegate.setAuthenticated(isAuthenticated);
+            if (authentication.getPrincipal() instanceof Principal principal) {
+                tenant = principal.getTenant();
             }
+
+            // keep the auditor, for audit purposes,
+            // sets principal to the resolved auditor and then deserialized authentication will return it as principal
+            // since the class is not known to auditor aware - it shall used default - principal as auditor
+            auditor = resolve(authentication);
+            authorities = authentication.getAuthorities().stream().map(Object::toString).toArray(String[]::new);
+        }
+
+        private SecurityContext toSecurityContext() {
+            final SecurityContext ctx = SecurityContextHolder.createEmptyContext();
+            final Principal principal = new Principal(tenant, auditor);
+            final Collection<? extends GrantedAuthority> grantedAuthorities = Stream.of(authorities).map(SimpleGrantedAuthority::new).toList();
+            ctx.setAuthentication(new Authentication() {
+
+                @Override
+                public Object getPrincipal() {
+                    return principal;
+                }
+
+                @Override
+                public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
+                    return grantedAuthorities;
+                }
+
+                @Override
+                public boolean isAuthenticated() {
+                    return true;
+                }
+
+                @Override
+                public Object getDetails() {
+                    return null;
+                }
+
+                @Override
+                public Object getCredentials() {
+                    return null;
+                }
+
+                @Override
+                public void setAuthenticated(final boolean isAuthenticated) throws IllegalArgumentException {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public String getName() {
+                    return auditor;
+                }
+            });
+            return ctx;
         }
     }
 }

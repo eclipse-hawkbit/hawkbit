@@ -76,13 +76,14 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
     private final TargetManagement<? extends Target> targetManagement;
     private final DeploymentManagement deploymentManagement;
     private final PlatformTransactionManager transactionManager;
-    private final LockRegistry lockRegistry;
+    private final LockRegistry<? extends Lock> lockRegistry;
     private final Optional<MeterRegistry> meterRegistry;
 
     public JpaAutoAssignHandler(
             final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
             final TargetManagement<? extends Target> targetManagement, final DeploymentManagement deploymentManagement,
-            final PlatformTransactionManager transactionManager, final LockRegistry lockRegistry, final Optional<MeterRegistry> meterRegistry) {
+            final PlatformTransactionManager transactionManager, final LockRegistry<? extends Lock> lockRegistry,
+            final Optional<MeterRegistry> meterRegistry) {
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;

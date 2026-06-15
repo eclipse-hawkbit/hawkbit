@@ -29,19 +29,21 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.criteria.MapJoin;
-import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.metamodel.MapAttribute;
 import jakarta.validation.constraints.NotEmpty;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
@@ -55,14 +57,14 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.qfields.TargetFields;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -70,6 +72,7 @@ import org.springframework.validation.annotation.Validated;
 /**
  * JPA implementation of {@link TargetManagement}.
  */
+@Slf4j
 @Transactional(readOnly = true)
 @Validated
 @Service
@@ -82,6 +85,9 @@ public class JpaTargetManagement
     private final QuotaManagement quotaManagement;
     private final TargetTypeRepository targetTypeRepository;
     private final TargetTagRepository targetTagRepository;
+
+    @Value("${hawkbit.target-group.assign.chunk-size:1000}")
+    private int assignTargetGroupChunkSize;
 
     @SuppressWarnings("java:S107")
     protected JpaTargetManagement(
@@ -241,16 +247,14 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void deleteByControllerId(final String controllerId) {
         jpaRepository.delete(jpaRepository.getByControllerId(controllerId));
     }
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public List<Target> assignTag(
             final Collection<String> controllerIds, final long targetTagId, final Consumer<Collection<String>> notFoundHandler) {
         return assignTag0(controllerIds, targetTagId, notFoundHandler);
@@ -258,8 +262,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public List<Target> assignTag(final Collection<String> controllerIds, final long targetTagId) {
         return assignTag0(controllerIds, targetTagId, null);
     }
@@ -284,8 +287,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public List<Target> unassignTag(
             final Collection<String> controllerIds, final long targetTagId, final Consumer<Collection<String>> notFoundHandler) {
         return unassignTag0(controllerIds, targetTagId, notFoundHandler);
@@ -293,8 +295,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public List<Target> unassignTag(final Collection<String> controllerIds, final long targetTagId) {
         return unassignTag0(controllerIds, targetTagId, null);
     }
@@ -313,8 +314,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Target assignType(final String controllerId, final Long targetTypeId) {
         final JpaTarget target = jpaRepository.getByControllerId(controllerId);
 
@@ -328,8 +328,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Target unassignType(final String controllerId) {
         final JpaTarget target = jpaRepository.getByControllerId(controllerId);
         target.setTargetType(null);
@@ -338,26 +337,69 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void assignTargetGroupWithRsql(String group, String rsql) {
+
+        // Switch back to UpdateAllQuery if switching back to hibernate. (EclipseLink does not work well with UpdateAllQuery)
+        // EclipseLink: using subquery approach — applying predicate directly to the UPDATE root
+        // fails for NOT EXISTS due to UpdateAllQuery's @Id resolution bug
+        // BUG Reported: https://github.com/eclipse-ee4j/eclipselink/issues/2757
+        // Hibernate: applies predicate directly to the UPDATE root — Hibernate handles
+        // NOT EXISTS subqueries correctly in CriteriaUpdate context. So this problem does not exist there.
+        if (Jpa.JPA_VENDOR == Jpa.JpaVendor.ECLIPSELINK && containsNegation(rsql)) {
+            log.debug("Assigning group {} with rsql {} on chunks.", group, rsql);
+            assignTargetGroupOnChunks(group, rsql);
+        } else {
+            log.debug("Assigning group {} with rsql {} with batch update", group, rsql);
+            assignTargetGroupDirect(group, rsql);
+        }
+    }
+
+    private static boolean containsNegation(final String rsql) {
+        return rsql.contains("!=") || rsql.contains("=out=") || rsql.contains("=notlike=");
+    }
+
+    private void assignTargetGroupDirect(final String group, final String rsql) {
         final Specification<JpaTarget> rsqlSpecification = QLSupport.getInstance().buildSpec(rsql, TargetFields.class);
-
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        final CriteriaUpdate<JpaTarget> criteriaUpdateQuery = cb.createCriteriaUpdate(JpaTarget.class);
-        final Root<JpaTarget> root = criteriaUpdateQuery.getRoot();
-        criteriaUpdateQuery.set("group", group);
-        // get predicate from rsql specification using a dummy query in order to execute batch update
-        final Predicate predicate = rsqlSpecification.toPredicate(root, entityManager.getCriteriaBuilder().createQuery(JpaTarget.class), cb);
-        criteriaUpdateQuery.where(predicate);
+        final CriteriaUpdate<JpaTarget> update = cb.createCriteriaUpdate(JpaTarget.class);
+        final Root<JpaTarget> root = update.getRoot();
+        update.set("group", group);
+        update.where(rsqlSpecification.toPredicate(root, cb.createQuery(JpaTarget.class), cb));
+        entityManager.createQuery(update).executeUpdate();
+    }
 
-        entityManager.createQuery(criteriaUpdateQuery).executeUpdate();
+    private void assignTargetGroupOnChunks(final String group, final String rsql) {
+        final Specification<JpaTarget> spec = QLSupport.getInstance().buildSpec(rsql, TargetFields.class);
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        // SELECT Target IDs
+        final CriteriaQuery<Long> select = cb.createQuery(Long.class);
+        final Root<JpaTarget> root = select.from(JpaTarget.class);
+        select.select(root.get(AbstractJpaBaseEntity_.ID));
+        select.where(spec.toPredicate(root, select, cb));
+
+        List<Long> chunk;
+        int offset = 0;
+        do {
+            chunk = entityManager.createQuery(select)
+                    .setFirstResult(offset)
+                    .setMaxResults(assignTargetGroupChunkSize)
+                    .getResultList();
+
+            if (chunk.isEmpty()) {
+                break;
+            }
+            final CriteriaUpdate<JpaTarget> update = cb.createCriteriaUpdate(JpaTarget.class);
+            update.set("group", group);
+            update.where(update.getRoot().get(AbstractJpaBaseEntity_.ID).in(chunk));
+            entityManager.createQuery(update).executeUpdate();
+            offset += chunk.size();
+        } while (true);
     }
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void assignTargetsWithGroup(String group, List<String> controllerIds) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaUpdate<JpaTarget> criteriaQuery = cb.createCriteriaUpdate(JpaTarget.class);
@@ -387,8 +429,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void createMetadata(final String controllerId, final String key, final String value) {
         final JpaTarget target = jpaRepository.getByControllerId(controllerId);
 
@@ -404,8 +445,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void createMetadata(final String controllerId, final Map<String, String> md) {
         final JpaTarget target = jpaRepository.getByControllerId(controllerId);
 
@@ -434,8 +474,7 @@ public class JpaTargetManagement
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void deleteMetadata(final String controllerId, final String key) {
         final JpaTarget target = jpaRepository.getByControllerId(controllerId);
 

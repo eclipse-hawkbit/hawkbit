@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import java.io.Serial;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -24,6 +25,7 @@ public class RolloutUpdatedEvent extends RemoteEntityEvent<Rollout> implements E
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @JsonIgnore
     public RolloutUpdatedEvent(final Rollout rollout) {
         super(rollout);
     }

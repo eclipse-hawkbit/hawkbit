@@ -21,7 +21,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.slf4j.MDC;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
@@ -61,22 +60,14 @@ public class Mdc {
             return callable.call();
         }
 
-        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null) {
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
             return callable.call();
         }
 
-        final String tenant;
-        if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails) {
-            tenant = tenantAwareAuthenticationDetails.tenant();
-        } else {
-            tenant = null;
-        }
-
+        final String tenant = AccessContext.tenant();
         final String actor = Optional.ofNullable(AccessContext.actor())
                 .filter(ctxActor -> !ctxActor.equals(AccessContext.SYSTEM_ACTOR)) // null and system are the same - system actor
                 .orElse(null);
-
         return asTenantAsActor0(tenant, actor, callable);
     }
 

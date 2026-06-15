@@ -12,19 +12,15 @@ package org.eclipse.hawkbit.security.controller;
 import static org.eclipse.hawkbit.context.AccessContext.asTenant;
 
 import java.io.Serial;
-import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 import lombok.EqualsAndHashCode;
 import org.eclipse.hawkbit.auth.SpRole;
+import org.eclipse.hawkbit.context.Principal;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
-import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.slf4j.Logger;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
  * Interface for Authentication mechanism.
@@ -65,14 +61,11 @@ public interface Authenticator {
             @Serial
             private static final long serialVersionUID = 1L;
 
-            private static final Collection<GrantedAuthority> CONTROLLER_AUTHORITY =
-                    List.of(new SimpleGrantedAuthority(SpRole.CONTROLLER_ROLE));
-            private final String controllerId;
+            private final Principal principal;
 
             AuthenticatedController(final String tenant, final String controllerId) {
-                super(CONTROLLER_AUTHORITY);
-                super.setDetails(new TenantAwareAuthenticationDetails(tenant, true));
-                this.controllerId = controllerId;
+                super(SpRole.CONTROLLER_AUTHORITIES);
+                this.principal = new Principal(tenant, controllerId);
                 setAuthenticated(true);
             }
 
@@ -83,7 +76,7 @@ public interface Authenticator {
 
             @Override
             public Object getPrincipal() {
-                return controllerId;
+                return principal;
             }
         }
     }

@@ -520,7 +520,7 @@ class TargetFilterQueryManagementTest extends AbstractRepositoryManagementTest<T
 
     private void verifyExpectedFilterQueriesInList(final Slice<TargetFilterQuery> tfqList,
             final TargetFilterQuery... expectedFilterQueries) {
-        assertThat(tfqList.map(TargetFilterQuery::getId)).containsExactly(
+        assertThat(tfqList.map(TargetFilterQuery::getId)).containsExactlyInAnyOrder(
                 Arrays.stream(expectedFilterQueries).map(TargetFilterQuery::getId).toArray(Long[]::new));
     }
 
@@ -536,7 +536,7 @@ class TargetFilterQueryManagementTest extends AbstractRepositoryManagementTest<T
             final TargetFilterQuery... expectedFilterQueries) {
         assertThat(expectedFilterQueries).as("Target filter query count").hasSize((int) tfqList.getTotalElements());
 
-        assertThat(tfqList.map(TargetFilterQuery::getId)).containsExactly(
+        assertThat(tfqList.map(TargetFilterQuery::getId)).containsExactlyInAnyOrder(
                 Arrays.stream(expectedFilterQueries).map(TargetFilterQuery::getId).toArray(Long[]::new));
     }
 

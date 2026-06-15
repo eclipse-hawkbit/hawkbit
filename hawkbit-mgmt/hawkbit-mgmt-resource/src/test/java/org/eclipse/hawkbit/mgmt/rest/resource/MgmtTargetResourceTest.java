@@ -45,7 +45,6 @@ import java.util.stream.Stream;
 
 import jakarta.validation.ConstraintViolationException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.exception.SpServerError;
@@ -92,7 +91,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
+import org.springframework.boot.jpa.autoconfigure.JpaProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -115,7 +114,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     private static final String JSON_PATH_ROOT = "$";
     // fields, attributes
     private static final String JSON_PATH_FIELD_ID = ".id";
-    private static final String JSON_PATH_FIELD_CONTROLLERID = ".controllerId";
+    private static final String JSON_PATH_FIELD_CONTROLLER_ID = ".controllerId";
     private static final String JSON_PATH_FIELD_NAME = ".name";
     private static final String JSON_PATH_FIELD_DESCRIPTION = ".description";
     private static final String JSON_PATH_FIELD_CONTENT = ".content";
@@ -133,7 +132,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     private static final String JSON_PATH_FIELD_TARGET_TYPE = ".targetType";
     private static final String JSON_PATH_NAME = JSON_PATH_ROOT + JSON_PATH_FIELD_NAME;
     private static final String JSON_PATH_ID = JSON_PATH_ROOT + JSON_PATH_FIELD_ID;
-    private static final String JSON_PATH_CONTROLLERID = JSON_PATH_ROOT + JSON_PATH_FIELD_CONTROLLERID;
+    private static final String JSON_PATH_CONTROLLER_ID = JSON_PATH_ROOT + JSON_PATH_FIELD_CONTROLLER_ID;
     private static final String JSON_PATH_DESCRIPTION = JSON_PATH_ROOT + JSON_PATH_FIELD_DESCRIPTION;
     private static final String JSON_PATH_LAST_REQUEST_AT = JSON_PATH_ROOT + JSON_PATH_FIELD_LAST_REQUEST_AT;
     private static final String JSON_PATH_TYPE = JSON_PATH_ROOT + JSON_PATH_FIELD_TARGET_TYPE;
@@ -145,8 +144,6 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     ActionRepository actionRepository;
     @Autowired
     private JpaProperties jpaProperties;
-    @Autowired
-    private ObjectMapper objectMapper;
 
     /**
      * Ensures that when targetType value of -1 is provided the target type is unassigned from the target.
@@ -254,7 +251,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final MgmtTargetAutoConfirmUpdate body = new MgmtTargetAutoConfirmUpdate("custom_initiator_value", "custom_remark_value");
         mvc.perform(post(TARGETS_V1 + "/{targetId}/" + AUTO_CONFIRM + "/" + ACTIVATE,
                         testTarget.getControllerId())
-                        .content(objectMapper.writeValueAsString(body)).contentType(APPLICATION_JSON))
+                        .content(OBJECT_MAPPER.writeValueAsString(body)).contentType(APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
     }
@@ -855,7 +852,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(JSON_PATH_NAME, equalTo(knownName)))
-                .andExpect(jsonPath(JSON_PATH_CONTROLLERID, equalTo(knownControllerId)))
+                .andExpect(jsonPath(JSON_PATH_CONTROLLER_ID, equalTo(knownControllerId)))
                 .andExpect(jsonPath(JSON_PATH_DESCRIPTION, equalTo(TARGET_DESCRIPTION_TEST)))
                 .andExpect(jsonPath(JSON_PATH_LAST_REQUEST_AT, equalTo(target.getLastTargetQuery())))
                 .andExpect(jsonPath("$.pollStatus", hasKey("lastRequestAt")))
@@ -2355,7 +2352,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(JSON_PATH_NAME, equalTo("targetOfType1")))
-                .andExpect(jsonPath(JSON_PATH_CONTROLLERID, equalTo("id2")))
+                .andExpect(jsonPath(JSON_PATH_CONTROLLER_ID, equalTo("id2")))
                 .andExpect(jsonPath(JSON_PATH_TYPE, equalTo(type1.getId().intValue())))
                 .andExpect(jsonPath(JSON_PATH_DESCRIPTION, equalTo("testid2")))
                 .andExpect(jsonPath("$._links.targetType.href", equalTo(hrefType1)))

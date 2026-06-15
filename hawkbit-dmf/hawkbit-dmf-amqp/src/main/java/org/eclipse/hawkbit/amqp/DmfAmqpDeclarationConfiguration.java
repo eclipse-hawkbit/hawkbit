@@ -142,7 +142,7 @@ public class DmfAmqpDeclarationConfiguration {
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {
-        final Map<String, Object> args = new HashMap<>(2);
+        final Map<String, Object> args = HashMap.newHashMap(2);
         args.put("x-message-ttl", Duration.ofSeconds(30).toMillis());
         args.put("x-max-length", 1_000);
         return args;

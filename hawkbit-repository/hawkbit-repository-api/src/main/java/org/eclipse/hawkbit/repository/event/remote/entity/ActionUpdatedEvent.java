@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import java.io.Serial;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -24,6 +25,7 @@ public class ActionUpdatedEvent extends AbstractActionEvent implements EntityUpd
     @Serial
     private static final long serialVersionUID = 2L;
 
+    @JsonIgnore
     public ActionUpdatedEvent(final Action action, final Long targetId, final Long rolloutId, final Long rolloutGroupId) {
         super(action, targetId, rolloutId, rolloutGroupId);
     }

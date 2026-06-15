@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutHelper;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
+import org.eclipse.hawkbit.repository.SoftDeletedMode;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
@@ -96,8 +97,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -197,8 +197,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Rollout create(
             final Create rollout, final int amountGroup, final boolean confirmationRequired,
             final RolloutGroupConditions conditions, final DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
@@ -240,8 +239,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Rollout create(
             @NotNull @Valid Create create, int amountGroup, boolean confirmationRequired,
             @NotNull RolloutGroupConditions conditions) {
@@ -250,8 +248,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Rollout create(final Create rollout, final List<GroupCreate> groups, final RolloutGroupConditions conditions) {
         if (groups.isEmpty()) {
             throw new ValidationException("The amount of groups cannot be 0");
@@ -271,6 +268,18 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
+    public Page<Rollout> findAll(final SoftDeletedMode softDeletedMode, Pageable pageable) {
+        return switch (softDeletedMode) {
+            case EXCLUDE_SOFT_DELETED -> JpaManagementHelper.convertPage(
+                    rolloutRepository.findAll(RolloutSpecification.isDeleted(false, pageable.getSort()), pageable), pageable);
+            case ONLY_SOFT_DELETED -> JpaManagementHelper.convertPage(
+                    rolloutRepository.findAll(RolloutSpecification.isDeleted(true, pageable.getSort()), pageable), pageable);
+            case INCLUDE_SOFT_DELETED -> JpaManagementHelper.convertPage(
+                    rolloutRepository.findAll(Specification.unrestricted(), pageable), pageable);
+        };
+    }
+
+    @Override
     public Page<Rollout> findAllWithDetailedStatus(final boolean deleted, final Pageable pageable) {
         return appendStatusDetails(JpaManagementHelper.convertPage(
                 rolloutRepository.findAll(RolloutSpecification.isDeleted(deleted, pageable.getSort()), JpaRollout_.GRAPH_ROLLOUT_DS, pageable),
@@ -283,6 +292,21 @@ public class JpaRolloutManagement implements RolloutManagement {
                 QLSupport.getInstance().buildSpec(rsql, RolloutFields.class),
                 RolloutSpecification.isDeleted(deleted, pageable.getSort()));
         return JpaManagementHelper.convertPage(rolloutRepository.findAll(JpaManagementHelper.combineWithAnd(specList), pageable), pageable);
+    }
+
+    @Override
+    public Page<Rollout> findByRsql(String rsql, SoftDeletedMode softDeletedMode, Pageable pageable) {
+        final Specification<JpaRollout> rsqlSpec = QLSupport.getInstance().buildSpec(rsql, RolloutFields.class);
+
+        if (softDeletedMode != SoftDeletedMode.INCLUDE_SOFT_DELETED) {
+            final Specification<JpaRollout> deletedSpec = RolloutSpecification.isDeleted(
+                    softDeletedMode == SoftDeletedMode.ONLY_SOFT_DELETED, pageable.getSort());
+            return JpaManagementHelper.convertPage(
+                    rolloutRepository.findAll(JpaManagementHelper.combineWithAnd(List.of(rsqlSpec, deletedSpec)), pageable), pageable);
+        } else {
+            return JpaManagementHelper.convertPage(rolloutRepository.findAll(rsqlSpec, pageable), pageable);
+
+        }
     }
 
     @Override
@@ -335,8 +359,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void pauseRollout(final long rolloutId) {
         final JpaRollout rollout = rolloutRepository.getById(rolloutId);
         if (RolloutStatus.RUNNING != rollout.getStatus()) {
@@ -352,8 +375,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void resumeRollout(final long rolloutId) {
         final JpaRollout rollout = rolloutRepository.getById(rolloutId);
         if (RolloutStatus.PAUSED != rollout.getStatus()) {
@@ -391,16 +413,14 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Rollout approveOrDeny(final long rolloutId, final Rollout.ApprovalDecision decision) {
         return approveOrDeny0(rolloutId, decision, null);
     }
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Rollout approveOrDeny(final long rolloutId, final Rollout.ApprovalDecision decision, final String remark) {
         return approveOrDeny0(rolloutId, decision, remark);
     }
@@ -431,8 +451,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Rollout start(final long rolloutId) {
         log.debug("startRollout called for rollout {}", rolloutId);
 
@@ -445,8 +464,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Rollout update(final Update update) {
         final JpaRollout rollout = rolloutRepository.getById(update.getId());
         checkIfDeleted(update.getId(), rollout.getStatus());
@@ -457,8 +475,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Rollout stop(long rolloutId) {
         final JpaRollout jpaRollout = rolloutRepository.getById(rolloutId);
 
@@ -474,8 +491,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void delete(final long rolloutId) {
         this.delete0(rolloutRepository.getById(rolloutId));
     }
@@ -503,8 +519,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void triggerNextGroup(final long rolloutId) {
         final JpaRollout rollout = rolloutRepository.getById(rolloutId);
         if (RolloutStatus.RUNNING != rollout.getStatus()) {
@@ -519,15 +534,11 @@ public class JpaRolloutManagement implements RolloutManagement {
             throw new RolloutIllegalStateException("Rollout does not have any groups left to be triggered");
         }
 
-        final List<JpaRolloutGroup> startedRolloutGroups = rollout.getRolloutGroups().stream()
+        final RolloutGroup lastStartedRolloutGroup = rollout.getRolloutGroups().stream()
                 .filter(group -> group.getStatus() != RolloutGroupStatus.SCHEDULED)
-                .sorted(ROLLOUT_GROUP_DESC_COMP)
-                .map(JpaRolloutGroup.class::cast)
-                .toList();
-        if (startedRolloutGroups.isEmpty()) {
-            throw new RolloutIllegalStateException("Cannot find any started rollout group to trigger next from");
-        }
-        startNextRolloutGroupAction.exec(rollout, startedRolloutGroups.get(0));
+                .min(ROLLOUT_GROUP_DESC_COMP)
+                .orElseThrow(() -> new RolloutIllegalStateException("Cannot find any started rollout group to trigger next from"));
+        startNextRolloutGroupAction.exec(rollout, lastStartedRolloutGroup);
     }
 
     @Override
@@ -561,6 +572,10 @@ public class JpaRolloutManagement implements RolloutManagement {
                 .getContent();
         log.info("Found {} active actions for rollout {}", actions.size(), rollout.getId());
 
+        if (actions.isEmpty()) {
+            return;
+        }
+        
         storeActionsAndStatuses(actions, Action.Status.CANCELED);
 
         // find next active actions - filter by targetId list and isActive
@@ -604,10 +619,10 @@ public class JpaRolloutManagement implements RolloutManagement {
     private int updateTargetAssignedDsWithFirstActiveAction(List<Long> targetIds) {
         final Query updateQuery = entityManager.createNativeQuery(
                 "UPDATE sp_target t " +
-                        "SET t.assigned_distribution_set = ( " +
+                        "SET assigned_distribution_set = ( " +
                         "SELECT a.distribution_set" +
                         "   FROM sp_action a" +
-                        "   WHERE a.target = t.id AND a.active = 1" +
+                        "   WHERE a.target = t.id AND a.active = TRUE" +
                         "   ORDER BY a.id ASC" +
                         "   LIMIT 1" +
                         ") " +
@@ -623,10 +638,10 @@ public class JpaRolloutManagement implements RolloutManagement {
     private int updateTargetAssignedDsWithInstalledIfNoActiveActions(List<Long> targetIds) {
         final Query updateQuery = entityManager.createNativeQuery(
                 "UPDATE sp_target t " +
-                        "SET t.assigned_distribution_set = t.installed_distribution_set, t.update_status = 1 " +
+                        "SET assigned_distribution_set = t.installed_distribution_set, update_status = 1 " +
                         "WHERE t.id IN (" + Jpa.formatNativeQueryInClause("tid", targetIds) + ") " +
                         "    AND (SELECT count(*) FROM sp_action a " +
-                        "        WHERE a.target=t.id and a.active=1) = 0"
+                        "        WHERE a.target = t.id and a.active = TRUE) = 0"
         );
         Jpa.setNativeQueryInParameter(updateQuery, "tid", targetIds);
         final int updated = updateQuery.executeUpdate();

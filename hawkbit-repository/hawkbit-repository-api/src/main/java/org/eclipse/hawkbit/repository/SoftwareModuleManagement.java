@@ -37,7 +37,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * Service for managing {@link SoftwareModule}s.
  */
 public interface SoftwareModuleManagement<T extends SoftwareModule>
-        extends RepositoryManagement<T, SoftwareModuleManagement.Create, SoftwareModuleManagement.Update>, MetadataSupport<MetadataValue> {
+        extends SoftDeletableRepositoryManagement<T, SoftwareModuleManagement.Create, SoftwareModuleManagement.Update>, MetadataSupport<MetadataValue> {
 
     @Override
     default String permissionGroup() {

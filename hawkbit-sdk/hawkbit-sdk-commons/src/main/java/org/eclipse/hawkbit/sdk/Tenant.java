@@ -15,8 +15,8 @@ import lombok.Data;
 import lombok.ToString;
 import org.eclipse.hawkbit.sdk.ca.CA;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 @ConfigurationProperties("hawkbit.tenant")
 @Data

@@ -39,7 +39,7 @@ public class AmqpDeadletterProperties {
      * @return map which holds the properties
      */
     public Map<String, Object> getDeadLetterExchangeArgs(final String exchange) {
-        final Map<String, Object> args = new HashMap<>(1);
+        final Map<String, Object> args = HashMap.newHashMap(1);
         args.put("x-dead-letter-exchange", exchange);
         return args;
     }
@@ -55,7 +55,7 @@ public class AmqpDeadletterProperties {
     }
 
     private Map<String, Object> getTTLArgs() {
-        final Map<String, Object> args = new HashMap<>(1);
+        final Map<String, Object> args = HashMap.newHashMap(1);
         args.put("x-message-ttl", getTtl());
         return args;
     }

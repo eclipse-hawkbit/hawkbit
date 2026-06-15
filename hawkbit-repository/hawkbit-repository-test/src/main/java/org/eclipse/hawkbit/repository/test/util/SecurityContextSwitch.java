@@ -23,9 +23,8 @@ import java.util.function.Supplier;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.auth.SpRole;
+import org.eclipse.hawkbit.context.Principal;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -92,8 +91,8 @@ public class SecurityContextSwitch {
         });
     }
 
-    public static WithUser withController(final String principal, final String... authorities) {
-        return withTenantAndUser(DEFAULT_TENANT, principal, authorities, true, true);
+    public static WithUser withController(final String principal) { // authorized controller
+        return withTenantAndUser(DEFAULT_TENANT, principal, new String[] { CONTROLLER_ROLE }, true, true);
     }
 
     public static WithUser withUser(final String principal, final String... authorities) {
@@ -146,12 +145,8 @@ public class SecurityContextSwitch {
 
         @Override
         public Authentication getAuthentication() {
-            final TestingAuthenticationToken testingAuthenticationToken = new TestingAuthenticationToken(
-                    new TenantAwareUser(annotation.principal(), "***", null, annotation.tenant()),
-                    annotation.credentials(), annotation.authorities());
-            testingAuthenticationToken.setDetails(
-                    new TenantAwareAuthenticationDetails(annotation.tenant(), annotation.controller()));
-            return testingAuthenticationToken;
+            return new TestingAuthenticationToken(
+                    new Principal(annotation.tenant(), annotation.principal()), annotation.credentials(), annotation.authorities());
         }
 
         @Override

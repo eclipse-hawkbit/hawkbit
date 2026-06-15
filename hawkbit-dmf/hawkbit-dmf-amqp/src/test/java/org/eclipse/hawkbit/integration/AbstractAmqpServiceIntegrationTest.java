@@ -70,7 +70,6 @@ import org.springframework.util.CollectionUtils;
 abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
 
     protected static final String TENANT_EXIST = "DEFAULT";
-    protected static final String CREATED_BY = "CONTROLLER_PLUG_AND_PLAY";
     protected static final String CORRELATION_ID = UUID.randomUUID().toString();
 
     protected ReplyToListener replyToListener;
@@ -132,7 +131,7 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
     protected DistributionSetAssignmentResult registerTargetAndAssignDistributionSet(final Long assignDs,
             final TargetUpdateStatus expectedStatus, final Set<SoftwareModule> expectedSoftwareModulesInMessage,
             final String controllerId) {
-        registerAndAssertTargetWithExistingTenant(controllerId, 1, expectedStatus, CREATED_BY);
+        registerAndAssertTargetWithExistingTenant(controllerId, 1, expectedStatus, CONTROLLER_PLUG_AND_PLAY);
 
         final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(assignDs, controllerId);
         if (isConfirmationFlowEnabled()) {
@@ -253,7 +252,7 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
     protected void registerAndAssertTargetWithExistingTenant(final String controllerId,
             final int existingTargetsAfterCreation) {
         registerAndAssertTargetWithExistingTenant(controllerId, existingTargetsAfterCreation,
-                TargetUpdateStatus.REGISTERED, CREATED_BY);
+                TargetUpdateStatus.REGISTERED, CONTROLLER_PLUG_AND_PLAY);
     }
 
     protected void registerAndAssertTargetWithExistingTenant(final String controllerId,
@@ -282,7 +281,7 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
             final Map<String, String> attributes) {
         final int version = controllerManagement.findByControllerId(controllerId).get().getOptLockRevision();
         registerAndAssertTargetWithExistingTenant(controllerId, name, existingTargetsAfterCreation,
-                expectedTargetStatus, CREATED_BY, attributes, () -> findTargetBasedOnNewVersion(controllerId, version));
+                expectedTargetStatus, CONTROLLER_PLUG_AND_PLAY, attributes, () -> findTargetBasedOnNewVersion(controllerId, version));
     }
 
     protected Message createTargetMessage(final String controllerId, final String tenant) {

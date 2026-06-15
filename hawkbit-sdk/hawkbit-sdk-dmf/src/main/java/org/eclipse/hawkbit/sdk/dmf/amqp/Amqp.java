@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.sdk.Tenant;
 import org.eclipse.hawkbit.sdk.Tenant.Dmf;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
+import org.springframework.boot.amqp.autoconfigure.RabbitProperties;
 import org.springframework.util.ObjectUtils;
 
 /**

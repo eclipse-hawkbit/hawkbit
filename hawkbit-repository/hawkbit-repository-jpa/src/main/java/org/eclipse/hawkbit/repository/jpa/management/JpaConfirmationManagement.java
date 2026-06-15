@@ -42,8 +42,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -103,8 +102,7 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Action confirmAction(final long actionId, final Integer code, final Collection<String> deviceMessages) {
         log.trace("Action with id {} confirm request is triggered.", actionId);
         final Action action = actionRepository.getById(actionId);
@@ -119,8 +117,7 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Action denyAction(final long actionId, final Integer code, final Collection<String> deviceMessages) {
         log.trace("Action with id {} deny request is triggered.", actionId);
         final Action action = actionRepository.getById(actionId);

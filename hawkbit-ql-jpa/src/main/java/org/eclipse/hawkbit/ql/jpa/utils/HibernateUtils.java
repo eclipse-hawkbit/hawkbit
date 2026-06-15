@@ -22,8 +22,10 @@ import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.metamodel.mapping.MappingModelExpressible;
 import org.hibernate.query.spi.QueryEngine;
+import org.hibernate.query.spi.QueryParameterBindings;
 import org.hibernate.query.spi.QueryParameterImplementor;
-import org.hibernate.query.sqm.internal.QuerySqmImpl;
+import org.hibernate.query.sqm.internal.DomainParameterXref;
+import org.hibernate.query.sqm.internal.SqmQueryImpl;
 import org.hibernate.query.sqm.internal.SqmUtil;
 import org.hibernate.query.sqm.spi.SqmParameterMappingModelResolutionAccess;
 import org.hibernate.query.sqm.sql.SqmTranslation;
@@ -33,6 +35,7 @@ import org.hibernate.query.sqm.tree.SqmDmlStatement;
 import org.hibernate.query.sqm.tree.expression.SqmParameter;
 import org.hibernate.query.sqm.tree.select.SqmSelectStatement;
 import org.hibernate.sql.ast.SqlAstTranslatorFactory;
+import org.hibernate.sql.ast.spi.SqlAstCreationContext;
 import org.hibernate.sql.ast.tree.MutationStatement;
 import org.hibernate.sql.ast.tree.Statement;
 import org.hibernate.sql.ast.tree.select.SelectStatement;
@@ -60,14 +63,14 @@ public class HibernateUtils {
             throw new UnsupportedOperationException("SqmTranslatorFactory resolver is not available");
         }
 
-        final QuerySqmImpl<?> hqlQuery = query.unwrap(QuerySqmImpl.class);
-        final SessionFactoryImplementor factory = hqlQuery.getSessionFactory();
+        final SqmQueryImpl<?> hqlQuery = query.unwrap(SqmQueryImpl.class);
+        final SessionFactoryImplementor sessionFactory = hqlQuery.getSessionFactory();
         final SharedSessionContractImplementor session = hqlQuery.getSession();
-        final SessionFactoryImplementor sessionFactory = session.getFactory();
+        final SqlAstCreationContext sqlAstCreationContext = (SqlAstCreationContext)session.getFactory();
 
         final SqmTranslatorFactory sqmTranslatorFactory;
         try {
-            sqmTranslatorFactory = (SqmTranslatorFactory) getSqmTranslatorFactory.invoke(factory.getQueryEngine());
+            sqmTranslatorFactory = (SqmTranslatorFactory) getSqmTranslatorFactory.invoke(sessionFactory.getQueryEngine());
         } catch (final IllegalAccessException | InvocationTargetException e) {
             throw new UnsupportedOperationException("Can't create SqmTranslatorFactory", e);
         }
@@ -76,19 +79,20 @@ public class HibernateUtils {
                 hqlQuery.getSqmStatement() instanceof SqmSelectStatement<?> selectStatement
                         ? sqmTranslatorFactory.createSelectTranslator(selectStatement,
                                 hqlQuery.getQueryOptions(), hqlQuery.getDomainParameterXref(), hqlQuery.getQueryParameterBindings(),
-                                hqlQuery.getLoadQueryInfluencers(), sessionFactory, false)
+                                hqlQuery.getLoadQueryInfluencers(), sqlAstCreationContext, false)
                         : sqmTranslatorFactory.createMutationTranslator((SqmDmlStatement<?>) hqlQuery.getSqmStatement(),
                                 hqlQuery.getQueryOptions(), hqlQuery.getDomainParameterXref(), hqlQuery.getQueryParameterBindings(),
-                                hqlQuery.getLoadQueryInfluencers(), sessionFactory);
+                                hqlQuery.getLoadQueryInfluencers(), sqlAstCreationContext);
 
         final SqmTranslation<? extends Statement> sqmTranslation = sqmSelectTranslator.translate();
-        final SqlAstTranslatorFactory sqlAstTranslatorFactory = factory.getJdbcServices().getJdbcEnvironment().getSqlAstTranslatorFactory();
+        final SqlAstTranslatorFactory sqlAstTranslatorFactory = sessionFactory.getJdbcServices().getJdbcEnvironment().getSqlAstTranslatorFactory();
         final Map<QueryParameterImplementor<?>, Map<SqmParameter<?>, List<JdbcParametersList>>> jdbcParamsXref = SqmUtil.generateJdbcParamsXref(
                 hqlQuery.getDomainParameterXref(), sqmTranslation::getJdbcParamsBySqmParam);
 
-        final JdbcParameterBindings jdbcParameterBindings = SqmUtil.createJdbcParameterBindings(hqlQuery.getQueryParameterBindings(),
-                hqlQuery.getDomainParameterXref(), jdbcParamsXref, factory.getRuntimeMetamodels().getMappingMetamodel(),
-                sqmSelectTranslator.getFromClauseAccess()::findTableGroup, new SqmParameterMappingModelResolutionAccess() {
+        final JdbcParameterBindings jdbcParameterBindings = SqmUtil.createJdbcParameterBindings(
+                (QueryParameterBindings) hqlQuery.getQueryParameterBindings(),
+                (DomainParameterXref) hqlQuery.getDomainParameterXref(), jdbcParamsXref, /*sessionFactory.getRuntimeMetamodels().getMappingMetamodel(),
+                sqmSelectTranslator.getFromClauseAccess()::findTableGroup,*/ new SqmParameterMappingModelResolutionAccess() {
 
                     @Override
                     @SuppressWarnings("unchecked")
@@ -97,9 +101,9 @@ public class HibernateUtils {
                     }
                 }, hqlQuery.getSession());
         return (sqmTranslation.getSqlAst() instanceof SelectStatement selectStatement
-                ? sqlAstTranslatorFactory.buildSelectTranslator(factory, selectStatement)
+                ? sqlAstTranslatorFactory.buildSelectTranslator(sessionFactory, selectStatement)
                         .translate(jdbcParameterBindings, hqlQuery.getQueryOptions())
-                : sqlAstTranslatorFactory.buildMutationTranslator(factory, (MutationStatement) sqmTranslation.getSqlAst())
+                : sqlAstTranslatorFactory.buildMutationTranslator(sessionFactory, (MutationStatement) sqmTranslation.getSqlAst())
                         .translate(jdbcParameterBindings, hqlQuery.getQueryOptions()))
                 .getSqlString();
     }

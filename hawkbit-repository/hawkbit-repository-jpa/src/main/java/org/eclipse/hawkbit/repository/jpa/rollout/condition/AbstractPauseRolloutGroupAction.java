@@ -45,4 +45,3 @@ public abstract class AbstractPauseRolloutGroupAction<T extends Enum<T>> impleme
         }
     }
 }
-

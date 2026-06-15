@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.api;
 
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE_DEFAULT;
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT;
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET;
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT;
@@ -93,7 +95,10 @@ public interface MgmtRolloutRestApi {
                     "The sequence of the sort criteria (multiple can be used) defines the sort order of the entities in the result.")
             String sortParam,
             @RequestParam(value = REQUEST_PARAMETER_REPRESENTATION_MODE, defaultValue = REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT)
-            String representationModeParam);
+            String representationModeParam,
+            @RequestParam(value = REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, defaultValue = REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE_DEFAULT, required = false)
+            @Schema(description = "Controls whether soft-deleted rollouts are included in the result.")
+            MgmtSoftDeletedMode softDeletedMode);
 
     /**
      * Handles the GET request of retrieving a single rollout.

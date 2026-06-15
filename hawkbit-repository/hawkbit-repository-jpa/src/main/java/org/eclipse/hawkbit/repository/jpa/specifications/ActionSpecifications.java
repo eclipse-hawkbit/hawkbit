@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.springframework.data.jpa.domain.DeleteSpecification;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
@@ -102,15 +103,14 @@ public final class ActionSpecifications {
         );
     }
 
-    public static Specification<JpaAction> byControllerIdAndIdIn(final String controllerId, final List<Long> actionIds) {
-        return ((root, query, cb) -> {
-                final Join<JpaAction, JpaTarget> targetJoin = root.join(JpaAction_.target);
-                return cb.and(
-                        cb.equal(targetJoin.get(JpaTarget_.controllerId), controllerId),
-                        root.get(AbstractJpaBaseEntity_.id).in(actionIds)
-                );
-        });
-
+    public static DeleteSpecification<JpaAction> byControllerIdAndIdIn(final String controllerId, final List<Long> actionIds) {
+        return (root, cd, cb) -> {
+            final Join<JpaAction, JpaTarget> targetJoin = root.join(JpaAction_.target);
+            return cb.and(
+                    cb.equal(targetJoin.get(JpaTarget_.controllerId), controllerId),
+                    root.get(AbstractJpaBaseEntity_.id).in(actionIds)
+            );
+        };
     }
 
     public static Specification<JpaAction> byDistributionSetIdAndActiveAndStatusIsNot(final Long distributionSetId, final Action.Status status) {

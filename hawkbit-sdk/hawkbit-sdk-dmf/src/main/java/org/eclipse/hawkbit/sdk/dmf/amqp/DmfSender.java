@@ -30,7 +30,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
+import org.springframework.amqp.support.converter.DefaultJacksonJavaTypeMapper;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -88,7 +88,7 @@ public class DmfSender {
         if (message == null) {
             return;
         }
-        message.getMessageProperties().getHeaders().remove(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
+        message.getMessageProperties().getHeaders().remove(DefaultJacksonJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
 
         String correlationId = message.getMessageProperties().getCorrelationId();
         if (ObjectUtils.isEmpty(correlationId)) {

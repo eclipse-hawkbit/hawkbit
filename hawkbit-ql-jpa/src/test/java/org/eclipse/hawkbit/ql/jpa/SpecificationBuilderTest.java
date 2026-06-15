@@ -26,12 +26,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.data.jpa.domain.Specification;
 
 @SuppressWarnings("java:S5961") // complex check because the matter is very complex
-@DataJpaTest(properties = { "spring.jpa.database=H2" }, excludeAutoConfiguration = { FlywayAutoConfiguration.class })
+@DataJpaTest(properties = "spring.jpa.database=H2")
 @EnableAutoConfiguration
 @Slf4j
 class SpecificationBuilderTest {
@@ -309,10 +308,25 @@ class SpecificationBuilderTest {
 
         assertThat(filter("subMap.x==*tx and subMap.y==rooty")).hasSize(1).containsExactlyInAnyOrder(root1);
         assertThat(filter("subMap.x==*tx and subMap.y!=rootx")).hasSize(1).containsExactlyInAnyOrder(root1);
-        assertThat(filter("subMap.x==*tx or subMap.x==rooty"))
-                .hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
-        assertThat(filter("subMap.x==*tx or subMap.x!=rootx"))
-                .hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
+        assertThat(filter("subMap.x==*tx or subMap.x==rooty")).hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
+        assertThat(filter("subMap.x==*tx or subMap.x!=rootx")).hasSize(5).containsExactlyInAnyOrder(root1, root2, root3, root4, root5);
+
+        assertThat(filter("subMap.x=out=rootx and subMap.y=out=rooty")).hasSize(1).containsExactlyInAnyOrder(root4);
+        assertThat(filter("subMap.x!=rootx and subMap.y!=rooty")).hasSize(1).containsExactlyInAnyOrder(root4);
+        assertThat(filter("subMap.x=out=(rootx, rooty) and subMap.y=out=(rootx, rooty)")).isEmpty();
+        assertThat(filter("subMap.x=out=rootx and subMap.y=out=rooty and subMap.x=out=rooty")).isEmpty();
+        assertThat(filter("subMap.x==rooty and subMap.y=out=rooty")).hasSize(1).containsExactlyInAnyOrder(root4);
+
+        assertThat(filter("subMap.x==rootx and subMap.y==rooty")).hasSize(1).containsExactlyInAnyOrder(root1);
+        assertThat(filter("subMap.x==rootx and subMap.y=in=(rooty, rootz)")).hasSize(1).containsExactlyInAnyOrder(root1);
+        assertThat(filter("subMap.x==rootx and subMap.y==rooty and subMap.x==rooty")).isEmpty();
+        assertThat(filter("subMap.x==rooty and subMap.y==rootx")).hasSize(1).containsExactlyInAnyOrder(root4);
+
+        assertThat(filter("subMap.x=in=(rootx) and subMap.y=in=(rooty)")).hasSize(1).containsExactlyInAnyOrder(root1);
+        assertThat(filter("subMap.x=in=(rootx,rooty) and subMap.y=in=(rootx,rooty)")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
+        assertThat(filter("subMap.x=in=(rootx) and subMap.y=in=(rooty) and subMap.x=in=(rooty)")).isEmpty();
+        assertThat(filter("subMap.x=out=rooty and subMap.y=out=rootx")).hasSize(1).containsExactlyInAnyOrder(root1);
+        assertThat(filter("subMap.x=out=rooty and subMap.y!=rootx")).hasSize(1).containsExactlyInAnyOrder(root1);
     }
 
     @Test

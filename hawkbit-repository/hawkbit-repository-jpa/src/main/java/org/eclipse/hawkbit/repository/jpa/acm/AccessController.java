@@ -11,9 +11,15 @@ package org.eclipse.hawkbit.repository.jpa.acm;
 
 import java.util.Optional;
 
+import jakarta.persistence.criteria.Root;
+
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.springframework.data.jpa.domain.DeleteSpecification;
+import org.springframework.data.jpa.domain.PredicateSpecification;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.Nullable;
+import org.springframework.data.jpa.domain.UpdateSpecification;
 
 /**
  * Interface of an extended access control by providing means or fine-grained access control.
@@ -42,11 +48,24 @@ public interface AccessController<T> {
      * @param specification is the root specification which needs to be appended by the resource limitation
      * @return a new appended specification
      */
-    @Nullable
-    default Specification<T> appendAccessRules(final Operation operation, @Nullable final Specification<T> specification) {
+    default @NonNull Specification<T> appendAccessRules(final Operation operation, @Nullable final Specification<T> specification) {
         return getAccessRules(operation)
                 .map(accessRules -> specification == null ? accessRules : specification.and(accessRules))
-                .orElse(specification);
+                .orElseGet(() -> specification == null ? Specification.unrestricted() : specification);
+    }
+
+    default @NonNull UpdateSpecification<T> appendAccessRules(final Operation operation, @Nullable final UpdateSpecification<T> specification) {
+        return getAccessRules(operation)
+                .map(this::predicateSpec)
+                .map(accessRules -> specification == null ? UpdateSpecification.where(accessRules) : specification.and(accessRules))
+                .orElseGet(() -> specification == null ? UpdateSpecification.unrestricted() : specification);
+    }
+
+    default @NonNull DeleteSpecification<T> appendAccessRules(final Operation operation, @Nullable final DeleteSpecification<T> specification) {
+        return getAccessRules(operation)
+                .map(this::predicateSpec)
+                .map(accessRules -> specification == null ? DeleteSpecification.where(accessRules) : specification.and(accessRules))
+                .orElseGet(() -> specification == null ? DeleteSpecification.unrestricted() : specification);
     }
 
     /**
@@ -66,6 +85,12 @@ public interface AccessController<T> {
         for (final T entity : entities) {
             assertOperationAllowed(operation, entity);
         }
+    }
+
+    // TODO - since Spring 4.x migration, reconsider if it is the best way
+    // shall not be used externally
+    default PredicateSpecification<T> predicateSpec(final Specification<T> spec) {
+        return (from, cb) -> spec.toPredicate((Root<T>) from, cb.createQuery(), cb);
     }
 
     /**

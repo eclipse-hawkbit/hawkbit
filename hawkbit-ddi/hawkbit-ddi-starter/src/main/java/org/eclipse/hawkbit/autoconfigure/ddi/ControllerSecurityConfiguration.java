@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -83,7 +84,7 @@ class ControllerSecurityConfiguration {
     @Order(301)
     protected SecurityFilterChain filterChainDDI(
             final HttpSecurity http,
-            @Value("${hawkbit.server.security.cors.disable-for-ddi-api:false}") final boolean disableCorsForDdiApi) throws Exception {
+            @Value("${hawkbit.server.security.cors.disable-for-ddi-api:false}") final boolean disableCorsForDdiApi) {
         http
                 .securityMatcher(DDI_ANT_MATCHERS)
                 .authorizeHttpRequests(amrmRegistry -> amrmRegistry.anyRequest().authenticated())
@@ -109,7 +110,7 @@ class ControllerSecurityConfiguration {
         }
 
         if (securityProperties.isRequireSsl()) {
-            http.requiresChannel(crmRegistry -> crmRegistry.anyRequest().requiresSecure());
+            http.redirectToHttps(Customizer.withDefaults());
         }
 
         Mdc.Filter.addMdcFilter(http);

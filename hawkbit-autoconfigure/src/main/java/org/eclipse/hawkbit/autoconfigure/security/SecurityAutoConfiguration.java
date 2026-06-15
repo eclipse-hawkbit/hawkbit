@@ -12,14 +12,15 @@ package org.eclipse.hawkbit.autoconfigure.security;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.audit.AuditLoggingAspect;
+import org.eclipse.hawkbit.auth.SpRole;
 import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RepositoryConfiguration;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.tenancy.TenantAwareUserProperties;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.security.autoconfigure.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -47,7 +48,7 @@ public class SecurityAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public AuditorAware<String> auditorAware() {
-        return () -> Optional.ofNullable(AccessContext.actor());
+        return () -> Optional.ofNullable(SpRole.isController() ? "CONTROLLER_PLUG_AND_PLAY" : AccessContext.actor());
     }
 
     @Bean

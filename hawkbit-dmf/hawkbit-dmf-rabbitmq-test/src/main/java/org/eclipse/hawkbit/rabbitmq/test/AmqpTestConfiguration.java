@@ -14,9 +14,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.hawkbit.dmf.DmfMessageConverter;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -32,7 +32,7 @@ public class AmqpTestConfiguration {
     @Primary
     public RabbitTemplate rabbitTemplateForTest(final ConnectionFactory connectionFactory) {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
+        rabbitTemplate.setMessageConverter(new DmfMessageConverter());
         rabbitTemplate.setReplyTimeout(TimeUnit.SECONDS.toMillis(3));
         rabbitTemplate.setReceiveTimeout(TimeUnit.SECONDS.toMillis(3));
         return rabbitTemplate;

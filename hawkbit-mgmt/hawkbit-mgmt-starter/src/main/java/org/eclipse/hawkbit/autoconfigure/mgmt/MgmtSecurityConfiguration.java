@@ -16,13 +16,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.context.Mdc;
+import org.eclipse.hawkbit.context.Principal;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.oidc.OidcProperties;
 import org.eclipse.hawkbit.oidc.OidcProperties.Oauth2.ResourceServer.Jwt.Claim;
@@ -30,8 +31,6 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.rest.SecurityManagedConfiguration;
 import org.eclipse.hawkbit.rest.security.DosFilter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
-import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -84,9 +83,7 @@ public class MgmtSecurityConfiguration {
     public FilterRegistrationBean<DosFilter> dosFilterREST() {
         final FilterRegistrationBean<DosFilter> filterRegBean = SecurityManagedConfiguration.dosFilter(null,
                 securityProperties.getDos().getFilter(), securityProperties.getClients());
-        filterRegBean.setUrlPatterns(List.of(
-                MgmtRestConstants.REST + "/*",
-                "/system/admin/*"));
+        filterRegBean.setUrlPatterns(List.of(MgmtRestConstants.REST + "/*", "/system/admin/*"));
         filterRegBean.setOrder(SecurityManagedConfiguration.DOS_FILTER_ORDER);
         filterRegBean.setName("dosMgmtFilter");
 
@@ -109,7 +106,7 @@ public class MgmtSecurityConfiguration {
             // could be used for instance to set authentication provider
             // Note: implementation of the customizer shall always take in account what is the already set by the hawkBit
             @Autowired(required = false) @Qualifier("hawkbitHttpSecurityCustomizer") final Customizer<HttpSecurity> httpSecurityCustomizer,
-            final SystemManagement systemManagement) throws Exception {
+            final SystemManagement systemManagement) {
         http
                 .securityMatcher(MgmtRestConstants.REST + "/**")
                 .authorizeHttpRequests(amrmRegistry -> amrmRegistry
@@ -136,7 +133,7 @@ public class MgmtSecurityConfiguration {
         }
 
         if (securityProperties.isRequireSsl()) {
-            http.requiresChannel(crmRegistry -> crmRegistry.anyRequest().requiresSecure());
+            http.redirectToHttps(Customizer.withDefaults());
         }
 
         if (oauth2ResourceServerCustomizer != null) {
@@ -169,8 +166,10 @@ public class MgmtSecurityConfiguration {
             final String tenantClaim = claim.getTenant();
             final String rolesClaim = claim.getRoles();
             oauth2ResourceServerConfigurer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
-                final String username = followPathInJwtClaims(jwt, usernameClaim, String.class);
-                final String tenant = tenantClaim == null ? "DEFAULT" : followPathInJwtClaims(jwt, tenantClaim, String.class);
+                final String username = Objects.requireNonNull(followPathInJwtClaims(jwt, usernameClaim, String.class));
+                final String tenant = tenantClaim == null
+                        ? "DEFAULT"
+                        : Objects.requireNonNull(followPathInJwtClaims(jwt, tenantClaim, String.class));
                 final Collection<GrantedAuthority> authorities = Optional
                         .ofNullable(followPathInJwtClaims(jwt, rolesClaim, Collection.class))
                         .map(resourceRoles -> ((Collection<String>) resourceRoles).stream()
@@ -179,7 +178,7 @@ public class MgmtSecurityConfiguration {
                                 .map(GrantedAuthority.class::cast)
                                 .toList())
                         .orElseGet(Collections::emptyList);
-                return new HawkbitJwtAuthenticationToken(jwt, new TenantAwareUser(username, username, authorities, tenant), authorities);
+                return new HawkbitJwtAuthenticationToken(jwt, new Principal(tenant, username), authorities);
             }));
         }
 
@@ -193,8 +192,10 @@ public class MgmtSecurityConfiguration {
             for (final String chunk : chunks) {
                 if (current instanceof Map<?, ?> map) {
                     current = map.get(chunk);
-                } else if (current == null) {
-                    return null;
+                    if (current == null) {
+                        log.warn("Path {} not found in claim", path);
+                        return null;
+                    }
                 } else {
                     log.warn("Unexpected claim type for path {} (chunk {})! Expected a Map but got {}", path, chunk, current.getClass());
                     return null;
@@ -218,9 +219,8 @@ public class MgmtSecurityConfiguration {
 
             private final String name;
 
-            private HawkbitJwtAuthenticationToken(final Jwt jwt, TenantAwareUser user, final Collection<GrantedAuthority> authorities) {
-                super(jwt, user, jwt, authorities);
-                setDetails(new TenantAwareAuthenticationDetails(user.getTenant(), false));
+            private HawkbitJwtAuthenticationToken(final Jwt jwt, Principal principal, final Collection<GrantedAuthority> authorities) {
+                super(jwt, principal, jwt, authorities);
                 name = jwt.getSubject();
                 setAuthenticated(true);
             }

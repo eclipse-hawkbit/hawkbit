@@ -21,11 +21,11 @@ import java.util.function.Supplier;
 import lombok.SneakyThrows;
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.context.AccessContext;
+import org.eclipse.hawkbit.context.Principal;
 import org.eclipse.hawkbit.repository.AutoAssignHandler;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -129,9 +129,7 @@ class SecurityContextCtxTest extends AbstractJpaIntegrationTest {
     private static SecurityContext createUserContext(final int testId) {
         final SecurityContext userContext = SecurityContextHolder.createEmptyContext();
         final UsernamePasswordAuthenticationToken userPassAuthentication = new UsernamePasswordAuthenticationToken(
-                "user", null, AUTHORITIES.stream().map(SimpleGrantedAuthority::new).toList());
-        final TenantAwareAuthenticationDetails details = new TenantAwareAuthenticationDetails("my_tenant_" + testId, false);
-        userPassAuthentication.setDetails(details);
+                new Principal("my_tenant_" + testId, "user"), null, AUTHORITIES.stream().map(SimpleGrantedAuthority::new).toList());
         userContext.setAuthentication(userPassAuthentication);
 
         assertThat(userContext).isNotNull();

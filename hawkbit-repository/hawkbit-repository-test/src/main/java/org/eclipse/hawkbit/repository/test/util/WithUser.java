@@ -29,18 +29,18 @@ import org.springframework.security.test.context.support.WithSecurityContextFact
 public @interface WithUser {
 
     /**
+     * Gets the test actor.
+     *
+     * @return test actor
+     */
+    String principal() default "TestActor";
+
+    /**
      * Gets the test tenant id.
      *
      * @return test tenant id
      */
     String tenant() default "DEFAULT";
-
-    /**
-     * Gets the test principal.
-     *
-     * @return test principal
-     */
-    String principal() default "TestPrincipal";
 
     /**
      * Gets the test credentials.

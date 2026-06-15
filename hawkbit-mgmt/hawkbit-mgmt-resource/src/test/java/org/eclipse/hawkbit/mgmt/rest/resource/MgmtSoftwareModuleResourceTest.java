@@ -1228,6 +1228,129 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.rest.param.rsqlInvalidField")));
     }
 
+    @Test
+    void getSoftwareModulesFilteredBySoftDeletedMode() throws Exception {
+        softwareModuleManagement.create(SoftwareModuleManagement.Create.builder().type(osType).name("activeSm").version("1.0").build());
+
+        SoftwareModule deletedSm = softwareModuleManagement.create(
+                SoftwareModuleManagement.Create.builder().type(osType).name("deletedSm").version("1.0").build());
+        testdataFactory.createDistributionSet(List.of(deletedSm));
+        softwareModuleManagement.delete(deletedSm.getId());
+
+        // default — only active
+        mvc.perform(get("/rest/v1/softwaremodules").accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo("activeSm")))
+                .andExpect(jsonPath("content[0].deleted", equalTo(false)));
+
+        // only_soft_deleted — only deleted
+        mvc.perform(get("/rest/v1/softwaremodules")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "ONLY_SOFT_DELETED")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo("deletedSm")))
+                .andExpect(jsonPath("content[0].deleted", equalTo(true)));
+
+        // include_soft_deleted — both
+        mvc.perform(get("/rest/v1/softwaremodules")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "INCLUDE_SOFT_DELETED")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.total", equalTo(2)));
+
+        // exclude_soft_deleted — explicit, same as default
+        mvc.perform(get("/rest/v1/softwaremodules")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "EXCLUDE_SOFT_DELETED")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].deleted", equalTo(false)));
+    }
+
+    @Test
+    void getSoftwareModulesFilteredBySoftDeletedModeWithRsql() throws Exception {
+        softwareModuleManagement.create(
+                SoftwareModuleManagement.Create.builder().type(osType).name("rsqlActive").version("1.0").build());
+
+        SoftwareModule deletedSm = softwareModuleManagement.create(
+                SoftwareModuleManagement.Create.builder().type(osType).name("rsqlDeleted").version("1.0").build());
+        testdataFactory.createDistributionSet(List.of(deletedSm));
+        softwareModuleManagement.delete(deletedSm.getId());
+
+        // rsql + soft_deleted — find deleted by name
+        mvc.perform(get("/rest/v1/softwaremodules")
+                        .param("q", "name==rsqlDeleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "ONLY_SOFT_DELETED")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo("rsqlDeleted")))
+                .andExpect(jsonPath("content[0].deleted", equalTo(true)));
+
+        // rsql + not_soft_deleted — deleted not found
+        mvc.perform(get("/rest/v1/softwaremodules")
+                        .param("q", "name==rsqlDeleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "EXCLUDE_SOFT_DELETED")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andExpect(jsonPath("$.total", equalTo(0)));
+
+        // rsql + include_soft_deleted — filter by name narrows to one
+        mvc.perform(get("/rest/v1/softwaremodules")
+                        .param("q", "name==rsqlActive")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "INCLUDE_SOFT_DELETED")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo("rsqlActive")));
+    }
+
+    @Test
+    void updateSoftDeletedSoftwareModuleRejected() throws Exception {
+        SoftwareModule sm = softwareModuleManagement.create(
+                SoftwareModuleManagement.Create.builder().type(osType).name("delSm").version("1.0").build());
+        testdataFactory.createDistributionSet(List.of(sm));
+        softwareModuleManagement.delete(sm.getId());
+
+        final String body = new JSONObject().put("description", "updated").toString();
+        mvc.perform(put("/rest/v1/softwaremodules/{smId}", sm.getId()).content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.deleted")));
+    }
+
+    @Test
+    void lockSoftDeletedSoftwareModuleRejected() throws Exception {
+        SoftwareModule sm = softwareModuleManagement.create(
+                SoftwareModuleManagement.Create.builder().type(osType).name("delSmLock").version("1.0").build());
+        testdataFactory.createDistributionSet(List.of(sm));
+        softwareModuleManagement.delete(sm.getId());
+
+        final String body = new JSONObject().put("locked", true).toString();
+        mvc.perform(put("/rest/v1/softwaremodules/{smId}", sm.getId()).content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.deleted")));
+    }
+
     /**
      * Tests GET request on /rest/v1/softwaremodules/{smId}.
      */

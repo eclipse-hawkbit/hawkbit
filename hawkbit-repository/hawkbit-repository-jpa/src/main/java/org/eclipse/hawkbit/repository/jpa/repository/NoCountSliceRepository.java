@@ -13,7 +13,7 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Repository interface that offers findAll with disabled count query.

@@ -35,7 +35,7 @@ public class JpaRolloutHandler implements RolloutHandler {
 
     private final RolloutManagement rolloutManagement;
     private final RolloutExecutor rolloutExecutor;
-    private final LockRegistry lockRegistry;
+    private final LockRegistry<? extends Lock> lockRegistry;
     private final PlatformTransactionManager txManager;
     private final Optional<MeterRegistry> meterRegistry;
 
@@ -48,7 +48,7 @@ public class JpaRolloutHandler implements RolloutHandler {
      * @param txManager transaction manager interface
      */
     public JpaRolloutHandler(final RolloutManagement rolloutManagement,
-            final RolloutExecutor rolloutExecutor, final LockRegistry lockRegistry,
+            final RolloutExecutor rolloutExecutor, final LockRegistry<? extends Lock> lockRegistry,
             final PlatformTransactionManager txManager, final Optional<MeterRegistry> meterRegistry) {
         this.rolloutManagement = rolloutManagement;
         this.rolloutExecutor = rolloutExecutor;

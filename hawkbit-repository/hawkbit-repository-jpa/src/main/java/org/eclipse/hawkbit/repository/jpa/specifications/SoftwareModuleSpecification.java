@@ -32,4 +32,9 @@ public final class SoftwareModuleSpecification {
             return cb.equal(join.get(AbstractJpaBaseEntity_.ID), dsId);
         };
     }
+
+    public static Specification<JpaSoftwareModule> isDeleted(final Boolean isDeleted) {
+        return (root, query, cb) ->
+                cb.equal(root.<Boolean> get(JpaSoftwareModule_.deleted), isDeleted);
+    }
 }

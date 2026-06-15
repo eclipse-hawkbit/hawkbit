@@ -68,12 +68,12 @@ public class StatisticsUtils {
             final Meter.Id id = m.getId();
             if (id.getName().startsWith(Statistics.METER_PREFIX)) {
                 final double value;
-                if (m instanceof Counter counter) {
-                    value = counter.count();
-                } else if (m instanceof FunctionCounter functionCounter) {
-                    value = functionCounter.count();
-                } else {
-                    return;
+                switch (m) {
+                    case Counter counter -> value = counter.count();
+                    case FunctionCounter functionCounter -> value = functionCounter.count();
+                    default -> {
+                        return;
+                    }
                 }
 
                 final StringBuilder key = new StringBuilder(id.getName());

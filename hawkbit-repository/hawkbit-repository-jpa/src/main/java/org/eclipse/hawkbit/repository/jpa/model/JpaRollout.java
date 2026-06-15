@@ -28,6 +28,7 @@ import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Max;
@@ -64,6 +65,7 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, EventAwareEntity {
 
     @OneToMany(targetEntity = JpaRolloutGroup.class, fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, mappedBy = "rollout")
+    @OrderBy("id ASC")
     private List<JpaRolloutGroup> rolloutGroups = new ArrayList<>();
 
     @Setter

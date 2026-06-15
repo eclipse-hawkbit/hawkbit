@@ -9,13 +9,27 @@
  */
 package org.eclipse.hawkbit.event;
 
+import java.util.Objects;
+
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.messaging.converter.MessageConverter;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
+@SpringBootTest(classes = EventJacksonConfiguration.class)
 class EventJacksonMessageConverterTest extends AbstractEventMessageConverterTest {
 
-    EventJacksonMessageConverterTest() {
-        super(new EventJacksonMessageConverter());
+    private MessageConverter messageConverter;
+
+    @Autowired
+    void setJsonMapper(final JsonMapper jsonMapper) {
+        messageConverter = new EventJacksonMessageConverter(jsonMapper);
+    }
+
+    protected MessageConverter messageConverter() {
+        return Objects.requireNonNull(messageConverter, "MessageConverter has not been initialized");
     }
 }

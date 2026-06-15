@@ -22,9 +22,12 @@ import java.util.List;
 
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetGroupRestApi;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.test.util.ReflectionTestUtils;
 
 public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegrationTest {
 
@@ -228,5 +231,67 @@ public class MgmtTargetGroupResourceTest extends AbstractManagementApiIntegratio
                 .andExpect(jsonPath("content.[0].controllerId", Matchers.equalTo("target1")))
                 .andExpect(jsonPath("content.[1].controllerId", Matchers.equalTo("target2")))
                 .andExpect(jsonPath("content.[2].controllerId", Matchers.equalTo("target3")));
+    }
+
+    @Test
+    void shouldAssignGroupToTargetsFilteredByTagNotEqual() throws Exception {
+        targetManagement.create(builder().controllerId("target1").build());
+        targetManagement.create(builder().controllerId("target2").build());
+        targetManagement.create(builder().controllerId("target3").build());
+
+        final TargetTag tag1 = targetTagManagement.create(TargetTagManagement.Create.builder().name("tag1").build());
+        final TargetTag tag2 = targetTagManagement.create(TargetTagManagement.Create.builder().name("tag2").build());
+
+        targetManagement.assignTag(List.of("target1"), tag1.getId());
+        targetManagement.assignTag(List.of("target2"), tag1.getId());
+        targetManagement.assignTag(List.of("target3"), tag2.getId());
+
+        mvc.perform(put(MgmtTargetGroupRestApi.TARGETGROUPS_V1 + "/FilteredGroup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("q", "tag!=tag1"))
+                .andExpect(status().isNoContent());
+
+        mvc.perform(get(MgmtTargetGroupRestApi.TARGETGROUPS_V1 + "/FilteredGroup/assigned")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("content", Matchers.hasSize(1)))
+                .andExpect(jsonPath("content.[0].controllerId", Matchers.equalTo("target3")));
+    }
+
+    @Test
+    void shouldAssignGroupInChunksWhenTargetCountExceedsChunkSize() throws Exception {
+        // create 5 targets with tag "exclude", 2 without — chunk size 2 forces multiple batches
+        final TargetTag excludeTag = targetTagManagement.create(TargetTagManagement.Create.builder().name("exclude").build());
+        for (int i = 1; i <= 5; i++) {
+            targetManagement.create(builder().controllerId("chunked-" + i).build());
+        }
+        targetManagement.create(builder().controllerId("excluded-1").build());
+        targetManagement.create(builder().controllerId("excluded-2").build());
+        targetManagement.assignTag(List.of("excluded-1", "excluded-2"), excludeTag.getId());
+
+        // override chunk size to 2 for this test
+        ReflectionTestUtils.setField(targetManagement, "assignTargetGroupChunkSize", 2);
+        try {
+            // tag!=exclude triggers chunked path and should assign only non-tagged targets
+            mvc.perform(put(MgmtTargetGroupRestApi.TARGETGROUPS_V1 + "/ChunkedGroup")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("q", "tag!=exclude"))
+                    .andExpect(status().isNoContent());
+
+            mvc.perform(get(MgmtTargetGroupRestApi.TARGETGROUPS_V1 + "/ChunkedGroup/assigned")
+                            .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("content", Matchers.hasSize(5)))
+                    .andExpect(jsonPath("content.[0].controllerId", Matchers.equalTo("chunked-1")))
+                    .andExpect(jsonPath("content.[1].controllerId", Matchers.equalTo("chunked-2")))
+                    .andExpect(jsonPath("content.[2].controllerId", Matchers.equalTo("chunked-3")))
+                    .andExpect(jsonPath("content.[3].controllerId", Matchers.equalTo("chunked-4")))
+                    .andExpect(jsonPath("content.[4].controllerId", Matchers.equalTo("chunked-5")));
+        } finally {
+            // restore default
+            ReflectionTestUtils.setField(targetManagement, "assignTargetGroupChunkSize", 1000);
+        }
     }
 }

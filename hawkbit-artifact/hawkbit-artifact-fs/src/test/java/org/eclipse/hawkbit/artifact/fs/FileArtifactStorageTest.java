@@ -15,11 +15,11 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Random;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.artifact.AbstractArtifactStorage;
 import org.eclipse.hawkbit.artifact.exception.ArtifactBinaryNotFoundException;
@@ -54,7 +54,7 @@ class FileArtifactStorageTest {
     static void afterClass() {
         if (new File(artifactResourceProperties.getPath()).exists()) {
             try {
-                FileUtils.deleteDirectory(new File(artifactResourceProperties.getPath()));
+                delete(new File(artifactResourceProperties.getPath()));
             } catch (final IOException | IllegalArgumentException e) {
                 log.warn("Cannot delete file-directory", e);
             }
@@ -69,9 +69,10 @@ class FileArtifactStorageTest {
         final byte[] fileContent = randomBytes();
         final StoredArtifactInfo artifact = storeRandomArtifact(fileContent);
 
-        final byte[] readContent = new byte[fileContent.length];
-        IOUtils.read(artifactFilesystemRepository.getBySha1(TENANT, artifact.getHashes().sha1()), readContent);
-        assertThat(readContent).isEqualTo(fileContent);
+        try (final InputStream is = artifactFilesystemRepository.getBySha1(TENANT, artifact.getHashes().sha1())) {
+            final byte[] readContent = is.readAllBytes();
+            assertThat(readContent).isEqualTo(fileContent);
+        }
     }
 
     /**
@@ -139,6 +140,22 @@ class FileArtifactStorageTest {
     private StoredArtifactInfo storeRandomArtifact(final byte[] fileContent) throws IOException {
         try (final ByteArrayInputStream inputStream = new ByteArrayInputStream(fileContent)) {
             return artifactFilesystemRepository.store(TENANT, inputStream, "filename.tmp", "application/txt", null);
+        }
+    }
+
+    private static void delete(final File file) throws IOException {
+        if (file.exists()) {
+            if (file.isDirectory()) {
+                // delete children
+                final File[] children = file.listFiles();
+                if (children != null) {
+                    for (final File child : children) {
+                        delete(child);
+                    }
+                }
+            }
+
+            Files.delete(file.toPath());
         }
     }
 }

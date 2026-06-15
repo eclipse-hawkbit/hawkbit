@@ -37,7 +37,6 @@ import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.integration.util.UUIDConverter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -77,20 +76,17 @@ class DistributedLockTest extends AbstractJpaIntegrationTest {
         }
 
         @Bean
-        LockRepository lockRepository0(final DataSource dataSource, final LockProperties lockProperties,
-                final PlatformTransactionManager txManager) {
-            return lockRepository(dataSource, lockProperties, txManager);
+        LockRepository lockRepository0(final DataSource dataSource, final LockProperties lockProperties) {
+            return lockRepository(dataSource, lockProperties);
         }
 
         @Bean
-        LockRepository lockRepository1(final DataSource dataSource, final LockProperties lockProperties,
-                final PlatformTransactionManager txManager) {
-            return lockRepository(dataSource, lockProperties, txManager);
+        LockRepository lockRepository1(final DataSource dataSource, final LockProperties lockProperties) {
+            return lockRepository(dataSource, lockProperties);
         }
 
-        private LockRepository lockRepository(final DataSource dataSource, final LockProperties lockProperties,
-                final PlatformTransactionManager txManager) {
-            final DefaultLockRepository repository = new DistributedLockRepository(dataSource, lockProperties, txManager);
+        private LockRepository lockRepository(final DataSource dataSource, final LockProperties lockProperties) {
+            final DefaultLockRepository repository = new DistributedLockRepository(dataSource, lockProperties);
             repository.setPrefix("SP_");
             return repository;
         }

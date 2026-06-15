@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionFactory;
+import org.eclipse.hawkbit.dmf.DmfMessageConverter;
 import org.eclipse.hawkbit.repository.jpa.JpaRepositoryConfiguration;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
@@ -25,7 +26,6 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.junit.RabbitAvailable;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -88,7 +88,7 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
 
     private RabbitTemplate createDmfClient() {
         final RabbitTemplate template = new RabbitTemplate(connectionFactory);
-        template.setMessageConverter(new Jackson2JsonMessageConverter());
+        template.setMessageConverter(new DmfMessageConverter());
         template.setReceiveTimeout(TimeUnit.SECONDS.toMillis(3));
         template.setReplyTimeout(TimeUnit.SECONDS.toMillis(3));
         template.setExchange(getExchange());
