@@ -65,7 +65,7 @@
 
         <!-- openfeign versions -->
         <spring-cloud-openfeign.version>5.0.2</spring-cloud-openfeign.version>
-        <openfeign-hc5.version>13.12</openfeign-hc5.version>
+        <openfeign-hc5.version>13.13</openfeign-hc5.version>
 
         <!-- Eclipselink - START -->
         <!--
