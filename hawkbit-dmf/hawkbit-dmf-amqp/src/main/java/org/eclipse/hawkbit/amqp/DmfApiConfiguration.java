@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import static org.eclipse.hawkbit.dmf.DmfMessageConverter.DMF_JSON_MODEL_PACKAGE;
-
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.Arrays;
@@ -52,6 +50,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.retry.RetryPolicy;
 import org.springframework.core.retry.RetryTemplate;
 import org.springframework.util.ErrorHandler;
+import org.springframework.util.ObjectUtils;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -99,8 +98,12 @@ public class DmfApiConfiguration {
     @ConditionalOnMissingBean(name = "dmfMessageConverter") // override it if needed to add / edit trusted packages or need other customization
     public MessageConverter dmfMessageConverter(
             final JsonMapper jsonMapper,
-            @Value("${hawkbit.dmf.trusted-packages:" + DMF_JSON_MODEL_PACKAGE + "}") final String trustedPackages) {
-        return new DmfMessageConverter(jsonMapper, Arrays.stream(trustedPackages.split(",")).map(String::trim).toArray(String[]::new));
+            @Value("${hawkbit.dmf.trusted-packages:}") final String trustedPackages) {
+        return new DmfMessageConverter(
+                jsonMapper,
+                ObjectUtils.isEmpty(trustedPackages)
+                        ? new String[0]
+                        : Arrays.stream(trustedPackages.split(",")).map(String::trim).toArray(String[]::new));
     }
 
     /**

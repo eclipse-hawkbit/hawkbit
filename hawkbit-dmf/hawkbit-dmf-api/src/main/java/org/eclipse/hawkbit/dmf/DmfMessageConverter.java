@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.dmf;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.amqp.core.Message;
@@ -22,14 +25,33 @@ import tools.jackson.databind.json.JsonMapper;
 // empty payload is empty byte[] and not try to convert it to Object (which fail since it is not JSON)
 public class DmfMessageConverter extends JacksonJsonMessageConverter {
 
-    public static final String DMF_JSON_MODEL_PACKAGE = "org.eclipse.hawkbit.dmf.json.model";
+    private static final String DMF_JSON_MODEL_PACKAGE = "org.eclipse.hawkbit.dmf.json.model";
 
-    public DmfMessageConverter(final String... trustedPackages) {
-        this(new JsonMapper(), trustedPackages);
+    /**
+     * Constructor unsing default {@link JsonMapper}, i.e. <code>new JsonMapper()</code>
+     *
+     * @param trustedPackagesExt {@link DmfMessageConverter} always trust {@link #DMF_JSON_MODEL_PACKAGE}. If any additional packages
+     *         shall be trusted provided here
+     */
+    public DmfMessageConverter(final String... trustedPackagesExt) {
+        this(new JsonMapper(), trustedPackagesExt);
     }
 
-    public DmfMessageConverter(final JsonMapper jsonMapper, final String... trustedPackages) {
-        super(jsonMapper, trustedPackages.length == 0 ? new String[] { DMF_JSON_MODEL_PACKAGE } : trustedPackages);
+    /**
+     * Constructor with specified {@link JsonMapper}
+     *
+     * @param jsonMapper the {@link JsonMapper} to use for conversion
+     * @param trustedPackagesExt {@link DmfMessageConverter} always trust {@link #DMF_JSON_MODEL_PACKAGE}. If any additional packages
+     *         shall be trusted provided here
+     */
+    public DmfMessageConverter(final JsonMapper jsonMapper, final String... trustedPackagesExt) {
+        super(
+                jsonMapper,
+                trustedPackagesExt == null || trustedPackagesExt.length == 0
+                        ? new String[] { DMF_JSON_MODEL_PACKAGE }
+                        : Stream.concat(Stream.of(DMF_JSON_MODEL_PACKAGE), Arrays.stream(trustedPackagesExt))
+                                .distinct()
+                                .toArray(String[]::new));
     }
 
     @Override
