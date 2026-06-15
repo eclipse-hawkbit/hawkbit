@@ -64,7 +64,7 @@
         <springdoc-openapi.version>3.0.3</springdoc-openapi.version>
 
         <!-- openfeign versions -->
-        <spring-cloud-openfeign.version>5.0.1</spring-cloud-openfeign.version>
+        <spring-cloud-openfeign.version>5.0.2</spring-cloud-openfeign.version>
         <openfeign-hc5.version>13.12</openfeign-hc5.version>
 
         <!-- Eclipselink - START -->
