@@ -42,12 +42,12 @@
 
     <properties>
         <!-- Overrides START - to be reviewed regularly -->
+        <!-- Spring boot version overrides (should be reviewed with every Spring boot upgrade) - START -->
+        <!-- Spring boot version overrides - END -->
         <!-- Override vulnerable commons-fileupload used by feign-form-spring (via spring-cloud-starter-openfeign) -->
         <commons-fileupload.version>1.6.0</commons-fileupload.version>
         <!-- Override commons-lang3 version since 3.17 is vulnerable -->
         <commons-lang.version>3.20.0</commons-lang.version>
-        <!-- Override Netty 4.2.12 due to CVE -->
-        <netty.version>4.2.13.Final</netty.version>
         <!-- Overrides END -->
 
         <revision>0-SNAPSHOT</revision>
@@ -66,11 +66,6 @@
         <!-- openfeign versions -->
         <spring-cloud-openfeign.version>5.0.1</spring-cloud-openfeign.version>
         <openfeign-hc5.version>13.12</openfeign-hc5.version>
-
-        <!-- Spring boot version overrides (should be reviewed with every Spring boot upgrade) - START -->
-        <!-- Newer versions needed than defined in the Spring boot -->
-
-        <!-- Spring boot version overrides - END -->
 
         <!-- Eclipselink - START -->
         <!--
