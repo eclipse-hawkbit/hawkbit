@@ -178,6 +178,31 @@ public class SpecificationBuilder<T> {
                     }
                     return compare(comparison, deepGetPath(pathResolver.getPath(attribute), split[1]));
                 }
+            } else if (attribute.getPersistentAttributeType() == Attribute.PersistentAttributeType.ONE_TO_MANY
+                    && split.length == 1 && "autoConfirmationStatus".equalsIgnoreCase(split[0])) {
+                // Target autoConfirm case - handle autoConfirm == true/false since autoconfirm is
+                // represented as List in JpaTarget just to enforce Lazy Loading with eclipse link
+                // (not enforced otherwise) so here support for boolean filtering on
+                // ONE_TO_MANY relationship presence is added
+                final Path<?> joinPath = pathResolver.getPath(attribute);
+                final String value = String.valueOf(comparison.getValue());
+                final boolean exists;
+                if ("true".equalsIgnoreCase(value)) {
+                    exists = true;
+                } else if ("false".equalsIgnoreCase(value)) {
+                    exists = false;
+                } else {
+                    throw new QueryException(INVALID_SYNTAX,
+                            String.format("Only a boolean value is supported for existance check on %s", getPathContext(comparison)));
+                }
+                final Path<?> idPath = joinPath.get("id");
+                return switch (op) {
+                    case EQ -> exists ? cb.isNotNull(idPath) : cb.isNull(idPath);
+                    case NE ->  exists ? cb.isNull(idPath) : cb.isNotNull(idPath);
+                    default -> throw new QueryException(INVALID_SYNTAX,
+                            String.format("Operator %s is not supported for existence check on %s", op, getPathContext(comparison)));
+                };
+
             } else { // singular attribute (BASIC and EMBEDDABLE) or plural (ListAttribute of entities)
                 final Path<?> attributePath = pathResolver.getPath(attribute);
                 return compare(comparison, split.length > 1 ? deepGetPath(attributePath, split[1]) : attributePath);
