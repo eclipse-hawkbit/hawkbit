@@ -14,7 +14,7 @@ import io.modelcontextprotocol.spec.McpSchema.PromptMessage;
 import io.modelcontextprotocol.spec.McpSchema.Role;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
 import lombok.extern.slf4j.Slf4j;
-import org.springaicommunity.mcp.annotation.McpPrompt;
+import org.springframework.ai.mcp.annotation.McpPrompt;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
@@ -34,9 +34,7 @@ public class HawkbitPromptProvider {
     private static final String PROMPTS_PATH = "prompts/";
 
     @McpPrompt(
-            name = "hawkbit-context",
-            description = "Provides initial context about hawkBit, available tools, and documentation resources. " +
-                    "Use this prompt at the start of a session to understand what you can do with hawkBit MCP.")
+            name = "hawkbit-context", description = "Provides initial context about hawkBit, available tools, and documentation resources. " + "Use this prompt at the start of a session to understand what you can do with hawkBit MCP.")
     public GetPromptResult getHawkBitContext() {
         return new GetPromptResult(
                 "hawkBit MCP Server Context",
@@ -45,9 +43,7 @@ public class HawkbitPromptProvider {
     }
 
     @McpPrompt(
-            name = "rsql-help",
-            description = "Explains RSQL query syntax for filtering hawkBit entities. " +
-                    "Use this when you need help constructing filter queries for targets, rollouts, etc.")
+            name = "rsql-help", description = "Explains RSQL query syntax for filtering hawkBit entities. " + "Use this when you need help constructing filter queries for targets, rollouts, etc.")
     public GetPromptResult getRsqlHelp() {
         return new GetPromptResult(
                 "RSQL Query Help",
