@@ -176,7 +176,7 @@ maven/mavencentral/org.bouncycastle/bcpkix-jdk18on/1.84, MIT, approved, #27142
 maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.81.1, NOASSERTION, restricted, clearlydefined
 maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.84, MIT, approved, #27144
 maven/mavencentral/org.flywaydb/flyway-core/12.4.0, , restricted, clearlydefined
-maven/mavencentral/org.flywaydb/flyway-database-postgresql/12.4.0, , restricted, clearlydefined
+maven/mavencentral/org.flywaydb/flyway-database-postgresql/12.4.0, Apache-2.0, approved, #28703
 maven/mavencentral/org.flywaydb/flyway-mysql/12.4.0, , restricted, clearlydefined
 maven/mavencentral/org.glassfish.jaxb/jaxb-core/4.0.9, BSD-3-Clause, approved, ee4j.jaxb-impl
 maven/mavencentral/org.glassfish.jaxb/jaxb-runtime/4.0.9, BSD-3-Clause, approved, ee4j.jaxb-impl
@@ -234,7 +234,7 @@ maven/mavencentral/org.springframework.boot/spring-boot-flyway/4.1.0, , restrict
 maven/mavencentral/org.springframework.boot/spring-boot-hateoas/4.1.0, Apache-2.0, approved, #28696
 maven/mavencentral/org.springframework.boot/spring-boot-health/4.1.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-hibernate/4.1.0, , restricted, clearlydefined
-maven/mavencentral/org.springframework.boot/spring-boot-http-client/4.1.0, , restricted, clearlydefined
+maven/mavencentral/org.springframework.boot/spring-boot-http-client/4.1.0, Apache-2.0, approved, #28705
 maven/mavencentral/org.springframework.boot/spring-boot-http-codec/4.1.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-http-converter/4.1.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-integration/4.1.0, , restricted, clearlydefined
@@ -283,7 +283,7 @@ maven/mavencentral/org.springframework.boot/spring-boot-validation/4.1.0, , rest
 maven/mavencentral/org.springframework.boot/spring-boot-web-server/4.1.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-webflux/4.1.0, , restricted, clearlydefined
 maven/mavencentral/org.springframework.boot/spring-boot-webmvc/4.1.0, , restricted, clearlydefined
-maven/mavencentral/org.springframework.boot/spring-boot/4.1.0, , restricted, clearlydefined
+maven/mavencentral/org.springframework.boot/spring-boot/4.1.0, Apache-2.0, approved, #28704
 maven/mavencentral/org.springframework.cloud/spring-cloud-commons/5.0.2, Apache-2.0, approved, #26106
 maven/mavencentral/org.springframework.cloud/spring-cloud-context/5.0.2, Apache-2.0, approved, #26094
 maven/mavencentral/org.springframework.cloud/spring-cloud-function-context/5.0.3, Apache-2.0, approved, #27659
