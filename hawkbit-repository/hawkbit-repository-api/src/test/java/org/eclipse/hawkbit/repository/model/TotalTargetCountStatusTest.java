@@ -52,7 +52,7 @@ class TotalTargetCountStatusTest {
     }
 
     /**
-     * When an empty list is passed to the TotalTargetCountStatus, all actions should be displayed as 
+     * When an empty list is passed to the TotalTargetCountStatus, all actions should be displayed as
      * NOTSTARTED
      */
     @Test

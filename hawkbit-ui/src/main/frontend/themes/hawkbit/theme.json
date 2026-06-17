@@ -1,3 +1,5 @@
 {
-  "lumoImports": ["badge"]
+  "lumoImports": [
+    "badge"
+  ]
 }

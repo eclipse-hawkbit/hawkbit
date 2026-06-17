@@ -323,7 +323,8 @@ class SpecificationBuilderTest {
         assertThat(filter("subMap.x==rooty and subMap.y==rootx")).hasSize(1).containsExactlyInAnyOrder(root4);
 
         assertThat(filter("subMap.x=in=(rootx) and subMap.y=in=(rooty)")).hasSize(1).containsExactlyInAnyOrder(root1);
-        assertThat(filter("subMap.x=in=(rootx,rooty) and subMap.y=in=(rootx,rooty)")).hasSize(4).containsExactlyInAnyOrder(root1, root2, root3, root4);
+        assertThat(filter("subMap.x=in=(rootx,rooty) and subMap.y=in=(rootx,rooty)")).hasSize(4)
+                .containsExactlyInAnyOrder(root1, root2, root3, root4);
         assertThat(filter("subMap.x=in=(rootx) and subMap.y=in=(rooty) and subMap.x=in=(rooty)")).isEmpty();
         assertThat(filter("subMap.x=out=rooty and subMap.y=out=rootx")).hasSize(1).containsExactlyInAnyOrder(root1);
         assertThat(filter("subMap.x=out=rooty and subMap.y!=rootx")).hasSize(1).containsExactlyInAnyOrder(root1);

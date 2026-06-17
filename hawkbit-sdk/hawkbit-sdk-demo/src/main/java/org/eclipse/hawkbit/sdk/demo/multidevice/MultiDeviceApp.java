@@ -40,7 +40,7 @@ public class MultiDeviceApp {
     }
 
     @Bean
-     HawkbitClient hawkbitClient(final HawkbitServer hawkBitServer) {
+    HawkbitClient hawkbitClient(final HawkbitServer hawkBitServer) {
         return new HawkbitClient(hawkBitServer);
     }
 

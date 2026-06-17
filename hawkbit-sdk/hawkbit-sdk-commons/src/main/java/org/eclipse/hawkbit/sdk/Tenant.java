@@ -14,9 +14,9 @@ import java.security.cert.X509Certificate;
 import lombok.Data;
 import lombok.ToString;
 import org.eclipse.hawkbit.sdk.ca.CA;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("hawkbit.tenant")
 @Data

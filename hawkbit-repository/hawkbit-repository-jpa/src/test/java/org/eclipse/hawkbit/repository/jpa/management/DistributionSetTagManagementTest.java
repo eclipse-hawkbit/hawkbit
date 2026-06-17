@@ -173,7 +173,8 @@ class DistributionSetTagManagementTest extends AbstractRepositoryManagementTest<
     }
 
     @SafeVarargs
-    private void assertTaggedWithATagAreAsExpected(final DistributionSetTag tag, final Collection<DistributionSet>... expectedDistributionSets) {
+    private void assertTaggedWithATagAreAsExpected(
+            final DistributionSetTag tag, final Collection<DistributionSet>... expectedDistributionSets) {
         final Collection<Long> retrievedFilteredDsIds = distributionSetManagement.findByTag(tag.getId(), UNPAGED).getContent().stream()
                 .map(DistributionSet::getId)
                 .toList();

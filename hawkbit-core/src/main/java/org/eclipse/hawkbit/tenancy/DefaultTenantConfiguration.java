@@ -45,8 +45,8 @@ public class DefaultTenantConfiguration {
     public static final String TENANT_TAG = "tenant";
 
     public static final Supplier<String> TENANT_TAG_VALUE_PROVIDER = () -> Optional.ofNullable(AccessContext.tenant())
-                .map(String::toUpperCase)
-                .orElse("N/A");
+            .map(String::toUpperCase)
+            .orElse("N/A");
 
     @Bean
     @ConditionalOnMissingBean

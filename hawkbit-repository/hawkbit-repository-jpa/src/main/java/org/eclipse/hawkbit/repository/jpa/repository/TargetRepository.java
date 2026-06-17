@@ -36,14 +36,18 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget> {
     default Optional<JpaTarget> findByControllerId(final String controllerId) {
         return findOne(TargetSpecifications.hasControllerId(controllerId));
     }
+
     default Optional<JpaTarget> findWithDetailsByControllerId(final String controllerId, final String entityGraph) {
         return findOne(TargetSpecifications.hasControllerId(controllerId), entityGraph);
     }
+
     default JpaTarget getByControllerId(final String controllerId) {
         return findByControllerId(controllerId).orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
     }
+
     default JpaTarget getWithDetailsByControllerId(final String controllerId, final String entityGraph) {
-        return findWithDetailsByControllerId(controllerId, entityGraph).orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+        return findWithDetailsByControllerId(controllerId, entityGraph)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
     }
 
     // TODO AC - remove it and use specification
@@ -57,7 +61,8 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget> {
     @Transactional
     @Query("UPDATE JpaTarget t SET t.assignedDistributionSet = :dSet, t.lastModifiedAt = :lastModifiedAt, t.lastModifiedBy = :lastModifiedBy, t.updateStatus = :status WHERE t.id IN :targets")
     void setAssignedDistributionSetAndUpdateStatus(
-            @Param("dSet") JpaDistributionSet set, @Param("lastModifiedAt") Long modifiedAt, @Param("lastModifiedBy") String modifiedBy, @Param("status") TargetUpdateStatus status,
+            @Param("dSet") JpaDistributionSet set, @Param("lastModifiedAt") Long modifiedAt, @Param("lastModifiedBy") String modifiedBy,
+            @Param("status") TargetUpdateStatus status,
             @Param("targets") Collection<Long> targets);
 
     // TODO AC - remove it and use specification
@@ -100,6 +105,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget> {
 
     /**
      * Finds all available distinct target groups
+     *
      * @return all target groups
      */
     @Query(value = "SELECT DISTINCT target_group FROM sp_target WHERE tenant = ?1 AND target_group IS NOT NULL", nativeQuery = true)

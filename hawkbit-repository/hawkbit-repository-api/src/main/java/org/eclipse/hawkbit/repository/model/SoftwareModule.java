@@ -97,6 +97,7 @@ public interface SoftwareModule extends NamedVersionedEntity {
     interface MetadataValue {
 
         String getValue();
+
         boolean isTargetVisible();
     }
 

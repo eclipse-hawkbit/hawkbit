@@ -84,7 +84,6 @@ public class JpaTargetTypeManagement
         return Optional.of(TenantAwareCacheManager.getInstance().getCache(JpaTargetType.class.getSimpleName()));
     }
 
-
     @Override
     @Cacheable(value = CACHE_TARGET_TYPE_NAME, key = "#key")
     public Optional<TargetType> findByKey(final String key) {

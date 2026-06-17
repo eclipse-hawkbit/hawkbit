@@ -103,7 +103,8 @@ public class EventVerifier extends AbstractTestExecutionListener {
             try {
                 verifyRightCountOfEvents(expectedEvents);
                 verifyAllEventsCounted(expectedEvents);
-                log.info("Expected events received:\n\t{}", Arrays.stream(expectedEvents).map(Object::toString).collect(Collectors.joining("\n\t")));
+                log.info("Expected events received:\n\t{}",
+                        Arrays.stream(expectedEvents).map(Object::toString).collect(Collectors.joining("\n\t")));
             } finally {
                 testContext.getApplicationContext().getBean(ApplicationEventMulticaster.class).removeApplicationListener(eventCaptor);
                 DYNAMIC_EXPECTATIONS.remove();

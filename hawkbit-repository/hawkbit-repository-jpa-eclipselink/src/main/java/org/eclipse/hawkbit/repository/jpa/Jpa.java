@@ -28,6 +28,7 @@ public class Jpa {
     }
 
     public static final JpaVendor JPA_VENDOR = JpaVendor.ECLIPSELINK;
+
     static {
         log.info("JPA vendor: {}", JPA_VENDOR);
     }

@@ -223,7 +223,7 @@ public class JpaDistributionSetTypeManagement
         }
     }
 
-    private void assertDistributionSetTypeIsNotDeleted(final DistributionSetType distributionSetType){
+    private void assertDistributionSetTypeIsNotDeleted(final DistributionSetType distributionSetType) {
         if (distributionSetType.isDeleted()) {
             throw new DeletedException(DistributionSetType.class, distributionSetType.getId());
         }

@@ -6,9 +6,13 @@ In this guide we describe how to create a **Feign REST Client** based on a Sprin
 
 ### Create Feign REST Client
 
-hawkBit provides REST interfaces for **Management API** and **DDI API**. Using these interfaces you can create a Feign client with the help of the *Feign inheritance support*.  
-Our example modules demonstrate how to create Feign client resources. Here you can find the [Management API client resources](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-mgmt-api) and the [DDI client resources](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-ddi-api).  
-A small simulator application demonstrates how you can interact with hawkBit via the [Management API](http://www.eclipse.org/hawkbit/documentation/interfaces/management-api.html).
+hawkBit provides REST interfaces for **Management API** and **DDI API**. Using these interfaces you can create a Feign
+client with the help of the *Feign inheritance support*.  
+Our example modules demonstrate how to create Feign client resources. Here you can find
+the [Management API client resources](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-mgmt-api) and
+the [DDI client resources](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-ddi-api).  
+A small simulator application demonstrates how you can interact with hawkBit via
+the [Management API](http://www.eclipse.org/hawkbit/documentation/interfaces/management-api.html).
 
 ---
 

@@ -84,7 +84,8 @@ public class RolloutExecutorTest extends AbstractJpaIntegrationTest {
     }
 
     private void createAction(
-            final Target target, final Rollout rollout, final Integer weight, final Action.Status status, final DistributionSet distributionSet) {
+            final Target target, final Rollout rollout, final Integer weight, final Action.Status status,
+            final DistributionSet distributionSet) {
         final JpaAction action = new JpaAction();
         action.setActionType(Action.ActionType.FORCED);
         action.setTarget(target);

@@ -10,7 +10,9 @@
 package org.eclipse.hawkbit.repository.jpa.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 import jakarta.persistence.OptimisticLockException;
+
 import org.eclipse.hawkbit.exception.GenericSpServerException;
 import org.eclipse.hawkbit.ql.QueryException;
 import org.eclipse.hawkbit.repository.exception.ConcurrentModificationException;
@@ -60,7 +62,6 @@ class ExceptionMapperTest {
 
         assertMappedTo(ExceptionMapper.mapRe(cause), cause, InsufficientPermissionException.class);
     }
-
 
     @Test
     void queryExceptionGenericMappedToGenericSpServerException() {

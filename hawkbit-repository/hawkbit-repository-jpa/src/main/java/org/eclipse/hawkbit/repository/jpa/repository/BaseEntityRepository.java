@@ -22,16 +22,17 @@ import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.jspecify.annotations.Nullable;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Command repository operations for all {@link TenantAwareBaseEntity}s.
+ *
  * @param <T> type if the entity type
  */
 @NoRepositoryBean

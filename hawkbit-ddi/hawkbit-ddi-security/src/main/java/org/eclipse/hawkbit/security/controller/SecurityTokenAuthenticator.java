@@ -56,8 +56,8 @@ public class SecurityTokenAuthenticator extends Authenticator.AbstractAuthentica
 
         final String tenant = controllerSecurityToken.getTenant();
         return asSystemAsTenant(tenant, () -> controllerSecurityToken.getTargetId() != null
-                                ? controllerManagement.find(controllerSecurityToken.getTargetId())
-                                : controllerManagement.findByControllerId(controllerSecurityToken.getControllerId()))
+                ? controllerManagement.find(controllerSecurityToken.getTargetId())
+                : controllerManagement.findByControllerId(controllerSecurityToken.getControllerId()))
                 // validate if the presented token is the same as the one set for the target
                 .filter(target -> presentedToken.equals(asSystemAsTenant(tenant, target::getSecurityToken)))
                 .map(target -> authenticatedController(tenant, target.getControllerId()))

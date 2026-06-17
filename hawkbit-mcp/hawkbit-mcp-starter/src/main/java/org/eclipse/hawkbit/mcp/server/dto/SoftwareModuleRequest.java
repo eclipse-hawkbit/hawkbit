@@ -37,7 +37,7 @@ public sealed interface SoftwareModuleRequest
      * Request to update an existing software module.
      *
      * @param softwareModuleId the software module ID
-     * @param body             the request body containing updated software module data
+     * @param body the request body containing updated software module data
      */
     record Update(Long softwareModuleId, MgmtSoftwareModuleRequestBodyPut body) implements SoftwareModuleRequest {}
 

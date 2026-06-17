@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponse
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftDeletedMode;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtRolloutMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
@@ -36,7 +37,6 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement.Create;
 import org.eclipse.hawkbit.repository.RolloutManagement.GroupCreate;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftDeletedMode;
 import org.eclipse.hawkbit.repository.SoftDeletedMode;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;

@@ -70,7 +70,7 @@ class ServiceEventsTest {
     }
 
     @Test
-    void testExpectedServiceEvents(){
+    void testExpectedServiceEvents() {
         var expected = Set.of(
                 TargetCreatedEvent.class,
                 TargetUpdatedEvent.class,
@@ -115,7 +115,8 @@ class ServiceEventsTest {
 
     @Test
     void testProcessingTargetAttributesRequestedEventIsSent() {
-        TargetAttributesRequestedEvent event = new TargetAttributesRequestedEvent("testtenant", 1l, Target.class, "testControllerId","address");
+        final TargetAttributesRequestedEvent event = new TargetAttributesRequestedEvent(
+                "testtenant", 1l, Target.class, "testControllerId", "address");
         publisher.publishEvent(event);
 
         verify(streamBridge).send("fanout", event);

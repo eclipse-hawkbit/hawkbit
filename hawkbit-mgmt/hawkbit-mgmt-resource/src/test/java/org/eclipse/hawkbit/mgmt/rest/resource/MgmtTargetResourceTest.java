@@ -281,7 +281,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final Status expectedStatusAfterActionConfirmationCall = Status.RUNNING;
         final long actionId = doAssignmentAndTestConfirmation("targetId");
         testActionConfirmation("targetId", actionId, MgmtActionConfirmationRequestBodyPut.Confirmation.CONFIRMED, expectedStatusCode,
-                new String[] { expectedStatusMessage1, expectedStatusMessage2 }, HttpStatus.NO_CONTENT, expectedStatusAfterActionConfirmationCall);
+                new String[] { expectedStatusMessage1, expectedStatusMessage2 }, HttpStatus.NO_CONTENT,
+                expectedStatusAfterActionConfirmationCall);
     }
 
     /**
@@ -295,7 +296,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final Status expectedStatusAfterActionConfirmationCall = Status.WAIT_FOR_CONFIRMATION;
         final long actionId = doAssignmentAndTestConfirmation("targetId");
         testActionConfirmation("targetId", actionId, MgmtActionConfirmationRequestBodyPut.Confirmation.DENIED, expectedStatusCode,
-                new String[] { expectedStatusMessage1, expectedStatusMessage2 }, HttpStatus.NO_CONTENT, expectedStatusAfterActionConfirmationCall);
+                new String[] { expectedStatusMessage1, expectedStatusMessage2 }, HttpStatus.NO_CONTENT,
+                expectedStatusAfterActionConfirmationCall);
     }
 
     /**

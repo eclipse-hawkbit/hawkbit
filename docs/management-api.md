@@ -1,38 +1,51 @@
 # Management API
 
-The Management API is a RESTful API that enables to perform Create/Read/Update/Delete operations for provisioning targets (i.e. devices) and repository content (i.e. software).
-Based on the Management API you can manage and monitor software update operations via HTTP/HTTPS. The Management API supports JSON payload with hypermedia as well as filtering, sorting and paging. Furthermore the Management API provides permission based access control and standard roles as well as custom role creation.
+The Management API is a RESTful API that enables to perform Create/Read/Update/Delete operations for provisioning
+targets (i.e. devices) and repository content (i.e. software).
+Based on the Management API you can manage and monitor software update operations via HTTP/HTTPS. The Management API
+supports JSON payload with hypermedia as well as filtering, sorting and paging. Furthermore the Management API provides
+permission based access control and standard roles as well as custom role creation.
 The API is protected and needs authentication and authorization based on the security concept.
 
 ---
 
 ### API Version
-hawkBit provides an consistent Management API interface that guarantees backwards compatibility for future releases by version control.
+
+hawkBit provides an consistent Management API interface that guarantees backwards compatibility for future releases by
+version control.
 The current version of the Management API is `version 1 (v1)` with the URI `http://localhost:8080/rest/v1/`
 
 ### API Resources
+
 **Supported HTTP-methods:**
+
 - `GET`
 - `POST`
 - `PUT`
 - `DELETE`
 
 ### Query parameter
-For filtering, sorting and paging as well as using the Feed Item Query Language (FIQL) see [Query parameters](query-parameters.md).
+
+For filtering, sorting and paging as well as using the Feed Item Query Language (FIQL)
+see [Query parameters](query-parameters.md).
 
 ### Headers
+
 For all requests an `Authorization` header has to be set.
+
 - Username: `username`
 - Password: `password`
-Also have a look to the Security chapter.
-In addition, for `POST` and `PUT` requests the `Content-Type` header has to be set. Accepted content-types are.
+  Also have a look to the Security chapter.
+  In addition, for `POST` and `PUT` requests the `Content-Type` header has to be set. Accepted content-types are.
 - `application/json`
 - `application/hal+json`
 
-
 ### Request Body
-Besides the relevant data (`name`, `description`, `createdBy` etc.) of a resource entity, a resource entity also has URIs `_links` to linked resource entities.
+
+Besides the relevant data (`name`, `description`, `createdBy` etc.) of a resource entity, a resource entity also has
+URIs `_links` to linked resource entities.
 A Distribution Set entity may have for example URIs to artifacts, Software Modules, Software Module Types and metadata.
+
 ```json
 "_links": {
   "artifacts": {
@@ -51,6 +64,7 @@ A Distribution Set entity may have for example URIs to artifacts, Software Modul
 ```
 
 ## REST Doc
+
 <div style="text-align: right; margin-bottom: 8px;">
 <button onclick="window.open('../rest-api/mgmt.html', '_blank')" 
         style="padding:8px 16px; border-radius:6px; border:1px solid #007bff; 
@@ -59,9 +73,9 @@ A Distribution Set entity may have for example URIs to artifacts, Software Modul
 </button>
 </div>
 
-<iframe 
-  src="rest-api/mgmt.html" 
-  width="100%" 
-  height="1080px" 
-  style="border: 1px solid #000000; border-radius: 16px;">
+<iframe
+src="rest-api/mgmt.html"
+width="100%"
+height="1080px"
+style="border: 1px solid #000000; border-radius: 16px;">
 </iframe>

@@ -77,7 +77,7 @@ public class AccessControllerConfiguration {
         return new AccessController<>() {
 
             @Override
-            @SuppressWarnings({"unchecked", "rawtypes"})
+            @SuppressWarnings("unchecked")
             public Optional<Specification<JpaAction>> getAccessRules(final Operation operation) {
                 return targetAccessController.getAccessRules(map(operation)).map(targetSpec -> (actionRoot, query, cb) -> {
                     final Join<JpaAction, JpaTarget> targetJoin = actionRoot.join(JpaAction_.target);

@@ -64,7 +64,8 @@ public class AfterTransactionCommitExecutor {
         @Override
         @SuppressWarnings({ "squid:S1217" })
         public void afterCompletion(final int status) {
-            log.debug("Transaction completed after commit with status {}", status == TransactionSynchronization.STATUS_COMMITTED ? "COMMITTED" : "ROLLEDBACK");
+            log.debug("Transaction completed after commit with status {}",
+                    status == TransactionSynchronization.STATUS_COMMITTED ? "COMMITTED" : "ROLLEDBACK");
         }
 
         private void afterCommit(final Runnable runnable) {

@@ -41,7 +41,8 @@ The following vendors offer free trial accounts for their hawkBit compatible pro
 
 # Device Integration (Client libraries)
 
-hawkBit exposes HTTP/JSON based [Direct Device Integration (API) API](https://hawkbit.eclipse.dev/#/direct-device-integration-api)
+hawkBit exposes HTTP/JSON
+based [Direct Device Integration (API) API](https://hawkbit.eclipse.dev/#/direct-device-integration-api)
 that allow any update client to integrate quite easily.
 
 The [Eclipse Hara subproject](https://projects.eclipse.org/projects/iot.hawkbit.hara) aims to provide a reference agent
@@ -103,9 +104,11 @@ Run with docker:
 docker run -d -p 8080:8080 hawkbit/hawkbit-update-server
 ```
 
-The monolith update server will start on port 8080 with default configuration and H2 database. The default user `admin:admin` is configured.
+The monolith update server will start on port 8080 with default configuration and H2 database. The default user
+`admin:admin` is configured.
 
-The Swagger UI is available at: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+The Swagger UI is available
+at: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
 See below for how to build and run the update server on your own. In addition we have
 a [guide](https://www.eclipse.org/hawkbit/guides/runhawkbit/) for setting up a complete landscape.
@@ -136,9 +139,11 @@ mvn clean install
 java -jar ./hawkbit-monolith/hawkbit-update-server/target/hawkbit-update-server-0-SNAPSHOT.jar
 ```
 
-The monolith update server will start on port 8080 with default configuration and H2 database. The default user `admin:admin` is configured.
+The monolith update server will start on port 8080 with default configuration and H2 database. The default user
+`admin:admin` is configured.
 
-The Swagger UI is available at: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+The Swagger UI is available
+at: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
 ## Start hawkBit [UI](hawkbit-ui)
 
@@ -150,7 +155,8 @@ Log in to [hawkbit UI](http://localhost:8088) with default `admin:admin` user.
 
 ## Start hawkBit [Device Simulator](hawkbit-sdk/hawkbit-sdk-demo)
 
-* Enable gateway token authentication - on update server set tenant configuration properties (via [Swagger UI](http://localhost:8080/swagger-ui/index.html) or [hawkBit
+* Enable gateway token authentication - on update server set tenant configuration properties (
+  via [Swagger UI](http://localhost:8080/swagger-ui/index.html) or [hawkBit
   UI](http://localhost:8088)):
     * `authentication.gatewaytoken.enabled=true` and
     * `authentication.gatewaytoken.key=<gw_token>`)

@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -107,7 +107,7 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
     @Test
     void canceledAndFailedActionsAreCleanedUp() {
         // cleanup config for this test case
-        setupCleanupConfiguration( 0, Action.Status.CANCELED, Action.Status.ERROR);
+        setupCleanupConfiguration(0, Action.Status.CANCELED, Action.Status.ERROR);
 
         final Target trg1 = testdataFactory.createTarget("trg1");
         final Target trg2 = testdataFactory.createTarget("trg2");

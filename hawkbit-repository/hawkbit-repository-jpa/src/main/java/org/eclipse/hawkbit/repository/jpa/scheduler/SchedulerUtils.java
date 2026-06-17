@@ -21,10 +21,8 @@ public final class SchedulerUtils {
      * Creates a new {@link ThreadPoolTaskExecutor} with the given thread name
      * prefix and pool size.
      *
-     * @param threadNamePrefix
-     *            the prefix for the thread name
-     * @param threadPoolSize
-     *            the size of the pool
+     * @param threadNamePrefix the prefix for the thread name
+     * @param threadPoolSize the size of the pool
      * @return the new scheduler
      */
     public static ThreadPoolTaskExecutor threadPoolTaskExecutor(final String threadNamePrefix, final int threadPoolSize) {

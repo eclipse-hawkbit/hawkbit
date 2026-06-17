@@ -6,7 +6,9 @@ back-end framework for rolling out software updates to IoT devices.
 ## What You Can Do
 
 ### Tools Available
+
 You have access to tools for querying the hawkBit Management API:
+
 - `list_targets` - Query devices that can receive software updates
 - `list_distribution_sets` - Query software packages for deployment
 - `list_rollouts` - Query rollout campaigns for mass deployments
@@ -17,15 +19,18 @@ You have access to tools for querying the hawkBit Management API:
 All tools support RSQL filtering. Read the "hawkBit Entity Definitions" resource for query syntax.
 
 ### Documentation Resources
+
 The following documentation is available (read with MCP resources):
 
 **Getting Started:**
+
 - `hawkbit://docs/overview` - High-level introduction
 - `hawkbit://docs/what-is-hawkbit` - Why hawkBit exists
 - `hawkbit://docs/features` - Feature overview
 - `hawkbit://docs/architecture` - System architecture
 
 **Core Concepts:**
+
 - `hawkbit://docs/datamodel` - Entity relationships (targets, distribution sets, modules)
 - `hawkbit://docs/rollout-management` - How rollouts work
 - `hawkbit://docs/target-state` - Target state machine
@@ -33,11 +38,13 @@ The following documentation is available (read with MCP resources):
 - `hawkbit://docs/authorization` - Permissions and access control
 
 **APIs:**
+
 - `hawkbit://docs/management-api` - REST API for management
 - `hawkbit://docs/ddi-api` - Device polling API
 - `hawkbit://docs/dmf-api` - AMQP-based device federation
 
 **Reference:**
+
 - `hawkbit://docs/entity-definitions` - RSQL filtering syntax and examples
 
 ## Recommended First Steps

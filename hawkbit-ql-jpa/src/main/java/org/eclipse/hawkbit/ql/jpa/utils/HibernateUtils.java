@@ -66,7 +66,7 @@ public class HibernateUtils {
         final SqmQueryImpl<?> hqlQuery = query.unwrap(SqmQueryImpl.class);
         final SessionFactoryImplementor sessionFactory = hqlQuery.getSessionFactory();
         final SharedSessionContractImplementor session = hqlQuery.getSession();
-        final SqlAstCreationContext sqlAstCreationContext = (SqlAstCreationContext)session.getFactory();
+        final SqlAstCreationContext sqlAstCreationContext = (SqlAstCreationContext) session.getFactory();
 
         final SqmTranslatorFactory sqmTranslatorFactory;
         try {
@@ -78,14 +78,15 @@ public class HibernateUtils {
         final SqmTranslator<? extends Statement> sqmSelectTranslator =
                 hqlQuery.getSqmStatement() instanceof SqmSelectStatement<?> selectStatement
                         ? sqmTranslatorFactory.createSelectTranslator(selectStatement,
-                                hqlQuery.getQueryOptions(), hqlQuery.getDomainParameterXref(), hqlQuery.getQueryParameterBindings(),
-                                hqlQuery.getLoadQueryInfluencers(), sqlAstCreationContext, false)
+                        hqlQuery.getQueryOptions(), hqlQuery.getDomainParameterXref(), hqlQuery.getQueryParameterBindings(),
+                        hqlQuery.getLoadQueryInfluencers(), sqlAstCreationContext, false)
                         : sqmTranslatorFactory.createMutationTranslator((SqmDmlStatement<?>) hqlQuery.getSqmStatement(),
                                 hqlQuery.getQueryOptions(), hqlQuery.getDomainParameterXref(), hqlQuery.getQueryParameterBindings(),
                                 hqlQuery.getLoadQueryInfluencers(), sqlAstCreationContext);
 
         final SqmTranslation<? extends Statement> sqmTranslation = sqmSelectTranslator.translate();
-        final SqlAstTranslatorFactory sqlAstTranslatorFactory = sessionFactory.getJdbcServices().getJdbcEnvironment().getSqlAstTranslatorFactory();
+        final SqlAstTranslatorFactory sqlAstTranslatorFactory = sessionFactory.getJdbcServices().getJdbcEnvironment()
+                .getSqlAstTranslatorFactory();
         final Map<QueryParameterImplementor<?>, Map<SqmParameter<?>, List<JdbcParametersList>>> jdbcParamsXref = SqmUtil.generateJdbcParamsXref(
                 hqlQuery.getDomainParameterXref(), sqmTranslation::getJdbcParamsBySqmParam);
 
@@ -102,7 +103,7 @@ public class HibernateUtils {
                 }, hqlQuery.getSession());
         return (sqmTranslation.getSqlAst() instanceof SelectStatement selectStatement
                 ? sqlAstTranslatorFactory.buildSelectTranslator(sessionFactory, selectStatement)
-                        .translate(jdbcParameterBindings, hqlQuery.getQueryOptions())
+                .translate(jdbcParameterBindings, hqlQuery.getQueryOptions())
                 : sqlAstTranslatorFactory.buildMutationTranslator(sessionFactory, (MutationStatement) sqmTranslation.getSqlAst())
                         .translate(jdbcParameterBindings, hqlQuery.getQueryOptions()))
                 .getSqlString();

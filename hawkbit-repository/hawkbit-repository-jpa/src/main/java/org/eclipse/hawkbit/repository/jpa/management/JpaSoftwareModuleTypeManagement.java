@@ -119,7 +119,7 @@ public class JpaSoftwareModuleTypeManagement
                 softwareModuleRepository.countByType(smt) > 0 || distributionSetTypeRepository.countByElementsSmType(smt) > 0).toList();
     }
 
-    private void assertSoftwareModuleTypeIsNotDeleted(final JpaSoftwareModuleType softwareModuleType){
+    private void assertSoftwareModuleTypeIsNotDeleted(final JpaSoftwareModuleType softwareModuleType) {
         if (softwareModuleType.isDeleted()) {
             throw new DeletedException(SoftwareModuleType.class, softwareModuleType.getId());
         }

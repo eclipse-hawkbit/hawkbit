@@ -23,7 +23,6 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.slf4j.MDC;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;

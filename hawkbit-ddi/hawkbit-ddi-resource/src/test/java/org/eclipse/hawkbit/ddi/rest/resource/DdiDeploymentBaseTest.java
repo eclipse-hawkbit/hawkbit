@@ -10,9 +10,13 @@
 package org.eclipse.hawkbit.ddi.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.context.AccessContext.tenant;
+import static org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi.MEDIA_TYPE_APPLICATION_CBOR;
+import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -27,10 +31,8 @@ import java.util.concurrent.TimeUnit;
 
 import com.jayway.jsonpath.JsonPath;
 import org.assertj.core.api.Condition;
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
-import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
@@ -96,17 +98,17 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Action action = deploymentManagement.findActiveActionsByTarget(target.getControllerId(), PAGE).getContent().get(0);
 
         // get deployment base
-        performGet(DEPLOYMENT_BASE, MediaType.parseMediaType(DdiRootControllerRestApi.MEDIA_TYPE_APPLICATION_CBOR), status().isOk(),
-                AccessContext.tenant(), target.getControllerId(), action.getId().toString());
+        performGet(DEPLOYMENT_BASE, MediaType.parseMediaType(MEDIA_TYPE_APPLICATION_CBOR), status().isOk(),
+                tenant(), target.getControllerId(), action.getId().toString());
 
         // get artifacts
-        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.parseMediaType(DdiRootControllerRestApi.MEDIA_TYPE_APPLICATION_CBOR),
-                status().isOk(), AccessContext.tenant(), target.getControllerId(),
-                String.valueOf(softwareModuleId));
+        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.parseMediaType(MEDIA_TYPE_APPLICATION_CBOR),
+                status().isOk(), tenant(), target.getControllerId(), String.valueOf(softwareModuleId));
 
         final byte[] feedback = jsonToCbor(getJsonProceedingDeploymentActionFeedback());
         postDeploymentFeedback(
-                MediaType.parseMediaType(DdiRootControllerRestApi.MEDIA_TYPE_APPLICATION_CBOR), target.getControllerId(), action.getId(), feedback,
+                MediaType.parseMediaType(MEDIA_TYPE_APPLICATION_CBOR), target.getControllerId(), action.getId(),
+                feedback,
                 status().isOk());
     }
 
@@ -116,8 +118,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     @Test
     void artifactsNotFound() throws Exception {
         final Target target = testdataFactory.createTarget();
-        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.APPLICATION_JSON, status().isNotFound(), AccessContext.tenant(),
-                target.getControllerId(), "1");
+        performGet(SOFTWARE_MODULE_ARTIFACTS, APPLICATION_JSON, status().isNotFound(), tenant(), target.getControllerId(), "1");
     }
 
     /**
@@ -133,7 +134,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         assignDistributionSet(distributionSet.getId(), target.getName());
 
-        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.APPLICATION_JSON, status().isOk(), AccessContext.tenant(),
+        performGet(SOFTWARE_MODULE_ARTIFACTS, APPLICATION_JSON, status().isOk(), tenant(),
                 target.getControllerId(), softwareModuleId.toString())
                 .andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$.[?(@.filename=='filename0')]", hasSize(1)))
@@ -175,7 +176,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Run test
         final long current = System.currentTimeMillis();
-        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), AccessContext.tenant(),
+        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenant(),
                 DEFAULT_CONTROLLER_ID)
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath(
@@ -185,7 +186,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(countActionStatusAll()).isEqualTo(2);
 
         final DistributionSet findDistributionSetByAction = findDsByAction(action.getId()).get();
-        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, artifact,
+        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, APPLICATION_JSON, ds, artifact,
                 artifactSignature, action.getId(),
                 findFirstModuleByType(findDistributionSetByAction, osType).orElseThrow().getId(), "forced", "forced");
 
@@ -206,20 +207,16 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Target target = testdataFactory.createTarget(DEFAULT_CONTROLLER_ID);
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
 
-        final Long actionId = getFirstAssignedActionId(assignDistributionSet(ds.getId(), target.getControllerId(),
-                ActionType.TIMEFORCED, System.currentTimeMillis() + 2_000));
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(
+                ds.getId(), target.getControllerId(), ActionType.TIMEFORCED, System.currentTimeMillis() + 2_000));
 
-        MvcResult mvcResult = performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(),
-                AccessContext.tenant(), DEFAULT_CONTROLLER_ID)
-                .andReturn();
+        MvcResult mvcResult = performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenant(), DEFAULT_CONTROLLER_ID).andReturn();
 
         final String urlBeforeSwitch = JsonPath.compile("_links.deploymentBase.href")
                 .read(mvcResult.getResponse().getContentAsString()).toString();
 
         // Time is not yet over, so we should see the same URL
-        mvcResult = performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), AccessContext.tenant(),
-                DEFAULT_CONTROLLER_ID)
-                .andReturn();
+        mvcResult = performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenant(), DEFAULT_CONTROLLER_ID).andReturn();
         assertThat(JsonPath.compile("_links.deploymentBase.href").read(mvcResult.getResponse().getContentAsString())
                 .toString()).isEqualTo(urlBeforeSwitch)
                 .startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, actionId.toString()));
@@ -227,9 +224,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         // After the time is over we should see a new etag
         TimeUnit.MILLISECONDS.sleep(2_000);
 
-        mvcResult = performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), AccessContext.tenant(),
-                DEFAULT_CONTROLLER_ID)
-                .andReturn();
+        mvcResult = performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenant(), DEFAULT_CONTROLLER_ID).andReturn();
 
         assertThat(JsonPath.compile("_links.deploymentBase.href").read(mvcResult.getResponse().getContentAsString())
                 .toString()).isNotEqualTo(urlBeforeSwitch);
@@ -246,10 +241,9 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final String visibleMetadataOsKey = "metaDataVisible";
         final String visibleMetadataOsValue = "withValue";
 
-        final Artifact artifact = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE), getOsModule(ds),
-                "test1", ARTIFACT_SIZE);
-        final Artifact artifactSignature = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE),
-                getOsModule(ds), "test1.signature", ARTIFACT_SIZE);
+        final Artifact artifact = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE), getOsModule(ds), "test1", ARTIFACT_SIZE);
+        final Artifact artifactSignature = testdataFactory.createArtifact(
+                nextBytes(ARTIFACT_SIZE), getOsModule(ds), "test1.signature", ARTIFACT_SIZE);
 
         softwareModuleManagement.createMetadata(getOsModule(ds), visibleMetadataOsKey, new MetadataValueCreate(visibleMetadataOsValue, true));
         softwareModuleManagement.createMetadata(getOsModule(ds), "metaDataNotVisible", new MetadataValueCreate("withValue", false));
@@ -273,17 +267,18 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Run test
         final long current = System.currentTimeMillis();
-        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), AccessContext.tenant(),
-                DEFAULT_CONTROLLER_ID)
+        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenant(), DEFAULT_CONTROLLER_ID)
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
-                .andExpect(jsonPath("$._links.deploymentBase.href",
+                .andExpect(jsonPath(
+                        "$._links.deploymentBase.href",
                         startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, uaction.getId().toString()))));
         assertLastTargetQueryUpdated(current);
         assertThat(countActionStatusAll()).isEqualTo(2);
 
         final DistributionSet findDistributionSetByAction = findDsByAction(action.getId()).get();
 
-        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, visibleMetadataOsKey,
+        getAndVerifyDeploymentBasePayload(
+                DEFAULT_CONTROLLER_ID, APPLICATION_JSON, ds, visibleMetadataOsKey,
                 visibleMetadataOsValue, artifact, artifactSignature, action.getId(), "attempt", "attempt",
                 getOsModule(findDistributionSetByAction));
 
@@ -291,8 +286,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final List<ActionStatus> actionStatusMessages = deploymentManagement
                 .findActionStatusByAction(uaction.getId(), PageRequest.of(0, 100, Direction.DESC, "id")).getContent();
         assertThat(actionStatusMessages).hasSize(2);
-        final ActionStatus actionStatusMessage = actionStatusMessages.iterator().next();
-        assertThat(actionStatusMessage.getStatus()).isEqualTo(Status.RETRIEVED);
+        assertThat(actionStatusMessages.getFirst().getStatus()).isEqualTo(Status.RETRIEVED);
     }
 
     /**
@@ -305,13 +299,13 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
 
         final Artifact artifact = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE), getOsModule(ds), "test1", ARTIFACT_SIZE);
-        final Artifact artifactSignature = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE),
-                getOsModule(ds), "test1.signature", ARTIFACT_SIZE);
+        final Artifact artifactSignature = testdataFactory.createArtifact(
+                nextBytes(ARTIFACT_SIZE), getOsModule(ds), "test1.signature", ARTIFACT_SIZE);
 
         final Target savedTarget = createTargetAndAssertNoActiveActions();
 
-        final List<Target> saved = assignDistributionSet(ds.getId(), savedTarget.getControllerId(),
-                ActionType.TIMEFORCED).getAssignedEntity().stream().map(Action::getTarget).toList();
+        final List<Target> saved = assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.TIMEFORCED)
+                .getAssignedEntity().stream().map(Action::getTarget).toList();
         implicitLock(ds);
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(1);
 
@@ -327,22 +321,21 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Run test
         final long current = System.currentTimeMillis();
-        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), AccessContext.tenant(),
-                DEFAULT_CONTROLLER_ID)
+        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenant(), DEFAULT_CONTROLLER_ID)
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
-                .andExpect(jsonPath("$._links.deploymentBase.href",
+                .andExpect(jsonPath(
+                        "$._links.deploymentBase.href",
                         startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, uaction.getId().toString()))));
         assertLastTargetQueryUpdated(current);
         assertThat(countActionStatusAll()).isEqualTo(2);
 
-        final DistributionSet findDistributionSetByAction = findDsByAction(action.getId()).get();
-        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, artifact,
+        final DistributionSet findDistributionSetByAction = findDsByAction(action.getId()).orElseThrow();
+        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, APPLICATION_JSON, ds, artifact,
                 artifactSignature, action.getId(),
                 findFirstModuleByType(findDistributionSetByAction, osType).orElseThrow().getId(), "forced", "forced");
 
         getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaTypes.HAL_JSON, ds, artifact, artifactSignature,
-                action.getId(), findFirstModuleByType(findDistributionSetByAction, osType).orElseThrow().getId(), "forced",
-                "forced");
+                action.getId(), findFirstModuleByType(findDistributionSetByAction, osType).orElseThrow().getId(), "forced", "forced");
 
         // Retrieved is reported
         final Iterable<ActionStatus> actionStatusMessages = deploymentManagement
@@ -369,35 +362,36 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final Target savedTarget = createTargetAndAssertNoActiveActions();
 
-        final List<Target> saved = assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.DOWNLOAD_ONLY)
+        final List<Target> saved = assignDistributionSet(ds.getId(), savedTarget.getControllerId(), DOWNLOAD_ONLY)
                 .getAssignedEntity().stream()
                 .map(Action::getTarget)
                 .toList();
         implicitLock(ds);
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(1);
 
-        final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
+        final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().getFirst();
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(1);
         assignDistributionSet(ds2, saved).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(2);
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(2);
 
-        final Action uaction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
+        final Action uaction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().getFirst();
         assertThat(uaction.getDistributionSet()).isEqualTo(ds);
         assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(2);
 
         // Run test
 
         final long current = System.currentTimeMillis();
-        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), AccessContext.tenant(), DEFAULT_CONTROLLER_ID)
+        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenant(), DEFAULT_CONTROLLER_ID)
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
-                .andExpect(jsonPath("$._links.deploymentBase.href",
+                .andExpect(jsonPath(
+                        "$._links.deploymentBase.href",
                         startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, uaction.getId().toString()))));
         assertLastTargetQueryUpdated(current);
         assertThat(countActionStatusAll()).isEqualTo(2);
 
         final DistributionSet findDistributionSetByAction = findDsByAction(action.getId()).get();
-        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, "metaDataVisible",
+        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, APPLICATION_JSON, ds, "metaDataVisible",
                 "withValue", artifact, artifactSignature, action.getId(), "forced", "skip",
                 getOsModule(findDistributionSetByAction));
 
@@ -417,25 +411,23 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Target target = testdataFactory.createTarget(DEFAULT_CONTROLLER_ID);
 
         // not allowed methods
-        mvc.perform(post(DEPLOYMENT_BASE, AccessContext.tenant(), DEFAULT_CONTROLLER_ID, "1"))
+        mvc.perform(post(DEPLOYMENT_BASE, tenant(), DEFAULT_CONTROLLER_ID, "1"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
-
-        mvc.perform(put(DEPLOYMENT_BASE, AccessContext.tenant(), DEFAULT_CONTROLLER_ID, "1"))
+        mvc.perform(put(DEPLOYMENT_BASE, tenant(), DEFAULT_CONTROLLER_ID, "1"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
-
-        mvc.perform(delete(DEPLOYMENT_BASE, AccessContext.tenant(), DEFAULT_CONTROLLER_ID, "1"))
+        mvc.perform(delete(DEPLOYMENT_BASE, tenant(), DEFAULT_CONTROLLER_ID, "1"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
         // non existing target
-        mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_BASE, AccessContext.tenant(), "not-existing", "1"))
+        mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_BASE, tenant(), "not-existing", "1"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
         // no deployment
-        mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_BASE, AccessContext.tenant(), DEFAULT_CONTROLLER_ID, "1"))
+        mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_BASE, tenant(), DEFAULT_CONTROLLER_ID, "1"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
@@ -444,12 +436,12 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet savedSet = testdataFactory.createDistributionSet("");
 
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(savedSet, toAssign));
-        mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_BASE, AccessContext.tenant(), DEFAULT_CONTROLLER_ID,
+        mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_BASE, tenant(), DEFAULT_CONTROLLER_ID,
                         actionId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
         mvc.perform(MockMvcRequestBuilders
-                        .get(DEPLOYMENT_BASE, AccessContext.tenant(), DEFAULT_CONTROLLER_ID, actionId)
+                        .get(DEPLOYMENT_BASE, tenant(), DEFAULT_CONTROLLER_ID, actionId)
                         .accept(MediaType.APPLICATION_ATOM_XML))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotAcceptable());
@@ -644,16 +636,16 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 DdiResult.FinalResult.NONE, Collections.singletonList("")), status().isNotFound());
 
         // not allowed methods
-        mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_FEEDBACK, AccessContext.tenant(),
+        mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_FEEDBACK, tenant(),
                         DEFAULT_CONTROLLER_ID, "2"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
-        mvc.perform(put(DEPLOYMENT_FEEDBACK, AccessContext.tenant(), DEFAULT_CONTROLLER_ID, "2"))
+        mvc.perform(put(DEPLOYMENT_FEEDBACK, tenant(), DEFAULT_CONTROLLER_ID, "2"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
-        mvc.perform(delete(DEPLOYMENT_FEEDBACK, AccessContext.tenant(), DEFAULT_CONTROLLER_ID, "2"))
+        mvc.perform(delete(DEPLOYMENT_FEEDBACK, tenant(), DEFAULT_CONTROLLER_ID, "2"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
     }
@@ -699,10 +691,9 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         assignDistributionSet(ds.getId(), "1080");
-        final Action action = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent().get(0);
+        final Action action = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent().getFirst();
 
-        final String missingResultInFeedback = getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, (DdiResult) null,
-                Collections.singletonList("test"));
+        final String missingResultInFeedback = getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, (DdiResult) null, List.of("test"));
         postDeploymentFeedback("1080", action.getId(), missingResultInFeedback, status().isBadRequest())
                 .andExpect(jsonPath("$.*", hasSize(3)))
                 .andExpect(jsonPath("$.exceptionClass", equalTo(MessageNotReadableException.class.getName())));

@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.jpa.model.EntityPropertyChangeListener;
 import org.eclipse.hawkbit.repository.jpa.utils.ExceptionMapper;
 import org.eclipse.hawkbit.repository.jpa.utils.JpaExceptionTranslator;
 import org.hibernate.boot.Metadata;
+import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
 import org.hibernate.boot.spi.BootstrapContext;
 import org.hibernate.cfg.MultiTenancySettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
@@ -81,6 +82,7 @@ public class JpaConfiguration extends JpaBaseConfiguration {
     protected AbstractJpaVendorAdapter createJpaVendorAdapter() {
 
         return new HibernateJpaVendorAdapter() {
+
             private final HibernateJpaDialect hibernateJpaDialect = new CustomHibernateJpaDialect();
 
             @Override
@@ -112,7 +114,7 @@ public class JpaConfiguration extends JpaBaseConfiguration {
     @Override
     protected Map<String, Object> getVendorProperties(final DataSource dataSource) {
         final Map<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.physical_naming_strategy", org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl.class.getName());
+        properties.put("hibernate.physical_naming_strategy", PhysicalNamingStrategyStandardImpl.class.getName());
         properties.put(MultiTenancySettings.MULTI_TENANT_IDENTIFIER_RESOLVER, tenantIdentifier);
         properties.put("hibernate.multiTenancy", "DISCRIMINATOR");
         // LAZY_LOAD - Enable lazy loading of lazy fields when session is closed - N + 1 problem occur.

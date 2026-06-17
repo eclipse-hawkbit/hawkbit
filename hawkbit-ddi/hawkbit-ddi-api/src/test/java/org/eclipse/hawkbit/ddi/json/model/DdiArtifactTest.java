@@ -78,6 +78,7 @@ class DdiArtifactTest {
         final String serializedDdiArtifact = "{\"filename\": [\"test.file\"],\"hashes\":{\"sha1\":\"123\",\"md5\":\"456\",\"sha256\":\"789\"},\"size\":111,\"links\":[]}";
 
         // Test
-        assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(() -> OBJECT_MAPPER.readValue(serializedDdiArtifact, DdiArtifact.class));
+        assertThatExceptionOfType(MismatchedInputException.class)
+                .isThrownBy(() -> OBJECT_MAPPER.readValue(serializedDdiArtifact, DdiArtifact.class));
     }
 }

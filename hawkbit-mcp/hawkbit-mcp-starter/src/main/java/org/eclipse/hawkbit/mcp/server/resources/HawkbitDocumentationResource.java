@@ -9,12 +9,12 @@
  */
 package org.eclipse.hawkbit.mcp.server.resources;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springaicommunity.mcp.annotation.McpResource;
 import org.springframework.core.io.ClassPathResource;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 /**
  * MCP resources providing hawkBit documentation for LLMs.

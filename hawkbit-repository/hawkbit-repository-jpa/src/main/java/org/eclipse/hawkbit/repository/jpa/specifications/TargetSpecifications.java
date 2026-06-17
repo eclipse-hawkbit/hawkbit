@@ -129,7 +129,7 @@ public final class TargetSpecifications {
         return (targetRoot, query, cb) -> cb.not(cb.equal(targetRoot.get(JpaTarget_.updateStatus), updateStatus));
     }
 
-    public  static Specification<JpaTarget> eqTargetGroup(final String targetGroup) {
+    public static Specification<JpaTarget> eqTargetGroup(final String targetGroup) {
         return (targetRoot, query, criteriaBuilder) -> {
             final String groupTextToLower = targetGroup.toLowerCase();
             return criteriaBuilder.equal(criteriaBuilder.lower(targetRoot.get(JpaTarget_.group)), groupTextToLower);
@@ -137,7 +137,7 @@ public final class TargetSpecifications {
     }
 
     public static Specification<JpaTarget> eqOrSubTargetGroup(final String targetGroupSearch) {
-        return (targetRoot, query, criteriaBuilder) ->  {
+        return (targetRoot, query, criteriaBuilder) -> {
             final String searchTextToLower = targetGroupSearch.toLowerCase();
             return criteriaBuilder.or(
                     criteriaBuilder.equal(criteriaBuilder.lower(targetRoot.get(JpaTarget_.group)), searchTextToLower),

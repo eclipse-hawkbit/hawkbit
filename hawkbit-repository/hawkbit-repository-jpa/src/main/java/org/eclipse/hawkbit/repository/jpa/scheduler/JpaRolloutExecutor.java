@@ -447,7 +447,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 callErrorAction(rollout, rolloutGroup);
             } else {// not in error so check success condition and group completed
                 // 'success' is either group completed or success condition reached - execute 'success' Action
-                final boolean groupCompleted = !(rolloutGroup == lastGroup && rolloutGroup.isDynamic()) && isRolloutGroupComplete(rollout, rolloutGroup);
+                final boolean groupCompleted = !(rolloutGroup == lastGroup && rolloutGroup.isDynamic())
+                        && isRolloutGroupComplete(rollout, rolloutGroup);
                 checkSuccessCondition(rollout, rolloutGroup, evalProxy, rolloutGroup.getSuccessCondition(), groupCompleted);
                 if (groupCompleted) {
                     rolloutGroup.setStatus(RolloutGroupStatus.FINISHED);
