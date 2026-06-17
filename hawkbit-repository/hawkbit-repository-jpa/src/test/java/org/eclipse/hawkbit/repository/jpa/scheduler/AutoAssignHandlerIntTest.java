@@ -459,7 +459,6 @@ class AutoAssignHandlerIntTest extends AbstractJpaIntegrationTest {
         assertThat(actions).allMatch(action -> action.getActionType().equals(actionType));
     }
 
-
     private Slice<@NonNull Action> findActionsByDistributionSet(final Pageable pageable, final long distributionSetId) {
         return actionRepository
                 .findAll(byDistributionSetId(distributionSetId), pageable)

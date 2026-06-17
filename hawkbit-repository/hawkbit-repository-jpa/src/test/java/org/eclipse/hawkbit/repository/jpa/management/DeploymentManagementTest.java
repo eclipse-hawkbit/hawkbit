@@ -789,7 +789,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = ActionCreatedEvent.class, count = 20),
             @Expect(type = ActionCreatedServiceEvent.class, count = 20),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 20),
-            })
+    })
     void maxActionsPerTargetIsCheckedBeforeAssignmentExecution() {
         final int maxActions = quotaManagement.getMaxActionsPerTarget();
         assertThat(maxActions)
@@ -821,7 +821,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
         final DeploymentRequest assignWithoutWeight = DeploymentRequest.builder(targetId, dsId).weight(456).build();
-        assertThat(deploymentManagement.assignDistributionSets(Collections.singletonList(assignWithoutWeight), null)).isNotNull().size().isEqualTo(1);
+        assertThat(deploymentManagement.assignDistributionSets(Collections.singletonList(assignWithoutWeight), null)).isNotNull().size()
+                .isEqualTo(1);
     }
 
     /**
@@ -861,7 +862,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Long validActionId1 = getFirstAssignedAction(
                 deploymentManagement.assignDistributionSets(Collections.singletonList(validRequest1), null).get(0)).getId();
         assertThat(actionRepository.findById(validActionId1).get().getWeight()).get().isEqualTo(Action.WEIGHT_MAX);
-        DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSets(Collections.singletonList(validRequest2), null).get(0);
+        DistributionSetAssignmentResult assignmentResult = deploymentManagement.assignDistributionSets(List.of(validRequest2), null).getFirst();
         System.out.println(assignmentResult.getAssignedEntity().toString());
 
         final Long validActionId2 = getFirstAssignedAction(assignmentResult).getId();
@@ -991,9 +992,9 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final List<Long> deployedTargetIDs = deploymentResult.getDeployedTargetIDs();
         final List<Long> undeployedTargetIDs = deploymentResult.getUndeployedTargetIDs();
-        @SuppressWarnings({"unchecked", "rawtypes"})
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         final Collection<JpaTarget> savedNakedTargets = (Collection) deploymentResult.getUndeployedTargets();
-        @SuppressWarnings({"unchecked", "rawtypes"})
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         final Collection<JpaTarget> savedDeployedTargets = (Collection) deploymentResult.getDeployedTargets();
 
         // retrieving all Actions created by the assignDistributionSet call

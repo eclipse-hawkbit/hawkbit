@@ -243,7 +243,7 @@ public interface UpdateHandler {
             }
         }
 
-        private UpdateStatus downloadUrl(final Link link,  final DmfArtifactHash hash, final long size) {
+        private UpdateStatus downloadUrl(final Link link, final DmfArtifactHash hash, final long size) {
             if (log.isDebugEnabled()) {
                 log.debug(LOG_PREFIX + "Downloading {}, expected hash {} and size {}",
                         dmfController.getTenant().getTenantId(), dmfController.getControllerId(), link.getHref(), hash, size);
@@ -252,7 +252,8 @@ public interface UpdateHandler {
             try {
                 return readAndCheckDownloadUrl(link, hash, size);
             } catch (final NoSuchAlgorithmException | IOException e) {
-                log.error(LOG_PREFIX + "Failed to download {}", dmfController.getTenant().getTenantId(), dmfController.getControllerId(), link.getHref(), e);
+                log.error(LOG_PREFIX + "Failed to download {}",
+                        dmfController.getTenant().getTenantId(), dmfController.getControllerId(), link.getHref(), e);
                 return new UpdateStatus(
                         DmfActionStatus.ERROR,
                         List.of("Failed to download " + link.getHref() + ": " + e.getMessage()));
@@ -299,6 +300,7 @@ public interface UpdateHandler {
         private interface Validator {
 
             void read(final byte[] buff, final int len);
+
             void validate();
         }
     }

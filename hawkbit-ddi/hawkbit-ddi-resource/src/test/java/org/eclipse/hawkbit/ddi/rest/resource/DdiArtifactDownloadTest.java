@@ -18,6 +18,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
 import static org.springframework.http.HttpHeaders.CONTENT_RANGE;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpHeaders.ETAG;
+import static org.springframework.http.HttpHeaders.IF_MATCH;
 import static org.springframework.http.HttpHeaders.LAST_MODIFIED;
 import static org.springframework.http.HttpHeaders.RANGE;
 import static org.springframework.http.HttpStatus.PARTIAL_CONTENT;
@@ -36,9 +37,7 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -59,7 +58,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -74,8 +72,8 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
     private static final String DOWNLOAD_FN = "/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}";
 
-    private static int downloadProgress = 0;
-    private static long shippedBytes = 0;
+    private static int downloadProgress;
+    private static long shippedBytes;
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 
@@ -89,23 +87,15 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
      */
     @Test
     void invalidRequestsOnArtifactResource() throws Exception {
-        // create target
-        final Target target = testdataFactory.createTarget();
-        final List<Target> targets = Collections.singletonList(target);
-        // create ds
-        final DistributionSet ds = testdataFactory.createDistributionSet("");
-        // create artifact
-        final int artifactSize = 5 * 1024;
-        final byte[] random = nextBytes(artifactSize);
-        final Artifact artifact = artifactManagement.create(new ArtifactUpload(
-                new ByteArrayInputStream(random),
-                null, artifactSize, null, findFirstModuleByType(ds, osType).orElseThrow().getId(), "file1", false));
+        final TestData testData = createTargetAndDs(5 * 1024);
+        final Target target = testData.target();
+        final DistributionSet ds = testData.ds();
+        final Artifact artifact = testData.artifact();
 
-        assignDistributionSet(ds, targets);
+        assignDistributionSet(ds, target);
 
         // no artifact available
-        mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), "123455"))
-                .andExpect(status().isNotFound());
+        mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), "123455")).andExpect(status().isNotFound());
         mvc.perform(get(DOWNLOAD_FN + ".MD5SUM", tenant(), target.getControllerId(), getOsModule(ds), "123455"))
                 .andExpect(status().isNotFound());
 
@@ -117,15 +107,14 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // test now consistent data to test allowed methods
         mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
-                        .header(HttpHeaders.IF_MATCH, artifact.getSha1Hash()))
+                        .header(IF_MATCH, artifact.getSha1Hash()))
                 .andExpect(status().isOk());
-        mvc.perform(get(DOWNLOAD_FN + ".MD5SUM",
-                        tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+        mvc.perform(get(DOWNLOAD_FN + ".MD5SUM", tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isOk());
 
         // test failed If-match
         mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
-                        .header(HttpHeaders.IF_MATCH, "fsjkhgjfdhg"))
+                        .header(IF_MATCH, "fsjkhgjfdhg"))
                 .andExpect(status().isPreconditionFailed());
 
         // test invalid range
@@ -166,23 +155,18 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         }
         assertThat(softwareModuleManagement.findAll(PAGE)).isEmpty();
 
-        // create target
-        final Target target = testdataFactory.createTarget();
-        final List<Target> targets = Collections.singletonList(target);
-        // create ds
-        final DistributionSet ds = testdataFactory.createDistributionSet("");
-        // create artifact
         final int artifactSize = (int) quotaManagement.getMaxArtifactSize();
-        final byte[] random = nextBytes(artifactSize);
-        final Artifact artifact = artifactManagement.create(new ArtifactUpload(
-                new ByteArrayInputStream(random),
-                null, artifactSize, null, findFirstModuleByType(ds, osType).orElseThrow().getId(), "file1", false));
+        final TestData testData = createTargetAndDs(artifactSize);
+        final Target target = testData.target();
+        final DistributionSet ds = testData.ds();
+        final Artifact artifact = testData.artifact();
+        final byte[] random = testData.randomBytes();
         // download fails as artifact is not yet assigned
         mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isNotFound());
 
         // now assign and download successful
-        assignDistributionSet(ds, targets);
+        assignDistributionSet(ds, target);
         final MvcResult result = mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_OCTET_STREAM))
@@ -205,15 +189,10 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
      */
     @Test
     void downloadMd5SumThroughControllerApi() throws Exception {
-        // create target
-        final Target target = testdataFactory.createTarget();
-        // create ds
-        final DistributionSet ds = testdataFactory.createDistributionSet("");
-        // create artifact
-        final int artifactSize = 5 * 1024;
-        final byte[] random = nextBytes(artifactSize);
-        final Artifact artifact = artifactManagement.create(new ArtifactUpload(
-                new ByteArrayInputStream(random), null, artifactSize, null, getOsModule(ds), "file1", false));
+        final TestData testData = createTargetAndDs(5 * 1024);
+        final Target target = testData.target();
+        final DistributionSet ds = testData.ds();
+        final Artifact artifact = testData.artifact();
 
         assignDistributionSet(ds, target);
 
@@ -228,26 +207,78 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 .isEqualTo((artifact.getMd5Hash() + "  " + artifact.getFilename()).getBytes(StandardCharsets.US_ASCII));
     }
 
+    @Test
+    void downloadWithoutRangeFailsIfNoActionForArtifact() throws Exception {
+        final TestData testData = createTargetAndDs(5 * 1024);
+        mvc.perform(get(DOWNLOAD_FN, tenant(), testData.target().getControllerId(), getOsModule(testData.ds()), "file1"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void downloadWithRangeFailsIfNoActionForArtifact() throws Exception {
+        final TestData testData = createTargetAndDs(5 * 1024);
+        mvc.perform(get(DOWNLOAD_FN, tenant(), testData.target().getControllerId(), getOsModule(testData.ds()), "file1")
+                        .header(RANGE, "bytes=0-99"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void downloadWithoutRangeSucceedsIfActionExistsForArtifact() throws Exception {
+        final TestData testData = createTargetAndDs(5 * 1024);
+        final Target target = testData.target();
+        final DistributionSet ds = testData.ds();
+        final Artifact artifact = testData.artifact();
+
+        assignDistributionSet(ds, target);
+
+        final MvcResult result = mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_OCTET_STREAM))
+                .andExpect(header().string(ACCEPT_RANGES, "bytes"))
+                .andExpect(header().string(CONTENT_DISPOSITION, "attachment;filename=" + artifact.getFilename()))
+                .andReturn();
+
+        assertArrayEquals(result.getResponse().getContentAsByteArray(), testData.randomBytes());
+    }
+
+    @Test
+    void downloadWithRangeSucceedsIfActionExistsForArtifact() throws Exception {
+        final int artifactSize = 5 * 1024;
+        final TestData testData = createTargetAndDs(artifactSize);
+        final Target target = testData.target();
+        final DistributionSet ds = testData.ds();
+        final Artifact artifact = testData.artifact();
+
+        assignDistributionSet(ds, target);
+
+        final MvcResult result = mvc.perform(
+                        get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
+                                .header(RANGE, "bytes=0-99"))
+                .andExpect(status().is(PARTIAL_CONTENT.value()))
+                .andExpect(content().contentType(APPLICATION_OCTET_STREAM))
+                .andExpect(header().string(ACCEPT_RANGES, "bytes"))
+                .andExpect(header().string(CONTENT_RANGE, "bytes 0-99/" + artifactSize))
+                .andExpect(header().string(CONTENT_DISPOSITION, "attachment;filename=" + artifact.getFilename()))
+                .andReturn();
+
+        assertArrayEquals(result.getResponse().getContentAsByteArray(), Arrays.copyOfRange(testData.randomBytes(), 0, 100));
+    }
+
     /**
      * Test various HTTP range requests for artifact download, e.g. chunk download or download resume.
      */
     @Test
     @WithUser(principal = TestdataFactory.DEFAULT_CONTROLLER_ID, authorities = { SpRole.CONTROLLER_ROLE, SpRole.TENANT_ADMIN })
     void rangeDownloadArtifact() throws Exception {
-        // create target
-        final Target target = testdataFactory.createTarget();
-        final List<Target> targets = Collections.singletonList(target);
-        // create ds
-        final DistributionSet ds = testdataFactory.createDistributionSet("");
-        // create artifact
         final int resultLength = (int) quotaManagement.getMaxArtifactSize();
-        final byte[] random = nextBytes(resultLength);
-        final Artifact artifact = artifactManagement.create(new ArtifactUpload(
-                new ByteArrayInputStream(random), null, resultLength, null, getOsModule(ds), "file1", false));
-        assertThat(random).hasSize(resultLength);
+        final TestData testData = createTargetAndDs(resultLength);
+        final Target target = testData.target();
+        final DistributionSet ds = testData.ds();
+        final Artifact artifact = testData.artifact();
+        final byte[] random = testData.randomBytes();
 
         // now assign and download successful
-        assignDistributionSet(ds, targets);
+        assignDistributionSet(ds, target);
         final int range = resultLength / 50;
         // full file download with standard range request
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -312,6 +343,17 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(header().string(CONTENT_DISPOSITION, "attachment;filename=file1"))
                 .andReturn();
     }
+
+    private TestData createTargetAndDs(final int artifactSize) {
+        final Target target = testdataFactory.createTarget();
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        final byte[] randomBytes = nextBytes(artifactSize);
+        final Artifact artifact = artifactManagement.create(new ArtifactUpload(
+                new ByteArrayInputStream(randomBytes), null, artifactSize, null, getOsModule(ds), "file1", false));
+        return new TestData(target, ds, artifact, randomBytes);
+    }
+
+    private record TestData(Target target, DistributionSet ds, Artifact artifact, byte[] randomBytes) {}
 
     @Configuration
     static class DownloadTestConfiguration {

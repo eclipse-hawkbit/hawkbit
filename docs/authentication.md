@@ -18,9 +18,10 @@ tenant.
 
 #### Target Security Token Authentication
 
-If not set by the user, the security token is automatically generated with 32 alphanumeric characters. 
+If not set by the user, the security token is automatically generated with 32 alphanumeric characters.
 However, the user can provide a custom token with a maximum length of 128 alphanumeric characters.
-This token can be used to authenticate the target at hawkBit through the HTTP-Authorization Header with the custom scheme _TargetToken_.
+This token can be used to authenticate the target at hawkBit through the HTTP-Authorization Header with the custom
+scheme _TargetToken_.
 
 ```http
 GET /DEFAULT/controller/v1/0e945f95-9117-4500-9b0a-9c6d72fa6c07 HTTP/1.1
@@ -32,8 +33,12 @@ The target security token is provided in **DMF API** as part of the update messa
 DMF clients to leverage the feature or can it be manually retrieved per target
 by **Management UI** or in the **Management UI** in the target details.
 
-Note: needs to be enabled in your hawkBit installation (See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java)
-for system-wide enablement) **and** in the tenant configuration (set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)#TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, _authentication.targettoken.enabled_ to true). That allows both the
+Note: needs to be enabled in your hawkBit installation (
+See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java)
+for system-wide enablement) **and** in the tenant configuration (
+set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)
+#TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, _authentication.targettoken.enabled_ to
+true). That allows both the
 operator and the individual customer (if run in a multi-tenant setup) to enable this access method.
 
 #### Gateway Security Token Authentication
@@ -52,8 +57,12 @@ Host: your.hawkBit.server
 Authorization: GatewayToken 3nkswAZhX81oDtktq0FF9Pn0Tc0UGXPW
 ```
 
-Note: needs to be enabled in your hawkBit installation (See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java)
-for system-wide enablement) **and** in the tenant configuration (set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)#TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, _authentication.gatewaytoken.enabled_ to true). That allows both the
+Note: needs to be enabled in your hawkBit installation (
+See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java)
+for system-wide enablement) **and** in the tenant configuration (
+set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)
+#TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, _authentication.gatewaytoken.enabled_ to
+true). That allows both the
 operator and the individual customer (if run in a multi-tenant setup) to enable this access method.
 
 ### Certificate Authentication by Reverse Proxy
@@ -73,11 +82,17 @@ fingerprint of the client certificate issuer(s) (as a comma separated list).
 To authenticate the request to hawBit the following condition shall be met:
 
 - the common name of the client certificate shall match the controller/client id
-- the TLS Issuer(s) hash of the presented client certificate shall be set for the tenant. 
+- the TLS Issuer(s) hash of the presented client certificate shall be set for the tenant.
 
 For that you shall:
-- enable header authentication in the tenant configuration - set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)#TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED, _authentication.header.enabled_ to true. 
-- set / configure the issuer, for the tenant, in the tenant configuration - set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)#AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME.AUTHENTICATION_MODE_HEADER_ENABLED, _aauthentication.header.authority_ to issuer hash.
+
+- enable header authentication in the tenant configuration -
+  set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)
+  #TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED, _authentication.header.enabled_ to true.
+- set / configure the issuer, for the tenant, in the tenant configuration -
+  set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)
+  #AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME.AUTHENTICATION_MODE_HEADER_ENABLED, _aauthentication.header.authority_ to
+  issuer hash.
 
   You can use the following command to get the issuer hash
   ```shell

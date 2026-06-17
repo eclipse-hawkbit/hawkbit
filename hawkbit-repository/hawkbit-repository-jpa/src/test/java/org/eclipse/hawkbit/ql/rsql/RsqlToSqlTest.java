@@ -114,10 +114,14 @@ class RsqlToSqlTest {
                 "((attribute.key1==00 or attribute.key1==01) and (attribute.key2==02 or attribute.key2==01) and attribute.key3==03 and updateStatus!=pending)");
         print(JpaTarget.class, TargetFields.class,
                 "((attribute.key1==00 or attribute.key1==01) and (attribute.key2==02 or attribute.key2==01) and attribute.key3==01 and updateStatus!=pending)");
-        print(JpaTarget.class, TargetFields.class, "attribute.sw_1_version=in=('test1','test2') and attribute.sw_2_version=in=('test3','test4') and attribute.sw_3_version=in=('test5','test6')");
-        print(JpaTarget.class, TargetFields.class, "attribute.sw_1_version=out=('test1','test2') and attribute.sw_2_version=out=('test3','test4') and attribute.sw_3_version=out=('test5','test6')");
-        print(JpaTarget.class, TargetFields.class, "metadata.key1=in=(value1,value2) and metadata.key2=out=(value3,value4) and metadata.key3=out=(value3,value4)");
-        print(JpaTarget.class, TargetFields.class, "metadata.key1=out=(value1,value2) and metadata.key2=out=(value3,value4) and metadata.key3=out=(value3,value4)");
+        print(JpaTarget.class, TargetFields.class,
+                "attribute.sw_1_version=in=('test1','test2') and attribute.sw_2_version=in=('test3','test4') and attribute.sw_3_version=in=('test5','test6')");
+        print(JpaTarget.class, TargetFields.class,
+                "attribute.sw_1_version=out=('test1','test2') and attribute.sw_2_version=out=('test3','test4') and attribute.sw_3_version=out=('test5','test6')");
+        print(JpaTarget.class, TargetFields.class,
+                "metadata.key1=in=(value1,value2) and metadata.key2=out=(value3,value4) and metadata.key3=out=(value3,value4)");
+        print(JpaTarget.class, TargetFields.class,
+                "metadata.key1=out=(value1,value2) and metadata.key2=out=(value3,value4) and metadata.key3=out=(value3,value4)");
     }
 
     @Test

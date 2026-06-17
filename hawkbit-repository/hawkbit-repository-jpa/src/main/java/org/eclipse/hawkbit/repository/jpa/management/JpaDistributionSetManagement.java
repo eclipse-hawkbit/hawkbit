@@ -418,12 +418,9 @@ public class JpaDistributionSetManagement
 
     private Specification<JpaDistributionSet> deletedSpecification(final SoftDeletedMode softDeletedMode) {
         return switch (softDeletedMode) {
-            case ONLY_SOFT_DELETED ->
-                    (root, query, cb) -> cb.equal(root.get(DELETED), true);
-            case EXCLUDE_SOFT_DELETED ->
-                    (root, query, cb) -> cb.equal(root.get(DELETED), false);
-            case INCLUDE_SOFT_DELETED ->
-                    Specification.unrestricted();
+            case ONLY_SOFT_DELETED -> (root, query, cb) -> cb.equal(root.get(DELETED), true);
+            case EXCLUDE_SOFT_DELETED -> (root, query, cb) -> cb.equal(root.get(DELETED), false);
+            case INCLUDE_SOFT_DELETED -> Specification.unrestricted();
         };
     }
 

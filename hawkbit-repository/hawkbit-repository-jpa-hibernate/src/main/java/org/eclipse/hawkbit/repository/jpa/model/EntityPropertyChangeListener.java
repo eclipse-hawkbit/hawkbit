@@ -27,6 +27,7 @@ public class EntityPropertyChangeListener implements PostUpdateEventListener {
     );
 
     private static final Class<?> JPA_TARGET;
+
     static {
         try {
             JPA_TARGET = Class.forName("org.eclipse.hawkbit.repository.jpa.model.JpaTarget");

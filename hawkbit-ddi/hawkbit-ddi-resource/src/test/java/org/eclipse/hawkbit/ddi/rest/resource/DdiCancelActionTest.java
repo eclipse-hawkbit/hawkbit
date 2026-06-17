@@ -461,7 +461,7 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.findAssignedDistributionSet(TestdataFactory.DEFAULT_CONTROLLER_ID).orElseThrow()).isEqualTo(ds3);
 
         mvc.perform(get(
-                "/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/" + cancelAction3.getId(),
+                        "/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/" + cancelAction3.getId(),
                         AccessContext.tenant()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())

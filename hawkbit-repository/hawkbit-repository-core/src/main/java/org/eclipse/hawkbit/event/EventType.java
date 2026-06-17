@@ -155,7 +155,6 @@ public class EventType {
         // target attributes requested flag
         TYPES.put(37, TargetAttributesRequestedEvent.class);
 
-
         // tenant configuration
         TYPES.put(40, TenantConfigurationCreatedEvent.class);
         TYPES.put(41, TenantConfigurationUpdatedEvent.class);

@@ -56,7 +56,7 @@ class HawkbitEclipseLinkJpaDialectTest {
 
     /**
      * Use Case: PersistenceException that could not be mapped by EclipseLinkJpaDialect directly but instead is wrapped
-     *  into JpaSystemException. Cause of PersistenceException is not an SQLException.
+     * into JpaSystemException. Cause of PersistenceException is not an SQLException.
      */
     @Test
     void jpaSystemExceptionWithNumberFormatExceptionIsNull() {
@@ -81,7 +81,7 @@ class HawkbitEclipseLinkJpaDialectTest {
     }
 
     /**
-     * Use Case: RuntimeException that could not be mapped by EclipseLinkJpaDialect directly. Cause of 
+     * Use Case: RuntimeException that could not be mapped by EclipseLinkJpaDialect directly. Cause of
      * RuntimeException is not an SQLException.
      */
     @Test

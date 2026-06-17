@@ -111,7 +111,8 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
         if (deviceMessages != null) {
             messages.addAll(deviceMessages);
         }
-        messages.add(SERVER_MESSAGE_PREFIX + "Target confirmed action. Therefore, it will be set to the running state to proceed with the deployment.");
+        messages.add(
+                SERVER_MESSAGE_PREFIX + "Target confirmed action. Therefore, it will be set to the running state to proceed with the deployment.");
         return addActionStatus(createConfirmationActionStatus(action.getId(), code, messages).status(Status.RUNNING).build());
     }
 

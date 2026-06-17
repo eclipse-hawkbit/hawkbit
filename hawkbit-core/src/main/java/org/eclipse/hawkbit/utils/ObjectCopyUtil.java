@@ -211,7 +211,7 @@ public class ObjectCopyUtil {
 
     // java:S3011 - low-level, reflection utility. intentionally changes the accessibility
     // java:S3776 - complexity is due to reflection and dynamic method invocation
-    @SuppressWarnings({"java:S3011", "java:S3776"})
+    @SuppressWarnings({ "java:S3011", "java:S3776" })
     private static Method getMethodAssignable(final Class<?> clazz, final String methodName, final Class<?> parameterType) {
         return Arrays.stream(clazz.getDeclaredMethods())
                 .filter(method -> methodName.equals(method.getName()))
@@ -284,41 +284,41 @@ public class ObjectCopyUtil {
     private record ToSetter(BiConsumer<Object, Object> toSetter, int order) {}
 
     @SuppressWarnings("java:S1210") // java:S1210 - return 0 only when default equals return equals, assume equal hashCodes for equal objects
-        private record PropertyCopyFunction(Method fromMethod, ToSetter toSetter, UnaryOperator<Object> toGetter)
+    private record PropertyCopyFunction(Method fromMethod, ToSetter toSetter, UnaryOperator<Object> toGetter)
             implements CopyFunction, Comparable<PropertyCopyFunction> {
 
         public boolean apply(final Object from, final Object to, final boolean setNullValues, final UnaryOperator<Object> propertyProcessor) {
-                final Object value;
-                try {
-                    value = fromMethod.invoke(from);
-                } catch (final IllegalAccessException e) {
-                    throw new IllegalStateException("Failed to get source value", e);
-                } catch (final InvocationTargetException e) {
-                    throw new IllegalStateException("Failed to get source value", e.getTargetException() == null ? e : e.getTargetException());
-                }
-                if (value == null && !setNullValues) { // if !setNullValues null means no change
-                    return false;
-                }
-                if (toGetter != null) {
-                    final Object currentValue = toGetter.apply(to);
-                    if (Objects.equals(value, currentValue)) {
-                        return false; // no change
-                    }
-                }
-                if (toSetter == null) {
-                    throw new IllegalStateException(
-                            "Setter counterpart for " + fromMethod + " is not found in " + to.getClass().getName() +
-                                    " and the 'from' value is not equal to the 'to' value");
-                }
-                toSetter.toSetter().accept(to, propertyProcessor.apply(value));
-                return true;
+            final Object value;
+            try {
+                value = fromMethod.invoke(from);
+            } catch (final IllegalAccessException e) {
+                throw new IllegalStateException("Failed to get source value", e);
+            } catch (final InvocationTargetException e) {
+                throw new IllegalStateException("Failed to get source value", e.getTargetException() == null ? e : e.getTargetException());
             }
-
-            public int compareTo(final PropertyCopyFunction other) {
-                final int orderCompare = Integer.compare(this.toSetter.order(), other.toSetter.order());
-                return orderCompare == 0 ? Integer.compare(this.hashCode(), other.hashCode()) : orderCompare;
+            if (value == null && !setNullValues) { // if !setNullValues null means no change
+                return false;
             }
+            if (toGetter != null) {
+                final Object currentValue = toGetter.apply(to);
+                if (Objects.equals(value, currentValue)) {
+                    return false; // no change
+                }
+            }
+            if (toSetter == null) {
+                throw new IllegalStateException(
+                        "Setter counterpart for " + fromMethod + " is not found in " + to.getClass().getName() +
+                                " and the 'from' value is not equal to the 'to' value");
+            }
+            toSetter.toSetter().accept(to, propertyProcessor.apply(value));
+            return true;
         }
+
+        public int compareTo(final PropertyCopyFunction other) {
+            final int orderCompare = Integer.compare(this.toSetter.order(), other.toSetter.order());
+            return orderCompare == 0 ? Integer.compare(this.hashCode(), other.hashCode()) : orderCompare;
+        }
+    }
 
     // functional interface to apply the copy operation
     private interface CopyFunction {

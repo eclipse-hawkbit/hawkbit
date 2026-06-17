@@ -30,7 +30,7 @@ public class DmfBatchDownloadAndUpdateRequest {
     private final List<DmfTarget> targets;
     private final List<DmfSoftwareModule> softwareModules;
 
-    public  DmfBatchDownloadAndUpdateRequest(
+    public DmfBatchDownloadAndUpdateRequest(
             @JsonProperty("timestamp") final Long timestamp,
             @JsonProperty("targets") final List<DmfTarget> targets,
             @JsonProperty("softwareModules") final List<DmfSoftwareModule> softwareModules) {

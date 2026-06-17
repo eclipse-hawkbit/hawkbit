@@ -14,10 +14,10 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
-import org.jspecify.annotations.Nullable;
 
 /**
  * Repository interface that offers some actions that takes in account a target operation.

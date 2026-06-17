@@ -71,7 +71,6 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         assertThat(targetManagement.getControllerAttributes(TARGET1_ID)).isEqualTo(attributes);
     }
 
-
     /**
      * We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) are requested only once from the device.")
      */
@@ -112,7 +111,7 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
     }
 
     /**
-     * We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) 
+     * We verify that the config data (i.e. device attributes like serial number, hardware revision etc.)
      * can be uploaded correctly by the controller.
      */
     @Test
@@ -165,7 +164,7 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
     }
 
     /**
-     * We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) 
+     * We verify that the config data (i.e. device attributes like serial number, hardware revision etc.)
      * resource behaves as expected in case of invalid request attempts.
      */
     @Test

@@ -42,7 +42,8 @@ public class JpaExceptionTranslator {
         SQL_EXCEPTION_TRANSLATOR.setFallbackTranslator(new SQLStateSQLExceptionTranslator());
     }
 
-    private JpaExceptionTranslator() {}
+    private JpaExceptionTranslator() {
+    }
 
     public static SQLExceptionTranslator getTranslator() {
         return SQL_EXCEPTION_TRANSLATOR;

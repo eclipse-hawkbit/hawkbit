@@ -36,7 +36,7 @@ public sealed interface TargetRequest
      * Request to update an existing target.
      *
      * @param controllerId the target controller ID
-     * @param body         the request body containing updated target data
+     * @param body the request body containing updated target data
      */
     record Update(String controllerId, MgmtTargetRequestBody body) implements TargetRequest {}
 

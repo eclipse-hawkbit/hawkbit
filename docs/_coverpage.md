@@ -1,4 +1,3 @@
-
 <img src="images/hawkbit_logo.png" alt="hawkBit logo" width="420">
 
 <!--# Documentation-->

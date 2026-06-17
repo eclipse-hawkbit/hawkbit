@@ -4,14 +4,14 @@ RSQL is a query language for filtering entities. Use it with the `rsql` paramete
 
 ## Operators
 
-| Operator | Meaning | Example |
-|----------|---------|---------|
-| `==` | Equal | `name==MyTarget` |
-| `!=` | Not equal | `status!=ERROR` |
-| `=lt=` | Less than | `createdAt=lt=1704067200000` |
-| `=gt=` | Greater than | `lastTargetQuery=gt=1704067200000` |
-| `=in=` | In list | `status=in=(RUNNING,FINISHED)` |
-| `=out=` | Not in list | `updateStatus=out=(ERROR,UNKNOWN)` |
+| Operator | Meaning      | Example                            |
+|----------|--------------|------------------------------------|
+| `==`     | Equal        | `name==MyTarget`                   |
+| `!=`     | Not equal    | `status!=ERROR`                    |
+| `=lt=`   | Less than    | `createdAt=lt=1704067200000`       |
+| `=gt=`   | Greater than | `lastTargetQuery=gt=1704067200000` |
+| `=in=`   | In list      | `status=in=(RUNNING,FINISHED)`     |
+| `=out=`  | Not in list  | `updateStatus=out=(ERROR,UNKNOWN)` |
 
 ## Combining Conditions
 
@@ -21,6 +21,7 @@ RSQL is a query language for filtering entities. Use it with the `rsql` paramete
 ## Wildcards
 
 Use `*` for pattern matching:
+
 - `name==Device*` - Starts with "Device"
 - `name==*Controller` - Ends with "Controller"
 - `name==*test*` - Contains "test"
@@ -28,6 +29,7 @@ Use `*` for pattern matching:
 ## Nested Fields
 
 Access related entities with dot notation:
+
 - `assignedDistributionSet.name==Firmware`
 - `target.controllerId==device-001`
 - `metadata.environment==production`

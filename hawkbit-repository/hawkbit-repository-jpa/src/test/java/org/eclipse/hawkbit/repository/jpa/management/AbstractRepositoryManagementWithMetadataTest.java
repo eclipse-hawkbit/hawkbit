@@ -45,7 +45,8 @@ public abstract class AbstractRepositoryManagementWithMetadataTest<T extends Bas
                 setMetadataSupport();
                 final Type[] genericTypes = genericTypes(getClass(), AbstractRepositoryManagementWithMetadataTest.class);
                 metadataValueImplType = (Class<MVI>) genericTypes[4];
-                maxMetaDataEntries = (Integer)QuotaManagement.class.getMethod("getMaxMetaDataEntriesPer" + getEntityType().getSimpleName()).invoke(quotaManagement);
+                maxMetaDataEntries = (Integer) QuotaManagement.class.getMethod("getMaxMetaDataEntriesPer" + getEntityType().getSimpleName())
+                        .invoke(quotaManagement);
             }
         }
     }

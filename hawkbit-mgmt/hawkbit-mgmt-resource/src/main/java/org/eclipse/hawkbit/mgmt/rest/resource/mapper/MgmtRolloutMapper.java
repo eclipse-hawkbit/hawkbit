@@ -163,7 +163,7 @@ public final class MgmtRolloutMapper {
                 .name(restRequest.getName())
                 .description(restRequest.getDescription()).targetFilterQuery(restRequest.getTargetFilterQuery())
                 .targetPercentage(restRequest.getTargetPercentage())
-                .conditions(fromRequest((AbstractMgmtRolloutConditionsEntity)restRequest, false))
+                .conditions(fromRequest((AbstractMgmtRolloutConditionsEntity) restRequest, false))
                 .confirmationRequired(confirmationRequired)
                 .build();
     }

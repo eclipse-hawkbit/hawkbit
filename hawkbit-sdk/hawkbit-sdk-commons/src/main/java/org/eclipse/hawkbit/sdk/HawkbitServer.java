@@ -10,8 +10,8 @@
 package org.eclipse.hawkbit.sdk;
 
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.jspecify.annotations.NonNull;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "hawkbit.server")
 @Data

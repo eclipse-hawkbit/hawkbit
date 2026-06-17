@@ -93,10 +93,10 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                     }
                 },
                 (query, rsqlFilter) -> Optional.ofNullable(
-                        hawkbitClient.getDistributionSetRestApi()
-                                .getDistributionSets(rsqlFilter, query.getOffset(), query.getPageSize(), Utils.getSortParam(query
-                                        .getSortOrders()), null)
-                                .getBody())
+                                hawkbitClient.getDistributionSetRestApi()
+                                        .getDistributionSets(
+                                                rsqlFilter, query.getOffset(), query.getPageSize(), Utils.getSortParam(query.getSortOrders()), null)
+                                        .getBody())
                         .stream().flatMap(body -> body.getContent().stream()),
                 e -> new CreateDialog(hawkbitClient).result(),
                 selectionGrid -> {
@@ -157,16 +157,16 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             textFilter.setPlaceholder("<name/version filter>");
             type.setItemLabelGenerator(MgmtDistributionSetType::getName);
             type.setItems(Optional.ofNullable(
-                    hawkbitClient.getDistributionSetTypeRestApi()
-                            .getDistributionSetTypes(null, 0, 20, Constants.NAME_ASC, null)
-                            .getBody())
+                            hawkbitClient.getDistributionSetTypeRestApi()
+                                    .getDistributionSetTypes(null, 0, 20, Constants.NAME_ASC, null)
+                                    .getBody())
                     .map(PagedList::getContent)
                     .orElseGet(Collections::emptyList));
             tag.setItemLabelGenerator(MgmtTag::getName);
             tag.setItems(Optional.ofNullable(
-                    hawkbitClient.getDistributionSetTagRestApi()
-                            .getDistributionSetTags(null, 0, 20, Constants.NAME_ASC)
-                            .getBody())
+                            hawkbitClient.getDistributionSetTagRestApi()
+                                    .getDistributionSetTags(null, 0, 20, Constants.NAME_ASC)
+                                    .getBody())
                     .map(PagedList::getContent)
                     .orElseGet(Collections::emptyList));
         }
@@ -206,9 +206,9 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
             description.setMinLength(2);
             Stream.of(
-                    description,
-                    createdBy, createdAt,
-                    lastModifiedBy, lastModifiedAt, metadata)
+                            description,
+                            createdBy, createdAt,
+                            lastModifiedBy, lastModifiedAt, metadata)
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
@@ -228,7 +228,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             lastModifiedBy.setValue(distributionSet.getLastModifiedBy());
             lastModifiedAt.setValue(Utils.localDateTimeFromTs(distributionSet.getLastModifiedAt()));
             metadata.setValue(Optional.ofNullable(
-                    hawkbitClient.getDistributionSetRestApi().getMetadata(distributionSet.getId()).getBody())
+                            hawkbitClient.getDistributionSetRestApi().getMetadata(distributionSet.getId()).getBody())
                     .map(body -> body.getContent().stream()
                             .map(b -> String.format("%s: %s\n", b.getKey(), b.getValue())).collect(
                                     Collectors.joining())).orElse(""));
@@ -265,9 +265,9 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                     "Type",
                     this::readyToCreate,
                     Optional.ofNullable(
-                            hawkbitClient.getDistributionSetTypeRestApi()
-                                    .getDistributionSetTypes(null, 0, 30, Constants.CREATED_AT_DESC, null)
-                                    .getBody())
+                                    hawkbitClient.getDistributionSetTypeRestApi()
+                                            .getDistributionSetTypes(null, 0, 30, Constants.CREATED_AT_DESC, null)
+                                            .getBody())
                             .map(body -> body.getContent().toArray(new MgmtDistributionSetType[0]))
                             .orElseGet(() -> new MgmtDistributionSetType[0]));
             type.focus();
@@ -313,15 +313,15 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             create.addClickListener(e -> {
                 close();
                 final long distributionSetId = Optional.ofNullable(
-                        hawkbitClient.getDistributionSetRestApi()
-                                .createDistributionSets(
-                                        List.of((MgmtDistributionSetRequestBodyPost) new MgmtDistributionSetRequestBodyPost()
-                                                .setType(type.getValue().getKey())
-                                                .setName(name.getValue())
-                                                .setVersion(version.getValue())
-                                                .setDescription(description.getValue())
-                                                .setRequiredMigrationStep(requiredMigrationStep.getValue())))
-                                .getBody())
+                                hawkbitClient.getDistributionSetRestApi()
+                                        .createDistributionSets(
+                                                List.of((MgmtDistributionSetRequestBodyPost) new MgmtDistributionSetRequestBodyPost()
+                                                        .setType(type.getValue().getKey())
+                                                        .setName(name.getValue())
+                                                        .setVersion(version.getValue())
+                                                        .setDescription(description.getValue())
+                                                        .setRequiredMigrationStep(requiredMigrationStep.getValue())))
+                                        .getBody())
                         .stream()
                         .flatMap(Collection::stream)
                         .findFirst()

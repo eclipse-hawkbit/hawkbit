@@ -27,6 +27,8 @@ import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController.Operation;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -34,8 +36,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.DeleteSpecification;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.UpdateSpecification;
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 
 @Slf4j
 public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements BaseEntityRepository<T> {
@@ -205,7 +205,8 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
     }
 
     @Override
-    public <S extends T, R> R findBy(@NonNull final Specification<T> spec, final Function<? super SpecificationFluentQuery<S>, R> queryFunction) {
+    public <S extends T, R> R findBy(@NonNull final Specification<T> spec,
+            final Function<? super SpecificationFluentQuery<S>, R> queryFunction) {
         Objects.requireNonNull(spec, SPEC_MUST_NOT_BE_NULL);
         return repository.findBy(accessController.appendAccessRules(Operation.READ, spec), queryFunction);
     }
@@ -327,7 +328,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaBaseEntity> implements
         return repository.findAll(accessController.appendAccessRules(Operation.READ, spec), entityGraph, sort);
     }
 
-    @SuppressWarnings({"unchecked", "java:S3776"}) // java:S3776 - better readable in one places
+    @SuppressWarnings({ "unchecked", "java:S3776" }) // java:S3776 - better readable in one places
     static <T extends AbstractJpaBaseEntity, R extends BaseEntityRepository<T>> R of(
             final R repository, @NonNull final AccessController<T> accessController) {
         Objects.requireNonNull(repository);

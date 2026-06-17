@@ -9,8 +9,11 @@
  */
 package org.eclipse.hawkbit.mcp.server.config;
 
-import feign.RequestInterceptor;
+import java.util.function.BiFunction;
+
 import jakarta.servlet.http.HttpServletRequest;
+
+import feign.RequestInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.sdk.Controller;
 import org.eclipse.hawkbit.sdk.Tenant;
@@ -20,8 +23,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
-import java.util.function.BiFunction;
 
 /**
  * Configuration for HTTP mode.

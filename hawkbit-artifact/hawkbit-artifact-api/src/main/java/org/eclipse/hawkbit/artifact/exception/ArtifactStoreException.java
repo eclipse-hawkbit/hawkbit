@@ -19,7 +19,7 @@ public class ArtifactStoreException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public  ArtifactStoreException(final String message) {
+    public ArtifactStoreException(final String message) {
         this(message, null);
     }
 

@@ -28,7 +28,9 @@ Docker image could be build, for example, with (fixed version 0.4.1 is just an e
 ```shell
 docker build --build-arg HAWKBIT_APP=hawkbit-update-server --build-arg HAWKBIT_VERSION=0.4.1 -t hawkbit_update_server:0.4.1 . -f Dockerfile
 ```
+
 or just by:
+
 ```shell
 docker build --build-arg HAWKBIT_VERSION=0.4.1 -t hawkbit_update_server:0.4.1 .
 ```
@@ -40,5 +42,6 @@ To build standard development docker images, e.g. snapshot based, you could use 
 ```shell
 docker build -t hawkbit_update_server:0-SNAPSHOT -f Dockerfile_dev ~/.m2/repository
 ```
+
 Note that here you have to use your maven repository containing the hawkBit app as docker build context, in the example
 case _~/.m2/repository_

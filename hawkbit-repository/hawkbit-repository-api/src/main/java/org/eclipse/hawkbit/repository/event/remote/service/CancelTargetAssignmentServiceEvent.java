@@ -23,7 +23,6 @@ public class CancelTargetAssignmentServiceEvent extends AbstractServiceRemoteEve
     @Serial
     private static final long serialVersionUID = 1L;
 
-
     @JsonCreator
     public CancelTargetAssignmentServiceEvent(@JsonProperty("payload") final CancelTargetAssignmentEvent remoteEvent) {
         super(remoteEvent);

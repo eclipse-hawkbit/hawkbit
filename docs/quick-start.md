@@ -5,13 +5,14 @@
 ## From Docker Image
 
 #### Overview
+
 HawkBit Update Server default user has **admin/admin** as default credentials.  
 See below how the user can be changed.
 
 It supports two configurations:
 
-- **monolith** – `hawkbit-update-server`  
-- **micro-service** – `hawkbit-mgmt-server`, `hawkbit-ddi-server`, `hawkbit-dmf-server`  
+- **monolith** – `hawkbit-update-server`
+- **micro-service** – `hawkbit-mgmt-server`, `hawkbit-ddi-server`, `hawkbit-dmf-server`
 
 ---
 
@@ -62,7 +63,7 @@ $ docker-compose -f docker-compose-monolith-with-ui-mysql.yml up -d
 ```
 
 > **Note:** `-d` flag is used to run the containers in detached mode.  
-> If you want to see the logs, you can remove the flag.  
+> If you want to see the logs, you can remove the flag.
 
 ---
 
@@ -101,7 +102,7 @@ $ docker-compose -f docker-compose-micro-services-with-ui-mysql.yml up -d
 ```
 
 > **Note:** `-d` flag is used to run the containers in detached mode.  
-> If you want to see the logs, you can remove the flag.  
+> If you want to see the logs, you can remove the flag.
 
 ---
 
@@ -138,13 +139,17 @@ $ java -jar ./hawkbit-monolith/hawkbit-update-server/target/hawkbit-update-serve
 ```
 
 **Note:** You could also start with H2 console enabled with:
+
 ```bash
 $java -jar ./hawkbit-monolith/hawkbit-update-server/target/hawkbit-update-server-0-SNAPSHOT.jar --spring.h2.console.enabled=true --spring.h2.console.path=/h2-console
 ```
+
 for monolith, and:
+
 ```bash
 $java -jar ./hawkbit-mgmt/hawkbit-mgmt-server/target/hawkbit-mgmt-server-0-SNAPSHOT.jar --spring.h2.console.enabled=true --spring.h2.console.path=/h2-console
 ```
+
 for mgmt server in micro-service mode.
 
 Then you will get H2 console available at '/h2-console' (Database available at 'jdbc:h2:mem:hawkbit')
@@ -162,7 +167,9 @@ $ java -jar ./hawkbit-ui/target/hawkbit-ui-0-SNAPSHOT.jar
 #### Change credentials
 
 As stated before, the default user is **admin/admin**.  
-It can be overridden by changing the [`TenantAwareUserProperties`](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-core/src/main/java/org/eclipse/hawkbit/tenancy/TenantAwareUserProperties.java) configuration using Spring.  
+It can be overridden by changing the [
+`TenantAwareUserProperties`](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-core/src/main/java/org/eclipse/hawkbit/tenancy/TenantAwareUserProperties.java)
+configuration using Spring.
 
 For instance, using a properties file like:
 
@@ -178,6 +185,7 @@ hawkbit.security.user.hawkbit.password={noop}isAwesome!
 hawkbit.security.user.hawkbit.roles=TENANT_ADMIN
 ```
 
-This will remove the default `admin/admin` user and add a user `hawkbit` with password `isAwesome!` and role `TENANT_ADMIN`.
+This will remove the default `admin/admin` user and add a user `hawkbit` with password `isAwesome!` and role
+`TENANT_ADMIN`.
 
 You can create multiple users with specified roles.

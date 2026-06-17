@@ -17,7 +17,6 @@ import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAME
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET;
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.SOFTWARE_MODULE_ORDER;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
-import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GONE_410;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.INTERNAL_SERVER_ERROR_500;

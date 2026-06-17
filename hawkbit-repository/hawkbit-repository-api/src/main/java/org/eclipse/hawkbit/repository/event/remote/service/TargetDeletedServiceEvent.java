@@ -23,7 +23,6 @@ public class TargetDeletedServiceEvent extends AbstractServiceRemoteEvent<Target
     @Serial
     private static final long serialVersionUID = 1L;
 
-
     @JsonCreator
     public TargetDeletedServiceEvent(@JsonProperty("payload") final TargetDeletedEvent remoteEvent) {
         super(remoteEvent);

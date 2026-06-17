@@ -6,17 +6,17 @@ Targets represent devices or software instances that can receive software update
 
 **Filterable/Sortable Fields:**
 
-| Field                            | Description                                                          | Type |
-|----------------------------------|----------------------------------------------------------------------|------|
+| Field                            | Description                                                          | Type   |
+|----------------------------------|----------------------------------------------------------------------|--------|
 | controllerId                     | Unique identifier of the target                                      | String |
 | name                             | Display name                                                         | String |
 | description                      | Description text                                                     | String |
-| updateStatus                     | Current update status (UNKNOWN, IN_SYNC, PENDING, ERROR, REGISTERED) | Enum |
+| updateStatus                     | Current update status (UNKNOWN, IN_SYNC, PENDING, ERROR, REGISTERED) | Enum   |
 | address                          | IP address or URI                                                    | String |
-| lastTargetQuery                  | Last time the target polled (timestamp in ms)                        | Long |
-| createdAt                        | Creation timestamp                                                   | Long |
+| lastTargetQuery                  | Last time the target polled (timestamp in ms)                        | Long   |
+| createdAt                        | Creation timestamp                                                   | Long   |
 | createdBy                        | Creator username                                                     | String |
-| lastModifiedAt                   | Last modification timestamp                                          | Long |
+| lastModifiedAt                   | Last modification timestamp                                          | Long   |
 | lastModifiedBy                   | Last modifier username                                               | String |
 | assignedDistributionSet.name     | Name of assigned distribution set                                    | String |
 | assignedDistributionSet.version  | Version of assigned distribution set                                 | String |
@@ -30,6 +30,7 @@ Targets represent devices or software instances that can receive software update
 | controllerAttributes.<key>       | Controller attribute by key                                          | String |
 
 **Example Queries:**
+
 ```
 # Find targets with update errors
 updateStatus==ERROR
@@ -61,24 +62,25 @@ Distribution Sets are collections of software modules that can be deployed to ta
 
 **Filterable/Sortable Fields:**
 
-| Field | Description | Type |
-|-------|-------------|------|
-| id | Unique identifier | Long |
-| name | Distribution set name | String |
-| version | Version string | String |
-| description | Description text | String |
-| type.key | Distribution set type key | String |
-| type.name | Distribution set type name | String |
-| valid | Whether the DS is valid for deployment | Boolean |
-| createdAt | Creation timestamp | Long |
-| createdBy | Creator username | String |
-| lastModifiedAt | Last modification timestamp | Long |
-| lastModifiedBy | Last modifier username | String |
-| tags.name | Tag name | String |
-| modules.name | Software module name | String |
-| metadata.<key> | Metadata value by key | String |
+| Field          | Description                            | Type    |
+|----------------|----------------------------------------|---------|
+| id             | Unique identifier                      | Long    |
+| name           | Distribution set name                  | String  |
+| version        | Version string                         | String  |
+| description    | Description text                       | String  |
+| type.key       | Distribution set type key              | String  |
+| type.name      | Distribution set type name             | String  |
+| valid          | Whether the DS is valid for deployment | Boolean |
+| createdAt      | Creation timestamp                     | Long    |
+| createdBy      | Creator username                       | String  |
+| lastModifiedAt | Last modification timestamp            | Long    |
+| lastModifiedBy | Last modifier username                 | String  |
+| tags.name      | Tag name                               | String  |
+| modules.name   | Software module name                   | String  |
+| metadata.<key> | Metadata value by key                  | String  |
 
 **Example Queries:**
+
 ```
 # Find distribution sets by name
 name==Firmware*
@@ -104,22 +106,23 @@ Rollouts are used to deploy software to groups of targets in a controlled manner
 
 **Filterable/Sortable Fields:**
 
-| Field | Description | Type |
-|-------|-------------|------|
-| id | Unique identifier | Long |
-| name | Rollout name | String |
-| description | Description text | String |
-| status | Rollout status (CREATING, READY, PAUSED, STARTING, RUNNING, FINISHED, etc.) | Enum |
-| distributionSet.id | Distribution set ID | Long |
-| distributionSet.name | Distribution set name | String |
-| distributionSet.version | Distribution set version | String |
-| distributionSet.type | Distribution set type | String |
-| createdAt | Creation timestamp | Long |
-| createdBy | Creator username | String |
-| lastModifiedAt | Last modification timestamp | Long |
-| lastModifiedBy | Last modifier username | String |
+| Field                   | Description                                                                 | Type   |
+|-------------------------|-----------------------------------------------------------------------------|--------|
+| id                      | Unique identifier                                                           | Long   |
+| name                    | Rollout name                                                                | String |
+| description             | Description text                                                            | String |
+| status                  | Rollout status (CREATING, READY, PAUSED, STARTING, RUNNING, FINISHED, etc.) | Enum   |
+| distributionSet.id      | Distribution set ID                                                         | Long   |
+| distributionSet.name    | Distribution set name                                                       | String |
+| distributionSet.version | Distribution set version                                                    | String |
+| distributionSet.type    | Distribution set type                                                       | String |
+| createdAt               | Creation timestamp                                                          | Long   |
+| createdBy               | Creator username                                                            | String |
+| lastModifiedAt          | Last modification timestamp                                                 | Long   |
+| lastModifiedBy          | Last modifier username                                                      | String |
 
 **Example Queries:**
+
 ```
 # Find running rollouts
 status==RUNNING
@@ -142,30 +145,31 @@ Actions represent deployment operations assigned to targets.
 
 **Filterable/Sortable Fields:**
 
-| Field | Description | Type |
-|-------|-------------|------|
-| id | Unique identifier | Long |
-| status | Action status (SCHEDULED, RUNNING, FINISHED, ERROR, CANCELED, etc.) | Enum |
-| active | Whether the action is currently active | Boolean |
-| weight | Priority weight (0-1000) | Integer |
-| lastActionStatusCode | Last status code reported | Integer |
-| externalRef | External reference string | String |
-| target.controllerId | Target controller ID | String |
-| target.name | Target name | String |
-| target.updateStatus | Target update status | Enum |
-| distributionSet.id | Distribution set ID | Long |
-| distributionSet.name | Distribution set name | String |
-| distributionSet.version | Distribution set version | String |
-| rollout.id | Rollout ID | Long |
-| rollout.name | Rollout name | String |
-| rolloutGroup.id | Rollout group ID | Long |
-| rolloutGroup.name | Rollout group name | String |
-| createdAt | Creation timestamp | Long |
-| createdBy | Creator username | String |
-| lastModifiedAt | Last modification timestamp | Long |
-| lastModifiedBy | Last modifier username | String |
+| Field                   | Description                                                         | Type    |
+|-------------------------|---------------------------------------------------------------------|---------|
+| id                      | Unique identifier                                                   | Long    |
+| status                  | Action status (SCHEDULED, RUNNING, FINISHED, ERROR, CANCELED, etc.) | Enum    |
+| active                  | Whether the action is currently active                              | Boolean |
+| weight                  | Priority weight (0-1000)                                            | Integer |
+| lastActionStatusCode    | Last status code reported                                           | Integer |
+| externalRef             | External reference string                                           | String  |
+| target.controllerId     | Target controller ID                                                | String  |
+| target.name             | Target name                                                         | String  |
+| target.updateStatus     | Target update status                                                | Enum    |
+| distributionSet.id      | Distribution set ID                                                 | Long    |
+| distributionSet.name    | Distribution set name                                               | String  |
+| distributionSet.version | Distribution set version                                            | String  |
+| rollout.id              | Rollout ID                                                          | Long    |
+| rollout.name            | Rollout name                                                        | String  |
+| rolloutGroup.id         | Rollout group ID                                                    | Long    |
+| rolloutGroup.name       | Rollout group name                                                  | String  |
+| createdAt               | Creation timestamp                                                  | Long    |
+| createdBy               | Creator username                                                    | String  |
+| lastModifiedAt          | Last modification timestamp                                         | Long    |
+| lastModifiedBy          | Last modifier username                                              | String  |
 
 **Example Queries:**
+
 ```
 # Find active actions
 active==true
@@ -197,21 +201,22 @@ Software Modules are individual software components that make up distribution se
 
 **Filterable/Sortable Fields:**
 
-| Field | Description | Type |
-|-------|-------------|------|
-| id | Unique identifier | Long |
-| name | Module name | String |
-| version | Version string | String |
-| description | Description text | String |
-| type.key | Software module type key | String |
-| type.name | Software module type name | String |
-| createdAt | Creation timestamp | Long |
-| createdBy | Creator username | String |
-| lastModifiedAt | Last modification timestamp | Long |
-| lastModifiedBy | Last modifier username | String |
-| metadata.<key> | Metadata value by key | String |
+| Field          | Description                 | Type   |
+|----------------|-----------------------------|--------|
+| id             | Unique identifier           | Long   |
+| name           | Module name                 | String |
+| version        | Version string              | String |
+| description    | Description text            | String |
+| type.key       | Software module type key    | String |
+| type.name      | Software module type name   | String |
+| createdAt      | Creation timestamp          | Long   |
+| createdBy      | Creator username            | String |
+| lastModifiedAt | Last modification timestamp | Long   |
+| lastModifiedBy | Last modifier username      | String |
+| metadata.<key> | Metadata value by key       | String |
 
 **Example Queries:**
+
 ```
 # Find modules by name
 name==bootloader*
@@ -234,18 +239,19 @@ Target Filter Queries define RSQL filters for grouping targets, used for rollout
 
 **Filterable/Sortable Fields:**
 
-| Field | Description | Type |
-|-------|-------------|------|
-| id | Unique identifier | Long |
-| name | Filter name | String |
-| autoAssignDistributionSet.name | Auto-assign DS name | String |
-| autoAssignDistributionSet.version | Auto-assign DS version | String |
-| createdAt | Creation timestamp | Long |
-| createdBy | Creator username | String |
-| lastModifiedAt | Last modification timestamp | Long |
-| lastModifiedBy | Last modifier username | String |
+| Field                             | Description                 | Type   |
+|-----------------------------------|-----------------------------|--------|
+| id                                | Unique identifier           | Long   |
+| name                              | Filter name                 | String |
+| autoAssignDistributionSet.name    | Auto-assign DS name         | String |
+| autoAssignDistributionSet.version | Auto-assign DS version      | String |
+| createdAt                         | Creation timestamp          | Long   |
+| createdBy                         | Creator username            | String |
+| lastModifiedAt                    | Last modification timestamp | Long   |
+| lastModifiedBy                    | Last modifier username      | String |
 
 **Example Queries:**
+
 ```
 # Find filters by name
 name==Production*

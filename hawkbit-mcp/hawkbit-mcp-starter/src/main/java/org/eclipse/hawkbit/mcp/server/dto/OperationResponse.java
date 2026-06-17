@@ -12,20 +12,13 @@ package org.eclipse.hawkbit.mcp.server.dto;
 /**
  * Unified response wrapper for management operations.
  *
- * @param <T>       the type of the data payload
+ * @param <T> the type of the data payload
  * @param operation the operation that was performed
- * @param success   whether the operation was successful
- * @param message   optional message (typically for success confirmations or error details)
- * @param data      the operation result data (e.g., created/updated entity)
+ * @param success whether the operation was successful
+ * @param message optional message (typically for success confirmations or error details)
+ * @param data the operation result data (e.g., created/updated entity)
  */
 public record OperationResponse<T>(String operation, boolean success, String message, T data) {
-
-    /**
-     * Creates a successful response with data.
-     */
-    public static <T> OperationResponse<T> success(final String operation, final T data) {
-        return new OperationResponse<>(operation, true, null, data);
-    }
 
     /**
      * Creates a successful response with a message (no data).

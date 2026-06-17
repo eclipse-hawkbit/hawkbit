@@ -10,10 +10,10 @@
 package org.eclipse.hawkbit.repository.jpa.repository;
 
 import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
-import org.jspecify.annotations.Nullable;
 
 /**
  * Repository interface that offers findAll with disabled count query.

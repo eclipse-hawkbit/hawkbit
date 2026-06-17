@@ -24,6 +24,7 @@ import lombok.NonNull;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.context.AccessContext;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -31,7 +32,6 @@ import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
-import org.jspecify.annotations.Nullable;
 
 /**
  * A spring Cache Manager that handles the multi tenancy.

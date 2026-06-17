@@ -84,7 +84,8 @@ spring.security.oauth2.client.registration.myidp.scope=openid,email,profile
 spring.security.oauth2.client.registration.myidp.provider=myidp
 ```
 
-Some providers (e.g. Auth0) require additional parameters in the authorization request. Use `additional-query-string-params` to pass
+Some providers (e.g. Auth0) require additional parameters in the authorization request. Use
+`additional-query-string-params` to pass
 them:
 
 ```properties
@@ -148,7 +149,6 @@ Swagger UI automatically sets the `redirect_uri` when initiating the authorizati
 ```
 
 This URL must be registered as an allowed redirect URI in your identity provider (IdP) configuration.
-
 
 ### Permissions
 

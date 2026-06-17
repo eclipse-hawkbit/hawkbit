@@ -1,4 +1,5 @@
 # Data model
+
 The hawkBit data model was designed to have enough flexibility to define complex software structures (e.g. operating
 system, runtimes, apps, different kind of artifacts) on one side and simplicity compared to the capabilities of a full
 blown configuration management on the other.
@@ -69,5 +70,6 @@ Just in case there are no connections to Distribution Sets and targets the serve
 process deletes all stored data, including all meta information.
 
 > In case of a SoftDelete the unique constraints are still in place, i.e. you cannot create an entity with the same
-> name/key. This constraint might be removed in future versions because of the impact on the user experience (i.e. he does
+> name/key. This constraint might be removed in future versions because of the impact on the user experience (i.e. he
+> does
 > not see the soft deleted module but cannot create a new one).

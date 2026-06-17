@@ -26,6 +26,7 @@ public class Jpa {
     }
 
     public static final JpaVendor JPA_VENDOR = JpaVendor.HIBERNATE;
+
     static {
         log.info("JPA Vendor: {}", JPA_VENDOR);
     }
