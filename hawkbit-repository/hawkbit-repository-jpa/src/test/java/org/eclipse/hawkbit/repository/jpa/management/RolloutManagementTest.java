@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.RolloutManagement.Create;
 import org.eclipse.hawkbit.repository.RolloutManagement.GroupCreate;
 import org.eclipse.hawkbit.repository.RolloutManagement.Update;
+import org.eclipse.hawkbit.repository.SoftDeletedMode;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -1086,7 +1087,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutHandler.handleAll();
 
         final Slice<Rollout> rolloutPage = rolloutManagement
-                .findAllWithDetailedStatus(false, new OffsetBasedPageRequest(0, 100, Sort.by(Direction.ASC, "name")));
+                .findAllWithDetailedStatus(SoftDeletedMode.EXCLUDE_SOFT_DELETED, new OffsetBasedPageRequest(0, 100, Sort.by(Direction.ASC, "name")));
         final List<Rollout> rolloutList = rolloutPage.getContent();
 
         // validate rolloutA -> 6 running and 6 ready
@@ -1153,7 +1154,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         }
 
         final Slice<Rollout> rollout = rolloutManagement.findByRsqlWithDetailedStatus(
-                "name==Rollout*", false, new OffsetBasedPageRequest(0, 100, Sort.by(Direction.ASC, "name")));
+                "name==Rollout*", SoftDeletedMode.EXCLUDE_SOFT_DELETED, new OffsetBasedPageRequest(0, 100, Sort.by(Direction.ASC, "name")));
         final List<Rollout> rolloutList = rollout.getContent();
         assertThat(rolloutList).hasSize(5);
         int i = 1;

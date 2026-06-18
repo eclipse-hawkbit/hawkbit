@@ -1600,6 +1600,108 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
+    void getFullRepresentationRolloutsFilteredBySoftDeletedMode() throws Exception {
+        testdataFactory.createTargets(20, "rolloutFullSd", "rolloutFullSd");
+        final DistributionSet dsA = testdataFactory.createDistributionSet("fullSdDs");
+
+        final Rollout rollout1 = createRollout("activeFullRollout", 4, dsA, "controllerId==rolloutFullSd*");
+        final Rollout rollout2 = createRollout("toDeleteFullRollout", 4, dsA, "controllerId==rolloutFullSd*");
+
+        // start and soft-delete rollout2
+        rolloutManagement.start(rollout2.getId());
+        rolloutHandler.handleAll();
+        rolloutManagement.delete(rollout2.getId());
+        rolloutHandler.handleAll();
+
+        // default (exclude_soft_deleted) in full mode — only active rollout
+        mvc.perform(get("/rest/v1/rollouts")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, "full")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo(rollout1.getName())))
+                .andExpect(jsonPath("content[0].deleted", equalTo(false)))
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus").exists());
+
+        // only_soft_deleted in full mode — only deleted rollout
+        mvc.perform(get("/rest/v1/rollouts")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, "full")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "ONLY_SOFT_DELETED")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo(rollout2.getName())))
+                .andExpect(jsonPath("content[0].deleted", equalTo(true)))
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus").exists());
+
+        // include_soft_deleted in full mode — both rollouts
+        mvc.perform(get("/rest/v1/rollouts")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, "full")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "INCLUDE_SOFT_DELETED")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.total", equalTo(2)));
+    }
+
+    @Test
+    void getFullRepresentationRolloutsFilteredBySoftDeletedModeWithRsql() throws Exception {
+        testdataFactory.createTargets(20, "rolloutFullRsql", "rolloutFullRsql");
+        final DistributionSet dsA = testdataFactory.createDistributionSet("fullRsqlDs");
+
+        final Rollout rollout1 = createRollout("fullRsqlActive", 4, dsA, "controllerId==rolloutFullRsql*");
+        final Rollout rollout2 = createRollout("fullRsqlDeleted", 4, dsA, "controllerId==rolloutFullRsql*");
+
+        // start and soft-delete rollout2
+        rolloutManagement.start(rollout2.getId());
+        rolloutHandler.handleAll();
+        rolloutManagement.delete(rollout2.getId());
+        rolloutHandler.handleAll();
+
+        // rsql + only_soft_deleted in full mode — find deleted rollout by name
+        mvc.perform(get("/rest/v1/rollouts")
+                        .param("q", "name==fullRsqlDeleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, "full")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "ONLY_SOFT_DELETED")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo(rollout2.getName())))
+                .andExpect(jsonPath("content[0].deleted", equalTo(true)))
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus").exists());
+
+        // rsql + default (exclude_soft_deleted) in full mode — deleted rollout not found
+        mvc.perform(get("/rest/v1/rollouts")
+                        .param("q", "name==fullRsqlDeleted")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, "full")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andExpect(jsonPath("$.total", equalTo(0)));
+
+        // rsql + include_soft_deleted in full mode — both visible, filter by name narrows to one
+        mvc.perform(get("/rest/v1/rollouts")
+                        .param("q", "name==fullRsqlActive")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, "full")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_LIST_SOFT_DELETED_MODE, "INCLUDE_SOFT_DELETED")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].name", equalTo(rollout1.getName())))
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus").exists());
+    }
+
+    @Test
     void stopRunningRollout() throws Exception {
         final Rollout rollout = testdataFactory.createAndStartRollout();
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/stop", rollout.getId()))
