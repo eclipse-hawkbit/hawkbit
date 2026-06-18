@@ -268,21 +268,15 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public Page<Rollout> findAll(final SoftDeletedMode softDeletedMode, Pageable pageable) {
-        return switch (softDeletedMode) {
-            case EXCLUDE_SOFT_DELETED -> JpaManagementHelper.convertPage(
-                    rolloutRepository.findAll(RolloutSpecification.isDeleted(false, pageable.getSort()), pageable), pageable);
-            case ONLY_SOFT_DELETED -> JpaManagementHelper.convertPage(
-                    rolloutRepository.findAll(RolloutSpecification.isDeleted(true, pageable.getSort()), pageable), pageable);
-            case INCLUDE_SOFT_DELETED -> JpaManagementHelper.convertPage(
-                    rolloutRepository.findAll(Specification.unrestricted(), pageable), pageable);
-        };
+    public Page<Rollout> findAll(final SoftDeletedMode softDeletedMode, final Pageable pageable) {
+        return JpaManagementHelper.convertPage(
+                rolloutRepository.findAll(softDeleteSpec(softDeletedMode, pageable.getSort()), pageable), pageable);
     }
 
     @Override
-    public Page<Rollout> findAllWithDetailedStatus(final boolean deleted, final Pageable pageable) {
+    public Page<Rollout> findAllWithDetailedStatus(final SoftDeletedMode softDeletedMode, final Pageable pageable) {
         return appendStatusDetails(JpaManagementHelper.convertPage(
-                rolloutRepository.findAll(RolloutSpecification.isDeleted(deleted, pageable.getSort()), JpaRollout_.GRAPH_ROLLOUT_DS, pageable),
+                rolloutRepository.findAll(softDeleteSpec(softDeletedMode, pageable.getSort()), JpaRollout_.GRAPH_ROLLOUT_DS, pageable),
                 pageable));
     }
 
@@ -295,27 +289,20 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public Page<Rollout> findByRsql(String rsql, SoftDeletedMode softDeletedMode, Pageable pageable) {
-        final Specification<JpaRollout> rsqlSpec = QLSupport.getInstance().buildSpec(rsql, RolloutFields.class);
-
-        if (softDeletedMode != SoftDeletedMode.INCLUDE_SOFT_DELETED) {
-            final Specification<JpaRollout> deletedSpec = RolloutSpecification.isDeleted(
-                    softDeletedMode == SoftDeletedMode.ONLY_SOFT_DELETED, pageable.getSort());
-            return JpaManagementHelper.convertPage(
-                    rolloutRepository.findAll(JpaManagementHelper.combineWithAnd(List.of(rsqlSpec, deletedSpec)), pageable), pageable);
-        } else {
-            return JpaManagementHelper.convertPage(rolloutRepository.findAll(rsqlSpec, pageable), pageable);
-
-        }
+    public Page<Rollout> findByRsql(final String rsql, final SoftDeletedMode softDeletedMode, final Pageable pageable) {
+        final Specification<JpaRollout> spec = JpaManagementHelper.combineWithAnd(List.of(
+                QLSupport.getInstance().buildSpec(rsql, RolloutFields.class),
+                softDeleteSpec(softDeletedMode, pageable.getSort())));
+        return JpaManagementHelper.convertPage(rolloutRepository.findAll(spec, pageable), pageable);
     }
 
     @Override
-    public Page<Rollout> findByRsqlWithDetailedStatus(final String rsql, final boolean deleted, final Pageable pageable) {
-        final List<Specification<JpaRollout>> specList = List.of(
+    public Page<Rollout> findByRsqlWithDetailedStatus(final String rsql, final SoftDeletedMode softDeletedMode, final Pageable pageable) {
+        final Specification<JpaRollout> spec = JpaManagementHelper.combineWithAnd(List.of(
                 QLSupport.getInstance().buildSpec(rsql, RolloutFields.class),
-                RolloutSpecification.isDeleted(deleted, pageable.getSort()));
+                softDeleteSpec(softDeletedMode, pageable.getSort())));
         return appendStatusDetails(JpaManagementHelper.convertPage(
-                rolloutRepository.findAll(JpaManagementHelper.combineWithAnd(specList), JpaRollout_.GRAPH_ROLLOUT_DS, pageable), pageable));
+                rolloutRepository.findAll(spec, JpaRollout_.GRAPH_ROLLOUT_DS, pageable), pageable));
     }
 
     @Override
@@ -675,6 +662,12 @@ public class JpaRolloutManagement implements RolloutManagement {
             });
         }
         return rollouts;
+    }
+
+    private static Specification<JpaRollout> softDeleteSpec(final SoftDeletedMode mode, final Sort sort) {
+        return mode == SoftDeletedMode.INCLUDE_SOFT_DELETED
+                ? Specification.unrestricted()
+                : RolloutSpecification.isDeleted(mode == SoftDeletedMode.ONLY_SOFT_DELETED, sort);
     }
 
     private static void validateDs(final Create rollout) {

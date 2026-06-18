@@ -177,12 +177,12 @@ public interface RolloutManagement extends PermissionSupport {
     /**
      * Get count of targets in different status in rollout.
      *
-     * @param deleted flag if deleted rollouts should be included
+     * @param softDeletedMode the filter defining which rollouts to return based on their soft-deleted status
      * @param pageable the page request to sort and limit the result
      * @return a list of rollouts with details of targets count for different statuses
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Page<Rollout> findAllWithDetailedStatus(boolean deleted, @NotNull Pageable pageable);
+    Page<Rollout> findAllWithDetailedStatus(SoftDeletedMode softDeletedMode, @NotNull Pageable pageable);
 
     /**
      * Retrieves all rollouts found by the given specification.
@@ -216,12 +216,12 @@ public interface RolloutManagement extends PermissionSupport {
      * Finds rollouts by given text in name or description.
      *
      * @param rsql search text which matches name or description of rollout
-     * @param deleted flag if deleted rollouts should be included
+     * @param softDeletedMode the filter defining which rollouts to return based on their soft-deleted status
      * @param pageable the page request to sort and limit the result
      * @return the founded rollout or {@code null} if rollout with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Page<Rollout> findByRsqlWithDetailedStatus(@NotEmpty String rsql, boolean deleted, @NotNull Pageable pageable);
+    Page<Rollout> findByRsqlWithDetailedStatus(@NotEmpty String rsql, SoftDeletedMode softDeletedMode, @NotNull Pageable pageable);
 
     /**
      * Find rollouts which are still active and needs to be handled.
