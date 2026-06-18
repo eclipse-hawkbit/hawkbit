@@ -43,19 +43,19 @@ class TargetTypeQueryManagementTest extends AbstractAccessControllerManagementTe
                 UPDATE_DISTRIBUTION_SET + "/type.id==" + dsType1.getId(),
                 // read / update target needed to update target filter query
                 READ_TARGET, UPDATE_TARGET), () -> {
-                    assertThat(targetFilterQueryManagement
-                            .updateAutoAssignDS(new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(ds1Type1.getId())
-                                    .actionType(Action.ActionType.FORCED).confirmationRequired(false))
-                            .getAutoAssignDistributionSet().getId()).isEqualTo(ds1Type1.getId());
-                    targetFilterQueryManagement
-                            .updateAutoAssignDS(new AutoAssignDistributionSetUpdate(targetFilterQuery.getId())
-                                    .ds(ds2Type2.getId()).actionType(Action.ActionType.FORCED).confirmationRequired(false))
-                            .getAutoAssignDistributionSet().getId();
-                    final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate = new AutoAssignDistributionSetUpdate(
-                            targetFilterQuery.getId())
-                            .ds(ds3Type2.getId()).actionType(Action.ActionType.FORCED).confirmationRequired(false);
-                    assertThatThrownBy(() -> targetFilterQueryManagement.updateAutoAssignDS(autoAssignDistributionSetUpdate))
-                            .isInstanceOf(EntityNotFoundException.class);
-                });
+            assertThat(targetFilterQueryManagement
+                    .updateAutoAssignDS(new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(ds1Type1.getId())
+                            .actionType(Action.ActionType.FORCED).confirmationRequired(false))
+                    .getAutoAssignDistributionSet().getId()).isEqualTo(ds1Type1.getId());
+            targetFilterQueryManagement
+                    .updateAutoAssignDS(new AutoAssignDistributionSetUpdate(targetFilterQuery.getId())
+                            .ds(ds2Type2.getId()).actionType(Action.ActionType.FORCED).confirmationRequired(false))
+                    .getAutoAssignDistributionSet().getId();
+            final AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate = new AutoAssignDistributionSetUpdate(
+                    targetFilterQuery.getId())
+                    .ds(ds3Type2.getId()).actionType(Action.ActionType.FORCED).confirmationRequired(false);
+            assertThatThrownBy(() -> targetFilterQueryManagement.updateAutoAssignDS(autoAssignDistributionSetUpdate))
+                    .isInstanceOf(EntityNotFoundException.class);
+        });
     }
 }

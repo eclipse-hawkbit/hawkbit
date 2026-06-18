@@ -117,6 +117,7 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
         private final transient HawkbitMgmtClient hawkbitClient;
         /**
          * Mirrored from RolloutManagement.ROLLOUT_STATUS_STOPPABLE
+         *
          * @see org.eclipse.hawkbit.repository.jpa.management.JpaRolloutManagement
          */
         private static final List<String> ROLLOUT_STATUS_STOPPABLE = List.of(
@@ -165,6 +166,7 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
             }
             if (ROLLOUT_STATUS_STOPPABLE.contains(rollout.getStatus())) {
                 add(Utils.tooltip(new Button(VaadinIcon.STOP.create()) {
+
                     {
                         addClickListener(v -> Utils.confirmDialog("Confirm Stopping",
                                 "Are you sure you want to stop the selected rollout? This action cannot be undone.",
@@ -178,6 +180,7 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
                 }, "Stop"));
             }
             add(Utils.tooltip(new Button(VaadinIcon.TRASH.create()) {
+
                 {
 
                     addClickListener(v -> Utils.confirmDialog("Confirm deletion",
@@ -245,11 +248,11 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
             description.setMinLength(2);
             groupGrid = createGroupGrid();
             Stream.of(
-                    description,
-                    createdBy, createdAt,
-                    lastModifiedBy, lastModifiedAt,
-                    targetFilter, distributionSet,
-                    actonType, startAt)
+                            description,
+                            createdBy, createdAt,
+                            lastModifiedBy, lastModifiedAt,
+                            targetFilter, distributionSet,
+                            actonType, startAt)
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
@@ -287,12 +290,12 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
             dynamic.setValue(rollout.isDynamic());
 
             groupGrid.setItems(query -> Optional.ofNullable(
-                    hawkbitClient.getRolloutRestApi()
-                            .getRolloutGroups(
-                                    rollout.getId(),
-                                    null, query.getOffset(), query.getPageSize(),
-                                    null, "full")
-                            .getBody())
+                            hawkbitClient.getRolloutRestApi()
+                                    .getRolloutGroups(
+                                            rollout.getId(),
+                                            null, query.getOffset(), query.getPageSize(),
+                                            null, "full")
+                                    .getBody())
                     .stream().flatMap(body -> body.getContent().stream())
                     .skip(query.getOffset())
                     .limit(query.getPageSize()));

@@ -78,8 +78,8 @@ public class DeviceApp {
                             .controllerId(controllerId)
                             .securityToken(ObjectUtils.isEmpty(securityToken)
                                     ? (ObjectUtils.isEmpty(ddiTenant.getTenant().getGatewayToken())
-                                        ? AuthenticationSetupHelper.randomToken()
-                                        : securityToken)
+                                       ? AuthenticationSetupHelper.randomToken()
+                                    : securityToken)
                                     : securityToken)
                             .build(),
                     updateHandler.orElse(null)).setOverridePollMillis(10_000);

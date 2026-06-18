@@ -52,7 +52,6 @@ public final class EventPublisherHolder {
     @Value("${hawkbit.events.remote.service.destination:serviceEventChannel}")
     private String serviceEventChannel;
 
-
     private static final EventPublisherHolder SINGLETON = new EventPublisherHolder();
     private ApplicationEventPublisher delegateEventPublisher;
     private StreamBridge streamBridge;
@@ -64,7 +63,8 @@ public final class EventPublisherHolder {
     @PostConstruct
     private void validateRemoteEventConfig() {
         if (remoteEventsEnabled && streamBridge == null) {
-            throw new IllegalStateException("'hawkbit.events.remote.enabled' is true but streamBridge is not configured. Check if 'spring-cloud-starter-stream-rabbit' dependency is included.");
+            throw new IllegalStateException(
+                    "'hawkbit.events.remote.enabled' is true but streamBridge is not configured. Check if 'spring-cloud-starter-stream-rabbit' dependency is included.");
         }
     }
 
@@ -176,7 +176,7 @@ public final class EventPublisherHolder {
                 return new TargetDeletedServiceEvent(targetDeletedEvent);
             } else if (event instanceof TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
                 return new TargetAssignDistributionSetServiceEvent(targetAssignDistributionSetEvent);
-            }  else if (event instanceof CancelTargetAssignmentEvent cancelTargetAssignmentEvent) {
+            } else if (event instanceof CancelTargetAssignmentEvent cancelTargetAssignmentEvent) {
                 return new CancelTargetAssignmentServiceEvent(cancelTargetAssignmentEvent);
             } else if (event instanceof TargetAttributesRequestedEvent targetAttributesRequestedEvent) {
                 return new TargetAttributesRequestedServiceEvent(targetAttributesRequestedEvent);

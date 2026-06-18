@@ -33,9 +33,9 @@ import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPut
 })
 public sealed interface RolloutRequest
         permits RolloutRequest.Create, RolloutRequest.Update, RolloutRequest.Delete,
-                RolloutRequest.Start, RolloutRequest.Pause, RolloutRequest.Stop,
-                RolloutRequest.Resume, RolloutRequest.Approve, RolloutRequest.Deny,
-                RolloutRequest.Retry, RolloutRequest.TriggerNextGroup {
+        RolloutRequest.Start, RolloutRequest.Pause, RolloutRequest.Stop,
+        RolloutRequest.Resume, RolloutRequest.Approve, RolloutRequest.Deny,
+        RolloutRequest.Retry, RolloutRequest.TriggerNextGroup {
 
     /**
      * Request to create a new rollout.
@@ -48,7 +48,7 @@ public sealed interface RolloutRequest
      * Request to update an existing rollout.
      *
      * @param rolloutId the rollout ID
-     * @param body      the request body containing updated rollout data
+     * @param body the request body containing updated rollout data
      */
     record Update(Long rolloutId, MgmtRolloutRestRequestBodyPut body) implements RolloutRequest {}
 
@@ -91,7 +91,7 @@ public sealed interface RolloutRequest
      * Request to approve a rollout.
      *
      * @param rolloutId the rollout ID to approve
-     * @param remark    optional remark for the approval
+     * @param remark optional remark for the approval
      */
     record Approve(Long rolloutId, String remark) implements RolloutRequest {}
 
@@ -99,7 +99,7 @@ public sealed interface RolloutRequest
      * Request to deny a rollout.
      *
      * @param rolloutId the rollout ID to deny
-     * @param remark    optional remark for the denial
+     * @param remark optional remark for the denial
      */
     record Deny(Long rolloutId, String remark) implements RolloutRequest {}
 

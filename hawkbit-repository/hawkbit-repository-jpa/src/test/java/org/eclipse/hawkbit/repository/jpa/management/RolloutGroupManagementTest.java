@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Test;
 class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
 
     /**
-     * Verifies that management get access reacts as specified on calls for non existing entities by means 
+     * Verifies that management get access reacts as specified on calls for non existing entities by means
      * of Optional not present.
      */
     @Test
@@ -48,8 +48,8 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * Verifies that management queries react as specified on calls for non existing entities 
-     *  by means of throwing EntityNotFoundException.
+     * Verifies that management queries react as specified on calls for non existing entities
+     * by means of throwing EntityNotFoundException.
      */
     @Test
     @ExpectEvents({

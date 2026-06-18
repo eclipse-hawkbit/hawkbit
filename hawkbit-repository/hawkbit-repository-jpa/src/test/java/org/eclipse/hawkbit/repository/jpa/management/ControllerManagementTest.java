@@ -242,7 +242,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionId1).isNotNull();
         final ActionStatusCreateBuilder status = ActionStatusCreate.builder().actionId(actionId1).status(Status.WARNING);
         for (int i = 0; i < maxStatusEntries; i++) {
-            controllerManagement.addInformationalActionStatus(status.messages(List.of("Msg " + i)).timestamp(java.lang.System.currentTimeMillis()).build());
+            controllerManagement.addInformationalActionStatus(
+                    status.messages(List.of("Msg " + i)).timestamp(java.lang.System.currentTimeMillis()).build());
         }
         final ActionStatusCreate actionStatusCreate = status.build();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
@@ -254,7 +255,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionId2).isNotEqualTo(actionId1);
         final ActionStatusCreateBuilder statusWarning = ActionStatusCreate.builder().actionId(actionId2).status(Status.WARNING);
         for (int i = 0; i < maxStatusEntries; i++) {
-            controllerManagement.addUpdateActionStatus(statusWarning.messages(List.of("Msg " + i)).timestamp(java.lang.System.currentTimeMillis()).build());
+            controllerManagement.addUpdateActionStatus(
+                    statusWarning.messages(List.of("Msg " + i)).timestamp(java.lang.System.currentTimeMillis()).build());
         }
         final ActionStatusCreate actionStatusCreateQE = statusWarning.build();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
@@ -662,7 +664,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 new ByteArrayInputStream(random), null, artifactSize, null,
                 findFirstModuleByType(ds, osType).orElseThrow().getId(), "file1", false));
         final Artifact artifact2 = artifactManagement.create(new ArtifactUpload(
-                new ByteArrayInputStream(random), null,  artifactSize, null,
+                new ByteArrayInputStream(random), null, artifactSize, null,
                 findFirstModuleByType(ds2, osType).orElseThrow().getId(), "file1", false));
         assertThat(artifact.getSha1Hash()).isEqualTo(artifact2.getSha1Hash());
 

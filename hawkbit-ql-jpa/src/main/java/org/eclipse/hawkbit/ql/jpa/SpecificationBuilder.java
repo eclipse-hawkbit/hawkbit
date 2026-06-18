@@ -31,7 +31,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import jakarta.annotation.Nonnull;
-import jakarta.persistence.PersistenceException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
@@ -152,10 +151,9 @@ public class SpecificationBuilder<T> {
                                 String.format("Operator %s is not supported for map fields with value null", op));
                     };
                 } else {
-                    final MapJoin<?, ?, ?> mapPath = (MapJoin<?, ?, ?>) pathResolver.getPath(attribute);
-                    return isNot(op)
-                            ? compare(comparison, toMapValuePath(pathResolver.getJoinOnInner(attribute, split[1])))
-                            : cb.and(equal(mapPath.key(), split[1]), compare(comparison, toMapValuePath(mapPath)));
+                    // map entry with key not null (exist) - use left join per key, key/value filtered in where
+                    final MapJoin<?, ?, ?> mapJoin = pathResolver.getJoinForWhere(attribute, split[1]);
+                    return cb.and(equal(mapJoin.key(), split[1]), compare(comparison, toMapValuePath(mapJoin)));
                 }
             } else if (attribute instanceof SetAttribute<?, ?> setAttribute) {
                 if (split.length < 2 || ObjectUtils.isEmpty(split[1])) {
@@ -176,6 +174,31 @@ public class SpecificationBuilder<T> {
                     }
                     return compare(comparison, deepGetPath(pathResolver.getPath(attribute), split[1]));
                 }
+            } else if (attribute.getPersistentAttributeType() == Attribute.PersistentAttributeType.ONE_TO_MANY
+                    && split.length == 1 && "autoConfirmationStatus".equalsIgnoreCase(split[0])) {
+                // Target autoConfirm case - handle autoConfirm == true/false since autoconfirm is
+                // represented as List in JpaTarget just to enforce Lazy Loading with eclipse link
+                // (not enforced otherwise) so here support for boolean filtering on
+                // ONE_TO_MANY relationship presence is added
+                final Path<?> joinPath = pathResolver.getPath(attribute);
+                final String value = String.valueOf(comparison.getValue());
+                final boolean exists;
+                if ("true".equalsIgnoreCase(value)) {
+                    exists = true;
+                } else if ("false".equalsIgnoreCase(value)) {
+                    exists = false;
+                } else {
+                    throw new QueryException(INVALID_SYNTAX,
+                            String.format("Only a boolean value is supported for existance check on %s", getPathContext(comparison)));
+                }
+                final Path<?> idPath = joinPath.get("id");
+                return switch (op) {
+                    case EQ -> exists ? cb.isNotNull(idPath) : cb.isNull(idPath);
+                    case NE ->  exists ? cb.isNull(idPath) : cb.isNotNull(idPath);
+                    default -> throw new QueryException(INVALID_SYNTAX,
+                            String.format("Operator %s is not supported for existence check on %s", op, getPathContext(comparison)));
+                };
+
             } else { // singular attribute (BASIC and EMBEDDABLE) or plural (ListAttribute of entities)
                 final Path<?> attributePath = pathResolver.getPath(attribute);
                 return compare(comparison, split.length > 1 ? deepGetPath(attributePath, split[1]) : attributePath);
@@ -373,41 +396,29 @@ public class SpecificationBuilder<T> {
             }
         }
 
-        @SuppressWarnings("java:S1872") // java:S1872 - sometimes class could be unavailable at runtime
         private Predicate like(final Path<String> fieldPath, final String sqlValue) {
-            try {
-                if (caseWise(fieldPath)) {
-                    return cb.like(cb.upper(fieldPath), sqlValue.toUpperCase(), ESCAPE_CHAR);
-                } else {
-                    return cb.like(fieldPath, sqlValue, ESCAPE_CHAR);
-                }
-            } catch (final PersistenceException e) {
-                if ("%".equals(sqlValue) && fieldPath.getJavaType() != String.class &&
-                        "org.hibernate.type.descriptor.java.CoercionException".equals(e.getClass().getName())) {
-                    // hibernate throws an exception if we try to do == on non-string field with wildcard only
-                    return fieldPath.isNotNull();
-                } else {
-                    throw e;
-                }
+            // LIKE on non-String fields (e.g. bigint) with wildcard-only value is equivalent to IS NOT NULL.
+            // Must be checked before building the SQL predicate because some databases (PostgreSQL, YugabyteDB)
+            // reject LIKE on non-text columns at the SQL level, before any JPA-provider-level validation.
+            if ("%".equals(sqlValue) && fieldPath.getJavaType() != String.class) {
+                return fieldPath.isNotNull();
+            }
+            if (caseWise(fieldPath)) {
+                return cb.like(cb.upper(fieldPath), sqlValue.toUpperCase(), ESCAPE_CHAR);
+            } else {
+                return cb.like(fieldPath, sqlValue, ESCAPE_CHAR);
             }
         }
 
-        @SuppressWarnings("java:S1872") // java:S1872 - sometimes class could be unavailable at runtime
         private Predicate notLike(final Path<String> fieldPath, final String sqlValue) {
-            try {
-                if (caseWise(fieldPath)) {
-                    return cb.notLike(cb.upper(fieldPath), sqlValue.toUpperCase(), ESCAPE_CHAR);
-                } else {
-                    return cb.notLike(fieldPath, sqlValue, ESCAPE_CHAR);
-                }
-            } catch (final PersistenceException e) {
-                if ("%".equals(sqlValue) && fieldPath.getJavaType() != String.class &&
-                        "org.hibernate.type.descriptor.java.CoercionException".equals(e.getClass().getName())) {
-                    // hibernate throws an exception if we try to do == on non-string field with wildcard only
-                    return fieldPath.isNull();
-                } else {
-                    throw e;
-                }
+            // NOT LIKE on non-String fields with wildcard-only value is equivalent to IS NULL.
+            if ("%".equals(sqlValue) && fieldPath.getJavaType() != String.class) {
+                return fieldPath.isNull();
+            }
+            if (caseWise(fieldPath)) {
+                return cb.notLike(cb.upper(fieldPath), sqlValue.toUpperCase(), ESCAPE_CHAR);
+            } else {
+                return cb.notLike(fieldPath, sqlValue, ESCAPE_CHAR);
             }
         }
 
@@ -446,8 +457,8 @@ public class SpecificationBuilder<T> {
                 return getCollectionPathResolver(attribute.getName()).getJoinOn(value);
             }
 
-            private MapJoin<?, ?, ?> getJoinOnInner(final Attribute<?, ?> attribute, final Object value) {
-                return getCollectionPathResolver(attribute.getName()).getJoinOnInner(value);
+            private MapJoin<?, ?, ?> getJoinForWhere(final Attribute<?, ?> attribute, final Object mapKeyName) {
+                return getCollectionPathResolver(attribute.getName()).getJoinForWhere(mapKeyName);
             }
 
             private Map<String, Integer> getState() {
@@ -472,7 +483,7 @@ public class SpecificationBuilder<T> {
                 @Setter
                 private int pos;
                 private final Map<Object, MapJoin<?, ?, ?>> joinOnCache = new HashMap<>();
-                private final Map<Object, MapJoin<?, ?, ?>> joinOnInnerCache = new HashMap<>();
+                private final Map<Object, MapJoin<?, ?, ?>> joinForWhereCache = new HashMap<>();
 
                 private CollectionPathResolver(final String attributeName) {
                     this.attributeName = attributeName;
@@ -497,12 +508,9 @@ public class SpecificationBuilder<T> {
                     });
                 }
 
-                private MapJoin<?, ?, ?> getJoinOnInner(final Object value) {
-                    return joinOnInnerCache.computeIfAbsent(value, k -> {
-                        final MapJoin<?, ?, ?> mapPath = (MapJoin<?, ?, ?>) root.join(attributeName, JoinType.INNER);
-                        mapPath.on(equal(mapPath.key(), k));
-                        return mapPath;
-                    });
+                private MapJoin<?, ?, ?> getJoinForWhere(final Object mapKeyName) {
+                    return joinForWhereCache.computeIfAbsent(mapKeyName, k ->
+                            (MapJoin<?, ?, ?>) root.join(attributeName, JoinType.LEFT));
                 }
             }
         }

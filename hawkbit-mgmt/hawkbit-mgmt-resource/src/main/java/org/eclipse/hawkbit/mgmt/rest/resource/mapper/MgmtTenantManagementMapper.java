@@ -36,7 +36,8 @@ public final class MgmtTenantManagementMapper {
         restConfValue.setCreatedBy(repoConfValue.getCreatedBy());
         restConfValue.setLastModifiedAt(repoConfValue.getLastModifiedAt());
         restConfValue.setLastModifiedBy(repoConfValue.getLastModifiedBy());
-        restConfValue.add(WebMvcLinkBuilder.linkTo(methodOn(MgmtTenantManagementResource.class).getTenantConfigurationValue(key)).withSelfRel().expand());
+        restConfValue.add(
+                WebMvcLinkBuilder.linkTo(methodOn(MgmtTenantManagementResource.class).getTenantConfigurationValue(key)).withSelfRel().expand());
         return restConfValue;
     }
 

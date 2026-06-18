@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.acm;
 
-import java.util.Set;
-
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.auth.SpPermission;
@@ -29,7 +27,6 @@ import org.eclipse.hawkbit.repository.qfields.TargetTagFields;
 // utility class to validate authorities when ACM is enabled
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AuthorityChecker {
-;
 
     public static void validateAuthorities(final String... authorities) {
         for (final String authority : authorities) {

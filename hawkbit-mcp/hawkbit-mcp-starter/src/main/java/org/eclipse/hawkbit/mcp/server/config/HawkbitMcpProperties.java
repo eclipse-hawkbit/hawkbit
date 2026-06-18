@@ -9,14 +9,15 @@
  */
 package org.eclipse.hawkbit.mcp.server.config;
 
+import java.time.Duration;
+
 import jakarta.validation.constraints.NotBlank;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
-
-import java.time.Duration;
 
 /**
  * Configuration properties for the standalone hawkBit MCP server.

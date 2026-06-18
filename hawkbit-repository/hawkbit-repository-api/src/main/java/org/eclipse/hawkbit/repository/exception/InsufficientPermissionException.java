@@ -35,6 +35,6 @@ public class InsufficientPermissionException extends AbstractServerRtException {
     }
 
     public InsufficientPermissionException() {
-        this((String)null);
+        this((String) null);
     }
 }

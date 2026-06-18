@@ -66,7 +66,8 @@ class SortUtilityTest {
      * Sorting based on name with case-sensitive is possible.
      */
     @Test
-    @SuppressWarnings("squid:S2699") // assert no error
+    @SuppressWarnings("squid:S2699")
+    // assert no error
     void parsingIsNotCaseSensitive() {
         SortUtility.parse(TargetFields.class, CASE_INSENSITIVE_DIRECTION_PARAM);
         SortUtility.parse(TargetFields.class, CASE_INSENSITIVE_DIRECTION_PARAM_1);

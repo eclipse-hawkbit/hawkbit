@@ -45,6 +45,7 @@ public final class IpUtil {
 
     /**
      * Converts address to URI. If the address is not parsable, it will log and return <code>null</code>.
+     *
      * @param address the address to convert
      * @return the {@link URI} or <code>null</code> if the address is not parsable
      */

@@ -322,11 +322,11 @@ public class HawkbitClient {
 
         return method.getReturnType() == ResponseEntity.class
                 ? new ResponseEntity<>(
-                    deserialize(
-                            conn.getInputStream(),
-                            (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0],
-                            objectMapper),
-                    HttpStatusCode.valueOf(responseCode))
+                deserialize(
+                        conn.getInputStream(),
+                        (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0],
+                        objectMapper),
+                HttpStatusCode.valueOf(responseCode))
                 : deserialize(conn.getInputStream(), method.getReturnType(), objectMapper);
     }
 

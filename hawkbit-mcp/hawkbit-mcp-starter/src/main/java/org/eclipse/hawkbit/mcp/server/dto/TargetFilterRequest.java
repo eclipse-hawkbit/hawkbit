@@ -36,7 +36,7 @@ public sealed interface TargetFilterRequest
      * Request to update an existing target filter.
      *
      * @param filterId the target filter ID
-     * @param body     the request body containing updated filter data
+     * @param body the request body containing updated filter data
      */
     record Update(Long filterId, MgmtTargetFilterQueryRequestBody body) implements TargetFilterRequest {}
 

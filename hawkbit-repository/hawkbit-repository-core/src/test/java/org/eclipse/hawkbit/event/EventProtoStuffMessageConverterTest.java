@@ -39,7 +39,7 @@ class EventProtoStuffMessageConverterTest extends AbstractEventMessageConverterT
 
         assertThatExceptionOfType(MessageConversionException.class)
                 .as("Missing MessageConversationException for un-defined event-type")
-                .isThrownBy(() -> ((EventProtoStuffMessageConverter)messageConverter).convertToInternal(dummyEvent, messageHeaders, null));
+                .isThrownBy(() -> ((EventProtoStuffMessageConverter) messageConverter).convertToInternal(dummyEvent, messageHeaders, null));
     }
 
     /**

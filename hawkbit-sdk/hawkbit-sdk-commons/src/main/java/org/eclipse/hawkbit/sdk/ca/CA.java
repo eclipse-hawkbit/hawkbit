@@ -131,7 +131,8 @@ public class CA {
             final X509v3CertificateBuilder caCertBuilder = new JcaX509v3CertificateBuilder(
                     caPrincipal, BigInteger.valueOf(0L), notBefore(notBefore), notAfter(notAfter), caPrincipal, keyPair.getPublic());
             caCertBuilder.addExtension(Extension.basicConstraints, false, new BasicConstraints(true));
-            return new Certificate(keyPair, new X509Certificate[] { new JcaX509CertificateConverter().getCertificate(caCertBuilder.build(selfSigner)) });
+            return new Certificate(keyPair,
+                    new X509Certificate[] { new JcaX509CertificateConverter().getCertificate(caCertBuilder.build(selfSigner)) });
         } catch (final NoSuchAlgorithmException | OperatorCreationException | CertIOException e) {
             throw new CertificateException(e);
         }

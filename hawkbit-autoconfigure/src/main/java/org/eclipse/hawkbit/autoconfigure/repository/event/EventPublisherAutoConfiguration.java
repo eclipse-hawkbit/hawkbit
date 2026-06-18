@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.autoconfigure.repository.event;
 
-
 import org.eclipse.hawkbit.event.EventPublisherConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

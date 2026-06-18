@@ -37,7 +37,7 @@ public sealed interface DistributionSetRequest
      * Request to update an existing distribution set.
      *
      * @param distributionSetId the distribution set ID
-     * @param body              the request body containing updated distribution set data
+     * @param body the request body containing updated distribution set data
      */
     record Update(Long distributionSetId, MgmtDistributionSetRequestBodyPut body) implements DistributionSetRequest {}
 

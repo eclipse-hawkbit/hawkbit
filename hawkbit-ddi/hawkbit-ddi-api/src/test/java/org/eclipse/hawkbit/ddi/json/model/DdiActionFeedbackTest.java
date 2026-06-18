@@ -74,15 +74,15 @@ class DdiActionFeedbackTest {
     void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiActionFeedback = """
-            {
-              "timestamp" : "1627997501890",
-              "status" : {
-                "execution" : "[closed]",
-                "result" : null,
-                "details" : []
-              }
-            }
-            """;
+                {
+                  "timestamp" : "1627997501890",
+                  "status" : {
+                    "execution" : "[closed]",
+                    "result" : null,
+                    "details" : []
+                  }
+                }
+                """;
         assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
                 () -> mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class));
     }
@@ -94,16 +94,16 @@ class DdiActionFeedbackTest {
     void shouldConvertItWithoutOptionalFieldTimestamp() throws JsonProcessingException {
         // Setup
         final String serializedDdiActionFeedback = """
-            {
-              "status" : {
-                "result" : {
-                  "finished" : "none"
-                },
-                "execution" : "download",
-                "details" : [ "Some message" ]
-              }
-            }
-            """;
+                {
+                  "status" : {
+                    "result" : {
+                      "finished" : "none"
+                    },
+                    "execution" : "download",
+                    "details" : [ "Some message" ]
+                  }
+                }
+                """;
 
         assertThat(mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class)).satisfies(deserializedDdiActionFeedback -> {
             assertThat(deserializedDdiActionFeedback.getTimestamp()).isNotNull();

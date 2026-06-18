@@ -197,6 +197,7 @@ public class TestdataFactory {
     }
 
     private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
     public static String randomString(final int len) {
         final StringBuilder sb = new StringBuilder(len);
         for (int i = 0; i < len; i++) {
@@ -636,7 +637,7 @@ public class TestdataFactory {
 
     /**
      * @return {@link DistributionSetType} with key {@link #DS_TYPE_DEFAULT} and {@link SoftwareModuleType}s {@link #SM_TYPE_OS},
-     *             {@link #SM_TYPE_RT} , {@link #SM_TYPE_APP}.
+     *         {@link #SM_TYPE_RT} , {@link #SM_TYPE_APP}.
      */
     public DistributionSetType findOrCreateDefaultTestDsType() {
         final List<SoftwareModuleType> swt = new ArrayList<>();
@@ -984,7 +985,8 @@ public class TestdataFactory {
 
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
-            final String successCondition, final RolloutGroup.RolloutGroupSuccessAction successAction, final String errorCondition, final boolean confirmationRequired,
+            final String successCondition, final RolloutGroup.RolloutGroupSuccessAction successAction, final String errorCondition,
+            final boolean confirmationRequired,
             final boolean dynamic) {
         return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet,
                 successCondition, successAction, errorCondition, Action.ActionType.FORCED, null, confirmationRequired, dynamic);
@@ -995,7 +997,8 @@ public class TestdataFactory {
             final String successCondition, final String errorCondition, final Action.ActionType actionType,
             final Integer weight, final boolean confirmationRequired) {
         return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet,
-                successCondition, RolloutGroup.RolloutGroupSuccessAction.NEXTGROUP, errorCondition, actionType, weight, confirmationRequired, false);
+                successCondition, RolloutGroup.RolloutGroupSuccessAction.NEXTGROUP, errorCondition, actionType, weight, confirmationRequired,
+                false);
     }
 
     /**
@@ -1016,7 +1019,8 @@ public class TestdataFactory {
      */
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
-            final String successCondition, final RolloutGroup.RolloutGroupSuccessAction successAction, final String errorCondition, final Action.ActionType actionType,
+            final String successCondition, final RolloutGroup.RolloutGroupSuccessAction successAction, final String errorCondition,
+            final Action.ActionType actionType,
             final Integer weight, final boolean confirmationRequired, final boolean dynamic) {
         return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet,
                 successCondition, successAction, errorCondition, actionType, weight, confirmationRequired, dynamic, null);

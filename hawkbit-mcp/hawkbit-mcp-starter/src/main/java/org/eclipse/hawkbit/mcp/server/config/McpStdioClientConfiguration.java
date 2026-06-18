@@ -9,6 +9,10 @@
  */
 package org.eclipse.hawkbit.mcp.server.config;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.function.BiFunction;
+
 import feign.RequestInterceptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +22,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.function.BiFunction;
 
 /**
  * Configuration for STDIO mode.

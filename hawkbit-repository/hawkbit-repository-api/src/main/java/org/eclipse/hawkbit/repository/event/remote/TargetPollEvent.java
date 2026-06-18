@@ -46,7 +46,8 @@ public class TargetPollEvent extends RemoteTenantAwareEvent {
     }
 
     public TargetPollEvent(final Target target) {
-        this(List.of(target.getControllerId()), target.getLastTargetQuery(), target.getTenant()); // here expect last target query to be already set
+        this(List.of(target.getControllerId()), target.getLastTargetQuery(),
+                target.getTenant()); // here expect last target query to be already set
         this.targetAddress = target.getAddress();
     }
 }

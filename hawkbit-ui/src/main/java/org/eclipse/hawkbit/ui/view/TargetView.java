@@ -409,11 +409,11 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             this.hawkbitClient = hawkbitClient;
             description.setMinLength(2);
             Stream.of(
-                    description,
-                    createdBy, createdAt,
-                    lastModifiedBy, lastModifiedAt,
-                    securityToken, lastPoll, group, targetAddress, targetAttributes
-            )
+                            description,
+                            createdBy, createdAt,
+                            lastModifiedBy, lastModifiedAt,
+                            securityToken, lastPoll, group, targetAddress, targetAttributes
+                    )
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
@@ -483,18 +483,18 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             Optional.ofNullable(supplier.get())
                     .map(ResponseEntity<MgmtDistributionSet>::getBody)
                     .ifPresentOrElse(value -> {
-                        final String description = """
-                                Name:  %s
-                                Version: %s
-                                %s
-                                """.replace("\n", System.lineSeparator());
-                        textArea.setValueWithLink(description.formatted(
-                                value.getName(),
-                                value.getVersion(),
-                                value.getModules().stream().map(module -> module.getTypeName() + ": " + module.getVersion())
-                                        .collect(Collectors.joining(System.lineSeparator()))
-                        ), "q=id%3D%3D" + value.getId().toString());
-                    },
+                                final String description = """
+                                        Name:  %s
+                                        Version: %s
+                                        %s
+                                        """.replace("\n", System.lineSeparator());
+                                textArea.setValueWithLink(description.formatted(
+                                        value.getName(),
+                                        value.getVersion(),
+                                        value.getModules().stream().map(module -> module.getTypeName() + ": " + module.getVersion())
+                                                .collect(Collectors.joining(System.lineSeparator()))
+                                ), "q=id%3D%3D" + value.getId().toString());
+                            },
                             () -> textArea.setValueWithLink("", null));
         }
     }
@@ -603,7 +603,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             int offset = 0;
             do {
                 List<MgmtTag> page = Optional.ofNullable(
-                        hawkbitClient.getTargetTagRestApi().getTargetTags(null, offset, 50, Constants.NAME_ASC).getBody())
+                                hawkbitClient.getTargetTagRestApi().getTargetTags(null, offset, 50, Constants.NAME_ASC).getBody())
                         .map(PagedList::getContent)
                         .orElse(Collections.emptyList());
                 tags.addAll(page);
@@ -647,7 +647,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             final Button addBtn = new Button("Add");
             addBtn.addClickListener(e -> new AddMetadataDialog(hawkbitClient, target, this::refreshMetadatas).result());
             addBtn.setEnabled(true);
-            final HorizontalLayout tools = new HorizontalLayout(); 
+            final HorizontalLayout tools = new HorizontalLayout();
             tools.setWidthFull();
             tools.add(addBtn);
             add(tools);
@@ -665,7 +665,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
         private void refreshMetadatas() {
             metadataArea.setItems(
                     Optional.ofNullable(
-                            hawkbitClient.getTargetRestApi().getMetadata(target.getControllerId()).getBody())
+                                    hawkbitClient.getTargetRestApi().getMetadata(target.getControllerId()).getBody())
                             .map(PagedList::getContent)
                             .orElse(Collections.emptyList()));
         }
@@ -845,7 +845,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
                     request.setTargetType(type.getValue().getId());
                 }
                 hawkbitClient.getTargetRestApi().createTargets(
-                        List.of(request))
+                                List.of(request))
                         .getBody()
                         .stream()
                         .findFirst()
@@ -1092,7 +1092,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             TargetWithDs targetWithDs = objectMapper.convertValue(target, TargetWithDs.class);
 
             targetWithDs.ds = Optional.ofNullable(hawkbitClient.getTargetRestApi().getInstalledDistributionSet(targetWithDs
-                    .getControllerId())
+                            .getControllerId())
                     .getBody());
             return targetWithDs;
         }

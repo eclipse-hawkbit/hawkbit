@@ -1,6 +1,7 @@
 # hawkBit MCP Server
 
-A standalone [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that provides AI assistants with tools to interact with [Eclipse hawkBit](https://www.eclipse.org/hawkbit/) for IoT device software update management.
+A standalone [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that provides AI assistants with
+tools to interact with [Eclipse hawkBit](https://www.eclipse.org/hawkbit/) for IoT device software update management.
 
 ## Building
 
@@ -16,11 +17,10 @@ The JAR will be created at: `hawkbit-mcp/target/hawkbit-mcp-server-0-SNAPSHOT.ja
 
 The MCP server supports two transport modes:
 
-| Mode | Use Case | Authentication |
-|------|----------|----------------|
-| **HTTP/SSE** | Remote access, multi-user | Per-request via `Authorization` header |
-| **STDIO** | Local CLI tools (e.g., Claude Code) | Environment variables |
-
+| Mode         | Use Case                            | Authentication                         |
+|--------------|-------------------------------------|----------------------------------------|
+| **HTTP/SSE** | Remote access, multi-user           | Per-request via `Authorization` header |
+| **STDIO**    | Local CLI tools (e.g., Claude Code) | Environment variables                  |
 
 ### HTTP Transport
 
@@ -84,13 +84,13 @@ Use STDIO transport for direct integration:
 
 ## Configuration Properties
 
-| Property | Environment Variable | Description | Default |
-|----------|---------------------|-------------|---------|
-| `hawkbit.mcp.mgmt-url` | `HAWKBIT_URL` | hawkBit Management API URL | `http://localhost:8080` |
-| `hawkbit.mcp.username` | `HAWKBIT_USERNAME` | Username for STDIO mode | - |
-| `hawkbit.mcp.password` | `HAWKBIT_PASSWORD` | Password for STDIO mode | - |
-| `hawkbit.mcp.validation.enabled` | - | Validate credentials against hawkBit | `true` |
-| `hawkbit.mcp.validation.cache-ttl` | - | Cache TTL for auth validation | `600s` |
+| Property                           | Environment Variable | Description                          | Default                 |
+|------------------------------------|----------------------|--------------------------------------|-------------------------|
+| `hawkbit.mcp.mgmt-url`             | `HAWKBIT_URL`        | hawkBit Management API URL           | `http://localhost:8080` |
+| `hawkbit.mcp.username`             | `HAWKBIT_USERNAME`   | Username for STDIO mode              | -                       |
+| `hawkbit.mcp.password`             | `HAWKBIT_PASSWORD`   | Password for STDIO mode              | -                       |
+| `hawkbit.mcp.validation.enabled`   | -                    | Validate credentials against hawkBit | `true`                  |
+| `hawkbit.mcp.validation.cache-ttl` | -                    | Cache TTL for auth validation        | `600s`                  |
 
 ### Operation Controls
 

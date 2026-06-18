@@ -34,7 +34,7 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
     private final TargetManagement<? extends Target> targetManagement;
 
     public MgmtTargetGroupResource(
-            final TargetManagement <? extends Target>targetManagement) {
+            final TargetManagement<? extends Target> targetManagement) {
         this.targetManagement = targetManagement;
     }
 
@@ -51,7 +51,8 @@ public class MgmtTargetGroupResource implements MgmtTargetGroupRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargetsWithSubgroups(
-            final String groupFilter, final boolean subgroups, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
+            final String groupFilter, final boolean subgroups, final int pagingOffsetParam, final int pagingLimitParam,
+            final String sortParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeTargetSortParam(sortParam));
 
         final Page<Target> targets = targetManagement.findTargetsByGroup(groupFilter, subgroups, pageable);

@@ -13,6 +13,7 @@ import java.util.Map;
 
 /**
  * Interface for entities that support metadata.
+ *
  * @param <MV> metadata value type
  * @param <MVI> metadata value implementation type
  */

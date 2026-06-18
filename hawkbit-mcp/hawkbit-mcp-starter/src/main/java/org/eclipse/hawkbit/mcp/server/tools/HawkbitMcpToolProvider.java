@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.mcp.server.tools;
 
+import java.util.Collections;
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mcp.server.config.HawkbitMcpProperties;
@@ -38,9 +41,6 @@ import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.Tenant;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springframework.http.ResponseEntity;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * MCP tools for hawkBit using the SDK.
@@ -94,8 +94,8 @@ public class HawkbitMcpToolProvider {
     }
 
     @McpTool(name = "list_targets",
-          description = "Retrieves a paged list of targets (devices) with optional RSQL filtering. " +
-                        "Targets represent devices that can receive software updates.")
+            description = "Retrieves a paged list of targets (devices) with optional RSQL filtering. " +
+                    "Targets represent devices that can receive software updates.")
     public PagedResponse<MgmtTarget> listTargets(final ListRequest request) {
         log.debug("Listing targets with rsql={}, offset={}, limit={}",
                 request.rsql(), request.getOffsetOrDefault(), request.getLimitOrDefault());
@@ -111,8 +111,8 @@ public class HawkbitMcpToolProvider {
     }
 
     @McpTool(name = "list_rollouts",
-          description = "Retrieves a paged list of rollouts with optional RSQL filtering. " +
-                        "Rollouts are used to deploy software to groups of targets.")
+            description = "Retrieves a paged list of rollouts with optional RSQL filtering. " +
+                    "Rollouts are used to deploy software to groups of targets.")
     public PagedResponse<MgmtRolloutResponseBody> listRollouts(final ListRequest request) {
         log.debug("Listing rollouts with rsql={}, offset={}, limit={}",
                 request.rsql(), request.getOffsetOrDefault(), request.getLimitOrDefault());
@@ -129,8 +129,8 @@ public class HawkbitMcpToolProvider {
     }
 
     @McpTool(name = "list_distribution_sets",
-          description = "Retrieves a paged list of distribution sets with optional RSQL filtering. " +
-                        "Distribution sets are software packages that can be deployed to targets.")
+            description = "Retrieves a paged list of distribution sets with optional RSQL filtering. " +
+                    "Distribution sets are software packages that can be deployed to targets.")
     public PagedResponse<MgmtDistributionSet> listDistributionSets(final ListRequest request) {
         log.debug("Listing distribution sets with rsql={}, offset={}, limit={}",
                 request.rsql(), request.getOffsetOrDefault(), request.getLimitOrDefault());
@@ -146,8 +146,8 @@ public class HawkbitMcpToolProvider {
     }
 
     @McpTool(name = "list_actions",
-          description = "Retrieves a paged list of actions with optional RSQL filtering. " +
-                        "Actions represent deployment operations assigned to targets.")
+            description = "Retrieves a paged list of actions with optional RSQL filtering. " +
+                    "Actions represent deployment operations assigned to targets.")
     public PagedResponse<MgmtAction> listActions(final ListRequest request) {
         log.debug("Listing actions with rsql={}, offset={}, limit={}",
                 request.rsql(), request.getOffsetOrDefault(), request.getLimitOrDefault());
@@ -164,8 +164,8 @@ public class HawkbitMcpToolProvider {
     }
 
     @McpTool(name = "list_software_modules",
-          description = "Retrieves a paged list of software modules with optional RSQL filtering. " +
-                        "Software modules are individual software components within distribution sets.")
+            description = "Retrieves a paged list of software modules with optional RSQL filtering. " +
+                    "Software modules are individual software components within distribution sets.")
     public PagedResponse<MgmtSoftwareModule> listSoftwareModules(final ListRequest request) {
         log.debug("Listing software modules with rsql={}, offset={}, limit={}",
                 request.rsql(), request.getOffsetOrDefault(), request.getLimitOrDefault());
@@ -181,8 +181,8 @@ public class HawkbitMcpToolProvider {
     }
 
     @McpTool(name = "list_target_filters",
-          description = "Retrieves a paged list of target filter queries with optional RSQL filtering. " +
-                        "Target filters define RSQL queries to group targets for rollouts or auto-assignment.")
+            description = "Retrieves a paged list of target filter queries with optional RSQL filtering. " +
+                    "Target filters define RSQL queries to group targets for rollouts or auto-assignment.")
     public PagedResponse<MgmtTargetFilterQuery> listTargetFilters(final ListRequest request) {
         log.debug("Listing target filters with rsql={}, offset={}, limit={}",
                 request.rsql(), request.getOffsetOrDefault(), request.getLimitOrDefault());
@@ -199,14 +199,14 @@ public class HawkbitMcpToolProvider {
     }
 
     @McpTool(name = "manage_target",
-             description = "Create, update, or delete targets (devices). " +
-                           "Operations: CREATE (new target with controllerId, name, description. When creating a target without a specific target type, set \"targetType\": null), " +
-                           "UPDATE (modify existing target by controllerId), " +
-                           "DELETE (remove target by controllerId). " +
-                           "Use 'type' field to select operation: " +
-                           "{\"type\":\"Create\",\"body\":{\"controllerId\":\"id\",\"name\":\"name\"}}, " +
-                           "{\"type\":\"Update\",\"controllerId\":\"id\",\"body\":{...}}, " +
-                           "{\"type\":\"Delete\",\"controllerId\":\"id\"}")
+            description = "Create, update, or delete targets (devices). " +
+                    "Operations: CREATE (new target with controllerId, name, description. When creating a target without a specific target type, set \"targetType\": null), " +
+                    "UPDATE (modify existing target by controllerId), " +
+                    "DELETE (remove target by controllerId). " +
+                    "Use 'type' field to select operation: " +
+                    "{\"type\":\"Create\",\"body\":{\"controllerId\":\"id\",\"name\":\"name\"}}, " +
+                    "{\"type\":\"Update\",\"controllerId\":\"id\",\"body\":{...}}, " +
+                    "{\"type\":\"Delete\",\"controllerId\":\"id\"}")
     @SuppressWarnings("java:S3776") // not too complex
     public OperationResponse<Object> manageTarget(final TargetRequest request) {
         log.debug("Managing target: request={}", request.getClass().getSimpleName());
@@ -244,14 +244,14 @@ public class HawkbitMcpToolProvider {
     }
 
     @McpTool(name = "manage_rollout",
-             description = "Create, update, delete, and control rollouts for software deployment. " +
-                           "Use 'type' field to select operation. " +
-                           "Types: Create, Update, Delete, Start, Pause, Stop, Resume, Approve, Deny, Retry, TriggerNextGroup. " +
-                           "For Create: use rollout 'type' values: 'soft', 'forced', 'timeforced', 'downloadonly' (lowercase). " +
-                           "If 'groups' list is provided, omit 'amountGroups' (they are mutually exclusive). " +
-                           "Examples: {\"type\":\"Create\",\"body\":{...}}, " +
-                           "{\"type\":\"Start\",\"rolloutId\":123}, " +
-                           "{\"type\":\"Approve\",\"rolloutId\":123,\"remark\":\"approved\"}")
+            description = "Create, update, delete, and control rollouts for software deployment. " +
+                    "Use 'type' field to select operation. " +
+                    "Types: Create, Update, Delete, Start, Pause, Stop, Resume, Approve, Deny, Retry, TriggerNextGroup. " +
+                    "For Create: use rollout 'type' values: 'soft', 'forced', 'timeforced', 'downloadonly' (lowercase). " +
+                    "If 'groups' list is provided, omit 'amountGroups' (they are mutually exclusive). " +
+                    "Examples: {\"type\":\"Create\",\"body\":{...}}, " +
+                    "{\"type\":\"Start\",\"rolloutId\":123}, " +
+                    "{\"type\":\"Approve\",\"rolloutId\":123,\"remark\":\"approved\"}")
     @SuppressWarnings("java:S3776") // not too complex, iterative logic
     public OperationResponse<Object> manageRollout(final RolloutRequest request) {
         log.debug("Managing rollout: request={}", request.getClass().getSimpleName());
@@ -343,11 +343,11 @@ public class HawkbitMcpToolProvider {
     }
 
     @McpTool(name = "manage_distribution_set",
-             description = "Create, update, or delete distribution sets (software packages). " +
-                           "Use 'type' field to select operation: " +
-                           "{\"type\":\"Create\",\"body\":{\"name\":\"n\",\"version\":\"v\",\"type\":\"t\"}}, " +
-                           "{\"type\":\"Update\",\"distributionSetId\":123,\"body\":{...}}, " +
-                           "{\"type\":\"Delete\",\"distributionSetId\":123}")
+            description = "Create, update, or delete distribution sets (software packages). " +
+                    "Use 'type' field to select operation: " +
+                    "{\"type\":\"Create\",\"body\":{\"name\":\"n\",\"version\":\"v\",\"type\":\"t\"}}, " +
+                    "{\"type\":\"Update\",\"distributionSetId\":123,\"body\":{...}}, " +
+                    "{\"type\":\"Delete\",\"distributionSetId\":123}")
     public OperationResponse<Object> manageDistributionSet(final DistributionSetRequest request) {
         log.debug("Managing distribution set: request={}", request.getClass().getSimpleName());
 
@@ -384,10 +384,10 @@ public class HawkbitMcpToolProvider {
     }
 
     @McpTool(name = "manage_action",
-             description = "Delete deployment actions. Actions are created indirectly via distribution set assignment. " +
-                           "Use 'type' field to select operation: " +
-                           "{\"type\":\"Delete\",\"actionIds\":[123]}, " +
-                           "{\"type\":\"DeleteBatch\",\"actionIds\":[1,2,3],\"rsql\":\"\"}")
+            description = "Delete deployment actions. Actions are created indirectly via distribution set assignment. " +
+                    "Use 'type' field to select operation: " +
+                    "{\"type\":\"Delete\",\"actionIds\":[123]}, " +
+                    "{\"type\":\"DeleteBatch\",\"actionIds\":[1,2,3],\"rsql\":\"\"}")
     public OperationResponse<Object> manageAction(final ActionRequest request) {
         log.debug("Managing action: request={}", request.getClass().getSimpleName());
 
@@ -403,7 +403,7 @@ public class HawkbitMcpToolProvider {
         } else if (request instanceof ActionRequest.DeleteBatch r) {
             validateActionOperation("delete-batch");
             if ((r.actionIds() == null || r.actionIds().isEmpty()) &&
-                (r.rsql() == null || r.rsql().isBlank())) {
+                    (r.rsql() == null || r.rsql().isBlank())) {
                 return OperationResponse.failure(OP_DELETE_BATCH, "Either actionIds or rsql is required for DELETE_BATCH operation");
             }
             api.deleteActions(r.rsql(), r.actionIds());
@@ -413,11 +413,11 @@ public class HawkbitMcpToolProvider {
     }
 
     @McpTool(name = "manage_software_module",
-             description = "Create, update, or delete software modules. " +
-                           "Use 'type' field to select operation: " +
-                           "{\"type\":\"Create\",\"body\":{\"name\":\"n\",\"version\":\"v\",\"type\":\"t\"}}, " +
-                           "{\"type\":\"Update\",\"softwareModuleId\":123,\"body\":{...}}, " +
-                           "{\"type\":\"Delete\",\"softwareModuleId\":123}")
+            description = "Create, update, or delete software modules. " +
+                    "Use 'type' field to select operation: " +
+                    "{\"type\":\"Create\",\"body\":{\"name\":\"n\",\"version\":\"v\",\"type\":\"t\"}}, " +
+                    "{\"type\":\"Update\",\"softwareModuleId\":123,\"body\":{...}}, " +
+                    "{\"type\":\"Delete\",\"softwareModuleId\":123}")
     public OperationResponse<Object> manageSoftwareModule(final SoftwareModuleRequest request) {
         log.debug("Managing software module: request={}", request.getClass().getSimpleName());
 
@@ -454,11 +454,11 @@ public class HawkbitMcpToolProvider {
     }
 
     @McpTool(name = "manage_target_filter",
-             description = "Create, update, or delete target filter queries. " +
-                           "Use 'type' field to select operation: " +
-                           "{\"type\":\"Create\",\"body\":{\"name\":\"n\",\"query\":\"name==*\"}}, " +
-                           "{\"type\":\"Update\",\"filterId\":123,\"body\":{...}}, " +
-                           "{\"type\":\"Delete\",\"filterId\":123}")
+            description = "Create, update, or delete target filter queries. " +
+                    "Use 'type' field to select operation: " +
+                    "{\"type\":\"Create\",\"body\":{\"name\":\"n\",\"query\":\"name==*\"}}, " +
+                    "{\"type\":\"Update\",\"filterId\":123,\"body\":{...}}, " +
+                    "{\"type\":\"Delete\",\"filterId\":123}")
     public OperationResponse<Object> manageTargetFilter(final TargetFilterRequest request) {
         log.debug("Managing target filter: request={}", request.getClass().getSimpleName());
 
@@ -492,12 +492,11 @@ public class HawkbitMcpToolProvider {
         throw new IllegalArgumentException("Unknown request type: " + request.getClass().getSimpleName());
     }
 
-
     private void validateOperation(final String operation, final String entity) {
         if (!isOperationEnabled(operation, entity)) {
             throw new IllegalArgumentException(
                     "Operation " + operation.toUpperCase() + " is not enabled for " + entity +
-                    ". Check hawkbit.mcp.operations configuration.");
+                            ". Check hawkbit.mcp.operations configuration.");
         }
     }
 
@@ -510,7 +509,7 @@ public class HawkbitMcpToolProvider {
             if (!properties.getOperations().isGlobalOperationEnabled(operation)) {
                 throw new IllegalArgumentException(
                         "Operation " + operation.toUpperCase() + " is not enabled for rollouts. " +
-                        "Check hawkbit.mcp.operations configuration.");
+                                "Check hawkbit.mcp.operations configuration.");
             }
             return;
         }
@@ -518,7 +517,7 @@ public class HawkbitMcpToolProvider {
         if (!entitySetting) {
             throw new IllegalArgumentException(
                     "Operation " + operation.toUpperCase() + " is not enabled for rollouts. " +
-                    "Check hawkbit.mcp.operations configuration.");
+                            "Check hawkbit.mcp.operations configuration.");
         }
     }
 
@@ -530,7 +529,7 @@ public class HawkbitMcpToolProvider {
             if (operation.equals("delete") && !properties.getOperations().isGlobalOperationEnabled(OP_DELETE)) {
                 throw new IllegalArgumentException(
                         "Operation " + operation.toUpperCase() + " is not enabled for actions. " +
-                        "Check hawkbit.mcp.operations configuration.");
+                                "Check hawkbit.mcp.operations configuration.");
             }
             return;
         }
@@ -538,7 +537,7 @@ public class HawkbitMcpToolProvider {
         if (!entitySetting) {
             throw new IllegalArgumentException(
                     "Operation " + operation.toUpperCase() + " is not enabled for actions. " +
-                    "Check hawkbit.mcp.operations configuration.");
+                            "Check hawkbit.mcp.operations configuration.");
         }
     }
 

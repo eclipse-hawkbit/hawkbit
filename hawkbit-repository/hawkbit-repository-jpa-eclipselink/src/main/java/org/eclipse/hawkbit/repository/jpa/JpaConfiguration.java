@@ -47,7 +47,6 @@ public class JpaConfiguration extends JpaBaseConfiguration {
     // only for testing purposes ddl generation may be enabled
     private final Map<String, String> eclipselinkProperties;
 
-
     protected JpaConfiguration(
             final DataSource dataSource, final JpaProperties properties,
             final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider,

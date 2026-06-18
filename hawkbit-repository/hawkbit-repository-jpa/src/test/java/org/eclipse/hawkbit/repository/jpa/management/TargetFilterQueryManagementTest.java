@@ -469,7 +469,8 @@ class TargetFilterQueryManagementTest extends AbstractRepositoryManagementTest<T
         verifyAutoAssignDsAndActionType(targetFilterQuery.getId(), distributionSet, ActionType.SOFT);
     }
 
-    private void verifyAutoAssignmentWithDownloadOnlyActionType(final TargetFilterQuery targetFilterQuery, final DistributionSet distributionSet) {
+    private void verifyAutoAssignmentWithDownloadOnlyActionType(final TargetFilterQuery targetFilterQuery,
+            final DistributionSet distributionSet) {
         targetFilterQueryManagement
                 .updateAutoAssignDS(new AutoAssignDistributionSetUpdate(targetFilterQuery.getId())
                         .ds(distributionSet.getId()).actionType(ActionType.DOWNLOAD_ONLY));

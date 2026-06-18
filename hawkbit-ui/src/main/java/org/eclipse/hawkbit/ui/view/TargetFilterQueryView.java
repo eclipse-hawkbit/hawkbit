@@ -9,6 +9,16 @@
  */
 package org.eclipse.hawkbit.ui.view;
 
+import java.io.Serial;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
+
+import jakarta.annotation.security.RolesAllowed;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
@@ -36,7 +46,6 @@ import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import jakarta.annotation.security.RolesAllowed;
 import lombok.Getter;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
@@ -50,19 +59,11 @@ import org.eclipse.hawkbit.ui.view.util.SelectionGrid;
 import org.eclipse.hawkbit.ui.view.util.TableView;
 import org.eclipse.hawkbit.ui.view.util.Utils;
 
-import java.io.Serial;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
-
 @PageTitle("Target Filter Queries")
 @Route(value = "target_filter_queries", layout = MainLayout.class)
 @RolesAllowed({ "TARGET_READ" })
 @Uses(Icon.class)
-public class TargetFilterQueryView extends TableView<TargetFilterQueryView.TargetFilterQueryGridItem, Long>  {
+public class TargetFilterQueryView extends TableView<TargetFilterQueryView.TargetFilterQueryGridItem, Long> {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -76,11 +77,15 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
                     @Override
                     protected void addColumns(final Grid<TargetFilterQueryGridItem> grid) {
                         grid.addColumn(MgmtTargetFilterQuery::getId).setHeader(Constants.ID).setAutoWidth(true).setKey("id").setSortable(true);
-                        grid.addColumn(MgmtTargetFilterQuery::getName).setHeader(Constants.NAME).setAutoWidth(true).setKey("name").setSortable(true).setResizable(true);
-                        grid.addColumn(new ComponentRenderer<>(QueryCell::new)).setHeader("Query").setAutoWidth(true).setKey("query").setResizable(true);
-                        grid.addColumn(Utils.localDateTimeRenderer(MgmtTargetFilterQuery::getLastModifiedAt)).setHeader(Constants.LAST_MODIFIED_AT).setKey("lastModifiedAt")
+                        grid.addColumn(MgmtTargetFilterQuery::getName).setHeader(Constants.NAME).setAutoWidth(true).setKey("name")
+                                .setSortable(true).setResizable(true);
+                        grid.addColumn(new ComponentRenderer<>(QueryCell::new)).setHeader("Query").setAutoWidth(true).setKey("query")
+                                .setResizable(true);
+                        grid.addColumn(Utils.localDateTimeRenderer(MgmtTargetFilterQuery::getLastModifiedAt))
+                                .setHeader(Constants.LAST_MODIFIED_AT).setKey("lastModifiedAt")
                                 .setSortable(true).setAutoWidth(true).setResizable(true);
-                        grid.addColumn(new ComponentRenderer<>(DistributionSetCell::new)).setHeader(Constants.DISTRIBUTION_SET).setAutoWidth(true).setResizable(true);
+                        grid.addColumn(new ComponentRenderer<>(DistributionSetCell::new)).setHeader(Constants.DISTRIBUTION_SET)
+                                .setAutoWidth(true).setResizable(true);
 
                         grid.addComponentColumn(rollout -> new Actions(rollout, grid, hawkbitClient)).setHeader(
                                 Constants.ACTIONS).setAutoWidth(true);
@@ -88,7 +93,8 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
                 },
                 (query, filter) -> Optional.ofNullable(
                                 hawkbitClient.getTargetFilterQueryRestApi()
-                                        .getFilters(filter, query.getOffset(), query.getPageSize(), Utils.getSortParam(query.getSortOrders(), Constants.NAME_ASC), "compact")
+                                        .getFilters(filter, query.getOffset(), query.getPageSize(),
+                                                Utils.getSortParam(query.getSortOrders(), Constants.NAME_ASC), "compact")
                                         .getBody())
                         .stream()
                         .map(PagedList::getContent)
@@ -182,7 +188,7 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
         private final transient HawkbitMgmtClient hawkbitClient;
 
         private Actions(final MgmtTargetFilterQuery filter, final Grid<TargetFilterQueryGridItem> grid,
-                        final HawkbitMgmtClient hawkbitClient) {
+                final HawkbitMgmtClient hawkbitClient) {
             this.grid = grid;
             this.hawkbitClient = hawkbitClient;
             init(filter);
@@ -248,7 +254,9 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
             Paragraph description = new Paragraph("When an auto assign distribution set is selected, " +
                     "it will be automatically assigned to all targets that match the target filter.");
 
-            actionType = Utils.actionTypeControls(new MgmtActionType[]{MgmtActionType.SOFT, MgmtActionType.FORCED, MgmtActionType.DOWNLOAD_ONLY}, MgmtActionType.FORCED, null);
+            actionType = Utils.actionTypeControls(
+                    new MgmtActionType[] { MgmtActionType.SOFT, MgmtActionType.FORCED, MgmtActionType.DOWNLOAD_ONLY }, MgmtActionType.FORCED,
+                    null);
 
             distributionSet = Utils.nameComboBox("Distribution Set", this::readyToAssign, query -> Optional.ofNullable(
                     hawkbitClient.getDistributionSetRestApi()
@@ -338,12 +346,12 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
         private TargetFilterQueryDetails() {
             query.setMinLength(2);
             Stream.of(
-                    name, query,
-                    createdBy, createdAt,
-                    lastModifiedBy, lastModifiedAt,
-                    autoAssignDistributionSet, autoAssignActionType,
-                    autoAssignWeight, confirmationRequired
-            )
+                            name, query,
+                            createdBy, createdAt,
+                            lastModifiedBy, lastModifiedAt,
+                            autoAssignDistributionSet, autoAssignActionType,
+                            autoAssignWeight, confirmationRequired
+                    )
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);

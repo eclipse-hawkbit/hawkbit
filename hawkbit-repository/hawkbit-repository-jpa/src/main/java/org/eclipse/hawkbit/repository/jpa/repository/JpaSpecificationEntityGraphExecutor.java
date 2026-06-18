@@ -27,47 +27,47 @@ public interface JpaSpecificationEntityGraphExecutor<T> {
 
     /**
      * Returns a single entity matching the given {@link Specification} with the entity graph hint or {@link Optional#empty()} if none found.
-     * @see org.springframework.data.jpa.repository.JpaSpecificationExecutor#findOne(Specification)
      *
      * @param spec must not be {@literal null}.
      * @param entityGraph the entity graph hint to use
      * @return never {@literal null}.
      * @throws org.springframework.dao.IncorrectResultSizeDataAccessException if more than one entity found.
+     * @see org.springframework.data.jpa.repository.JpaSpecificationExecutor#findOne(Specification)
      */
     Optional<T> findOne(Specification<T> spec, String entityGraph);
 
     /**
      * Returns all entities matching the given {@link Specification} with the entity graph hint.
      * <p>
-     * @see org.springframework.data.jpa.repository.JpaSpecificationExecutor#findAll(Specification)
      *
      * @param spec can be {@literal null}.
      * @param entityGraph the entity graph hint to use
      * @return never {@literal null}.
+     * @see org.springframework.data.jpa.repository.JpaSpecificationExecutor#findAll(Specification)
      */
     List<T> findAll(@Nullable Specification<T> spec, String entityGraph);
 
     /**
      * Returns a {@link Page} of entities matching the given {@link Specification} with the entity graph hint.
      * <p>
-     * @see org.springframework.data.jpa.repository.JpaSpecificationExecutor#findAll(Specification, Pageable)
      *
      * @param spec can be {@literal null}.
      * @param entityGraph the entity graph hint to use
      * @param pageable must not be {@literal null}.
      * @return never {@literal null}.
+     * @see org.springframework.data.jpa.repository.JpaSpecificationExecutor#findAll(Specification, Pageable)
      */
     Page<T> findAll(@Nullable Specification<T> spec, String entityGraph, Pageable pageable);
 
     /**
      * Returns all entities matching the given {@link Specification} and {@link Sort} with the entity graph hint.
      * <p>
-     * @see org.springframework.data.jpa.repository.JpaSpecificationExecutor#findAll(Specification, Sort)
      *
      * @param spec can be {@literal null}.
      * @param entityGraph the entity graph hint to use
      * @param sort must not be {@literal null}.
      * @return never {@literal null}.
+     * @see org.springframework.data.jpa.repository.JpaSpecificationExecutor#findAll(Specification, Sort)
      */
     List<T> findAll(@Nullable Specification<T> spec, String entityGraph, Sort sort);
 }

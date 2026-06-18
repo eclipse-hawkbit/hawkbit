@@ -206,7 +206,7 @@ public class EntityMatcher {
                                 return type instanceof Class<?>
                                         ? type
                                         : type instanceof ParameterizedType
-                                                ? type // Map or Collection generic type
+                                          ? type // Map or Collection generic type
                                                 : ResolvableType.forMethodReturnType(getter, t).resolve();
                             }
                         };

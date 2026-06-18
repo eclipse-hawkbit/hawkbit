@@ -1,12 +1,18 @@
 # Device Provisioning
 
-Device provisioning is the process of registering a device with the hawkBit update server so it can receive software updates. hawkBit supports two main provisioning scenarios:
-- **Provisioning and Registration via Management API**: An administrator or backend system register devices in hawkBit before they connect by providing device identification and description. This approach provides centralized control and is ideal for pre-planned deployments.
-- **Direct Registration via DDI API**: Devices register themselves automatically when they first connect to hawkBit. This is called auto-registration and is ideal for dynamic environments.
+Device provisioning is the process of registering a device with the hawkBit update server so it can receive software
+updates. hawkBit supports two main provisioning scenarios:
+
+- **Provisioning and Registration via Management API**: An administrator or backend system register devices in hawkBit
+  before they connect by providing device identification and description. This approach provides centralized control and
+  is ideal for pre-planned deployments.
+- **Direct Registration via DDI API**: Devices register themselves automatically when they first connect to hawkBit.
+  This is called auto-registration and is ideal for dynamic environments.
 
 ## Provisioning and Registration via Management API
 
-In this scenario, an administrator or backend system first provision the device using the Management UI or the [Management API](management-api.md). This is the step where the device identification and description is provided.
+In this scenario, an administrator or backend system first provision the device using the Management UI or
+the [Management API](management-api.md). This is the step where the device identification and description is provided.
 
 ### When to Use
 
@@ -19,13 +25,15 @@ In this scenario, an administrator or backend system first provision the device 
 ### Prerequisites
 
 - Management API access with appropriate permissions:
-  - `CREATE_TARGET` - to create targets
-  - `UPDATE_TARGET` - to modify targets
-  - `READ_TARGET` - to view targets
+    - `CREATE_TARGET` - to create targets
+    - `UPDATE_TARGET` - to modify targets
+    - `READ_TARGET` - to view targets
 - Valid credentials (username/password) for Basic Authentication
-- Target Security Token authentication enabled on the server - see [Configuration Properties](#configuration-properties) below
+- Target Security Token authentication enabled on the server - see [Configuration Properties](#configuration-properties)
+  below
 
 ### Workflow
+
 ```mermaid
  %%{init: {'theme':'base', 'themeVariables': {
       'primaryColor':'#027ABE',
@@ -100,20 +108,24 @@ sequenceDiagram
     DDIAPI-->>Device: Configuration updated
     deactivate DDIAPI
 ```
+
 ### Provisioning
 
-**Endpoint:** 
+**Endpoint:**
+
 ```
 POST /rest/v1/targets
 ```
 
 **Request Headers:**
+
 ```http
 Content-Type: application/json
 Authorization: Basic <base64-encoded-credentials>
 ```
 
 **Request Body:**
+
 ```json
 [
   {
@@ -127,9 +139,11 @@ Authorization: Basic <base64-encoded-credentials>
   }
 ]
 ```
+
 See [Target Entity Definition](entity-definitions.md#target) for all available fields.
 
 **Response:**  201 Created
+
 ```json
 [
   {
@@ -167,19 +181,24 @@ See [Target Entity Definition](entity-definitions.md#target) for all available f
 ```
 
 ### Registration
-To complete the whole process, the provisioned device can register itself via the [Direct Device Integration API](direct-device-integration-api.md) using its `controllerId` and `securityToken`.
 
-**Endpoint:** 
+To complete the whole process, the provisioned device can register itself via
+the [Direct Device Integration API](direct-device-integration-api.md) using its `controllerId` and `securityToken`.
+
+**Endpoint:**
+
 ```
 GET /{tenant}/controller/v1/{controllerId}
 ```
 
 **Request Headers:**
+
 ```http
 Authorization: TargetToken mySecureToken987654321
 ```
 
 **Response:** 200 OK
+
 ```json
 {
   "config": {
@@ -197,19 +216,22 @@ Authorization: TargetToken mySecureToken987654321
 
 ### Add Device Attributes (Optional)
 
-By following the link to `configData` provided in response to the last call, you can add some attributes to the device. In the code example below, we have shown how to add two attributes, namely hwRevision and VIN.
+By following the link to `configData` provided in response to the last call, you can add some attributes to the device.
+In the code example below, we have shown how to add two attributes, namely hwRevision and VIN.
 
 **Endpoint:** `PUT {tenant}/controller/v1/{controllerId}/configData`
 
 **Authentication:** TargetToken
 
 **Request Headers:**
+
 ```http
 Content-Type: application/json
 Authorization: TargetToken mySecureToken987654321
 ```
 
 **Request Body:**
+
 ```json
 {
   "mode": "merge",
@@ -221,6 +243,7 @@ Authorization: TargetToken mySecureToken987654321
 ```
 
 **Response:**  200 OK
+
 ```json
 ```
 
@@ -236,9 +259,11 @@ Authorization: TargetToken mySecureToken987654321
 
 ## Direct Registration via Direct Device Integration API
 
-In this scenario, devices register themselves automatically when they first connect to hawkBit. This is called **auto-registration** and is ideal for dynamic environments.
+In this scenario, devices register themselves automatically when they first connect to hawkBit. This is called *
+*auto-registration** and is ideal for dynamic environments.
 
 ### When to Use
+
 - Devices are manufactured without pre-registration
 - You have a dynamic fleet with frequent additions
 - Gateway devices manage multiple sub-devices
@@ -246,15 +271,17 @@ In this scenario, devices register themselves automatically when they first conn
 - IoT scenarios with thousands of devices
 
 ### Prerequisites
+
 - Gateway Token authentication enabled on the server:
-  - Target Security Token mode (per-device tokens), OR
-  - Gateway Token mode (single token for all devices in a tenant), OR
-  - Certificate-based authentication (mTLS)
+    - Target Security Token mode (per-device tokens), OR
+    - Gateway Token mode (single token for all devices in a tenant), OR
+    - Certificate-based authentication (mTLS)
 - Device must know its `controllerId` (typically MAC address, serial number, or UUID)
 
 see [Configuration Properties](#configuration-properties) below for details on how to enable authentication modes.
 
 ### Workflow
+
 ```mermaid
  %%{init: {'theme':'base', 'themeVariables': {
       'primaryColor':'#027ABE',
@@ -334,22 +361,26 @@ sequenceDiagram
 All devices share a single token for the tenant. **Use with caution in production.**
 
 **Enable in system configuration:**
+
 ```properties
 hawkbit.server.ddi.security.authentication.gatewaytoken.enabled=true
 ```
 
 **Enable in tenant configuration:**
+
 ```
 authentication.gatewaytoken.enabled=true
 ```
 
 **Retrieve Gateway Token:**
+
 ```bash
 curl http://localhost:8080/rest/v1/system/configs/authentication.gatewaytoken.key \
   -u admin:admin
 ```
 
 **Response:**
+
 ```json
 {
   "value": "3nkswAZhX81oDtktq0FF9Pn0Tc0UGXPW",
@@ -368,20 +399,25 @@ curl http://localhost:8080/rest/v1/system/configs/authentication.gatewaytoken.ke
 
 ### Device Auto-Registration on First Poll
 
-The device polls the hawkBit server using its `controllerId`. If the target doesn't exist, hawkBit creates it automatically.
+The device polls the hawkBit server using its `controllerId`. If the target doesn't exist, hawkBit creates it
+automatically.
 
-**Endpoint:** 
+**Endpoint:**
+
 ```
 GET /{tenant}/controller/v1/{controllerId}
 ```
+
 **Authentication:** GatewayToken
 
 **Request Headers:**
+
 ```http
 Authorization: GatewayToken 3nkswAZhX81oDtktq0FF9Pn0Tc0UGXPW
 ```
 
 **Response:**  200 OK
+
 ```json
 {
   "config": {
@@ -406,12 +442,14 @@ The device can send its attributes (hardware version, OS version, custom data) t
 **Authentication:** GatewayToken
 
 **Request Headers:**
+
 ```http
 Content-Type: application/json
 Authorization: GatewayToken mySecureToken987654321
 ```
 
 **Request Body:**
+
 ```json
 {
   "mode": "merge",
@@ -423,12 +461,15 @@ Authorization: GatewayToken mySecureToken987654321
   }
 }
 ```
+
 **Modes:**
+
 - `merge`: Merge new attributes with existing ones
 - `replace`: Replace all attributes with new data
 - `remove`: Remove specified attributes
 
 **Response:**  200 OK
+
 ```json
 ```
 
@@ -445,17 +486,17 @@ Authorization: GatewayToken mySecureToken987654321
 
 ## Comparison: Management API vs DDI API
 
-| Aspect | Management API Provisioning | DDI Auto-Registration |
-|--------|----------------------------|----------------------|
-| **Timing** | Before device deployment | On first device connection |
-| **Control** | Centralized by admin | Decentralized (device-initiated) |
-| **Use Case** | Pre-planned deployments | Dynamic fleet management |
-| **Authentication** | Basic Auth (admin credentials) | TargetToken / GatewayToken / mTLS |
-| **Security Token** | Set during creation or auto-generated | Auto-generated on registration |
-| **Pre-assignment** | Possible before device connects | Only after first poll |
-| **Scalability** | Manual or scripted bulk creation | Automatic, scales infinitely |
-| **Device Attributes** | Must be set via separate request | Device sends on first connection |
-| **Audit Trail** | createdBy: admin | createdBy: system |
+| Aspect                | Management API Provisioning           | DDI Auto-Registration             |
+|-----------------------|---------------------------------------|-----------------------------------|
+| **Timing**            | Before device deployment              | On first device connection        |
+| **Control**           | Centralized by admin                  | Decentralized (device-initiated)  |
+| **Use Case**          | Pre-planned deployments               | Dynamic fleet management          |
+| **Authentication**    | Basic Auth (admin credentials)        | TargetToken / GatewayToken / mTLS |
+| **Security Token**    | Set during creation or auto-generated | Auto-generated on registration    |
+| **Pre-assignment**    | Possible before device connects       | Only after first poll             |
+| **Scalability**       | Manual or scripted bulk creation      | Automatic, scales infinitely      |
+| **Device Attributes** | Must be set via separate request      | Device sends on first connection  |
+| **Audit Trail**       | createdBy: admin                      | createdBy: system                 |
 
 ---
 
@@ -484,6 +525,7 @@ Authorization: GatewayToken mySecureToken987654321
 ### Enable DDI Authentication Modes
 
 **System-wide (application.properties):**
+
 ```properties
 # Target Security Token (per-device)
 hawkbit.server.ddi.security.authentication.targettoken.enabled=true
@@ -494,7 +536,9 @@ hawkbit.server.ddi.security.authentication.gatewaytoken.enabled=true
 # Anonymous downloads (not recommended for production)
 hawkbit.server.ddi.security.authentication.anonymous.enabled=false
 ```
+
 ---
+
 ## Related Documentation
 
 - [Management API](management-api.md) - Complete Management API reference

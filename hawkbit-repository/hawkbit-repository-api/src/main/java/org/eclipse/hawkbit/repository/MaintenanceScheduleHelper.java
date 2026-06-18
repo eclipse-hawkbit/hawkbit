@@ -39,7 +39,7 @@ public final class MaintenanceScheduleHelper {
      * Calculate the next available maintenance window.
      *
      * @param cronSchedule is a cron expression with 6 mandatory fields and 1 last optional field: "second minute hour day-of-month month
-     *                     weekday year".
+     *         weekday year".
      * @param duration in HH:mm:ss format specifying the duration of a maintenance window, for example 00:30:00 for 30 minutes.
      * @param timezone is the time zone specified as +/-hh:mm offset from UTC. For example +02:00 for CET summer time and +00:00 for UTC. The
      *         start time of a maintenance window calculated based on the cron expression is relative to this time zone.
@@ -64,7 +64,7 @@ public final class MaintenanceScheduleHelper {
      * Parse the given cron expression with quartz parser.
      *
      * @param cronSchedule is a cron expression with 6 mandatory fields and 1 last optional field: "second minute hour day-of-month
-     *                     month weekday year".
+     *         month weekday year".
      * @return {@link Cron} object, that corresponds to the expression.
      * @throws IllegalArgumentException if the cron expression doesn't have a valid format.
      */
@@ -78,7 +78,7 @@ public final class MaintenanceScheduleHelper {
      * valid or are null.
      *
      * @param cronSchedule is a cron expression with 6 mandatory fields and 1 last optional field: "second minute hour day-of-month month
-     *                     weekday year".
+     *         weekday year".
      * @param duration in HH:mm:ss format specifying the duration of a maintenance window, for example 00:30:00 for 30 minutes.
      * @param timezone is the time zone specified as +/-hh:mm offset from UTC. For example +02:00 for CET summer time and +00:00 for UTC. The
      *         start time of a maintenance window calculated based on the cron expression is relative to this time zone.
@@ -101,7 +101,7 @@ public final class MaintenanceScheduleHelper {
      * Convert the time interval or duration specified in "HH:mm:ss" format to ISO format.
      *
      * @param timeInterval in "HH:mm:ss" string format. This format is popularly used but can be confused with time of the day,
-     *                     hence conversion to ISO specified format for time duration is required.
+     *         hence conversion to ISO specified format for time duration is required.
      * @return {@link Duration} in ISO format.
      * @throws DateTimeParseException if the text cannot be converted to ISO format.
      */
@@ -113,7 +113,7 @@ public final class MaintenanceScheduleHelper {
      * Validates the format of the maintenance window duration
      *
      * @param duration in "HH:mm:ss" string format. This format is popularly used but can be confused with time of the day, hence conversion
-     *                 to ISO specified format for time duration is required.
+     *         to ISO specified format for time duration is required.
      * @throws InvalidMaintenanceScheduleException if the duration doesn't have a valid format to be converted to ISO.
      */
     public static void validateDuration(final String duration) {
@@ -130,7 +130,7 @@ public final class MaintenanceScheduleHelper {
      * Validates the format of the maintenance window cron expression
      *
      * @param cronSchedule is a cron expression with 6 mandatory fields and 1 last optional field: "second minute hour day-of-month month
-     *                     weekday year".
+     *         weekday year".
      * @throws InvalidMaintenanceScheduleException if the cron expression doesn't have a valid quartz format.
      */
     public static void validateCronSchedule(final String cronSchedule) {

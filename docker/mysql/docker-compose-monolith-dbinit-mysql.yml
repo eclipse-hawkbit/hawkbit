@@ -26,7 +26,7 @@ services:
       - 'AND_THEN=sleep infinity'
     restart: always
     healthcheck:
-      test: ["CMD", "pgrep", "sleep"]
+      test: [ "CMD", "pgrep", "sleep" ]
       start_period: 30s
       interval: 10s
       retries: 5

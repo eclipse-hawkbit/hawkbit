@@ -73,8 +73,8 @@ jobs:
     # only on original eclipse-hawkbit/hawkbit repo
     if: github.repository == 'eclipse-hawkbit/hawkbit'
     needs:
-    - license-scan
-    - trivy-scan
+      - license-scan
+      - trivy-scan
     runs-on: ubuntu-latest
 
     permissions:
