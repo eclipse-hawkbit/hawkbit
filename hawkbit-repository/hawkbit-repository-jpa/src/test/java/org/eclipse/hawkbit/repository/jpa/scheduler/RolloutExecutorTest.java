@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 
-public class RolloutExecutorTest extends AbstractJpaIntegrationTest {
+class RolloutExecutorTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     private JpaRolloutExecutor jpaRolloutExecutor;

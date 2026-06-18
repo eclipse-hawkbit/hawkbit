@@ -13,7 +13,6 @@ package org.eclipse.hawkbit.ddi.json.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,7 +34,7 @@ class DdiChunkTest {
      * Verify the correct serialization and deserialization of the model
      */
     @Test
-    void shouldSerializeAndDeserializeObject() throws IOException {
+    void shouldSerializeAndDeserializeObject() {
         // Setup
         final String part = "1234";
         final String version = "1.0";
@@ -57,7 +56,7 @@ class DdiChunkTest {
      * Verify the correct deserialization of a model with an additional unknown property
      */
     @Test
-    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    void shouldDeserializeObjectWithUnknownProperty() {
         // Setup
         final String serializedDdiChunk = "{\"part\":\"1234\",\"version\":\"1.0\",\"name\":\"Dummy-Artifact\",\"artifacts\":[],\"unknownProperty\":\"test\"}";
 

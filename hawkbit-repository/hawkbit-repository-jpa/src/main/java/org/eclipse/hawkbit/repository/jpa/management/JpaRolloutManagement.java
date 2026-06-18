@@ -488,16 +488,14 @@ public class JpaRolloutManagement implements RolloutManagement {
     public void cancelRolloutsForDistributionSet(final DistributionSet set, final ActionCancellationType cancelationType) {
         // stop all rollouts for this distribution set
         if (cancelationType.equals(ActionCancellationType.SOFT)) {
-            rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
-                final JpaRollout jpaRollout = (JpaRollout) rollout;
+            rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(jpaRollout -> {
                 jpaRollout.setStatus(RolloutStatus.STOPPING);
                 rolloutRepository.save(jpaRollout);
                 log.debug("Rollout {} stopping", jpaRollout.getId());
             });
         } else if (cancelationType.equals(ActionCancellationType.FORCE)) {
             // Use same status filter here like in the soft case ? Seems they make sense
-            rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
-                final JpaRollout jpaRollout = (JpaRollout) rollout;
+            rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(jpaRollout -> {
                 this.delete0(jpaRollout);
                 log.debug("Rollout {} deleting", jpaRollout.getId());
             });

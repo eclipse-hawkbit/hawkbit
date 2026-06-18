@@ -13,7 +13,6 @@ package org.eclipse.hawkbit.ddi.json.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,7 +34,7 @@ class DdiActionHistoryTest {
      * Verify the correct serialization and deserialization of the model
      */
     @Test
-    void shouldSerializeAndDeserializeObject() throws IOException {
+    void shouldSerializeAndDeserializeObject() {
         // Setup
         final String actionStatus = "TestAction";
         final List<String> messages = Arrays.asList("Action status message 1", "Action status message 2");
@@ -52,7 +51,7 @@ class DdiActionHistoryTest {
      * Verify the correct deserialization of a model with an additional unknown property
      */
     @Test
-    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    void shouldDeserializeObjectWithUnknownProperty() {
         // Setup
         final String serializedDdiActionHistory = """
                 {

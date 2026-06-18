@@ -54,6 +54,7 @@ import org.springframework.security.access.expression.method.DefaultMethodSecuri
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.authorization.DefaultAuthorizationManagerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -169,7 +170,9 @@ public class AccessControllerConfiguration {
                 return super.createSecurityExpressionRoot(new RawAuthoritiesAuthentication(authentication), mi);
             }
         };
-        methodSecurityExpressionHandler.setRoleHierarchy(roleHierarchy);
+        final DefaultAuthorizationManagerFactory<MethodInvocation> authorizationManagerFactory = new DefaultAuthorizationManagerFactory<>();
+        authorizationManagerFactory.setRoleHierarchy(roleHierarchy);
+        methodSecurityExpressionHandler.setAuthorizationManagerFactory(authorizationManagerFactory);
         methodSecurityExpressionHandler.setPermissionEvaluator(permissionEvaluator);
         applicationContext.ifPresent(methodSecurityExpressionHandler::setApplicationContext);
         return methodSecurityExpressionHandler;

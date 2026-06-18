@@ -14,8 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.eclipse.hawkbit.ddi.json.model.DdiResult.FinalResult.NONE;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.exc.MismatchedInputException;
@@ -34,7 +32,7 @@ class DdiResultTest {
      * Verify the correct serialization and deserialization of the model
      */
     @Test
-    void shouldSerializeAndDeserializeObject() throws IOException {
+    void shouldSerializeAndDeserializeObject() {
         // Setup
         final DdiProgress ddiProgress = new DdiProgress(30, 100);
         final DdiResult ddiResult = new DdiResult(NONE, ddiProgress);
@@ -52,7 +50,7 @@ class DdiResultTest {
      * Verify the correct deserialization of a model with an additional unknown property
      */
     @Test
-    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    void shouldDeserializeObjectWithUnknownProperty() {
         // Setup
         final String serializedDdiResult = "{\"finished\":\"none\",\"progress\":{\"cnt\":30,\"of\":100},\"unknownProperty\":\"test\"}";
 

@@ -30,7 +30,7 @@ public final class EntityInterceptorHolder {
     private final List<EntityInterceptor> entityInterceptors = new ArrayList<>();
 
     /**
-     * @return the entity intreceptor holder singleton instance
+     * @return the entity interceptor holder singleton instance
      */
     public static EntityInterceptorHolder getInstance() {
         return SINGLETON;

@@ -15,7 +15,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.eclipse.hawkbit.ddi.json.model.DdiResult.FinalResult.NONE;
 import static org.eclipse.hawkbit.ddi.json.model.DdiStatus.ExecutionStatus.PROCEEDING;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.stream.Stream;
 
@@ -41,7 +40,7 @@ class DdiStatusTest {
      */
     @ParameterizedTest
     @MethodSource("ddiStatusPossibilities")
-    void shouldSerializeAndDeserializeObject(final DdiResult ddiResult, final DdiStatus ddiStatus) throws IOException {
+    void shouldSerializeAndDeserializeObject(final DdiResult ddiResult, final DdiStatus ddiStatus) {
         // Test
         final String serializedDdiStatus = OBJECT_MAPPER.writeValueAsString(ddiStatus);
         final DdiStatus deserializedDdiStatus = OBJECT_MAPPER.readValue(serializedDdiStatus, DdiStatus.class);
@@ -58,7 +57,7 @@ class DdiStatusTest {
      * Verify the correct deserialization of a model with an additional unknown property
      */
     @Test
-    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    void shouldDeserializeObjectWithUnknownProperty() {
         // Setup
         final String serializedDdiStatus = "{\"execution\":\"proceeding\",\"result\":{\"finished\":\"none\"," +
                 "\"progress\":{\"cnt\":30,\"of\":100}},\"details\":[],\"unknownProperty\":\"test\"}";
@@ -76,7 +75,7 @@ class DdiStatusTest {
      * Verify the correct deserialization of a model with a provided code (optional)
      */
     @Test
-    void shouldDeserializeObjectWithOptionalCode() throws IOException {
+    void shouldDeserializeObjectWithOptionalCode() {
         // Setup
         final String serializedDdiStatus = "{\"execution\":\"proceeding\",\"result\":{\"finished\":\"none\"," +
                 "\"progress\":{\"cnt\":30,\"of\":100}},\"code\": 12,\"details\":[]}";
