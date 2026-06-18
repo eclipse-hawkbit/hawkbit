@@ -44,6 +44,7 @@ public enum TargetFields implements QueryField {
             TargetTypeFields.ID.getName(),
             TargetTypeFields.KEY.getName(),
             TargetTypeFields.NAME.getName()),
+    AUTOCONFIRM("autoConfirmationStatus"),
     // kept just for backward compatibility for backward compatibility
     // could be removed only if in the systems there are no active auto assignments or rollouts (dynamic or starting) with that condition
     // to be reconsidered if and when to be removed
