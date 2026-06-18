@@ -13,7 +13,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver;

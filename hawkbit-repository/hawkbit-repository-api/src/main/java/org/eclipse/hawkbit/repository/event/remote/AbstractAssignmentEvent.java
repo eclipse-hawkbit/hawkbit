@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.repository.event.remote;
 import java.io.Serial;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 

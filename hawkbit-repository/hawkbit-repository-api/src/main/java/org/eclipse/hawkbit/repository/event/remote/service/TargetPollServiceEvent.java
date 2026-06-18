@@ -9,11 +9,11 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.service;
 
+import java.io.Serial;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
-
-import java.io.Serial;
 
 /**
  * Service event for {@link TargetPollEvent}. Event that needs single replica processing

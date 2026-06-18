@@ -40,7 +40,7 @@ public class SecurityContextSwitch {
 
     public static final String DEFAULT_TENANT = "DEFAULT";
     private static final WithUser PRIVILEGED_USER = new WithUserImpl(
-            DEFAULT_TENANT, "bumlux", new String[] {TENANT_ADMIN, CONTROLLER_ROLE, SYSTEM_ROLE}, false, false);
+            DEFAULT_TENANT, "bumlux", new String[] { TENANT_ADMIN, CONTROLLER_ROLE, SYSTEM_ROLE }, false, false);
 
     private static SystemManagement systemManagement;
 

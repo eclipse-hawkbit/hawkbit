@@ -119,7 +119,7 @@ public class ExceptionMapper {
             return qe.getErrorCode() == QueryException.ErrorCode.INVALID_SYNTAX
                     ? new RSQLParameterSyntaxException(qe.getMessage(), qe.getCause())
                     : (qe.getErrorCode() == QueryException.ErrorCode.UNSUPPORTED_FIELD
-                            ? new RSQLParameterUnsupportedFieldException(qe.getMessage(), qe.getCause())
+                       ? new RSQLParameterUnsupportedFieldException(qe.getMessage(), qe.getCause())
                             : new GenericSpServerException(qe));
         }
 

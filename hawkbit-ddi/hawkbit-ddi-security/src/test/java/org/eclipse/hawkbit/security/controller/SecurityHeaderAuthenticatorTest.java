@@ -141,7 +141,8 @@ class SecurityHeaderAuthenticatorTest {
     @Test
     void testWithSingleTrustedAuthorityButDisabled() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(SINGLE_AUTHORITY);
-        when(tenantConfigurationManagementMock.getConfigurationValue(AUTHENTICATION_HEADER_ENABLED, Boolean.class)).thenReturn(CONFIG_VALUE_DISABLED);
+        when(tenantConfigurationManagementMock.getConfigurationValue(AUTHENTICATION_HEADER_ENABLED, Boolean.class)).thenReturn(
+                CONFIG_VALUE_DISABLED);
 
         assertThat(authenticator.authenticate(securityToken)).isNull();
     }

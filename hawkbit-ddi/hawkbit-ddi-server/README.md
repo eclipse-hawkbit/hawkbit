@@ -25,5 +25,7 @@ The Management API can be accessed via http://localhost:8081/rest/v1
 The root url http://localhost:8081 will redirect directly to the Swagger Management UI
 
 # Clustering (Experimental!!!)
+
 ## Remote Events between micro-services
+
 [See more information](../../docs/content/guides/clustering.md)

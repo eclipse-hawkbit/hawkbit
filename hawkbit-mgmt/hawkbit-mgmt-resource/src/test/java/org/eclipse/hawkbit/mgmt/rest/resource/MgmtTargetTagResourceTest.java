@@ -85,7 +85,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
      * Handles the GET request of retrieving all targets tags within SP based by parameter
      */
     @Test
-     void getTargetTagsWithParameters() throws Exception {
+    void getTargetTagsWithParameters() throws Exception {
         testdataFactory.createTargetTags(2, "");
         mvc.perform(get(MgmtTargetTagRestApi.TARGETTAGS_V1 + "?limit=10&sort=name:ASC&offset=0&q=name==targetTag"))
                 .andExpect(status().isOk())
@@ -96,7 +96,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
      * Verifies that a page result when listing tags reflects on the content in the repository when filtered by 2 fields - one tag field and one target field
      */
     @Test
-     void getTargetTagsFilteredByColor() throws Exception {
+    void getTargetTagsFilteredByColor() throws Exception {
         final String controllerId1 = "controllerTestId1";
         final String controllerId2 = "controllerTestId2";
         testdataFactory.createTarget(controllerId1);
@@ -234,7 +234,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     @Test
     @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
-            @Expect(type = TargetCreatedEvent.class, count = 5), 
+            @Expect(type = TargetCreatedEvent.class, count = 5),
             @Expect(type = TargetUpdatedEvent.class, count = 5) })
     public void getAssignedTargets() throws Exception {
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
@@ -381,8 +381,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                     final Map<String, Object> info = exceptionInfo.getInfo();
                     assertThat(info).isNotNull();
                     assertThat(info.get(EntityNotFoundException.TYPE)).isEqualTo(Target.class.getSimpleName());
-                    @SuppressWarnings("unchecked")
-                    final List<String> notFound = (List<String>) info.get(EntityNotFoundException.ENTITY_ID);
+                    @SuppressWarnings("unchecked") final List<String> notFound = (List<String>) info.get(EntityNotFoundException.ENTITY_ID);
                     Collections.sort(notFound);
                     assertThat(notFound).isEqualTo(missing);
                 });
@@ -425,8 +424,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                     final Map<String, Object> info = exceptionInfo.getInfo();
                     assertThat(info).isNotNull();
                     assertThat(info.get(EntityNotFoundException.TYPE)).isEqualTo(Target.class.getSimpleName());
-                    @SuppressWarnings("unchecked")
-                    final List<String> notFound = (List<String>) info.get(EntityNotFoundException.ENTITY_ID);
+                    @SuppressWarnings("unchecked") final List<String> notFound = (List<String>) info.get(EntityNotFoundException.ENTITY_ID);
                     Collections.sort(notFound);
                     assertThat(notFound).isEqualTo(missing);
                 });
@@ -560,8 +558,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                     final Map<String, Object> info = exceptionInfo.getInfo();
                     assertThat(info).isNotNull();
                     assertThat(info.get(EntityNotFoundException.TYPE)).isEqualTo(Target.class.getSimpleName());
-                    @SuppressWarnings("unchecked")
-                    final List<String> notFound = (List<String>) info.get(EntityNotFoundException.ENTITY_ID);
+                    @SuppressWarnings("unchecked") final List<String> notFound = (List<String>) info.get(EntityNotFoundException.ENTITY_ID);
                     Collections.sort(notFound);
                     assertThat(notFound).isEqualTo(missing);
                 });
@@ -607,8 +604,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                     final Map<String, Object> info = exceptionInfo.getInfo();
                     assertThat(info).isNotNull();
                     assertThat(info.get(EntityNotFoundException.TYPE)).isEqualTo(Target.class.getSimpleName());
-                    @SuppressWarnings("unchecked")
-                    final List<String> notFound = (List<String>) info.get(EntityNotFoundException.ENTITY_ID);
+                    @SuppressWarnings("unchecked") final List<String> notFound = (List<String>) info.get(EntityNotFoundException.ENTITY_ID);
                     Collections.sort(notFound);
                     assertThat(notFound).isEqualTo(missing);
                 });

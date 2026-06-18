@@ -265,7 +265,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 1), 
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void sendConfirmedActionStateFeedbackTest() throws Exception {

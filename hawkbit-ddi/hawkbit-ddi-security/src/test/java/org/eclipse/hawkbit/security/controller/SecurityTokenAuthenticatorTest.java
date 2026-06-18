@@ -109,7 +109,8 @@ class SecurityTokenAuthenticatorTest {
 
     private static ControllerSecurityToken prepareSecurityToken(final String secToken) {
         final ControllerSecurityToken securityToken = new ControllerSecurityToken("DEFAULT", CONTROLLER_ID);
-        securityToken.putHeader(ControllerSecurityToken.AUTHORIZATION_HEADER, SecurityTokenAuthenticator.TARGET_SECURITY_TOKEN_AUTH_SCHEME + secToken);
+        securityToken.putHeader(ControllerSecurityToken.AUTHORIZATION_HEADER,
+                SecurityTokenAuthenticator.TARGET_SECURITY_TOKEN_AUTH_SCHEME + secToken);
         return securityToken;
     }
 }

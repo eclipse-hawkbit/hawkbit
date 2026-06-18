@@ -90,7 +90,7 @@ class ManagementSecurityTest extends AbstractJpaIntegrationTest {
         final Object managementObject = TenantStatsManagement.class == managementInterface
                 ? tenantStatsManagement // it's not a field of AbstractIntegrationTest, so we need to use the autowired instance
                 : TenantConfigurationManagement.class == managementInterface
-                        ? tenantConfigurationManagement // it's not a field of AbstractIntegrationTest, so we need to use the autowired instance
+                  ? tenantConfigurationManagement // it's not a field of AbstractIntegrationTest, so we need to use the autowired instance
                         : Stream
                                 .of(AbstractIntegrationTest.class.getDeclaredFields())
                                 .filter(field -> managementInterface.isAssignableFrom(field.getType()))

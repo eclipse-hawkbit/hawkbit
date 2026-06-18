@@ -28,7 +28,8 @@ import org.springframework.stereotype.Service;
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "software-module-type=management" }, matchIfMissing = true)
 public class JpaSoftwareModuleTypeManagement
-        extends AbstractJpaRepositoryManagement<JpaSoftwareModuleType, SoftwareModuleTypeManagement.Create, SoftwareModuleTypeManagement.Update, SoftwareModuleTypeRepository, SoftwareModuleTypeFields>
+        extends
+        AbstractJpaRepositoryManagement<JpaSoftwareModuleType, SoftwareModuleTypeManagement.Create, SoftwareModuleTypeManagement.Update, SoftwareModuleTypeRepository, SoftwareModuleTypeFields>
         implements SoftwareModuleTypeManagement<JpaSoftwareModuleType> {
 
     private final DistributionSetTypeRepository distributionSetTypeRepository;

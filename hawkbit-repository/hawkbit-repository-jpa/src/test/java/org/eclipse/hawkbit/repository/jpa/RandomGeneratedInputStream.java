@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.SecureRandom;
-import java.util.Random;
 
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 

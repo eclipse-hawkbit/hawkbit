@@ -27,8 +27,9 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "target-tag-management" }, matchIfMissing = true)
-public class JpaTargetTagManagement 
-        extends AbstractJpaRepositoryManagement<JpaTargetTag, TargetTagManagement.Create, TargetTagManagement.Update, TargetTagRepository, TargetTagFields>
+public class JpaTargetTagManagement
+        extends
+        AbstractJpaRepositoryManagement<JpaTargetTag, TargetTagManagement.Create, TargetTagManagement.Update, TargetTagRepository, TargetTagFields>
         implements TargetTagManagement<JpaTargetTag> {
 
     protected JpaTargetTagManagement(

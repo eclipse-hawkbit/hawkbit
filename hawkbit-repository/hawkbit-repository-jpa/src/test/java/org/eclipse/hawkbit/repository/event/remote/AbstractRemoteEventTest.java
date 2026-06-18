@@ -29,7 +29,6 @@ public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest
 
     private EventJacksonMessageConverter jacksonMessageConverter = new EventJacksonMessageConverter();
 
-
     @SuppressWarnings("unchecked")
     protected <T extends TenantAwareEvent> T createJacksonEvent(final T event) {
         final Message<?> message = createJsonMessage(event);

@@ -45,7 +45,7 @@ public class DdiArtifactHash {
     public DdiArtifactHash(
             @JsonProperty("sha1") final String sha1,
             @JsonProperty("md5") final String md5,
-            @JsonProperty ("sha256") final String sha256) {
+            @JsonProperty("sha256") final String sha256) {
         this.sha1 = sha1;
         this.md5 = md5;
         this.sha256 = sha256;

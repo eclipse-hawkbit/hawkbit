@@ -160,7 +160,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      * Counts all actions referring to a given rollout, rollout group and status.
-    * <p/>
+     * <p/>
      * No access control applied
      *
      * @param rolloutId the ID of rollout the actions belong to
@@ -214,7 +214,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      * Returns {@code true} if actions for the given rollout exists, otherwise {@code false}
-    * <p/>
+     * <p/>
      * No access control applied
      *
      * @param rolloutId the ID of the rollout the actions belong to
@@ -226,9 +226,9 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      * Retrieving all actions referring to a given rollout with a specific action as parent reference and a specific status.
-    * <p/>
+     * <p/>
      * Finding all actions of a specific rollout group parent relation.
-    * <p/>
+     * <p/>
      * No access control applied
      *
      * @param pageable page parameters
@@ -242,7 +242,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      * Retrieving all actions referring to the first group of a rollout.
-    * <p/>
+     * <p/>
      * No access control applied
      *
      * @param pageable page parameters
@@ -255,7 +255,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      * Retrieves all actions for a specific rollout and in a specific status.
-    * <p/>
+     * <p/>
      * No access control applied
      *
      * @param pageable page parameters
@@ -267,7 +267,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      * Get list of objects which has details of status and count of targets in each status in specified rollout.
-    * <p/>
+     * <p/>
      * No access control applied
      *
      * @param rolloutId id of {@link Rollout}
@@ -278,7 +278,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      * Get list of objects which has details of status and count of targets in each status in specified rollout.
-    * <p/>
+     * <p/>
      * No access control applied
      *
      * @param rolloutId id of {@link Rollout}
@@ -289,7 +289,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      * Get list of objects which has details of status and count of targets in each status in specified rollout group.
-    * <p/>
+     * <p/>
      * No access control applied
      *
      * @param rolloutGroupId id of {@link RolloutGroup}
@@ -300,7 +300,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      * Get list of objects which has details of status and count of targets in each status in specified rollout group.
-    * <p/>
+     * <p/>
      * No access control applied
      *
      * @param rolloutGroupId list of id of {@link RolloutGroup}

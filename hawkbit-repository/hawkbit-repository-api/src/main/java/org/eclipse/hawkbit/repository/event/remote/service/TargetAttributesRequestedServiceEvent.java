@@ -23,7 +23,6 @@ public class TargetAttributesRequestedServiceEvent extends AbstractServiceRemote
     @Serial
     private static final long serialVersionUID = 1L;
 
-
     @JsonCreator
     public TargetAttributesRequestedServiceEvent(@JsonProperty("payload") final TargetAttributesRequestedEvent remoteEvent) {
         super(remoteEvent);

@@ -564,7 +564,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         if (actions.isEmpty()) {
             return;
         }
-        
+
         storeActionsAndStatuses(actions, Action.Status.CANCELED);
 
         // find next active actions - filter by targetId list and isActive

@@ -48,7 +48,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "distribution-set-type-management" }, matchIfMissing = true)
 public class JpaDistributionSetTypeManagement
-        extends AbstractJpaRepositoryManagement<JpaDistributionSetType, DistributionSetTypeManagement.Create, DistributionSetTypeManagement.Update, DistributionSetTypeRepository, DistributionSetTypeFields>
+        extends
+        AbstractJpaRepositoryManagement<JpaDistributionSetType, DistributionSetTypeManagement.Create, DistributionSetTypeManagement.Update, DistributionSetTypeRepository, DistributionSetTypeFields>
         implements DistributionSetTypeManagement<JpaDistributionSetType> {
 
     private final SoftwareModuleTypeRepository softwareModuleTypeRepository;

@@ -79,7 +79,8 @@ public class PropertyBasedArtifactUrlResolverProperties {
         /**
          * Support for the following hawkBit API.
          */
-        private List<ArtifactUrlResolver.ApiType> supports = Arrays.asList(ArtifactUrlResolver.ApiType.DDI, ArtifactUrlResolver.ApiType.DMF, ArtifactUrlResolver.ApiType.MGMT);
+        private List<ArtifactUrlResolver.ApiType> supports = Arrays.asList(ArtifactUrlResolver.ApiType.DDI, ArtifactUrlResolver.ApiType.DMF,
+                ArtifactUrlResolver.ApiType.MGMT);
 
         public void setSupports(final List<ArtifactUrlResolver.ApiType> supports) {
             this.supports = Collections.unmodifiableList(supports);

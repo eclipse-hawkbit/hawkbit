@@ -9,6 +9,10 @@
  */
 package org.eclipse.hawkbit.mcp.server.prompts;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 import io.modelcontextprotocol.spec.McpSchema.GetPromptResult;
 import io.modelcontextprotocol.spec.McpSchema.PromptMessage;
 import io.modelcontextprotocol.spec.McpSchema.Role;
@@ -16,10 +20,6 @@ import io.modelcontextprotocol.spec.McpSchema.TextContent;
 import lombok.extern.slf4j.Slf4j;
 import org.springaicommunity.mcp.annotation.McpPrompt;
 import org.springframework.core.io.ClassPathResource;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 /**
  * MCP prompts for hawkBit that provide initial context to LLMs.

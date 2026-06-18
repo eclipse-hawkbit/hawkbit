@@ -21,7 +21,8 @@ import org.springframework.stereotype.Service;
 @Service
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "distribution-set-tag-management" }, matchIfMissing = true)
 public class JpaDistributionSetTagManagement
-        extends AbstractJpaRepositoryManagement<JpaDistributionSetTag, DistributionSetTagManagement.Create, DistributionSetTagManagement.Update, DistributionSetTagRepository, DistributionSetTagFields>
+        extends
+        AbstractJpaRepositoryManagement<JpaDistributionSetTag, DistributionSetTagManagement.Create, DistributionSetTagManagement.Update, DistributionSetTagRepository, DistributionSetTagFields>
         implements DistributionSetTagManagement<JpaDistributionSetTag> {
 
     protected JpaDistributionSetTagManagement(

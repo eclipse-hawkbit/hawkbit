@@ -52,8 +52,8 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.CallbackDataProvider.FetchCallback;
+import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
@@ -190,7 +190,7 @@ public class Utils {
     public static <T> void remove(final Collection<T> remove, final Set<T> from, final Function<T, ?> idFn) {
         remove.forEach(toRemove -> {
             final Object id = idFn.apply(toRemove);
-            for (final Iterator<T> i = from.iterator(); i.hasNext();) {
+            for (final Iterator<T> i = from.iterator(); i.hasNext(); ) {
                 if (idFn.apply(i.next()).equals(id)) {
                     i.remove();
                 }
@@ -236,7 +236,8 @@ public class Utils {
         return actionTypeControls(MgmtActionType.values(), defaultValue, forceTime);
     }
 
-    public static Select<MgmtActionType> actionTypeControls(MgmtActionType[] displayedValues, MgmtActionType defaultValue, DateTimePicker forceTime) {
+    public static Select<MgmtActionType> actionTypeControls(MgmtActionType[] displayedValues, MgmtActionType defaultValue,
+            DateTimePicker forceTime) {
         Select<MgmtActionType> actionType = new Select<>();
         actionType.setLabel(Constants.ACTION_TYPE);
         actionType.setItems(displayedValues);

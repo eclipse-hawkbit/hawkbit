@@ -42,7 +42,6 @@ public enum SoftwareModuleFields implements QueryField {
         this.subEntityAttributes = List.of(subEntityAttributes);
     }
 
-
     @Override
     public String getDefaultSubEntityAttribute() {
         return this == TYPE ? SoftwareModuleTypeFields.KEY.getName() : QueryField.super.getDefaultSubEntityAttribute();

@@ -34,7 +34,7 @@ public @interface AuditLog {
 
     String description() default "";
 
-    String[] logParams() default {"*"};
+    String[] logParams() default { "*" };
 
     boolean logResponse() default false;
 }

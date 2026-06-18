@@ -51,7 +51,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
     }
 
     @Override
-    public void setEnvironment(@NonNull  final Environment env) {
+    public void setEnvironment(@NonNull final Environment env) {
         this.env = env;
     }
 

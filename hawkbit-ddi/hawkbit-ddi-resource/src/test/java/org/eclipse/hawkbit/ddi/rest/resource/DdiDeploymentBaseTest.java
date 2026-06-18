@@ -106,7 +106,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final byte[] feedback = jsonToCbor(getJsonProceedingDeploymentActionFeedback());
         postDeploymentFeedback(
-                MediaType.parseMediaType(DdiRootControllerRestApi.MEDIA_TYPE_APPLICATION_CBOR), target.getControllerId(), action.getId(), feedback,
+                MediaType.parseMediaType(DdiRootControllerRestApi.MEDIA_TYPE_APPLICATION_CBOR), target.getControllerId(), action.getId(),
+                feedback,
                 status().isOk());
     }
 

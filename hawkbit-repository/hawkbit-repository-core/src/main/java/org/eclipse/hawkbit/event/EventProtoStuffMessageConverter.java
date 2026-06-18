@@ -46,7 +46,6 @@ public class EventProtoStuffMessageConverter extends AbstractMessageConverter {
     public static final MimeType APPLICATION_BINARY_PROTOSTUFF = new MimeType("application", "binary+protostuff");
     private static final int HEADER_LENGTH_PREFIX_SIZE = 4;
 
-
     public EventProtoStuffMessageConverter() {
         super(APPLICATION_BINARY_PROTOSTUFF);
     }
@@ -112,7 +111,6 @@ public class EventProtoStuffMessageConverter extends AbstractMessageConverter {
         return content;
     }
 
-
     private static EventType readClassHeader(final byte[] typeInformation) {
         final Schema<EventType> schema = RuntimeSchema.getSchema(EventType.class);
         final EventType deserializedType = schema.newMessage();
@@ -134,8 +132,7 @@ public class EventProtoStuffMessageConverter extends AbstractMessageConverter {
             throw new MessageConversionException("Missing EventType for given class : " + clazz);
         }
 
-        @SuppressWarnings("unchecked")
-        final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema((Class<?>) EventType.class);
+        @SuppressWarnings("unchecked") final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema((Class<?>) EventType.class);
         final LinkedBuffer buffer = LinkedBuffer.allocate();
         byte[] typeBytes = ProtobufIOUtil.toByteArray(clazzEventType, schema, buffer);
 

@@ -52,10 +52,10 @@ public class MgmtOpenApiConfiguration {
                                                 """))
                                 .servers(tenantEndpointEnabled
                                         ? List.of(
-                                            new Server()
-                                                    .url("/{tenant}/")
-                                                    .variables(new ServerVariables().addServerVariable("tenant", tenantSeverVariable())),
-                                            new Server().url("/"))
+                                        new Server()
+                                                .url("/{tenant}/")
+                                                .variables(new ServerVariables().addServerVariable("tenant", tenantSeverVariable())),
+                                        new Server().url("/"))
                                         : List.of(new Server().url("/")))
                                 .addSecurityItem(new SecurityRequirement()
                                         .addList(BASIC_AUTH_SEC_SCHEME_NAME)

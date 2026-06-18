@@ -39,21 +39,24 @@ public class AuthenticationFilters {
 
     public static class GatewayTokenAuthenticationFilter extends AbstractAuthenticationFilter {
 
-        public GatewayTokenAuthenticationFilter(final GatewayTokenAuthenticator authenticator, final DdiSecurityProperties ddiSecurityProperties) {
+        public GatewayTokenAuthenticationFilter(final GatewayTokenAuthenticator authenticator,
+                final DdiSecurityProperties ddiSecurityProperties) {
             super(authenticator, ddiSecurityProperties);
         }
     }
 
     public static class SecurityHeaderAuthenticationFilter extends AbstractAuthenticationFilter {
 
-        public SecurityHeaderAuthenticationFilter(final SecurityHeaderAuthenticator authenticator, final DdiSecurityProperties ddiSecurityProperties) {
+        public SecurityHeaderAuthenticationFilter(final SecurityHeaderAuthenticator authenticator,
+                final DdiSecurityProperties ddiSecurityProperties) {
             super(authenticator, ddiSecurityProperties);
         }
     }
 
     public static class SecurityTokenAuthenticationFilter extends AbstractAuthenticationFilter {
 
-        public SecurityTokenAuthenticationFilter(final SecurityTokenAuthenticator authenticator, final DdiSecurityProperties ddiSecurityProperties) {
+        public SecurityTokenAuthenticationFilter(final SecurityTokenAuthenticator authenticator,
+                final DdiSecurityProperties ddiSecurityProperties) {
             super(authenticator, ddiSecurityProperties);
         }
     }
@@ -125,7 +128,8 @@ public class AuthenticationFilters {
                 authenticator.log().trace("Parsed tenant {} and controllerId {} from path request {}", tenant, controllerId, requestURI);
                 return createTenantSecurityTokenVariables(request, tenant, controllerId);
             } else {
-                authenticator.log().trace("request {} does not match the path pattern {}, request gets ignored", requestURI, CONTROLLER_REQUEST_ANT_PATTERN);
+                authenticator.log().trace("request {} does not match the path pattern {}, request gets ignored", requestURI,
+                        CONTROLLER_REQUEST_ANT_PATTERN);
                 return null;
             }
         }

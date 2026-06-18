@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Command repository operations for all {@link TenantAwareBaseEntity}s.
+ *
  * @param <T> type if the entity type
  */
 @NoRepositoryBean

@@ -348,13 +348,13 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
      * Testing that creating rollout with insufficient permission returns forbidden
      */
     @Test
-    @WithUser(principal = "bumlux", authorities = {SpRole.TARGET_ADMIN, SpRole.REPOSITORY_ADMIN, "CREATE_ROLLOUT"})
+    @WithUser(principal = "bumlux", authorities = { SpRole.TARGET_ADMIN, SpRole.REPOSITORY_ADMIN, "CREATE_ROLLOUT" })
     void createRolloutWithSufficientPermissionsIsOk() throws Exception {
         createRolloutWithPermissions("rollout-suff", 201);
     }
 
     @Test
-    @WithUser(authorities = {SpRole.TARGET_ADMIN, SpRole.REPOSITORY_ADMIN})
+    @WithUser(authorities = { SpRole.TARGET_ADMIN, SpRole.REPOSITORY_ADMIN })
     void createRolloutWithInsufficientPermissionReturnsForbidden() throws Exception {
         createRolloutWithPermissions("rollout-insuff", 403);
     }
