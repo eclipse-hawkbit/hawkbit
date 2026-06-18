@@ -160,19 +160,17 @@ public final class SpPermission {
     @SuppressWarnings("java:S3776") // java:S3776 - better in one place for better readability
     public static boolean hasPermission(final String permission) {
         final SecurityContext context = SecurityContextHolder.getContext();
-        if (context != null) {
-            final Authentication authentication = context.getAuthentication();
-            if (authentication != null) {
-                Collection<? extends GrantedAuthority> grantedAuthorities = authentication.getAuthorities();
-                final RoleHierarchy roleHierarchy = Hierarchy.getRoleHierarchy();
-                if (!ObjectUtils.isEmpty(grantedAuthorities)) {
-                    if (roleHierarchy != null) {
-                        grantedAuthorities = roleHierarchy.getReachableGrantedAuthorities(grantedAuthorities);
-                    }
-                    for (final GrantedAuthority authority : grantedAuthorities) {
-                        if (authority.getAuthority().equals(permission)) {
-                            return true;
-                        }
+        final Authentication authentication = context.getAuthentication();
+        if (authentication != null) {
+            Collection<? extends GrantedAuthority> grantedAuthorities = authentication.getAuthorities();
+            final RoleHierarchy roleHierarchy = Hierarchy.getRoleHierarchy();
+            if (!ObjectUtils.isEmpty(grantedAuthorities)) {
+                if (roleHierarchy != null) {
+                    grantedAuthorities = roleHierarchy.getReachableGrantedAuthorities(grantedAuthorities);
+                }
+                for (final GrantedAuthority authority : grantedAuthorities) {
+                    if (authority.getAuthority().equals(permission)) {
+                        return true;
                     }
                 }
             }

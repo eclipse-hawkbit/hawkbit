@@ -13,7 +13,6 @@ package org.eclipse.hawkbit.ddi.json.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import java.io.IOException;
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,7 @@ class DdiActionFeedbackTest {
      * Verify the correct serialization and deserialization of the model with minimal payload
      */
     @Test
-    void shouldSerializeAndDeserializeObjectWithoutOptionalValues() throws IOException {
+    void shouldSerializeAndDeserializeObjectWithoutOptionalValues() {
         // Setup
         final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, null, null, Collections.emptyList());
         final DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(ddiStatus);
@@ -51,7 +50,7 @@ class DdiActionFeedbackTest {
      * Verify the correct serialization and deserialization of the model with all values provided
      */
     @Test
-    void shouldSerializeAndDeserializeObjectWithOptionalValues() throws IOException {
+    void shouldSerializeAndDeserializeObjectWithOptionalValues() {
         // Setup
         final Long timestamp = System.currentTimeMillis();
         final DdiResult ddiResult = new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(10, 10));

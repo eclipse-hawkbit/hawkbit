@@ -65,7 +65,6 @@ public final class TargetActionsHistory extends Grid<TargetActionsHistory.Action
                 .setHeader("Actions").setAutoWidth(true).setFlexGrow(0).setFrozenToEnd(true);
         addColumn(new ComponentRenderer<>(ActionStatusEntry::getForceQuitLayout))
                 .setHeader("Force Quit").setAutoWidth(true).setFlexGrow(0).setFrozenToEnd(true);
-        ;
         addItemClickListener(e -> actionStepsGrid.setActionId(e.getItem().action.getId()));
         this.actionStepsGrid = actionStepsGrid;
     }

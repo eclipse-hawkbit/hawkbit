@@ -13,8 +13,6 @@ package org.eclipse.hawkbit.ddi.json.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.exc.MismatchedInputException;
@@ -33,7 +31,7 @@ class DdiMetadataTest {
      * Verify the correct serialization and deserialization of the model
      */
     @Test
-    void shouldSerializeAndDeserializeObject() throws IOException {
+    void shouldSerializeAndDeserializeObject() {
         // Setup
         final String key = "testKey";
         final String value = "testValue";
@@ -51,7 +49,7 @@ class DdiMetadataTest {
      * Verify the correct deserialization of a model with an additional unknown property
      */
     @Test
-    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    void shouldDeserializeObjectWithUnknownProperty() {
         // Setup
         final String serializedDdiMetadata = "{\"key\":\"testKey\",\"value\":\"testValue\",\"unknownProperty\":\"test\"}";
 

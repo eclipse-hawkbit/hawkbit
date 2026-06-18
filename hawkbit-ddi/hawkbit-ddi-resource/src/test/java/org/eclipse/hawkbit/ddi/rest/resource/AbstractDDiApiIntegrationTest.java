@@ -45,8 +45,11 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import tools.jackson.core.JsonEncoding;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.JsonParser;
+import tools.jackson.core.ObjectReadContext;
+import tools.jackson.core.ObjectWriteContext;
 import tools.jackson.core.json.JsonFactory;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.cbor.CBORFactory;
@@ -85,10 +88,10 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
      */
     protected static byte[] jsonToCbor(final String json) {
         final JsonFactory jsonFactory = new JsonFactory();
-        final JsonParser jsonParser = jsonFactory.createParser(json);
+        final JsonParser jsonParser = jsonFactory.createParser(ObjectReadContext.empty(), json);
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         final CBORFactory cborFactory = new CBORFactory();
-        final JsonGenerator cborGenerator = cborFactory.createGenerator(out);
+        final JsonGenerator cborGenerator = cborFactory.createGenerator(ObjectWriteContext.empty(), out, JsonEncoding.UTF8);
         while (jsonParser.nextToken() != null) {
             cborGenerator.copyCurrentEvent(jsonParser);
         }
@@ -103,10 +106,10 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
      * @return Equivalent JSON string
      */
     protected static String cborToJson(final byte[] input) {
-        final JsonParser cborParser = new CBORFactory().createParser(input);
+        final JsonParser cborParser = new CBORFactory().createParser(ObjectReadContext.empty(), input);
         final JsonFactory jsonFactory = new JsonFactory();
         final StringWriter stringWriter = new StringWriter();
-        final JsonGenerator jsonGenerator = jsonFactory.createGenerator(stringWriter);
+        final JsonGenerator jsonGenerator = jsonFactory.createGenerator(ObjectWriteContext.empty(), stringWriter);
         while (cborParser.nextToken() != null) {
             jsonGenerator.copyCurrentEvent(cborParser);
         }

@@ -82,9 +82,8 @@ class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
         mock.setOptLockRevision(type.getOptLockRevision());
         mock.setTenant(type.getTenant());
 
-        assertThat(type).as("managed entity is equal to regular object with same content").isEqualTo(mock);
         assertThat(type)
-                .as("managed entity has same hash code as regular object with same content")
-                .hasSameHashCodeAs(mock.hashCode());
+                .as("managed entity is equal to regular object with same content").isEqualTo(mock)
+                .as("managed entity has same hash code as regular object with same content").hasSameHashCodeAs(mock.hashCode());
     }
 }

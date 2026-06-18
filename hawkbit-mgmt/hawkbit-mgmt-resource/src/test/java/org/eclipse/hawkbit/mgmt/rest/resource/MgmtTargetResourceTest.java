@@ -2292,10 +2292,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("content.[0].rollout", equalTo(rollout.getId().intValue())))
                 .andExpect(jsonPath("content.[0].rolloutName", equalTo(rollout.getName())));
 
-        // get the first action for the first target;
+        // get the first action for the first target
         // verify that also the rollout link is present
-        final Slice<Action> action = deploymentManagement.findActionsByTarget(target.getControllerId(),
-                PageRequest.of(0, 100));
+        final Slice<Action> action = deploymentManagement.findActionsByTarget(target.getControllerId(), PageRequest.of(0, 100));
         assertThat(action.getContent()).hasSize(1);
         mvc.perform(get("/rest/v1/targets/{targetId}/actions/{actionId}", target.getControllerId(), action.getContent().get(0).getId()))
                 .andExpect(status().isOk())
@@ -2754,7 +2753,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         long remaining = actionRepository.countByTargetId(testTarget.getId());
         Assertions.assertEquals(10 - evenActionIds.size(), remaining);
         List<Action> remainingActions = deploymentManagement.findActionsByTarget(testTarget.getControllerId(), PAGE).getContent();
-        remainingActions.forEach(action -> Assertions.assertTrue(action.getId() % 2 != 0));
+        remainingActions.forEach(action -> Assertions.assertNotEquals(action.getId() % 2, 0));
     }
 
     private static Stream<Arguments> confirmationOptions() {

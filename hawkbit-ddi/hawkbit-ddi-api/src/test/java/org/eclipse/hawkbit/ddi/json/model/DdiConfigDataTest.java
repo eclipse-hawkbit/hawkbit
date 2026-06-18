@@ -13,7 +13,6 @@ package org.eclipse.hawkbit.ddi.json.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +34,7 @@ class DdiConfigDataTest {
      * Verify the correct serialization and deserialization of the model
      */
     @Test
-    void shouldSerializeAndDeserializeObject() throws IOException {
+    void shouldSerializeAndDeserializeObject() {
         // Setup
         final Map<String, String> data = new HashMap<>();
         data.put("test", "data");
@@ -52,7 +51,7 @@ class DdiConfigDataTest {
      * Verify the correct deserialization of a model with an additional unknown property
      */
     @Test
-    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    void shouldDeserializeObjectWithUnknownProperty() {
         // Setup
         final String serializedDdiConfigData = "{\"data\":{\"test\":\"data\"},\"mode\":\"replace\",\"unknownProperty\":\"test\"}";
 
@@ -78,7 +77,7 @@ class DdiConfigDataTest {
      * Verify the correct deserialization of a model with removed unused status property
      */
     @Test
-    void shouldDeserializeObjectWithStatusProperty() throws IOException {
+    void shouldDeserializeObjectWithStatusProperty() {
         // We formerly falsely required a 'status' property object when using the
         // configData endpoint. It was removed as a requirement from code and
         // documentation, as it was unused. This test ensures we still behave correctly

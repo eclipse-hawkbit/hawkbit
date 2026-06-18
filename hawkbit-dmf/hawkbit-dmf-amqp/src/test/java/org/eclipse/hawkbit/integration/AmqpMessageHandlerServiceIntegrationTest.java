@@ -853,7 +853,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetPollEvent.class, count = 1) })
-    void downloadOnlyAssignmentFinishesActionWhenTargetReportsDownloaded() throws IOException {
+    void downloadOnlyAssignmentFinishesActionWhenTargetReportsDownloaded() {
         // create target
         final String controllerId = TARGET_PREFIX + "registerTargets_1";
         final DistributionSet distributionSet = createTargetAndDistributionSetAndAssign(controllerId, DOWNLOAD_ONLY);
@@ -889,7 +889,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
             @Expect(type = TargetAttributesRequestedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 3),
             @Expect(type = TargetPollEvent.class, count = 1) })
-    void downloadOnlyAssignmentAllowsActionStatusUpdatesWhenTargetReportsFinishedAndUpdatesInstalledDS() throws IOException {
+    void downloadOnlyAssignmentAllowsActionStatusUpdatesWhenTargetReportsFinishedAndUpdatesInstalledDS() {
         // create target
         final String controllerId = TARGET_PREFIX + "registerTargets_1";
         final DistributionSet distributionSet = createTargetAndDistributionSetAndAssign(controllerId, DOWNLOAD_ONLY);
@@ -1107,7 +1107,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         final ObjectMapper objectMapper = new ObjectMapper();
         final ObjectNode node = objectMapper.readValue(new String(body, Charset.defaultCharset()), ObjectNode.class);
         assertThat(node.has("actionId")).isTrue();
-        return node.get("actionId").asText();
+        return node.get("actionId").asString();
     }
 
     private void updateAttributesWithUpdateModeRemove() {

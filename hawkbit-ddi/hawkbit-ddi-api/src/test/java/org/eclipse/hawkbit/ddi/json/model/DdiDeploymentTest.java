@@ -16,7 +16,6 @@ import static org.eclipse.hawkbit.ddi.json.model.DdiDeployment.DdiMaintenanceWin
 import static org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType.ATTEMPT;
 import static org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType.FORCED;
 
-import java.io.IOException;
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
@@ -37,7 +36,7 @@ class DdiDeploymentTest {
      * Verify the correct serialization and deserialization of the model
      */
     @Test
-    void shouldSerializeAndDeserializeObject() throws IOException {
+    void shouldSerializeAndDeserializeObject() {
         // Setup
         final DdiDeployment ddiDeployment = new DdiDeployment(FORCED, ATTEMPT, Collections.emptyList(), AVAILABLE);
 
@@ -55,7 +54,7 @@ class DdiDeploymentTest {
      * Verify the correct deserialization of a model with an additional unknown property
      */
     @Test
-    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    void shouldDeserializeObjectWithUnknownProperty() {
         // Setup
         final String serializedDdiDeployment = "{\"download\":\"forced\",\"update\":\"attempt\", " +
                 "\"maintenanceWindow\":\"available\",\"chunks\":[],\"unknownProperty\":\"test\"}";

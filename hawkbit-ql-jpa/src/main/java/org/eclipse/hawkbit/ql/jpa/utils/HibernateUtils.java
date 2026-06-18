@@ -91,9 +91,8 @@ public class HibernateUtils {
                 hqlQuery.getDomainParameterXref(), sqmTranslation::getJdbcParamsBySqmParam);
 
         final JdbcParameterBindings jdbcParameterBindings = SqmUtil.createJdbcParameterBindings(
-                (QueryParameterBindings) hqlQuery.getQueryParameterBindings(),
-                (DomainParameterXref) hqlQuery.getDomainParameterXref(), jdbcParamsXref, /*sessionFactory.getRuntimeMetamodels().getMappingMetamodel(),
-                sqmSelectTranslator.getFromClauseAccess()::findTableGroup,*/ new SqmParameterMappingModelResolutionAccess() {
+                hqlQuery.getQueryParameterBindings(),
+                hqlQuery.getDomainParameterXref(), jdbcParamsXref, new SqmParameterMappingModelResolutionAccess() {
 
                     @Override
                     @SuppressWarnings("unchecked")

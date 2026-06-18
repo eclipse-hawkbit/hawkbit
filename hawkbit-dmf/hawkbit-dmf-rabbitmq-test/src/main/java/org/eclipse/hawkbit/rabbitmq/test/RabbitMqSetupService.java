@@ -10,8 +10,8 @@
 package org.eclipse.hawkbit.rabbitmq.test;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.UUID;
 
 import jakarta.annotation.PreDestroy;
@@ -69,7 +69,7 @@ public class RabbitMqSetupService {
     private synchronized Client getRabbitmqHttpClient() {
         if (rabbitmqHttpClient == null) {
             try {
-                rabbitmqHttpClient = new Client(new URL(getHttpApiUrl()), getUsername(), getPassword());
+                rabbitmqHttpClient = new Client(new URI(getHttpApiUrl()).toURL(), getUsername(), getPassword());
             } catch (final MalformedURLException | URISyntaxException e) {
                 throw new RuntimeException(e);
             }

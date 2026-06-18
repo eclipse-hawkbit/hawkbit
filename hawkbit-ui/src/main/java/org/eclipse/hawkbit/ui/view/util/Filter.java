@@ -152,7 +152,7 @@ public final class Filter extends Div {
         switch (value) {
             case Collection<?> coll -> {
                 final StringBuilder sb = new StringBuilder();
-                coll.stream().forEach(next -> sb.append(key).append("==").append(next).append(','));
+                coll.forEach(next -> sb.append(key).append("==").append(next).append(','));
                 return sb.substring(0, sb.length() - 1);
             }
             case Optional<?> opt -> {

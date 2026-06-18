@@ -70,10 +70,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  */
 class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
-    @Autowired
-    ActionStatusRepository actionStatusRepository;
     private static final int ARTIFACT_SIZE = 5 * 1024;
     private static final String CONTROLLER_ID = "4715";
+
+    @Autowired
+    ActionStatusRepository actionStatusRepository;
 
     /**
      * Ensure that the installed base resource is available as CBOR
@@ -100,7 +101,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     /**
-     * Ensure that assigned version is self assigned version
+     * Ensure that assigned version is self-assigned version
      */
     @Test
     void installedVersion() throws Exception {
