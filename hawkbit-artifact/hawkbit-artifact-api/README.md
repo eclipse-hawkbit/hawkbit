@@ -9,6 +9,6 @@ The module contains artifact API classes supporting following main concepts:
   the [ArtifactEncryptionService](src/main/java/org/eclipse/hawkbit/artifact/encryption/ArtifactEncryptionService.java).
   It is a pluggable implementation of artifact encryption operations.
 * Artifact URL handling - represented
-  by[ArtifactUrlResolver](src/main/java/org/eclipse/hawkbit/artifact/urlresolver/ArtifactUrlResolver.java) interface. It
+  by [ArtifactUrlResolver](src/main/java/org/eclipse/hawkbit/artifact/urlresolver/ArtifactUrlResolver.java) interface. It
   provides resolving URLs to the artifacts. The module provides a simple property based
   implementation ([PropertyBasedArtifactUrlResolver](src/main/java/org/eclipse/hawkbit/artifact/urlresolver/PropertyBasedArtifactUrlResolver.java))

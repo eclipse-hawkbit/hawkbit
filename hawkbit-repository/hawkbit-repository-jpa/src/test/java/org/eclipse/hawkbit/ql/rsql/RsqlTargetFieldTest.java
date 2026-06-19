@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.TargetManagement.Create;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -356,7 +357,8 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
                 "ASSIGNEDDS.name == abcd and ASSIGNEDDS.version == 0123 and INSTALLEDDS.name == abcd and INSTALLEDDS.version == 0123",
                 TargetFields.class, JpaTarget.class);
         validate(
-                "ATTRIBUTE.subkey1 == test and ATTRIBUTE.subkey2 == test and METADATA.metakey1 == abcd and METADATA.metavalue2 == asdfg",
+                "ATTRIBUTE.subkey1 == test and ATTRIBUTE.subkey2 == test and METADATA.metakey1 == abcd and METADATA.metavalue2 == asdfg" +
+                        " and AUTOCONFIRM == true",
                 TargetFields.class, JpaTarget.class);
         validate(
                 "CREATEDAT =lt= ${NOW_TS} and LASTMODIFIEDAT =ge= ${OVERDUE_TS}",
@@ -399,6 +401,37 @@ class RsqlTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery("targettype." + TargetTypeFields.NAME.name() + "==*1", 1);
         assertRSQLQuery("targettype." + TargetTypeFields.NAME.name() + "!=" + targetType2.getName(), 4);
         assertRSQLQuery("targettype." + TargetTypeFields.NAME.name() + "==noExist*", 0);
+    }
+
+    /**
+     * Test filter by auto confirmation status presence
+     */
+    @Test
+    void testFilterByAutoConfirm() {
+        confirmationManagement.activateAutoConfirmation(target.getControllerId(), "testInitiator", "testRemark");
+
+        assertRSQLQuery(TargetFields.AUTOCONFIRM.name() + "==true", 1);
+        assertRSQLQuery(TargetFields.AUTOCONFIRM.name() + "==false", 4);
+        assertRSQLQuery(TargetFields.AUTOCONFIRM.name() + "!=true", 4);
+        assertRSQLQuery(TargetFields.AUTOCONFIRM.name() + "!=false", 1);
+    }
+
+    /**
+     * Test filter by auto confirmation rejects unsupported operators
+     */
+    @Test
+    void testFilterByAutoConfirmUnsupportedOperator() {
+        assertThatExceptionOfType(RSQLParameterSyntaxException.class)
+                .isThrownBy(() -> assertRSQLQuery(TargetFields.AUTOCONFIRM.name() + "=gt=true", 0));
+    }
+
+    /**
+     * Test filter by auto confirmation rejects non-boolean values
+     */
+    @Test
+    void testFilterByAutoConfirmInvalidValue() {
+        assertThatExceptionOfType(RSQLParameterSyntaxException.class)
+                .isThrownBy(() -> assertRSQLQuery(TargetFields.AUTOCONFIRM.name() + "==notABoolean", 0));
     }
 
     /**

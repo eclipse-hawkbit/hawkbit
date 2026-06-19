@@ -63,6 +63,7 @@ import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidConfirmationFeedbackException;
+import org.eclipse.hawkbit.repository.exception.SoftwareModuleNotAssignedToTargetException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate.ActionStatusCreateBuilder;
@@ -125,12 +126,29 @@ public class DdiRootController implements DdiRootControllerRestApi {
     @Override
     public ResponseEntity<List<DdiArtifact>> getSoftwareModulesArtifacts(
             final String tenant, final String controllerId, final Long softwareModuleId) {
-        log.debug("getSoftwareModulesArtifacts({})", controllerId);
         final Target target = findTargetOrThrow(controllerId);
         final SoftwareModule softwareModule = controllerManagement.getSoftwareModule(softwareModuleId);
+
+        // check action assigned to device
+        try {
+            final Action action = Objects.requireNonNull(
+                    controllerManagement.getActionForDownloadByTargetAndSoftwareModule(controllerId, softwareModuleId));
+            log.debug("getSoftwareModulesArtifacts({}, {}) for action {}", controllerId, softwareModuleId, action.getId());
+        } catch (final SoftwareModuleNotAssignedToTargetException e) {
+            controllerManagement.findInstalledActionByTarget(target)
+                    .filter(action -> action.getDistributionSet().getModules().stream()
+                            .map(SoftwareModule::getId).anyMatch(id -> id.equals(softwareModuleId)))
+                    .ifPresentOrElse(
+                            action -> log.debug("getSoftwareModulesArtifacts({}, {}) for installed action {}",
+                                    controllerId, softwareModuleId, action.getId()),
+                            () -> {
+                                throw e;
+                            });
+        }
+
         return new ResponseEntity<>(
-                createArtifacts(target, softwareModule, artifactUrlHandler, systemManagement,
-                        new ServletServerHttpRequest(getHttpServletRequest())),
+                createArtifacts(
+                        target, softwareModule, artifactUrlHandler, systemManagement, new ServletServerHttpRequest(getHttpServletRequest())),
                 HttpStatus.OK);
     }
 
@@ -403,15 +421,12 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     @Override
     public ResponseEntity<Void> setAssignedOfflineVersion(
-            final DdiAssignedVersion ddiAssignedVersion,
-            final String tenant,
-            final String controllerId) {
-        boolean updated = controllerManagement.updateOfflineAssignedVersion(controllerId,
-                ddiAssignedVersion.getName(), ddiAssignedVersion.getVersion());
-        if (updated) {
+            final DdiAssignedVersion ddiAssignedVersion, final String tenant, final String controllerId) {
+        if (controllerManagement.updateOfflineAssignedVersion(controllerId, ddiAssignedVersion.getName(), ddiAssignedVersion.getVersion())) {
             return new ResponseEntity<>(HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>(HttpStatus.OK);
         }
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private static boolean checkModule(final String fileName, final SoftwareModule module) {
@@ -421,14 +436,14 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private static HandlingType calculateDownloadType(final Action action) {
         if (action.isDownloadOnly() || action.isForcedOrTimeForced()) {
             return HandlingType.FORCED;
+        } else {
+            return HandlingType.ATTEMPT;
         }
-        return HandlingType.ATTEMPT;
     }
 
     private static DdiMaintenanceWindowStatus calculateMaintenanceWindow(final Action action) {
         if (action.hasMaintenanceSchedule()) {
-            return action.isMaintenanceWindowAvailable() ? DdiMaintenanceWindowStatus.AVAILABLE
-                    : DdiMaintenanceWindowStatus.UNAVAILABLE;
+            return action.isMaintenanceWindowAvailable() ? DdiMaintenanceWindowStatus.AVAILABLE : DdiMaintenanceWindowStatus.UNAVAILABLE;
         }
         return null;
     }
@@ -438,8 +453,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
             return HandlingType.SKIP;
         } else if (action.hasMaintenanceSchedule()) {
             return action.isMaintenanceWindowAvailable() ? downloadType : HandlingType.SKIP;
+        } else {
+            return downloadType;
         }
-        return downloadType;
     }
 
     private static void addMessageIfEmpty(final String text, final List<String> messages) {
@@ -448,8 +464,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         }
     }
 
-    private static ActionStatusCreate generateActionCancelStatus(
-            final DdiActionFeedback feedback, final Target target, final Long actionId) {
+    private static ActionStatusCreate generateActionCancelStatus(final DdiActionFeedback feedback, final Target target, final Long actionId) {
         final ActionStatusCreateBuilder actionStatusCreate = ActionStatusCreate.builder().actionId(actionId).timestamp(feedback.getTimestamp());
         final List<String> messages = new ArrayList<>();
         final Status status;
@@ -678,9 +693,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     private DdiDeployment generateDdiDeployment(final Target target, final Action action) {
         final List<DdiChunk> chunks = DataConversionHelper.createChunks(
-                target, action, artifactUrlHandler,
-                systemManagement, new ServletServerHttpRequest(getHttpServletRequest()),
-                controllerManagement);
+                target, action, artifactUrlHandler, systemManagement,
+                new ServletServerHttpRequest(getHttpServletRequest()), controllerManagement);
         final HandlingType downloadType = calculateDownloadType(action);
         final HandlingType updateType = calculateUpdateType(action, downloadType);
         final DdiMaintenanceWindowStatus maintenanceWindow = calculateMaintenanceWindow(action);

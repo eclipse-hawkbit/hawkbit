@@ -31,15 +31,15 @@ import lombok.Data;
  *
  * <p>
  * The answer header would look like: {
- * "timestamp": "1733218554123",
- * "status": {
- * "execution": "closed",
- * "result": {
- * "final": "success",
- * "progress": {}
- * }
- * "details": []
- * }
+ *   "timestamp": "1733218554123",
+ *   "status": {
+ *      "execution": "closed",
+ *      "result": {
+ *         "final": "success",
+ *         "progress": {}
+ *      }
+ *      "details": []
+ *   }
  * }
  * </p>
  */

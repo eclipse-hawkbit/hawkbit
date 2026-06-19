@@ -13,6 +13,7 @@ import static feign.Util.ISO_8859_1;
 
 import java.io.Serial;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.util.Base64;
 import java.util.Collections;
@@ -128,7 +129,7 @@ public class HawkbitUiApp implements AppShellConfigurator {
 
     public static boolean isAuthenticated(String username, String password, String mgmtUrl) {
         try {
-            final URL url = new URL(mgmtUrl + "/rest/v1/rollouts");
+            final URL url = new URI(mgmtUrl + "/rest/v1/rollouts").toURL();
             final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 

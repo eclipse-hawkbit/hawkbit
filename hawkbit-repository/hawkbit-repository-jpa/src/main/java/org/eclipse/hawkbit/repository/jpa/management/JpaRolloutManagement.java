@@ -493,9 +493,8 @@ public class JpaRolloutManagement implements RolloutManagement {
             });
         } else if (cancelationType.equals(ActionCancellationType.FORCE)) {
             // Use same status filter here like in the soft case ? Seems they make sense
-            rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
-                final JpaRollout jpaRollout = (JpaRollout) rollout;
-                this.delete0(jpaRollout);
+            rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(jpaRollout -> {
+                this.delete0((JpaRollout) jpaRollout);
                 log.debug("Rollout {} deleting", jpaRollout.getId());
             });
         }

@@ -138,7 +138,7 @@ public class AuditLoggingAspect {
         return resultMessageBuilder.build();
     }
 
-    private boolean isLogAll(String[] logParams) {
+    private boolean isLogAll(final String[] logParams) {
         return Arrays.asList(logParams).contains("*");
     }
 

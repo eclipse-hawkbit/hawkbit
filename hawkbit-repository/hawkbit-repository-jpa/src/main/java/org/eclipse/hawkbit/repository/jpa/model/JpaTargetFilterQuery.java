@@ -82,7 +82,7 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
             final ActionType autoAssignActionType, final Integer autoAssignWeight, final boolean confirmationRequired) {
         this.name = name;
         this.query = query;
-        this.autoAssignDistributionSet = (JpaDistributionSet) autoAssignDistributionSet;
+        this.autoAssignDistributionSet = autoAssignDistributionSet;
         this.autoAssignActionType = autoAssignActionType;
         this.autoAssignWeight = autoAssignWeight == null ? 0 : autoAssignWeight;
         this.confirmationRequired = confirmationRequired;

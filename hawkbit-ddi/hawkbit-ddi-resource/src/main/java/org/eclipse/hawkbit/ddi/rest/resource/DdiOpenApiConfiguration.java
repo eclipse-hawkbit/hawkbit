@@ -40,8 +40,7 @@ public class DdiOpenApiConfiguration {
                                 .info(new Info()
                                         .title("Direct Device Integration API")
                                         .version("v1")
-                                        .description(
-                                                "The Direct Device Integration (DDI) API provides a way for devices to interact directly with the hawkBit."))
+                                        .description("The Direct Device Integration (DDI) API provides a way for devices to interact directly with the hawkBit."))
                                 .addSecurityItem(new SecurityRequirement().addList(DDI_TOKEN_SEC_SCHEME_NAME))
                                 .components(
                                         openApi

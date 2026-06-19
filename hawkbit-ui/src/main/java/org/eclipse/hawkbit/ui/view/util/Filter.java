@@ -151,14 +151,10 @@ public final class Filter extends Div {
 
         if (value instanceof Collection<?> coll) {
             final StringBuilder sb = new StringBuilder();
-            coll.stream().forEach(next -> sb.append(key).append("==").append(next).append(','));
+            coll.forEach(next -> sb.append(key).append("==").append(next).append(','));
             return sb.substring(0, sb.length() - 1);
         } else if (value instanceof Optional<?> opt) {
-            if (opt.isEmpty()) {
-                return null;
-            } else {
-                return key + "==" + opt.get();
-            }
+            return opt.map(o -> key + "==" + o).orElse(null);
         } else {
             return key + "==" + value;
         }

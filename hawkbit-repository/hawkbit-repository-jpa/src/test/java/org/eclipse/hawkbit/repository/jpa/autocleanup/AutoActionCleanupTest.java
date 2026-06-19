@@ -161,7 +161,7 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
      */
     @Test
     @SuppressWarnings("squid:S2925")
-    void canceledAndFailedActionsAreCleanedUpWhenExpired() throws InterruptedException {
+    void canceledAndFailedActionsAreCleanedUpWhenExpired() {
         // cleanup config for this test case
         setupCleanupConfiguration(500, Action.Status.CANCELED, Action.Status.ERROR);
 
