@@ -402,7 +402,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                     MgmtDistributionSetMapper.addLinks(set, response);
                     return response;
                 })
-                .map(distributionSetRest -> ResponseEntity.ok(distributionSetRest))
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());
     }
 

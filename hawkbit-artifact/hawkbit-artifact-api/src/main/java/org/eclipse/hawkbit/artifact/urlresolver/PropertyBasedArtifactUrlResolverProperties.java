@@ -9,13 +9,13 @@
  */
 package org.eclipse.hawkbit.artifact.urlresolver;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import lombok.Data;
+import org.eclipse.hawkbit.artifact.urlresolver.ArtifactUrlResolver.ApiType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -79,10 +79,9 @@ public class PropertyBasedArtifactUrlResolverProperties {
         /**
          * Support for the following hawkBit API.
          */
-        private List<ArtifactUrlResolver.ApiType> supports = Arrays.asList(ArtifactUrlResolver.ApiType.DDI, ArtifactUrlResolver.ApiType.DMF,
-                ArtifactUrlResolver.ApiType.MGMT);
+        private List<ApiType> supports = List.of(ApiType.DDI, ApiType.DMF, ApiType.MGMT);
 
-        public void setSupports(final List<ArtifactUrlResolver.ApiType> supports) {
+        public void setSupports(final List<ApiType> supports) {
             this.supports = Collections.unmodifiableList(supports);
         }
     }

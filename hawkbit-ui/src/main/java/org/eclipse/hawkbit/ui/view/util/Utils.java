@@ -313,10 +313,8 @@ public class Utils {
 
     public static <G> LocalDateTimeRenderer<G> localDateTimeRenderer(ToLongFunction<G> f) {
 
-        return new LocalDateTimeRenderer<>((e) -> LocalDateTime.ofInstant(Instant.ofEpochMilli(f.applyAsLong(e)), getZoneId()),
-                () -> DateTimeFormatter.ofLocalizedDateTime(
-                        FormatStyle.SHORT,
-                        FormatStyle.MEDIUM).withLocale(UI.getCurrent().getLocale()));
+        return new LocalDateTimeRenderer<>(e -> LocalDateTime.ofInstant(Instant.ofEpochMilli(f.applyAsLong(e)), getZoneId()),
+                () -> DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM).withLocale(UI.getCurrent().getLocale()));
     }
 
     public static String localDateTimeFromTs(long timestamp) {
