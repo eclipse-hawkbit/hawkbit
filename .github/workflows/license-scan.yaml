@@ -3,6 +3,15 @@ name: License Scan
 on:
   # enable running the workflow manually
   workflow_dispatch:
+  push:
+    branches:
+      - master
+      - "1.0"
+    paths:
+      - pom.xml
+      - hawkbit-ui/pom.xml
+      - hawkbit-sdk/pom.xml
+      - hawkbit-sdk/hawkbit-sdk-demo/pom.xml
   schedule:
     # run every Monday at 2:00 AM (UTC), 429 when querying ClearlyDefined too frequently
     - cron: '0 2 * * 1'
