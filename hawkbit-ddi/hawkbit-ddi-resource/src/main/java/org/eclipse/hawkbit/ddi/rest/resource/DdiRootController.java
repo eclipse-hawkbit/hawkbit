@@ -21,10 +21,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -76,6 +78,8 @@ import org.eclipse.hawkbit.rest.util.FileStreamingUtil;
 import org.eclipse.hawkbit.rest.util.HttpUtil;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.utils.IpUtil;
+import org.jspecify.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpHeaders;
@@ -83,6 +87,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -107,13 +112,16 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private final SystemManagement systemManagement;
     private final ApplicationEventPublisher eventPublisher;
     private final HawkbitSecurityProperties securityProperties;
+    private final Set<String> skipArtifactAccessCheckTenants;
+    private final boolean skipArtifactAccessCheck; // disable check for all tenants
 
     @SuppressWarnings("java:S107")
     public DdiRootController(
             final ControllerManagement controllerManagement, final ConfirmationManagement confirmationManagement,
             final ArtifactManagement artifactManagement, final ArtifactUrlResolver artifactUrlHandler,
             final SystemManagement systemManagement, final ApplicationEventPublisher eventPublisher,
-            final HawkbitSecurityProperties securityProperties) {
+            final HawkbitSecurityProperties securityProperties,
+            @Value("${hawkbit.ddi.skip-artifact-access-check.tenants:}") final String skipArtifactAccessCheckTenants) {
         this.controllerManagement = controllerManagement;
         this.confirmationManagement = confirmationManagement;
         this.artifactManagement = artifactManagement;
@@ -121,35 +129,14 @@ public class DdiRootController implements DdiRootControllerRestApi {
         this.systemManagement = systemManagement;
         this.eventPublisher = eventPublisher;
         this.securityProperties = securityProperties;
-    }
-
-    @Override
-    public ResponseEntity<List<DdiArtifact>> getSoftwareModulesArtifacts(
-            final String tenant, final String controllerId, final Long softwareModuleId) {
-        final Target target = findTargetOrThrow(controllerId);
-        final SoftwareModule softwareModule = controllerManagement.getSoftwareModule(softwareModuleId);
-
-        // check action assigned to device
-        try {
-            final Action action = Objects.requireNonNull(
-                    controllerManagement.getActionForDownloadByTargetAndSoftwareModule(controllerId, softwareModuleId));
-            log.debug("getSoftwareModulesArtifacts({}, {}) for action {}", controllerId, softwareModuleId, action.getId());
-        } catch (final SoftwareModuleNotAssignedToTargetException e) {
-            controllerManagement.findInstalledActionByTarget(target)
-                    .filter(action -> action.getDistributionSet().getModules().stream()
-                            .map(SoftwareModule::getId).anyMatch(id -> id.equals(softwareModuleId)))
-                    .ifPresentOrElse(
-                            action -> log.debug("getSoftwareModulesArtifacts({}, {}) for installed action {}",
-                                    controllerId, softwareModuleId, action.getId()),
-                            () -> {
-                                throw e;
-                            });
-        }
-
-        return new ResponseEntity<>(
-                createArtifacts(
-                        target, softwareModule, artifactUrlHandler, systemManagement, new ServletServerHttpRequest(getHttpServletRequest())),
-                HttpStatus.OK);
+        skipArtifactAccessCheck = "*".equals(skipArtifactAccessCheckTenants);
+        this.skipArtifactAccessCheckTenants = skipArtifactAccessCheck || ObjectUtils.isEmpty(skipArtifactAccessCheckTenants)
+                ? Set.of()
+                : Arrays.stream(skipArtifactAccessCheckTenants.split(","))
+                        .map(String::trim)
+                        .map(String::toUpperCase)
+                        .filter(s -> !s.isEmpty())
+                        .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
@@ -173,6 +160,42 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     @Override
+    public ResponseEntity<List<DdiArtifact>> getSoftwareModulesArtifacts(
+            final String tenant, final String controllerId, final Long softwareModuleId) {
+        final Target target = findTargetOrThrow(controllerId);
+        final SoftwareModule softwareModule = controllerManagement.getSoftwareModule(softwareModuleId);
+
+        if (!skipArtifactAccessCheck(tenant)) {
+            // check action assigned to device
+            try {
+                final Action action = getAction(tenant, target, softwareModule);
+                if (action == null) {
+                    // should check access - so this shall return non-null or throw
+                    // nevertheless, we check here for null to be clear just looking here and to protect from future getAction modification changes
+                    throw new SoftwareModuleNotAssignedToTargetException(softwareModuleId, controllerId);
+                }
+                log.debug("getSoftwareModulesArtifacts({}, {}) for action {}", controllerId, softwareModuleId, action.getId());
+            } catch (final SoftwareModuleNotAssignedToTargetException e) {
+                // or if action is installed on device
+                controllerManagement.findInstalledActionByTarget(target)
+                        .filter(action -> action.getDistributionSet().getModules().stream()
+                                .map(SoftwareModule::getId).anyMatch(id -> id.equals(softwareModuleId)))
+                        .ifPresentOrElse(
+                                action -> log.debug("getSoftwareModulesArtifacts({}, {}) for installed action {}",
+                                        controllerId, softwareModuleId, action.getId()),
+                                () -> {
+                                    throw e;
+                                });
+            }
+        }
+
+        return new ResponseEntity<>(
+                createArtifacts(
+                        target, softwareModule, artifactUrlHandler, systemManagement, new ServletServerHttpRequest(getHttpServletRequest())),
+                HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<InputStream> downloadArtifact(
             final String tenant, final String controllerId, final Long softwareModuleId, final String fileName) {
         final Target target = findTargetOrThrow(controllerId);
@@ -183,16 +206,13 @@ public class DdiRootController implements DdiRootControllerRestApi {
         } else {
             // Artifact presence is ensured in 'checkModule'
             final Artifact artifact = module.getArtifactByFilename(fileName).orElseThrow(NoSuchElementException::new);
-            final ArtifactStream file = artifactManagement.getArtifactStream(artifact.getSha1Hash(), module.getId(), module.isEncrypted());
-
             final String ifMatch = getHttpServletRequest().getHeader(IF_MATCH);
             if (ifMatch != null && !HttpUtil.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
                 return new ResponseEntity<>(PRECONDITION_FAILED);
             } else {
-                // check action assigned to device
-                final Action action = Objects.requireNonNull(
-                        controllerManagement.getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module.getId()));
-                final ActionStatus actionStatus = getHttpServletRequest().getHeader("Range") == null
+                final Action action = getAction(tenant, target, module);
+                final ArtifactStream file = artifactManagement.getArtifactStream(artifact.getSha1Hash(), module.getId(), module.isEncrypted());
+                final ActionStatus actionStatus = action != null && getHttpServletRequest().getHeader("Range") == null
                         ? logDownload(action)
                         : null; // range request - could have too many - so doesn't check action, don't log action status, and don't publish events
                 return FileStreamingUtil.writeFileResponse(file, artifact.getFilename(), artifact.getCreatedAt(),
@@ -213,21 +233,21 @@ public class DdiRootController implements DdiRootControllerRestApi {
     public ResponseEntity<Void> downloadArtifactMd5(
             final String tenant, final String controllerId, final Long softwareModuleId, final String fileName) {
         final Target target = findTargetOrThrow(controllerId);
-
         final SoftwareModule module = controllerManagement.getSoftwareModule(softwareModuleId);
+
         if (checkModule(fileName, module)) {
             log.warn("Software module with id {} could not be found (2).", softwareModuleId);
             return ResponseEntity.notFound().build();
         }
+        final Action action = getAction(tenant, target, module);
 
         final Artifact artifact = module.getArtifactByFilename(fileName)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, fileName));
         try {
-            // check action assigned to device
-            final Action action = Objects.requireNonNull(
-                    controllerManagement.getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module.getId()));
-            logDownload(action);
             writeMD5FileResponse(getHttpServletResponse(), artifact.getMd5Hash(), fileName);
+            if (action != null) {
+                logDownload(action);
+            }
         } catch (final IOException e) {
             log.error("Failed to stream MD5 File", e);
             return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
@@ -557,6 +577,29 @@ public class DdiRootController implements DdiRootControllerRestApi {
         response.setContentLength(content.length);
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + filename + ARTIFACT_MD5_DOWNLOAD_SUFFIX);
         response.getOutputStream().write(content);
+    }
+
+    @SuppressWarnings("java:S3516")
+    private @Nullable Action getAction(final String tenant, final Target target, final SoftwareModule module) {
+        // check action assigned to device
+        try {
+            final Action action = controllerManagement.getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module.getId());
+            if (action == null) {
+                // current getActionForDownloadByTargetAndSoftwareModule implementation will not return null - but for sure
+                throw new SoftwareModuleNotAssignedToTargetException(module.getId(), target.getControllerId());
+            }
+            return action;
+        } catch (final SoftwareModuleNotAssignedToTargetException | NullPointerException e) {
+            if (skipArtifactAccessCheck(tenant)) {
+                return null;
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    private boolean skipArtifactAccessCheck(final String tenant) {
+        return skipArtifactAccessCheck || skipArtifactAccessCheckTenants.contains(tenant.toUpperCase());
     }
 
     private ActionStatus logDownload(final Action action) {
