@@ -1,2 +1,0 @@
-7292
-/opt/homebrew/opt/openjdk@21/bin/java --enable-native-access=ALL-UNNAMED -classpath /opt/homebrew/Cellar/maven/3.9.16/libexec/boot/plexus-classworlds-2.11.0.jar -Dclassworlds.conf=/opt/homebrew/Cellar/maven/3.9.16/libexec/bin/m2.conf -Dmaven.home=/opt/homebrew/Cellar/maven/3.9.16/libexec -Dlibrary.jansi.path=/opt/homebrew/Cellar/maven/3.9.16/libexec/lib/jansi-native -Dmaven.multiModuleProjectDirectory=/Users/maa1sf/Develop/rollouts/hawkbit org.codehaus.plexus.classworlds.launcher.Launcher clean install -DskipTests -rf :hawkbit-repository-jpa

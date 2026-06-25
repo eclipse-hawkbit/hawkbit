@@ -71,5 +71,8 @@ spring-shell.log
 # Documentation
 .gitmodules
 
+# Vaadin
+.vaadin-node-tasks.lock
+
 # AI
 .claude
