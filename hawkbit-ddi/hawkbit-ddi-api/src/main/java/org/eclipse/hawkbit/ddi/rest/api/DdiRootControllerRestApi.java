@@ -114,24 +114,6 @@ public interface DdiRootControllerRestApi {
     String NO_ACTION_HISTORY = "0";
 
     /**
-     * Returns all artifacts of a given software module and target.
-     *
-     * @param tenant of the client
-     * @param controllerId of the target that matches to controller id
-     * @param softwareModuleId of the software module
-     * @return the response
-     */
-    @Operation(summary = "Return all artifacts of a given software module and target",
-            description = "Returns all artifacts that are assigned to the software module")
-    @GetIfExistResponses
-    @GetMapping(value = CONTROLLER_V1 + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts",
-            produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
-    ResponseEntity<List<DdiArtifact>> getSoftwareModulesArtifacts(
-            @PathVariable("tenant") String tenant,
-            @PathVariable("controllerId") String controllerId,
-            @PathVariable("softwareModuleId") Long softwareModuleId);
-
-    /**
      * Root resource for an individual {@link Target}.
      *
      * @param tenant of the request
@@ -152,6 +134,24 @@ public interface DdiRootControllerRestApi {
     ResponseEntity<DdiControllerBase> getControllerBase(
             @PathVariable("tenant") String tenant,
             @PathVariable("controllerId") String controllerId);
+
+    /**
+     * Returns all artifacts of a given software module and target.
+     *
+     * @param tenant of the client
+     * @param controllerId of the target that matches to controller id
+     * @param softwareModuleId of the software module
+     * @return the response
+     */
+    @Operation(summary = "Return all artifacts of a given software module and target",
+            description = "Returns all artifacts that are assigned to the software module")
+    @GetIfExistResponses
+    @GetMapping(value = CONTROLLER_V1 + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts",
+            produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE, MEDIA_TYPE_APPLICATION_CBOR })
+    ResponseEntity<List<DdiArtifact>> getSoftwareModulesArtifacts(
+            @PathVariable("tenant") String tenant,
+            @PathVariable("controllerId") String controllerId,
+            @PathVariable("softwareModuleId") Long softwareModuleId);
 
     /**
      * Handles GET {@link DdiArtifact} download request. This could be full or

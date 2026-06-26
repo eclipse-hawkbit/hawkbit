@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
@@ -59,6 +60,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MvcResult;
 
 /**
@@ -68,7 +70,10 @@ import org.springframework.test.web.servlet.MvcResult;
  * Story: Artifact Download Resource
  */
 @SpringBootTest(classes = { DownloadTestConfiguration.class })
+@TestPropertySource(properties = "hawkbit.ddi.skip-artifact-access-check.tenants=" + DdiArtifactDownloadTest.SKIP_ARTIFACT_CHECK_TENANT)
 class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
+
+    static final String SKIP_ARTIFACT_CHECK_TENANT = "SKIP_ARTIFACT_CHECK_TENANT";
 
     private static final String DOWNLOAD_FN = "/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}";
 
@@ -95,8 +100,9 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         assignDistributionSet(ds, target);
 
         // no artifact available
-        mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), "123455")).andExpect(status().isNotFound());
-        mvc.perform(get(DOWNLOAD_FN + ".MD5SUM", tenant(), target.getControllerId(), getOsModule(ds), "123455"))
+        final Long module = testData.moduleId();
+        mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), module, "123455")).andExpect(status().isNotFound());
+        mvc.perform(get(DOWNLOAD_FN + ".MD5SUM", tenant(), target.getControllerId(), module, "123455"))
                 .andExpect(status().isNotFound());
 
         // SM does not exist
@@ -106,40 +112,40 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(status().isNotFound());
 
         // test now consistent data to test allowed methods
-        mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
+        mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), module, artifact.getFilename())
                         .header(IF_MATCH, artifact.getSha1Hash()))
                 .andExpect(status().isOk());
-        mvc.perform(get(DOWNLOAD_FN + ".MD5SUM", tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+        mvc.perform(get(DOWNLOAD_FN + ".MD5SUM", tenant(), target.getControllerId(), module, artifact.getFilename()))
                 .andExpect(status().isOk());
 
         // test failed If-match
-        mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
+        mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), module, artifact.getFilename())
                         .header(IF_MATCH, "fsjkhgjfdhg"))
                 .andExpect(status().isPreconditionFailed());
 
         // test invalid range
-        mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
+        mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), module, artifact.getFilename())
                         .header(RANGE, "bytes=1-10,hdsfjksdh"))
                 .andExpect(header().string(CONTENT_RANGE, "bytes */" + 5 * 1024))
                 .andExpect(status().isRequestedRangeNotSatisfiable());
 
-        mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
+        mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), module, artifact.getFilename())
                         .header(RANGE, "bytes=100-10"))
                 .andExpect(header().string(CONTENT_RANGE, "bytes */" + 5 * 1024))
                 .andExpect(status().isRequestedRangeNotSatisfiable());
 
         // not allowed methods
-        mvc.perform(put(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+        mvc.perform(put(DOWNLOAD_FN, tenant(), target.getControllerId(), module, artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
-        mvc.perform(delete(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+        mvc.perform(delete(DOWNLOAD_FN, tenant(), target.getControllerId(), module, artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
-        mvc.perform(post(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+        mvc.perform(post(DOWNLOAD_FN, tenant(), target.getControllerId(), module, artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
-        mvc.perform(put(DOWNLOAD_FN + ".MD5SUM", tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+        mvc.perform(put(DOWNLOAD_FN + ".MD5SUM", tenant(), target.getControllerId(), module, artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
-        mvc.perform(delete(DOWNLOAD_FN + ".MD5SUM", tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+        mvc.perform(delete(DOWNLOAD_FN + ".MD5SUM", tenant(), target.getControllerId(), module, artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
-        mvc.perform(post(DOWNLOAD_FN + ".MD5SUM", tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+        mvc.perform(post(DOWNLOAD_FN + ".MD5SUM", tenant(), target.getControllerId(), module, artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
     }
 
@@ -162,12 +168,13 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         final Artifact artifact = testData.artifact();
         final byte[] random = testData.randomBytes();
         // download fails as artifact is not yet assigned
-        mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+        final Long module = testData.moduleId();
+        mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), module, artifact.getFilename()))
                 .andExpect(status().isNotFound());
 
         // now assign and download successful
         assignDistributionSet(ds, target);
-        final MvcResult result = mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+        final MvcResult result = mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), module, artifact.getFilename()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_OCTET_STREAM))
                 .andExpect(header().string(ACCEPT_RANGES, "bytes"))
@@ -184,84 +191,151 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         }
     }
 
-    /**
-     * Tests valid MD5SUm file downloads through the artifact resource by identifying the artifact by ID.
-     */
     @Test
-    void downloadMd5SumThroughControllerApi() throws Exception {
-        final TestData testData = createTargetAndDs(5 * 1024);
-        final Target target = testData.target();
-        final DistributionSet ds = testData.ds();
-        final Artifact artifact = testData.artifact();
-
-        assignDistributionSet(ds, target);
-
-        // download
-        final MvcResult result = mvc.perform(
-                        get(DOWNLOAD_FN + ".MD5SUM", tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
-                .andExpect(status().isOk())
-                .andExpect(header().string(CONTENT_DISPOSITION, "attachment;filename=" + artifact.getFilename() + ".MD5SUM"))
-                .andReturn();
-
-        assertThat(result.getResponse().getContentAsByteArray())
-                .isEqualTo((artifact.getMd5Hash() + "  " + artifact.getFilename()).getBytes(StandardCharsets.US_ASCII));
+    void listArtifactsAccessCheck() throws Exception {
+        listArtifactsAccessCheck0(false);
     }
 
     @Test
-    void downloadWithoutRangeFailsIfNoActionForArtifact() throws Exception {
+    @WithUser(tenant = SKIP_ARTIFACT_CHECK_TENANT, principal = "controller1", authorities = { SpRole.CONTROLLER_ROLE, SpRole.TENANT_ADMIN })
+    void listArtifactsAccessCheckSkip() throws Exception {
+        listArtifactsAccessCheck0(true);
+    }
+
+    void listArtifactsAccessCheck0(final boolean skip) throws Exception {
         final TestData testData = createTargetAndDs(5 * 1024);
-        mvc.perform(get(DOWNLOAD_FN, tenant(), testData.target().getControllerId(), getOsModule(testData.ds()), "file1"))
-                .andExpect(status().isNotFound());
+        // no assigment check
+        if (skip) {
+            // doesn't fail if skip
+            mvc.perform(get(SOFTWARE_MODULE_ARTIFACTS, SKIP_ARTIFACT_CHECK_TENANT, testData.target().getControllerId(), testData.moduleId()))
+                    .andExpect(status().isOk());
+        } else {
+            // fail with no assigned or installed
+            mvc.perform(get(SOFTWARE_MODULE_ARTIFACTS, tenant(), testData.target().getControllerId(), testData.moduleId()))
+                    .andExpect(status().isNotFound());
+        }
+
+        // assign
+        final DistributionSetAssignmentResult firstAssignment = assignDistributionSet(testData.ds(), testData.target());
+
+        // succeeds with assigned action
+        mvc.perform(get(SOFTWARE_MODULE_ARTIFACTS, tenant(), testData.target().getControllerId(), testData.moduleId()))
+                .andExpect(status().isOk());
+
+        // succeeds with installed action
+        final Long firstActionId = getFirstAssignedActionId(firstAssignment);
+        postDeploymentFeedback(testData.target().getControllerId(), firstActionId, getJsonClosedDeploymentActionFeedback(), status().isOk());
+        final DistributionSetAssignmentResult secondAssignment = assignDistributionSet(testdataFactory.createDistributionSet("2nd_"),
+                testData.target()); // assign new ds
+        mvc.perform(get(SOFTWARE_MODULE_ARTIFACTS, tenant(), testData.target().getControllerId(), testData.moduleId()))
+                .andExpect(status().isOk());
+
+        // again not assigned or installed
+        final Long secondActionId = getFirstAssignedActionId(secondAssignment);
+        postDeploymentFeedback(testData.target().getControllerId(), secondActionId, getJsonClosedDeploymentActionFeedback(), status().isOk());
+        if (skip) {
+            // doesn't fail if skip
+            mvc.perform(get(SOFTWARE_MODULE_ARTIFACTS, SKIP_ARTIFACT_CHECK_TENANT, testData.target().getControllerId(), testData.moduleId()))
+                    .andExpect(status().isOk());
+        } else {
+            // fail with no assigned or installed
+            mvc.perform(get(SOFTWARE_MODULE_ARTIFACTS, tenant(), testData.target().getControllerId(), testData.moduleId()))
+                    .andExpect(status().isNotFound());
+        }
     }
 
     @Test
-    void downloadWithRangeFailsIfNoActionForArtifact() throws Exception {
-        final TestData testData = createTargetAndDs(5 * 1024);
-        mvc.perform(get(DOWNLOAD_FN, tenant(), testData.target().getControllerId(), getOsModule(testData.ds()), "file1")
-                        .header(RANGE, "bytes=0-99"))
-                .andExpect(status().isNotFound());
+    void downloadAccessCheck() throws Exception {
+        downloadAccessCheck0(false);
     }
 
     @Test
-    void downloadWithoutRangeSucceedsIfActionExistsForArtifact() throws Exception {
-        final TestData testData = createTargetAndDs(5 * 1024);
-        final Target target = testData.target();
-        final DistributionSet ds = testData.ds();
-        final Artifact artifact = testData.artifact();
-
-        assignDistributionSet(ds, target);
-
-        final MvcResult result = mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(APPLICATION_OCTET_STREAM))
-                .andExpect(header().string(ACCEPT_RANGES, "bytes"))
-                .andExpect(header().string(CONTENT_DISPOSITION, "attachment;filename=" + artifact.getFilename()))
-                .andReturn();
-
-        assertArrayEquals(result.getResponse().getContentAsByteArray(), testData.randomBytes());
+    @WithUser(tenant = SKIP_ARTIFACT_CHECK_TENANT, principal = "controller1", authorities = { SpRole.CONTROLLER_ROLE, SpRole.TENANT_ADMIN })
+    void downloadAccessCheckSkip() throws Exception {
+        downloadAccessCheck0(true);
     }
 
-    @Test
-    void downloadWithRangeSucceedsIfActionExistsForArtifact() throws Exception {
+    void downloadAccessCheck0(final boolean skip) throws Exception {
         final int artifactSize = 5 * 1024;
         final TestData testData = createTargetAndDs(artifactSize);
         final Target target = testData.target();
         final DistributionSet ds = testData.ds();
         final Artifact artifact = testData.artifact();
-
+        if (skip) {
+            // doesn't fail if skip
+            downloadSucceeds(testData, target, artifact, artifactSize);
+        } else {
+            // fail with no assigned or installed
+            // without range
+            mvc.perform(get(DOWNLOAD_FN, tenant(), testData.target().getControllerId(), testData.moduleId(), "file1"))
+                    .andExpect(status().isNotFound());
+            // with range
+            mvc.perform(get(DOWNLOAD_FN, tenant(), testData.target().getControllerId(), testData.moduleId(), "file1")
+                            .header(RANGE, "bytes=0-99"))
+                    .andExpect(status().isNotFound());
+        }
+        // succeeds with assigned action
         assignDistributionSet(ds, target);
 
-        final MvcResult result = mvc.perform(
-                        get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
-                                .header(RANGE, "bytes=0-99"))
+        downloadSucceeds(testData, target, artifact, artifactSize);
+    }
+
+    // asserts that download succeeds with or without range
+    private void downloadSucceeds(
+            final TestData testData, final Target target, final Artifact artifact, final int artifactSize) throws Exception {
+        // without range
+        assertArrayEquals(mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), testData.moduleId(), artifact.getFilename()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_OCTET_STREAM))
+                .andReturn().getResponse().getContentAsByteArray(), testData.randomBytes());
+
+        // with range
+        assertArrayEquals(mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), testData.moduleId(), artifact.getFilename())
+                        .header(RANGE, "bytes=0-99"))
                 .andExpect(status().is(PARTIAL_CONTENT.value()))
                 .andExpect(content().contentType(APPLICATION_OCTET_STREAM))
                 .andExpect(header().string(ACCEPT_RANGES, "bytes"))
                 .andExpect(header().string(CONTENT_RANGE, "bytes 0-99/" + artifactSize))
                 .andExpect(header().string(CONTENT_DISPOSITION, "attachment;filename=" + artifact.getFilename()))
-                .andReturn();
+                .andReturn().getResponse().getContentAsByteArray(), Arrays.copyOfRange(testData.randomBytes(), 0, 100));
+    }
 
-        assertArrayEquals(result.getResponse().getContentAsByteArray(), Arrays.copyOfRange(testData.randomBytes(), 0, 100));
+    @Test
+    void downloadMd5AccessCheck() throws Exception {
+        downloadMd5AccessCheck0(false);
+    }
+
+    @Test
+    @WithUser(tenant = SKIP_ARTIFACT_CHECK_TENANT, principal = "controller1", authorities = { SpRole.CONTROLLER_ROLE, SpRole.TENANT_ADMIN })
+    void downloadMd5AccessCheckSkip() throws Exception {
+        downloadMd5AccessCheck0(true);
+    }
+
+    void downloadMd5AccessCheck0(final boolean skip) throws Exception {
+        final TestData testData = createTargetAndDs(5 * 1024);
+        final Target target = testData.target();
+        final DistributionSet ds = testData.ds();
+        final Artifact artifact = testData.artifact();
+        if (skip) {
+            // doesn't fail if skip
+            downloadMd5Succeeds(SKIP_ARTIFACT_CHECK_TENANT, testData.target(), testData.moduleId(), artifact);
+        } else {
+            // fail with no assigned or installed
+            mvc.perform(get(DOWNLOAD_FN + ".MD5SUM", tenant(), testData.target().getControllerId(), testData.moduleId(), "file1"))
+                    .andExpect(status().isNotFound());
+        }
+        // succeeds with assigned action
+        assignDistributionSet(ds, target);
+
+        downloadMd5Succeeds(tenant(), target, testData.moduleId(), artifact);
+    }
+
+    private void downloadMd5Succeeds(final String tenant, final Target target, final Long moduleId, final Artifact artifact) throws Exception {
+        assertThat(mvc.perform(get(DOWNLOAD_FN + ".MD5SUM", tenant, target.getControllerId(), moduleId, artifact.getFilename()))
+                .andExpect(status().isOk())
+                .andExpect(header().string(CONTENT_DISPOSITION, "attachment;filename=" + artifact.getFilename() + ".MD5SUM"))
+                .andReturn().getResponse().getContentAsByteArray())
+                .isEqualTo((artifact.getMd5Hash() + "  " + artifact.getFilename()).getBytes(StandardCharsets.US_ASCII));
     }
 
     /**
@@ -274,6 +348,7 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         final TestData testData = createTargetAndDs(resultLength);
         final Target target = testData.target();
         final DistributionSet ds = testData.ds();
+        final Long moduleId = testData.moduleId();
         final Artifact artifact = testData.artifact();
         final byte[] random = testData.randomBytes();
 
@@ -284,7 +359,7 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         for (int i = 0; i < resultLength / range; i++) {
             final String rangeString = (i * range) + "-" + ((i + 1) * range - 1);
-            final MvcResult result = getRange(target, ds, artifact, rangeString, PARTIAL_CONTENT, range, rangeString + "/" + resultLength);
+            final MvcResult result = getRange(target, moduleId, artifact, rangeString, PARTIAL_CONTENT, range, rangeString + "/" + resultLength);
             outputStream.write(result.getResponse().getContentAsByteArray());
         }
 
@@ -292,21 +367,21 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // return last 1000 Bytes
         MvcResult result = getRange(
-                target, ds, artifact, "-1000",
+                target, moduleId, artifact, "-1000",
                 PARTIAL_CONTENT, 1000, (resultLength - 1000) + "-" + (resultLength - 1) + "/" + resultLength);
         assertThat(result.getResponse().getContentAsByteArray()).isEqualTo(Arrays.copyOfRange(random, resultLength - 1000, resultLength));
 
         // skip first 1000 Bytes and return the rest
         result = getRange(
-                target, ds, artifact, "1000-",
+                target, moduleId, artifact, "1000-",
                 PARTIAL_CONTENT, resultLength - 1000, 1000 + "-" + (resultLength - 1) + "/" + resultLength);
         assertThat(result.getResponse().getContentAsByteArray()).isEqualTo(Arrays.copyOfRange(random, 1000, resultLength));
 
         // Start download from file end fails
-        getRange(target, ds, artifact, random.length + "-", REQUESTED_RANGE_NOT_SATISFIABLE, null, "*/" + resultLength);
+        getRange(target, moduleId, artifact, random.length + "-", REQUESTED_RANGE_NOT_SATISFIABLE, null, "*/" + resultLength);
 
         // multipart download - first 20 bytes in 2 parts
-        result = getRange(target, ds, artifact, "0-9,10-19", PARTIAL_CONTENT, null, null);
+        result = getRange(target, moduleId, artifact, "0-9,10-19", PARTIAL_CONTENT, null, null);
 
         outputStream.reset();
         outputStream.write("--THIS_STRING_SEPARATES_MULTIPART\r\n".getBytes(StandardCharsets.ISO_8859_1));
@@ -323,9 +398,9 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     }
 
     private MvcResult getRange(
-            final Target target, final DistributionSet ds, final Artifact artifact, final String range,
+            final Target target, final Long moduleId, final Artifact artifact, final String range,
             final HttpStatus expectStatus, final Integer expectedContentLength, final String expectContentRange) throws Exception {
-        return mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), getOsModule(ds), "file1").header(RANGE, "bytes=" + range))
+        return mvc.perform(get(DOWNLOAD_FN, tenant(), target.getControllerId(), moduleId, "file1").header(RANGE, "bytes=" + range))
                 .andExpect(status().is(expectStatus.value()))
                 .andExpect(header().string(
                         CONTENT_TYPE,
@@ -347,13 +422,14 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     private TestData createTargetAndDs(final int artifactSize) {
         final Target target = testdataFactory.createTarget();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
+        final Long moduleId = ds.getModules().iterator().next().getId();
         final byte[] randomBytes = nextBytes(artifactSize);
-        final Artifact artifact = artifactManagement.create(new ArtifactUpload(
-                new ByteArrayInputStream(randomBytes), null, artifactSize, null, getOsModule(ds), "file1", false));
-        return new TestData(target, ds, artifact, randomBytes);
+        final Artifact artifact = artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(randomBytes), null, artifactSize, null, moduleId, "file1", false));
+        return new TestData(target, ds, moduleId, artifact, randomBytes);
     }
 
-    private record TestData(Target target, DistributionSet ds, Artifact artifact, byte[] randomBytes) {}
+    private record TestData(Target target, DistributionSet ds, Long moduleId, Artifact artifact, byte[] randomBytes) {}
 
     @Configuration
     static class DownloadTestConfiguration {
