@@ -71,7 +71,7 @@
         <!--
           Ethlo plugin uses 4.x dependencies - since it only does static weaving - it should be fine - but should eventually upgrade its dependencies.
         -->
-        <eclipselink.version>5.0.0</eclipselink.version>
+        <eclipselink.version>5.0.1</eclipselink.version>
         <eclipselink-maven-plugin.version>4.0.2</eclipselink-maven-plugin.version>
         <!-- Eclipselink - END -->
 
