@@ -18,6 +18,7 @@ import java.net.URL;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.server.PWA;
@@ -117,10 +118,12 @@ public class HawkbitUiApp implements AppShellConfigurator {
 
     // accepts all user / pass, just delegating them to the feign client
     @Bean
-    AuthenticationManager authenticationManager(final HawkbitMgmtClient hawkbitClient, final HawkbitServer server) {
+    AuthenticationManager authenticationManager(final HawkbitServer server) {
         return authentication -> {
             final String username = authentication.getName();
-            final String password = authentication.getCredentials().toString();
+            final String password = Optional.ofNullable(authentication.getCredentials())
+                    .map(Object::toString)
+                    .orElseThrow(() -> new BadCredentialsException("No password!"));
 
             // make simple check in order not to be logged in as not real user.
             if (!isAuthenticated(username, password, server.getMgmtUrl())) {
