@@ -52,7 +52,7 @@ public class DmfApp {
     }
 
     @Component
-    public static class Shell {
+    static class Shell {
 
         private final DmfTenant dmfTenant;
         private final UpdateHandler updateHandler;

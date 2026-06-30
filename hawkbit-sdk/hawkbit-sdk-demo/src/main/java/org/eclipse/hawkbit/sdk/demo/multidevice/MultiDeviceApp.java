@@ -56,7 +56,7 @@ public class MultiDeviceApp {
     }
 
     @Component
-    public static class Shell {
+    static class Shell {
 
         private final DdiTenant ddiTenant;
         private final AuthenticationSetupHelper mgmtApi;

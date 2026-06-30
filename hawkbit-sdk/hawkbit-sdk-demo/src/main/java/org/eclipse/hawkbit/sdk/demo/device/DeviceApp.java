@@ -56,7 +56,7 @@ public class DeviceApp {
     }
 
     @Component
-    public static class Shell {
+    static class Shell {
 
         private final DdiTenant ddiTenant;
 
