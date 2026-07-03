@@ -104,7 +104,8 @@ public class HawkbitUiApp implements AppShellConfigurator {
             @Autowired(required = false) final OAuth2AuthorizedClientManager authorizedClientManager) {
         final RequestInterceptor authorization = authorizationInterceptor(authorizedClientManager);
         return new HawkbitClient(
-                hawkBitServer, null, null, null,
+                hawkBitServer,
+                HawkbitClientCodecs.DEFAULT_ENCODER, HawkbitClientCodecs.DEFAULT_DECODER, HawkbitClientCodecs.DEFAULT_CONTRACT,
                 ERROR_DECODER,
                 (tenant, controller) -> controller == null
                         ? authorization
