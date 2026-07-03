@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.ui.security;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Objects;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -44,13 +45,15 @@ class UserDetailsSetter extends OncePerRequestFilter {
     protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain)
             throws ServletException, IOException {
         final Authentication authentication = securityContextHolderStrategy.getContext().getAuthentication();
-        final Authentication newAuthentication;
 
-        if (!(authentication instanceof AnonymousAuthenticationToken) && authentication.isAuthenticated()) {
+        final Authentication newAuthentication;
+        if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken) && authentication.isAuthenticated()) {
             final Collection<? extends GrantedAuthority> grantedAuthorities = grantedAuthoritiesService.getGrantedAuthorities(authentication);
             if (authentication instanceof OAuth2AuthenticationToken oAuth2AuthenticationToken) {
                 newAuthentication = new OAuth2AuthenticationToken(
-                        oAuth2AuthenticationToken.getPrincipal(), grantedAuthorities,
+                        // principal is not null, but the method is not @NonNull annotated
+                        Objects.requireNonNull(oAuth2AuthenticationToken.getPrincipal()),
+                        grantedAuthorities,
                         oAuth2AuthenticationToken.getAuthorizedClientRegistrationId());
                 if (authentication.getPrincipal() instanceof OidcUser user) {
                     // if there is no refresh token and the access token is expired then re-login is required

@@ -34,7 +34,7 @@ public final class AboutView extends VerticalLayout {
     public AboutView() {
         setSpacing(false);
 
-        final Image img = new Image("images/about_image.png", "hawkBit");
+        final Image img = new Image("images/hawkbit_logo.png", "hawkBit");
         img.setWidth("200px");
         add(img);
 

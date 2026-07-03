@@ -81,6 +81,8 @@ public class TableView<T, ID> extends Div implements Constants, BeforeEnterObser
         splitLayout.setSplitterPosition(100);
         splitLayout.addToPrimary(selectionGrid);
         detailsPanel = new Div();
+        detailsPanel.setSizeFull();
+        detailsPanel.getStyle().set("display", "flex").set("flex-direction", "column").set("min-height", "0");
 
         if (detailsButtonHandler != null) {
             ComponentRenderer<Button, T> renderer = new ComponentRenderer<>(renderDetailsButton(detailsButtonHandler));

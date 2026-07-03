@@ -94,8 +94,8 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                 },
                 (query, rsqlFilter) -> Optional.ofNullable(
                                 hawkbitClient.getDistributionSetRestApi()
-                                        .getDistributionSets(rsqlFilter, query.getOffset(), query.getPageSize(), Utils.getSortParam(query
-                                                .getSortOrders()))
+                                        .getDistributionSets(
+                                                rsqlFilter, query.getOffset(), query.getPageSize(), Utils.getSortParam(query.getSortOrders()), null)
                                         .getBody())
                         .stream().flatMap(body -> body.getContent().stream()),
                 e -> new CreateDialog(hawkbitClient).result(),
@@ -158,7 +158,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             type.setItemLabelGenerator(MgmtDistributionSetType::getName);
             type.setItems(Optional.ofNullable(
                             hawkbitClient.getDistributionSetTypeRestApi()
-                                    .getDistributionSetTypes(null, 0, 20, Constants.NAME_ASC)
+                                    .getDistributionSetTypes(null, 0, 20, Constants.NAME_ASC, null)
                                     .getBody())
                     .map(PagedList::getContent)
                     .orElseGet(Collections::emptyList));
@@ -266,7 +266,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                     this::readyToCreate,
                     Optional.ofNullable(
                                     hawkbitClient.getDistributionSetTypeRestApi()
-                                            .getDistributionSetTypes(null, 0, 30, Constants.CREATED_AT_DESC)
+                                            .getDistributionSetTypes(null, 0, 30, Constants.CREATED_AT_DESC, null)
                                             .getBody())
                             .map(body -> body.getContent().toArray(new MgmtDistributionSetType[0]))
                             .orElseGet(() -> new MgmtDistributionSetType[0]));
@@ -353,6 +353,8 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                     v -> new Utils.BaseDialog<Void>("Add Software Modules") {
 
                         {
+                            setHeight("80vh");
+                            setWidth("80vw");
                             final SoftwareModuleView softwareModulesView = new SoftwareModuleView(false, hawkbitClient);
                             add(softwareModulesView);
                             final Button addBtn = new Button("Add");

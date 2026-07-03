@@ -61,11 +61,10 @@ public final class TargetActionsHistory extends Grid<TargetActionsHistory.Action
                 .setComparator(ActionStatusEntry::getLastModifiedAt);
 
         addColumn(new ComponentRenderer<>(ActionStatusEntry::getForceTypeIcon)).setHeader("Type").setAutoWidth(true).setFlexGrow(0);
-        addColumn(new ComponentRenderer<>(ActionStatusEntry::getActionsLayout)).setHeader("Actions").setAutoWidth(true).setFlexGrow(0)
-                .setFrozenToEnd(true);
-        addColumn(new ComponentRenderer<>(ActionStatusEntry::getForceQuitLayout)).setHeader("Force Quit").setAutoWidth(true)
-                .setFlexGrow(0).setFrozenToEnd(true);
-        ;
+        addColumn(new ComponentRenderer<>(ActionStatusEntry::getActionsLayout))
+                .setHeader("Actions").setAutoWidth(true).setFlexGrow(0).setFrozenToEnd(true);
+        addColumn(new ComponentRenderer<>(ActionStatusEntry::getForceQuitLayout))
+                .setHeader("Force Quit").setAutoWidth(true).setFlexGrow(0).setFrozenToEnd(true);
         addItemClickListener(e -> actionStepsGrid.setActionId(e.getItem().action.getId()));
         this.actionStepsGrid = actionStepsGrid;
     }
@@ -87,10 +86,12 @@ public final class TargetActionsHistory extends Grid<TargetActionsHistory.Action
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
+        // TODO: it is a bug in vaadin, reported at 02.07.2026. To remove when fixed
+        getElement().executeJs("if (!this.$connector && window.Vaadin && Vaadin.Flow && Vaadin.Flow.gridConnector) { Vaadin.Flow.gridConnector.initLazy(this); }");
+
         List<ActionStatusEntry> actionStatusEntries = fetchActions();
         setItems(actionStatusEntries);
         actionStatusEntries.stream().findFirst().ifPresentOrElse(e -> {
-            // select first action in the list by default
             asSingleSelect().setValue(e);
             actionStepsGrid.setActionId(e.action.getId());
         }, () -> actionStepsGrid.setActionId(null));
