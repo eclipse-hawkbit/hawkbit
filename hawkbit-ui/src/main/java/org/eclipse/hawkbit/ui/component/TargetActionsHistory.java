@@ -30,6 +30,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
@@ -75,9 +76,15 @@ public final class TargetActionsHistory extends Grid<TargetActionsHistory.Action
     }
 
     private List<ActionStatusEntry> fetchActions() {
-        return hawkbitClient.getTargetRestApi().getActionHistory(target.getControllerId(), null, 0, 30, null)
-                .getBody()
-                .getContent()
+        final PagedList<MgmtAction> actions =
+                hawkbitClient.getTargetRestApi()
+                        .getActionHistory(target.getControllerId(), null, 0, 30, null)
+                        .getBody();
+        if (actions == null || actions.getContent() == null) {
+            log.error("Unable to fetch action history for target : {}", target.getControllerId());
+            return List.of();
+        }
+        return actions.getContent()
                 .stream()
                 .map(action -> new ActionStatusEntry(action, () -> setItems(fetchActions())))
                 .filter(value -> value.action != null)
@@ -86,12 +93,11 @@ public final class TargetActionsHistory extends Grid<TargetActionsHistory.Action
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
-        // TODO: it is a bug in vaadin, reported at 02.07.2026. To remove when fixed
-        getElement().executeJs("if (!this.$connector && window.Vaadin && Vaadin.Flow && Vaadin.Flow.gridConnector) { Vaadin.Flow.gridConnector.initLazy(this); }");
-
+        super.onAttach(attachEvent);
         List<ActionStatusEntry> actionStatusEntries = fetchActions();
         setItems(actionStatusEntries);
         actionStatusEntries.stream().findFirst().ifPresentOrElse(e -> {
+            // select first action in the list by default
             asSingleSelect().setValue(e);
             actionStepsGrid.setActionId(e.action.getId());
         }, () -> actionStepsGrid.setActionId(null));

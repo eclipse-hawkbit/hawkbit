@@ -230,7 +230,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             metadata.setValue(Optional.ofNullable(
                             hawkbitClient.getDistributionSetRestApi().getMetadata(distributionSet.getId()).getBody())
                     .map(body -> body.getContent().stream()
-                            .map(b -> String.format("%s: %s\n", b.getKey(), b.getValue())).collect(
+                            .map(b -> b.getKey() + ":" + b.getValue() + "\n").collect(
                                     Collectors.joining())).orElse(""));
 
             softwareModulesGrid.setItems(query -> Optional.ofNullable(

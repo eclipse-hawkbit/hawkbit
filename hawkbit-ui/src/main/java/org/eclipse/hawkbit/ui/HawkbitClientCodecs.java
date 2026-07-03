@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Contributors to the Eclipse Foundation
+ * Copyright (c) 2026 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -39,10 +39,6 @@ import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Spring Boot 4 (Jackson 3 / HAL) compatible Feign codecs for the hawkBit UI.
- * <p>
- * These mirror the {@code DEFAULT_ENCODER}/{@code DEFAULT_DECODER}/{@code DEFAULT_CONTRACT} provided by the SDK's
- * {@code HawkbitClient} on the Spring Boot 4 baseline. They are duplicated here so the UI can run on Spring Boot 4 while
- * the shared {@code hawkbit-sdk-commons} stays on the Spring Boot 3.5 (Jackson 2) baseline of the rest of the project.
  */
 final class HawkbitClientCodecs {
 
@@ -118,7 +114,4 @@ final class HawkbitClientCodecs {
     };
 
     public static final Contract DEFAULT_CONTRACT = new SpringMvcContract();
-
-    private HawkbitClientCodecs() {
-    }
 }
