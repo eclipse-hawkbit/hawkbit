@@ -90,6 +90,7 @@ public final class TargetActionsHistory extends Grid<TargetActionsHistory.Action
         List<ActionStatusEntry> actionStatusEntries = fetchActions();
         setItems(actionStatusEntries);
         actionStatusEntries.stream().findFirst().ifPresentOrElse(e -> {
+            // select first action in the list by default
             asSingleSelect().setValue(e);
             actionStepsGrid.setActionId(e.action.getId());
         }, () -> actionStepsGrid.setActionId(null));

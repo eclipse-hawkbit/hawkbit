@@ -355,14 +355,14 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
 
         private TargetDetailedView(final HawkbitMgmtClient hawkbitClient) {
             final TabSheet tabSheet = new TabSheet();
-            tabSheet.setSizeFull();
+            tabSheet.setWidthFull();
             targetId = new Span();
             targetDetails = new TargetDetails(hawkbitClient);
             targetAssignedInstalled = new TargetAssignedInstalled(hawkbitClient);
             targetTags = new TargetTags(hawkbitClient);
             targetMetadata = new TargetMetadata(hawkbitClient);
             targetActionsHistoryLayout = new TargetActionsHistoryLayout(hawkbitClient);
-            setSizeFull();
+            setWidthFull();
 
             add(targetId);
             tabSheet.add("Details", targetDetails);
@@ -370,7 +370,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             tabSheet.add("Tags", targetTags);
             tabSheet.add("Metadata", targetMetadata);
             tabSheet.add("Action History", targetActionsHistoryLayout);
-            addAndExpand(tabSheet);
+            add(tabSheet);
         }
 
         private void setItem(final MgmtTarget target) {
@@ -672,40 +672,17 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
         @Serial
         private static final long serialVersionUID = 1L;
 
-        private final transient HawkbitMgmtClient hawkbitMgmtClient;
-        private TargetActionsHistory targetActionsHistory;
-        private transient MgmtTarget pendingTarget;
+        private final TargetActionsHistory targetActionsHistory;
 
         public TargetActionsHistoryLayout(HawkbitMgmtClient hawkbitMgmtClient) {
-            this.hawkbitMgmtClient = hawkbitMgmtClient;
-            setSizeFull();
-            setMinHeight("60vh");
-            setPadding(false);
-            setSpacing(false);
-        }
-
-        @Override
-        protected void onAttach(AttachEvent attachEvent) {
-            if (targetActionsHistory == null) {
-                ActionStepsGrid actionStepsGrid = new ActionStepsGrid(hawkbitMgmtClient);
-                targetActionsHistory = new TargetActionsHistory(hawkbitMgmtClient, actionStepsGrid);
-                targetActionsHistory.setSizeFull();
-                targetActionsHistory.setMinHeight("25vh");
-                actionStepsGrid.setSizeFull();
-                actionStepsGrid.setMinHeight("25vh");
-                if (pendingTarget != null) {
-                    targetActionsHistory.setItem(pendingTarget);
-                    actionStepsGrid.setTarget(pendingTarget);
-                }
-                addAndExpand(targetActionsHistory, actionStepsGrid);
-            }
+            ActionStepsGrid actionStepsGrid = new ActionStepsGrid(hawkbitMgmtClient);
+            targetActionsHistory = new TargetActionsHistory(hawkbitMgmtClient, actionStepsGrid);
+            add(targetActionsHistory);
+            add(actionStepsGrid);
         }
 
         public void setItem(MgmtTarget target) {
-            this.pendingTarget = target;
-            if (targetActionsHistory != null) {
-                targetActionsHistory.setItem(target);
-            }
+            targetActionsHistory.setItem(target);
         }
 
         public static class ActionStepsGrid extends Grid<ActionStepsGrid.ActionStepEntry> {
