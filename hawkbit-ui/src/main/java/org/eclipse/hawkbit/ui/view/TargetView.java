@@ -686,6 +686,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
 
         @Override
         protected void onAttach(AttachEvent attachEvent) {
+            super.onAttach(attachEvent);
             if (targetActionsHistory == null) {
                 ActionStepsGrid actionStepsGrid = new ActionStepsGrid(hawkbitMgmtClient);
                 targetActionsHistory = new TargetActionsHistory(hawkbitMgmtClient, actionStepsGrid);
@@ -740,9 +741,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
 
             @Override
             protected void onAttach(AttachEvent attachEvent) {
-                // TODO: it is a bug in vaadin, reported at 02.07.2026. To remove when fixed
-                getElement().executeJs("if (!this.$connector && window.Vaadin && Vaadin.Flow && Vaadin.Flow.gridConnector) { Vaadin.Flow.gridConnector.initLazy(this); }");
-
+                super.onAttach(attachEvent);
                 setItems(fetchActionSteps());
             }
 

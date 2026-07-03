@@ -86,12 +86,11 @@ public final class TargetActionsHistory extends Grid<TargetActionsHistory.Action
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
-        // TODO: it is a bug in vaadin, reported at 02.07.2026. To remove when fixed
-        getElement().executeJs("if (!this.$connector && window.Vaadin && Vaadin.Flow && Vaadin.Flow.gridConnector) { Vaadin.Flow.gridConnector.initLazy(this); }");
-
+        super.onAttach(attachEvent);
         List<ActionStatusEntry> actionStatusEntries = fetchActions();
         setItems(actionStatusEntries);
         actionStatusEntries.stream().findFirst().ifPresentOrElse(e -> {
+            // select first action in the list by default
             asSingleSelect().setValue(e);
             actionStepsGrid.setActionId(e.action.getId());
         }, () -> actionStepsGrid.setActionId(null));
