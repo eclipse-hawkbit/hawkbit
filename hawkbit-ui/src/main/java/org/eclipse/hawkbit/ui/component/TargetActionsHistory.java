@@ -86,10 +86,10 @@ public final class TargetActionsHistory extends Grid<TargetActionsHistory.Action
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
+        getElement().executeJs("if (!this.$connector && window.Vaadin && Vaadin.Flow && Vaadin.Flow.gridConnector) { Vaadin.Flow.gridConnector.initLazy(this); }");
         List<ActionStatusEntry> actionStatusEntries = fetchActions();
         setItems(actionStatusEntries);
         actionStatusEntries.stream().findFirst().ifPresentOrElse(e -> {
-            // select first action in the list by default
             asSingleSelect().setValue(e);
             actionStepsGrid.setActionId(e.action.getId());
         }, () -> actionStepsGrid.setActionId(null));
