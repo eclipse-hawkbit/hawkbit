@@ -31,6 +31,19 @@ jobs:
         id: get-sha
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
+      - name: Derive branch ref for SARIF upload
+        id: upload-ref
+        run: |
+          R="${{ inputs.ref }}"
+          R="${R#refs/heads/}"                              # strip refs/heads/ if present
+          R="${R#refs/tags/}"                               # strip refs/tags/ if present
+          if [[ "$R" =~ ^([0-9]+\.[0-9]+)\.[0-9]+(-.+)?$ ]]; then
+            BRANCH="${BASH_REMATCH[1]}"                     # 1.1.0 -> 1.1, 2.0.0-M1 -> 2.0
+          else
+            BRANCH="$R"                                     # master, 1.0, 1.1 pass through
+          fi
+          echo "ref=refs/heads/$BRANCH" >> "$GITHUB_OUTPUT"
+
       - name: Set up JDK
         uses: actions/setup-java@v5.4.0
         with:
@@ -119,7 +132,7 @@ jobs:
         if: ${{ inputs.upload }}
         uses: github/codeql-action/upload-sarif@v4.35.1
         with:
-          ref: refs/heads/${{ inputs.ref }}
+          ref: ${{ steps.upload-ref.outputs.ref }}
           sha: ${{ steps.get-sha.outputs.sha }}
           sarif_file: 'scans/hawkbit-ddi-server.sarif'
           category: "Container Images (hawkbit-ddi-server) [${{ inputs.ref }}]"
@@ -127,7 +140,7 @@ jobs:
         if: ${{ inputs.upload }}
         uses: github/codeql-action/upload-sarif@v4.35.1
         with:
-          ref: refs/heads/${{ inputs.ref }}
+          ref: ${{ steps.upload-ref.outputs.ref }}
           sha: ${{ steps.get-sha.outputs.sha }}
           sarif_file: 'scans/hawkbit-dmf-server.sarif'
           category: "Container Images (hawkbit-dmf-server) [${{ inputs.ref }}]"
@@ -135,7 +148,7 @@ jobs:
         if: ${{ inputs.upload }}
         uses: github/codeql-action/upload-sarif@v4.35.1
         with:
-          ref: refs/heads/${{ inputs.ref }}
+          ref: ${{ steps.upload-ref.outputs.ref }}
           sha: ${{ steps.get-sha.outputs.sha }}
           sarif_file: 'scans/hawkbit-mgmt-server.sarif'
           category: "Container Images (hawkbit-mgmt-server) [${{ inputs.ref }}]"
@@ -143,7 +156,7 @@ jobs:
         if: ${{ inputs.upload }}
         uses: github/codeql-action/upload-sarif@v4.35.1
         with:
-          ref: refs/heads/${{ inputs.ref }}
+          ref: ${{ steps.upload-ref.outputs.ref }}
           sha: ${{ steps.get-sha.outputs.sha }}
           sarif_file: 'scans/hawkbit-ui.sarif'
           category: "Container Images (hawkbit-ui) [${{ inputs.ref }}]"
@@ -152,7 +165,7 @@ jobs:
         if: ${{ inputs.upload }}
         uses: github/codeql-action/upload-sarif@v4.35.1
         with:
-          ref: refs/heads/${{ inputs.ref }}
+          ref: ${{ steps.upload-ref.outputs.ref }}
           sha: ${{ steps.get-sha.outputs.sha }}
           sarif_file: 'scans/hawkbit-update-server.sarif'
           category: "Container Images (hawkbit-update-server) [${{ inputs.ref }}]"
@@ -161,7 +174,7 @@ jobs:
         if: ${{ inputs.upload }}
         uses: github/codeql-action/upload-sarif@v4.35.1
         with:
-          ref: refs/heads/${{ inputs.ref }}
+          ref: ${{ steps.upload-ref.outputs.ref }}
           sha: ${{ steps.get-sha.outputs.sha }}
           sarif_file: 'scans/hawkbit-repository-jpa-init.sarif'
           category: "Container Images (hawkbit-repository-jpa-init) [${{ inputs.ref }}]"
