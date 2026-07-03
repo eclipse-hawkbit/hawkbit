@@ -98,8 +98,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
                 },
                 (query, rsqlFilter) -> Optional.ofNullable(
                                 hawkbitClient.getSoftwareModuleRestApi()
-                                        .getSoftwareModules(rsqlFilter, query.getOffset(), query.getPageSize(), Constants.NAME_ASC,
-                                                null)
+                                        .getSoftwareModules(rsqlFilter, query.getOffset(), query.getPageSize(), Constants.NAME_ASC)
                                         .getBody())
                         .stream().map(PagedList::getContent).flatMap(List::stream),
                 isParent ? v -> new CreateDialog(hawkbitClient).result() : null,
@@ -138,7 +137,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             type.setItemLabelGenerator(MgmtSoftwareModuleType::getName);
             type.setItems(Optional.ofNullable(
                             hawkbitClient.getSoftwareModuleTypeRestApi()
-                                    .getTypes(null, 0, 20, Constants.NAME_ASC, null)
+                                    .getTypes(null, 0, 20, Constants.NAME_ASC)
                                     .getBody())
                     .map(PagedList::getContent)
                     .orElseGet(Collections::emptyList));
@@ -232,7 +231,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
                     this::readyToCreate,
                     Optional.ofNullable(
                                     hawkbitClient.getSoftwareModuleTypeRestApi()
-                                            .getTypes(null, 0, 30, Constants.NAME_ASC, null)
+                                            .getTypes(null, 0, 30, Constants.NAME_ASC)
                                             .getBody())
                             .map(body -> body.getContent().toArray(new MgmtSoftwareModuleType[0]))
                             .orElseGet(() -> new MgmtSoftwareModuleType[0]));
@@ -265,7 +264,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
                     distType.setItems(
                             Optional.ofNullable(
                                             hawkbitClient.getDistributionSetTypeRestApi()
-                                                    .getDistributionSetTypes(null, 0, 30, Constants.NAME_ASC, null)
+                                                    .getDistributionSetTypes(null, 0, 30, Constants.NAME_ASC)
                                                     .getBody())
                                     .map(body -> body.getContent().toArray(new MgmtDistributionSetType[0]))
                                     .orElseGet(() -> new MgmtDistributionSetType[0]));

@@ -96,7 +96,7 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
                 (query, rsqlFilter) -> Optional.ofNullable(
                         hawkbitClient.getRolloutRestApi()
                                 .getRollouts(
-                                        rsqlFilter, query.getOffset(), query.getPageSize(), Constants.NAME_ASC, "full", null)
+                                        rsqlFilter, query.getOffset(), query.getPageSize(), Constants.NAME_ASC, "full")
                                 .getBody()).stream().flatMap(page -> page.getContent().stream()),
                 selectionGrid -> new CreateDialog(hawkbitClient).result(),
                 selectionGrid -> {
@@ -349,7 +349,7 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
                     query -> hawkbitClient.getDistributionSetRestApi()
                             .getDistributionSets(
                                     query.getFilter().orElse(null),
-                                    query.getOffset(), query.getPageSize(), Constants.NAME_ASC, null)
+                                    query.getOffset(), query.getPageSize(), Constants.NAME_ASC)
                             .getBody().getContent().stream());
             distributionSet.setRequiredIndicatorVisible(true);
             distributionSet.setItemLabelGenerator(distributionSetO -> distributionSetO.getName() + ":" + distributionSetO.getVersion());

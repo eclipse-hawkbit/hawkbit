@@ -24,11 +24,21 @@
     <name>hawkBit :: UI</name>
 
     <properties>
+        <java.version>21</java.version>
         <vaadin.version>25.2.1</vaadin.version>
+        <spring.boot.version>4.1.0</spring.boot.version>
     </properties>
 
     <dependencyManagement>
+
         <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-bom</artifactId>
