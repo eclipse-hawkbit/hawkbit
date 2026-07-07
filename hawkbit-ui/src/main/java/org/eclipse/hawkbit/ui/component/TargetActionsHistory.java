@@ -30,6 +30,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
@@ -75,9 +76,15 @@ public final class TargetActionsHistory extends Grid<TargetActionsHistory.Action
     }
 
     private List<ActionStatusEntry> fetchActions() {
-        return hawkbitClient.getTargetRestApi().getActionHistory(target.getControllerId(), null, 0, 30, null)
-                .getBody()
-                .getContent()
+        final PagedList<MgmtAction> actions =
+                hawkbitClient.getTargetRestApi()
+                        .getActionHistory(target.getControllerId(), null, 0, 30, null)
+                        .getBody();
+        if (actions == null || actions.getContent() == null) {
+            log.error("Unable to fetch action history for target : {}", target.getControllerId());
+            return List.of();
+        }
+        return actions.getContent()
                 .stream()
                 .map(action -> new ActionStatusEntry(action, () -> setItems(fetchActions())))
                 .filter(value -> value.action != null)
