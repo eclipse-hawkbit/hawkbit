@@ -19,7 +19,6 @@ import java.util.stream.Stream;
 
 import jakarta.annotation.security.RolesAllowed;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Unit;
@@ -58,6 +57,7 @@ import org.eclipse.hawkbit.ui.view.util.Filter;
 import org.eclipse.hawkbit.ui.view.util.SelectionGrid;
 import org.eclipse.hawkbit.ui.view.util.TableView;
 import org.eclipse.hawkbit.ui.view.util.Utils;
+import tools.jackson.databind.ObjectMapper;
 
 @PageTitle("Target Filter Queries")
 @Route(value = "target_filter_queries", layout = MainLayout.class)
@@ -77,15 +77,15 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
                     @Override
                     protected void addColumns(final Grid<TargetFilterQueryGridItem> grid) {
                         grid.addColumn(MgmtTargetFilterQuery::getId).setHeader(Constants.ID).setAutoWidth(true).setKey("id").setSortable(true);
-                        grid.addColumn(MgmtTargetFilterQuery::getName).setHeader(Constants.NAME).setAutoWidth(true).setKey("name")
-                                .setSortable(true).setResizable(true);
-                        grid.addColumn(new ComponentRenderer<>(QueryCell::new)).setHeader("Query").setAutoWidth(true).setKey("query")
-                                .setResizable(true);
+                        grid.addColumn(MgmtTargetFilterQuery::getName)
+                                .setHeader(Constants.NAME).setAutoWidth(true).setKey("name").setSortable(true).setResizable(true);
+                        grid.addColumn(new ComponentRenderer<>(QueryCell::new))
+                                .setHeader("Query").setAutoWidth(true).setKey("query").setResizable(true);
                         grid.addColumn(Utils.localDateTimeRenderer(MgmtTargetFilterQuery::getLastModifiedAt))
-                                .setHeader(Constants.LAST_MODIFIED_AT).setKey("lastModifiedAt")
-                                .setSortable(true).setAutoWidth(true).setResizable(true);
-                        grid.addColumn(new ComponentRenderer<>(DistributionSetCell::new)).setHeader(Constants.DISTRIBUTION_SET)
-                                .setAutoWidth(true).setResizable(true);
+                                .setHeader(Constants.LAST_MODIFIED_AT).setKey("lastModifiedAt").setSortable(true).setAutoWidth(true)
+                                .setResizable(true);
+                        grid.addColumn(new ComponentRenderer<>(DistributionSetCell::new))
+                                .setHeader(Constants.DISTRIBUTION_SET).setAutoWidth(true).setResizable(true);
 
                         grid.addComponentColumn(rollout -> new Actions(rollout, grid, hawkbitClient)).setHeader(
                                 Constants.ACTIONS).setAutoWidth(true);
@@ -93,7 +93,8 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
                 },
                 (query, filter) -> Optional.ofNullable(
                                 hawkbitClient.getTargetFilterQueryRestApi()
-                                        .getFilters(filter, query.getOffset(), query.getPageSize(),
+                                        .getFilters(
+                                                filter, query.getOffset(), query.getPageSize(),
                                                 Utils.getSortParam(query.getSortOrders(), Constants.NAME_ASC), "compact")
                                         .getBody())
                         .stream()
@@ -187,8 +188,8 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
         private final Grid<TargetFilterQueryGridItem> grid;
         private final transient HawkbitMgmtClient hawkbitClient;
 
-        private Actions(final MgmtTargetFilterQuery filter, final Grid<TargetFilterQueryGridItem> grid,
-                final HawkbitMgmtClient hawkbitClient) {
+        private Actions(
+                final MgmtTargetFilterQuery filter, final Grid<TargetFilterQueryGridItem> grid, final HawkbitMgmtClient hawkbitClient) {
             this.grid = grid;
             this.hawkbitClient = hawkbitClient;
             init(filter);
@@ -255,8 +256,8 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
                     "it will be automatically assigned to all targets that match the target filter.");
 
             actionType = Utils.actionTypeControls(
-                    new MgmtActionType[] { MgmtActionType.SOFT, MgmtActionType.FORCED, MgmtActionType.DOWNLOAD_ONLY }, MgmtActionType.FORCED,
-                    null);
+                    new MgmtActionType[] {
+                            MgmtActionType.SOFT, MgmtActionType.FORCED, MgmtActionType.DOWNLOAD_ONLY }, MgmtActionType.FORCED, null);
 
             distributionSet = Utils.nameComboBox("Distribution Set", this::readyToAssign, query -> Optional.ofNullable(
                     hawkbitClient.getDistributionSetRestApi()
@@ -350,8 +351,7 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
                             createdBy, createdAt,
                             lastModifiedBy, lastModifiedAt,
                             autoAssignDistributionSet, autoAssignActionType,
-                            autoAssignWeight, confirmationRequired
-                    )
+                            autoAssignWeight, confirmationRequired)
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
@@ -382,7 +382,7 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
         }
     }
 
-    // todo change /targetfilters api to reduce api calls ?
+    // TODO - change /targetfilters api to reduce api calls ?
     @Getter
     public static class TargetFilterQueryGridItem extends MgmtTargetFilterQuery {
 
@@ -391,10 +391,10 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
         }
 
         private Optional<MgmtDistributionSet> ds;
-        static ObjectMapper objectMapper = new ObjectMapper();
+        private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
         public static TargetFilterQueryGridItem from(final HawkbitMgmtClient hawkbitClient, MgmtTargetFilterQuery filter) {
-            TargetFilterQueryGridItem filterGridItem = objectMapper.convertValue(filter, TargetFilterQueryGridItem.class);
+            TargetFilterQueryGridItem filterGridItem = OBJECT_MAPPER.convertValue(filter, TargetFilterQueryGridItem.class);
 
             if (filterGridItem.getAutoAssignDistributionSet() != null) {
                 filterGridItem.ds = Optional.ofNullable(

@@ -30,6 +30,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
@@ -61,11 +62,10 @@ public final class TargetActionsHistory extends Grid<TargetActionsHistory.Action
                 .setComparator(ActionStatusEntry::getLastModifiedAt);
 
         addColumn(new ComponentRenderer<>(ActionStatusEntry::getForceTypeIcon)).setHeader("Type").setAutoWidth(true).setFlexGrow(0);
-        addColumn(new ComponentRenderer<>(ActionStatusEntry::getActionsLayout)).setHeader("Actions").setAutoWidth(true).setFlexGrow(0)
-                .setFrozenToEnd(true);
-        addColumn(new ComponentRenderer<>(ActionStatusEntry::getForceQuitLayout)).setHeader("Force Quit").setAutoWidth(true)
-                .setFlexGrow(0).setFrozenToEnd(true);
-        ;
+        addColumn(new ComponentRenderer<>(ActionStatusEntry::getActionsLayout))
+                .setHeader("Actions").setAutoWidth(true).setFlexGrow(0).setFrozenToEnd(true);
+        addColumn(new ComponentRenderer<>(ActionStatusEntry::getForceQuitLayout))
+                .setHeader("Force Quit").setAutoWidth(true).setFlexGrow(0).setFrozenToEnd(true);
         addItemClickListener(e -> actionStepsGrid.setActionId(e.getItem().action.getId()));
         this.actionStepsGrid = actionStepsGrid;
     }
@@ -76,9 +76,15 @@ public final class TargetActionsHistory extends Grid<TargetActionsHistory.Action
     }
 
     private List<ActionStatusEntry> fetchActions() {
-        return hawkbitClient.getTargetRestApi().getActionHistory(target.getControllerId(), null, 0, 30, null)
-                .getBody()
-                .getContent()
+        final PagedList<MgmtAction> actions =
+                hawkbitClient.getTargetRestApi()
+                        .getActionHistory(target.getControllerId(), null, 0, 30, null)
+                        .getBody();
+        if (actions == null || actions.getContent() == null) {
+            log.error("Unable to fetch action history for target : {}", target.getControllerId());
+            return List.of();
+        }
+        return actions.getContent()
                 .stream()
                 .map(action -> new ActionStatusEntry(action, () -> setItems(fetchActions())))
                 .filter(value -> value.action != null)
@@ -87,6 +93,7 @@ public final class TargetActionsHistory extends Grid<TargetActionsHistory.Action
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
         List<ActionStatusEntry> actionStatusEntries = fetchActions();
         setItems(actionStatusEntries);
         actionStatusEntries.stream().findFirst().ifPresentOrElse(e -> {

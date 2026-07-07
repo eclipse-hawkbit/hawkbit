@@ -14,19 +14,99 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.eclipse.hawkbit</groupId>
-        <artifactId>hawkbit-parent</artifactId>
-        <version>${revision}</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.1.0</version>
+        <relativePath/>
     </parent>
 
+    <groupId>org.eclipse.hawkbit</groupId>
     <artifactId>hawkbit-ui</artifactId>
     <version>${revision}</version>
     <packaging>jar</packaging>
     <name>hawkBit :: UI</name>
 
+    <licenses>
+        <license>
+            <name>EPL-2.0</name>
+            <url>https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt</url>
+            <comments>Eclipse Public License - Version 2.0</comments>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git@github.com:eclipse-hawkbit/hawkbit.git</connection>
+        <developerConnection>scm:git:https://github.com/eclipse-hawkbit/hawkbit.git</developerConnection>
+        <url>https://github.com/eclipse-hawkbit/hawkbit.git</url>
+    </scm>
+
     <properties>
-        <vaadin.version>24.10.7</vaadin.version>
+        <revision>0-SNAPSHOT</revision>
+        <java.version>21</java.version>
+        <vaadin.version>25.2.1</vaadin.version>
+        <springdoc-openapi.version>3.0.3</springdoc-openapi.version>
+        <spring-cloud.version>2025.1.2</spring-cloud.version>
+
+        <!-- Maven Plugin versions - START -->
+        <maven.enforcer.plugin.version>3.6.3</maven.enforcer.plugin.version>
+        <flatten.maven.plugin.version>1.7.3</flatten.maven.plugin.version>
+
+        <maven.surefire.plugin.version>3.5.6</maven.surefire.plugin.version>
+        <jacoco.maven.plugin.version>0.8.15</jacoco.maven.plugin.version>
+
+        <license.tool.plugin.version>1.1.0</license.tool.plugin.version>
+        <license.maven.plugin.version>5.0.0</license.maven.plugin.version>
+        <central.publishing.maven.plugin.version>0.11.0</central.publishing.maven.plugin.version>
+        <maven.gpg.plugin.version>3.2.8</maven.gpg.plugin.version>
+        <!-- Maven Plugin versions - END -->
+
+        <!-- Test - START -->
+        <surefire.forkcount>1</surefire.forkcount>
+        <surefire.jvm.args/>
+        <!-- Test - END -->
+
+        <!-- Sonar - START -->
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.branch.name>LOCAL_SCAN</sonar.branch.name>
+        <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+        <sonar.qualitygate.timeout>600</sonar.qualitygate.timeout>
+        <sonar.links.homepage>https://hawkbit.eclipse.dev/</sonar.links.homepage>
+        <sonar.links.ci>https://github.com/eclipse-hawkbit/hawkbit/actions</sonar.links.ci>
+        <sonar.coverage.exclusions>
+            **/*Configuration.java,
+            **/*Properties.java,
+            **/*Exception.java,
+            **/src/test/**,
+            **/src/main/java/org/eclipse/hawkbit/repository/test/**,
+            **/src/main/java/org/eclipse/hawkbit/rabbitmq/test/**,
+            **/src/main/java/org/eclipse/hawkbit/ui/**
+        </sonar.coverage.exclusions>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${project.basedir}/../target/jacoco-aggregate/jacoco.xml,
+            ${project.basedir}/../../target/jacoco-aggregate/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
+        <!-- Sonar - END -->
+
+        <!-- Dash tool integration - START -->
+        <dash.skip>false</dash.skip>
+        <dash.fail>true</dash.fail>
+        <dash.projectId>iot.hawkbit</dash.projectId>
+        <dash.summary>.3rd-party/DEPENDENCIES</dash.summary>
+        <!-- To automatically create IP Team review requests for identified content call with -Ddash.iplab.token=<token> (do not share your access token) -->
+        <dash.review.summary>${project.build.directory}/.3rd-party/DEPENDENCIES_REVIEW</dash.review.summary>
+        <excludeGroupIds>org.eclipse,org.junit</excludeGroupIds>
+        <!-- Dash tool integration - END -->
+
+        <skipPublishing>false</skipPublishing>
+        <ratchetFrom>origin/master</ratchetFrom>
     </properties>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>dash-licenses</id>
+            <url>https://repo.eclipse.org/content/repositories/dash-maven2-releases</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <dependencyManagement>
         <dependencies>
@@ -37,19 +117,42 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc-openapi.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-sdk-commons</artifactId>
-            <version>${revision}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-mgmt-api</artifactId>
-            <version>${revision}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -67,7 +170,11 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+            <artifactId>spring-boot-starter-security-oauth2-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -107,6 +214,378 @@
                     <frontendHotdeploy>false</frontendHotdeploy>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <!--
+                https://github.com/diffplug/spotless/tree/main/plugin-maven#-spotless-keep-your-code-spotless-with-maven
+
+                Usage:
+                mvn spotless:apply
+                mvn spotless:check
+                -->
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <ratchetFrom>${ratchetFrom}</ratchetFrom>
+                    <java>
+                        <eclipse>
+                            <file>${maven.multiModuleProjectDirectory}/eclipse_codeformatter.xml</file>
+                        </eclipse>
+                    </java>
+                </configuration>
+            </plugin>
         </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>${maven.enforcer.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>enforce-maven-and-java</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <requireMavenVersion>
+                                        <version>3.8.6</version>
+                                    </requireMavenVersion>
+                                    <requireJavaVersion>
+                                        <version>17</version>
+                                    </requireJavaVersion>
+                                </rules>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>enforce-no-snapshots-deps</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <requireReleaseDeps>
+                                        <message>No Snapshots Allowed!</message>
+                                        <onlyWhenRelease>true</onlyWhenRelease>
+                                    </requireReleaseDeps>
+                                    <requireReleaseDeps>
+                                        <message>No Snapshots Allowed!</message>
+                                        <onlyWhenRelease>false</onlyWhenRelease>
+                                        <excludes>
+                                            <exclude>org.eclipse.hawkbit:*</exclude>
+                                            <!-- if used in child poms with different groupId -->
+                                            <exclude>${project.groupId}:*</exclude>
+                                        </excludes>
+                                    </requireReleaseDeps>
+                                </rules>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>flatten-maven-plugin</artifactId>
+                    <version>${flatten.maven.plugin.version}</version>
+                    <configuration>
+                        <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                        <updatePomFile>true</updatePomFile>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>flatten</id>
+                            <phase>process-resources</phase>
+                            <goals>
+                                <goal>flatten</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>flatten.clean</id>
+                            <phase>clean</phase>
+                            <goals>
+                                <goal>clean</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <parameters>true</parameters>
+                        <proc>full</proc>
+                        <compilerArgument>-Xlint:all,-processing</compilerArgument>
+                        <showWarnings>true</showWarnings>
+                        <showDeprecation>true</showDeprecation>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <configuration>
+                        <doclint>syntax</doclint>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.maven.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>prepare-ut-agent</id>
+                            <phase>process-test-classes</phase>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                            <configuration>
+                                <propertyName>jacoco.agent.args</propertyName>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>prepare-it-agent</id>
+                            <phase>pre-integration-test</phase>
+                            <goals>
+                                <goal>prepare-agent-integration</goal>
+                            </goals>
+                            <configuration>
+                                <propertyName>jacoco.agent.integration.args</propertyName>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>report-ut</id>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report-it</id>
+                            <phase>post-integration-test</phase>
+                            <goals>
+                                <goal>report-integration</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven.surefire.plugin.version}</version>
+                    <configuration>
+                        <reuseForks>true</reuseForks>
+                        <forkCount>${surefire.forkcount}</forkCount>
+                        <argLine>${jacoco.agent.args} ${surefire.jvm.args}</argLine>
+                        <excludes>
+                            <exclude>**/Abstract*.java</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
+
+    <profiles>
+        <profile>
+            <id>checkLicense</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.mycila</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>${license.maven.plugin.version}</version>
+                        <configuration>
+                            <licenseSets>
+                                <licenseSet>
+                                    <header>licenses/LICENSE_HEADER_TEMPLATE.txt</header>
+                                    <validHeaders>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_CONTRIBUTORS_23.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_CONTRIBUTORS_24.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_CONTRIBUTORS_25.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_15.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_19.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_20.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_21.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_22.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_23.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_20.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_19.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_20.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_KIWIGRID_19.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_ENAPTER.txt</validHeader>
+                                        <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BLUEZONE_25.txt</validHeader>
+                                    </validHeaders>
+                                    <excludes>
+                                        <exclude>docker/**</exclude>
+                                        <exclude>licenses/LICENSE*</exclude>
+                                        <exclude>docs/**</exclude>
+                                        <exclude>eclipse_codeformatter.xml</exclude>
+                                        <exclude>intellij_codeformatter.xml</exclude>
+                                        <exclude>**/*.sql</exclude>
+                                        <!-- hawkbit-ui - start-->
+                                        <exclude>**/banner.txt</exclude>
+                                        <exclude>**/robots.txt</exclude>
+                                        <exclude>**/frontend/**</exclude>
+                                        <exclude>**/generated/**</exclude>
+                                        <exclude>**/tsconfig.json</exclude>
+                                        <exclude>**/types.d.ts</exclude>
+                                        <exclude>**/vite.config.ts</exclude>
+                                        <exclude>**/vite.generated.ts</exclude>
+                                        <!-- hawkbit-ui - end -->
+                                        <!-- development files -->
+                                        <exclude>**/application-local.properties</exclude>
+                                    </excludes>
+                                </licenseSet>
+                            </licenseSets>
+                            <mapping>
+                                <java>JAVADOC_STYLE</java>
+                                <scss>JAVADOC_STYLE</scss>
+                            </mapping>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.eclipse.dash</groupId>
+                        <artifactId>license-tool-plugin</artifactId>
+                        <version>${license.tool.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>license-check</id>
+                                <goals>
+                                    <goal>license-check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!-- follows https://eclipse-cbi.github.io/cbi-website/best-practices/github-actions/central-portal/index.html#prerequisites -->
+            <id>publish</id>
+            <activation>
+                <property>
+                    <name>publish</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- This enables javadoc packaging for sonatype central publishing - javadoc is required for releases with hard versions-->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>javadoc-jar</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${maven.gpg.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${central.publishing.maven.plugin.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>published</waitUntil>
+                            <skipPublishing>${skipPublishing}</skipPublishing>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>generateTestReport</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-report-plugin</artifactId>
+                    </plugin>
+                </plugins>
+
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-surefire-report-plugin</artifactId>
+                            <version>${maven.surefire.plugin.version}</version>
+                            <executions>
+                                <execution>
+                                    <id>generate-surefire-report</id>
+                                    <phase>verify</phase>
+                                    <goals>
+                                        <goal>report</goal>
+                                    </goals>
+                                    <inherited>false</inherited>
+                                    <configuration>
+                                        <outputDirectory>${project.build.directory}/surefire-reports</outputDirectory>
+                                        <aggregate>true</aggregate>
+                                        <linkXRef>true</linkXRef>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+    </profiles>
 </project>

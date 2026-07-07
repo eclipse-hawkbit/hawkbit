@@ -27,7 +27,6 @@ public class VaadinServiceInit implements VaadinServiceInitListener {
     @Override
     public void serviceInit(ServiceInitEvent event) {
         // cache zoneId of client as soon as possible
-        event.getSource().addUIInitListener(uiEvent ->
-                uiEvent.getUI().getPage().retrieveExtendedClientDetails(details -> {}));
+        event.getSource().addUIInitListener(uiEvent -> uiEvent.getUI().getPage().retrieveExtendedClientDetails(details -> {}));
     }
 }

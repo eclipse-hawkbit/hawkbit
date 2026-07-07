@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 
 import jakarta.annotation.security.RolesAllowed;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
@@ -86,6 +85,7 @@ import org.eclipse.hawkbit.ui.view.util.TableView;
 import org.eclipse.hawkbit.ui.view.util.Utils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
+import tools.jackson.databind.ObjectMapper;
 
 @PageTitle("Targets")
 @Route(value = "targets", layout = MainLayout.class)
@@ -255,13 +255,9 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
         }
 
         private static List<MgmtTargetFilterQuery> listFilters(HawkbitMgmtClient hawkbitClient) {
-            return Optional
-                    .ofNullable(
-                            hawkbitClient.getTargetFilterQueryRestApi()
-                                    .getFilters(null, 0, 30, null, null)
-                                    .getBody()
-                                    .getContent())
-                    .orElse(Collections.emptyList());
+            return Optional.ofNullable(hawkbitClient.getTargetFilterQueryRestApi().getFilters(null, 0, 30, null, null).getBody())
+                    .map(PagedList::getContent)
+                    .orElseGet(List::of);
         }
 
         private ComponentEventListener<ClickEvent<Button>> createBtnListener(HawkbitMgmtClient hawkbitClient) {
@@ -359,14 +355,14 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
 
         private TargetDetailedView(final HawkbitMgmtClient hawkbitClient) {
             final TabSheet tabSheet = new TabSheet();
-            tabSheet.setWidthFull();
+            tabSheet.setSizeFull();
             targetId = new Span();
             targetDetails = new TargetDetails(hawkbitClient);
             targetAssignedInstalled = new TargetAssignedInstalled(hawkbitClient);
             targetTags = new TargetTags(hawkbitClient);
             targetMetadata = new TargetMetadata(hawkbitClient);
             targetActionsHistoryLayout = new TargetActionsHistoryLayout(hawkbitClient);
-            setWidthFull();
+            setSizeFull();
 
             add(targetId);
             tabSheet.add("Details", targetDetails);
@@ -374,7 +370,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             tabSheet.add("Tags", targetTags);
             tabSheet.add("Metadata", targetMetadata);
             tabSheet.add("Action History", targetActionsHistoryLayout);
-            add(tabSheet);
+            addAndExpand(tabSheet);
         }
 
         private void setItem(final MgmtTarget target) {
@@ -676,17 +672,41 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
         @Serial
         private static final long serialVersionUID = 1L;
 
-        private final TargetActionsHistory targetActionsHistory;
+        private final transient HawkbitMgmtClient hawkbitMgmtClient;
+        private TargetActionsHistory targetActionsHistory;
+        private transient MgmtTarget pendingTarget;
 
         public TargetActionsHistoryLayout(HawkbitMgmtClient hawkbitMgmtClient) {
-            ActionStepsGrid actionStepsGrid = new ActionStepsGrid(hawkbitMgmtClient);
-            targetActionsHistory = new TargetActionsHistory(hawkbitMgmtClient, actionStepsGrid);
-            add(targetActionsHistory);
-            add(actionStepsGrid);
+            this.hawkbitMgmtClient = hawkbitMgmtClient;
+            setSizeFull();
+            setMinHeight("60vh");
+            setPadding(false);
+            setSpacing(false);
+        }
+
+        @Override
+        protected void onAttach(AttachEvent attachEvent) {
+            super.onAttach(attachEvent);
+            if (targetActionsHistory == null) {
+                ActionStepsGrid actionStepsGrid = new ActionStepsGrid(hawkbitMgmtClient);
+                targetActionsHistory = new TargetActionsHistory(hawkbitMgmtClient, actionStepsGrid);
+                targetActionsHistory.setSizeFull();
+                targetActionsHistory.setMinHeight("25vh");
+                actionStepsGrid.setSizeFull();
+                actionStepsGrid.setMinHeight("25vh");
+                if (pendingTarget != null) {
+                    targetActionsHistory.setItem(pendingTarget);
+                    actionStepsGrid.setTarget(pendingTarget);
+                }
+                addAndExpand(targetActionsHistory, actionStepsGrid);
+            }
         }
 
         public void setItem(MgmtTarget target) {
-            targetActionsHistory.setItem(target);
+            this.pendingTarget = target;
+            if (targetActionsHistory != null) {
+                targetActionsHistory.setItem(target);
+            }
         }
 
         public static class ActionStepsGrid extends Grid<ActionStepsGrid.ActionStepEntry> {
@@ -721,6 +741,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
 
             @Override
             protected void onAttach(AttachEvent attachEvent) {
+                super.onAttach(attachEvent);
                 setItems(fetchActionSteps());
             }
 
@@ -873,7 +894,9 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
                     "Distribution Set",
                     this::readyToAssign,
                     query -> hawkbitClient.getDistributionSetRestApi()
-                            .getDistributionSets(query.getFilter().orElse(null), query.getOffset(), query.getPageSize(), Constants.NAME_ASC)
+                            .getDistributionSets(
+                                    query.getFilter().orElse(null),
+                                    query.getOffset(), query.getPageSize(), Constants.NAME_ASC)
                             .getBody().getContent().stream());
             distributionSet.setRequiredIndicatorVisible(true);
             distributionSet.setItemLabelGenerator(distributionSetO -> distributionSetO.getName() + ":" + distributionSetO.getVersion());
@@ -1091,9 +1114,8 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
         public static TargetWithDs from(final HawkbitMgmtClient hawkbitClient, MgmtTarget target) {
             TargetWithDs targetWithDs = objectMapper.convertValue(target, TargetWithDs.class);
 
-            targetWithDs.ds = Optional.ofNullable(hawkbitClient.getTargetRestApi().getInstalledDistributionSet(targetWithDs
-                            .getControllerId())
-                    .getBody());
+            targetWithDs.ds = Optional.ofNullable(hawkbitClient.getTargetRestApi()
+                    .getInstalledDistributionSet(targetWithDs.getControllerId()).getBody());
             return targetWithDs;
         }
 

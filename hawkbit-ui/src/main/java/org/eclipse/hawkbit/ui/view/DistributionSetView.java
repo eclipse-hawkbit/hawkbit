@@ -94,8 +94,8 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                 },
                 (query, rsqlFilter) -> Optional.ofNullable(
                                 hawkbitClient.getDistributionSetRestApi()
-                                        .getDistributionSets(rsqlFilter, query.getOffset(), query.getPageSize(), Utils.getSortParam(query
-                                                .getSortOrders()))
+                                        .getDistributionSets(
+                                                rsqlFilter, query.getOffset(), query.getPageSize(), Utils.getSortParam(query.getSortOrders()))
                                         .getBody())
                         .stream().flatMap(body -> body.getContent().stream()),
                 e -> new CreateDialog(hawkbitClient).result(),
@@ -230,7 +230,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             metadata.setValue(Optional.ofNullable(
                             hawkbitClient.getDistributionSetRestApi().getMetadata(distributionSet.getId()).getBody())
                     .map(body -> body.getContent().stream()
-                            .map(b -> String.format("%s: %s\n", b.getKey(), b.getValue())).collect(
+                            .map(b -> b.getKey() + ":" + b.getValue() + "\n").collect(
                                     Collectors.joining())).orElse(""));
 
             softwareModulesGrid.setItems(query -> Optional.ofNullable(
@@ -353,6 +353,8 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                     v -> new Utils.BaseDialog<Void>("Add Software Modules") {
 
                         {
+                            setHeight("80vh");
+                            setWidth("80vw");
                             final SoftwareModuleView softwareModulesView = new SoftwareModuleView(false, hawkbitClient);
                             add(softwareModulesView);
                             final Button addBtn = new Button("Add");
