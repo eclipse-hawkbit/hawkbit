@@ -398,7 +398,7 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
                 : Optional.empty();
     }
 
-    private T jpaEntity(final Object create) {
+    protected T jpaEntity(final Object create) {
         final T jpaEntity = jpaEntityCreator.get();
         ObjectCopyUtil.copy(create, jpaEntity, false, this::attach);
         return jpaEntity;

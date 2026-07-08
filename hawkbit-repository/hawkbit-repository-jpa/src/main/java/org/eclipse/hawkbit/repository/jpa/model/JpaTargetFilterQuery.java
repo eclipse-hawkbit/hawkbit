@@ -9,10 +9,12 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.util.EnumMap;
 import java.util.Optional;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
+import jakarta.persistence.Converter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -29,6 +31,7 @@ import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetFilterQueryDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryUpdatedEvent;
+import org.eclipse.hawkbit.repository.jpa.utils.MapAttributeConverter;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
@@ -64,6 +67,17 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
     @Convert(converter = JpaAction.ActionTypeConverter.class)
     private ActionType autoAssignActionType;
 
+    @Column(name = "start_at")
+    private Long startAt;
+
+    @Column(name = "approval_decided_by")
+    @Size(min = 1, max = TargetFilterQuery.APPROVED_BY_MAX_SIZE)
+    private String approvalDecidedBy;
+
+    @Column(name = "approval_remark")
+    @Size(max = TargetFilterQuery.APPROVAL_REMARK_MAX_SIZE)
+    private String approvalRemark;
+
     @Column(name = "auto_assign_weight")
     private Integer autoAssignWeight;
 
@@ -77,6 +91,10 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
     @Lob
     @Size(max = TargetFilterQuery.ACCESS_CONTROL_CONTEXT_MAX_SIZE)
     private String accessControlContext;
+
+    @Column(name = "auto_assign_status")
+    @Convert(converter = AutoAssignStatusConverter.class)
+    private AutoAssignStatus autoAssignStatus;
 
     public JpaTargetFilterQuery(final String name, final String query, final DistributionSet autoAssignDistributionSet,
             final ActionType autoAssignActionType, final Integer autoAssignWeight, final boolean confirmationRequired) {
@@ -119,5 +137,18 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
     public void fireDeleteEvent() {
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new TargetFilterQueryDeletedEvent(getTenant(), getId(), getClass()));
+    }
+
+    @Converter
+    public static class AutoAssignStatusConverter extends MapAttributeConverter<AutoAssignStatus, Integer> {
+        public AutoAssignStatusConverter() {
+            super(new EnumMap<>(AutoAssignStatus.class) {{
+                put(AutoAssignStatus.WAITING_FOR_APPROVAL, 0);
+                put(AutoAssignStatus.APPROVAL_DENIED, 1);
+                put(AutoAssignStatus.READY, 2);
+                put(AutoAssignStatus.PAUSED, 3);
+                put(AutoAssignStatus.RUNNING, 4);
+            }}, null);
+        }
     }
 }

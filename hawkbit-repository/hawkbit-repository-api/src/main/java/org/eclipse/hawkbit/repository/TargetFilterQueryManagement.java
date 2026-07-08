@@ -31,11 +31,13 @@ import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeExcep
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -94,7 +96,7 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
      * @return the page with the found {@link TargetFilterQuery}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Slice<TargetFilterQuery> findWithAutoAssignDS(@NotNull Pageable pageable);
+    Slice<TargetFilterQuery> findWithActiveAutoAssignDS(@NotNull Pageable pageable);
 
     /**
      * Updates the auto assign settings of an {@link TargetFilterQuery}.
@@ -123,6 +125,9 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     void cancelAutoAssignmentForDistributionSet(long setId);
+
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    TargetFilterQuery start(final long targetFilterQueryId);
 
     @SuperBuilder
     @Getter
@@ -176,6 +181,13 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
         private final long targetFilterId;
         private Long dsId;
         private ActionType actionType;
+        private Long startAt;
+
+        private TargetFilterQuery.AutoAssignStatus autoAssignStatus;
+        @Size(min = 1, max = TargetFilterQuery.APPROVED_BY_MAX_SIZE)
+        private String approvalDecidedBy;
+        @Size(max = TargetFilterQuery.APPROVAL_REMARK_MAX_SIZE)
+        private String approvalRemark;
 
         @Min(Action.WEIGHT_MIN)
         @Max(Action.WEIGHT_MAX)
@@ -211,6 +223,53 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
          */
         public AutoAssignDistributionSetUpdate actionType(final ActionType actionType) {
             this.actionType = actionType;
+            return this;
+        }
+
+        /**
+         *
+         * Specify a timestamp when the auto assignment should be started automatically
+         *
+         * @param startAt time in milliseconds
+         * @return updated builder instance
+         */
+        public AutoAssignDistributionSetUpdate setStartAt(Long startAt) {
+            this.startAt = startAt;
+            return this;
+        }
+
+        /**
+         *
+         * Specify the status of the auto assignment
+         *
+         * @param autoAssignStatus status of the auto assignment
+         * @return updated builder instance
+         */
+        public AutoAssignDistributionSetUpdate setAutoAssignStatus(TargetFilterQuery.AutoAssignStatus autoAssignStatus) {
+            this.autoAssignStatus = autoAssignStatus;
+            return this;
+        }
+
+        /**
+         *
+         * Specify a user that approved or denied the auto assignment
+         *
+         * @param approvalDecidedBy username of the approving/denying user
+         * @return updated builder instance
+         */
+        public AutoAssignDistributionSetUpdate setApprovalDecidedBy(String approvalDecidedBy) {
+            this.approvalDecidedBy = approvalDecidedBy;
+            return this;
+        }
+
+        /**
+         * Specify an additional note on approval/denial decision
+         *
+         * @param approvalRemark the note
+         * @return updated builder instance
+         */
+        public AutoAssignDistributionSetUpdate setApprovalRemark(String approvalRemark) {
+            this.approvalRemark = approvalRemark;
             return this;
         }
 
