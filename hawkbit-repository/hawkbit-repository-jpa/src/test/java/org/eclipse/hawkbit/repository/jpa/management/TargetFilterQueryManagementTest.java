@@ -527,7 +527,7 @@ class TargetFilterQueryManagementTest extends AbstractRepositoryManagementTest<T
 
     private void verifyFindForAllWithAutoAssignDs(final TargetFilterQuery... expectedFilterQueries) {
         final Slice<TargetFilterQuery> tfqList = targetFilterQueryManagement
-                .findWithAutoAssignDS(PageRequest.of(0, 500));
+                .findWithActiveAutoAssignDS(PageRequest.of(0, 500));
 
         assertThat(tfqList.getNumberOfElements()).isEqualTo(expectedFilterQueries.length);
         verifyExpectedFilterQueriesInList(tfqList, expectedFilterQueries);

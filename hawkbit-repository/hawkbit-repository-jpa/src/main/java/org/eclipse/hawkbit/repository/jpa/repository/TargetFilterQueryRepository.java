@@ -44,7 +44,7 @@ public interface TargetFilterQueryRepository extends BaseEntityRepository<JpaTar
      */
     @Modifying
     @Transactional
-    @Query("UPDATE JpaTargetFilterQuery d SET d.autoAssignDistributionSet = NULL, d.autoAssignActionType = NULL, d.accessControlContext = NULL WHERE d.autoAssignDistributionSet.id IN :ids")
+    @Query("UPDATE JpaTargetFilterQuery d SET d.autoAssignDistributionSet = NULL, d.autoAssignActionType = NULL, d.accessControlContext = NULL, d.autoAssignStatus = NULL, d.startAt = NULL, d.approvalDecidedBy = NULL, d.approvalRemark = NULL WHERE d.autoAssignDistributionSet.id IN :ids")
     void unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(@Param("ids") Long... dsIds);
 
     /**

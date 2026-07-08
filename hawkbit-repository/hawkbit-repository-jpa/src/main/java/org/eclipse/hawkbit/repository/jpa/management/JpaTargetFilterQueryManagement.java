@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
+import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
@@ -44,14 +45,18 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.qfields.TargetFields;
 import org.eclipse.hawkbit.repository.qfields.TargetFilterQueryFields;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
+
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTO_ASSIGNMENT_APPROVAL_ENABLED;
 
 /**
  * JPA implementation of {@link TargetFilterQueryManagement}.
@@ -85,9 +90,19 @@ class JpaTargetFilterQueryManagement
     }
 
     @Override
+    @Transactional
     public JpaTargetFilterQuery create(final Create create) {
         validate(create);
         return super.create(create);
+    }
+
+    @Override
+    protected JpaTargetFilterQuery jpaEntity(final Object create) {
+        final JpaTargetFilterQuery jpaEntity = super.jpaEntity(create);
+        if (jpaEntity.getAutoAssignDistributionSet() != null) {
+            jpaEntity.setAutoAssignStatus(resolveInitialAutoAssignStatus());
+        }
+        return jpaEntity;
     }
 
     @Override
@@ -132,9 +147,9 @@ class JpaTargetFilterQueryManagement
     }
 
     @Override
-    public Slice<TargetFilterQuery> findWithAutoAssignDS(final Pageable pageable) {
+    public Slice<TargetFilterQuery> findWithActiveAutoAssignDS(final Pageable pageable) {
         return JpaManagementHelper.findAllWithoutCountBySpec(
-                jpaRepository, List.of(TargetFilterQuerySpecification.withAutoAssignDS()), pageable);
+                jpaRepository, List.of(TargetFilterQuerySpecification.withActiveAutoAssignDS()), pageable);
     }
 
     @Override
@@ -145,6 +160,10 @@ class JpaTargetFilterQueryManagement
             targetFilterQuery.setAccessControlContext(null);
             targetFilterQuery.setAutoAssignDistributionSet(null);
             targetFilterQuery.setAutoAssignActionType(null);
+            targetFilterQuery.setStartAt(null);
+            targetFilterQuery.setAutoAssignStatus(null);
+            targetFilterQuery.setApprovalDecidedBy(null);
+            targetFilterQuery.setApprovalRemark(null);
             targetFilterQuery.setAutoAssignWeight(0);
             targetFilterQuery.setAutoAssignInitiatedBy(null);
             targetFilterQuery.setConfirmationRequired(false);
@@ -160,6 +179,10 @@ class JpaTargetFilterQueryManagement
             AccessContext.securityContext().ifPresent(targetFilterQuery::setAccessControlContext);
             targetFilterQuery.setAutoAssignInitiatedBy(Optional.ofNullable(AccessContext.actor()).orElse(targetFilterQuery.getCreatedBy()));
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.actionType()));
+            targetFilterQuery.setStartAt(update.startAt());
+            targetFilterQuery.setAutoAssignStatus(resolveInitialAutoAssignStatus());
+            targetFilterQuery.setApprovalDecidedBy(null);
+            targetFilterQuery.setApprovalRemark(null);
             targetFilterQuery.setAutoAssignWeight(update.weight() == null ? repositoryProperties.getActionWeightIfAbsent() : update.weight());
             final boolean confirmationRequired = update.confirmationRequired() == null
                     ? TenantConfigHelper.isUserConfirmationFlowEnabled()
@@ -174,6 +197,21 @@ class JpaTargetFilterQueryManagement
     public void cancelAutoAssignmentForDistributionSet(final long distributionSetId) {
         jpaRepository.unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(distributionSetId);
         log.debug("Auto assignments for distribution sets {} deactivated", distributionSetId);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public TargetFilterQuery start(final long targetFilterQueryId) {
+        final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(targetFilterQueryId);
+        targetFilterQuery.setAutoAssignStatus(TargetFilterQuery.AutoAssignStatus.RUNNING);
+        return jpaRepository.save(targetFilterQuery);
+    }
+
+    private TargetFilterQuery.AutoAssignStatus resolveInitialAutoAssignStatus() {
+        return TenantConfigHelper.getAsSystem(AUTO_ASSIGNMENT_APPROVAL_ENABLED, Boolean.class)
+                ? TargetFilterQuery.AutoAssignStatus.WAITING_FOR_APPROVAL
+                : TargetFilterQuery.AutoAssignStatus.READY;
     }
 
     private static ActionType sanitizeAutoAssignActionType(final ActionType actionType) {

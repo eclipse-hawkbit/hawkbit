@@ -77,7 +77,7 @@ class AutoAssignHandlerTest {
         when(lock.tryLock()).thenReturn(false);
         when(lockRegistry.obtain(any())).thenReturn(lock);
         final TargetFilterQuery matching = mock(TargetFilterQuery.class);
-        when(targetFilterQueryManagement.findWithAutoAssignDS(any())).thenReturn(new SliceImpl<>(Arrays.asList(matching)));
+        when(targetFilterQueryManagement.findWithActiveAutoAssignDS(any())).thenReturn(new SliceImpl<>(Arrays.asList(matching)));
 
         assertThatNoException().isThrownBy(autoAssignHandler::handleAll);
     }
@@ -91,7 +91,7 @@ class AutoAssignHandlerTest {
         final long ds = getRandomLong();
         final TargetFilterQuery matching = mockFilterQuery(ds);
         final TargetFilterQuery notMatching = mockFilterQuery(ds);
-        when(targetFilterQueryManagement.findWithAutoAssignDS(any())).thenReturn(new SliceImpl<>(Arrays.asList(notMatching, matching)));
+        when(targetFilterQueryManagement.findWithActiveAutoAssignDS(any())).thenReturn(new SliceImpl<>(Arrays.asList(notMatching, matching)));
         when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, ds, matching.getQuery())).thenReturn(true);
         when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, ds, notMatching.getQuery()))
                 .thenReturn(false);

@@ -41,8 +41,10 @@ public final class TargetFilterQuerySpecification {
      *
      * @return the {@link JpaTargetFilterQuery} {@link Specification}
      */
-    public static Specification<JpaTargetFilterQuery> withAutoAssignDS() {
-        return (targetFilterQueryRoot, query, cb) -> cb
-                .isNotNull(targetFilterQueryRoot.get(JpaTargetFilterQuery_.autoAssignDistributionSet));
+    public static Specification<JpaTargetFilterQuery> withActiveAutoAssignDS() {
+        return (targetFilterQueryRoot, query, cb) -> cb.and(
+                cb.isNotNull(targetFilterQueryRoot.get(JpaTargetFilterQuery_.autoAssignDistributionSet)),
+                cb.or(cb.equal(targetFilterQueryRoot.get(JpaTargetFilterQuery_.autoAssignStatus), TargetFilterQuery.AutoAssignStatus.RUNNING),
+                        cb.equal(targetFilterQueryRoot.get(JpaTargetFilterQuery_.autoAssignStatus), TargetFilterQuery.AutoAssignStatus.READY)));
     }
 }

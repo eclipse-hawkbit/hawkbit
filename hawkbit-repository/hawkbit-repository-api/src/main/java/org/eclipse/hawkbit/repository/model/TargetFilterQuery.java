@@ -47,6 +47,15 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
     int QUERY_MAX_SIZE = 1024;
 
     /**
+     * Maximum length of author name.
+     */
+    int APPROVED_BY_MAX_SIZE = 64;
+
+    /**
+     * Maximum length on comment regarding approval decision.
+     */
+    int APPROVAL_REMARK_MAX_SIZE = 255;
+    /**
      * Maximum length of access control context.
      */
     int ACCESS_CONTROL_CONTEXT_MAX_SIZE = 32768;
@@ -78,6 +87,26 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
     ActionType getAutoAssignActionType();
 
     /**
+     * @return Timestamp when the auto assignment should be started automatically. Can be null.
+     */
+    Long getStartAt();
+
+    /**
+     * @return status of the auto assignment
+     */
+    AutoAssignStatus getAutoAssignStatus();
+
+    /**
+     * @return user that approved or denied the auto assignment
+     */
+    String getApprovalDecidedBy();
+
+    /**
+     * @return additional note on approval/denial decision.
+     */
+    String getApprovalRemark();
+
+    /**
      * @return the weight of the {@link Action}s created during an auto assignment.
      */
     Optional<Integer> getAutoAssignWeight();
@@ -98,4 +127,35 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
      * performing the auto-assignment by the scheduler
      */
     Optional<String> getAccessControlContext();
+
+    /**
+     * State machine for an auto assignment
+     */
+    enum AutoAssignStatus {
+
+        /**
+         * Auto assignment needs to be approved
+         */
+        WAITING_FOR_APPROVAL,
+
+        /**
+         * Auto assignment is denied. Cannot be started
+         */
+        APPROVAL_DENIED,
+
+        /**
+         * Auto assignment is ready to start
+         */
+        READY,
+
+        /**
+         * Auto assignment has been paused
+         */
+        PAUSED,
+
+        /**
+         * Auto assignment is running
+         */
+        RUNNING
+    }
 }
