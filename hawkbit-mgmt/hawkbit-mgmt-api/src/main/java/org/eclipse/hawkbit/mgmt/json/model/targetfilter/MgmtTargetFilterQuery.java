@@ -68,12 +68,15 @@ public class MgmtTargetFilterQuery extends MgmtBaseEntity {
     @Schema(example = "15")
     private Long autoAssignDistributionSet;
 
+    @Deprecated
     @Schema(description = "Auto assign distribution set id")
     private MgmtActionType autoAssignActionType;
 
+    @Deprecated
     @Schema(description = "Weight of the resulting Actions", example = "600")
     private Integer autoAssignWeight;
 
+    @Deprecated
     @Schema(description = "(Available with user consent flow active) Defines, if the confirmation is required for an " +
             "action. Confirmation is required per default.", example = "false")
     private Boolean confirmationRequired;

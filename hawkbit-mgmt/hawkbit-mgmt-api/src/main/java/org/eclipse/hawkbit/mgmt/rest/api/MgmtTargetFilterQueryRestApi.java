@@ -151,6 +151,7 @@ public interface MgmtTargetFilterQueryRestApi {
      * @param filterId the ID of the target to retrieve the assigned distribution
      * @return the assigned distribution set with status OK, if none is assigned than {@code null} content (e.g. "{}")
      */
+    @Deprecated
     @Operation(summary = "Return distribution set for auto assignment of a specific target filter", description = "Handles the GET request of retrieving the auto assign distribution set. Required permission: READ_TARGET")
     @GetIfExistResponses
     @GetMapping(value = TARGETFILTERS_V1 + "/{filterId}/autoAssignDS", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
@@ -163,6 +164,7 @@ public interface MgmtTargetFilterQueryRestApi {
      * @param autoAssignRequest id of the distribution set and the action type for auto assignment
      * @return http status
      */
+    @Deprecated
     @Operation(summary = "Set auto assignment of distribution set for a target filter query",
             description = "Handles the POST request of setting the auto assign distribution set for a target filter " +
                     "query. Required permissions: UPDATE_TARGET and READ_REPOSITORY")
@@ -179,6 +181,7 @@ public interface MgmtTargetFilterQueryRestApi {
      * @param filterId of the target to change
      * @return http status
      */
+    @Deprecated
     @Operation(summary = "Remove Distribution Set for auto assignment of a target filter",
             description = "Removes the auto assign distribution set from the target filter query. " +
                     "Required permission: UPDATE_TARGET")
