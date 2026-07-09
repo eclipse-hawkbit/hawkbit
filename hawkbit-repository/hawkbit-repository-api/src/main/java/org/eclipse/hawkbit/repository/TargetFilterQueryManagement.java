@@ -260,6 +260,10 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
         private Long startAt;
 
         private TargetFilterQuery.AutoAssignStatus autoAssignStatus;
+        @Size(min = 1, max = TargetFilterQuery.APPROVED_BY_MAX_SIZE)
+        private String approvalDecidedBy;
+        @Size(max = TargetFilterQuery.APPROVAL_REMARK_MAX_SIZE)
+        private String approvalRemark;
 
         @Min(Action.WEIGHT_MIN)
         @Max(Action.WEIGHT_MAX)
@@ -319,6 +323,29 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
          */
         public AutoAssignDistributionSetUpdate autoAssignStatus(TargetFilterQuery.AutoAssignStatus autoAssignStatus) {
             this.autoAssignStatus = autoAssignStatus;
+            return this;
+        }
+
+        /**
+         *
+         * Specify a user that approved or denied the auto assignment
+         *
+         * @param approvalDecidedBy username of the approving/denying user
+         * @return updated builder instance
+         */
+        public AutoAssignDistributionSetUpdate approvalDecidedBy(String approvalDecidedBy) {
+            this.approvalDecidedBy = approvalDecidedBy;
+            return this;
+        }
+
+        /**
+         * Specify an additional note on approval/denial decision
+         *
+         * @param approvalRemark the note
+         * @return updated builder instance
+         */
+        public AutoAssignDistributionSetUpdate approvalRemark(String approvalRemark) {
+            this.approvalRemark = approvalRemark;
             return this;
         }
 
