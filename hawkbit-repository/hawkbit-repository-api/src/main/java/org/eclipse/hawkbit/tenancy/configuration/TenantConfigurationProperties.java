@@ -101,6 +101,10 @@ public class TenantConfigurationProperties {
          */
         public static final String ROLLOUT_APPROVAL_ENABLED = "rollout.approval.enabled";
         /**
+         * Represents setting if approval for an auto assignment is needed.
+         */
+        public static final String AUTO_ASSIGNMENT_APPROVAL_ENABLED = "auto.assignment.approval.enabled";
+        /**
          * Repository on autoclose mode instead of canceling in case of new Distribution Set assignment over active actions.
          */
         public static final String REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED = "repository.actions.autoclose.enabled";

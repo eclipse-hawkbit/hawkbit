@@ -208,11 +208,18 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
         Slice<TargetFilterQuery> filterQueries;
         Pageable query = PageRequest.of(0, PAGE_SIZE);
         do {
-            filterQueries = targetFilterQueryManagement.findWithAutoAssignDS(query);
+            filterQueries = targetFilterQueryManagement.findWithActiveAutoAssignDS(query);
 
             try {
                 filterQueries.forEach(filterQuery -> {
                     try {
+                        if (filterQuery.getAutoAssignStatus() == TargetFilterQuery.AutoAssignStatus.READY) {
+                            final Long startAt = filterQuery.getStartAt();
+                            if (startAt != null && startAt > System.currentTimeMillis()) {
+                                return;
+                            }
+                            targetFilterQueryManagement.start(filterQuery.getId());
+                        }
                         filterQuery.getAccessControlContext().ifPresentOrElse(
                                 // has stored context - executes it with it
                                 context -> withSecurityContext(context, () -> consumer.accept(filterQuery)),
