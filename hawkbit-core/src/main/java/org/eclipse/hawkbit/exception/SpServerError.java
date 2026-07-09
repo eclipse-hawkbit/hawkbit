@@ -44,6 +44,9 @@ public enum SpServerError {
     SP_TARGET_ATTRIBUTES_INVALID(
             "hawkbit.server.error.repo.invalidTargetAttributes",
             "The given target attributes are invalid"),
+    SP_AUTO_ASSIGNMENT_ILLEGAL_STATE(
+            "hawkbit.server.error.auto.assignment.illegalState",
+            "The rollout is in the wrong state for the requested operation"),
     SP_REST_SORT_PARAM_SYNTAX(
             "hawkbit.server.error.rest.param.sortParamSyntax",
             "The given sort parameter is not well formed"),

@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.exception.AutoAssignmentIllegalStateException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
@@ -202,9 +203,29 @@ class JpaTargetFilterQueryManagement
     @Override
     @Transactional
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
-    public TargetFilterQuery start(final long targetFilterQueryId) {
+    public TargetFilterQuery startAutoAssignDS(final long targetFilterQueryId) {
         final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(targetFilterQueryId);
         targetFilterQuery.setAutoAssignStatus(TargetFilterQuery.AutoAssignStatus.RUNNING);
+        return jpaRepository.save(targetFilterQuery);
+    }
+
+    @Override
+    public TargetFilterQuery pauseAutoAssignDS(final long targetFilterQueryId) {
+        final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(targetFilterQueryId);
+        if(targetFilterQuery.getAutoAssignStatus() != TargetFilterQuery.AutoAssignStatus.RUNNING) {
+            throw new AutoAssignmentIllegalStateException("Auto assignment not running");
+        }
+        targetFilterQuery.setAutoAssignStatus(TargetFilterQuery.AutoAssignStatus.PAUSED);
+        return jpaRepository.save(targetFilterQuery);
+    }
+
+    @Override
+    public TargetFilterQuery resumeAutoAssignDS(final long targetFilterQueryId) {
+        final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(targetFilterQueryId);
+        if(targetFilterQuery.getAutoAssignStatus() != TargetFilterQuery.AutoAssignStatus.PAUSED) {
+            throw new AutoAssignmentIllegalStateException("Auto assignment not paused");
+        }
+        targetFilterQuery.setAutoAssignStatus(TargetFilterQuery.AutoAssignStatus.PAUSED);
         return jpaRepository.save(targetFilterQuery);
     }
 

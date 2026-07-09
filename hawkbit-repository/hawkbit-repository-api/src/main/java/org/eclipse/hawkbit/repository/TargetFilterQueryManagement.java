@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import static org.eclipse.hawkbit.auth.SpPermission.APPROVE_AUTO_ASSIGNMENT;
+import static org.eclipse.hawkbit.auth.SpPermission.HANDLE_AUTO_ASSIGNMENT;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -31,13 +34,11 @@ import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeExcep
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -48,6 +49,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
         extends RepositoryManagement<T, TargetFilterQueryManagement.Create, TargetFilterQueryManagement.Update> {
+
+
+    String HAS_AUTO_ASSIGNMENT_APPROVE = "hasPermission(#root, '" + APPROVE_AUTO_ASSIGNMENT + "')";
+    String HAS_AUTO_ASSIGNMENT_HANDLE = "hasPermission(#root, '" + HANDLE_AUTO_ASSIGNMENT + "')";
 
     @Override
     default String permissionGroup() {
@@ -127,7 +132,13 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
     void cancelAutoAssignmentForDistributionSet(long setId);
 
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    TargetFilterQuery start(final long targetFilterQueryId);
+    TargetFilterQuery startAutoAssignDS(final long targetFilterQueryId);
+
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    TargetFilterQuery pauseAutoAssignDS(final long targetFilterQueryId);
+
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    TargetFilterQuery resumeAutoAssignDS(final long targetFilterQueryId);
 
     @SuperBuilder
     @Getter

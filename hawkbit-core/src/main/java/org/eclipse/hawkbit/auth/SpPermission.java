@@ -52,6 +52,7 @@ public final class SpPermission {
     public static final String SOFTWARE_MODULE_TYPE = "SOFTWARE_MODULE_TYPE";
     public static final String DISTRIBUTION_SET = "DISTRIBUTION_SET";
     public static final String DISTRIBUTION_SET_TYPE = "DISTRIBUTION_SET_TYPE";
+    public static final String AUTO_ASSIGNMENT = "AUTO_ASSIGNMENT";
     public static final String ROLLOUT = "ROLLOUT";
     public static final String TENANT_CONFIGURATION = "TENANT_CONFIGURATION";
 
@@ -74,6 +75,11 @@ public final class SpPermission {
 
     public static final String READ_SOFTWARE_MODULE_ARTIFACT = READ_PREFIX + SOFTWARE_MODULE + "_ARTIFACT";
 
+
+    /** Permission to approve or deny an auto assignment prior to starting. */
+    public static final String APPROVE_AUTO_ASSIGNMENT = "APPROVE_" + AUTO_ASSIGNMENT;
+    /** Permission to start/stop/resume an auto assignment. */
+    public static final String HANDLE_AUTO_ASSIGNMENT = "HANDLE_" + AUTO_ASSIGNMENT;
     /**
      * Permission to read the tenant settings.
      */
@@ -145,6 +151,8 @@ public final class SpPermission {
         allPermissions.add(READ_TARGET_SECURITY_TOKEN);
         allPermissions.add(READ_GATEWAY_SECURITY_TOKEN);
         allPermissions.add(READ_SOFTWARE_MODULE_ARTIFACT);
+        allPermissions.add(APPROVE_AUTO_ASSIGNMENT);
+        allPermissions.add(HANDLE_AUTO_ASSIGNMENT);
         allPermissions.add(APPROVE_ROLLOUT);
         allPermissions.add(HANDLE_ROLLOUT);
 
