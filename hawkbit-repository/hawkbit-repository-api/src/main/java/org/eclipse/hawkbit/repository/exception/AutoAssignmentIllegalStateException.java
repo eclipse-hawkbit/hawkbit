@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2026 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2026 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,8 @@ import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- * The {@link AutoAssignmentIllegalStateException} is thrown when an auto assignment is changing its state which is not valid. E.g. trying to start an already
+ * The {@link AutoAssignmentIllegalStateException} is thrown when an auto assignment is changing its state which is not valid. E.g. trying to
+ * start an already
  * running auto assignment.
  */
 @EqualsAndHashCode(callSuper = true)

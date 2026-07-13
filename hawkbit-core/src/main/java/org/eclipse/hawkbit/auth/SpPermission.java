@@ -75,7 +75,6 @@ public final class SpPermission {
 
     public static final String READ_SOFTWARE_MODULE_ARTIFACT = READ_PREFIX + SOFTWARE_MODULE + "_ARTIFACT";
 
-
     /** Permission to approve or deny an auto assignment prior to starting. */
     public static final String APPROVE_AUTO_ASSIGNMENT = "APPROVE_" + AUTO_ASSIGNMENT;
     /** Permission to start/stop/resume an auto assignment. */

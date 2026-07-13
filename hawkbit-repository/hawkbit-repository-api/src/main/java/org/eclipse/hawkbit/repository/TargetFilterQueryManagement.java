@@ -28,6 +28,7 @@ import lombok.experimental.SuperBuilder;
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.auth.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AutoAssignmentIllegalStateException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
@@ -49,7 +50,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
         extends RepositoryManagement<T, TargetFilterQueryManagement.Create, TargetFilterQueryManagement.Update> {
-
 
     String HAS_AUTO_ASSIGNMENT_APPROVE = "hasPermission(#root, '" + APPROVE_AUTO_ASSIGNMENT + "')";
     String HAS_AUTO_ASSIGNMENT_HANDLE = "hasPermission(#root, '" + HANDLE_AUTO_ASSIGNMENT + "')";
@@ -131,13 +131,78 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
     void cancelAutoAssignmentForDistributionSet(long setId);
 
-    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    /**
+     * Approves or denies a created auto assignment in state {@link TargetFilterQuery.AutoAssignStatus#WAITING_FOR_APPROVAL}. If the auto
+     * assignment is approved,
+     * it switches state to {@link TargetFilterQuery.AutoAssignStatus#READY}, otherwise it switches to state
+     * {@link TargetFilterQuery.AutoAssignStatus#APPROVAL_DENIED}
+     *
+     * @param targetFilterQueryId the auto assignment to be approved or denied.
+     * @param decision decision whether an auto assignment is approved or denied.
+     * @return target filter query of the approved/denied auto assignment
+     * @throws EntityNotFoundException if target filter query with given ID does not exist
+     * @throws AutoAssignmentIllegalStateException if given auto assignment is not in
+     *             {@link TargetFilterQuery.AutoAssignStatus#WAITING_FOR_APPROVAL}. Only auto assignments
+     *             waiting for approval can be acted upon.
+     */
+    @PreAuthorize(HAS_AUTO_ASSIGNMENT_APPROVE)
+    TargetFilterQuery approveOrDeny(long targetFilterQueryId, TargetFilterQuery.AutoAssignApprovalDecision decision);
+
+    /**
+     * Approves or denies a created auto assignment in state {@link TargetFilterQuery.AutoAssignStatus#WAITING_FOR_APPROVAL}. If the auto
+     * assignment is approved,
+     * it switches state to {@link TargetFilterQuery.AutoAssignStatus#READY}, otherwise it switches to state
+     * {@link TargetFilterQuery.AutoAssignStatus#APPROVAL_DENIED}
+     *
+     * @param targetFilterQueryId the auto assignment to be approved or denied.
+     * @param decision decision whether an auto assignment is approved or denied.
+     * @param remark user remark on approve / deny decision
+     * @return target filter query of the approved/denied auto assignment
+     * @throws EntityNotFoundException if target filter query with given ID does not exist
+     * @throws AutoAssignmentIllegalStateException if given auto assignment is not in
+     *             {@link TargetFilterQuery.AutoAssignStatus#WAITING_FOR_APPROVAL}. Only auto assignments
+     *             waiting for approval can be acted upon.
+     */
+    @PreAuthorize(HAS_AUTO_ASSIGNMENT_APPROVE)
+    TargetFilterQuery approveOrDeny(long targetFilterQueryId, TargetFilterQuery.AutoAssignApprovalDecision decision, String remark);
+
+    /**
+     * Starts an auto assignment which is in {@link TargetFilterQuery.AutoAssignStatus#READY} state. The auto assignment is set into the
+     * {@link TargetFilterQuery.AutoAssignStatus#RUNNING} state, so that it is picked up by the scheduler.
+     *
+     * @param targetFilterQueryId the auto assignment to be started
+     * @return started target filter query
+     * @throws EntityNotFoundException if target filter query with given ID does not exist
+     * @throws AutoAssignmentIllegalStateException if given auto assignment is not in {@link TargetFilterQuery.AutoAssignStatus#READY}. Only
+     *             ready auto assignments can be started.
+     */
+    @PreAuthorize(HAS_AUTO_ASSIGNMENT_HANDLE)
     TargetFilterQuery startAutoAssignDS(final long targetFilterQueryId);
 
-    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    /**
+     * Pauses an auto assignment which is currently running. The auto assignment switches to {@link TargetFilterQuery.AutoAssignStatus#PAUSED}
+     * state and is no longer picked up by the scheduler until it is resumed via {@link #resumeAutoAssignDS(long)}.
+     *
+     * @param targetFilterQueryId the auto assignment to be paused
+     * @return paused target filter query
+     * @throws EntityNotFoundException if target filter query with given ID does not exist
+     * @throws AutoAssignmentIllegalStateException if given auto assignment is not in {@link TargetFilterQuery.AutoAssignStatus#RUNNING}. Only
+     *             running auto assignments can be paused.
+     */
+    @PreAuthorize(HAS_AUTO_ASSIGNMENT_HANDLE)
     TargetFilterQuery pauseAutoAssignDS(final long targetFilterQueryId);
 
-    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    /**
+     * Resumes a paused auto assignment. The auto assignment switches back to {@link TargetFilterQuery.AutoAssignStatus#RUNNING} state which
+     * is then picked up again by the scheduler.
+     *
+     * @param targetFilterQueryId the auto assignment to be resumed
+     * @return resumed target filter query
+     * @throws EntityNotFoundException if target filter query with given ID does not exist
+     * @throws AutoAssignmentIllegalStateException if given auto assignment is not in {@link TargetFilterQuery.AutoAssignStatus#PAUSED}. Only
+     *             paused auto assignments can be resumed.
+     */
+    @PreAuthorize(HAS_AUTO_ASSIGNMENT_HANDLE)
     TargetFilterQuery resumeAutoAssignDS(final long targetFilterQueryId);
 
     @SuperBuilder
@@ -244,7 +309,7 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
          * @param startAt time in milliseconds
          * @return updated builder instance
          */
-        public AutoAssignDistributionSetUpdate setStartAt(Long startAt) {
+        public AutoAssignDistributionSetUpdate startAt(Long startAt) {
             this.startAt = startAt;
             return this;
         }
@@ -256,7 +321,7 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
          * @param autoAssignStatus status of the auto assignment
          * @return updated builder instance
          */
-        public AutoAssignDistributionSetUpdate setAutoAssignStatus(TargetFilterQuery.AutoAssignStatus autoAssignStatus) {
+        public AutoAssignDistributionSetUpdate autoAssignStatus(TargetFilterQuery.AutoAssignStatus autoAssignStatus) {
             this.autoAssignStatus = autoAssignStatus;
             return this;
         }
@@ -268,7 +333,7 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
          * @param approvalDecidedBy username of the approving/denying user
          * @return updated builder instance
          */
-        public AutoAssignDistributionSetUpdate setApprovalDecidedBy(String approvalDecidedBy) {
+        public AutoAssignDistributionSetUpdate approvalDecidedBy(String approvalDecidedBy) {
             this.approvalDecidedBy = approvalDecidedBy;
             return this;
         }
@@ -279,7 +344,7 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
          * @param approvalRemark the note
          * @return updated builder instance
          */
-        public AutoAssignDistributionSetUpdate setApprovalRemark(String approvalRemark) {
+        public AutoAssignDistributionSetUpdate approvalRemark(String approvalRemark) {
             this.approvalRemark = approvalRemark;
             return this;
         }

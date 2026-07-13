@@ -44,9 +44,6 @@ public enum SpServerError {
     SP_TARGET_ATTRIBUTES_INVALID(
             "hawkbit.server.error.repo.invalidTargetAttributes",
             "The given target attributes are invalid"),
-    SP_AUTO_ASSIGNMENT_ILLEGAL_STATE(
-            "hawkbit.server.error.auto.assignment.illegalState",
-            "The rollout is in the wrong state for the requested operation"),
     SP_REST_SORT_PARAM_SYNTAX(
             "hawkbit.server.error.rest.param.sortParamSyntax",
             "The given sort parameter is not well formed"),
@@ -134,6 +131,9 @@ public enum SpServerError {
     SP_REPO_TENANT_NOT_EXISTS(
             "hawkbit.server.error.repo.tenantNotExists",
             "The entity cannot be inserted due the tenant does not exists"),
+    SP_AUTO_ASSIGNMENT_ILLEGAL_STATE(
+            "hawkbit.server.error.auto.assignment.illegalState",
+            "The auto assignment is in the wrong state for the requested operation"),
     SP_REPO_ENTITY_READ_ONLY(
             "hawkbit.server.error.entityReadOnly",
             "The given entity is read only and the change cannot be completed."),
