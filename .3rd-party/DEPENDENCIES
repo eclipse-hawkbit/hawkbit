@@ -24,7 +24,7 @@ maven/mavencentral/com.nimbusds/nimbus-jose-jwt/10.9, Apache-2.0, approved, #290
 maven/mavencentral/com.nimbusds/oauth2-oidc-sdk/11.37.2, Apache-2.0, approved, #28740
 maven/mavencentral/com.rabbitmq.client/amqp-client/1.1.0, Apache-2.0, approved, #28792
 maven/mavencentral/com.rabbitmq/amqp-client/5.30.0, (Apache-2.0 OR GPL-2.0-only OR MPL-2.0) AND (Apache-2.0 OR GPL-2.0-only OR LGPL-2.0-or-later OR MPL-2.0), approved, #28726
-maven/mavencentral/com.rabbitmq/http-client/5.5.0, Apache-2.0, approved, #26777
+maven/mavencentral/com.rabbitmq/http-client/5.6.0, , restricted, clearlydefined
 maven/mavencentral/com.sun.istack/istack-commons-runtime/4.1.2, BSD-3-Clause, approved, #15290
 maven/mavencentral/com.vaadin.external.atmosphere/atmosphere-runtime/3.0.5.slf4jvaadin1, Apache-2.0, approved, #12113
 maven/mavencentral/com.vaadin.external.google/android-json/0.0.20131108.vaadin1, Apache-2.0, approved, CQ21310
@@ -184,7 +184,7 @@ maven/mavencentral/org.hamcrest/hamcrest/3.0, BSD-3-Clause, approved, #17661
 maven/mavencentral/org.hibernate.models/hibernate-models/1.1.1, Apache-2.0, approved, #27318
 maven/mavencentral/org.hibernate.orm/hibernate-core/7.4.1.Final, Apache-2.0 AND (EPL-2.0 OR BSD-3-Clause), approved, #28749
 maven/mavencentral/org.hibernate.orm/hibernate-processor/7.4.1.Final, Apache-2.0, approved, #28712
-maven/mavencentral/org.hibernate.validator/hibernate-validator/9.1.0.Final, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.hibernate.validator/hibernate-validator/9.1.0.Final, Apache-2.0, approved, #29640
 maven/mavencentral/org.jboss.logging/jboss-logging/3.6.3.Final, Apache-2.0, approved, #26108
 maven/mavencentral/org.jline/jline/3.30.13, BSD-3-Clause AND Apache-2.0, approved, #25548
 maven/mavencentral/org.jsoup/jsoup/1.22.2, MIT AND (Apache-2.0 AND BSD-3-Clause), approved, #25465
