@@ -24,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -440,34 +441,48 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             throw new InvalidTargetAttributeException();
         }
 
-        final JpaTarget target = targetRepository.getByControllerId(controllerId);
-
-        // get the modifiable attribute map
-        final Map<String, String> controllerAttributes = target.getControllerAttributes();
+        final JpaTarget jpaTarget = targetRepository.getByControllerId(controllerId);
+        final Map<String, String> current = jpaTarget.getControllerAttributes();
         final UpdateMode updateMode = mode != null ? mode : UpdateMode.MERGE;
+
+        boolean targetChanged = false;
         switch (updateMode) {
             case REMOVE:
-                // remove the addressed attributes
-                data.keySet().forEach(controllerAttributes::remove);
+                if (isRemoveNoOp(data, current)) {
+                    return jpaTarget;
+                }
+                data.keySet().forEach(current::remove);
+                targetChanged = true;
                 break;
-            case REPLACE:
-                // clear the attributes before adding the new attributes
-                controllerAttributes.clear();
-                copy(data, controllerAttributes);
-                target.setRequestControllerAttributes(false);
+            case REPLACE: {
+                final Map<String, String> replaced = new HashMap<>();
+                copy(data, replaced);
+                if (!replaced.equals(current)) {
+                    current.clear();
+                    current.putAll(replaced);
+                    assertTargetAttributesQuota(jpaTarget);
+                    targetChanged = true;
+                }
+                jpaTarget.setRequestControllerAttributes(false);
                 break;
-            case MERGE:
-                // just merge the attributes in
-                copy(data, controllerAttributes);
-                target.setRequestControllerAttributes(false);
+            }
+            case MERGE: {
+                final Map<String, String> merged = new HashMap<>(current);
+                copy(data, merged);
+                if (!merged.equals(current)) {
+                    current.clear();
+                    current.putAll(merged);
+                    assertTargetAttributesQuota(jpaTarget);
+                    targetChanged = true;
+                }
+                jpaTarget.setRequestControllerAttributes(false);
                 break;
+            }
             default:
-                // unknown update mode
                 throw new IllegalStateException("The update mode " + updateMode + " is not supported.");
         }
-        assertTargetAttributesQuota(target);
 
-        return targetRepository.save(target);
+        return targetChanged ? targetRepository.save(jpaTarget) : jpaTarget;
     }
 
     @Override
@@ -622,6 +637,11 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 trg.remove(key);
             }
         });
+    }
+
+    // True if REMOVE would leave current map unchanged (none of the keys to remove are present in current attributes).
+    private static boolean isRemoveNoOp(final Map<String, String> incoming, final Map<String, String> current) {
+        return incoming.keySet().stream().noneMatch(current::containsKey);
     }
 
     private void throwExceptionIfTargetDoesNotExist(final String controllerId) {
