@@ -40,8 +40,6 @@ updates:
         update-types: [ "version-update:semver-major" ]
       - dependency-name: "org.eclipse.persistence:org.eclipse.persistence.jpa"
         versions: [ ">= 5.0.0" ]
-      - dependency-name: "com.vaadin:*"
-        versions: [ ">= 25.0.0" ]
   - package-ecosystem: "docker"
     directory: "/docker"
     target-branch: "1.0"
