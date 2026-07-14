@@ -43,7 +43,7 @@
     <properties>
         <revision>0-SNAPSHOT</revision>
         <java.version>21</java.version>
-        <vaadin.version>25.2.1</vaadin.version>
+        <vaadin.version>25.2.2</vaadin.version>
         <springdoc-openapi.version>3.0.3</springdoc-openapi.version>
         <spring-cloud.version>2025.1.2</spring-cloud.version>
 
