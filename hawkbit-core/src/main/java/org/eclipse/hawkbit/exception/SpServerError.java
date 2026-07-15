@@ -131,6 +131,9 @@ public enum SpServerError {
     SP_REPO_TENANT_NOT_EXISTS(
             "hawkbit.server.error.repo.tenantNotExists",
             "The entity cannot be inserted due the tenant does not exists"),
+    SP_AUTO_ASSIGNMENT_ILLEGAL_STATE(
+            "hawkbit.server.error.auto.assignment.illegalState",
+            "The auto assignment is in the wrong state for the requested operation"),
     SP_REPO_ENTITY_READ_ONLY(
             "hawkbit.server.error.entityReadOnly",
             "The given entity is read only and the change cannot be completed."),

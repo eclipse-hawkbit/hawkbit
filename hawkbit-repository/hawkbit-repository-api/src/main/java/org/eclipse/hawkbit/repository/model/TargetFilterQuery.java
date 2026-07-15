@@ -158,4 +158,11 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
          */
         RUNNING
     }
+
+    enum AutoAssignApprovalDecision {
+
+        APPROVED,
+
+        DENIED
+    }
 }

@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.exception.AutoAssignmentIllegalStateException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
@@ -56,6 +57,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 
+import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignApprovalDecision.APPROVED;
+import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.APPROVAL_DENIED;
+import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.PAUSED;
+import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.READY;
+import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.RUNNING;
+import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.WAITING_FOR_APPROVAL;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTO_ASSIGNMENT_APPROVAL_ENABLED;
 
 /**
@@ -202,16 +209,70 @@ class JpaTargetFilterQueryManagement
     @Override
     @Transactional
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
-    public TargetFilterQuery start(final long targetFilterQueryId) {
+    public TargetFilterQuery approveOrDeny(final long targetFilterQueryId, final TargetFilterQuery.AutoAssignApprovalDecision decision) {
+        return approveOrDeny0(targetFilterQueryId, decision, null);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public TargetFilterQuery approveOrDeny(final long targetFilterQueryId, final TargetFilterQuery.AutoAssignApprovalDecision decision,
+            final String remark) {
+        return approveOrDeny0(targetFilterQueryId, decision, remark);
+    }
+
+    private TargetFilterQuery approveOrDeny0(final long targetFilterQueryId, final TargetFilterQuery.AutoAssignApprovalDecision decision,
+            final String remark) {
         final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(targetFilterQueryId);
-        targetFilterQuery.setAutoAssignStatus(TargetFilterQuery.AutoAssignStatus.RUNNING);
+        if (targetFilterQuery.getAutoAssignStatus() != WAITING_FOR_APPROVAL) {
+            throw new AutoAssignmentIllegalStateException("Auto assignment not waiting for approval");
+        }
+        targetFilterQuery.setAutoAssignStatus(decision == APPROVED ? READY : APPROVAL_DENIED);
+        targetFilterQuery.setApprovalDecidedBy(AccessContext.actor());
+        targetFilterQuery.setApprovalRemark(remark);
+        return jpaRepository.save(targetFilterQuery);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public TargetFilterQuery startAutoAssignDS(final long targetFilterQueryId) {
+        final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(targetFilterQueryId);
+        if (targetFilterQuery.getAutoAssignStatus() != READY) {
+            throw new AutoAssignmentIllegalStateException("Auto assignment not ready");
+        }
+        targetFilterQuery.setAutoAssignStatus(RUNNING);
+        return jpaRepository.save(targetFilterQuery);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public TargetFilterQuery pauseAutoAssignDS(final long targetFilterQueryId) {
+        final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(targetFilterQueryId);
+        if (targetFilterQuery.getAutoAssignStatus() != RUNNING) {
+            throw new AutoAssignmentIllegalStateException("Auto assignment not running");
+        }
+        targetFilterQuery.setAutoAssignStatus(PAUSED);
+        return jpaRepository.save(targetFilterQuery);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
+    public TargetFilterQuery resumeAutoAssignDS(final long targetFilterQueryId) {
+        final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(targetFilterQueryId);
+        if (targetFilterQuery.getAutoAssignStatus() != PAUSED) {
+            throw new AutoAssignmentIllegalStateException("Auto assignment not paused");
+        }
+        targetFilterQuery.setAutoAssignStatus(RUNNING);
         return jpaRepository.save(targetFilterQuery);
     }
 
     private TargetFilterQuery.AutoAssignStatus resolveInitialAutoAssignStatus() {
         return TenantConfigHelper.getAsSystem(AUTO_ASSIGNMENT_APPROVAL_ENABLED, Boolean.class)
-                ? TargetFilterQuery.AutoAssignStatus.WAITING_FOR_APPROVAL
-                : TargetFilterQuery.AutoAssignStatus.READY;
+                ? WAITING_FOR_APPROVAL
+                : READY;
     }
 
     private static ActionType sanitizeAutoAssignActionType(final ActionType actionType) {

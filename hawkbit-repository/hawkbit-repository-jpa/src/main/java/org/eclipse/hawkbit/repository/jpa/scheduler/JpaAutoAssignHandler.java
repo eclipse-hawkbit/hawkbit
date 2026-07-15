@@ -218,7 +218,7 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
                             if (startAt != null && startAt > System.currentTimeMillis()) {
                                 return;
                             }
-                            targetFilterQueryManagement.start(filterQuery.getId());
+                            targetFilterQueryManagement.startAutoAssignDS(filterQuery.getId());
                         }
                         filterQuery.getAccessControlContext().ifPresentOrElse(
                                 // has stored context - executes it with it
