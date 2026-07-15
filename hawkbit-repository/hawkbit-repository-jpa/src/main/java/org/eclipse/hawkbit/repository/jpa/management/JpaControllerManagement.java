@@ -448,34 +448,20 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         boolean targetChanged = false;
         switch (updateMode) {
             case REMOVE:
-                if (isRemoveNoOp(data, current)) {
-                    return jpaTarget;
-                }
-                data.keySet().forEach(current::remove);
-                targetChanged = true;
-                break;
-            case REPLACE: {
-                final Map<String, String> replaced = new HashMap<>();
-                copy(data, replaced);
-                if (!replaced.equals(current)) {
-                    current.clear();
-                    current.putAll(replaced);
-                    assertTargetAttributesQuota(jpaTarget);
+                // change target only if we really would remove 'existing' attribute
+                if (data.keySet().stream().anyMatch(current::containsKey)) {
+                    data.keySet().forEach(current::remove);
                     targetChanged = true;
                 }
-                jpaTarget.setRequestControllerAttributes(false);
+                break;
+            case REPLACE: {
+                final Map<String, String> result = new HashMap<>();
+                targetChanged = updateAttributes(data, result, current, jpaTarget);
                 break;
             }
             case MERGE: {
-                final Map<String, String> merged = new HashMap<>(current);
-                copy(data, merged);
-                if (!merged.equals(current)) {
-                    current.clear();
-                    current.putAll(merged);
-                    assertTargetAttributesQuota(jpaTarget);
-                    targetChanged = true;
-                }
-                jpaTarget.setRequestControllerAttributes(false);
+                final Map<String, String> result = new HashMap<>(current);
+                targetChanged = updateAttributes(data, result, current, jpaTarget);
                 break;
             }
             default:
@@ -483,6 +469,37 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         }
 
         return targetChanged ? targetRepository.save(jpaTarget) : jpaTarget;
+    }
+
+    /**
+     * Update Target attribute if
+     * - incoming attributes are different from current attributes
+     * - request attributes was pending, update the flag - controller has sent its latest attributes.
+     * @param incoming Controller Attributes that Device has sent
+     * @param result either new attributes or merged attributes based on update mode
+     * @param current current Controller Attributes of Device
+     * @param jpaTarget the target
+     * @return true if Target (attributes or requestAttr flag) has been modified and save is needed, false otherwise.
+     */
+    private boolean updateAttributes(final Map<String, String> incoming, final Map<String, String> result, final Map<String, String> current, final JpaTarget jpaTarget) {
+        boolean targetChanged = false;
+        copy(incoming, result);
+
+        if (!result.equals(current)) {
+            boolean assertQuota = result.size() > current.size();
+            current.clear();
+            current.putAll(result);
+            if (assertQuota) {
+                assertTargetAttributesQuota(jpaTarget);
+            }
+            targetChanged = true;
+        }
+
+        if (jpaTarget.isRequestControllerAttributes()) {
+            jpaTarget.setRequestControllerAttributes(false);
+            targetChanged = true;
+        }
+        return targetChanged;
     }
 
     @Override
