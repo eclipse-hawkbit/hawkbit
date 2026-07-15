@@ -31,4 +31,6 @@ public class MgmtDistributionSetAutoAssignment extends MgmtId {
     private Integer weight;
 
     private Boolean confirmationRequired;
+
+    private Long startAt;
 }
