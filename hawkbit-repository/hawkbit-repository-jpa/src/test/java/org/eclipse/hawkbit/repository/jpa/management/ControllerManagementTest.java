@@ -1920,4 +1920,113 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     private boolean activeActionExistsForControllerId(final String controllerId) {
         return actionRepository.exists(ActionSpecifications.byTargetControllerIdAndActive(controllerId, true));
     }
+
+    /**
+     * Verifies that a repeated MERGE with identical data does not mutate the attribute table
+     * (entity stays clean → no TargetUpdatedEvent on the second call).
+     */
+    @Test
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1) })
+    void updateTargetAttributesNoOpForMergeWhenDataUnchanged() {
+        final String controllerId = "noOpMergeCtrl";
+        testdataFactory.createTarget(controllerId);
+
+        final Map<String, String> attrs = Map.of("hw", "rev1", "mac", "AA:BB:CC:DD:EE:FF");
+        final WithUser withController = SecurityContextSwitch.withController("controller");
+
+        // First call: sets attributes + clears requestControllerAttributes flag → 1 event
+        runAs(withController, () -> controllerManagement.updateControllerAttributes(controllerId, attrs, UpdateMode.MERGE));
+
+        // Second call: data unchanged, flag already false → no entity mutation → 0 events
+        runAs(withController, () -> controllerManagement.updateControllerAttributes(controllerId, attrs, UpdateMode.MERGE));
+
+        assertThat(targetManagement.getControllerAttributes(controllerId)).containsAllEntriesOf(attrs);
+    }
+
+    /**
+     * Verifies that a repeated REPLACE with identical data does not mutate the attribute table.
+     */
+    @Test
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1) })
+    void updateTargetAttributesNoOpForReplaceWhenDataUnchanged() {
+        final String controllerId = "noOpReplaceCtrl";
+        testdataFactory.createTarget(controllerId);
+
+        final Map<String, String> attrs = Map.of("serial", "SN-1234");
+        final WithUser withController = SecurityContextSwitch.withController("controller");
+
+        runAs(withController, () -> controllerManagement.updateControllerAttributes(controllerId, attrs, UpdateMode.REPLACE));
+        runAs(withController, () -> controllerManagement.updateControllerAttributes(controllerId, attrs, UpdateMode.REPLACE));
+
+        assertThat(targetManagement.getControllerAttributes(controllerId)).isEqualTo(attrs);
+    }
+
+    /**
+     * Verifies that REMOVE with keys that do not exist is a no-op (no attribute table mutation).
+     */
+    @Test
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1) })
+    void updateTargetAttributesNoOpForRemoveWhenKeysAbsent() {
+        final String controllerId = "noOpRemoveCtrl";
+        testdataFactory.createTarget(controllerId);
+
+        final Map<String, String> initial = Map.of("existing", "val");
+        final WithUser withController = SecurityContextSwitch.withController("controller");
+
+        runAs(withController, () -> controllerManagement.updateControllerAttributes(controllerId, initial, UpdateMode.MERGE));
+
+        // REMOVE keys that do not exist → no-op
+        final Map<String, String> removeNonExistent = Map.of("notPresent", "ignored");
+        runAs(withController, () -> controllerManagement.updateControllerAttributes(controllerId, removeNonExistent, UpdateMode.REMOVE));
+
+        assertThat(targetManagement.getControllerAttributes(controllerId)).containsAllEntriesOf(initial);
+    }
+
+    /**
+     * Verifies that a MERGE with a changed value is NOT skipped.
+     */
+    @Test
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2) })
+    void updateTargetAttributesNotSkippedWhenValueChanges() {
+        final String controllerId = "changedValueCtrl";
+        testdataFactory.createTarget(controllerId);
+
+        final WithUser withController = SecurityContextSwitch.withController("controller");
+        runAs(withController, () -> controllerManagement.updateControllerAttributes(controllerId, Map.of("fw", "1.0"), UpdateMode.MERGE));
+        runAs(withController, () -> controllerManagement.updateControllerAttributes(controllerId, Map.of("fw", "2.0"), UpdateMode.MERGE));
+
+        assertThat(targetManagement.getControllerAttributes(controllerId)).containsEntry("fw", "2.0");
+    }
+
+    /**
+     * Verifies that a MERGE with a null value removes the key (not treated as no-op when key exists).
+     */
+    @Test
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2) })
+    void updateTargetAttributesNotSkippedWhenNullRemovesExistingKey() {
+        final String controllerId = "nullRemoveCtrl";
+        testdataFactory.createTarget(controllerId);
+
+        final WithUser withController = SecurityContextSwitch.withController("controller");
+        runAs(withController, () -> controllerManagement.updateControllerAttributes(controllerId, Map.of("a", "1", "b", "2"), UpdateMode.MERGE));
+
+        // null value means "remove key a" in copy() — must NOT be treated as no-op
+        final Map<String, String> removeA = new HashMap<>();
+        removeA.put("a", null);
+        runAs(withController, () -> controllerManagement.updateControllerAttributes(controllerId, removeA, UpdateMode.MERGE));
+
+        final Map<String, String> result = targetManagement.getControllerAttributes(controllerId);
+        assertThat(result).doesNotContainKey("a");
+        assertThat(result).containsEntry("b", "2");
+    }
 }
