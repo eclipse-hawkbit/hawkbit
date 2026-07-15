@@ -442,47 +442,41 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         }
 
         final JpaTarget jpaTarget = targetRepository.getByControllerId(controllerId);
-        final Map<String, String> current = jpaTarget.getControllerAttributes();
         final UpdateMode updateMode = mode != null ? mode : UpdateMode.MERGE;
 
         boolean targetChanged = false;
-        switch (updateMode) {
-            case REMOVE:
-                // change target only if we really would remove 'existing' attribute
-                if (data.keySet().stream().anyMatch(current::containsKey)) {
-                    data.keySet().forEach(current::remove);
-                    targetChanged = true;
-                }
-                break;
-            case REPLACE: {
-                final Map<String, String> result = new HashMap<>();
-                targetChanged = updateAttributes(data, result, current, jpaTarget);
-                break;
+        if (updateMode == UpdateMode.REMOVE) {
+            // change target only if we really would remove 'existing' attribute
+            final Map<String, String> current = jpaTarget.getControllerAttributes();
+            if (data.keySet().stream().anyMatch(current::containsKey)) {
+                data.keySet().forEach(current::remove);
+                targetChanged = true;
             }
-            case MERGE: {
-                final Map<String, String> result = new HashMap<>(current);
-                targetChanged = updateAttributes(data, result, current, jpaTarget);
-                break;
-            }
-            default:
-                throw new IllegalStateException("The update mode " + updateMode + " is not supported.");
+        } else { // MERGE or REPLACE
+            targetChanged = updateAttributes(updateMode, data, jpaTarget);
         }
 
         return targetChanged ? targetRepository.save(jpaTarget) : jpaTarget;
     }
 
     /**
-     * Update Target attribute if
-     * - incoming attributes are different from current attributes
+     * Update Target Attributes if
+     * - incoming REPLACE attributes are different from current attributes or
+     * - incoming MERGE attributes would change current attributes or
      * - request attributes was pending, update the flag - controller has sent its latest attributes.
      * @param incoming Controller Attributes that Device has sent
-     * @param result either new attributes or merged attributes based on update mode
-     * @param current current Controller Attributes of Device
      * @param jpaTarget the target
      * @return true if Target (attributes or requestAttr flag) has been modified and save is needed, false otherwise.
      */
-    private boolean updateAttributes(final Map<String, String> incoming, final Map<String, String> result, final Map<String, String> current, final JpaTarget jpaTarget) {
+    private boolean updateAttributes(final UpdateMode updateMode, final Map<String, String> incoming, final JpaTarget jpaTarget) {
         boolean targetChanged = false;
+        final Map<String, String> current = jpaTarget.getControllerAttributes();
+        Map<String, String> result = switch (updateMode) {
+            case MERGE -> new HashMap<>(current);
+            case REPLACE -> new HashMap<>();
+            default -> throw new IllegalStateException("The update mode " + updateMode + " is not supported.");
+        };
+
         copy(incoming, result);
 
         if (!result.equals(current)) {
@@ -654,11 +648,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 trg.remove(key);
             }
         });
-    }
-
-    // True if REMOVE would leave current map unchanged (none of the keys to remove are present in current attributes).
-    private static boolean isRemoveNoOp(final Map<String, String> incoming, final Map<String, String> current) {
-        return incoming.keySet().stream().noneMatch(current::containsKey);
     }
 
     private void throwExceptionIfTargetDoesNotExist(final String controllerId) {
