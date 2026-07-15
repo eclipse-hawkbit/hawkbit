@@ -445,40 +445,31 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         final UpdateMode updateMode = mode != null ? mode : UpdateMode.MERGE;
 
         boolean targetChanged = false;
-        if (updateMode == UpdateMode.REMOVE) {
-            // change target only if we really would remove 'existing' attribute
-            final Map<String, String> current = jpaTarget.getControllerAttributes();
-            if (data.keySet().stream().anyMatch(current::containsKey)) {
-                data.keySet().forEach(current::remove);
-                targetChanged = true;
-            }
-        } else { // MERGE or REPLACE
-            targetChanged = updateAttributes(updateMode, data, jpaTarget);
-        }
 
-        return targetChanged ? targetRepository.save(jpaTarget) : jpaTarget;
-    }
-
-    /**
-     * Update Target Attributes if
-     * - incoming REPLACE attributes are different from current attributes or
-     * - incoming MERGE attributes would change current attributes or
-     * - request attributes was pending, update the flag - controller has sent its latest attributes.
-     * @param incoming Controller Attributes that Device has sent
-     * @param jpaTarget the target
-     * @return true if Target (attributes or requestAttr flag) has been modified and save is needed, false otherwise.
-     */
-    private boolean updateAttributes(final UpdateMode updateMode, final Map<String, String> incoming, final JpaTarget jpaTarget) {
-        boolean targetChanged = false;
         final Map<String, String> current = jpaTarget.getControllerAttributes();
-        Map<String, String> result = switch (updateMode) {
-            case MERGE -> new HashMap<>(current);
-            case REPLACE -> new HashMap<>();
-            default -> throw new IllegalStateException("The update mode " + updateMode + " is not supported.");
+        final Map<String, String> result = switch (updateMode) {
+            case REMOVE -> {
+                final Map<String, String> r = new HashMap<>(current);
+                data.keySet().forEach(r::remove);
+                yield r;
+            }
+            case MERGE -> {
+                final Map<String, String> r = new HashMap<>(current);
+                copy(data, r);
+                yield r;
+            }
+            case REPLACE -> {
+                final Map<String, String> r = new HashMap<>();
+                copy(data, r);
+                yield r;
+            }
         };
 
-        copy(incoming, result);
-
+        // Update Target Attributes if
+        // - incoming REMOVE contained existing attributes that would really be removed
+        // - incoming REPLACE attributes are different from current attributes or
+        // - incoming MERGE attributes would change current attributes or
+        // - request attributes was pending, update the flag - controller has sent its latest attributes.
         if (!result.equals(current)) {
             boolean assertQuota = result.size() > current.size();
             current.clear();
@@ -488,12 +479,11 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             }
             targetChanged = true;
         }
-
         if (jpaTarget.isRequestControllerAttributes()) {
             jpaTarget.setRequestControllerAttributes(false);
             targetChanged = true;
         }
-        return targetChanged;
+        return targetChanged ? targetRepository.save(jpaTarget) : jpaTarget;
     }
 
     @Override
