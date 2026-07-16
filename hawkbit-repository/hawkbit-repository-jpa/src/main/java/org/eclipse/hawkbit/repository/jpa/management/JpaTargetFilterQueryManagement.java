@@ -141,6 +141,11 @@ class JpaTargetFilterQueryManagement
     }
 
     @Override
+    public Optional<TargetFilterQuery> findByName(final String name) {
+        return jpaRepository.findByName(name);
+    }
+
+    @Override
     public Page<TargetFilterQuery> findByAutoAssignDSAndRsql(final long setId, final String rsql, final Pageable pageable) {
         final DistributionSet distributionSet = distributionSetManagement.get(setId);
 
@@ -160,7 +165,19 @@ class JpaTargetFilterQueryManagement
     }
 
     @Override
+    public Page<TargetFilterQuery> findWithAutoAssignDSByRsql(final String rsql, final Pageable pageable) {
+        final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>(2);
+        specList.add(TargetFilterQuerySpecification.withAutoAssignDS());
+        if (!ObjectUtils.isEmpty(rsql)) {
+            specList.add(QLSupport.getInstance().buildSpec(rsql, TargetFilterQueryFields.class));
+        }
+
+        return JpaManagementHelper.findAllWithCountBySpec(jpaRepository, specList, pageable);
+    }
+
+    @Override
     @Transactional
+    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public TargetFilterQuery updateAutoAssignDS(final AutoAssignDistributionSetUpdate update) {
         final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(update.targetFilterId());
         if (update.dsId() == null) {

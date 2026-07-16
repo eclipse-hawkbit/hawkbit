@@ -27,21 +27,27 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 @JsonInclude(Include.NON_NULL)
 @Schema(example = """
         {
+            "name" : "autoAssignmentName",
+            "targetFilterQuery": "name==*",
             "distributionSetId" : 6,
-            "targetFilterQueryId" : 3,
             "startAt" : 1682408570791,
             "actionType" : "forced",
             "confirmationRequired" : true,
             "weight" : 400
         }""")
 public class MgmtAutoAssignmentRestRequestBodyPost {
+
     @JsonProperty(required = true)
-    @Schema(description = "The ID of the target filter query", example = "3")
-    private Long targetFilterQueryId;
+    @Schema(description = "The name of the auto assignment")
+    private String name;
+
+    @JsonProperty(required = true)
+    @Schema(description = "The query for the auto assignment")
+    private String targetFilterQuery;
 
     @JsonProperty(required = true)
     @Schema(description = "The ID of the distribution set", example = "6")
-    private Long distributionSetId;
+    private long distributionSetId;
 
     @Schema(description = "Start at timestamp of the auto assignment", example = "1691065753136")
     private Long startAt;
@@ -52,6 +58,7 @@ public class MgmtAutoAssignmentRestRequestBodyPost {
     @Schema(description = "Weight of the resulting Action", example = "400")
     private Integer weight;
 
+    @JsonProperty(defaultValue = "false")
     @Schema(example = "false")
     private Boolean confirmationRequired;
 }

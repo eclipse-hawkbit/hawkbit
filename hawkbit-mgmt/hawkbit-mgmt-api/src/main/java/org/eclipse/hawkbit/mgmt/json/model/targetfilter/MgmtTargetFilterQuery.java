@@ -65,18 +65,31 @@ public class MgmtTargetFilterQuery extends MgmtBaseEntity {
     @Schema(description = "Target filter query expression", example = "name==*")
     private String query;
 
+    /**
+     * @deprecated will be removed in 2.x
+     */
+    @Deprecated(forRemoval = true, since = "1.1.1")
     @Schema(example = "15")
     private Long autoAssignDistributionSet;
 
-    @Deprecated
+    /**
+     * @deprecated will be removed in 2.x
+     */
+    @Deprecated(forRemoval = true, since = "1.1.1")
     @Schema(description = "Auto assign distribution set id")
     private MgmtActionType autoAssignActionType;
 
-    @Deprecated
+    /**
+     * @deprecated will be removed in 2.x
+     */
+    @Deprecated(forRemoval = true, since = "1.1.1")
     @Schema(description = "Weight of the resulting Actions", example = "600")
     private Integer autoAssignWeight;
 
-    @Deprecated
+    /**
+     * @deprecated will be removed in 2.x
+     */
+    @Deprecated(forRemoval = true, since = "1.1.1")
     @Schema(description = "(Available with user consent flow active) Defines, if the confirmation is required for an " +
             "action. Confirmation is required per default.", example = "false")
     private Boolean confirmationRequired;
