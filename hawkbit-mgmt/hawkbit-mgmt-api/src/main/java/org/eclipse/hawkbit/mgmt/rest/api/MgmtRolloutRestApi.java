@@ -128,7 +128,7 @@ public interface MgmtRolloutRestApi {
             @RequestBody MgmtRolloutRestRequestBodyPost rolloutRequestBody);
 
     /**
-     * Handles the POST request for creating rollout.
+     * Handles the PUT request for updating rollout.
      *
      * @param rolloutUpdateBody the rollout body with details for update.
      * @return In case rollout could successful updated the ResponseEntity with status code 200 with the successfully created rollout. In any

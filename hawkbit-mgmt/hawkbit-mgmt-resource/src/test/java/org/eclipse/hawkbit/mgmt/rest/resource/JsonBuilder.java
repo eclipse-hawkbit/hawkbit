@@ -83,6 +83,42 @@ class JsonBuilder {
         return builder.toString();
     }
 
+    static String autoAssignment(final String name, final String targetFilterQuery, final long distributionSetId) {
+        return autoAssignment(name, targetFilterQuery, distributionSetId, null, null, null, false);
+    }
+
+    static String autoAssignment(final String name, final String targetFilterQuery, final long distributionSetId,
+            final Long startAt, final String actionType, final Integer weight, final Boolean confirmationRequired) {
+        final JSONObject json = new JSONObject();
+
+        try {
+            json.put("name", name);
+            json.put("distributionSetId", distributionSetId);
+            json.put("targetFilterQuery", targetFilterQuery);
+
+            if (actionType != null) {
+                json.put("actionType", actionType);
+            }
+
+            if (weight != null) {
+                json.put("weight", weight);
+            }
+
+            if (startAt != null) {
+                json.put("startAt", startAt);
+            }
+
+            if (confirmationRequired != null) {
+                json.put("confirmationRequired", confirmationRequired);
+            }
+
+        } catch (final JSONException e) {
+            log.error("JSONException (skip)", e);
+        }
+
+        return json.toString();
+    }
+
     static String rollout(
             final String name, final String description, final int groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions) {

@@ -12,6 +12,8 @@ package org.eclipse.hawkbit.repository;
 import static org.eclipse.hawkbit.auth.SpPermission.APPROVE_AUTO_ASSIGNMENT;
 import static org.eclipse.hawkbit.auth.SpPermission.HANDLE_AUTO_ASSIGNMENT;
 
+import java.util.Optional;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -83,6 +85,15 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
     long countByAutoAssignDistributionSetId(long autoAssignDistributionSetId);
 
     /**
+     * Find customer target filter by name
+     *
+     * @param name
+     * @return custom target filter
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    Optional<TargetFilterQuery> findByName(final String name);
+
+    /**
      * Retrieves all {@link TargetFilterQuery}s which match the given auto-assign distribution set and RSQL filter.
      *
      * @param setId the auto assign distribution set
@@ -102,6 +113,17 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Slice<TargetFilterQuery> findWithActiveAutoAssignDS(@NotNull Pageable pageable);
+
+    /**
+     * Retrieves all {@link TargetFilterQuery}s that have an auto-assign distribution set assigned - regardless of their
+     * auto-assign status - and match the given RSQL filter.
+     *
+     * @param rsql RSQL filter, may be {@code null} or empty to match all auto assignments
+     * @param pageable pagination information
+     * @return the page with the found {@link TargetFilterQuery}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    Page<TargetFilterQuery> findWithAutoAssignDSByRsql(String rsql, @NotNull Pageable pageable);
 
     /**
      * Updates the auto assign settings of an {@link TargetFilterQuery}.
@@ -260,10 +282,6 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
         private Long startAt;
 
         private TargetFilterQuery.AutoAssignStatus autoAssignStatus;
-        @Size(min = 1, max = TargetFilterQuery.APPROVED_BY_MAX_SIZE)
-        private String approvalDecidedBy;
-        @Size(max = TargetFilterQuery.APPROVAL_REMARK_MAX_SIZE)
-        private String approvalRemark;
 
         @Min(Action.WEIGHT_MIN)
         @Max(Action.WEIGHT_MAX)
@@ -323,29 +341,6 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
          */
         public AutoAssignDistributionSetUpdate autoAssignStatus(TargetFilterQuery.AutoAssignStatus autoAssignStatus) {
             this.autoAssignStatus = autoAssignStatus;
-            return this;
-        }
-
-        /**
-         *
-         * Specify a user that approved or denied the auto assignment
-         *
-         * @param approvalDecidedBy username of the approving/denying user
-         * @return updated builder instance
-         */
-        public AutoAssignDistributionSetUpdate approvalDecidedBy(String approvalDecidedBy) {
-            this.approvalDecidedBy = approvalDecidedBy;
-            return this;
-        }
-
-        /**
-         * Specify an additional note on approval/denial decision
-         *
-         * @param approvalRemark the note
-         * @return updated builder instance
-         */
-        public AutoAssignDistributionSetUpdate approvalRemark(String approvalRemark) {
-            this.approvalRemark = approvalRemark;
             return this;
         }
 

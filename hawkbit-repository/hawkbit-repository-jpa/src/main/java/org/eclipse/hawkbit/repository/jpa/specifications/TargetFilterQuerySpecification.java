@@ -47,4 +47,15 @@ public final class TargetFilterQuerySpecification {
                 cb.or(cb.equal(targetFilterQueryRoot.get(JpaTargetFilterQuery_.autoAssignStatus), TargetFilterQuery.AutoAssignStatus.RUNNING),
                         cb.equal(targetFilterQueryRoot.get(JpaTargetFilterQuery_.autoAssignStatus), TargetFilterQuery.AutoAssignStatus.READY)));
     }
+
+    /**
+     * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s that have an auto-assign distribution set
+     * assigned, regardless of their auto-assign status.
+     *
+     * @return the {@link JpaTargetFilterQuery} {@link Specification}
+     */
+    public static Specification<JpaTargetFilterQuery> withAutoAssignDS() {
+        return (targetFilterQueryRoot, query, cb) -> cb
+                .isNotNull(targetFilterQueryRoot.get(JpaTargetFilterQuery_.autoAssignDistributionSet));
+    }
 }
