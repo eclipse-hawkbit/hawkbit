@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
+import java.util.Optional;
+
 import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
@@ -16,6 +18,8 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
+import org.springframework.cache.Cache;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -59,4 +63,14 @@ public interface DistributionSetTypeRepository extends BaseEntityRepository<JpaD
     @Transactional
     @Query("DELETE FROM JpaDistributionSetType t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
+
+    @Override
+    default boolean isCached() {
+        return true;
+    }
+
+    @Override
+    default Optional<Cache> getCache() {
+        return Optional.of(TenantAwareCacheManager.getInstance().getCache(JpaDistributionSetType.class.getSimpleName()));
+    }
 }

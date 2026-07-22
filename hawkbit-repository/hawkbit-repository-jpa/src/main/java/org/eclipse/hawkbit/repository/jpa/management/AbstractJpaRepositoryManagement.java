@@ -49,7 +49,6 @@ import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.repository.BaseEntityRepository;
 import org.eclipse.hawkbit.utils.ObjectCopyUtil;
-import org.springframework.cache.Cache;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -142,31 +141,13 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
 
     @Override
     public T get(final long id) {
-        final Cache cache = getCache().orElse(null);
-        if (cache == null) {
-            return jpaRepository.getById(id);
-        } else {
-            try {
-                return cache.get(id, () -> jpaRepository.getById(id));
-            } catch (final Cache.ValueRetrievalException e) {
-                if (e.getCause() instanceof EntityNotFoundException enf) {
-                    throw enf;
-                } else {
-                    throw e;
-                }
-            }
-        }
+        return find(id).orElseThrow(() -> new EntityNotFoundException(jpaRepository.getManagementClass(), id));
     }
 
     @Override
     public Optional<T> find(final long id) {
-        final Cache cache = getCache().orElse(null);
-        if (cache == null) {
-            return jpaRepository.findById(id);
-        } else {
-            // we cache only value - not optionals
-            return Optional.ofNullable(cache.get(id, () -> jpaRepository.findById(id).orElse(null)));
-        }
+        // Caching and access control are applied below the management layer by the repository facade.
+        return jpaRepository.findById(id);
     }
 
     @Override
@@ -329,11 +310,6 @@ abstract class AbstractJpaRepositoryManagement<T extends AbstractJpaBaseEntity, 
             // handle the empty list
             jpaRepository.deleteAllById(toHardDelete);
         }
-    }
-
-    // if cache is supported for the entities - override this method
-    protected Optional<Cache> getCache() {
-        return Optional.empty();
     }
 
     private List<T> findAllById(final Collection<Long> ids, final boolean throwIfNotFound) {
