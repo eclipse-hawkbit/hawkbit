@@ -15,40 +15,15 @@ import static org.eclipse.hawkbit.auth.SpPermission.DISTRIBUTION_SET_TYPE;
 import static org.eclipse.hawkbit.auth.SpPermission.READ_PREFIX;
 import static org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch.runAs;
 
-import java.util.Map;
-
-import jakarta.persistence.EntityManagerFactory;
-
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
-import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
-import org.eclipse.persistence.sessions.Session;
-import org.eclipse.persistence.tools.profiler.PerformanceMonitor;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.TestPropertySource;
 
 /**
- * ACM-aware cache behaviour served by the repository wrapper ({@code BaseEntityRepositoryWrapper}).
- * <p>
- * Focus: prove the wrapper caches the RAW (permission-agnostic) entity by id and enforces access in-memory on top,
- * so that:
- * <ul>
- *     <li>one cache entry is shared across principals (not cached per-user);</li>
- *     <li>a permission check on a cache hit costs 0 DB queries;</li>
- *     <li>a denied caller gets {@link EntityNotFoundException} / {@link java.util.Optional#empty()} without a DB hit.</li>
- * </ul>
- * DB access is counted via EclipseLink's {@code PerformanceMonitor} (see {@link #readQueries()}).
+ * ACM-aware by-id cache behaviour for the {@code DistributionSetType} management service, served by the repository
+ * wrapper ({@code BaseEntityRepositoryWrapper}).
  */
-@TestPropertySource(properties = {
-        "spring.jpa.properties.eclipselink.profiler=PerformanceMonitor",
-        // enable a real cache - the test defaults set maximumSize=0 (NOP), which would defeat these assertions
-        "hawkbit.cache.JpaDistributionSetType.spec=maximumSize=1000,expireAfterWrite=60s",
-        "hawkbit.cache.JpaSoftwareModuleType.spec=maximumSize=1000,expireAfterWrite=60s" })
-class TypeManagementCacheAcmTest extends AbstractAccessControllerManagementTest {
-
-    @Autowired
-    private EntityManagerFactory emf;
+class DistributionSetTypeManagementCacheAcmTest extends AbstractTypeManagementCacheAcmTest {
 
     /**
      * Scenario: admin warms the cache, then a user permitted to read the entity reads it.
@@ -108,7 +83,7 @@ class TypeManagementCacheAcmTest extends AbstractAccessControllerManagementTest 
      */
     @Test
     void verifyCacheMissThenHitWithoutQuery() {
-        evictDstCache(dsType1.getId());
+        evict(JpaDistributionSetType.class.getSimpleName(), dsType1.getId());
 
         runAs(withAuthorities(READ_PREFIX + DISTRIBUTION_SET_TYPE + "/id==" + dsType1.getId()), () -> {
             distributionSetTypeManagement.get(dsType1.getId()); // miss — populates cache
@@ -130,7 +105,7 @@ class TypeManagementCacheAcmTest extends AbstractAccessControllerManagementTest 
      */
     @Test
     void verifyDeniedColdMissCachesRawEntityForPermittedUser() {
-        evictDstCache(dsType1.getId());
+        evict(JpaDistributionSetType.class.getSimpleName(), dsType1.getId());
 
         // denied user causes the cold cache miss
         runAs(withAuthorities(READ_PREFIX + DISTRIBUTION_SET_TYPE + "/id==" + dsType2.getId()), () -> assertThatThrownBy(
@@ -146,24 +121,5 @@ class TypeManagementCacheAcmTest extends AbstractAccessControllerManagementTest 
                     .as("permitted user after a denied cold-miss must serve from cache — 0 DB queries")
                     .isZero();
         });
-    }
-
-    // ── helpers ────────────────────────────────────────────────────────────────
-
-    private void evictDstCache(final Long id) {
-        TenantAwareCacheManager.getInstance()
-                .getCache(JpaDistributionSetType.class.getSimpleName())
-                .evict(id);
-    }
-
-    private long readQueries() {
-        final PerformanceMonitor pm = (PerformanceMonitor) emf.unwrap(Session.class).getProfiler();
-        final Map<String, Object> t = pm.getOperationTimings();
-        return longValue(t, "Counter:ReadAllQuery") + longValue(t, "Counter:ReadObjectQuery");
-    }
-
-    private static long longValue(final Map<String, Object> map, final String key) {
-        final Object v = map.get(key);
-        return v == null ? 0L : (long) Double.parseDouble(v.toString());
     }
 }
