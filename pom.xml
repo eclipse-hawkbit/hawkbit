@@ -102,7 +102,7 @@
         <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
 
         <license-tool-plugin.version>1.1.0</license-tool-plugin.version>
-        <license-maven-plugin.version>5.0.0</license-maven-plugin.version>
+        <license-maven-plugin.version>5.1.1</license-maven-plugin.version>
         <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
         <spotless-maven-plugin.version>3.8.0</spotless-maven-plugin.version>
