@@ -178,21 +178,21 @@ public class JpaRepositoryConfiguration {
             public Object postProcessAfterInitialization(@NonNull final Object bean, @NonNull final String beanName)
                     throws BeansException {
                 if (bean instanceof ArtifactRepository repo) {
-                    return repo.withWrapper(artifactAccessController);
+                    return repo.withProxy(artifactAccessController);
                 } else if (bean instanceof SoftwareModuleTypeRepository repo) {
-                    return repo.withWrapper(softwareModuleTypeAccessController);
+                    return repo.withProxy(softwareModuleTypeAccessController);
                 } else if (bean instanceof SoftwareModuleRepository repo) {
-                    return repo.withWrapper(softwareModuleAccessController);
+                    return repo.withProxy(softwareModuleAccessController);
                 } else if (bean instanceof DistributionSetTypeRepository repo) {
-                    return repo.withWrapper(distributionSetTypeAccessController);
+                    return repo.withProxy(distributionSetTypeAccessController);
                 } else if (bean instanceof DistributionSetRepository repo) {
-                    return repo.withWrapper(distributionSetAccessController);
+                    return repo.withProxy(distributionSetAccessController);
                 } else if (bean instanceof TargetTypeRepository repo) {
-                    return repo.withWrapper(targetTypeAccessControlManager);
+                    return repo.withProxy(targetTypeAccessControlManager);
                 } else if (bean instanceof TargetRepository repo) {
-                    return repo.withWrapper(targetAccessControlManager);
+                    return repo.withProxy(targetAccessControlManager);
                 } else if (bean instanceof ActionRepository repo) {
-                    return repo.withWrapper(actionAccessController);
+                    return repo.withProxy(actionAccessController);
                 }
                 return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
             }

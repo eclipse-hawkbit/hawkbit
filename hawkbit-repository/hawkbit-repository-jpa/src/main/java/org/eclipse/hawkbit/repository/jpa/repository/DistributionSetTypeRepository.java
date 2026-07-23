@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
-import java.util.Optional;
-
 import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
@@ -18,8 +16,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
-import org.springframework.cache.Cache;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -27,7 +23,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * {@link PagingAndSortingRepository} and {@link  org.springframework.data.repository.CrudRepository} for {@link DistributionSetType}.
+ * {@link PagingAndSortingRepository} and {@link org.springframework.data.repository.CrudRepository} for {@link DistributionSetType}.
  */
 @Transactional(readOnly = true)
 public interface DistributionSetTypeRepository extends BaseEntityRepository<JpaDistributionSetType> {
@@ -65,12 +61,7 @@ public interface DistributionSetTypeRepository extends BaseEntityRepository<JpaD
     void deleteByTenant(@Param("tenant") String tenant);
 
     @Override
-    default boolean isCached() {
+    default boolean isCacheEnabled() {
         return true;
-    }
-
-    @Override
-    default Optional<Cache> getCache() {
-        return Optional.of(TenantAwareCacheManager.getInstance().getCache(JpaDistributionSetType.class.getSimpleName()));
     }
 }

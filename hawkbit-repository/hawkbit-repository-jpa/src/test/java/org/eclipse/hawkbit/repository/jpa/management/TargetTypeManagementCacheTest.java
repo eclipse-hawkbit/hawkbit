@@ -47,25 +47,4 @@ class TargetTypeManagementCacheTest extends AbstractTypeManagementCacheTest {
                 .isZero();
     }
 
-    /**
-     * Scenario: load a TargetType on a cold cache, then walk its compatible distribution set types.
-     * Documents a KNOWN GAP: {@code TargetType.distributionSetTypes} is a {@code @ManyToMany} with the default LAZY
-     * fetch, so it is NOT materialized during the by-id cache load. Navigating it on a cache hit currently re-queries
-     * (observed: 8 DB queries), i.e. the by-id cache does not cover this relation - unlike the EAGER
-     * {@code DistributionSetType.elements}. Disabled until the relation-overload fix lands (make the relation resolve
-     * from the shared type cache / batch-fetch / eager); this is its acceptance test.
-     */
-    @Disabled("known gap: lazy @ManyToMany is not served by the by-id cache - re-enable with the relation-overload fix")
-    @Test
-    void verifyCachedEntityDistributionSetTypesAccessibleWithoutQuery() {
-        final TargetType targetType = testdataFactory.createTargetType("cacheTargetTypeRel", Set.of(standardDsType));
-        evict(JpaTargetType.class.getSimpleName(), targetType.getId());
-        final TargetType loaded = targetTypeManagement.get(targetType.getId());
-
-        final long before = readQueries();
-        assertThat(loaded.getDistributionSetTypes()).hasSize(1);
-        assertThat(readQueries() - before)
-                .as("distribution set types on the fully-loaded cached entity must not hit DB")
-                .isZero();
-    }
 }

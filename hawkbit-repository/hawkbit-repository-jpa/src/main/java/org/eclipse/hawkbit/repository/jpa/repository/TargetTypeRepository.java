@@ -10,12 +10,9 @@
 package org.eclipse.hawkbit.repository.jpa.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification;
-import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
-import org.springframework.cache.Cache;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -38,12 +35,7 @@ public interface TargetTypeRepository extends BaseEntityRepository<JpaTargetType
     void deleteByTenant(@Param("tenant") String tenant);
 
     @Override
-    default boolean isCached() {
+    default boolean isCacheEnabled() {
         return true;
-    }
-
-    @Override
-    default Optional<Cache> getCache() {
-        return Optional.of(TenantAwareCacheManager.getInstance().getCache(JpaTargetType.class.getSimpleName()));
     }
 }

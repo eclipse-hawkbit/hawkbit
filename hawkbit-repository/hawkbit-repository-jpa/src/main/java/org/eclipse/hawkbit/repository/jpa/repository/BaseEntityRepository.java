@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
 import org.jspecify.annotations.Nullable;
 import org.springframework.cache.Cache;
 import org.springframework.data.jpa.domain.Specification;
@@ -34,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Command repository operations for all {@link TenantAwareBaseEntity}s.
  * <p>
- * When accessed through the wrapper from {@link #withWrapper(AccessController)}, {@link #findById} is served
+ * When accessed through the wrapper from {@link #withProxy(AccessController)}, {@link #findById} is served
  * from the by-id cache (see {@link #getCache()}) and access control is re-checked in-memory on every call.
  *
  * @param <T> the entity type
@@ -111,11 +112,11 @@ public interface BaseEntityRepository<T extends AbstractJpaBaseEntity>
      * @param accessController the access controller to enforce, or {@code null} to skip access control
      * @return the wrapping repository, or {@code this} when there is nothing to add (no access controller and no cache)
      */
-    default BaseEntityRepository<T> withWrapper(@Nullable final AccessController<T> accessController) {
+    default BaseEntityRepository<T> withProxy(@Nullable final AccessController<T> accessController) {
         // Wrap only when there is something to add: access control, or a by-id cache. isCached() is used
         // instead of getCache() because decoration happens at bean-post-processing time, before the tenant
         // cache manager is guaranteed initialized; the facade still resolves getCache() lazily per call.
-        return (accessController == null && !isCached()) ? this : BaseEntityRepositoryWrapper.of(this, accessController);
+        return (accessController == null && !isCacheEnabled()) ? this : BaseEntityRepositoryProxy.of(this, accessController);
     }
 
     /**
@@ -126,7 +127,7 @@ public interface BaseEntityRepository<T extends AbstractJpaBaseEntity>
      *
      * @return {@code true} if by-id results are cached; {@code false} by default
      */
-    default boolean isCached() {
+    default boolean isCacheEnabled() {
         return false;
     }
 
@@ -134,12 +135,15 @@ public interface BaseEntityRepository<T extends AbstractJpaBaseEntity>
      * The cache holding raw, permission-agnostic entities keyed by id for {@link #findById}.
      * <p>
      * Access control is not baked into the cached value - it is re-checked in-memory on each call - so a single entry
-     * is safely shared across principals. Repositories that opt into caching override this; the default is no cache.
+     * is safely shared across principals. Repositories opt into caching by overriding {@link #isCacheEnabled()}; the
+     * cache is then resolved by domain-class name, so this method does not need to be overridden.
      *
      * @return the by-id entity cache, or {@link Optional#empty()} when caching is disabled
      */
     default Optional<Cache> getCache() {
-        return Optional.empty();
+        return isCacheEnabled()
+                ? Optional.of(TenantAwareCacheManager.getInstance().getCache(getDomainClass().getSimpleName()))
+                : Optional.empty();
     }
 
     default <S extends AbstractJpaBaseEntity> Specification<S> byIdSpec(final Long id) {
@@ -170,8 +174,8 @@ public interface BaseEntityRepository<T extends AbstractJpaBaseEntity>
         }
         final String managementClassSimpleName = domainClassSimpleName.substring(3);
         final Class<?> superClass = domainClass.getSuperclass();
-        if (superClass != null &&
-                superClass.getSimpleName().equals(managementClassSimpleName) && BaseEntity.class.isAssignableFrom(superClass)) {
+        if (superClass != null && superClass.getSimpleName().equals(managementClassSimpleName) && BaseEntity.class.isAssignableFrom(
+                superClass)) {
             return (Class<? extends BaseEntity>) superClass;
         }
 

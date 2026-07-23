@@ -43,16 +43,16 @@ import org.springframework.data.jpa.domain.UpdateSpecification;
 /**
  * Repository wrapper that sits below the management layer and adds two concerns to the delegated repository:
  * <ul>
- *     <li><b>caching</b> - {@link #findById(Long)} loads a raw, permission-agnostic entity through
- *         {@link BaseEntityRepository#getCache()} (when the delegate opts into caching);</li>
- *     <li><b>access control</b> - when an {@link AccessController} is present, READ is asserted in-memory on the
- *         (possibly cached) entity, and the remaining operations append access rules to their queries.</li>
+ * <li><b>caching</b> - {@link #findById(Long)} loads a raw, permission-agnostic entity through
+ * {@link BaseEntityRepository#getCache()} (when the delegate opts into caching);</li>
+ * <li><b>access control</b> - when an {@link AccessController} is present, READ is asserted in-memory on the
+ * (possibly cached) entity, and the remaining operations append access rules to their queries.</li>
  * </ul>
  * Keeping access control out of the cached value lets a single cache entry be shared across principals while each
  * caller's permissions are still enforced on every call.
  */
 @Slf4j
-public class BaseEntityRepositoryWrapper<T extends AbstractJpaBaseEntity> implements BaseEntityRepository<T> {
+public class BaseEntityRepositoryProxy<T extends AbstractJpaBaseEntity> implements BaseEntityRepository<T> {
 
     private static final String SPEC_MUST_NOT_BE_NULL = "Specification must not be null";
 
@@ -60,40 +60,9 @@ public class BaseEntityRepositoryWrapper<T extends AbstractJpaBaseEntity> implem
     @Nullable
     private final AccessController<T> accessController;
 
-    BaseEntityRepositoryWrapper(final BaseEntityRepository<T> repository, @Nullable final AccessController<T> accessController) {
+    BaseEntityRepositoryProxy(final BaseEntityRepository<T> repository, @Nullable final AccessController<T> accessController) {
         this.repository = repository;
         this.accessController = accessController;
-    }
-
-    private Specification<T> rules(final Operation operation, @Nullable final Specification<T> spec) {
-        if (accessController == null || operation == null) {
-            return spec == null ? Specification.unrestricted() : spec;
-        }
-        return accessController.appendAccessRules(operation, spec);
-    }
-
-    private void assertAllowed(final Operation operation, final T entity) {
-        if (accessController != null && operation != null) {
-            accessController.assertOperationAllowed(operation, entity);
-        }
-    }
-
-    private void assertAllowed(final Operation operation, final Iterable<? extends T> entities) {
-        if (accessController != null && operation != null) {
-            accessController.assertOperationAllowed(operation, entities);
-        }
-    }
-
-    private boolean readable(final T entity) {
-        if (accessController == null) {
-            return true;
-        }
-        try {
-            accessController.assertOperationAllowed(Operation.READ, entity);
-            return true;
-        } catch (final InsufficientPermissionException e) {
-            return false;
-        }
     }
 
     /**
@@ -112,8 +81,10 @@ public class BaseEntityRepositoryWrapper<T extends AbstractJpaBaseEntity> implem
         final Cache cache = repository.getCache().orElse(null);
         if (cache == null) {
             return repository.findById(id);
+        } else {
+            // we cache only value - not optionals
+            return Optional.ofNullable(cache.get(id, () -> repository.findById(id).orElse(null)));
         }
-        return Optional.ofNullable(cache.get(id, () -> repository.findById(id).orElse(null)));
     }
 
     @Override
@@ -194,6 +165,12 @@ public class BaseEntityRepositoryWrapper<T extends AbstractJpaBaseEntity> implem
 
     @Override
     public void deleteAll() {
+        // TODO - shall we remove deleteByTenant and implement this method instead?
+//        if (accessController.getAccessRules(AccessController.Operation.DELETE).isPresent()) {
+//            throw new InsufficientPermissionException(
+//                    "DELETE operation has restriction for given context! deleteAll can't be executed!");
+//        }
+//        repository.deleteAll();
         throw new UnsupportedOperationException();
     }
 
@@ -226,41 +203,41 @@ public class BaseEntityRepositoryWrapper<T extends AbstractJpaBaseEntity> implem
     @NonNull
     public Optional<T> findOne(final Specification<T> spec) {
         Objects.requireNonNull(spec, SPEC_MUST_NOT_BE_NULL);
-        return repository.findOne(rules(Operation.READ, spec));
+        return repository.findOne(appendRules(Operation.READ, spec));
     }
 
     @Override
     @NonNull
     public List<T> findAll(final Specification<T> spec) {
-        return repository.findAll(rules(Operation.READ, spec));
+        return repository.findAll(appendRules(Operation.READ, spec));
     }
 
     @Override
     @NonNull
     public Page<T> findAll(@Nullable final Specification<T> spec, @NonNull final Pageable pageable) {
-        return repository.findAll(rules(Operation.READ, spec), pageable);
+        return repository.findAll(appendRules(Operation.READ, spec), pageable);
     }
 
     @Override
     public Page<T> findAll(@Nullable final Specification<T> spec, @NonNull final Specification<T> countSpec, @NonNull final Pageable pageable) {
-        return repository.findAll(rules(Operation.READ, spec), countSpec, pageable);
+        return repository.findAll(appendRules(Operation.READ, spec), countSpec, pageable);
     }
 
     @Override
     @NonNull
     public List<T> findAll(@Nullable final Specification<T> spec, @NonNull final Sort sort) {
-        return repository.findAll(rules(Operation.READ, spec), sort);
+        return repository.findAll(appendRules(Operation.READ, spec), sort);
     }
 
     @Override
     public long count(@Nullable final Specification<T> spec) {
-        return repository.count(rules(Operation.READ, spec));
+        return repository.count(appendRules(Operation.READ, spec));
     }
 
     @Override
     public boolean exists(@NonNull final Specification<T> spec) {
         Objects.requireNonNull(spec, SPEC_MUST_NOT_BE_NULL);
-        return repository.exists(rules(Operation.READ, spec));
+        return repository.exists(appendRules(Operation.READ, spec));
     }
 
     @Override
@@ -277,7 +254,7 @@ public class BaseEntityRepositoryWrapper<T extends AbstractJpaBaseEntity> implem
     public <S extends T, R> R findBy(@NonNull final Specification<T> spec,
             final Function<? super SpecificationFluentQuery<S>, R> queryFunction) {
         Objects.requireNonNull(spec, SPEC_MUST_NOT_BE_NULL);
-        return repository.findBy(rules(Operation.READ, spec), queryFunction);
+        return repository.findBy(appendRules(Operation.READ, spec), queryFunction);
     }
 
     @Override
@@ -299,36 +276,36 @@ public class BaseEntityRepositoryWrapper<T extends AbstractJpaBaseEntity> implem
 
     @Override
     public Slice<T> findAllWithoutCount(final Specification<T> spec, final Pageable pageable) {
-        return repository.findAllWithoutCount(rules(Operation.READ, spec), pageable);
+        return repository.findAllWithoutCount(appendRules(Operation.READ, spec), pageable);
     }
 
     @NonNull
     public Optional<T> findOne(final Operation operation, @NonNull final Specification<T> spec) {
         Objects.requireNonNull(spec, SPEC_MUST_NOT_BE_NULL);
-        return repository.findOne(rules(operation, spec));
+        return repository.findOne(appendRules(operation, spec));
     }
 
     @Override
     @NonNull
     public List<T> findAll(final Operation operation, @Nullable final Specification<T> spec) {
-        return repository.findAll(rules(operation, spec));
+        return repository.findAll(appendRules(operation, spec));
     }
 
     @Override
     public boolean exists(final Operation operation, final Specification<T> spec) {
         Objects.requireNonNull(spec, SPEC_MUST_NOT_BE_NULL);
-        return repository.exists(rules(operation, spec));
+        return repository.exists(appendRules(operation, spec));
     }
 
     @Override
     public long count(final Operation operation, @Nullable final Specification<T> spec) {
-        return repository.count(rules(operation, spec));
+        return repository.count(appendRules(operation, spec));
     }
 
     @Override
     @NonNull
     public Slice<T> findAllWithoutCount(final Operation operation, @Nullable final Specification<T> spec, final Pageable pageable) {
-        return repository.findAllWithoutCount(rules(operation, spec), pageable);
+        return repository.findAllWithoutCount(appendRules(operation, spec), pageable);
     }
 
     @Override
@@ -339,29 +316,72 @@ public class BaseEntityRepositoryWrapper<T extends AbstractJpaBaseEntity> implem
 
     @Override
     public Optional<T> findOne(final Specification<T> spec, final String entityGraph) {
-        return repository.findOne(rules(Operation.READ, spec), entityGraph);
+        return repository.findOne(appendRules(Operation.READ, spec), entityGraph);
     }
 
     @Override
     public List<T> findAll(final Specification<T> spec, final String entityGraph) {
-        return repository.findAll(rules(Operation.READ, spec), entityGraph);
+        return repository.findAll(appendRules(Operation.READ, spec), entityGraph);
     }
 
     @Override
     public Page<T> findAll(final Specification<T> spec, final String entityGraph, final Pageable pageable) {
-        return repository.findAll(rules(Operation.READ, spec), entityGraph, pageable);
+        return repository.findAll(appendRules(Operation.READ, spec), entityGraph, pageable);
     }
 
     @Override
     public List<T> findAll(final Specification<T> spec, final String entityGraph, final Sort sort) {
-        return repository.findAll(rules(Operation.READ, spec), entityGraph, sort);
+        return repository.findAll(appendRules(Operation.READ, spec), entityGraph, sort);
+    }
+
+    private Specification<T> appendRules(final Operation operation, @Nullable final Specification<T> spec) {
+        if (accessController == null || operation == null) {
+            return spec == null ? Specification.unrestricted() : spec;
+        }
+        return accessController.appendAccessRules(operation, spec);
+    }
+
+    private void assertAllowed(final Operation operation, final T entity) {
+        if (accessController != null && operation != null) {
+            accessController.assertOperationAllowed(operation, entity);
+        }
+    }
+
+    private void assertAllowed(final Operation operation, final Iterable<? extends T> entities) {
+        if (accessController != null && operation != null) {
+            accessController.assertOperationAllowed(operation, entities);
+        }
+    }
+
+    private boolean readable(final T entity) {
+        if (accessController == null) {
+            return true;
+        }
+        try {
+            accessController.assertOperationAllowed(Operation.READ, entity);
+            return true;
+        } catch (final InsufficientPermissionException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Invokes {@code method} on {@code target}, unwrapping reflection's {@link InvocationTargetException} so the proxy
+     * propagates the real (possibly checked) exception transparently instead of the reflection wrapper.
+     */
+    private static Object invokeUnwrapping(final Method method, final Object target, final Object[] args) throws Throwable {
+        try {
+            return method.invoke(target, args);
+        } catch (final InvocationTargetException e) {
+            throw e.getCause() == null ? e : e.getCause();
+        }
     }
 
     @SuppressWarnings({ "unchecked", "java:S3776" }) // java:S3776 - better readable in one places
     static <T extends AbstractJpaBaseEntity, R extends BaseEntityRepository<T>> R of(
             final R repository, @Nullable final AccessController<T> accessController) {
         Objects.requireNonNull(repository);
-        final BaseEntityRepositoryWrapper<T> repositoryACM = new BaseEntityRepositoryWrapper<>(repository, accessController);
+        final BaseEntityRepositoryProxy<T> repositoryACM = new BaseEntityRepositoryProxy<>(repository, accessController);
         // Resolve each proxied method once to the wrapper method that overrides it (or empty when the wrapper does not
         // declare it and the call falls through to the raw repository). Avoids a getDeclaredMethod lookup and an
         // exception-driven branch on every invocation.
@@ -372,55 +392,45 @@ public class BaseEntityRepositoryWrapper<T extends AbstractJpaBaseEntity> implem
                 (proxyInstance, method, args) -> {
                     final Optional<Method> delegate = delegateCache.computeIfAbsent(method, m -> {
                         try {
-                            return Optional.of(BaseEntityRepositoryWrapper.class.getDeclaredMethod(m.getName(), m.getParameterTypes()));
+                            return Optional.of(BaseEntityRepositoryProxy.class.getDeclaredMethod(m.getName(), m.getParameterTypes()));
                         } catch (final NoSuchMethodException nsme) {
+                            log.warn("RepositoryProxy does not override method {} - call will fall through to the raw repository", m, nsme);
                             return Optional.empty();
                         }
                     });
                     if (delegate.isPresent()) {
-                        try {
-                            return delegate.get().invoke(repositoryACM, args);
-                        } catch (final InvocationTargetException e) {
-                            throw e.getCause() == null ? e : e.getCause();
-                        }
+                        return invokeUnwrapping(delegate.get(), repositoryACM, args);
                     }
-                    {
-                        try {
-                            // call a repository method the wrapper does not override
-                            if (method.getName().startsWith("find") || method.getName().startsWith("get")) {
-                                final Object result = method.invoke(repository, args);
-                                if (accessController != null) {
-                                    // Iterable, List, Page, Slice
-                                    if (Iterable.class.isAssignableFrom(method.getReturnType())) {
-                                        for (final Object e : (Iterable<?>) result) {
-                                            if (repository.getDomainClass().isAssignableFrom(e.getClass())) {
-                                                accessController.assertOperationAllowed(Operation.READ, (T) e);
-                                            }
-                                        }
-                                    } else if (Optional.class.isAssignableFrom(method.getReturnType()) && ((Optional<?>) result)
-                                            .filter(value -> repository.getDomainClass().isAssignableFrom(value.getClass()))
-                                            .isPresent()) {
-                                                return ((Optional<T>) result).filter(
-                                                        t -> {
-                                                            // if not accessible - throws exception (as for iterables or single entities)
-                                                            accessController.assertOperationAllowed(Operation.READ, t);
-                                                            return true;
-                                                        });
-                                            } else if (repository.getDomainClass().isAssignableFrom(method.getReturnType())) {
-                                                accessController.assertOperationAllowed(Operation.READ, (T) result);
-                                            }
+                    // call a repository method the wrapper does not override
+                    if (method.getName().startsWith("find") || method.getName().startsWith("get")) {
+                        final Object result = invokeUnwrapping(method, repository, args);
+                        if (accessController != null) {
+                            // Iterable, List, Page, Slice
+                            if (Iterable.class.isAssignableFrom(method.getReturnType())) {
+                                for (final Object e : (Iterable<?>) result) {
+                                    if (repository.getDomainClass().isAssignableFrom(e.getClass())) {
+                                        accessController.assertOperationAllowed(Operation.READ, (T) e);
+                                    }
                                 }
-                                return result;
-                            } else if ("toString".equals(method.getName()) && method.getParameterCount() == 0) {
-                                return BaseEntityRepositoryWrapper.class
-                                        .getSimpleName() + "(repository: " + repository + ", accessController: " + accessController + ")";
-                            } else {
-                                return method.invoke(repository, args);
-                            }
-                        } catch (final InvocationTargetException ite) {
-                            throw ite.getCause() == null ? ite : ite.getCause();
+                            } else if (Optional.class.isAssignableFrom(method.getReturnType()) && ((Optional<?>) result)
+                                    .filter(value -> repository.getDomainClass().isAssignableFrom(value.getClass()))
+                                    .isPresent()) {
+                                        return ((Optional<T>) result).filter(
+                                                t -> {
+                                                    // if not accessible - throws exception (as for iterables or single entities)
+                                                    accessController.assertOperationAllowed(Operation.READ, t);
+                                                    return true;
+                                                });
+                                    } else if (repository.getDomainClass().isAssignableFrom(method.getReturnType())) {
+                                        accessController.assertOperationAllowed(Operation.READ, (T) result);
+                                    }
                         }
+                        return result;
+                    } else if ("toString".equals(method.getName()) && method.getParameterCount() == 0) {
+                        return BaseEntityRepositoryProxy.class
+                                .getSimpleName() + "(repository: " + repository + ", accessController: " + accessController + ")";
                     }
+                    return invokeUnwrapping(method, repository, args);
                 });
         log.debug("Repository wrapper created -> {}", acmProxy);
         return acmProxy;
