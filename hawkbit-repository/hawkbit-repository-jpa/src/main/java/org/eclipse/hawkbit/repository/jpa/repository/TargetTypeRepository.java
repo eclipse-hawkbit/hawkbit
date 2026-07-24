@@ -33,4 +33,9 @@ public interface TargetTypeRepository extends BaseEntityRepository<JpaTargetType
     @Transactional
     @Query("DELETE FROM JpaTargetType t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
+
+    @Override
+    default boolean isCacheEnabled() {
+        return true;
+    }
 }

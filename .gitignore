@@ -73,4 +73,6 @@ spring-shell.log
 
 # AI
 .claude
-CLAUDE.md
+.superpowers
+docs/superpowers
+graphify-out

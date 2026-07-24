@@ -23,7 +23,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * {@link PagingAndSortingRepository} and {@link  org.springframework.data.repository.CrudRepository} for {@link DistributionSetType}.
+ * {@link PagingAndSortingRepository} and {@link org.springframework.data.repository.CrudRepository} for {@link DistributionSetType}.
  */
 @Transactional(readOnly = true)
 public interface DistributionSetTypeRepository extends BaseEntityRepository<JpaDistributionSetType> {
@@ -59,4 +59,9 @@ public interface DistributionSetTypeRepository extends BaseEntityRepository<JpaD
     @Transactional
     @Query("DELETE FROM JpaDistributionSetType t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
+
+    @Override
+    default boolean isCacheEnabled() {
+        return true;
+    }
 }

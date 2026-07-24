@@ -30,9 +30,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleTypeRepositor
 import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleTypeSpecification;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.qfields.SoftwareModuleTypeFields;
-import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
-import org.springframework.cache.Cache;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -60,11 +58,6 @@ public class JpaSoftwareModuleTypeManagement
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleRepository = softwareModuleRepository;
-    }
-
-    @Override
-    protected Optional<Cache> getCache() {
-        return Optional.of(TenantAwareCacheManager.getInstance().getCache(JpaSoftwareModuleType.class.getSimpleName()));
     }
 
     @Override

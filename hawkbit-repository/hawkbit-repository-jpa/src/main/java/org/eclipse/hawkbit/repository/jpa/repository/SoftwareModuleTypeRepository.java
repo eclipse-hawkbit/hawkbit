@@ -50,4 +50,9 @@ public interface SoftwareModuleTypeRepository extends BaseEntityRepository<JpaSo
     @Transactional
     @Query("DELETE FROM JpaSoftwareModuleType t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
+
+    @Override
+    default boolean isCacheEnabled() {
+        return true;
+    }
 }

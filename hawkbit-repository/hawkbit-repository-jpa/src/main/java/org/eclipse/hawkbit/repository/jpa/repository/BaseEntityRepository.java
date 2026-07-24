@@ -22,7 +22,9 @@ import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
 import org.jspecify.annotations.Nullable;
+import org.springframework.cache.Cache;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
@@ -32,8 +34,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Command repository operations for all {@link TenantAwareBaseEntity}s.
+ * <p>
+ * When accessed through the wrapper from {@link #withProxy(AccessController)}, {@link #findById} is served
+ * from the by-id cache (see {@link #getCache()}) and access control is re-checked in-memory on every call.
  *
- * @param <T> type if the entity type
+ * @param <T> the entity type
  */
 @NoRepositoryBean
 @Transactional(readOnly = true)
@@ -41,6 +46,14 @@ public interface BaseEntityRepository<T extends AbstractJpaBaseEntity>
         extends PagingAndSortingRepository<T, Long>, CrudRepository<T, Long>, JpaSpecificationExecutor<T>,
         JpaSpecificationEntityGraphExecutor<T>, NoCountSliceRepository<T>, ACMRepository<T> {
 
+    /**
+     * Loads an entity by id directly from the database, bypassing the by-id cache. Use {@link #findById}
+     * for the cached, access-controlled lookup.
+     *
+     * @param id the entity id
+     * @return the matching entity
+     * @throws EntityNotFoundException if no entity with the given id exists
+     */
     default T getById(final Long id) {
         return findOne(byIdSpec(id)).orElseThrow(() -> new EntityNotFoundException(getManagementClass(), id));
     }
@@ -90,32 +103,47 @@ public interface BaseEntityRepository<T extends AbstractJpaBaseEntity>
     void deleteByTenant(String tenant);
 
     /**
-     * Returns a wrapper (or the same instance if access controller is <code>null</code> of this repository that supports ACM.
-     * <p/>
-     * Note: To use ACM support the returned object shall be used! <code>this</code> object will not achieve ACM support!
-     * <p/>
-     * Notes on ACM support (if enabled, i.e. <code>accessController</code> is not <code>null</code>):
-     * <ul>
-     *     <li>ACM is applied for all {@link BaseEntityRepository} methods</li>
-     *     <li>ACM is applied for all <code>findXXX</code> methods that returns {@link Iterable}
-     *         (expected of <code>? extends T</code>),
-     *         <code>? extends T</code> or {@link java.util.Optional}(expected of <code>? extends T</code>).
-     *     </li>
-     *     <li>For all other methods defined on repository interface level that are implemented, for instance,
-     *         via {@link org.springframework.data.jpa.repository.Query} or using naming conventions
-     *         (existsBySomething) the ACM won't be applied!
-     *     </li>
-     * </ul>
+     * Wraps this repository so that {@link #findById} is served from the by-id cache (see {@link #getCache()})
+     * and, when an {@link AccessController} is given, access control is enforced below the management layer.
+     * <p>
+     * The wrapper resolves {@link #getCache()} lazily on each call, so it is safe to create here during bean
+     * initialization - before the tenant-aware cache manager is ready.
      *
-     * @param accessController access controller to be applied to the result
-     * @return a repository that supports ACM.
+     * @param accessController the access controller to enforce, or {@code null} to skip access control
+     * @return the wrapping repository, or {@code this} when there is nothing to add (no access controller and no cache)
      */
-    default BaseEntityRepository<T> withACM(@Nullable final AccessController<T> accessController) {
-        if (accessController == null) {
-            return this;
-        } else {
-            return BaseEntityRepositoryACM.of(this, accessController);
-        }
+    default BaseEntityRepository<T> withProxy(@Nullable final AccessController<T> accessController) {
+        // Wrap only when there is something to add: access control, or a by-id cache. isCached() is used
+        // instead of getCache() because decoration happens at bean-post-processing time, before the tenant
+        // cache manager is guaranteed initialized; the facade still resolves getCache() lazily per call.
+        return (accessController == null && !isCacheEnabled()) ? this : BaseEntityRepositoryProxy.of(this, accessController);
+    }
+
+    /**
+     * Whether this repository caches {@link #findById} results by id.
+     * <p>
+     * Cheap and startup-safe, so it can be called while wiring beans - unlike {@link #getCache()}, which resolves the
+     * tenant-aware cache manager and must only be called at runtime. Cached repositories override this to {@code true}.
+     *
+     * @return {@code true} if by-id results are cached; {@code false} by default
+     */
+    default boolean isCacheEnabled() {
+        return false;
+    }
+
+    /**
+     * The cache holding raw, permission-agnostic entities keyed by id for {@link #findById}.
+     * <p>
+     * Access control is not baked into the cached value - it is re-checked in-memory on each call - so a single entry
+     * is safely shared across principals. Repositories opt into caching by overriding {@link #isCacheEnabled()}; the
+     * cache is then resolved by domain-class name, so this method does not need to be overridden.
+     *
+     * @return the by-id entity cache, or {@link Optional#empty()} when caching is disabled
+     */
+    default Optional<Cache> getCache() {
+        return isCacheEnabled()
+                ? Optional.of(TenantAwareCacheManager.getInstance().getCache(getDomainClass().getSimpleName()))
+                : Optional.empty();
     }
 
     default <S extends AbstractJpaBaseEntity> Specification<S> byIdSpec(final Long id) {
@@ -146,8 +174,8 @@ public interface BaseEntityRepository<T extends AbstractJpaBaseEntity>
         }
         final String managementClassSimpleName = domainClassSimpleName.substring(3);
         final Class<?> superClass = domainClass.getSuperclass();
-        if (superClass != null &&
-                superClass.getSimpleName().equals(managementClassSimpleName) && BaseEntity.class.isAssignableFrom(superClass)) {
+        if (superClass != null && superClass.getSimpleName().equals(managementClassSimpleName) && BaseEntity.class.isAssignableFrom(
+                superClass)) {
             return (Class<? extends BaseEntity>) superClass;
         }
 

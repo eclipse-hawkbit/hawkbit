@@ -40,9 +40,7 @@ import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.qfields.DistributionSetTypeFields;
-import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
-import org.springframework.cache.Cache;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -97,11 +95,6 @@ public class JpaDistributionSetTypeManagement
     public void delete0(final Collection<Long> ids) {
         ids.forEach(this::unassignDsTypeFromTargetTypes);
         super.delete0(ids);
-    }
-
-    @Override
-    protected Optional<Cache> getCache() {
-        return Optional.of(TenantAwareCacheManager.getInstance().getCache(JpaDistributionSetType.class.getSimpleName()));
     }
 
     @Override
