@@ -122,12 +122,19 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     public Action denyAction(final long actionId, final Integer code, final Collection<String> deviceMessages) {
         log.trace("Action with id {} deny request is triggered.", actionId);
         final Action action = actionRepository.getById(actionId);
-        assertActionCanAcceptFeedback(action);
+        assertActionCanBeDenied(action);
         final List<String> messages = new ArrayList<>();
         if (deviceMessages != null) {
             messages.addAll(deviceMessages);
         }
-        messages.add(SERVER_MESSAGE_PREFIX + "Target rejected action. Action will stay in confirmation pending state.");
+        if (action.getStatus() == Status.WAIT_FOR_CONFIRMATION) {
+            messages.add(SERVER_MESSAGE_PREFIX + "Target rejected action. Action will stay in confirmation pending state.");
+        } else {
+            // the target revokes a previously granted confirmation (auto- or manually confirmed) for an action that has not
+            // been installed yet - revert it back to WAIT_FOR_CONFIRMATION
+            messages.add(SERVER_MESSAGE_PREFIX
+                    + "Target revoked previously granted confirmation. Action returned to confirmation-pending state.");
+        }
         return addActionStatus(createConfirmationActionStatus(action.getId(), code, messages).status(Status.WAIT_FOR_CONFIRMATION).build());
     }
 
@@ -155,8 +162,13 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
 
     @Override
     protected void onActionStatusUpdate(final JpaActionStatus newActionStatus, final JpaAction action) {
-        if (newActionStatus.getStatus() == Status.RUNNING && action.isActive()) {
-            action.setStatus(Status.RUNNING);
+        if (action.isActive()) {
+            if (newActionStatus.getStatus() == Status.RUNNING) {
+                action.setStatus(Status.RUNNING);
+            } else if (newActionStatus.getStatus() == Status.WAIT_FOR_CONFIRMATION) {
+                // a denied feedback reverts an already confirmed (RUNNING) action back to the confirmation-pending state
+                action.setStatus(Status.WAIT_FOR_CONFIRMATION);
+            }
         }
     }
 
@@ -173,6 +185,20 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
             log.warn(msg);
             throw new InvalidConfirmationFeedbackException(
                     InvalidConfirmationFeedbackException.Reason.NOT_AWAITING_CONFIRMATION, msg);
+        }
+    }
+
+    private static void assertActionCanBeDenied(final Action action) {
+        // a denied feedback is accepted while awaiting confirmation (stays in confirmation-pending state) or for an
+        // already confirmed but not yet installed action, in which case the previously granted confirmation is revoked
+        // and the action reverts to the confirmation-pending state. As the device is the authority on whether it may
+        // still revoke consent, there is no maintenance-window or progress gating - only closed actions are rejected.
+        if (!action.isActive()) {
+            final String msg = String.format(
+                    "Denying action %s is not possible since the action is not active anymore.", action.getId());
+            log.warn(msg);
+            throw new InvalidConfirmationFeedbackException(InvalidConfirmationFeedbackException.Reason.ACTION_CLOSED,
+                    msg);
         }
     }
 

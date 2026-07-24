@@ -430,6 +430,44 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     /**
+     * Controller revokes a previously granted confirmation via 'denied' feedback, reverting the RUNNING action back to
+     * WAIT_FOR_CONFIRMATION so that the confirmationBase is offered again and the action can be re-confirmed.
+     */
+    @Test
+    void revokeConfirmationRevertsRunningActionToConfirmationBase() throws Exception {
+        enableConfirmationFlow();
+
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        Target savedTarget = testdataFactory.createTarget("991");
+        savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
+        final String controllerId = savedTarget.getControllerId();
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(controllerId, PAGE).getContent().get(0);
+
+        // confirm -> action RUNNING, deploymentBase exposed
+        sendConfirmationFeedback(
+                savedTarget, savedAction, DdiConfirmationFeedback.Confirmation.CONFIRMED, 10, "Action confirmed message.")
+                .andExpect(status().isOk());
+        verifyActionInDeploymentBaseState(controllerId, savedAction.getId());
+
+        // deny -> previously granted confirmation revoked, action reverted to WAIT_FOR_CONFIRMATION
+        sendConfirmationFeedback(
+                savedTarget, savedAction, DdiConfirmationFeedback.Confirmation.DENIED, 20, "Consent revoked message.")
+                .andExpect(status().isOk());
+        // subsequent poll offers confirmationBase again and no longer the deploymentBase
+        verifyActionInConfirmationBaseState(controllerId, savedAction.getId());
+        mvc.perform(get(DEPLOYMENT_BASE, AccessContext.tenant(), controllerId, savedAction.getId())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
+
+        // re-confirm -> action returns to RUNNING and deploymentBase is exposed again
+        sendConfirmationFeedback(
+                savedTarget, savedAction, DdiConfirmationFeedback.Confirmation.CONFIRMED, 10, "Action re-confirmed message.")
+                .andExpect(status().isOk());
+        verifyActionInDeploymentBaseState(controllerId, savedAction.getId());
+    }
+
+    /**
      * Test to verify that only a specific count of messages are returned based on the input actionHistory for getControllerDeploymentActionFeedback endpoint.
      */
     @Test

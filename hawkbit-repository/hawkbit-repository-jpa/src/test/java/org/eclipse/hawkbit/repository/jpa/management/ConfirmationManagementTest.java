@@ -159,6 +159,103 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
+     * Verify denying a manually confirmed (RUNNING) action reverts it back to WFC state
+     */
+    @Test
+    void deniedActionAfterManualConfirmRevertsToWfcState() {
+        enableConfirmationFlow();
+
+        final String controllerId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final List<Action> actions = assignDistributionSet(dsId, controllerId).getAssignedEntity();
+        assertThat(actions).hasSize(1).allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
+        final Long actionId = actions.get(0).getId();
+
+        // manual consent -> RUNNING
+        assertThat(confirmationManagement.confirmAction(actionId, null, null).getStatus()).isEqualTo(Status.RUNNING);
+        assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).isEmpty();
+
+        // revoke consent -> back to WAIT_FOR_CONFIRMATION
+        final Action revokedAction = confirmationManagement.denyAction(actionId, null, null);
+        assertThat(revokedAction.getStatus()).isEqualTo(Status.WAIT_FOR_CONFIRMATION);
+
+        // action is offered for confirmation again
+        assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).hasSize(1)
+                .allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
+
+        // audit trail: WFC (initial) -> RUNNING (confirm) -> WAIT_FOR_CONFIRMATION (revoke)
+        assertThat(controllerManagement.findActionStatusByAction(actionId, PAGE)).hasSize(3)
+                .anyMatch(status -> status.getStatus() == Status.RUNNING)
+                .anyMatch(status -> status.getStatus() == Status.WAIT_FOR_CONFIRMATION);
+    }
+
+    /**
+     * Verify denying an auto-confirmed (RUNNING) action reverts it back to WFC state
+     */
+    @Test
+    void deniedActionAfterAutoConfirmRevertsToWfcState() {
+        enableConfirmationFlow();
+
+        final String controllerId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        // auto-confirmation -> assigned action goes straight to RUNNING
+        confirmationManagement.activateAutoConfirmation(controllerId, null, null);
+
+        final List<Action> actions = assignDistributionSet(dsId, controllerId).getAssignedEntity();
+        assertThat(actions).hasSize(1).allMatch(action -> action.getStatus() == Status.RUNNING);
+        final Long actionId = actions.get(0).getId();
+        assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).isEmpty();
+
+        // revoke consent -> back to WAIT_FOR_CONFIRMATION
+        final Action revokedAction = confirmationManagement.denyAction(actionId, null, null);
+        assertThat(revokedAction.getStatus()).isEqualTo(Status.WAIT_FOR_CONFIRMATION);
+
+        // action is offered for confirmation again
+        assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).hasSize(1)
+                .allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
+    }
+
+    /**
+     * Verify a revoked (reverted to WFC) action can be confirmed again and returns to RUNNING
+     */
+    @Test
+    void revokedActionCanBeConfirmedAgain() {
+        enableConfirmationFlow();
+
+        final String controllerId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final List<Action> actions = assignDistributionSet(dsId, controllerId).getAssignedEntity();
+        assertThat(actions).hasSize(1);
+        final Long actionId = actions.get(0).getId();
+
+        // confirm -> RUNNING
+        assertThat(confirmationManagement.confirmAction(actionId, null, null).getStatus()).isEqualTo(Status.RUNNING);
+        // revoke -> WAIT_FOR_CONFIRMATION
+        assertThat(confirmationManagement.denyAction(actionId, null, null).getStatus())
+                .isEqualTo(Status.WAIT_FOR_CONFIRMATION);
+        // re-confirm -> RUNNING again
+        assertThat(confirmationManagement.confirmAction(actionId, null, null).getStatus()).isEqualTo(Status.RUNNING);
+
+        assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).isEmpty();
+    }
+
+    /**
+     * Verify denying a closed action will lead to a specific failure
+     */
+    @Test
+    void deniedActionCannotBeGivenOnFinishedAction() {
+        enableConfirmationFlow();
+        final Long actionId = prepareFinishedUpdate().getId();
+        assertThatThrownBy(() -> confirmationManagement.denyAction(actionId, null, null))
+                .isInstanceOf(InvalidConfirmationFeedbackException.class)
+                .matches(e -> ((InvalidConfirmationFeedbackException) e)
+                        .getReason() == InvalidConfirmationFeedbackException.Reason.ACTION_CLOSED);
+    }
+
+    /**
      * Verify action in WFC state will be transferred in RUNNING state in case auto-confirmation is activated.
      */
     @Test
