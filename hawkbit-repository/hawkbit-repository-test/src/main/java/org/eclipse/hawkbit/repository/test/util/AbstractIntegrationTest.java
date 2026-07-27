@@ -38,6 +38,7 @@ import org.awaitility.core.ConditionFactory;
 import org.eclipse.hawkbit.artifact.ArtifactStorage;
 import org.eclipse.hawkbit.artifact.exception.ArtifactStoreException;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.AutoAssignmentManagement;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -63,6 +64,7 @@ import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
@@ -151,6 +153,8 @@ public abstract class AbstractIntegrationTest {
     protected TargetTypeManagement<? extends TargetType> targetTypeManagement;
     @Autowired
     protected TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
+    @Autowired
+    protected AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement;
     @Autowired
     protected TargetTagManagement<? extends TargetTag> targetTagManagement;
     @Autowired

@@ -9,57 +9,46 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import static org.eclipse.hawkbit.auth.SpPermission.APPROVE_AUTO_ASSIGNMENT;
-import static org.eclipse.hawkbit.auth.SpPermission.HANDLE_AUTO_ASSIGNMENT;
-
 import java.util.Optional;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.auth.SpringEvalExpressions;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
-import org.eclipse.hawkbit.repository.exception.AutoAssignmentIllegalStateException;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
-import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
-import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * Management service for {@link TargetFilterQuery}s.
  */
 public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
-        extends RepositoryManagement<T, TargetFilterQueryManagement.Create, TargetFilterQueryManagement.Update> {
-
-    String HAS_AUTO_ASSIGNMENT_APPROVE = "hasPermission(#root, '" + APPROVE_AUTO_ASSIGNMENT + "')";
-    String HAS_AUTO_ASSIGNMENT_HANDLE = "hasPermission(#root, '" + HANDLE_AUTO_ASSIGNMENT + "')";
+        extends RepositoryManagement<T, TargetFilterQueryManagement.UpdateCreate, TargetFilterQueryManagement.Update> {
 
     @Override
     default String permissionGroup() {
         return SpPermission.TARGET;
     }
+
+    /**
+     * Finds the auto assignment with the same name and query as the target filter query if it exists
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    Optional<AutoAssignment> findLinkedAutoAssignment(final long id);
+
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    AutoAssignment createLinkedAutoAssignment(final long id, final AutoAssignmentManagement.Create create);
+
+    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
+    void deleteLinkedAutoAssignment(final long id);
 
     /**
      * Verifies the provided filter syntax.
@@ -71,176 +60,6 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     void verifyTargetFilterQuerySyntax(@NotNull String query);
-
-    /**
-     * Counts all target filters that have a given auto assign distribution set
-     * assigned.
-     * <p/>
-     * No access control applied
-     *
-     * @param autoAssignDistributionSetId the id of the distribution set
-     * @return the count
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    long countByAutoAssignDistributionSetId(long autoAssignDistributionSetId);
-
-    /**
-     * Find customer target filter by name
-     *
-     * @param name
-     * @return custom target filter
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Optional<TargetFilterQuery> findByName(final String name);
-
-    /**
-     * Retrieves all {@link TargetFilterQuery}s which match the given auto-assign distribution set and RSQL filter.
-     *
-     * @param setId the auto assign distribution set
-     * @param rsql RSQL filter
-     * @param pageable pagination parameter
-     * @return the page with the found {@link TargetFilterQuery}s
-     * @throws EntityNotFoundException if DS with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY + " and " + "hasAuthority('READ_" + SpPermission.DISTRIBUTION_SET + "')")
-    Page<TargetFilterQuery> findByAutoAssignDSAndRsql(long setId, String rsql, @NotNull Pageable pageable);
-
-    /**
-     * Retrieves all {@link TargetFilterQuery}s with an auto-assign distribution set.
-     *
-     * @param pageable pagination information
-     * @return the page with the found {@link TargetFilterQuery}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Slice<TargetFilterQuery> findWithActiveAutoAssignDS(@NotNull Pageable pageable);
-
-    /**
-     * Retrieves all {@link TargetFilterQuery}s that have an auto-assign distribution set assigned - regardless of their
-     * auto-assign status - and match the given RSQL filter.
-     *
-     * @param rsql RSQL filter, may be {@code null} or empty to match all auto assignments
-     * @param pageable pagination information
-     * @return the page with the found {@link TargetFilterQuery}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
-    Page<TargetFilterQuery> findWithAutoAssignDSByRsql(String rsql, @NotNull Pageable pageable);
-
-    /**
-     * Updates the auto assign settings of an {@link TargetFilterQuery}.
-     *
-     * @param autoAssignDistributionSetUpdate the new auto assignment
-     * @return the updated {@link TargetFilterQuery}
-     * @throws EntityNotFoundException if either {@link TargetFilterQuery} and/or autoAssignDs are
-     *         provided but not found
-     * @throws AssignmentQuotaExceededException if the query that is already associated with this filter
-     *         query addresses too many targets (auto-assignments only)
-     * @throws InvalidAutoAssignActionTypeException if the provided auto-assign {@link ActionType} is not valid
-     *         (neither FORCED, nor SOFT)
-     * @throws IncompleteDistributionSetException if the provided auto-assign {@link DistributionSet} is
-     *         incomplete
-     * @throws InvalidDistributionSetException if the provided auto-assign {@link DistributionSet} is
-     *         invalidated
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    TargetFilterQuery updateAutoAssignDS(@NotNull @Valid AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate);
-
-    /**
-     * Removes the given {@link DistributionSet} from all auto assignments.
-     *
-     * @param setId the {@link DistributionSet} to be removed from auto
-     *         assignments.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    void cancelAutoAssignmentForDistributionSet(long setId);
-
-    /**
-     * Approves or denies a created auto assignment in state {@link TargetFilterQuery.AutoAssignStatus#WAITING_FOR_APPROVAL}. If the auto
-     * assignment is approved,
-     * it switches state to {@link TargetFilterQuery.AutoAssignStatus#READY}, otherwise it switches to state
-     * {@link TargetFilterQuery.AutoAssignStatus#APPROVAL_DENIED}
-     *
-     * @param targetFilterQueryId the auto assignment to be approved or denied.
-     * @param decision decision whether an auto assignment is approved or denied.
-     * @return target filter query of the approved/denied auto assignment
-     * @throws EntityNotFoundException if target filter query with given ID does not exist
-     * @throws AutoAssignmentIllegalStateException if given auto assignment is not in
-     *             {@link TargetFilterQuery.AutoAssignStatus#WAITING_FOR_APPROVAL}. Only auto assignments
-     *             waiting for approval can be acted upon.
-     */
-    @PreAuthorize(HAS_AUTO_ASSIGNMENT_APPROVE)
-    TargetFilterQuery approveOrDeny(long targetFilterQueryId, TargetFilterQuery.AutoAssignApprovalDecision decision);
-
-    /**
-     * Approves or denies a created auto assignment in state {@link TargetFilterQuery.AutoAssignStatus#WAITING_FOR_APPROVAL}. If the auto
-     * assignment is approved,
-     * it switches state to {@link TargetFilterQuery.AutoAssignStatus#READY}, otherwise it switches to state
-     * {@link TargetFilterQuery.AutoAssignStatus#APPROVAL_DENIED}
-     *
-     * @param targetFilterQueryId the auto assignment to be approved or denied.
-     * @param decision decision whether an auto assignment is approved or denied.
-     * @param remark user remark on approve / deny decision
-     * @return target filter query of the approved/denied auto assignment
-     * @throws EntityNotFoundException if target filter query with given ID does not exist
-     * @throws AutoAssignmentIllegalStateException if given auto assignment is not in
-     *             {@link TargetFilterQuery.AutoAssignStatus#WAITING_FOR_APPROVAL}. Only auto assignments
-     *             waiting for approval can be acted upon.
-     */
-    @PreAuthorize(HAS_AUTO_ASSIGNMENT_APPROVE)
-    TargetFilterQuery approveOrDeny(long targetFilterQueryId, TargetFilterQuery.AutoAssignApprovalDecision decision, String remark);
-
-    /**
-     * Starts an auto assignment which is in {@link TargetFilterQuery.AutoAssignStatus#READY} state. The auto assignment is set into the
-     * {@link TargetFilterQuery.AutoAssignStatus#RUNNING} state, so that it is picked up by the scheduler.
-     *
-     * @param targetFilterQueryId the auto assignment to be started
-     * @return started target filter query
-     * @throws EntityNotFoundException if target filter query with given ID does not exist
-     * @throws AutoAssignmentIllegalStateException if given auto assignment is not in {@link TargetFilterQuery.AutoAssignStatus#READY}. Only
-     *             ready auto assignments can be started.
-     */
-    @PreAuthorize(HAS_AUTO_ASSIGNMENT_HANDLE)
-    TargetFilterQuery startAutoAssignDS(final long targetFilterQueryId);
-
-    /**
-     * Pauses an auto assignment which is currently running. The auto assignment switches to {@link TargetFilterQuery.AutoAssignStatus#PAUSED}
-     * state and is no longer picked up by the scheduler until it is resumed via {@link #resumeAutoAssignDS(long)}.
-     *
-     * @param targetFilterQueryId the auto assignment to be paused
-     * @return paused target filter query
-     * @throws EntityNotFoundException if target filter query with given ID does not exist
-     * @throws AutoAssignmentIllegalStateException if given auto assignment is not in {@link TargetFilterQuery.AutoAssignStatus#RUNNING}. Only
-     *             running auto assignments can be paused.
-     */
-    @PreAuthorize(HAS_AUTO_ASSIGNMENT_HANDLE)
-    TargetFilterQuery pauseAutoAssignDS(final long targetFilterQueryId);
-
-    /**
-     * Resumes a paused auto assignment. The auto assignment switches back to {@link TargetFilterQuery.AutoAssignStatus#RUNNING} state which
-     * is then picked up again by the scheduler.
-     *
-     * @param targetFilterQueryId the auto assignment to be resumed
-     * @return resumed target filter query
-     * @throws EntityNotFoundException if target filter query with given ID does not exist
-     * @throws AutoAssignmentIllegalStateException if given auto assignment is not in {@link TargetFilterQuery.AutoAssignStatus#PAUSED}. Only
-     *             paused auto assignments can be resumed.
-     */
-    @PreAuthorize(HAS_AUTO_ASSIGNMENT_HANDLE)
-    TargetFilterQuery resumeAutoAssignDS(final long targetFilterQueryId);
-
-    @SuperBuilder
-    @Getter
-    @EqualsAndHashCode(callSuper = true)
-    @ToString(callSuper = true)
-    final class Create extends UpdateCreate {
-
-        private DistributionSet autoAssignDistributionSet;
-        private ActionType autoAssignActionType;
-        @Setter
-        @Min(Action.WEIGHT_MIN)
-        @Max(Action.WEIGHT_MAX)
-        private Integer autoAssignWeight;
-        private boolean confirmationRequired;
-    }
 
     @SuperBuilder
     @Getter
@@ -264,107 +83,5 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
         @ValidString
         @Size(min = 1, max = TargetFilterQuery.QUERY_MAX_SIZE)
         private String query;
-    }
-
-    /**
-     * Builder to update the auto assign {@link DistributionSet} of a
-     * {@link TargetFilterQuery} entry. Defines all fields that can be updated.
-     */
-    @Data
-    @Accessors(fluent = true)
-    @EqualsAndHashCode
-    @ToString
-    class AutoAssignDistributionSetUpdate {
-
-        private final long targetFilterId;
-        private Long dsId;
-        private ActionType actionType;
-        private Long startAt;
-
-        private TargetFilterQuery.AutoAssignStatus autoAssignStatus;
-
-        @Min(Action.WEIGHT_MIN)
-        @Max(Action.WEIGHT_MAX)
-        private Integer weight;
-
-        private Boolean confirmationRequired;
-
-        /**
-         * Constructor
-         *
-         * @param targetFilterId ID of {@link TargetFilterQuery} to update
-         */
-        public AutoAssignDistributionSetUpdate(final long targetFilterId) {
-            this.targetFilterId = targetFilterId;
-        }
-
-        /**
-         * Specify {@link DistributionSet}
-         *
-         * @param dsId ID of the {@link DistributionSet}
-         * @return updated builder instance
-         */
-        public AutoAssignDistributionSetUpdate ds(final Long dsId) {
-            this.dsId = dsId;
-            return this;
-        }
-
-        /**
-         * Specify {@link DistributionSet}
-         *
-         * @param actionType {@link ActionType} used for the auto assignment
-         * @return updated builder instance
-         */
-        public AutoAssignDistributionSetUpdate actionType(final ActionType actionType) {
-            this.actionType = actionType;
-            return this;
-        }
-
-        /**
-         *
-         * Specify a timestamp when the auto assignment should be started automatically
-         *
-         * @param startAt time in milliseconds
-         * @return updated builder instance
-         */
-        public AutoAssignDistributionSetUpdate startAt(Long startAt) {
-            this.startAt = startAt;
-            return this;
-        }
-
-        /**
-         *
-         * Specify the status of the auto assignment
-         *
-         * @param autoAssignStatus status of the auto assignment
-         * @return updated builder instance
-         */
-        public AutoAssignDistributionSetUpdate autoAssignStatus(TargetFilterQuery.AutoAssignStatus autoAssignStatus) {
-            this.autoAssignStatus = autoAssignStatus;
-            return this;
-        }
-
-        /**
-         * Specify weight of resulting {@link Action}
-         *
-         * @param weight weight used for the auto assignment
-         * @return updated builder instance
-         */
-        public AutoAssignDistributionSetUpdate weight(final Integer weight) {
-            this.weight = weight;
-            return this;
-        }
-
-        /**
-         * Specify initial confirmation state of resulting {@link Action}
-         *
-         * @param confirmationRequired if confirmation is required for this auto assignment (considered
-         *         with confirmation flow active)
-         * @return updated builder instance
-         */
-        public AutoAssignDistributionSetUpdate confirmationRequired(final boolean confirmationRequired) {
-            this.confirmationRequired = confirmationRequired;
-            return this;
-        }
     }
 }

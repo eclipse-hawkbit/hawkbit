@@ -10,12 +10,12 @@
 
 package org.eclipse.hawkbit.mgmt.rest.api;
 
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.AUTO_ASSIGNMENT_ORDER;
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT;
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET;
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT;
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET;
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REST_V1;
-import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.TARGET_FILTER_ORDER;
 import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -24,9 +24,12 @@ import io.swagger.v3.oas.annotations.extensions.Extension;
 import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
-import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtAutoAssignmentResponseBody;
-import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtAutoAssignmentRestRequestBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.autoassignment.MgmtAutoAssignmentResponseBody;
+import org.eclipse.hawkbit.mgmt.json.model.autoassignment.MgmtAutoAssignmentRestRequestBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.autoassignment.MgmtAutoAssignmentRestRequestBodyPut;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostCreateNoContentResponses;
@@ -37,6 +40,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -44,7 +48,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * REST API for Auto Assignment CRUD operations
  */
 @Tag(name = "Auto Assignments", description = "REST API for Auto Assignment CRUD operations",
-        extensions = @Extension(name = OpenApi.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = TARGET_FILTER_ORDER)))
+        extensions = @Extension(name = OpenApi.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = AUTO_ASSIGNMENT_ORDER)))
 public interface MgmtAutoAssignmentRestApi {
 
     String AUTO_ASSIGNMENTS_V1 = REST_V1 + "/autoassignments";
@@ -62,14 +66,13 @@ public interface MgmtAutoAssignmentRestApi {
     @PostCreateResponses
     @PostMapping(value = AUTO_ASSIGNMENTS_V1,
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
-
-    ResponseEntity<MgmtAutoAssignmentResponseBody> create(@RequestBody MgmtAutoAssignmentRestRequestBodyPost autoAssignmentRequestBody);
+    ResponseEntity<MgmtAutoAssignmentResponseBody> create(@Valid @RequestBody MgmtAutoAssignmentRestRequestBodyPost autoAssignmentRequestBody);
 
     /**
      * Handles the GET request of retrieving multiple auto assignment
      */
     @Operation(summary = "Return all auto assignments",
-            description = "Handles the GET request of retrieving all auto assignments. Required Permission: READ_TARGET")
+            description = "Handles the GET request of retrieving all auto assignments. Required Permission: READ_AUTO_ASSIGNMENT")
     @GetIfExistResponses
     @GetMapping(value = AUTO_ASSIGNMENTS_V1, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtAutoAssignmentResponseBody>> getAutoAssignments(
@@ -96,10 +99,25 @@ public interface MgmtAutoAssignmentRestApi {
      * @return a single auto assignment with status OK
      */
     @Operation(summary = "Return a single auto assignment",
-            description = "Handles the GET request of retrieving a single auto assignment. Required Permission: READ_TARGET")
+            description = "Handles the GET request of retrieving a single auto assignment. Required Permission: READ_AUTO_ASSIGNMENT")
     @GetIfExistResponses
     @GetMapping(value = AUTO_ASSIGNMENTS_V1 + "/{id}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtAutoAssignmentResponseBody> getAutoAssignment(@PathVariable("id") long id);
+
+    /**
+     * Handles the PUT request of updating an auto assignment
+     *
+     * @param id the id of the auto assignment
+     * @param body the update body
+     * @return OK response (200) if the auto assignment is updated. In case of any exceptions, the corresponding errors occur
+     */
+    @Operation(summary = "Update an auto assignment",
+            description = "Handles the request for updating an auto assignment. Required Permission: UPDATE_AUTO_ASSIGNMENT")
+    @PutMapping(value = AUTO_ASSIGNMENTS_V1 + "/{id}",
+            consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtAutoAssignmentResponseBody> update(
+            @PathVariable("id") long id,
+            @RequestBody MgmtAutoAssignmentRestRequestBodyPut body);
 
     /**
      * Handles the request for approving an auto assignment

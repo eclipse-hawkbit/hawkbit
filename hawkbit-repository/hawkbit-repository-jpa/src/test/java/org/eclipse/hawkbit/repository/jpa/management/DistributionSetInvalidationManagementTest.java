@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.AutoAssignmentManagement;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -26,13 +26,13 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionCancellationType;
+import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidationCount;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
@@ -63,8 +63,8 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation);
         rolloutHandler.handleAll();
 
-        assertThat(targetFilterQueryManagement.find(invalidationTestData.targetFilterQuery().getId()).orElseThrow()
-                .getAutoAssignDistributionSet()).isNull();
+        assertThat(autoAssignmentManagement.find(invalidationTestData.autoAssignment().getId()))
+                .as("Auto assignment should be removed by the invalidation").isEmpty();
         assertThat(rolloutRepository.findById(invalidationTestData.rollout().getId()).orElseThrow().getStatus())
                 .isNotIn(RolloutStatus.STOPPING, RolloutStatus.FINISHED);
         for (final Target target : invalidationTestData.targets()) {
@@ -90,8 +90,8 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation);
         rolloutHandler.handleAll();
 
-        assertThat(targetFilterQueryManagement.find(invalidationTestData.targetFilterQuery().getId()).orElseThrow()
-                .getAutoAssignDistributionSet()).isNull();
+        assertThat(autoAssignmentManagement.find(invalidationTestData.autoAssignment().getId()))
+                .as("Auto assignment should be removed by the invalidation").isEmpty();
         assertThat(rolloutRepository.findById(invalidationTestData.rollout().getId()).orElseThrow().getStatus())
                 .isEqualTo(RolloutStatus.READY);
 
@@ -106,7 +106,8 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     }
 
     /**
-     * Verify invalidation of distribution sets that removes distribution sets from auto assignments, stops rollouts and force cancels assignments
+     * Verify invalidation of distribution sets that removes distribution sets from auto assignments, stops rollouts and force cancels
+     * assignments
      */
     @Test
     void verifyInvalidateDistributionSetStopAllAndForceCancel() {
@@ -120,8 +121,8 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation);
         rolloutHandler.handleAll();
 
-        assertThat(targetFilterQueryManagement.find(invalidationTestData.targetFilterQuery().getId()).orElseThrow()
-                .getAutoAssignDistributionSet()).isNull();
+        assertThat(autoAssignmentManagement.find(invalidationTestData.autoAssignment().getId()))
+                .as("Auto assignment should be removed by the invalidation").isEmpty();
         // rollout should be deleted when force invalidation
         assertThat(rolloutRepository.findById(invalidationTestData.rollout().getId())).isEmpty();
         assertNoScheduledActionsExist(invalidationTestData.rollout());
@@ -142,8 +143,8 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
 
         distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation);
 
-        assertThat(targetFilterQueryManagement.find(invalidationTestData.targetFilterQuery().getId()).orElseThrow()
-                .getAutoAssignDistributionSet()).isNull();
+        assertThat(autoAssignmentManagement.find(invalidationTestData.autoAssignment().getId()))
+                .as("Auto assignment should be removed by the invalidation").isEmpty();
         assertThat(rolloutRepository.findById(invalidationTestData.rollout().getId()).orElseThrow().getStatus())
                 .isIn(RolloutStatus.STOPPING, RolloutStatus.FINISHED);
         for (final Target target : invalidationTestData.targets()) {
@@ -239,11 +240,11 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         final List<Target> targets = testdataFactory.createTargets(5, testName);
         // if implicitly locked - the old distribution set becomes stale
         distributionSet = assignDistributionSet(distributionSet, targets).getDistributionSet();
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(TargetFilterQueryManagement.Create.builder()
-                .name(testName).query("name==*").autoAssignDistributionSet(distributionSet).build());
+        final AutoAssignment autoAssignment = autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder()
+                .name(testName).targetFilterQuery("name==*").distributionSet(distributionSet).build());
         final Rollout rollout = testdataFactory.createRolloutByVariables(testName, "desc", 2, "name==*", distributionSet, "50", "80");
 
-        return new InvalidationTestData(distributionSet, targets, targetFilterQuery, rollout);
+        return new InvalidationTestData(distributionSet, targets, autoAssignment, rollout);
     }
 
     private void assertDistributionSetInvalidationCount(
@@ -276,7 +277,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     }
 
     private long countAutoAssignmentsForInvalidation(final Collection<Long> setIds) {
-        return setIds.stream().mapToLong(targetFilterQueryManagement::countByAutoAssignDistributionSetId).sum();
+        return setIds.stream().mapToLong(setId -> autoAssignmentManagement.findByDSAndRsql(setId, null, PAGE).getTotalElements()).sum();
     }
 
     private long countActionsForInvalidation(final Collection<Long> setIds, final ActionCancellationType cancelationType) {
@@ -301,5 +302,5 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     }
 
     private record InvalidationTestData(
-            DistributionSet distributionSet, List<Target> targets, TargetFilterQuery targetFilterQuery, Rollout rollout) {}
+            DistributionSet distributionSet, List<Target> targets, AutoAssignment autoAssignment, Rollout rollout) {}
 }

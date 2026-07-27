@@ -35,7 +35,7 @@ import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.AutoAssignmentManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
@@ -840,14 +840,14 @@ class DistributionSetManagementTest extends AbstractRepositoryManagementWithMeta
         DistributionSet ds = testdataFactory.createDistributionSet("DS");
         DistributionSet ds2 = testdataFactory.createDistributionSet("DS2");
         testdataFactory.createTargets("targets", 4);
-        targetFilterQueryManagement.create(
-                TargetFilterQueryManagement.Create.builder()
-                        .name("test filter 1").autoAssignDistributionSet(ds).query("name==targets*")
+        autoAssignmentManagement.create(
+                AutoAssignmentManagement.Create.builder()
+                        .name("test filter 1").distributionSet(ds).targetFilterQuery("name==targets*")
                         .build());
 
-        targetFilterQueryManagement.create(
-                TargetFilterQueryManagement.Create.builder()
-                        .name("test filter 2").autoAssignDistributionSet(ds).query("name==targets*")
+        autoAssignmentManagement.create(
+                AutoAssignmentManagement.Create.builder()
+                        .name("test filter 2").distributionSet(ds).targetFilterQuery("name==targets*")
                         .build());
 
         assertThat(distributionSetManagement.countAutoAssignmentsForDistributionSet(ds.getId())).isEqualTo(2);

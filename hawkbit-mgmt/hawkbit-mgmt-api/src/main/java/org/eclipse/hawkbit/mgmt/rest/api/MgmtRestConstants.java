@@ -102,6 +102,7 @@ public final class MgmtRestConstants {
     public static final String TARGET_GROUP_ORDER = "4500";
     public static final String ACTION_ORDER = "5000";
     public static final String ROLLOUT_ORDER = "6000";
+    public static final String AUTO_ASSIGNMENT_ORDER = "6500";
     public static final String DISTRIBUTION_SET_ORDER = "7000";
     public static final String DISTRIBUTION_SET_TYPE_ORDER = "8000";
     public static final String DISTRIBUTION_SET_TAG_ORDER = "9000";

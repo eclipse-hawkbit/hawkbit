@@ -42,6 +42,7 @@ import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Statistic;
+import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -217,10 +218,10 @@ public interface DistributionSetManagement<T extends DistributionSet>
     List<Statistic> countActionsByStatusForDistributionSet(@NotNull Long id);
 
     /**
-     * Count all {@link TargetFilterQueryManagement.AutoAssignDistributionSetUpdate}s for Distribution Set.
+     * Count all {@link AutoAssignment}s for Distribution Set.
      *
      * @param id to look for
-     * @return number of {@link TargetFilterQueryManagement.AutoAssignDistributionSetUpdate}s
+     * @return number of {@link AutoAssignment}s
      */
     @PreAuthorize(HAS_READ_REPOSITORY)
     Long countAutoAssignmentsForDistributionSet(@NotNull Long id);

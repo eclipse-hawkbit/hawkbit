@@ -17,6 +17,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.eclipse.hawkbit.repository.event.remote.AutoAssignmentDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
@@ -37,6 +38,8 @@ import org.eclipse.hawkbit.repository.event.remote.TargetTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TenantConfigurationDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.AutoAssignmentCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.AutoAssignmentUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
@@ -167,6 +170,11 @@ public class EventType {
         TYPES.put(44, TargetTypeCreatedEvent.class);
         TYPES.put(45, TargetTypeUpdatedEvent.class);
         TYPES.put(46, TargetTypeDeletedEvent.class);
+
+        //auto assignment
+        TYPES.put(47, AutoAssignmentCreatedEvent.class);
+        TYPES.put(48, AutoAssignmentUpdatedEvent.class);
+        TYPES.put(49, AutoAssignmentDeletedEvent.class);
 
         // processing events - start from 1000 to leave room for future db events
         TYPES.put(1000, TargetCreatedServiceEvent.class);

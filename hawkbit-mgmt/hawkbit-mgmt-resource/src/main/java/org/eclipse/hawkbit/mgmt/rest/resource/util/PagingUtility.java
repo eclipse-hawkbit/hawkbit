@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.qfields.ActionFields;
 import org.eclipse.hawkbit.repository.qfields.ActionStatusFields;
+import org.eclipse.hawkbit.repository.qfields.AutoAssignmentFields;
 import org.eclipse.hawkbit.repository.qfields.DistributionSetFields;
 import org.eclipse.hawkbit.repository.qfields.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.qfields.RolloutFields;
@@ -65,6 +66,14 @@ public final class PagingUtility {
             return Sort.by(Direction.ASC, TargetFilterQueryFields.ID.getName());
         }
         return Sort.by(SortUtility.parse(TargetFilterQueryFields.class, sortParam));
+    }
+
+    public static Sort sanitizeAutoAssignmentSortParam(final String sortParam) {
+        if (sortParam == null) {
+            // default
+            return Sort.by(Direction.ASC, AutoAssignmentFields.ID.getName());
+        }
+        return Sort.by(SortUtility.parse(AutoAssignmentFields.class, sortParam));
     }
 
     public static Sort sanitizeSoftwareModuleSortParam(final String sortParam) {

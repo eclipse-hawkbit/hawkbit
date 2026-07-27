@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-package org.eclipse.hawkbit.mgmt.json.model.targetfilter;
+package org.eclipse.hawkbit.mgmt.json.model.autoassignment;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -79,8 +79,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 public class MgmtAutoAssignmentResponseBody extends MgmtNamedEntity {
 
     @JsonProperty(required = true)
-    @Schema(description = "The ID of the auto assignment. Currently equal to the ID of the target filter query it "
-            + "originates from, but may become an independent identifier in the future", example = "3")
+    @Schema(description = "The ID of the auto assignment", example = "3")
     private long id;
 
     @Schema(description = "The target filter query (RSQL) of the auto assignment", example = "name==*")

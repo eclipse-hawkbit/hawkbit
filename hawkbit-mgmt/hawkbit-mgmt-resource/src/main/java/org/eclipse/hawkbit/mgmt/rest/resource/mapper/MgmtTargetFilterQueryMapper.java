@@ -12,23 +12,19 @@ package org.eclipse.hawkbit.mgmt.rest.resource.mapper;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtDistributionSetAutoAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetFilterQueryRestApi;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDistributionSetUpdate;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.Create;
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.UpdateCreate;
+import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.springframework.util.CollectionUtils;
 
 /**
  * A mapper which maps repository model to RESTful model representation and back.
@@ -36,16 +32,9 @@ import org.springframework.util.CollectionUtils;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtTargetFilterQueryMapper {
 
-    public static List<MgmtTargetFilterQuery> toResponse(
-            final List<? extends TargetFilterQuery> filters, final boolean confirmationFlowEnabled, final boolean isRepresentationFull) {
-        if (CollectionUtils.isEmpty(filters)) {
-            return Collections.emptyList();
-        }
-        return filters.stream().map(filter -> toResponse(filter, confirmationFlowEnabled, isRepresentationFull)).toList();
-    }
-
     public static MgmtTargetFilterQuery toResponse(
-            final TargetFilterQuery filter, final boolean confirmationFlowEnabled, final boolean isRepresentationFull) {
+            final TargetFilterQuery filter, final Optional<AutoAssignment> autoAssignment,
+            final boolean confirmationFlowEnabled, final boolean isRepresentationFull) {
         final MgmtTargetFilterQuery targetRest = new MgmtTargetFilterQuery();
         targetRest.setId(filter.getId());
         targetRest.setName(filter.getName());
@@ -57,13 +46,13 @@ public final class MgmtTargetFilterQueryMapper {
         targetRest.setCreatedAt(filter.getCreatedAt());
         targetRest.setLastModifiedAt(filter.getLastModifiedAt());
 
-        final DistributionSet distributionSet = filter.getAutoAssignDistributionSet();
+        final DistributionSet distributionSet = autoAssignment.map(AutoAssignment::getDistributionSet).orElse(null);
         if (distributionSet != null) {
             targetRest.setAutoAssignDistributionSet(distributionSet.getId());
-            targetRest.setAutoAssignActionType(MgmtRestModelMapper.convertActionType(filter.getAutoAssignActionType()));
-            filter.getAutoAssignWeight().ifPresent(targetRest::setAutoAssignWeight);
+            targetRest.setAutoAssignActionType(MgmtRestModelMapper.convertActionType(autoAssignment.get().getActionType()));
+            autoAssignment.get().getWeight().ifPresent(targetRest::setAutoAssignWeight);
             if (confirmationFlowEnabled) {
-                targetRest.setConfirmationRequired(filter.isConfirmationRequired());
+                targetRest.setConfirmationRequired(autoAssignment.get().isConfirmationRequired());
             }
         }
 
@@ -86,14 +75,7 @@ public final class MgmtTargetFilterQueryMapper {
                 .postAssignedDistributionSet(targetRest.getId(), null)).withRel("autoAssignDS").expand());
     }
 
-    public static Create fromRequest(final MgmtTargetFilterQueryRequestBody filterRest) {
-        return Create.builder().name(filterRest.getName()).query(filterRest.getQuery()).build();
-    }
-
-    public static AutoAssignDistributionSetUpdate fromRequest(final long filterId,
-            final MgmtDistributionSetAutoAssignment assignRest) {
-        final ActionType type = MgmtRestModelMapper.convertActionType(assignRest.getType());
-
-        return new AutoAssignDistributionSetUpdate(filterId).ds(assignRest.getId()).actionType(type).weight(assignRest.getWeight());
+    public static UpdateCreate fromRequest(final MgmtTargetFilterQueryRequestBody filterRest) {
+        return UpdateCreate.builder().name(filterRest.getName()).query(filterRest.getQuery()).build();
     }
 }

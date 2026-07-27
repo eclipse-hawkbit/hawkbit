@@ -29,6 +29,7 @@ import java.util.stream.IntStream;
 
 import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.AutoAssignmentManagement;
 import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -42,7 +43,6 @@ import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
@@ -54,6 +54,7 @@ import org.eclipse.hawkbit.repository.model.ActionCancellationType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
+import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
@@ -155,6 +156,7 @@ public class TestdataFactory {
     private final DistributionSetInvalidationManagement distributionSetInvalidationManagement;
     private final TargetManagement<? extends Target> targetManagement;
     private final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
+    private final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement;
     private final TargetTypeManagement<? extends TargetType> targetTypeManagement;
     private final TargetTagManagement<? extends TargetTag> targetTagManagement;
     private final DeploymentManagement deploymentManagement;
@@ -172,6 +174,7 @@ public class TestdataFactory {
             final DistributionSetInvalidationManagement distributionSetInvalidationManagement,
             final TargetManagement<? extends Target> targetManagement,
             final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
+            final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement,
             final TargetTypeManagement<? extends TargetType> targetTypeManagement,
             final TargetTagManagement<? extends TargetTag> targetTagManagement,
             final DeploymentManagement deploymentManagement,
@@ -186,6 +189,7 @@ public class TestdataFactory {
         this.distributionSetInvalidationManagement = distributionSetInvalidationManagement;
         this.targetManagement = targetManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.autoAssignmentManagement = autoAssignmentManagement;
         this.targetTypeManagement = targetTypeManagement;
         this.targetTagManagement = targetTagManagement;
         this.deploymentManagement = deploymentManagement;
@@ -948,12 +952,9 @@ public class TestdataFactory {
         return result;
     }
 
-    public TargetFilterQuery createTargetFilterWithTargetsAndActiveAutoAssignment() {
+    public AutoAssignment createTargetsAndAutoAssignment() {
         createTargets(quotaManagement.getMaxTargetsPerAutoAssignment());
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(TargetFilterQueryManagement.Create.builder().name("testName").query("id==*").build());
-        return targetFilterQueryManagement.updateAutoAssignDS(
-                new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(createDistributionSet().getId()));
+        return autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder().name("testName").targetFilterQuery("id==*").distributionSet(createDistributionSet()).build());
     }
 
     /**

@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.scheduler;
 
 import static org.eclipse.hawkbit.context.AccessContext.asActor;
 import static org.eclipse.hawkbit.context.AccessContext.withSecurityContext;
+import static org.eclipse.hawkbit.repository.model.AutoAssignment.AutoAssignStatus.READY;
 import static org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration.TENANT_TAG;
 import static org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration.TENANT_TAG_VALUE_PROVIDER;
 
@@ -30,15 +31,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.AutoAssignHandler;
+import org.eclipse.hawkbit.repository.AutoAssignmentManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -48,12 +49,11 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 /**
- * Checks if targets need a new distribution set (DS) based on the target filter queries and assigns the new DS when necessary. First all target
- * filter queries are listed. For every target filter query (TFQ) the auto assign DS is retrieved. All targets get listed per target filter
- * query, that match the TFQ and that don't have the auto assign DS in their action history.
+ * Checks if targets need a new distribution set (DS) based on the auto assignments and assigns the new DS when necessary. First all active auto
+ * assignments are listed. For every auto assignment, the DS is retrieved. All targets get listed per auto assignment, that match its query and
+ * that don't have the auto assign DS in their action history.
  */
 @Slf4j
 @Service
@@ -61,18 +61,18 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
 
     /**
      * The message which is added to the action status when a distribution set is assigned to a target.
-     * First %s is the name of the target filter.
+     * First %s is the name of the auto assignment.
      */
-    private static final String ACTION_MESSAGE = "Auto assignment by target filter: %s";
+    private static final String ACTION_MESSAGE = "Auto assignment: %s";
 
     /**
-     * Maximum for target filter queries with auto assign DS activated.
+     * Maximum number of active auto assignments fetched per page.
      */
     private static final int PAGE_SIZE = 1000;
 
     private static final LockTimeoutException LOCK_TIMEOUT_EXCEPTION = new LockTimeoutException("Could not obtain lock for auto assignment");
 
-    private final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
+    private final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement;
     private final TargetManagement<? extends Target> targetManagement;
     private final DeploymentManagement deploymentManagement;
     private final PlatformTransactionManager transactionManager;
@@ -80,11 +80,11 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
     private final Optional<MeterRegistry> meterRegistry;
 
     public JpaAutoAssignHandler(
-            final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
+            final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement,
             final TargetManagement<? extends Target> targetManagement, final DeploymentManagement deploymentManagement,
             final PlatformTransactionManager transactionManager, final LockRegistry<? extends Lock> lockRegistry,
             final Optional<MeterRegistry> meterRegistry) {
-        this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.autoAssignmentManagement = autoAssignmentManagement;
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
         this.transactionManager = transactionManager;
@@ -99,9 +99,9 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
 
         final AtomicReference<Lock> lockRef = new AtomicReference<>();
         try {
-            forEachFilterWithAutoAssignDS(targetFilterQuery -> {
+            forEachAutoAssignment(autoAssignment -> {
                 if (lockRef.get() == null) {
-                    // only if there are targetFilterQueries to process we try to obtain the lock (on the first one)
+                    // only if there are auto assignments to process we try to obtain the lock (on the first one)
                     final Lock lock = lockRegistry.obtain(createAutoAssignmentLockKey(AccessContext.tenant()));
                     if (!lock.tryLock()) {
                         if (log.isTraceEnabled()) {
@@ -117,12 +117,12 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
 
                 final long startNanoPartial = System.nanoTime();
                 try {
-                    checkByTargetFilterQueryAndAssignDS(targetFilterQuery);
+                    checkByDistributionSet(autoAssignment);
                 } finally {
-                    meterRegistry // handle single targetFilterQuery
+                    meterRegistry // handle single autoAssignment
                             .map(mReg -> mReg.timer(
-                                    "hawkbit.autoassign.handle", TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get(), "targetFilterQuery",
-                                    String.valueOf(targetFilterQuery.getId())))
+                                    "hawkbit.autoassign.handle", TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get(), "autoAssignment",
+                                    String.valueOf(autoAssignment.getId())))
                             .ifPresent(timer -> timer.record(System.nanoTime() - startNanoPartial, TimeUnit.NANOSECONDS));
                 }
             });
@@ -131,8 +131,8 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
             if (lock != null) {
                 lock.unlock();
 
-                // only if there is at least one targetFilterQuery and lock has been obtained then will be measured (as in rollouts)
-                meterRegistry // handle single targetFilterQuery for single target
+                // only if there is at least one autoAssignment and lock has been obtained then will be measured (as in rollouts)
+                meterRegistry // handle single autoAssignment for single target
                         .map(mReg -> mReg.timer(
                                 "hawkbit.autoassign.handle.all", TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get()))
                         .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
@@ -146,20 +146,20 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
         log.debug("Auto assign check call for device {} started", controllerId);
         final long startNano = System.nanoTime();
 
-        forEachFilterWithAutoAssignDS(targetFilterQuery -> {
+        forEachAutoAssignment(autoAssignment -> {
             final long startNanoPartial = System.nanoTime();
             try {
-                checkForDevice(controllerId, targetFilterQuery);
+                checkForDevice(controllerId, autoAssignment);
             } finally {
-                meterRegistry // handle single targetFilterQuery for single target
+                meterRegistry // handle single autoAssignment for single target
                         .map(mReg -> mReg.timer(
-                                "hawkbit.autoassign.handle.single", TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get(), "targetFilterQuery",
-                                String.valueOf(targetFilterQuery.getId())))
+                                "hawkbit.autoassign.handle.single", TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get(), "autoAssignment",
+                                String.valueOf(autoAssignment.getId())))
                         .ifPresent(timer -> timer.record(System.nanoTime() - startNanoPartial, TimeUnit.NANOSECONDS));
             }
         });
 
-        meterRegistry // handle single targetFilterQuery for single target
+        meterRegistry // handle all single-target auto assignments
                 .map(mReg -> mReg.timer(
                         "hawkbit.autoassign.handle.single.all", TENANT_TAG, TENANT_TAG_VALUE_PROVIDER.get()))
                 .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
@@ -170,97 +170,96 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
      * Fetches the distribution set, gets all controllerIds and assigns the DS to them. Catches PersistenceException and own exceptions derived
      * from AbstractServerRtException
      *
-     * @param targetFilterQuery the target filter query
+     * @param autoAssignment the auto assignment
      */
-    private void checkByTargetFilterQueryAndAssignDS(final TargetFilterQuery targetFilterQuery) {
-        log.debug("Auto assign check call for target filter query id {} started", targetFilterQuery.getId());
+    private void checkByDistributionSet(final AutoAssignment autoAssignment) {
+        log.debug("Auto assign check call for id {} started", autoAssignment.getId());
         try {
             int count;
             do {
                 final List<String> controllerIds = targetManagement
                         .findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(
-                                targetFilterQuery.getAutoAssignDistributionSet().getId(), targetFilterQuery.getQuery(),
+                                autoAssignment.getDistributionSet().getId(), autoAssignment.getTargetFilterQuery(),
                                 PageRequest.of(0, Constants.MAX_ENTRIES_IN_STATEMENT))
                         .getContent().stream().map(Target::getControllerId).toList();
-                log.debug("Retrieved {} auto assign targets for target filter query id {}, starting with assignment",
-                        controllerIds.size(), targetFilterQuery.getId());
+                log.debug("Retrieved {} auto assign targets for auto assignment id {}, starting with assignment",
+                        controllerIds.size(), autoAssignment.getId());
 
-                count = runTransactionalAssignment(targetFilterQuery, controllerIds);
-                log.debug("Assignment for {} auto assign targets for target filter query id {} finished",
-                        controllerIds.size(), targetFilterQuery.getId());
+                count = runTransactionalAssignment(autoAssignment, controllerIds);
+                log.debug("Assignment for {} auto assign targets for auto assignment id {} finished",
+                        controllerIds.size(), autoAssignment.getId());
             } while (count == Constants.MAX_ENTRIES_IN_STATEMENT);
         } catch (final PersistenceException | AbstractServerRtException e) {
-            log.error("Error during auto assign check of target filter query id {}", targetFilterQuery.getId(), e);
+            log.error("Error during auto assign check id {}", autoAssignment.getId(), e);
         }
-        log.debug("Auto assign check call for target filter query id {} finished", targetFilterQuery.getId());
+        log.debug("Auto assign check call with id {} finished", autoAssignment.getId());
     }
 
-    private static String getAutoAssignmentInitiatedBy(final TargetFilterQuery targetFilterQuery) {
-        return StringUtils.hasText(targetFilterQuery.getAutoAssignInitiatedBy())
-                ? targetFilterQuery.getAutoAssignInitiatedBy()
-                : targetFilterQuery.getCreatedBy();
+    private static String getAutoAssignmentInitiatedBy(final AutoAssignment autoAssignment) {
+        return autoAssignment.getCreatedBy();
     }
 
     // run in the context the auto assignment is made in, i.e. if there is access control context it runs in it
     // otherwise in the tenant & user context built by createdBy
     // Note: It must be called in a tenant context, i.e. Security.getCurrentTenant() returns the tenant
-    private void forEachFilterWithAutoAssignDS(final Consumer<TargetFilterQuery> consumer) {
-        Slice<TargetFilterQuery> filterQueries;
+    private void forEachAutoAssignment(final Consumer<AutoAssignment> consumer) {
+        Slice<AutoAssignment> autoAssignments;
         Pageable query = PageRequest.of(0, PAGE_SIZE);
         do {
-            filterQueries = targetFilterQueryManagement.findWithActiveAutoAssignDS(query);
+            autoAssignments = autoAssignmentManagement.getActiveAutoAssignments(query);
 
             try {
-                filterQueries.forEach(filterQuery -> {
+                autoAssignments.forEach(autoAssignment -> {
                     try {
-                        if (filterQuery.getAutoAssignStatus() == TargetFilterQuery.AutoAssignStatus.READY) {
-                            final Long startAt = filterQuery.getStartAt();
+                        if (autoAssignment.getStatus() == READY) {
+                            final Long startAt = autoAssignment.getStartAt();
                             if (startAt != null && startAt > System.currentTimeMillis()) {
                                 return;
                             }
-                            targetFilterQueryManagement.startAutoAssignDS(filterQuery.getId());
+                            autoAssignmentManagement.start(autoAssignment.getId());
                         }
-                        filterQuery.getAccessControlContext().ifPresentOrElse(
+                        autoAssignment.getAccessControlContext().ifPresentOrElse(
                                 // has stored context - executes it with it
-                                context -> withSecurityContext(context, () -> consumer.accept(filterQuery)),
+                                context -> withSecurityContext(context, () -> consumer.accept(autoAssignment)),
                                 // has no stored context - executes it in the tenant & user scope
-                                () -> asActor(getAutoAssignmentInitiatedBy(filterQuery), () -> consumer.accept(filterQuery)));
+                                () -> asActor(getAutoAssignmentInitiatedBy(autoAssignment), () -> consumer.accept(autoAssignment)));
                     } catch (final RuntimeException ex) {
                         if (ex == LOCK_TIMEOUT_EXCEPTION) {
                             // expected - just stop processing further
                             throw ex; // throw in order to break
                         }
                         if (log.isDebugEnabled()) {
-                            log.debug("Exception on forEachFilterWithAutoAssignDS execution for filter id {}. Continue with next filter query.",
-                                    filterQuery.getId(), ex);
+                            log.debug(
+                                    "Exception on forEachAutoAssignment execution for auto assignment id {}. Continue with next auto assignment.",
+                                    autoAssignment.getId(), ex);
                         } else {
                             log.error(
-                                    "Exception on forEachFilterWithAutoAssignDS execution for filter id {} and error message [{}]. Continue with next filter query.",
-                                    filterQuery.getId(), ex.getMessage());
+                                    "Exception on forEachAutoAssignment execution for auto assignment id {} and error message [{}]. Continue with next auto assignment.",
+                                    autoAssignment.getId(), ex.getMessage());
                         }
                     }
                 });
             } catch (final LockTimeoutException lte) {
                 break; // lock not found
             }
-        } while (filterQueries.hasNext() && (query = filterQueries.nextPageable()) != Pageable.unpaged());
+        } while (autoAssignments.hasNext() && (query = autoAssignments.nextPageable()) != Pageable.unpaged());
     }
 
     /**
      * Runs target assignments within a dedicated transaction for a given list of controllerIDs
      *
-     * @param targetFilterQuery the target filter query
+     * @param autoAssignment the auto assignment
      * @param controllerIds the controllerIDs
      * @return count of targets
      */
-    private int runTransactionalAssignment(final TargetFilterQuery targetFilterQuery, final List<String> controllerIds) {
-        final String actionMessage = String.format(ACTION_MESSAGE, targetFilterQuery.getName());
+    private int runTransactionalAssignment(final AutoAssignment autoAssignment, final List<String> controllerIds) {
+        final String actionMessage = String.format(ACTION_MESSAGE, autoAssignment.getName());
         return DeploymentHelper.runInNewTransaction(transactionManager, "autoAssignDSToTargets", Isolation.READ_COMMITTED.value(), status -> {
-            final List<DeploymentRequest> deploymentRequests = mapToDeploymentRequests(controllerIds, targetFilterQuery);
+            final List<DeploymentRequest> deploymentRequests = mapToDeploymentRequests(controllerIds, autoAssignment);
             final int count = deploymentRequests.size();
             if (count > 0) {
                 asActor(
-                        getAutoAssignmentInitiatedBy(targetFilterQuery),
+                        getAutoAssignmentInitiatedBy(autoAssignment),
                         () -> deploymentManagement.assignDistributionSets(deploymentRequests, actionMessage));
             }
             return count;
@@ -268,36 +267,36 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
     }
 
     /**
-     * Creates a list of {@link DeploymentRequest} for given list of controllerIds and {@link TargetFilterQuery}
+     * Creates a list of {@link DeploymentRequest} for given list of controllerIds and {@link AutoAssignment}
      *
      * @param controllerIds list of controllerIds
-     * @param filterQuery the query the targets have to match
+     * @param autoAssignment the auto assignment the targets have to match
      * @return list of deployment request
      */
-    private List<DeploymentRequest> mapToDeploymentRequests(final List<String> controllerIds, final TargetFilterQuery filterQuery) {
+    private List<DeploymentRequest> mapToDeploymentRequests(final List<String> controllerIds, final AutoAssignment autoAssignment) {
         // the action type is set to FORCED per default (when not explicitly specified)
-        final Action.ActionType autoAssignActionType = filterQuery.getAutoAssignActionType() == null
+        final Action.ActionType autoAssignActionType = autoAssignment.getActionType() == null
                 ? Action.ActionType.FORCED
-                : filterQuery.getAutoAssignActionType();
+                : autoAssignment.getActionType();
         return controllerIds.stream()
                 .map(controllerId -> DeploymentRequest
-                        .builder(controllerId, filterQuery.getAutoAssignDistributionSet().getId())
-                        .actionType(autoAssignActionType).weight(filterQuery.getAutoAssignWeight().orElse(null))
-                        .confirmationRequired(filterQuery.isConfirmationRequired()).build())
+                        .builder(controllerId, autoAssignment.getDistributionSet().getId())
+                        .actionType(autoAssignActionType).weight(autoAssignment.getWeight().orElse(null))
+                        .confirmationRequired(autoAssignment.isConfirmationRequired()).build())
                 .toList();
     }
 
-    private void checkForDevice(final String controllerId, final TargetFilterQuery targetFilterQuery) {
-        log.debug("Auto assign check call for target filter query id {} for device {} started", targetFilterQuery.getId(), controllerId);
+    private void checkForDevice(final String controllerId, final AutoAssignment autoAssignment) {
+        log.debug("Auto assign check call for auto assignment id {} for device {} started", autoAssignment.getId(), controllerId);
         try {
             if (targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(
-                    controllerId, targetFilterQuery.getAutoAssignDistributionSet().getId(), targetFilterQuery.getQuery())) {
-                runTransactionalAssignment(targetFilterQuery, Collections.singletonList(controllerId));
+                    controllerId, autoAssignment.getDistributionSet().getId(), autoAssignment.getTargetFilterQuery())) {
+                runTransactionalAssignment(autoAssignment, Collections.singletonList(controllerId));
             }
         } catch (final PersistenceException | AbstractServerRtException e) {
-            log.error("Error during auto assign check of target filter query id {}", targetFilterQuery.getId(), e);
+            log.error("Error during auto assign check of id {}", autoAssignment.getId(), e);
         }
-        log.debug("Auto assign check call for target filter query id {} for device {} finished", targetFilterQuery.getId(), controllerId);
+        log.debug("Auto assign check call for id {} for device {} finished", autoAssignment.getId(), controllerId);
     }
 
     private static String createAutoAssignmentLockKey(final String tenant) {

@@ -43,6 +43,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
+import org.eclipse.hawkbit.mgmt.json.model.autoassignment.MgmtAutoAssignmentResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPut;
@@ -53,7 +54,6 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentR
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
-import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateNoContentResponses;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateResponses;
 import org.eclipse.hawkbit.rest.OpenApi;
@@ -248,9 +248,9 @@ public interface MgmtDistributionSetRestApi {
             description = "Handles the GET request for retrieving assigned target filter queries of a single " +
                     "distribution set. Required permissions: READ_REPOSITORY and READ_TARGET")
     @GetResponses
-    @GetMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/autoAssignTargetFilters",
-            produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
-    ResponseEntity<PagedList<MgmtTargetFilterQuery>> getAutoAssignTargetFilterQueries(
+    @GetMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/autoAssignTargetFilters", produces = { HAL_JSON_VALUE,
+            APPLICATION_JSON_VALUE })
+    ResponseEntity<PagedList<MgmtAutoAssignmentResponseBody>> getAutoAssignments(
             @PathVariable("distributionSetId") Long distributionSetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
             @Schema(description = "Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for available fields.")

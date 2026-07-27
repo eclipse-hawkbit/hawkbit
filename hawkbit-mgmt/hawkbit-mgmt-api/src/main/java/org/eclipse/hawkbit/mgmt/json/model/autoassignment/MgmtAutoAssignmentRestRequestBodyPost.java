@@ -8,14 +8,16 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-package org.eclipse.hawkbit.mgmt.json.model.targetfilter;
+package org.eclipse.hawkbit.mgmt.json.model.autoassignment;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 
 /**
@@ -28,6 +30,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 @Schema(example = """
         {
             "name" : "autoAssignmentName",
+            "description" : "A description of the auto assignment",
             "targetFilterQuery": "name==*",
             "distributionSetId" : 6,
             "startAt" : 1682408570791,
@@ -35,19 +38,16 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
             "confirmationRequired" : true,
             "weight" : 400
         }""")
-public class MgmtAutoAssignmentRestRequestBodyPost {
-
-    @JsonProperty(required = true)
-    @Schema(description = "The name of the auto assignment")
-    private String name;
+public class MgmtAutoAssignmentRestRequestBodyPost extends MgmtNamedEntity {
 
     @JsonProperty(required = true)
     @Schema(description = "The query for the auto assignment")
     private String targetFilterQuery;
 
+    @NotNull
     @JsonProperty(required = true)
     @Schema(description = "The ID of the distribution set", example = "6")
-    private long distributionSetId;
+    private Long distributionSetId;
 
     @Schema(description = "Start at timestamp of the auto assignment", example = "1691065753136")
     private Long startAt;

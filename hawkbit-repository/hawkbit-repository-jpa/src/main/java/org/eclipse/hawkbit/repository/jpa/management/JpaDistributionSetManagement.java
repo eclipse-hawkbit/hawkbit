@@ -42,14 +42,15 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAutoAssignment;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.repository.AutoAssignmentRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -79,7 +80,7 @@ public class JpaDistributionSetManagement
     private final DistributionSetTagManagement<JpaDistributionSetTag> distributionSetTagManagement;
     private final SoftwareModuleRepository softwareModuleRepository;
     private final DistributionSetTagRepository distributionSetTagRepository;
-    private final TargetFilterQueryRepository targetFilterQueryRepository;
+    private final AutoAssignmentRepository autoAssignmentRepository;
     private final QuotaManagement quotaManagement;
     private final RepositoryProperties repositoryProperties;
 
@@ -90,14 +91,14 @@ public class JpaDistributionSetManagement
             final DistributionSetTagManagement<JpaDistributionSetTag> distributionSetTagManagement,
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
-            final TargetFilterQueryRepository targetFilterQueryRepository,
+            final AutoAssignmentRepository autoAssignmentRepository,
             final QuotaManagement quotaManagement,
             final RepositoryProperties repositoryProperties) {
         super(jpaRepository, entityManager);
         this.distributionSetTagManagement = distributionSetTagManagement;
         this.softwareModuleRepository = softwareModuleRepository;
         this.distributionSetTagRepository = distributionSetTagRepository;
-        this.targetFilterQueryRepository = targetFilterQueryRepository;
+        this.autoAssignmentRepository = autoAssignmentRepository;
         this.quotaManagement = quotaManagement;
         this.repositoryProperties = repositoryProperties;
     }
@@ -163,7 +164,8 @@ public class JpaDistributionSetManagement
         }
 
         // if delete fail (because of permission denied) transaction will be rolled back
-        targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(distributionSetIDs.toArray(new Long[0]));
+        final List<JpaAutoAssignment> affected = autoAssignmentRepository.findByDistributionSet(distributionSetIDs.toArray(new Long[0]));
+        autoAssignmentRepository.deleteAll(affected);
         super.delete0(distributionSetIDs);
     }
 
@@ -409,8 +411,9 @@ public class JpaDistributionSetManagement
 
         // fallback
         final List<Specification<JpaDistributionSet>> specList = new ArrayList<>();
-        final Specification<JpaDistributionSet> rslqSpec =
-                rsql != null ? QLSupport.getInstance().buildSpec(rsql, DistributionSetFields.class) : Specification.unrestricted();
+        final Specification<JpaDistributionSet> rslqSpec = rsql != null
+                ? QLSupport.getInstance().buildSpec(rsql, DistributionSetFields.class)
+                : Specification.unrestricted();
         specList.add(deletedSpecification(deletedMode));
         specList.add(rslqSpec);
         return JpaManagementHelper.findAllWithCountBySpec(jpaRepository, specList, pageable);
@@ -462,11 +465,11 @@ public class JpaDistributionSetManagement
             final Collection<Long> dsIds, final long dsTagId,
             final BiFunction<JpaDistributionSetTag, JpaDistributionSet, JpaDistributionSet> updater) {
         final JpaDistributionSetTag tag = distributionSetTagManagement.get(dsTagId);
-        final List<JpaDistributionSet> allDs = dsIds.size() == 1 ?
-                jpaRepository.findById(dsIds.iterator().next())
+        final List<JpaDistributionSet> allDs = dsIds.size() == 1
+                ? jpaRepository.findById(dsIds.iterator().next())
                         .map(List::of)
-                        .orElseGet(Collections::emptyList) :
-                jpaRepository.findAll(DistributionSetSpecification.byIdsFetch(dsIds));
+                        .orElseGet(Collections::emptyList)
+                : jpaRepository.findAll(DistributionSetSpecification.byIdsFetch(dsIds));
         if (allDs.size() < dsIds.size()) {
             throw new EntityNotFoundException(DistributionSet.class, notFound(dsIds, allDs));
         }
