@@ -90,7 +90,7 @@
 
         <!-- test -->
         <rabbitmq-http-client.version>5.6.0</rabbitmq-http-client.version>
-        <classgraph.version>4.8.185</classgraph.version>
+        <classgraph.version>4.8.186</classgraph.version>
         <awaitility.version>4.3.0</awaitility.version>
         <!-- Misc libraries versions - END -->
 
