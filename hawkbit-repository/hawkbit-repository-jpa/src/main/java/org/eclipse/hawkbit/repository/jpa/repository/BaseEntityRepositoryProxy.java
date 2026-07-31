@@ -31,7 +31,10 @@ import org.eclipse.hawkbit.repository.jpa.acm.AccessController.Operation;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.springframework.aop.TargetClassAware;
+import org.springframework.aop.framework.Advised;
 import org.springframework.cache.Cache;
+import org.springframework.core.DecoratingProxy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -394,7 +397,12 @@ public class BaseEntityRepositoryProxy<T extends AbstractJpaBaseEntity> implemen
                         try {
                             return Optional.of(BaseEntityRepositoryProxy.class.getDeclaredMethod(m.getName(), m.getParameterTypes()));
                         } catch (final NoSuchMethodException nsme) {
-                            log.warn("RepositoryProxy does not override method {} - call will fall through to the raw repository", m, nsme);
+                            // spring bean proxy extends DecoratingProxy and Advised (extending TargetClassAware)
+                            // and call their methods, e.g. TargetClassAware#getTargetClass() - we don't need to implement these
+                            // hence we don't log those hit misses
+                            if (!List.of(TargetClassAware.class, Advised.class, DecoratingProxy.class).contains(m.getDeclaringClass())) {
+                                log.warn("RepositoryProxy does not override method {} - call will fall through to the raw repository", m, nsme);
+                            }
                             return Optional.empty();
                         }
                     });
