@@ -48,10 +48,10 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRe
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssignment;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
+import org.eclipse.hawkbit.repository.AutoAssignmentManagement.Create;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement.Update;
 import org.eclipse.hawkbit.repository.Identifiable;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.Create;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -65,7 +65,6 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
@@ -696,20 +695,23 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     }
 
     /**
-     * Ensures that target filters with auto assign DS are returned as persisted in the repository.
+     * Ensures that auto assign DS are returned as persisted in the repository.
      */
     @Test
-    void getAutoAssignTargetFiltersOfDistributionSet() throws Exception {
+    void getAutoAssignmentOfDistributionSet() throws Exception {
         // prepare distribution set
         final String knownFilterName = "a";
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
+        final DistributionSet otherDs = testdataFactory.createDistributionSet();
 
-        targetFilterQueryManagement.create(
-                Create.builder().name(knownFilterName).query("name==y").autoAssignDistributionSet(createdDs).build());
+        autoAssignmentManagement.create(
+                Create.builder().name(knownFilterName).targetFilterQuery("name==y").distributionSet(createdDs).build());
 
-        // create some dummy target filter queries
-        targetFilterQueryManagement.create(Create.builder().name("b").query("name==y").build());
-        targetFilterQueryManagement.create(Create.builder().name("c").query("name==y").build());
+        // create some dummy auto assignments
+        autoAssignmentManagement.create(
+                Create.builder().name("b").targetFilterQuery("name==y").distributionSet(otherDs).build());
+        autoAssignmentManagement.create(
+                Create.builder().name("c").targetFilterQuery("name==y").distributionSet(otherDs).build());
 
         mvc.perform(get(DISTRIBUTIONSETS_V1 + "/" + createdDs.getId() + "/autoAssignTargetFilters"))
                 .andExpect(status().isOk())
@@ -718,12 +720,13 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     }
 
     /**
-     * Handles the GET request for retrieving assigned target filter queries of a single distribution set with a defined page size and offset, sorted by name in descending order and filtered down to all targets with a name that ends with '1'.
+     * Handles the GET request for retrieving assigned target filter queries of a single distribution set with a defined page size and offset,
+     * sorted by name in descending order and filtered down to all targets with a name that ends with '1'.
      */
     @Test
-    void ggetAutoAssignTargetFiltersOfDistributionSetWithParameters() throws Exception {
+    void getAutoAssignmentOfDistributionSetWithParameters() throws Exception {
         final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
-        targetFilterQueryManagement.create(Create.builder().name("filter1").query("name==a").autoAssignDistributionSet(set).build());
+        autoAssignmentManagement.create(Create.builder().name("filter1").targetFilterQuery("name==a").distributionSet(set).build());
 
         mvc.perform(get(DISTRIBUTIONSETS_V1 + "/" + set.getId() + "/autoAssignTargetFilters")
                         .param("offset", "1").param("limit", "2").param("sort", "name:DESC").param("q", "name==*1")
@@ -756,7 +759,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         final String query = "name==" + filterNamePrefix + "*";
 
-        prepareTestFilters(filterNamePrefix, createdDs);
+        prepareTestAutoAssignments(filterNamePrefix, createdDs);
 
         mvc.perform(get(DISTRIBUTIONSETS_V1 + "/" + createdDs.getId() + "/autoAssignTargetFilters")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, query))
@@ -775,7 +778,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         final String query = "name==doesNotExist";
 
-        prepareTestFilters(filterNamePrefix, createdDs);
+        prepareTestAutoAssignments(filterNamePrefix, createdDs);
 
         mvc.perform(get(DISTRIBUTIONSETS_V1 + "/" + createdDs.getId() + "/autoAssignTargetFilters")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, query))
@@ -1731,11 +1734,11 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         DistributionSet ds1 = testdataFactory.createDistributionSet("DS1");
         DistributionSet ds2 = testdataFactory.createDistributionSet("DS2");
 
-        targetFilterQueryManagement.create(
-                Create.builder().name("test filter 1").autoAssignDistributionSet(ds1).query("name==targets*").build());
+        autoAssignmentManagement.create(
+                Create.builder().name("test filter 1").distributionSet(ds1).targetFilterQuery("name==targets*").build());
 
-        targetFilterQueryManagement.create(
-                Create.builder().name("test filter 2").autoAssignDistributionSet(ds1).query("name==targets*").build());
+        autoAssignmentManagement.create(
+                Create.builder().name("test filter 2").distributionSet(ds1).targetFilterQuery("name==targets*").build());
 
         mvc.perform(get(DISTRIBUTIONSETS_V1 + "/{ds}/statistics/autoassignments", ds1.getId()).contentType(
                         APPLICATION_JSON))
@@ -1764,8 +1767,10 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         DistributionSet ds1 = testdataFactory.createDistributionSet("DS1");
         DistributionSet ds2 = testdataFactory.createDistributionSet("DS2");
 
-        targetFilterQueryManagement.create(
-                Create.builder().name("test filter 1").autoAssignDistributionSet(ds1).query("name==autoAssignments*").build());
+        autoAssignmentManagement.create(
+                Create.builder().name("test filter 1").distributionSet(ds1).targetFilterQuery("name==autoAssignments*").build());
+        // the auto assignment creation implicitly locks the distribution set, so the old instance becomes stale
+        ds1 = distributionSetManagement.get(ds1.getId());
 
         Rollout rollout = testdataFactory.createRolloutByVariables("rollout", "description", 1, "name==targets*", ds1, "50", "5", false);
         rolloutManagement.start(rollout.getId());
@@ -1799,8 +1804,9 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         final List<Target> targets = testdataFactory.createTargets(5, "invalidateDistributionSet");
         // the distribution set is locked and the old instance become stale
         distributionSet = assignDistributionSet(distributionSet, targets).getDistributionSet();
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
-                Create.builder().name("invalidateDistributionSet").query("name==*").autoAssignDistributionSet(distributionSet).build());
+        autoAssignmentManagement.create(
+                Create.builder().name("invalidateDistributionSet").targetFilterQuery("name==*").distributionSet(distributionSet)
+                        .build());
         final Rollout rollout = testdataFactory.createRolloutByVariables(
                 "invalidateDistributionSet", "desc", 2, "name==*", distributionSet, "50", "80");
 
@@ -1812,8 +1818,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                         .content(jsonObject.toString()))
                 .andExpect(status().isNoContent());
 
-        assertThat(targetFilterQueryManagement.find(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
-                .isNull();
+        assertThat(autoAssignmentManagement.findByName("invalidateDistributionSet")).isEmpty();
         assertThat(rolloutManagement.get(rollout.getId()).getStatus()).isIn(RolloutStatus.STOPPING,
                 RolloutStatus.STOPPED);
         //then enforce executor to stop the rollout and check
@@ -1835,8 +1840,9 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final List<Target> targets = testdataFactory.createTargets(5, "invalidateDistributionSet");
         distributionSet = assignDistributionSet(distributionSet, targets).getDistributionSet();
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
-                Create.builder().name("invalidateDistributionSet").query("name==*").autoAssignDistributionSet(distributionSet).build());
+        autoAssignmentManagement.create(
+                Create.builder().name("invalidateDistributionSet").targetFilterQuery("name==*").distributionSet(distributionSet)
+                        .build());
         final Rollout rollout = testdataFactory.createRolloutByVariables("invalidateDistributionSet", "desc", 2,
                 "name==*", distributionSet, "50", "80");
 
@@ -1847,7 +1853,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                         .content(jsonObject.toString()).contentType(APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
-        assertThat(targetFilterQueryManagement.find(targetFilterQuery.getId()).get().getAutoAssignDistributionSet()).isNull();
+        assertThat(autoAssignmentManagement.findByName("invalidateDistributionSet")).isEmpty();
         final Long rolloutId = rollout.getId();
         assertThat(rolloutManagement.get(rolloutId).getStatus()).isIn(RolloutStatus.DELETING, RolloutStatus.DELETED);
         //then enforce executor to stop the rollout and check
@@ -1997,15 +2003,18 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         return result;
     }
 
-    private void prepareTestFilters(final String filterNamePrefix, final DistributionSet createdDs) {
-        // create target filter queries that should be found
-        targetFilterQueryManagement.create(Create.builder().name(filterNamePrefix + "1")
-                .query("name==y").autoAssignDistributionSet(createdDs).build());
-        targetFilterQueryManagement.create(Create.builder().name(filterNamePrefix + "2")
-                .query("name==y").autoAssignDistributionSet(createdDs).build());
-        // create some dummy target filter queries
-        targetFilterQueryManagement.create(Create.builder().name(filterNamePrefix + "b").query("name==y").build());
-        targetFilterQueryManagement.create(Create.builder().name(filterNamePrefix + "c").query("name==y").build());
+    private void prepareTestAutoAssignments(final String namePrefix, final DistributionSet createdDs) {
+        // create auto assignments that should be found
+        autoAssignmentManagement.create(Create.builder().name(namePrefix + "1")
+                .targetFilterQuery("name==y").distributionSet(createdDs).build());
+        autoAssignmentManagement.create(Create.builder().name(namePrefix + "2")
+                .targetFilterQuery("name==y").distributionSet(createdDs).build());
+        // create some dummy auto assignments
+        final DistributionSet otherDS = testdataFactory.createDistributionSet();
+        autoAssignmentManagement.create(Create.builder().name(namePrefix + "3")
+                .targetFilterQuery("name==y").distributionSet(otherDS).build());
+        autoAssignmentManagement.create(Create.builder().name(namePrefix + "4")
+                .targetFilterQuery("name==y").distributionSet(otherDS).build());
     }
 
     private MvcResult executeMgmtTargetPost(

@@ -75,6 +75,10 @@ public final class SpPermission {
 
     public static final String READ_SOFTWARE_MODULE_ARTIFACT = READ_PREFIX + SOFTWARE_MODULE + "_ARTIFACT";
 
+    public static final String CREATE_AUTO_ASSIGNMENT = CREATE_PREFIX + AUTO_ASSIGNMENT;
+    public static final String READ_AUTO_ASSIGNMENT = READ_PREFIX + AUTO_ASSIGNMENT;
+    public static final String UPDATE_AUTO_ASSIGNMENT = UPDATE_PREFIX + AUTO_ASSIGNMENT;
+    public static final String DELETE_AUTO_ASSIGNMENT = DELETE_PREFIX + AUTO_ASSIGNMENT;
     /** Permission to approve or deny an auto assignment prior to starting. */
     public static final String APPROVE_AUTO_ASSIGNMENT = "APPROVE_" + AUTO_ASSIGNMENT;
     /** Permission to start/stop/resume an auto assignment. */
@@ -112,7 +116,11 @@ public final class SpPermission {
             CREATE_TARGET + IMPLY_READ + TARGET_TYPE + LINE_BREAK +
             READ_TARGET + IMPLY_READ + TARGET_TYPE + LINE_BREAK +
             UPDATE_TARGET + IMPLY_READ + TARGET_TYPE + LINE_BREAK +
-            DELETE_TARGET + IMPLY_READ + TARGET_TYPE + LINE_BREAK;
+            DELETE_TARGET + IMPLY_READ + TARGET_TYPE + LINE_BREAK  +
+            UPDATE_TARGET + IMPLY_CREATE + AUTO_ASSIGNMENT + LINE_BREAK +
+            READ_TARGET + IMPLY_READ + AUTO_ASSIGNMENT + LINE_BREAK +
+            UPDATE_TARGET + IMPLY_UPDATE + AUTO_ASSIGNMENT + LINE_BREAK +
+            UPDATE_TARGET + IMPLY_DELETE + AUTO_ASSIGNMENT + LINE_BREAK;
     public static final String SOFTWARE_MODULE_HIERARCHY =
             CREATE_PREFIX + SOFTWARE_MODULE + IMPLY_READ + SOFTWARE_MODULE_TYPE + LINE_BREAK +
             READ_PREFIX + SOFTWARE_MODULE + IMPLY_READ + SOFTWARE_MODULE_TYPE + LINE_BREAK +
@@ -140,7 +148,7 @@ public final class SpPermission {
         for (final String group : new String[] {
                 TARGET, TARGET_TYPE,
                 SOFTWARE_MODULE, SOFTWARE_MODULE_TYPE, DISTRIBUTION_SET, DISTRIBUTION_SET_TYPE,
-                ROLLOUT,
+                ROLLOUT, AUTO_ASSIGNMENT,
                 TENANT_CONFIGURATION }) {
             for (final String access_prefix : new String[] { CREATE_PREFIX, READ_PREFIX, UPDATE_PREFIX, DELETE_PREFIX }) {
                 allPermissions.add(access_prefix + group);

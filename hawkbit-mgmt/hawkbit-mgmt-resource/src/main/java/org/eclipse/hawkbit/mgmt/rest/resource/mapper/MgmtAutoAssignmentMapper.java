@@ -11,10 +11,6 @@
 package org.eclipse.hawkbit.mgmt.rest.resource.mapper;
 
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.FORCED;
-import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.PAUSED;
-import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.READY;
-import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.RUNNING;
-import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.WAITING_FOR_APPROVAL;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -24,15 +20,16 @@ import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtAutoAssignmentResponseBody;
-import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtAutoAssignmentRestRequestBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.autoassignment.MgmtAutoAssignmentResponseBody;
+import org.eclipse.hawkbit.mgmt.json.model.autoassignment.MgmtAutoAssignmentRestRequestBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.autoassignment.MgmtAutoAssignmentRestRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtAutoAssignmentRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDistributionSetUpdate;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.AutoAssignmentManagement.Create;
+import org.eclipse.hawkbit.repository.AutoAssignmentManagement.Update;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
+import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
 /**
  * A mapper which maps repository model to RESTful model representation and back.
@@ -40,61 +37,71 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MgmtAutoAssignmentMapper {
 
-    public static List<MgmtAutoAssignmentResponseBody> toResponseAutoAssignment(final List<TargetFilterQuery> targetFilterQueries) {
-        if (targetFilterQueries == null) {
+    public static List<MgmtAutoAssignmentResponseBody> toResponseAutoAssignment(final List<AutoAssignment> autoAssignments) {
+        if (autoAssignments == null) {
             return Collections.emptyList();
         }
 
-        return targetFilterQueries.stream().map(MgmtAutoAssignmentMapper::toResponseAutoAssignment).toList();
+        return autoAssignments.stream().map(MgmtAutoAssignmentMapper::toResponseAutoAssignment).toList();
     }
 
-    public static MgmtAutoAssignmentResponseBody toResponseAutoAssignment(final TargetFilterQuery targetFilterQuery) {
-        if (targetFilterQuery.getAutoAssignDistributionSet() == null) {
-            throw new EntityNotFoundException("Distribution Set inside Target Filter Query", targetFilterQuery.getId());
-        }
+    public static MgmtAutoAssignmentResponseBody toResponseAutoAssignment(final AutoAssignment autoAssignment) {
+
         final MgmtAutoAssignmentResponseBody body = new MgmtAutoAssignmentResponseBody();
-        body.setId(targetFilterQuery.getId());
-        body.setDistributionSetId(targetFilterQuery.getAutoAssignDistributionSet().getId());
-        body.setTargetFilterQuery(targetFilterQuery.getQuery());
-        body.setStatus(targetFilterQuery.getAutoAssignStatus().toString().toLowerCase());
-        body.setStartAt(targetFilterQuery.getStartAt());
-        body.setActionType(MgmtRestModelMapper.convertActionType(targetFilterQuery.getAutoAssignActionType()));
-        targetFilterQuery.getAutoAssignWeight().ifPresent(body::setWeight);
-        body.setConfirmationRequired(targetFilterQuery.isConfirmationRequired());
-        body.setApprovalDecidedBy(targetFilterQuery.getApprovalDecidedBy());
-        body.setApprovalRemark(targetFilterQuery.getApprovalRemark());
+        body.setId(autoAssignment.getId());
+        body.setName(autoAssignment.getName());
+        body.setDescription(autoAssignment.getDescription());
+        body.setDistributionSetId(autoAssignment.getDistributionSet().getId());
+        body.setTargetFilterQuery(autoAssignment.getTargetFilterQuery());
+        body.setStatus(autoAssignment.getStatus().toString().toLowerCase());
+        body.setStartAt(autoAssignment.getStartAt());
+        body.setActionType(MgmtRestModelMapper.convertActionType(autoAssignment.getActionType()));
+        autoAssignment.getWeight().ifPresent(body::setWeight);
+        body.setConfirmationRequired(autoAssignment.isConfirmationRequired());
+        body.setApprovalDecidedBy(autoAssignment.getApprovalDecidedBy());
+        body.setApprovalRemark(autoAssignment.getApprovalRemark());
 
         body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).getAutoAssignment(body.getId())).withSelfRel().expand());
-        if (targetFilterQuery.getAutoAssignStatus() == WAITING_FOR_APPROVAL) {
-            body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).approve(body.getId(), null)).withRel("approve").expand());
-            body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).deny(body.getId(), null)).withRel("deny").expand());
-        }
-        else if (targetFilterQuery.getAutoAssignStatus() == READY) {
-            body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).start(body.getId())).withRel("start").expand());
-        }
-        else if (targetFilterQuery.getAutoAssignStatus() == RUNNING) {
-            body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).pause(body.getId())).withRel("pause").expand());
-        }
-        else if (targetFilterQuery.getAutoAssignStatus() == PAUSED) {
-            body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).resume(body.getId())).withRel("resume").expand());
+        switch (autoAssignment.getStatus()) {
+            case WAITING_FOR_APPROVAL:
+                body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).approve(body.getId(), null)).withRel("approve").expand());
+                body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).deny(body.getId(), null)).withRel("deny").expand());
+                break;
+            case READY:
+                body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).start(body.getId())).withRel("start").expand());
+                break;
+            case RUNNING:
+                body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).pause(body.getId())).withRel("pause").expand());
+                break;
+            case PAUSED:
+                body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).resume(body.getId())).withRel("resume").expand());
         }
 
-        final DistributionSet distributionSet = targetFilterQuery.getAutoAssignDistributionSet();
+        final DistributionSet distributionSet = autoAssignment.getDistributionSet();
         body.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(distributionSet.getId()))
                 .withRel("distributionset").withName(distributionSet.getName() + ":" + distributionSet.getVersion()).expand());
 
         return body;
     }
 
-    public static AutoAssignDistributionSetUpdate fromRequest(final MgmtAutoAssignmentRestRequestBodyPost restRequest,
-            final Long targetFilterQueryId) {
-        return new AutoAssignDistributionSetUpdate(targetFilterQueryId)
-                .ds(restRequest.getDistributionSetId())
+    public static Create fromRequest(final MgmtAutoAssignmentRestRequestBodyPost restRequest,
+            final DistributionSet distributionSet) {
+        return Create.builder()
+                .distributionSet(distributionSet)
+                .targetFilterQuery(restRequest.getTargetFilterQuery())
+                .name(restRequest.getName())
+                .description(restRequest.getDescription())
                 .startAt(restRequest.getStartAt())
                 .actionType(Optional.ofNullable(MgmtRestModelMapper.convertActionType(restRequest.getActionType())).orElse(
                         FORCED))
                 .confirmationRequired(Optional.ofNullable(restRequest.getConfirmationRequired()).orElse(TenantConfigHelper
                         .isUserConfirmationFlowEnabled()))
-                .weight(restRequest.getWeight());
+                .weight(restRequest.getWeight()).build();
+    }
+
+    public static Update fromRequest(final MgmtAutoAssignmentRestRequestBodyPut restRequest, final long id) {
+        return Update.builder()
+                .name(restRequest.getName())
+                .description(restRequest.getDescription()).id(id).build();
     }
 }

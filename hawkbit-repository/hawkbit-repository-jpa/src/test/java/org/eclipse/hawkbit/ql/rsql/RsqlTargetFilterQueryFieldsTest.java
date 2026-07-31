@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.ql.rsql;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.eclipse.hawkbit.repository.AutoAssignmentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -32,6 +33,8 @@ class RsqlTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest {
 
     private TargetFilterQuery filter1;
     private TargetFilterQuery filter2;
+    private DistributionSet ds1;
+    private DistributionSet ds2;
 
     @BeforeEach
     void setupBeforeTest() {
@@ -39,14 +42,19 @@ class RsqlTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest {
         final String filterName2 = "filter_b";
         final String filterName3 = "filter_c";
 
-        final DistributionSet ds1 = testdataFactory.createDistributionSet("AutoAssignedDs_1");
-        final DistributionSet ds2 = testdataFactory.createDistributionSet("AutoAssignedDs_2");
+        ds1 = testdataFactory.createDistributionSet("AutoAssignedDs_1");
+        ds2 = testdataFactory.createDistributionSet("AutoAssignedDs_2");
 
-        filter1 = targetFilterQueryManagement.create(TargetFilterQueryManagement.Create.builder().name(filterName1)
-                .query("name==*").autoAssignDistributionSet(ds1).autoAssignActionType(ActionType.SOFT).build());
-        filter2 = targetFilterQueryManagement.create(TargetFilterQueryManagement.Create.builder().name(filterName2)
-                .query("name==*").autoAssignDistributionSet(ds2).build());
-        targetFilterQueryManagement.create(TargetFilterQueryManagement.Create.builder().name(filterName3).query("name==*").build());
+        filter1 = targetFilterQueryManagement.create(TargetFilterQueryManagement.UpdateCreate.builder().name(filterName1)
+                .query("name==*").build());
+        filter2 = targetFilterQueryManagement.create(TargetFilterQueryManagement.UpdateCreate.builder().name(filterName2)
+                .query("name==*").build());
+        targetFilterQueryManagement.create(TargetFilterQueryManagement.UpdateCreate.builder().name(filterName3).query("name==*").build());
+
+        autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder().name(filter1.getName())
+                .targetFilterQuery(filter1.getQuery()).distributionSet(ds1).actionType(ActionType.SOFT).build());
+        autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder().name(filter2.getName())
+                .targetFilterQuery(filter2.getQuery()).distributionSet(ds2).build());
 
         assertEquals(3L, targetFilterQueryManagement.count());
     }
@@ -89,15 +97,15 @@ class RsqlTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest {
     @Test
     void testFilterByAutoAssignedDsName() {
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".name=="
-                + filter1.getAutoAssignDistributionSet().getName(), 1);
+                + ds1.getName(), 1);
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".name=="
-                + filter2.getAutoAssignDistributionSet().getName(), 1);
+                + ds2.getName(), 1);
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".name==AutoAssignedDs_*", 2);
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".name==noExist*", 0);
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".name=in=("
-                + filter1.getAutoAssignDistributionSet().getName() + ",notexist)", 1);
+                + ds1.getName() + ",notexist)", 1);
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".name=out=("
-                + filter1.getAutoAssignDistributionSet().getName() + ",notexist)", 2);
+                + ds1.getName() + ",notexist)", 2);
     }
 
     /**

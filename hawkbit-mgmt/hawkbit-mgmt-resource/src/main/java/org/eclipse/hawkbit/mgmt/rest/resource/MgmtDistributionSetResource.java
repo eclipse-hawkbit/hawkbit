@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
+import org.eclipse.hawkbit.mgmt.json.model.autoassignment.MgmtAutoAssignmentResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPut;
@@ -37,17 +38,17 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentR
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
-import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftDeletedMode;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtAutoAssignmentMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtDeploymentRequestMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtDistributionSetMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtRestModelMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtSoftwareModuleMapper;
-import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetFilterQueryMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.LogUtility;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
+import org.eclipse.hawkbit.repository.AutoAssignmentManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -59,6 +60,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
+import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
@@ -86,6 +88,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     private final DistributionSetInvalidationManagement distributionSetInvalidationManagement;
     private final TargetManagement<? extends Target> targetManagement;
     private final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
+    private final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement;
     private final DeploymentManagement deployManagement;
     private final SystemManagement systemManagement;
     private final MgmtDistributionSetMapper mgmtDistributionSetMapper;
@@ -98,6 +101,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             final DistributionSetInvalidationManagement distributionSetInvalidationManagement,
             final TargetManagement<? extends Target> targetManagement,
             final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
+            final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement,
             final DeploymentManagement deployManagement,
             final MgmtDistributionSetMapper mgmtDistributionSetMapper,
             final SystemManagement systemManagement) {
@@ -107,6 +111,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         this.distributionSetInvalidationManagement = distributionSetInvalidationManagement;
         this.targetManagement = targetManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.autoAssignmentManagement = autoAssignmentManagement;
         this.deployManagement = deployManagement;
         this.mgmtDistributionSetMapper = mgmtDistributionSetMapper;
         this.systemManagement = systemManagement;
@@ -232,17 +237,17 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtTargetFilterQuery>> getAutoAssignTargetFilterQueries(
+    public ResponseEntity<PagedList<MgmtAutoAssignmentResponseBody>> getAutoAssignments(
             final Long distributionSetId, final String rsqlParam,
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
-        final Page<TargetFilterQuery> targetFilterQueries = targetFilterQueryManagement
-                .findByAutoAssignDSAndRsql(distributionSetId, rsqlParam, pageable);
+        final Page<AutoAssignment> autoAssignments = autoAssignmentManagement
+                .findByDSAndRsql(distributionSetId, rsqlParam, pageable);
 
         return ResponseEntity.ok(new PagedList<>(
-                MgmtTargetFilterQueryMapper.toResponse(
-                        targetFilterQueries.getContent(), TenantConfigHelper.isUserConfirmationFlowEnabled(), false),
-                targetFilterQueries.getTotalElements()));
+                MgmtAutoAssignmentMapper.toResponseAutoAssignment(
+                        autoAssignments.getContent()),
+                autoAssignments.getTotalElements()));
     }
 
     @Override

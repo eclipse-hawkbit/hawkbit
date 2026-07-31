@@ -9,61 +9,33 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
+import org.eclipse.hawkbit.repository.AutoAssignmentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.QuotaManagement;
-import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.exception.AutoAssignmentIllegalStateException;
-import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
-import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
-import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
-import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
-import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
-import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecification;
-import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.qfields.TargetFields;
 import org.eclipse.hawkbit.repository.qfields.TargetFilterQueryFields;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
-import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
-
-import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignApprovalDecision.APPROVED;
-import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.APPROVAL_DENIED;
-import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.PAUSED;
-import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.READY;
-import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.RUNNING;
-import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.WAITING_FOR_APPROVAL;
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTO_ASSIGNMENT_APPROVAL_ENABLED;
 
 /**
  * JPA implementation of {@link TargetFilterQueryManagement}.
@@ -75,54 +47,107 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 @ConditionalOnBooleanProperty(prefix = "hawkbit.jpa", name = { "enabled", "target-filter-management" }, matchIfMissing = true)
 class JpaTargetFilterQueryManagement
         extends
-        AbstractJpaRepositoryManagement<JpaTargetFilterQuery, TargetFilterQueryManagement.Create, TargetFilterQueryManagement.Update, TargetFilterQueryRepository, TargetFilterQueryFields>
+        AbstractJpaRepositoryManagement<JpaTargetFilterQuery, TargetFilterQueryManagement.UpdateCreate, TargetFilterQueryManagement.Update, TargetFilterQueryRepository, TargetFilterQueryFields>
         implements TargetFilterQueryManagement<JpaTargetFilterQuery> {
 
-    private final TargetManagement<? extends Target> targetManagement;
-    private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
-    private final QuotaManagement quotaManagement;
-    private final RepositoryProperties repositoryProperties;
+    private AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement;
+    private DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
 
     protected JpaTargetFilterQueryManagement(
             final TargetFilterQueryRepository targetFilterQueryRepository, final EntityManager entityManager,
-            final TargetManagement<? extends Target> targetManagement,
-            final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
-            final QuotaManagement quotaManagement,
-            final RepositoryProperties repositoryProperties) {
+            final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement,
+            final DistributionSetManagement<? extends DistributionSet> distributionSetManagement) {
         super(targetFilterQueryRepository, entityManager);
-        this.targetManagement = targetManagement;
+        this.autoAssignmentManagement = autoAssignmentManagement;
         this.distributionSetManagement = distributionSetManagement;
-        this.quotaManagement = quotaManagement;
-        this.repositoryProperties = repositoryProperties;
     }
 
     @Override
     @Transactional
-    public JpaTargetFilterQuery create(final Create create) {
+    public JpaTargetFilterQuery create(final UpdateCreate create) {
         validate(create);
         return super.create(create);
     }
 
     @Override
-    protected JpaTargetFilterQuery jpaEntity(final Object create) {
-        final JpaTargetFilterQuery jpaEntity = super.jpaEntity(create);
-        if (jpaEntity.getAutoAssignDistributionSet() != null) {
-            jpaEntity.setAutoAssignStatus(resolveInitialAutoAssignStatus());
-        }
-        return jpaEntity;
+    @Transactional
+    public List<JpaTargetFilterQuery> create(final Collection<UpdateCreate> creates) {
+        creates.forEach(this::validate);
+        return super.create(creates);
     }
 
     @Override
-    public List<JpaTargetFilterQuery> create(final Collection<Create> create) {
-        create.forEach(this::validate);
-        return super.create(create);
+    protected JpaTargetFilterQuery jpaEntity(final Object create) {
+        return super.jpaEntity(create);
     }
 
     @Override
     @Transactional
     public JpaTargetFilterQuery update(final Update update) {
+        updateAutoAssignment(update);
         validate(update);
         return super.update(update);
+    }
+
+    @Override
+    @Transactional
+    public Map<Long, JpaTargetFilterQuery> update(final Collection<Update> updates) {
+        updates.forEach(update -> {
+            updateAutoAssignment(update);
+            validate(update);
+        });
+        return super.update(updates);
+    }
+
+    @Override
+    @Transactional
+    public void delete(final long id) {
+        findLinkedAutoAssignment(id).ifPresent(autoAssignment -> {
+            unlinkAutoAssignment(id);
+            autoAssignmentManagement.delete(autoAssignment.getId());
+        });
+        super.delete(id);
+    }
+
+    @Override
+    @Transactional
+    public void delete(final Collection<Long> ids) {
+        ids.forEach(id -> findLinkedAutoAssignment(id).ifPresent(autoAssignment -> {
+            unlinkAutoAssignment(id);
+            autoAssignmentManagement.delete(autoAssignment.getId());
+        }));
+        super.delete(ids);
+    }
+
+    @Override
+    @Transactional
+    public AutoAssignment createLinkedAutoAssignment(final long id, final AutoAssignmentManagement.Create create) {
+
+        unlinkAutoAssignment(id);
+        findLinkedAutoAssignment(id).ifPresent(autoAssignment -> autoAssignmentManagement.delete(autoAssignment.getId()));
+        entityManager.flush();
+
+        final AutoAssignment created = autoAssignmentManagement.create(create);
+        return created;
+    }
+
+    @Override
+    @Transactional
+    public void deleteLinkedAutoAssignment(final long id) {
+        unlinkAutoAssignment(id);
+        autoAssignmentManagement.findByName(get(id).getName())
+                .ifPresent(autoAssignment -> autoAssignmentManagement.delete(autoAssignment.getId()));
+    }
+
+    @Override
+    public Optional<AutoAssignment> findLinkedAutoAssignment(final long id) {
+        final TargetFilterQuery targetFilterQuery = get(id);
+        Optional<AutoAssignment> searchResult = autoAssignmentManagement.findByName(targetFilterQuery.getName());
+        if (searchResult.isPresent() && !searchResult.get().getTargetFilterQuery().equals(targetFilterQuery.getQuery())) {
+            searchResult = Optional.empty();
+        }
+
+        return searchResult;
     }
 
     @Override
@@ -135,206 +160,11 @@ class JpaTargetFilterQueryManagement
         }
     }
 
-    @Override
-    public long countByAutoAssignDistributionSetId(final long autoAssignDistributionSetId) {
-        return jpaRepository.countByAutoAssignDistributionSetId(autoAssignDistributionSetId);
-    }
-
-    @Override
-    public Optional<TargetFilterQuery> findByName(final String name) {
-        return jpaRepository.findByName(name);
-    }
-
-    @Override
-    public Page<TargetFilterQuery> findByAutoAssignDSAndRsql(final long setId, final String rsql, final Pageable pageable) {
-        final DistributionSet distributionSet = distributionSetManagement.get(setId);
-
-        final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>(2);
-        specList.add(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet));
-        if (!ObjectUtils.isEmpty(rsql)) {
-            specList.add(QLSupport.getInstance().buildSpec(rsql, TargetFilterQueryFields.class));
-        }
-
-        return JpaManagementHelper.findAllWithCountBySpec(jpaRepository, specList, pageable);
-    }
-
-    @Override
-    public Slice<TargetFilterQuery> findWithActiveAutoAssignDS(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithoutCountBySpec(
-                jpaRepository, List.of(TargetFilterQuerySpecification.withActiveAutoAssignDS()), pageable);
-    }
-
-    @Override
-    public Page<TargetFilterQuery> findWithAutoAssignDSByRsql(final String rsql, final Pageable pageable) {
-        final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>(2);
-        specList.add(TargetFilterQuerySpecification.withAutoAssignDS());
-        if (!ObjectUtils.isEmpty(rsql)) {
-            specList.add(QLSupport.getInstance().buildSpec(rsql, TargetFilterQueryFields.class));
-        }
-
-        return JpaManagementHelper.findAllWithCountBySpec(jpaRepository, specList, pageable);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
-    public TargetFilterQuery updateAutoAssignDS(final AutoAssignDistributionSetUpdate update) {
-        final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(update.targetFilterId());
-        if (update.dsId() == null) {
-            targetFilterQuery.setAccessControlContext(null);
-            targetFilterQuery.setAutoAssignDistributionSet(null);
-            targetFilterQuery.setAutoAssignActionType(null);
-            targetFilterQuery.setStartAt(null);
-            targetFilterQuery.setAutoAssignStatus(null);
-            targetFilterQuery.setApprovalDecidedBy(null);
-            targetFilterQuery.setApprovalRemark(null);
-            targetFilterQuery.setAutoAssignWeight(0);
-            targetFilterQuery.setAutoAssignInitiatedBy(null);
-            targetFilterQuery.setConfirmationRequired(false);
-        } else {
-            assertMaxTargetsQuota(targetFilterQuery.getQuery(), targetFilterQuery.getName(), update.dsId());
-
-            DistributionSet distributionSet = distributionSetManagement.getValidAndComplete(update.dsId());
-            if (distributionSetManagement.shouldLockImplicitly(distributionSet)) {
-                distributionSet = distributionSetManagement.lock(distributionSet);
-            }
-
-            targetFilterQuery.setAutoAssignDistributionSet(distributionSet);
-            AccessContext.securityContext().ifPresent(targetFilterQuery::setAccessControlContext);
-            targetFilterQuery.setAutoAssignInitiatedBy(Optional.ofNullable(AccessContext.actor()).orElse(targetFilterQuery.getCreatedBy()));
-            targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.actionType()));
-            targetFilterQuery.setStartAt(update.startAt());
-            targetFilterQuery.setAutoAssignStatus(resolveInitialAutoAssignStatus());
-            targetFilterQuery.setApprovalDecidedBy(null);
-            targetFilterQuery.setApprovalRemark(null);
-            targetFilterQuery.setAutoAssignWeight(update.weight() == null ? repositoryProperties.getActionWeightIfAbsent() : update.weight());
-            final boolean confirmationRequired = update.confirmationRequired() == null
-                    ? TenantConfigHelper.isUserConfirmationFlowEnabled()
-                    : update.confirmationRequired();
-            targetFilterQuery.setConfirmationRequired(confirmationRequired);
-        }
-        return jpaRepository.save(targetFilterQuery);
-    }
-
-    @Override
-    @Transactional
-    public void cancelAutoAssignmentForDistributionSet(final long distributionSetId) {
-        jpaRepository.unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(distributionSetId);
-        log.debug("Auto assignments for distribution sets {} deactivated", distributionSetId);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
-    public TargetFilterQuery approveOrDeny(final long targetFilterQueryId, final TargetFilterQuery.AutoAssignApprovalDecision decision) {
-        return approveOrDeny0(targetFilterQueryId, decision, null);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
-    public TargetFilterQuery approveOrDeny(final long targetFilterQueryId, final TargetFilterQuery.AutoAssignApprovalDecision decision,
-            final String remark) {
-        return approveOrDeny0(targetFilterQueryId, decision, remark);
-    }
-
-    private TargetFilterQuery approveOrDeny0(final long targetFilterQueryId, final TargetFilterQuery.AutoAssignApprovalDecision decision,
-            final String remark) {
-        final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(targetFilterQueryId);
-        if (targetFilterQuery.getAutoAssignStatus() != WAITING_FOR_APPROVAL) {
-            throw new AutoAssignmentIllegalStateException("Auto assignment not waiting for approval");
-        }
-        targetFilterQuery.setAutoAssignStatus(decision == APPROVED ? READY : APPROVAL_DENIED);
-        targetFilterQuery.setApprovalDecidedBy(AccessContext.actor());
-        targetFilterQuery.setApprovalRemark(remark);
-        return jpaRepository.save(targetFilterQuery);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
-    public TargetFilterQuery startAutoAssignDS(final long targetFilterQueryId) {
-        final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(targetFilterQueryId);
-        if (targetFilterQuery.getAutoAssignStatus() != READY) {
-            throw new AutoAssignmentIllegalStateException("Auto assignment not ready");
-        }
-        targetFilterQuery.setAutoAssignStatus(RUNNING);
-        return jpaRepository.save(targetFilterQuery);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
-    public TargetFilterQuery pauseAutoAssignDS(final long targetFilterQueryId) {
-        final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(targetFilterQueryId);
-        if (targetFilterQuery.getAutoAssignStatus() != RUNNING) {
-            throw new AutoAssignmentIllegalStateException("Auto assignment not running");
-        }
-        targetFilterQuery.setAutoAssignStatus(PAUSED);
-        return jpaRepository.save(targetFilterQuery);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
-    public TargetFilterQuery resumeAutoAssignDS(final long targetFilterQueryId) {
-        final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(targetFilterQueryId);
-        if (targetFilterQuery.getAutoAssignStatus() != PAUSED) {
-            throw new AutoAssignmentIllegalStateException("Auto assignment not paused");
-        }
-        targetFilterQuery.setAutoAssignStatus(RUNNING);
-        return jpaRepository.save(targetFilterQuery);
-    }
-
-    private TargetFilterQuery.AutoAssignStatus resolveInitialAutoAssignStatus() {
-        return TenantConfigHelper.getAsSystem(AUTO_ASSIGNMENT_APPROVAL_ENABLED, Boolean.class)
-                ? WAITING_FOR_APPROVAL
-                : READY;
-    }
-
-    private static ActionType sanitizeAutoAssignActionType(final ActionType actionType) {
-        if (actionType == null) {
-            return ActionType.FORCED;
-        }
-
-        if (!TargetFilterQuery.ALLOWED_AUTO_ASSIGN_ACTION_TYPES.contains(actionType)) {
-            throw new InvalidAutoAssignActionTypeException();
-        }
-
-        return actionType;
-    }
-
-    private void assertMaxTargetsQuota(final String query, final String filterName, final long dsId) {
-        QuotaHelper.assertAssignmentQuota(filterName,
-                targetManagement.countByRsqlAndNonDsAndCompatibleAndUpdatable(dsId, query),
-                quotaManagement.getMaxTargetsPerAutoAssignment(), Target.class, TargetFilterQuery.class, null);
-    }
-
-    private void validate(final Create create) {
-        Optional.ofNullable(create.getAutoAssignDistributionSet()).ifPresent(distributionSet -> {
-            if (!distributionSet.isValid()) {
-                throw new InvalidDistributionSetException();
-            }
-            if (!distributionSet.isComplete()) {
-                throw new IncompleteDistributionSetException();
-            }
-        });
-        Optional.ofNullable(create.getAutoAssignActionType()).ifPresent(actionType -> {
-            if (!TargetFilterQuery.ALLOWED_AUTO_ASSIGN_ACTION_TYPES.contains(actionType)) {
-                throw new InvalidAutoAssignActionTypeException();
-            }
-        });
+    private void validate(final UpdateCreate create) {
         Optional.ofNullable(create.getQuery()).ifPresent(query -> {
             // validate the RSQL query syntax
             QLSupport.getInstance().validate(query, TargetFields.class, JpaTarget.class);
-
-            // enforce the 'max targets per auto assign' quota right here even if the result of the filter query can vary over time
-            Optional.ofNullable(create.getAutoAssignDistributionSet())
-                    .ifPresent(dsId -> assertMaxTargetsQuota(query, create.getName(), dsId.getId()));
         });
-        if (create.getAutoAssignWeight() == null) {
-            create.setAutoAssignWeight(create.getAutoAssignDistributionSet() == null ? 0 : repositoryProperties.getActionWeightIfAbsent());
-        }
     }
 
     private void validate(final Update update) {
@@ -342,16 +172,41 @@ class JpaTargetFilterQueryManagement
         Optional.ofNullable(update.getQuery()).ifPresent(query -> {
             // validate the RSQL query syntax
             QLSupport.getInstance().validate(query, TargetFields.class, JpaTarget.class);
-
-            Optional.ofNullable(targetFilterQuery.getAutoAssignDistributionSet()).ifPresent(autoAssignDs -> {
-                // enforce the 'max targets per auto assignment'-quota only if the query is going to change
-                if (!query.equals(targetFilterQuery.getQuery())) {
-                    assertMaxTargetsQuota(query, targetFilterQuery.getName(), autoAssignDs.getId());
-                }
-            });
-
             // set the new query
             targetFilterQuery.setQuery(query);
         });
+    }
+
+    private void updateAutoAssignment(Update update) {
+        findLinkedAutoAssignment(update.getId()).ifPresent(autoAssignment -> {
+            AutoAssignmentManagement.Create create = AutoAssignmentManagement.Create.builder()
+                    .name(update.getName() != null ? update.getName() : autoAssignment.getName())
+                    .description(autoAssignment.getDescription())
+                    .targetFilterQuery(update.getQuery() != null ? update.getQuery() : autoAssignment.getTargetFilterQuery())
+                    .distributionSet(autoAssignment.getDistributionSet())
+                    .actionType(autoAssignment.getActionType())
+                    .confirmationRequired(autoAssignment.isConfirmationRequired())
+                    .weight(autoAssignment.getWeight().orElse(null))
+                    .startAt(autoAssignment.getStartAt())
+                    .build();
+            unlinkAutoAssignment(update.getId());
+            autoAssignmentManagement.delete(autoAssignment.getId());
+            entityManager.flush();
+            autoAssignmentManagement.create(create);
+        });
+    }
+
+
+    /**
+     * Clears the in-memory link from the target filter query to its (read-only mapped) auto assignment.
+     * <p>
+     * The auto assignment is an independent entity linked to the filter only by matching name and query. When it is
+     * removed or replaced within the same transaction, the still-managed target filter query would otherwise keep a
+     * reference to the no-longer-persistent auto assignment, which Hibernate rejects on flush. Callers that delete or
+     * replace the linked auto assignment must call this first.
+     */
+    @Transactional
+    private void unlinkAutoAssignment(final long id) {
+        jpaRepository.getById(id).setAutoAssignment(null);
     }
 }

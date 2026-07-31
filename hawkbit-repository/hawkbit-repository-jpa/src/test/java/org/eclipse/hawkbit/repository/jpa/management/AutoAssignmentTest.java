@@ -11,25 +11,24 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignApprovalDecision.APPROVED;
-import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignApprovalDecision.DENIED;
-import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.APPROVAL_DENIED;
-import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.PAUSED;
-import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.READY;
-import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.RUNNING;
-import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.AutoAssignStatus.WAITING_FOR_APPROVAL;
+import static org.eclipse.hawkbit.repository.model.AutoAssignment.AutoAssignApprovalDecision.APPROVED;
+import static org.eclipse.hawkbit.repository.model.AutoAssignment.AutoAssignApprovalDecision.DENIED;
+import static org.eclipse.hawkbit.repository.model.AutoAssignment.AutoAssignStatus.APPROVAL_DENIED;
+import static org.eclipse.hawkbit.repository.model.AutoAssignment.AutoAssignStatus.PAUSED;
+import static org.eclipse.hawkbit.repository.model.AutoAssignment.AutoAssignStatus.READY;
+import static org.eclipse.hawkbit.repository.model.AutoAssignment.AutoAssignStatus.RUNNING;
+import static org.eclipse.hawkbit.repository.model.AutoAssignment.AutoAssignStatus.WAITING_FOR_APPROVAL;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.AUTO_ASSIGNMENT_APPROVAL_ENABLED;
 
 import java.time.Duration;
 
 import org.eclipse.hawkbit.context.AccessContext;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDistributionSetUpdate;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.Create;
+import org.eclipse.hawkbit.repository.AutoAssignmentManagement.Create;
 import org.eclipse.hawkbit.repository.exception.AutoAssignmentIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.scheduler.JpaAutoAssignHandler;
+import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,12 +50,11 @@ class AutoAssignmentTest extends AbstractJpaIntegrationTest {
     @Test
     void autoAssignmentLifecycleWithoutApproval() {
         final DistributionSet ds = testdataFactory.createDistributionSet();
-        final Long filterId = targetFilterQueryManagement.create(Create.builder().name("ds").query("name==*").build()).getId();
-
-        targetFilterQueryManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(filterId).ds(ds.getId()));
+        final Long autoAssignmentId = autoAssignmentManagement.create(
+                Create.builder().name("ds").targetFilterQuery("name==*").distributionSet(ds).build()).getId();
 
         // approval is disabled, so the auto assignment becomes READY directly
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(READY);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(READY);
     }
 
     /**
@@ -67,20 +65,19 @@ class AutoAssignmentTest extends AbstractJpaIntegrationTest {
         tenantConfigurationManagement().addOrUpdateConfiguration(AUTO_ASSIGNMENT_APPROVAL_ENABLED, true);
 
         final DistributionSet ds = testdataFactory.createDistributionSet();
-        final Long filterId = targetFilterQueryManagement.create(Create.builder().name("ds").query("name==*").build()).getId();
-
-        targetFilterQueryManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(filterId).ds(ds.getId()));
+        final Long autoAssignmentId = autoAssignmentManagement.create(
+                Create.builder().name("ds").targetFilterQuery("name==*").distributionSet(ds).build()).getId();
 
         // approval is enabled, so the auto assignment waits for approval
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(WAITING_FOR_APPROVAL);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(WAITING_FOR_APPROVAL);
 
-        targetFilterQueryManagement.approveOrDeny(filterId, DENIED, "denied");
+        autoAssignmentManagement.approveOrDeny(autoAssignmentId, DENIED, "denied");
 
         // the decision, the deciding actor and the remark are persisted
-        final TargetFilterQuery query = targetFilterQueryManagement.get(filterId);
-        assertThat(query.getAutoAssignStatus()).isEqualTo(APPROVAL_DENIED);
-        assertThat(query.getApprovalDecidedBy()).isEqualTo(AccessContext.actor());
-        assertThat(query.getApprovalRemark()).isEqualTo("denied");
+        final AutoAssignment autoAssignment = autoAssignmentManagement.get(autoAssignmentId);
+        assertThat(autoAssignment.getStatus()).isEqualTo(APPROVAL_DENIED);
+        assertThat(autoAssignment.getApprovalDecidedBy()).isEqualTo(AccessContext.actor());
+        assertThat(autoAssignment.getApprovalRemark()).isEqualTo("denied");
     }
 
     /**
@@ -91,24 +88,23 @@ class AutoAssignmentTest extends AbstractJpaIntegrationTest {
         tenantConfigurationManagement().addOrUpdateConfiguration(AUTO_ASSIGNMENT_APPROVAL_ENABLED, true);
 
         final DistributionSet ds = testdataFactory.createDistributionSet();
-        final Long filterId = targetFilterQueryManagement.create(Create.builder().name("ds").query("name==*").build()).getId();
-
-        targetFilterQueryManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(filterId).ds(ds.getId()));
+        final Long autoAssignmentId = autoAssignmentManagement.create(
+                Create.builder().name("ds").targetFilterQuery("name==*").distributionSet(ds).build()).getId();
 
         // approval is enabled, so the auto assignment waits for approval
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(WAITING_FOR_APPROVAL);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(WAITING_FOR_APPROVAL);
 
-        targetFilterQueryManagement.approveOrDeny(filterId, APPROVED, "approved");
+        autoAssignmentManagement.approveOrDeny(autoAssignmentId, APPROVED, "approved");
 
         // the decision, the deciding actor and the remark are persisted
-        final TargetFilterQuery query = targetFilterQueryManagement.get(filterId);
-        assertThat(query.getAutoAssignStatus()).isEqualTo(READY);
-        assertThat(query.getApprovalDecidedBy()).isEqualTo(AccessContext.actor());
-        assertThat(query.getApprovalRemark()).isEqualTo("approved");
+        final AutoAssignment autoAssignment = autoAssignmentManagement.get(autoAssignmentId);
+        assertThat(autoAssignment.getStatus()).isEqualTo(READY);
+        assertThat(autoAssignment.getApprovalDecidedBy()).isEqualTo(AccessContext.actor());
+        assertThat(autoAssignment.getApprovalRemark()).isEqualTo("approved");
 
         // an already decided auto assignment cannot be approved or denied again
         assertThatExceptionOfType(AutoAssignmentIllegalStateException.class)
-                .isThrownBy(() -> targetFilterQueryManagement.approveOrDeny(filterId, APPROVED, "again"));
+                .isThrownBy(() -> autoAssignmentManagement.approveOrDeny(autoAssignmentId, APPROVED, "again"));
     }
 
     /**
@@ -117,32 +113,31 @@ class AutoAssignmentTest extends AbstractJpaIntegrationTest {
     @Test
     void autoAssignmentPauseResume() {
         final DistributionSet ds = testdataFactory.createDistributionSet();
-        final Long filterId = targetFilterQueryManagement.create(Create.builder().name("ds").query("name==*").build()).getId();
-
-        targetFilterQueryManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(filterId).ds(ds.getId()));
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(READY);
+        final Long autoAssignmentId = autoAssignmentManagement.create(
+                Create.builder().name("ds").targetFilterQuery("name==*").distributionSet(ds).build()).getId();
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(READY);
 
         // READY -> RUNNING, but a running auto assignment cannot be started again
-        targetFilterQueryManagement.startAutoAssignDS(filterId);
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(RUNNING);
+        autoAssignmentManagement.start(autoAssignmentId);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(RUNNING);
         assertThatExceptionOfType(AutoAssignmentIllegalStateException.class)
-                .isThrownBy(() -> targetFilterQueryManagement.startAutoAssignDS(filterId));
+                .isThrownBy(() -> autoAssignmentManagement.start(autoAssignmentId));
 
         // RUNNING -> PAUSED, but a paused auto assignment cannot be paused again
-        targetFilterQueryManagement.pauseAutoAssignDS(filterId);
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(PAUSED);
+        autoAssignmentManagement.pause(autoAssignmentId);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(PAUSED);
         assertThatExceptionOfType(AutoAssignmentIllegalStateException.class)
-                .isThrownBy(() -> targetFilterQueryManagement.pauseAutoAssignDS(filterId));
+                .isThrownBy(() -> autoAssignmentManagement.pause(autoAssignmentId));
 
         // a paused auto assignment is ignored by the scheduler
         autoAssignHandler.handleAll();
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(PAUSED);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(PAUSED);
 
         // PAUSED -> RUNNING, but a running auto assignment cannot be resumed again
-        targetFilterQueryManagement.resumeAutoAssignDS(filterId);
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(RUNNING);
+        autoAssignmentManagement.resume(autoAssignmentId);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(RUNNING);
         assertThatExceptionOfType(AutoAssignmentIllegalStateException.class)
-                .isThrownBy(() -> targetFilterQueryManagement.resumeAutoAssignDS(filterId));
+                .isThrownBy(() -> autoAssignmentManagement.resume(autoAssignmentId));
     }
 
     /**
@@ -151,18 +146,17 @@ class AutoAssignmentTest extends AbstractJpaIntegrationTest {
     @Test
     void autoAssignmentSchedulerTestCurrentTime() {
         final DistributionSet ds = testdataFactory.createDistributionSet();
-        final Long filterId = targetFilterQueryManagement.create(Create.builder().name("dsCurrent").query("name==*").build()).getId();
-
         final long currentTime = System.currentTimeMillis();
-        targetFilterQueryManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(filterId).ds(ds.getId()).startAt(currentTime));
+        final Long autoAssignmentId = autoAssignmentManagement.create(
+                Create.builder().name("dsCurrent").targetFilterQuery("name==*").distributionSet(ds).startAt(currentTime).build()).getId();
 
-        assertThat(targetFilterQueryManagement.get(filterId).getStartAt()).isEqualTo(currentTime);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStartAt()).isEqualTo(currentTime);
         // approval is disabled, so the auto assignment is READY
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(READY);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(READY);
 
         // startAt is due, so the scheduler starts it
         autoAssignHandler.handleAll();
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(RUNNING);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(RUNNING);
     }
 
     /**
@@ -171,18 +165,17 @@ class AutoAssignmentTest extends AbstractJpaIntegrationTest {
     @Test
     void autoAssignmentSchedulerTestFutureTime() {
         final DistributionSet ds = testdataFactory.createDistributionSet();
-        final Long filterId = targetFilterQueryManagement.create(Create.builder().name("dsCurrent").query("name==*").build()).getId();
-
         final long futureTime = System.currentTimeMillis() + Duration.ofHours(1).toMillis();
-        targetFilterQueryManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(filterId).ds(ds.getId()).startAt(futureTime));
+        final Long autoAssignmentId = autoAssignmentManagement.create(
+                Create.builder().name("dsCurrent").targetFilterQuery("name==*").distributionSet(ds).startAt(futureTime).build()).getId();
 
-        assertThat(targetFilterQueryManagement.get(filterId).getStartAt()).isEqualTo(futureTime);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStartAt()).isEqualTo(futureTime);
         // approval is disabled, so the auto assignment is READY
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(READY);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(READY);
 
         // startAt is in the future, so the scheduler leaves it READY
         autoAssignHandler.handleAll();
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(READY);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(READY);
     }
 
     /**
@@ -191,17 +184,16 @@ class AutoAssignmentTest extends AbstractJpaIntegrationTest {
     @Test
     void autoAssignmentSchedulerTestNoTimeSet() {
         final DistributionSet ds = testdataFactory.createDistributionSet();
-        final Long filterId = targetFilterQueryManagement.create(Create.builder().name("dsCurrent").query("name==*").build()).getId();
+        final Long autoAssignmentId = autoAssignmentManagement.create(
+                Create.builder().name("dsCurrent").targetFilterQuery("name==*").distributionSet(ds).startAt(null).build()).getId();
 
-        targetFilterQueryManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(filterId).ds(ds.getId()).startAt(null));
-
-        assertThat(targetFilterQueryManagement.get(filterId).getStartAt()).isNull();
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStartAt()).isNull();
         // approval is disabled, so the auto assignment is READY
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(READY);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(READY);
 
         // no startAt is set, so the scheduler starts it immediately
         autoAssignHandler.handleAll();
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(RUNNING);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(RUNNING);
     }
 
     /**
@@ -212,21 +204,20 @@ class AutoAssignmentTest extends AbstractJpaIntegrationTest {
         tenantConfigurationManagement().addOrUpdateConfiguration(AUTO_ASSIGNMENT_APPROVAL_ENABLED, true);
 
         final DistributionSet ds = testdataFactory.createDistributionSet();
-        final Long filterId = targetFilterQueryManagement.create(Create.builder().name("dsCurrent").query("name==*").build()).getId();
-
-        targetFilterQueryManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(filterId).ds(ds.getId()));
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(WAITING_FOR_APPROVAL);
+        final Long autoAssignmentId = autoAssignmentManagement.create(
+                Create.builder().name("dsCurrent").targetFilterQuery("name==*").distributionSet(ds).build()).getId();
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(WAITING_FOR_APPROVAL);
 
         // a WAITING_FOR_APPROVAL auto assignment is ignored by the scheduler
         autoAssignHandler.handleAll();
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(WAITING_FOR_APPROVAL);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(WAITING_FOR_APPROVAL);
 
-        targetFilterQueryManagement.approveOrDeny(filterId, DENIED);
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(APPROVAL_DENIED);
+        autoAssignmentManagement.approveOrDeny(autoAssignmentId, DENIED);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(APPROVAL_DENIED);
 
         // an APPROVAL_DENIED auto assignment is ignored by the scheduler
         autoAssignHandler.handleAll();
-        assertThat(targetFilterQueryManagement.get(filterId).getAutoAssignStatus()).isEqualTo(APPROVAL_DENIED);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(APPROVAL_DENIED);
     }
 
     @BeforeEach

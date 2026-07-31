@@ -23,13 +23,13 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.locks.Lock;
 
+import org.eclipse.hawkbit.repository.AutoAssignmentManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,7 +49,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 class AutoAssignHandlerTest {
 
     @Mock
-    private TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
+    private AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement;
     @Mock
     private TargetManagement<? extends Target> targetManagement;
     @Mock
@@ -65,7 +65,7 @@ class AutoAssignHandlerTest {
     @BeforeEach
     void before() {
         autoAssignHandler = new JpaAutoAssignHandler(
-                targetFilterQueryManagement, targetManagement, deploymentManagement, transactionManager, lockRegistry, Optional.empty());
+                autoAssignmentManagement, targetManagement, deploymentManagement, transactionManager, lockRegistry, Optional.empty());
     }
 
     /**
@@ -76,8 +76,8 @@ class AutoAssignHandlerTest {
         final Lock lock = mock(Lock.class);
         when(lock.tryLock()).thenReturn(false);
         when(lockRegistry.obtain(any())).thenReturn(lock);
-        final TargetFilterQuery matching = mock(TargetFilterQuery.class);
-        when(targetFilterQueryManagement.findWithActiveAutoAssignDS(any())).thenReturn(new SliceImpl<>(Arrays.asList(matching)));
+        final AutoAssignment matching = mock(AutoAssignment.class);
+        when(autoAssignmentManagement.getActiveAutoAssignments(any())).thenReturn(new SliceImpl<>(Arrays.asList(matching)));
 
         assertThatNoException().isThrownBy(autoAssignHandler::handleAll);
     }
@@ -89,11 +89,11 @@ class AutoAssignHandlerTest {
     void handleSingleTarget() {
         final String target = getRandomString();
         final long ds = getRandomLong();
-        final TargetFilterQuery matching = mockFilterQuery(ds);
-        final TargetFilterQuery notMatching = mockFilterQuery(ds);
-        when(targetFilterQueryManagement.findWithActiveAutoAssignDS(any())).thenReturn(new SliceImpl<>(Arrays.asList(notMatching, matching)));
-        when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, ds, matching.getQuery())).thenReturn(true);
-        when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, ds, notMatching.getQuery()))
+        final AutoAssignment matching = mockAutoAssignment(ds);
+        final AutoAssignment notMatching = mockAutoAssignment(ds);
+        when(autoAssignmentManagement.getActiveAutoAssignments(any())).thenReturn(new SliceImpl<>(Arrays.asList(notMatching, matching)));
+        when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, ds, matching.getTargetFilterQuery())).thenReturn(true);
+        when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, ds, notMatching.getTargetFilterQuery()))
                 .thenReturn(false);
 
         autoAssignHandler.handleSingleTarget(target);
@@ -102,15 +102,15 @@ class AutoAssignHandlerTest {
         Mockito.verifyNoMoreInteractions(deploymentManagement);
     }
 
-    private static TargetFilterQuery mockFilterQuery(final long dsId) {
+    private static AutoAssignment mockAutoAssignment(final long dsId) {
         final DistributionSet ds = mock(DistributionSet.class);
         when(ds.getId()).thenReturn(dsId);
-        final TargetFilterQuery filter = mock(TargetFilterQuery.class);
-        when(filter.getId()).thenReturn(getRandomLong());
-        when(filter.getQuery()).thenReturn(getRandomString());
-        lenient().when(filter.getAutoAssignInitiatedBy()).thenReturn(getRandomString());
-        when(filter.getAutoAssignDistributionSet()).thenReturn(ds);
-        return filter;
+        final AutoAssignment autoAssignment = mock(AutoAssignment.class);
+        when(autoAssignment.getId()).thenReturn(getRandomLong());
+        when(autoAssignment.getTargetFilterQuery()).thenReturn(getRandomString());
+        lenient().when(autoAssignment.getCreatedBy()).thenReturn(getRandomString());
+        when(autoAssignment.getDistributionSet()).thenReturn(ds);
+        return autoAssignment;
     }
 
     private static long getRandomLong() {

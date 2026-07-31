@@ -9,17 +9,13 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.util.EnumMap;
-import java.util.Optional;
-
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Converter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
 import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -31,9 +27,6 @@ import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetFilterQueryDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryUpdatedEvent;
-import org.eclipse.hawkbit.repository.jpa.utils.MapAttributeConverter;
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
@@ -59,68 +52,19 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
     @NotEmpty
     private String query;
 
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = JpaDistributionSet.class)
-    @JoinColumn(name = "auto_assign_distribution_set")
-    private DistributionSet autoAssignDistributionSet;
-
-    @Column(name = "auto_assign_action_type")
-    @Convert(converter = JpaAction.ActionTypeConverter.class)
-    private ActionType autoAssignActionType;
-
-    @Column(name = "start_at")
-    private Long startAt;
-
-    @Column(name = "approval_decided_by")
-    @Size(min = 1, max = TargetFilterQuery.APPROVED_BY_MAX_SIZE)
-    private String approvalDecidedBy;
-
-    @Column(name = "approval_remark")
-    @Size(max = TargetFilterQuery.APPROVAL_REMARK_MAX_SIZE)
-    private String approvalRemark;
-
-    @Column(name = "auto_assign_weight")
-    private Integer autoAssignWeight;
-
-    @Column(name = "auto_assign_initiated_by", length = USERNAME_FIELD_LENGTH)
-    private String autoAssignInitiatedBy;
-
-    @Column(name = "confirmation_required")
-    private boolean confirmationRequired;
-
     @Column(name = "access_control_context")
     @Lob
     @Size(max = TargetFilterQuery.ACCESS_CONTROL_CONTEXT_MAX_SIZE)
     private String accessControlContext;
 
-    @Column(name = "auto_assign_status")
-    @Convert(converter = AutoAssignStatusConverter.class)
-    private AutoAssignStatus autoAssignStatus;
+    @OneToOne(fetch = FetchType.LAZY, targetEntity = JpaAutoAssignment.class)
+    @JoinColumn(name = "name", referencedColumnName = "name", insertable = false, updatable = false)
+    @JoinColumn(name = "query", referencedColumnName = "query", insertable = false, updatable = false)
+    private JpaAutoAssignment autoAssignment;
 
-    public JpaTargetFilterQuery(final String name, final String query, final DistributionSet autoAssignDistributionSet,
-            final ActionType autoAssignActionType, final Integer autoAssignWeight, final boolean confirmationRequired) {
+    public JpaTargetFilterQuery(final String name, final String query) {
         this.name = name;
         this.query = query;
-        this.autoAssignDistributionSet = autoAssignDistributionSet;
-        this.autoAssignActionType = autoAssignActionType;
-        this.autoAssignWeight = autoAssignWeight == null ? 0 : autoAssignWeight;
-        this.confirmationRequired = confirmationRequired;
-    }
-
-    public void setAutoAssignActionType(final ActionType actionType) {
-        if (actionType == ActionType.TIMEFORCED) {
-            throw new IllegalArgumentException("TIMEFORCED is not permitted in autoAssignment");
-        }
-        this.autoAssignActionType = actionType;
-    }
-
-    @Override
-    public Optional<Integer> getAutoAssignWeight() {
-        return Optional.ofNullable(autoAssignWeight);
-    }
-
-    @Override
-    public Optional<String> getAccessControlContext() {
-        return Optional.ofNullable(accessControlContext);
     }
 
     @Override
@@ -137,18 +81,5 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
     public void fireDeleteEvent() {
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new TargetFilterQueryDeletedEvent(getTenant(), getId(), getClass()));
-    }
-
-    @Converter
-    public static class AutoAssignStatusConverter extends MapAttributeConverter<AutoAssignStatus, Integer> {
-        public AutoAssignStatusConverter() {
-            super(new EnumMap<>(AutoAssignStatus.class) {{
-                put(AutoAssignStatus.WAITING_FOR_APPROVAL, 0);
-                put(AutoAssignStatus.APPROVAL_DENIED, 1);
-                put(AutoAssignStatus.READY, 2);
-                put(AutoAssignStatus.PAUSED, 3);
-                put(AutoAssignStatus.RUNNING, 4);
-            }}, null);
-        }
     }
 }

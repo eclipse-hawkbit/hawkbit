@@ -19,7 +19,10 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 /**
  * Request Body of DistributionSet Id and Action Type for target filter auto
  * assignment operation.
+ *
+ * @deprecated will be removed in 2.x
  */
+@Deprecated(forRemoval = true, since = "1.1.1")
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)

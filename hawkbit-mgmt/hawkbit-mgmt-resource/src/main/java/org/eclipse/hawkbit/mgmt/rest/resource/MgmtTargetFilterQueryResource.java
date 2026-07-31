@@ -12,23 +12,28 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitizeTargetFilterQuerySortParam;
 
 import java.util.List;
+import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
+import org.eclipse.hawkbit.mgmt.json.model.autoassignment.MgmtAutoAssignmentRestRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtDistributionSetAutoAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetFilterQueryRestApi;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtAutoAssignmentMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtDistributionSetMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetFilterQueryMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
+import org.eclipse.hawkbit.repository.AutoAssignmentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
+import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.data.domain.Page;
@@ -45,9 +50,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestApi {
 
     private final TargetFilterQueryManagement<? extends TargetFilterQuery> filterManagement;
+    private final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement;
+    private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
 
-    MgmtTargetFilterQueryResource(final TargetFilterQueryManagement<? extends TargetFilterQuery> filterManagement) {
+    MgmtTargetFilterQueryResource(final TargetFilterQueryManagement<? extends TargetFilterQuery> filterManagement,
+            final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement,
+            final DistributionSetManagement<? extends DistributionSet> distributionSetManagement) {
         this.filterManagement = filterManagement;
+        this.autoAssignmentManagement = autoAssignmentManagement;
+        this.distributionSetManagement = distributionSetManagement;
     }
 
     @Override
@@ -55,7 +66,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         final TargetFilterQuery findTarget = findFilterWithExceptionIfNotFound(filterId);
         // to single response include poll status
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(findTarget,
-                TenantConfigHelper.isUserConfirmationFlowEnabled(), true);
+                filterManagement.findLinkedAutoAssignment(filterId), TenantConfigHelper.isUserConfirmationFlowEnabled(), true);
         MgmtTargetFilterQueryMapper.addLinks(response);
 
         return ResponseEntity.ok(response);
@@ -74,9 +85,12 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         }
 
         final boolean isRepresentationFull = parseRepresentationMode(representationModeParam) == MgmtRepresentationMode.FULL;
+        final boolean confirmationFlowEnabled = TenantConfigHelper.isUserConfirmationFlowEnabled();
 
-        final List<MgmtTargetFilterQuery> rest = MgmtTargetFilterQueryMapper.toResponse(
-                findTargetFiltersAll.getContent(), TenantConfigHelper.isUserConfirmationFlowEnabled(), isRepresentationFull);
+        final List<MgmtTargetFilterQuery> rest = findTargetFiltersAll.getContent().stream()
+                .map(filter -> MgmtTargetFilterQueryMapper.toResponse(
+                        filter, filterManagement.findLinkedAutoAssignment(filter.getId()), confirmationFlowEnabled, isRepresentationFull))
+                .toList();
         return ResponseEntity.ok(new PagedList<>(rest, filterManagement.count()));
     }
 
@@ -85,7 +99,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         final TargetFilterQuery createdTarget = filterManagement.create(MgmtTargetFilterQueryMapper.fromRequest(filter));
 
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(
-                createdTarget, TenantConfigHelper.isUserConfirmationFlowEnabled(), false);
+                createdTarget, Optional.empty(), TenantConfigHelper.isUserConfirmationFlowEnabled(), false);
         MgmtTargetFilterQueryMapper.addLinks(response);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -101,7 +115,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
                         .build());
 
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(updateFilter,
-                TenantConfigHelper.isUserConfirmationFlowEnabled(), false);
+                filterManagement.findLinkedAutoAssignment(filterId), TenantConfigHelper.isUserConfirmationFlowEnabled(), false);
         MgmtTargetFilterQueryMapper.addLinks(response);
 
         return ResponseEntity.ok(response);
@@ -117,32 +131,32 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
     @Override
     public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(final Long filterId) {
-        final TargetFilterQuery filter = findFilterWithExceptionIfNotFound(filterId);
-        final DistributionSet autoAssignDistributionSet = filter.getAutoAssignDistributionSet();
-
-        if (autoAssignDistributionSet == null) {
-            return ResponseEntity.noContent().build();
-        }
-
-        final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(autoAssignDistributionSet);
-        MgmtDistributionSetMapper.addLinks(autoAssignDistributionSet, response);
-
-        return ResponseEntity.ok(response);
+        return filterManagement.findLinkedAutoAssignment(filterId)
+                .map(AutoAssignment::getDistributionSet)
+                .map(distributionSet -> {
+                    final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(distributionSet);
+                    MgmtDistributionSetMapper.addLinks(distributionSet, response);
+                    return ResponseEntity.ok(response);
+                })
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @Override
     public ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(
             final Long filterId, final MgmtDistributionSetAutoAssignment autoAssignRequest) {
-        final boolean confirmationRequired = autoAssignRequest.getConfirmationRequired() == null
-                ? TenantConfigHelper.isUserConfirmationFlowEnabled()
-                : autoAssignRequest.getConfirmationRequired();
+        final TargetFilterQuery filter = filterManagement.get(filterId);
 
-        final AutoAssignDistributionSetUpdate update = MgmtTargetFilterQueryMapper
-                .fromRequest(filterId, autoAssignRequest).confirmationRequired(confirmationRequired);
+        final MgmtAutoAssignmentRestRequestBodyPost body = new MgmtAutoAssignmentRestRequestBodyPost();
+        body.setName(filter.getName());
+        body.setTargetFilterQuery(filter.getQuery());
+        body.setDistributionSetId(autoAssignRequest.getId());
+        body.setActionType(autoAssignRequest.getType());
+        body.setWeight(autoAssignRequest.getWeight());
+        body.setConfirmationRequired(autoAssignRequest.getConfirmationRequired());
 
-        final TargetFilterQuery updateFilter = filterManagement.updateAutoAssignDS(update);
-
-        final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(updateFilter,
+        final AutoAssignmentManagement.Create create = MgmtAutoAssignmentMapper.fromRequest(body, distributionSetManagement.get(autoAssignRequest.getId()));
+        final AutoAssignment created = filterManagement.createLinkedAutoAssignment(filterId, create);
+        final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(filterManagement.get(filterId), Optional.of(created),
                 TenantConfigHelper.isUserConfirmationFlowEnabled(), false);
         MgmtTargetFilterQueryMapper.addLinks(response);
 
@@ -152,7 +166,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     @Override
     @AuditLog(entity = "TargetFilter", type = AuditLog.Type.DELETE, description = "Delete Target Filter Assigned Distribution Set")
     public ResponseEntity<Void> deleteAssignedDistributionSet(final Long filterId) {
-        filterManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(filterId).ds(null));
+        filterManagement.deleteLinkedAutoAssignment(filterId);
         return ResponseEntity.noContent().build();
     }
 

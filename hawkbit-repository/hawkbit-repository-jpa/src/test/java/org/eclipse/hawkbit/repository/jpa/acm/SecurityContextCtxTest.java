@@ -24,8 +24,8 @@ import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.context.Principal;
 import org.eclipse.hawkbit.repository.AutoAssignHandler;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -67,9 +67,8 @@ class SecurityContextCtxTest extends AbstractJpaIntegrationTest {
     void verifyContextIsPersistedInActiveAutoAssignment() {
         final SecurityContext userContext = createUserContext(2);
 
-        final TargetFilterQuery targetFilterQuery =
-                withSecurityContext(userContext, testdataFactory::createTargetFilterWithTargetsAndActiveAutoAssignment);
-        assertThat(targetFilterQuery.getAccessControlContext())
+        final AutoAssignment autoAssignment = withSecurityContext(userContext, testdataFactory::createTargetsAndAutoAssignment);
+        assertThat(autoAssignment.getAccessControlContext())
                 .hasValueSatisfying(ctx -> assertEssentialEquals(deserialize(ctx), userContext));
     }
 
@@ -95,7 +94,7 @@ class SecurityContextCtxTest extends AbstractJpaIntegrationTest {
         final SecurityContext userContext = createUserContext(3);
         final String serialized = serialize(userContext);
         try (final MockedStatic<AccessContext> mocked = mockStatic(AccessContext.class, Mockito.CALLS_REAL_METHODS)) {
-            withSecurityContext(userContext, testdataFactory::createTargetFilterWithTargetsAndActiveAutoAssignment);
+            withSecurityContext(userContext, testdataFactory::createTargetsAndAutoAssignment);
             withSecurityContext(userContext, () -> {
                 autoAssignHandler.handleAll();
                 return null;
@@ -116,7 +115,7 @@ class SecurityContextCtxTest extends AbstractJpaIntegrationTest {
             mocked.when(() -> AccessContext.withSecurityContext(any(SecurityContext.class), (Supplier<?>) any(Supplier.class)))
                     .thenCallRealMethod();
 
-            withSecurityContext(userContext, testdataFactory::createTargetFilterWithTargetsAndActiveAutoAssignment);
+            withSecurityContext(userContext, testdataFactory::createTargetsAndAutoAssignment);
             withSecurityContext(userContext, () -> {
                 autoAssignHandler.handleSingleTarget(targetManagement.findAll(Pageable.ofSize(1)).getContent().get(0).getControllerId());
                 return null;

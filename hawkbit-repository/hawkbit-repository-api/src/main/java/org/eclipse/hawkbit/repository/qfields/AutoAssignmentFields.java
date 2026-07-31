@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2026 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,11 +15,8 @@ import java.util.List;
 import lombok.Getter;
 import org.eclipse.hawkbit.ql.QueryField;
 
-/**
- * Describing the fields of the Target model which can be used in the REST API e.g. for sorting etc.
- */
 @Getter
-public enum TargetFilterQueryFields implements QueryField {
+public enum AutoAssignmentFields implements QueryField {
 
     ID("id"),
     NAME("name"),
@@ -27,20 +24,20 @@ public enum TargetFilterQueryFields implements QueryField {
     CREATEDBY("createdBy"),
     LASTMODIFIEDAT("lastModifiedAt"),
     LASTMODIFIEDBY("lastModifiedBy"),
-    AUTOASSIGNDISTRIBUTIONSET("autoAssignment.distributionSet", "name", "version");
+    DISTRIBUTIONSET("distributionSet", "name", "version");
 
     private final String name;
     private final List<String> subEntityAttributes;
 
-    TargetFilterQueryFields(final String name) {
+    AutoAssignmentFields(final String name) {
         this(name, Collections.emptyList());
     }
 
-    TargetFilterQueryFields(final String name, final String... subEntityAttribues) {
+    AutoAssignmentFields(final String name, final String... subEntityAttribues) {
         this(name, List.of(subEntityAttribues));
     }
 
-    TargetFilterQueryFields(final String name, final List<String> subEntityAttribues) {
+    AutoAssignmentFields(final String name, final List<String> subEntityAttribues) {
         this.name = name;
         this.subEntityAttributes = subEntityAttribues;
     }

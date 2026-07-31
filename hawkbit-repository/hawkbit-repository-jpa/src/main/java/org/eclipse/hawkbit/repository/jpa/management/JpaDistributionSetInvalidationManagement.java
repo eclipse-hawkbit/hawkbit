@@ -16,19 +16,19 @@ import java.util.concurrent.locks.Lock;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.context.AccessContext;
+import org.eclipse.hawkbit.repository.AutoAssignmentManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.StopRolloutException;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.ActionCancellationType;
+import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.stereotype.Service;
@@ -45,7 +45,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
     private final RolloutManagement rolloutManagement;
     private final DeploymentManagement deploymentManagement;
-    private final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
+    private final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement;
     private final PlatformTransactionManager txManager;
     private final RepositoryProperties repositoryProperties;
     private final LockRegistry<? extends Lock> lockRegistry;
@@ -54,13 +54,13 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     protected JpaDistributionSetInvalidationManagement(
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final RolloutManagement rolloutManagement, final DeploymentManagement deploymentManagement,
-            final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
+            final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement,
             final PlatformTransactionManager txManager, final RepositoryProperties repositoryProperties,
             final LockRegistry<? extends Lock> lockRegistry) {
         this.distributionSetManagement = distributionSetManagement;
         this.rolloutManagement = rolloutManagement;
         this.deploymentManagement = deploymentManagement;
-        this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.autoAssignmentManagement = autoAssignmentManagement;
         this.txManager = txManager;
         this.repositoryProperties = repositoryProperties;
         this.lockRegistry = lockRegistry;
@@ -128,7 +128,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
         // Do run as system to ensure all actions (even invisible) are canceled due to invalidation.
         asSystem(() -> {
             log.debug("Cancel auto assignments after ds invalidation. ID: {}", setId);
-            targetFilterQueryManagement.cancelAutoAssignmentForDistributionSet(setId);
+            autoAssignmentManagement.cancelAutoAssignmentForDistributionSet(setId);
         });
     }
 }

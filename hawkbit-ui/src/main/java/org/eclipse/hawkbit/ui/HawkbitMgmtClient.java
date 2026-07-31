@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 import feign.FeignException;
 import lombok.Getter;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtAutoAssignmentRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTagRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
@@ -44,6 +45,7 @@ public class HawkbitMgmtClient {
     private final MgmtTargetTypeRestApi targetTypeRestApi;
     private final MgmtTargetTagRestApi targetTagRestApi;
     private final MgmtTargetFilterQueryRestApi targetFilterQueryRestApi;
+    private final MgmtAutoAssignmentRestApi autoAssignmentRestApi;
     private final MgmtRolloutRestApi rolloutRestApi;
     private final MgmtTenantManagementRestApi tenantManagementRestApi;
     private final MgmtActionRestApi actionRestApi;
@@ -61,6 +63,7 @@ public class HawkbitMgmtClient {
         targetTypeRestApi = service(MgmtTargetTypeRestApi.class);
         targetTagRestApi = service(MgmtTargetTagRestApi.class);
         targetFilterQueryRestApi = service(MgmtTargetFilterQueryRestApi.class);
+        autoAssignmentRestApi = service(MgmtAutoAssignmentRestApi.class);
         rolloutRestApi = service(MgmtRolloutRestApi.class);
         tenantManagementRestApi = service(MgmtTenantManagementRestApi.class);
         actionRestApi = service(MgmtActionRestApi.class);

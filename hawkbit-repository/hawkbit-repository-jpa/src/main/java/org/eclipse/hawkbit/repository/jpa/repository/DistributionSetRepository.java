@@ -61,7 +61,7 @@ public interface DistributionSetRepository extends BaseEntityRepository<JpaDistr
      * @param dsId to be found
      * @return number of Auto Assignments for Distribution set
      */
-    @Query(value = "SELECT COUNT(f.autoAssignDistributionSet) FROM JpaTargetFilterQuery f WHERE f.autoAssignDistributionSet.id = :dsId GROUP BY f.autoAssignDistributionSet")
+    @Query(value = "SELECT COUNT(a.distributionSet) FROM JpaAutoAssignment a WHERE a.distributionSet.id = :dsId GROUP BY a.distributionSet")
     Long countAutoAssignmentsForDistributionSet(@Param("dsId") Long dsId);
 
     /**

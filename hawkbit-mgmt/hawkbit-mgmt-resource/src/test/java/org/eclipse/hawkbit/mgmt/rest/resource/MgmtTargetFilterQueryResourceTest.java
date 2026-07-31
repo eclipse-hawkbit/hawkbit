@@ -33,15 +33,16 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetFilterQueryRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtRestModelMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.ResourceUtility;
+import org.eclipse.hawkbit.repository.AutoAssignmentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.AutoAssignDistributionSetUpdate;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.Create;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement.UpdateCreate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.DeletedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
@@ -150,6 +151,28 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     /**
+     * Ensures that deletion of a target filter query that has a linked auto assignment successfully deletes it as well
+     */
+    @Test
+    void deleteTargetFilterQueryWithLinkedAutoAssignment() throws Exception {
+        final String filterName = "filter_01";
+        final String query = "name==test_01";
+        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery(filterName, query);
+
+        final AutoAssignment autoAssignment = autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder()
+                .name(filterName)
+                .targetFilterQuery(query)
+                .distributionSet(testdataFactory.createDistributionSet()).
+                build());
+
+        mvc.perform(delete(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + filterQuery.getId()))
+                .andExpect(status().isNoContent());
+
+        assertThat(targetFilterQueryManagement.find(filterQuery.getId())).isNotPresent();
+        assertThat(autoAssignmentManagement.find(autoAssignment.getId())).isNotPresent();
+    }
+
+    /**
      * Ensures that deletion is refused with not found if target does not exist.
      */
     @Test
@@ -200,6 +223,42 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     /**
+     * Ensures that update request also updates the linked auto assignment
+     */
+    @Test
+    void updateTargetFilterQueryQueryWithLinkedAutoAssignment() throws Exception {
+        final String filterName = "filter_02";
+        final String filterQuery = "name==test_02";
+        final String filterQuery2 = "name==test_02_changed";
+        final String body = new JSONObject().put("query", filterQuery2).toString();
+
+        final AutoAssignment autoAssignment = autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder()
+                .name(filterName)
+                .targetFilterQuery(filterQuery)
+                .distributionSet(testdataFactory.createDistributionSet()).
+                build());
+
+        assertThat(autoAssignmentManagement.findByName(filterName).get().getTargetFilterQuery()).isEqualTo(filterQuery);
+
+        // prepare
+        final TargetFilterQuery tfq = createSingleTargetFilterQuery(filterName, filterQuery);
+
+        mvc.perform(put(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId()).content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath(JSON_PATH_ID, equalTo(tfq.getId().intValue())))
+                .andExpect(jsonPath(JSON_PATH_QUERY, equalTo(filterQuery2)))
+                .andExpect(jsonPath(JSON_PATH_NAME, equalTo(filterName)))
+                .andExpect(jsonPath(JSON_PATH_CONFIRMATION_REQUIRED).doesNotExist());
+
+        final TargetFilterQuery tfqCheck = targetFilterQueryManagement.find(tfq.getId()).get();
+        assertThat(tfqCheck.getQuery()).isEqualTo(filterQuery2);
+        assertThat(tfqCheck.getName()).isEqualTo(filterName);
+        assertThat(autoAssignmentManagement.findByName(filterName).get().getTargetFilterQuery()).isEqualTo(filterQuery2);
+    }
+
+    /**
      * Ensures that update request is reflected by repository.
      */
     @Test
@@ -210,7 +269,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final String body = new JSONObject().put("name", filterName2).toString();
 
         // prepare
-        final TargetFilterQuery tfq = targetFilterQueryManagement.create(Create.builder().name(filterName).query(filterQuery).build());
+        final TargetFilterQuery tfq = targetFilterQueryManagement.create(UpdateCreate.builder().name(filterName).query(filterQuery).build());
 
         mvc.perform(put(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId()).content(body)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -224,6 +283,43 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final TargetFilterQuery tfqCheck = targetFilterQueryManagement.find(tfq.getId()).get();
         assertThat(tfqCheck.getQuery()).isEqualTo(filterQuery);
         assertThat(tfqCheck.getName()).isEqualTo(filterName2);
+    }
+
+    /**
+     * Ensures that update request is reflected by repository.
+     */
+    @Test
+    void updateTargetFilterQueryNameWithLinkedAutoAssignment() throws Exception {
+        final String filterName = "filter_03";
+        final String filterName2 = "filter_03_changed";
+        final String filterQuery = "name==test_03";
+        final String body = new JSONObject().put("name", filterName2).toString();
+
+        final AutoAssignment autoAssignment = autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder()
+                .name(filterName)
+                .targetFilterQuery(filterQuery)
+                .distributionSet(testdataFactory.createDistributionSet()).
+                build());
+
+        assertThat(autoAssignmentManagement.findByName(filterName2)).isNotPresent();
+
+        // prepare
+        final TargetFilterQuery tfq = targetFilterQueryManagement.create(UpdateCreate.builder().name(filterName).query(filterQuery).build());
+
+        mvc.perform(put(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId()).content(body)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath(JSON_PATH_ID, equalTo(tfq.getId().intValue())))
+                .andExpect(jsonPath(JSON_PATH_QUERY, equalTo(filterQuery)))
+                .andExpect(jsonPath(JSON_PATH_NAME, equalTo(filterName2)))
+                .andExpect(jsonPath(JSON_PATH_CONFIRMATION_REQUIRED).doesNotExist());
+
+        final TargetFilterQuery tfqCheck = targetFilterQueryManagement.find(tfq.getId()).get();
+        assertThat(tfqCheck.getQuery()).isEqualTo(filterQuery);
+        assertThat(tfqCheck.getName()).isEqualTo(filterName2);
+        assertThat(autoAssignmentManagement.findByName(filterName)).isNotPresent();
+        assertThat(autoAssignmentManagement.findByName(filterName2)).isPresent();
     }
 
     /**
@@ -473,45 +569,6 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     /**
-     * Ensures that the update of a target filter query results in a HTTP Forbidden error (403)
-     * if the updated query addresses too many targets.
-     */
-    @Test
-    public void updateTargetFilterQueryWithQueryThatExceedsQuota() throws Exception {
-        // create targets
-        final int maxTargets = quotaManagement.getMaxTargetsPerAutoAssignment();
-        testdataFactory.createTargets(maxTargets + 1, "target");
-
-        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("1", "controllerId==target1");
-
-        // create the filter query and the distribution set
-        final DistributionSet set = testdataFactory.createDistributionSet();
-
-        // assign the auto-assign distribution set, this should work
-        mvc.perform(
-                        post(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + filterQuery.getId() + "/autoAssignDS")
-                                .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isOk());
-        implicitLock(set);
-
-        final TargetFilterQuery updatedFilterQuery = targetFilterQueryManagement.find(filterQuery.getId()).get();
-
-        assertThat(updatedFilterQuery.getAutoAssignDistributionSet()).isEqualTo(set);
-        assertThat(updatedFilterQuery.getAutoAssignActionType()).isEqualTo(ActionType.FORCED);
-
-        // update the query of the filter query to trigger a quota hit
-        mvc.perform(put(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + filterQuery.getId())
-                        .content("{\"query\":\"controllerId==target*\"}").contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isTooManyRequests())
-                .andExpect(
-                        jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(AssignmentQuotaExceededException.class.getName())))
-                .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
-
-    }
-
-    /**
      * Ensures that the distribution set auto-assignment works as intended with distribution set, action type and confirmation validation
      */
     @ParameterizedTest
@@ -541,13 +598,14 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     /**
-     * Handles the GET request of retrieving a the auto assign distribution set of a target filter query within SP.
+     * Handles the GET request of retrieving the auto assign distribution set of a target filter query within SP.
      */
     @Test
     void getAssignDS() throws Exception {
         final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("filter_01", "name==test_01");
         final DistributionSet ds = testdataFactory.createDistributionSet("ds");
-        targetFilterQueryManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(filterQuery.getId()).ds(ds.getId()));
+        autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder()
+                .name(filterQuery.getName()).targetFilterQuery(filterQuery.getQuery()).distributionSet(ds).build());
 
         mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/{targetFilterQueryId}/autoAssignDS",
                         filterQuery.getId()))
@@ -601,13 +659,14 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
 
         final DistributionSet set = testdataFactory.createDistributionSet(dsName);
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
-        targetFilterQueryManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(tfq.getId()).ds(set.getId()));
+        autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder()
+                .name(tfq.getName()).targetFilterQuery(tfq.getQuery()).distributionSet(set).build());
         implicitLock(set);
 
-        final TargetFilterQuery updatedFilterQuery = targetFilterQueryManagement.find(tfq.getId()).orElseThrow();
+        final AutoAssignment autoAssignment = autoAssignmentManagement.findByName(tfq.getName()).orElseThrow();
 
-        assertThat(updatedFilterQuery.getAutoAssignDistributionSet()).isEqualTo(set);
-        assertThat(updatedFilterQuery.getAutoAssignActionType()).isEqualTo(ActionType.FORCED);
+        assertThat(autoAssignment.getDistributionSet()).isEqualTo(set);
+        assertThat(autoAssignment.getActionType()).isEqualTo(ActionType.FORCED);
 
         mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isOk())
@@ -616,10 +675,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         mvc.perform(delete(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isNoContent());
 
-        final TargetFilterQuery filterQueryWithDeletedDs = targetFilterQueryManagement.find(tfq.getId()).get();
-
-        assertThat(filterQueryWithDeletedDs.getAutoAssignDistributionSet()).isNull();
-        assertThat(filterQueryWithDeletedDs.getAutoAssignActionType()).isNull();
+        assertThat(autoAssignmentManagement.findByName(knownName)).isEmpty();
 
         mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId() + "/autoAssignDS"))
                 .andExpect(status().isNoContent());
@@ -655,7 +711,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
 
         final List<? extends TargetFilterQuery> filters = targetFilterQueryManagement.findAll(PAGE).getContent();
         assertThat(filters).hasSize(1);
-        assertThat(filters.get(0).getAutoAssignWeight()).contains(45);
+        assertThat(autoAssignmentManagement.findByName("filter1").orElseThrow().getWeight()).contains(45);
     }
 
     /**
@@ -677,8 +733,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         // do not provide something about the confirmation
         verifyAutoAssignmentByActionType(tfq, set, null, null);
 
-        assertThat(targetFilterQueryManagement.find(tfq.getId())).hasValueSatisfying(filter ->
-                assertThat(filter.isConfirmationRequired()).isEqualTo(confirmationFlowActive));
+        assertThat(autoAssignmentManagement.findByName(tfq.getName())).hasValueSatisfying(autoAssignment ->
+                assertThat(autoAssignment.isConfirmationRequired()).isEqualTo(confirmationFlowActive));
     }
 
     private static Stream<Arguments> confirmationOptions() {
@@ -721,11 +777,11 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .andExpect(status().isOk());
         implicitLock(set);
 
-        final TargetFilterQuery updatedFilterQuery = targetFilterQueryManagement.find(tfq.getId()).get();
+        final AutoAssignment autoAssignment = autoAssignmentManagement.findByName(tfq.getName()).orElseThrow();
         final MgmtActionType expectedActionType = actionType != null ? actionType : MgmtActionType.FORCED;
 
-        assertThat(updatedFilterQuery.getAutoAssignDistributionSet()).isEqualTo(set);
-        assertThat(updatedFilterQuery.getAutoAssignActionType())
+        assertThat(autoAssignment.getDistributionSet()).isEqualTo(set);
+        assertThat(autoAssignment.getActionType())
                 .isEqualTo(MgmtRestModelMapper.convertActionType(expectedActionType));
 
         mvc.perform(get(MgmtTargetFilterQueryRestApi.TARGETFILTERS_V1 + "/" + tfq.getId()))
@@ -801,6 +857,6 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     private TargetFilterQuery createSingleTargetFilterQuery(final String name, final String query) {
-        return targetFilterQueryManagement.create(Create.builder().name(name).query(query).build());
+        return targetFilterQueryManagement.create(UpdateCreate.builder().name(name).query(query).build());
     }
 }
