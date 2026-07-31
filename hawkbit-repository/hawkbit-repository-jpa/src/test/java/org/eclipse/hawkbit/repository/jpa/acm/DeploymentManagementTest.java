@@ -102,6 +102,7 @@ class DeploymentManagementTest extends AbstractAccessControllerManagementTest {
     @Test
     void verifyDeleteActionById() {
         verify(
+                this::finishAction,
                 null,
                 actionId -> assertThatExceptionOfType(InsufficientPermissionException.class)
                         .isThrownBy(() -> deploymentManagement.deleteAction(actionId)),
@@ -111,6 +112,7 @@ class DeploymentManagementTest extends AbstractAccessControllerManagementTest {
     @Test
     void verifyDeleteActionsById() {
         verify(
+                this::finishAction,
                 null,
                 actionId -> {
                     final List<Long> actionIds = List.of(actionId);
@@ -123,6 +125,7 @@ class DeploymentManagementTest extends AbstractAccessControllerManagementTest {
     @Test
     void verifyDeleteActionByRSQL() {
         verify(
+                this::finishAction,
                 null,
                 actionId -> {
                     assertThatNoException().isThrownBy(() -> deploymentManagement.deleteActionsByRsql("id==" + actionId));
@@ -139,6 +142,7 @@ class DeploymentManagementTest extends AbstractAccessControllerManagementTest {
     @Test
     void verifyDeleteTargetActionsById() {
         verify(
+                this::finishAction,
                 null,
                 actionId -> {
                     final String controllerId = deploymentManagement.findAction(actionId)
@@ -192,11 +196,23 @@ class DeploymentManagementTest extends AbstractAccessControllerManagementTest {
     }
 
     private void verify(final Consumer<Long> noRead, final Consumer<Long> readNoUpdate, final Consumer<Long> readAndUpdate) {
+        verify(null, noRead, readNoUpdate, readAndUpdate);
+    }
+
+    private void verify(final Consumer<Long> prepareAsSystem, final Consumer<Long> noRead,
+            final Consumer<Long> readNoUpdate, final Consumer<Long> readAndUpdate) {
         final Long actionId = asSystem(() -> {
             final List<Action> actions = assignDistributionSet(ds1Type1.getId(), target1Type1.getControllerId()).getAssignedEntity();
             assertThat(actions).hasSize(1).allMatch(action -> action.getTarget().getId().equals(target1Type1.getId()));
             return actions.get(0);
         }).getId();
+
+        if (prepareAsSystem != null) {
+            asSystem(() -> {
+                prepareAsSystem.accept(actionId);
+                return null;
+            });
+        }
 
         if (noRead != null) {
             // no read permission
@@ -215,6 +231,12 @@ class DeploymentManagementTest extends AbstractAccessControllerManagementTest {
             runAs(withAuthorities(READ_TARGET + "/type.id==" + targetType1.getId(), UPDATE_TARGET + "/type.id==" + targetType1.getId()),
                     () -> readAndUpdate.accept(actionId));
         }
+    }
+
+    // moves the action to a status that is allowed for deletion (default allowed: CANCELED, ERROR, FINISHED)
+    private void finishAction(final Long actionId) {
+        controllerManagement.addUpdateActionStatus(
+                Action.ActionStatusCreate.builder().actionId(actionId).status(Action.Status.FINISHED).build());
     }
 
     private void assertActionOfTarget1Type1(final Action action) {

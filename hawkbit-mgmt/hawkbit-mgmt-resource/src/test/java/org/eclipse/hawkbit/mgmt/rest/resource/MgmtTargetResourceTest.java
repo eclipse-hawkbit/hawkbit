@@ -2696,6 +2696,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
             assignDistributionSet(distributionSet.getId(), testTarget.getControllerId());
         }
 
+        testdataFactory.sendUpdateActionStatusToTargets(List.of(testTarget), Action.Status.FINISHED, "done");
+
         long actionsPerTarget = actionRepository.countByTargetId(testTarget.getId());
         Assertions.assertEquals(10, actionsPerTarget);
         List<Action> oldActions = deploymentManagement.findActionsByTarget(testTarget.getControllerId(), PAGE).getContent();
@@ -2712,6 +2714,51 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
             Assertions.assertEquals(oldActions.get(i + 5), actions.get(i));
         }
     }
+
+    @Test
+    void testDeletionOfLastNTargetActionsDeletesOnlyEligibleStatuses() throws Exception {
+        final Target testTarget = testdataFactory.createTarget("testTarget");
+
+        for (int i = 0; i < 10; i++) {
+            final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+            assignDistributionSet(distributionSet.getId(), testTarget.getControllerId());
+        }
+
+        final List<Action> oldActions = deploymentManagement.findActionsByTarget(testTarget.getControllerId(), PAGE).getContent();
+        Assertions.assertEquals(10, oldActions.size());
+
+        // keepLast=5 -> the oldest 5 (indices 0..4) are deletion candidates.
+        // Make 3 of them ineligible (RUNNING) and 2 eligible (FINISHED). Must be set AFTER all assignments,
+        // otherwise the next assignment would re-cancel the actions we set back to RUNNING.
+        updateActionStatus(oldActions.get(0), Status.RUNNING, null);
+        updateActionStatus(oldActions.get(1), Status.RUNNING, null);
+        updateActionStatus(oldActions.get(2), Status.RUNNING, null);
+        updateActionStatus(oldActions.get(3), Status.FINISHED, null);
+        updateActionStatus(oldActions.get(4), Status.FINISHED, null);
+
+        mvc.perform(delete(TARGETS_V1 + "/{targetId}/actions", testTarget.getControllerId()).param("keepLast", "5"))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNoContent());
+
+        // only the 2 FINISHED candidates are eligible for deletion; the 3 RUNNING candidates and the last 5 remain
+        final List<Action> remaining = deploymentManagement.findActionsByTarget(testTarget.getControllerId(), PAGE).getContent();
+        Assertions.assertEquals(8, remaining.size());
+
+        final List<Long> remainingIds = remaining.stream().map(Identifiable::getId).toList();
+        // the 2 eligible (FINISHED) oldest actions are deleted
+        Assertions.assertFalse(remainingIds.contains(oldActions.get(3).getId()));
+        Assertions.assertFalse(remainingIds.contains(oldActions.get(4).getId()));
+        // the 3 ineligible (RUNNING) oldest actions survive
+        Assertions.assertTrue(remainingIds.contains(oldActions.get(0).getId()));
+        Assertions.assertTrue(remainingIds.contains(oldActions.get(1).getId()));
+        Assertions.assertTrue(remainingIds.contains(oldActions.get(2).getId()));
+        // the last 5 actions survive regardless of status
+        for (int i = 5; i < 10; i++) {
+            Assertions.assertTrue(remainingIds.contains(oldActions.get(i).getId()));
+        }
+    }
+
+
 
     @Test
     void testThatDeletionOfLastNTargetActionsReturnsBadRequestWhenNeeded() throws Exception {
@@ -2738,6 +2785,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
             long dsId = distributionSet.getId();
             assignDistributionSet(dsId, testTarget.getControllerId());
         }
+        testdataFactory.sendUpdateActionStatusToTargets(List.of(testTarget), Action.Status.FINISHED, "done");
 
         final List<Long> evenActionIds = deploymentManagement.findActionsByTarget(testTarget.getControllerId(), PAGE).getContent()
                 .stream()
@@ -2754,6 +2802,30 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         Assertions.assertEquals(10 - evenActionIds.size(), remaining);
         List<Action> remainingActions = deploymentManagement.findActionsByTarget(testTarget.getControllerId(), PAGE).getContent();
         remainingActions.forEach(action -> Assertions.assertNotEquals(0, action.getId() % 2));
+    }
+
+    @Test
+    void shouldReturnNotAllowedWhenDeletingActionsNotEligibleForDeletion() throws Exception {
+        final Target testTarget = testdataFactory.createTarget("testTarget");
+        for (int i = 0; i < 10; i++) {
+            final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+            long dsId = distributionSet.getId();
+            assignDistributionSet(dsId, testTarget.getControllerId());
+        }
+        testdataFactory.sendUpdateActionStatusToTargets(List.of(testTarget), Action.Status.FINISHED, "done");
+
+        // create one single action which will be in running state
+        assignDistributionSet(testdataFactory.createDistributionSet().getId(), testTarget.getControllerId());
+
+        final List<Long> evenActionIds = deploymentManagement.findActionsByTarget(testTarget.getControllerId(), PAGE).getContent()
+                .stream()
+                .map(Identifiable::getId).toList();
+
+        mvc.perform(delete(TARGETS_V1 + "/{targetId}/actions", testTarget.getControllerId())
+                        .content(toJson(evenActionIds))
+                        .contentType(APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isMethodNotAllowed());
     }
 
     private static Stream<Arguments> confirmationOptions() {

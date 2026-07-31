@@ -240,8 +240,17 @@ public interface MgmtTargetRestApi {
      * @param keepLast - the number of last target actions to be left
      * @param actionIds - Specific action id list for actions to be deleted
      */
-    @Operation(summary = "Deletes all actions for the provided target EXCEPT the latest N actions OR by provided action IDs list.", description = "Deletes/Purges the action history of the target except the last N actions OR deletes only the actions in the provided action ids list. Required Permission: DELETE_REPOSITORY")
+    @Operation(summary = "Deletes all actions for the provided target EXCEPT the latest N actions OR by provided action IDs list.",
+            description = "Deletes/Purges the action history of the target except the last N actions (keepLast) OR deletes only the " +
+                    "actions in the provided action ids list. Deletion is restricted to actions whose status is allowed for deletion " +
+                    "by the tenant configuration 'action.delete.allowed.statuses' (default: CANCELED, ERROR, FINISHED). With keepLast, " +
+                    "actions not in an allowed status are skipped; with an action ids list, the request is rejected if any provided " +
+                    "action is not in an allowed status. Required Permission: DELETE_REPOSITORY")
     @DeleteResponses
+    @ApiResponses(@ApiResponse(responseCode = METHOD_NOT_ALLOWED_405,
+            description = "At least one action in the provided action ids list is not in a status that is allowed for deletion (see " +
+                    "tenant configuration 'action.delete.allowed.statuses').",
+            content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))))
     @DeleteMapping(value = TARGETS_V1 + "/{targetId}/actions", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> deleteActionsForTarget(
             @PathVariable("targetId") String targetId,

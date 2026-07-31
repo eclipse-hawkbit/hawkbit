@@ -19,6 +19,7 @@ import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAME
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.DeleteResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetIfExistResponses;
 import static org.eclipse.hawkbit.rest.ApiResponsesConstants.GetResponses;
+import static org.eclipse.hawkbit.rest.ApiResponsesConstants.METHOD_NOT_ALLOWED_405;
 import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -27,7 +28,10 @@ import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.extensions.Extension;
 import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
@@ -102,8 +106,15 @@ public interface MgmtActionRestApi {
      * @param actionId - the id of action about to be deleted
      * @return status OK if delete as successful.
      */
-    @Operation(summary = "Delete a single action by id", description = "Handles the DELETE request for single action within Bosch IoT Rollouts. Required Permission: DELETE_REPOSITORY")
+    @Operation(summary = "Delete a single action by id",
+            description = "Handles the DELETE request for single action within Bosch IoT Rollouts. Only actions whose status is " +
+                    "allowed for deletion by the tenant configuration 'action.delete.allowed.statuses' (default: CANCELED, ERROR, " +
+                    "FINISHED) can be deleted; otherwise the request is rejected. Required Permission: DELETE_REPOSITORY")
     @DeleteResponses
+    @ApiResponses(@ApiResponse(responseCode = METHOD_NOT_ALLOWED_405,
+            description = "The action is not in a status that is allowed for deletion (see tenant configuration " +
+                    "'action.delete.allowed.statuses').",
+            content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))))
     @DeleteMapping(value = ACTIONS_V1 + "/{actionId}")
     ResponseEntity<Void> deleteAction(@PathVariable("actionId") Long actionId);
 
@@ -114,8 +125,16 @@ public interface MgmtActionRestApi {
      * @param rsqlParam - rsql filter matching actions to be deleted
      * @return status OK if delete as successful.
      */
-    @Operation(summary = "Delete multiple actions by list OR rsql filter", description = "Handles the DELETE request for multiple actions within Bosch IoT Rollouts. Either action id list OR rsql filter SHOULD be provided. Required Permission: DELETE_REPOSITORY")
+    @Operation(summary = "Delete multiple actions by list OR rsql filter",
+            description = "Handles the DELETE request for multiple actions within Bosch IoT Rollouts. Either action id list OR rsql " +
+                    "filter SHOULD be provided. Only actions whose status is allowed for deletion by the tenant configuration " +
+                    "'action.delete.allowed.statuses' (default: CANCELED, ERROR, FINISHED) can be deleted; if any matched action is " +
+                    "not in an allowed status the request is rejected. Required Permission: DELETE_REPOSITORY")
     @DeleteResponses
+    @ApiResponses(@ApiResponse(responseCode = METHOD_NOT_ALLOWED_405,
+            description = "At least one matched action is not in a status that is allowed for deletion (see tenant configuration " +
+                    "'action.delete.allowed.statuses').",
+            content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))))
     @DeleteMapping(value = ACTIONS_V1)
     ResponseEntity<Void> deleteActions(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false, defaultValue = "")
