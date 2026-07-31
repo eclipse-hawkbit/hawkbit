@@ -173,22 +173,29 @@ class JpaTargetFilterQueryManagement
     }
 
     private void updateAutoAssignment(Update update) {
-        findLinkedAutoAssignment(update.getId()).ifPresent(autoAssignment -> {
+        final Optional<AutoAssignment> autoAssignment = findLinkedAutoAssignment(update.getId());
+        if (update.getQuery() != null && autoAssignment.isPresent()) {
+            AutoAssignment assignment = autoAssignment.get();
             AutoAssignmentManagement.Create create = AutoAssignmentManagement.Create.builder()
-                    .name(update.getName() != null ? update.getName() : autoAssignment.getName())
-                    .description(autoAssignment.getDescription())
-                    .targetFilterQuery(update.getQuery() != null ? update.getQuery() : autoAssignment.getTargetFilterQuery())
-                    .distributionSet(autoAssignment.getDistributionSet())
-                    .actionType(autoAssignment.getActionType())
-                    .confirmationRequired(autoAssignment.isConfirmationRequired())
-                    .weight(autoAssignment.getWeight().orElse(null))
-                    .startAt(autoAssignment.getStartAt())
+                    .name(update.getName() != null ? update.getName() : assignment.getName())
+                    .description(assignment.getDescription())
+                    .targetFilterQuery(update.getQuery())
+                    .distributionSet(assignment.getDistributionSet())
+                    .actionType(assignment.getActionType())
+                    .confirmationRequired(assignment.isConfirmationRequired())
+                    .weight(assignment.getWeight().orElse(null))
+                    .startAt(assignment.getStartAt())
                     .build();
             unlinkAutoAssignment(update.getId());
-            autoAssignmentManagement.delete(autoAssignment.getId());
+            autoAssignmentManagement.delete(assignment.getId());
             entityManager.flush();
             autoAssignmentManagement.create(create);
-        });
+        } else if (update.getName() != null && autoAssignment.isPresent()) {
+            autoAssignmentManagement.update(AutoAssignmentManagement.Update.builder()
+                    .id(autoAssignment.get().getId())
+                    .name(update.getName())
+                    .build());
+        }
     }
 
 
