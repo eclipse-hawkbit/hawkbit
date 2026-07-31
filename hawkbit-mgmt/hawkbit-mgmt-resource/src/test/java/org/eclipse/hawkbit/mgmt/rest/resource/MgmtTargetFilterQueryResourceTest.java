@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.repository.model.AutoAssignment.AutoAssignStatus.RUNNING;
 import static org.eclipse.hawkbit.rest.util.MockMvcResultPrinter.print;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
@@ -295,12 +296,16 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final String filterQuery = "name==test_03";
         final String body = new JSONObject().put("name", filterName2).toString();
 
-        autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder()
+        final AutoAssignment autoAssignment = autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder()
                 .name(filterName)
                 .targetFilterQuery(filterQuery)
                 .distributionSet(testdataFactory.createDistributionSet()).
                 build());
 
+        //start to make sure that the status remains the same after update
+        autoAssignmentManagement.start(autoAssignment.getId());
+
+        assertThat(autoAssignmentManagement.get(autoAssignment.getId()).getStatus()).isEqualTo(RUNNING);
         assertThat(autoAssignmentManagement.findByName(filterName2)).isNotPresent();
 
         // prepare
@@ -320,6 +325,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         assertThat(tfqCheck.getName()).isEqualTo(filterName2);
         assertThat(autoAssignmentManagement.findByName(filterName)).isNotPresent();
         assertThat(autoAssignmentManagement.findByName(filterName2)).isPresent();
+        assertThat(autoAssignmentManagement.findByName(filterName2).get().getStatus()).isEqualTo(RUNNING);
     }
 
     /**

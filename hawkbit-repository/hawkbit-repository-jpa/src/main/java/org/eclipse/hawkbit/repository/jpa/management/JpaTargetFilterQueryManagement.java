@@ -79,8 +79,8 @@ class JpaTargetFilterQueryManagement
     @Override
     @Transactional
     public JpaTargetFilterQuery update(final Update update) {
-        updateAutoAssignment(update);
         validate(update);
+        updateAutoAssignment(update);
         return super.update(update);
     }
 
@@ -88,8 +88,8 @@ class JpaTargetFilterQueryManagement
     @Transactional
     public Map<Long, JpaTargetFilterQuery> update(final Collection<Update> updates) {
         updates.forEach(update -> {
-            updateAutoAssignment(update);
             validate(update);
+            updateAutoAssignment(update);
         });
         return super.update(updates);
     }
@@ -117,7 +117,6 @@ class JpaTargetFilterQueryManagement
     @Override
     @Transactional
     public AutoAssignment createLinkedAutoAssignment(final long id, final AutoAssignmentManagement.Create create) {
-
         unlinkAutoAssignment(id);
         findLinkedAutoAssignment(id).ifPresent(autoAssignment -> autoAssignmentManagement.delete(autoAssignment.getId()));
         entityManager.flush();
@@ -162,35 +161,32 @@ class JpaTargetFilterQueryManagement
         });
     }
 
-    private void validate(final Update update) {
-        final JpaTargetFilterQuery targetFilterQuery = jpaRepository.getById(update.getId());
-        Optional.ofNullable(update.getQuery()).ifPresent(query -> {
-            // validate the RSQL query syntax
-            QLSupport.getInstance().validate(query, TargetFields.class, JpaTarget.class);
-            // set the new query
-            targetFilterQuery.setQuery(query);
-        });
-    }
-
-    private void updateAutoAssignment(Update update) {
+    private void updateAutoAssignment(final Update update) {
         findLinkedAutoAssignment(update.getId()).ifPresent(autoAssignment -> {
-            AutoAssignmentManagement.Create create = AutoAssignmentManagement.Create.builder()
-                    .name(update.getName() != null ? update.getName() : autoAssignment.getName())
-                    .description(autoAssignment.getDescription())
-                    .targetFilterQuery(update.getQuery() != null ? update.getQuery() : autoAssignment.getTargetFilterQuery())
-                    .distributionSet(autoAssignment.getDistributionSet())
-                    .actionType(autoAssignment.getActionType())
-                    .confirmationRequired(autoAssignment.isConfirmationRequired())
-                    .weight(autoAssignment.getWeight().orElse(null))
-                    .startAt(autoAssignment.getStartAt())
-                    .build();
-            unlinkAutoAssignment(update.getId());
-            autoAssignmentManagement.delete(autoAssignment.getId());
-            entityManager.flush();
-            autoAssignmentManagement.create(create);
+            if (update.getQuery() != null && !update.getQuery().equals(get(update.getId()).getQuery())) {
+                AutoAssignment assignment = autoAssignment;
+                AutoAssignmentManagement.Create create = AutoAssignmentManagement.Create.builder()
+                        .name(update.getName() != null ? update.getName() : assignment.getName())
+                        .description(assignment.getDescription())
+                        .targetFilterQuery(update.getQuery())
+                        .distributionSet(assignment.getDistributionSet())
+                        .actionType(assignment.getActionType())
+                        .confirmationRequired(assignment.isConfirmationRequired())
+                        .weight(assignment.getWeight().orElse(null))
+                        .startAt(assignment.getStartAt())
+                        .build();
+                unlinkAutoAssignment(update.getId());
+                autoAssignmentManagement.delete(assignment.getId());
+                entityManager.flush();
+                autoAssignmentManagement.create(create);
+            } else if (update.getName() != null && !update.getName().equals(autoAssignment.getName())) {
+                autoAssignmentManagement.update(AutoAssignmentManagement.Update.builder()
+                        .id(autoAssignment.getId())
+                        .name(update.getName())
+                        .build());
+            }
         });
     }
-
 
     /**
      * Clears the in-memory link from the target filter query to its (read-only mapped) auto assignment.
