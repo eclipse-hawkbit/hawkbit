@@ -190,7 +190,7 @@ maven/mavencentral/org.hibernate.orm/hibernate-processor/7.4.1.Final, Apache-2.0
 maven/mavencentral/org.hibernate.validator/hibernate-validator/9.1.0.Final, Apache-2.0, approved, #29640
 maven/mavencentral/org.jboss.logging/jboss-logging/3.6.3.Final, Apache-2.0, approved, #26108
 maven/mavencentral/org.jline/jline/3.30.13, BSD-3-Clause AND Apache-2.0, approved, #25548
-maven/mavencentral/org.jsoup/jsoup/1.22.2, MIT AND (Apache-2.0 AND BSD-3-Clause), approved, #25465
+maven/mavencentral/org.jsoup/jsoup/1.23.1, MIT AND (Apache-2.0 AND BSD-3-Clause), approved, #29949
 maven/mavencentral/org.jspecify/jspecify/1.0.0, Apache-2.0, approved, #21897
 maven/mavencentral/org.mariadb.jdbc/mariadb-java-client/3.5.8, LGPL-2.1-or-later AND CC0-1.0, approved, #22822
 maven/mavencentral/org.mockito/mockito-core/5.23.0, MIT AND (Apache-2.0 AND MIT) AND Apache-2.0, approved, #26529
