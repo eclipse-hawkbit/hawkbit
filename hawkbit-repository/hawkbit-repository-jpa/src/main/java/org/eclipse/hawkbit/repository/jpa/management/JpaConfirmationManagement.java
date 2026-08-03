@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.exception.AutoConfirmationAlreadyActiveException;
 import org.eclipse.hawkbit.repository.exception.InvalidConfirmationFeedbackException;
+import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -165,8 +166,9 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
         if (action.isActive()) {
             if (newActionStatus.getStatus() == Status.RUNNING) {
                 action.setStatus(Status.RUNNING);
-            } else if (newActionStatus.getStatus() == Status.WAIT_FOR_CONFIRMATION) {
-                // a denied feedback reverts an already confirmed (RUNNING) action back to the confirmation-pending state
+            } else if (newActionStatus.getStatus() == Status.WAIT_FOR_CONFIRMATION && !action.isCancelingOrCanceled()) {
+                // a denied feedback reverts an already confirmed (RUNNING) action back to the confirmation-pending
+                // state. A pending cancellation must never be overruled by that.
                 action.setStatus(Status.WAIT_FOR_CONFIRMATION);
             }
         }
@@ -192,13 +194,42 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
         // a denied feedback is accepted while awaiting confirmation (stays in confirmation-pending state) or for an
         // already confirmed but not yet installed action, in which case the previously granted confirmation is revoked
         // and the action reverts to the confirmation-pending state. As the device is the authority on whether it may
-        // still revoke consent, there is no maintenance-window or progress gating - only closed actions are rejected.
+        // still revoke consent, there is no maintenance-window or progress gating.
         if (!action.isActive()) {
             final String msg = String.format(
                     "Denying action %s is not possible since the action is not active anymore.", action.getId());
             log.warn(msg);
             throw new InvalidConfirmationFeedbackException(InvalidConfirmationFeedbackException.Reason.ACTION_CLOSED,
                     msg);
+        }
+
+        if (action.isWaitingConfirmation()) {
+            // the regular case - the action awaits confirmation and just stays there
+            return;
+        }
+
+        // from here on the feedback would revoke an already granted confirmation, which is only valid as long as the
+        // action is still a confirmation-driven one
+        if (action.isCancelingOrCanceled()) {
+            // the action is (soft) canceled, i.e. the target is served a cancel action on poll and not a confirmation
+            // base. Reverting it to WAIT_FOR_CONFIRMATION would hide the pending cancellation from the device.
+            final String msg = String.format(
+                    "Denying action %s is not possible since the action is in %s state and hence not confirmation-pending anymore.",
+                    action.getId(), action.getStatus());
+            log.warn(msg);
+            throw new InvalidConfirmationFeedbackException(
+                    InvalidConfirmationFeedbackException.Reason.NOT_AWAITING_CONFIRMATION, msg);
+        }
+
+        if (!TenantConfigHelper.isUserConfirmationFlowEnabled()) {
+            // without an active confirmation flow an action shall never end up in WAIT_FOR_CONFIRMATION. Actions that
+            // have been created while the flow was still enabled remain deniable since they are in WAIT_FOR_CONFIRMATION
+            // (handled above).
+            final String msg = String.format(
+                    "Denying action %s is not possible since the confirmation flow is not enabled.", action.getId());
+            log.warn(msg);
+            throw new InvalidConfirmationFeedbackException(
+                    InvalidConfirmationFeedbackException.Reason.NOT_AWAITING_CONFIRMATION, msg);
         }
     }
 

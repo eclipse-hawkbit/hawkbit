@@ -256,6 +256,76 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
+     * Verify denying a canceling action is rejected and keeps the action in canceling state
+     */
+    @Test
+    void deniedActionNotPossibleForCancelingAction() {
+        enableConfirmationFlow();
+
+        final String controllerId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final List<Action> actions = assignDistributionSet(dsId, controllerId).getAssignedEntity();
+        assertThat(actions).hasSize(1);
+        final Long actionId = actions.get(0).getId();
+
+        // confirm -> RUNNING and cancel it afterwards (soft cancel) -> CANCELING
+        assertThat(confirmationManagement.confirmAction(actionId, null, null).getStatus()).isEqualTo(Status.RUNNING);
+        assertThat(deploymentManagement.cancelAction(actionId).getStatus()).isEqualTo(Status.CANCELING);
+
+        // the target gets a cancel action on poll - denying must not push it back to WAIT_FOR_CONFIRMATION
+        assertThatThrownBy(() -> confirmationManagement.denyAction(actionId, null, null))
+                .isInstanceOf(InvalidConfirmationFeedbackException.class)
+                .matches(e -> ((InvalidConfirmationFeedbackException) e)
+                        .getReason() == InvalidConfirmationFeedbackException.Reason.NOT_AWAITING_CONFIRMATION);
+
+        assertThat(deploymentManagement.findAction(actionId).orElseThrow().getStatus()).isEqualTo(Status.CANCELING);
+        assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).isEmpty();
+    }
+
+    /**
+     * Verify denying a running action is rejected in case the confirmation flow is disabled
+     */
+    @Test
+    void deniedActionNotPossibleWithDisabledConfirmationFlow() {
+        final String controllerId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        // confirmation flow disabled -> action is directly in RUNNING state
+        final List<Action> actions = assignDistributionSet(dsId, controllerId).getAssignedEntity();
+        assertThat(actions).hasSize(1).allMatch(action -> action.getStatus() == Status.RUNNING);
+        final Long actionId = actions.get(0).getId();
+
+        assertThatThrownBy(() -> confirmationManagement.denyAction(actionId, null, null))
+                .isInstanceOf(InvalidConfirmationFeedbackException.class)
+                .matches(e -> ((InvalidConfirmationFeedbackException) e)
+                        .getReason() == InvalidConfirmationFeedbackException.Reason.NOT_AWAITING_CONFIRMATION);
+
+        assertThat(deploymentManagement.findAction(actionId).orElseThrow().getStatus()).isEqualTo(Status.RUNNING);
+        assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).isEmpty();
+    }
+
+    /**
+     * Verify an action waiting for confirmation can still be denied after the confirmation flow got disabled
+     */
+    @Test
+    void deniedActionStillPossibleForWfcActionAfterDisablingConfirmationFlow() {
+        enableConfirmationFlow();
+
+        final String controllerId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final List<Action> actions = assignDistributionSet(dsId, controllerId).getAssignedEntity();
+        assertThat(actions).hasSize(1).allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
+        final Long actionId = actions.get(0).getId();
+
+        disableConfirmationFlow();
+
+        assertThat(confirmationManagement.denyAction(actionId, null, null).getStatus())
+                .isEqualTo(Status.WAIT_FOR_CONFIRMATION);
+    }
+
+    /**
      * Verify action in WFC state will be transferred in RUNNING state in case auto-confirmation is activated.
      */
     @Test

@@ -468,6 +468,57 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     /**
+     * Controller sends a 'denied' feedback for a canceled action which must be rejected in order to keep the pending
+     * cancellation visible to the device.
+     */
+    @Test
+    void revokeConfirmationIsRejectedForCancelingAction() throws Exception {
+        enableConfirmationFlow();
+
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        Target savedTarget = testdataFactory.createTarget("992");
+        savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
+        final String controllerId = savedTarget.getControllerId();
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(controllerId, PAGE).getContent().get(0);
+
+        // confirm -> action RUNNING, afterwards soft cancel it -> CANCELING
+        sendConfirmationFeedback(
+                savedTarget, savedAction, DdiConfirmationFeedback.Confirmation.CONFIRMED, 10, "Action confirmed message.")
+                .andExpect(status().isOk());
+        assertThat(deploymentManagement.cancelAction(savedAction.getId()).getStatus()).isEqualTo(Action.Status.CANCELING);
+
+        sendConfirmationFeedback(
+                savedTarget, savedAction, DdiConfirmationFeedback.Confirmation.DENIED, 20, "Consent revoked message.")
+                .andExpect(status().isNotFound());
+
+        assertThat(deploymentManagement.findAction(savedAction.getId()).orElseThrow().getStatus())
+                .isEqualTo(Action.Status.CANCELING);
+    }
+
+    /**
+     * Controller sends a 'denied' feedback for a running action while the confirmation flow is disabled, which must be
+     * rejected since the action never has been confirmation-driven.
+     */
+    @Test
+    void revokeConfirmationIsRejectedIfConfirmationFlowIsDisabled() throws Exception {
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        Target savedTarget = testdataFactory.createTarget("993");
+        savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
+        final String controllerId = savedTarget.getControllerId();
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(controllerId, PAGE).getContent().get(0);
+        assertThat(savedAction.getStatus()).isEqualTo(Action.Status.RUNNING);
+
+        sendConfirmationFeedback(
+                savedTarget, savedAction, DdiConfirmationFeedback.Confirmation.DENIED, 20, "Consent revoked message.")
+                .andExpect(status().isNotFound());
+
+        // action remains running and the deploymentBase is still exposed
+        assertThat(deploymentManagement.findAction(savedAction.getId()).orElseThrow().getStatus())
+                .isEqualTo(Action.Status.RUNNING);
+        verifyActionInDeploymentBaseState(controllerId, savedAction.getId());
+    }
+
+    /**
      * Test to verify that only a specific count of messages are returned based on the input actionHistory for getControllerDeploymentActionFeedback endpoint.
      */
     @Test
