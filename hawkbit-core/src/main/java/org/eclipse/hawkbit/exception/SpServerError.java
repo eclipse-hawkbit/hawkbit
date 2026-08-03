@@ -110,6 +110,9 @@ public enum SpServerError {
     SP_ACTION_NOT_FORCE_QUITABLE(
             "hawkbit.server.error.action.notForceQuitable",
             "Only active actions which are in status pending can be force quit."),
+    SP_ACTION_NOT_DELETABLE(
+            "hawkbit.server.error.action.notDeletable",
+            "Only configured action statuses could be deleted. Please check your tenant configuration for allowed values."),
     SP_DS_INCOMPLETE(
             "hawkbit.server.error.distributionset.incomplete",
             "Distribution set is assigned/locked to a target that is incomplete (i.e. mandatory modules are missing)"),

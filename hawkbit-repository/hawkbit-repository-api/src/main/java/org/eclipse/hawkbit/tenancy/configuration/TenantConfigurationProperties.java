@@ -121,6 +121,10 @@ public class TenantConfigurationProperties {
          */
         public static final String ACTION_CLEANUP_ON_QUOTA_HIT_PERCENTAGE = "action.cleanup.onQuotaHit.percent";
         /**
+         * Configuration value for allowed action statuses that can be deleted by user
+         */
+        public static final String ACTION_USER_DELETION_ALLOWED_STATUSES = "action.delete.allowed.statuses";
+        /**
          * Switch to enable/disable the batch-assignment feature.
          */
         public static final String BATCH_ASSIGNMENTS_ENABLED = "batch.assignments.enabled";

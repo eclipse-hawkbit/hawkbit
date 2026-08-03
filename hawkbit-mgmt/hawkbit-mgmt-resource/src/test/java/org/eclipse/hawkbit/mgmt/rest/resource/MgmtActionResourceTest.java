@@ -517,6 +517,15 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("content.[0].id", equalTo(action1.getId().intValue())))
                 .andExpect(jsonPath("content.[1].id", equalTo(action2.getId().intValue())));
 
+        // MethodNotAllowed should be the result when action is not in allowed status for deletion
+        mvc.perform(delete(ACTIONS_V1 + "/" + action1.getId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isMethodNotAllowed());
+
+        // move the action to an allowed status (FINISHED) and delete again
+        controllerManagement.addUpdateActionStatus(Action.ActionStatusCreate.builder()
+                .actionId(action1.getId()).status(Status.FINISHED).messages(List.of("done")).build());
+
         mvc.perform(delete(ACTIONS_V1 + "/" + action1.getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNoContent());
@@ -542,12 +551,24 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final List<Long> actionIdsToDelete = new ArrayList<>();
         final long deletedActionId1 = assignmentResults.get(2).getAssignedEntity().get(0).getId();
         actionIdsToDelete.add(deletedActionId1);
+        // finish first action
+        controllerManagement.addUpdateActionStatus(Action.ActionStatusCreate.builder()
+                .actionId(deletedActionId1).status(Status.FINISHED).messages(List.of("done")).build());
+
         final long deletedActionId2 = assignmentResults.get(3).getAssignedEntity().get(0).getId();
         actionIdsToDelete.add(deletedActionId2);
 
+        // one of the actions is not in allowed statuses - should return method not allowed.
         mvc.perform(delete(MgmtActionRestApi.ACTIONS_V1)
                         .content(toJson(actionIdsToDelete)).contentType(APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isMethodNotAllowed());
+
+        controllerManagement.addUpdateActionStatus(Action.ActionStatusCreate.builder()
+                .actionId(deletedActionId2).status(Status.FINISHED).messages(List.of("done")).build());
+
+        mvc.perform(delete(MgmtActionRestApi.ACTIONS_V1)
+                .content(toJson(actionIdsToDelete)).contentType(APPLICATION_JSON))
+                        .andExpect(status().isNoContent());
 
         mvc.perform(get(ACTIONS_V1 + "/" + deletedActionId1))
                 .andDo(MockMvcResultPrinter.print())
@@ -558,6 +579,15 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final Action deletedAction3 = assignmentResults.get(1).getAssignedEntity().get(0);
         final String rsql = "target.name==" + deletedAction3.getTarget().getName();
 
+        // deletedAction3 should be RUNNING which is not in allowed statuses
+        mvc.perform(delete(MgmtActionRestApi.ACTIONS_V1)
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, rsql).contentType(APPLICATION_JSON))
+                .andExpect(status().isMethodNotAllowed());
+
+        controllerManagement.addUpdateActionStatus(Action.ActionStatusCreate.builder()
+                .actionId(deletedAction3.getId()).status(Status.FINISHED).messages(List.of("done")).build());
+
+        // after finishing should be successfully deleted
         mvc.perform(delete(MgmtActionRestApi.ACTIONS_V1)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, rsql).contentType(APPLICATION_JSON))
                 .andExpect(status().isNoContent());

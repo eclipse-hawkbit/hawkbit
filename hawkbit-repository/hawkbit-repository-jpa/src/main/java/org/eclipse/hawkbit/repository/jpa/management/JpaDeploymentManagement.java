@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.eclipse.hawkbit.context.AccessContext.asSystem;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_USER_DELETION_ALLOWED_STATUSES;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED;
 
 import java.time.Duration;
@@ -18,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,9 +48,11 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
+import org.eclipse.hawkbit.repository.exception.DeleteActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompatibleTargetTypeException;
@@ -71,6 +75,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
+import org.eclipse.hawkbit.repository.jpa.utils.ActionUtils;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -142,6 +147,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final RetryTemplate retryTemplate;
     private final OnlineDsAssignmentStrategy onlineDsAssignmentStrategy;
     private final OfflineDsAssignmentStrategy offlineDsAssignmentStrategy;
+    private final TenantConfigurationManagement tenantConfigurationManagement;
 
     @SuppressWarnings("java:S107")
     protected JpaDeploymentManagement(
@@ -149,6 +155,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final QuotaManagement quotaManagement, final RepositoryProperties repositoryProperties,
             final JpaDistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
             final EntityManager entityManager, final PlatformTransactionManager txManager, final JpaProperties jpaProperties,
+            final TenantConfigurationManagement tenantConfigurationManagement,
             @Value(Constants.RETRY_MAX) final long maxRetries, @Value(Constants.RETRY_DELAY) final long delay) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
         this.distributionSetManagement = distributionSetManagement;
@@ -173,6 +180,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository,
                 quotaManagement, this::isConfirmationFlowEnabled, repositoryProperties,
                 maxAssignmentsExceededHandler);
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
     }
 
     @Override
@@ -385,6 +393,13 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Transactional
     public void deleteAction(final long actionId) {
         log.info("Deleting action {}", actionId);
+        final JpaAction action = actionRepository.getById(actionId);
+        final EnumSet<Action.Status> allowedStatuses = getActionsAllowedStatusesToDelete();
+        if (!allowedStatuses.contains(action.getStatus())) {
+            throw new DeleteActionNotAllowedException(
+                    "Status of action with id " + actionId + " is not in allowed values for deletion: " + allowedStatuses);
+        }
+
         actionRepository.deleteById(actionId);
     }
 
@@ -392,7 +407,18 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Transactional
     public void deleteActionsByRsql(final String rsql) {
         log.info("Deleting actions matching rsql {}", rsql);
-        actionRepository.delete(DeleteSpecification.where(predicateSpec(QLSupport.getInstance().buildSpec(rsql, ActionFields.class))));
+        final Specification<JpaAction> rsqlSpec = QLSupport.getInstance().buildSpec(rsql, ActionFields.class);
+        final EnumSet<Action.Status> allowedStatuses = getActionsAllowedStatusesToDelete();
+        final Specification<JpaAction> statusesNotInSpec = ActionSpecifications.byStatusesNotIn(allowedStatuses.stream().toList());
+
+        final long count = actionRepository.count(JpaManagementHelper.combineWithAnd(List.of(rsqlSpec, statusesNotInSpec)));
+        if (count > 0) {
+            throw new DeleteActionNotAllowedException(count +
+                    " actions matching the rsql filter are not in allowed statuses for deletion: " + allowedStatuses);
+        }
+
+        final PredicateSpecification<JpaAction> rsqlPredSpec = predicateSpec(rsqlSpec);
+        actionRepository.delete(DeleteSpecification.where(rsqlPredSpec));
     }
 
     // TODO - since Spring 4.x migration, reconsider if it is the best way
@@ -404,6 +430,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Transactional
     public void deleteActionsByIds(final List<Long> actionIds) {
         log.info("Deleting actions with ids {}", actionIds);
+        checkActionsEligibleForDeletion(actionIds);
         actionRepository.deleteAllById(actionIds);
     }
 
@@ -411,6 +438,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Transactional
     public void deleteTargetActionsByIds(final String controllerId, final List<Long> actionsIds) {
         log.info("Delete actions for target {} with action ids {}", controllerId, actionsIds);
+        checkActionsEligibleForDeletion(actionsIds);
         actionRepository.delete(ActionSpecifications.byControllerIdAndIdIn(controllerId, actionsIds));
     }
 
@@ -424,7 +452,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         final long targetActions = actionRepository.countByTargetId(target.getId());
         if (targetActions > keepLast) {
             final long oldestToDelete = targetActions - keepLast;
-            deleteOldestTargetActions(target.getId(), (int) oldestToDelete);
+            deleteOldestTargetActions(target.getId(), (int) oldestToDelete, true);
         }
     }
 
@@ -570,7 +598,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             }
             log.info("Actions purge percentage {}, will delete {} oldest actions for target {}",
                     actionsPurgePercentage, numberOfActions, targetId);
-            deleteOldestTargetActions(targetId, numberOfActions);
+            deleteOldestTargetActions(targetId, numberOfActions, false);
         } else {
             throw quotaExceededException;
         }
@@ -581,10 +609,25 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      *
      * @param targetId - target id
      * @param oldestToDelete - number of oldest actions to be deleted
+     * @param deleteOnlyEligible - whether to delete actions matching the tenant allowedStatuses only, or not
      */
-    private void deleteOldestTargetActions(long targetId, int oldestToDelete) {
+    private void deleteOldestTargetActions(long targetId, int oldestToDelete, boolean deleteOnlyEligible) {
         // Workaround for the case where JPQL or Criteria API do not support LIMIT
         log.info("Deleting last {} actions of target {}", oldestToDelete, targetId);
+
+        final List<Integer> allowedStatuses = deleteOnlyEligible
+                ? getActionsAllowedStatusesToDelete().stream().map(new JpaAction.StatusConverter()::convertToDatabaseColumn).toList()
+                : List.of();
+
+        if (deleteOnlyEligible && allowedStatuses.isEmpty()) {
+            log.debug("Nothing eligible to delete for target {}", targetId);
+            return;
+        }
+
+        final String statusFilter = deleteOnlyEligible
+                ? " AND status in(" + Jpa.formatNativeQueryInClause("status", allowedStatuses) + ")"
+                : "";
+
         final String SQL = "DELETE FROM sp_action WHERE id IN(" +
                 "SELECT id FROM (" +
                 "SELECT id FROM sp_action" +
@@ -592,14 +635,34 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 " ORDER BY id ASC" +
                 " LIMIT " + oldestToDelete
                 + ") AS sub"
-                + ")";
+                + ")" + statusFilter;
         final Query query = entityManager.createNativeQuery(SQL);
         query.setParameter("target", targetId);
+        if (deleteOnlyEligible) {
+            Jpa.setNativeQueryInParameter(query, "status", allowedStatuses);
+        }
         query.executeUpdate();
+    }
+
+    private void checkActionsEligibleForDeletion(final List<Long> actionIds) {
+        final EnumSet<Action.Status> allowedStatuses = getActionsAllowedStatusesToDelete();
+        final Specification<JpaAction> statusesNotInSpec = ActionSpecifications.byStatusesNotIn(allowedStatuses.stream().toList());
+        final Specification<JpaAction> actionIdsSpec = ActionSpecifications.byIdIn(actionIds);
+
+        final long count = actionRepository.count(JpaManagementHelper.combineWithAnd(List.of(actionIdsSpec, statusesNotInSpec)));
+        if (count > 0) {
+            throw new DeleteActionNotAllowedException(count +
+                    " actions from ID list are not in allowed statuses for deletion: " + allowedStatuses);
+        }
     }
 
     private int getActionsPurgePercentage() {
         return TenantConfigHelper.getAsSystem(TenantConfigurationKey.ACTION_CLEANUP_ON_QUOTA_HIT_PERCENTAGE, Integer.class);
+    }
+
+    private EnumSet<Action.Status> getActionsAllowedStatusesToDelete() {
+        return AccessContext.asSystem(
+                () -> ActionUtils.getActionStatus(tenantConfigurationManagement, ACTION_USER_DELETION_ALLOWED_STATUSES));
     }
 
     protected boolean isActionsAutocloseEnabled() {

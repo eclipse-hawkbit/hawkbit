@@ -38,6 +38,10 @@ import org.springframework.data.jpa.domain.Specification;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ActionSpecifications {
 
+    public static Specification<JpaAction> byStatusesNotIn(final List<Action.Status> statuses) {
+        return ((root, query, cb) -> cb.not(root.get(JpaAction_.status).in(statuses)));
+    }
+
     public static Specification<JpaAction> byTargetIdAndIsActive(final Long targetId) {
         return (root, query, cb) -> cb.and(
                 cb.equal(root.get(JpaAction_.target).get(AbstractJpaBaseEntity_.id), targetId),
@@ -101,6 +105,10 @@ public final class ActionSpecifications {
                 cb.equal(root.get(JpaAction_.active), true),
                 cb.not(root.get(JpaAction_.status).in(statuses))
         );
+    }
+
+    public static Specification<JpaAction> byIdIn(final List<Long> actionIds) {
+        return (root, cd, cb) -> root.get(AbstractJpaBaseEntity_.id).in(actionIds);
     }
 
     public static DeleteSpecification<JpaAction> byControllerIdAndIdIn(final String controllerId, final List<Long> actionIds) {
