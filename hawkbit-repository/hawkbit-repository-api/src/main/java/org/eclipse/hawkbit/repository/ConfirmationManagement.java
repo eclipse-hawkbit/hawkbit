@@ -57,7 +57,14 @@ public interface ConfirmationManagement extends PermissionSupport {
     Action confirmAction(long actionId, Integer code, Collection<String> messages);
 
     /**
-     * Deny a given action and leave it in {@link Action.Status#WAIT_FOR_CONFIRMATION} state.
+     * Deny a given action and set it to {@link Action.Status#WAIT_FOR_CONFIRMATION} state. A denied feedback is accepted for an active
+     * action that is either still in {@link Action.Status#WAIT_FOR_CONFIRMATION} (stays there) or already in
+     * {@link Action.Status#RUNNING} because a previously granted confirmation (auto- or manually given) is revoked, which reverts the
+     * action back to {@link Action.Status#WAIT_FOR_CONFIRMATION}.
+     * <p/>
+     * Revoking a previously granted confirmation is rejected in case the action is not confirmation-driven anymore, i.e. if the action
+     * is in {@link Action.Status#CANCELING} / {@link Action.Status#CANCELED} state (the target is served a cancel action instead of a
+     * confirmation base) or if the user confirmation flow is disabled for the tenant.
      *
      * @param actionId mandatory to know which action to deny
      * @param code optional value to specify a code for the created action status
