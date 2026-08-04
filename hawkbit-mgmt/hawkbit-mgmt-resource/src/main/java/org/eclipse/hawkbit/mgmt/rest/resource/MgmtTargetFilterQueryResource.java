@@ -50,14 +50,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestApi {
 
     private final TargetFilterQueryManagement<? extends TargetFilterQuery> filterManagement;
-    private final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
 
     MgmtTargetFilterQueryResource(final TargetFilterQueryManagement<? extends TargetFilterQuery> filterManagement,
-            final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement) {
         this.filterManagement = filterManagement;
-        this.autoAssignmentManagement = autoAssignmentManagement;
         this.distributionSetManagement = distributionSetManagement;
     }
 
@@ -142,6 +139,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
+    @SuppressWarnings("java:S5738") // TODO: remove after replace the deprecated call
     public ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(
             final Long filterId, final MgmtDistributionSetAutoAssignment autoAssignRequest) {
         final TargetFilterQuery filter = filterManagement.get(filterId);

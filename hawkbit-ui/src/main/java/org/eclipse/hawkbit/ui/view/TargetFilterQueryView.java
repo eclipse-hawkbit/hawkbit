@@ -297,6 +297,7 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
             }
         }
 
+        @SuppressWarnings("java:S5738") // TODO: remove after replace the deprecated call
         private void addAssignClickListener(final HawkbitMgmtClient hawkbitClient, Runnable onSuccess) {
             assign.addClickListener(e -> {
                 MgmtDistributionSetAutoAssignment newAssignment = new MgmtDistributionSetAutoAssignment();

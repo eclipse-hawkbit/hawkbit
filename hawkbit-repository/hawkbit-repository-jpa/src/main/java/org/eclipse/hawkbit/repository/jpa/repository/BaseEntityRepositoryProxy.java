@@ -245,12 +245,12 @@ public class BaseEntityRepositoryProxy<T extends AbstractJpaBaseEntity> implemen
 
     @Override
     public long update(@Nullable final UpdateSpecification<T> spec) {
-        return repository.update(accessController == null ? spec : accessController.appendAccessRules(Operation.UPDATE, spec));
+        return repository.update((accessController == null && spec != null) ? spec : accessController.appendAccessRules(Operation.UPDATE, spec));
     }
 
     @Override
     public long delete(@Nullable final DeleteSpecification<T> spec) {
-        return repository.delete(accessController == null ? spec : accessController.appendAccessRules(Operation.DELETE, spec));
+        return repository.delete((accessController == null && spec != null) ? spec : accessController.appendAccessRules(Operation.DELETE, spec));
     }
 
     @Override
@@ -372,6 +372,7 @@ public class BaseEntityRepositoryProxy<T extends AbstractJpaBaseEntity> implemen
      * Invokes {@code method} on {@code target}, unwrapping reflection's {@link InvocationTargetException} so the proxy
      * propagates the real (possibly checked) exception transparently instead of the reflection wrapper.
      */
+    @SuppressWarnings("java:S112") // rethrows original cause transparently through dynamic proxy; InvocationHandler contract requires throws Throwable
     private static Object invokeUnwrapping(final Method method, final Object target, final Object[] args) throws Throwable {
         try {
             return method.invoke(target, args);

@@ -49,11 +49,12 @@ class SoftwareModuleTypeManagementCacheAcmTest extends AbstractTypeManagementCac
      */
     @Test
     void verifyDeniedUserThrowsWithoutQuery() {
-        softwareModuleTypeManagement.get(smType1.getId()); // warm cache
+        long smType1Id = smType1.getId();
+        softwareModuleTypeManagement.get(smType1Id); // warm cache
 
         runAs(withAuthorities(READ_PREFIX + SOFTWARE_MODULE_TYPE + "/id==" + smType2.getId()), () -> {
             final long before = readQueries();
-            assertThatThrownBy(() -> softwareModuleTypeManagement.get(smType1.getId()))
+            assertThatThrownBy(() -> softwareModuleTypeManagement.get(smType1Id))
                     .isInstanceOf(EntityNotFoundException.class);
             assertThat(readQueries() - before)
                     .as("permission rejection from cache must produce 0 DB queries")

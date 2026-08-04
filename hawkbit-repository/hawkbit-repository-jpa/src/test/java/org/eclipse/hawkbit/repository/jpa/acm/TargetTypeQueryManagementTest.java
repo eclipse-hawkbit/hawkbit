@@ -49,10 +49,10 @@ class TargetTypeQueryManagementTest extends AbstractAccessControllerManagementTe
                     autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder().name("aa2").targetFilterQuery("id==*")
                             .distributionSet(distributionSetManagement.get(ds2Type2.getId()))
                             .actionType(Action.ActionType.FORCED).confirmationRequired(false).build());
-                    // a not readable distribution set cannot be auto assigned
-                    assertThatThrownBy(() -> autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder().name("aa3").targetFilterQuery(
-                                    "id==*")
-                            .distributionSet(distributionSetManagement.get(ds3Type2.getId()))
+                    // a not readable distribution set cannot be auto assigned - ds3Type2 was created as system in
+                    // setup, so create(...) is the single invocation expected to throw under the restricted rights
+                    assertThatThrownBy(() -> autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder()
+                            .name("aa3").targetFilterQuery("id==*").distributionSet(ds3Type2)
                             .actionType(Action.ActionType.FORCED).confirmationRequired(false).build()))
                             .isInstanceOf(EntityNotFoundException.class);
                 });

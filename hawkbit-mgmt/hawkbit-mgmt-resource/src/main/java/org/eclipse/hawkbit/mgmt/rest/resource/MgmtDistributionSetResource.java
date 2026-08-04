@@ -56,7 +56,6 @@ import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SoftDeletedMode;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.helper.TenantConfigHelper;
@@ -87,7 +86,6 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     private final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement;
     private final DistributionSetInvalidationManagement distributionSetInvalidationManagement;
     private final TargetManagement<? extends Target> targetManagement;
-    private final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement;
     private final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement;
     private final DeploymentManagement deployManagement;
     private final SystemManagement systemManagement;
@@ -100,7 +98,6 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             final DistributionSetTypeManagement<? extends DistributionSetType> distributionSetTypeManagement,
             final DistributionSetInvalidationManagement distributionSetInvalidationManagement,
             final TargetManagement<? extends Target> targetManagement,
-            final TargetFilterQueryManagement<? extends TargetFilterQuery> targetFilterQueryManagement,
             final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement,
             final DeploymentManagement deployManagement,
             final MgmtDistributionSetMapper mgmtDistributionSetMapper,
@@ -110,7 +107,6 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         this.distributionSetTypeManagement = distributionSetTypeManagement;
         this.distributionSetInvalidationManagement = distributionSetInvalidationManagement;
         this.targetManagement = targetManagement;
-        this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.autoAssignmentManagement = autoAssignmentManagement;
         this.deployManagement = deployManagement;
         this.mgmtDistributionSetMapper = mgmtDistributionSetMapper;
