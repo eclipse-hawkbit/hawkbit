@@ -139,7 +139,6 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
-    @SuppressWarnings("java:S5738") // TODO: remove after replace the deprecated call
     public ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(
             final Long filterId, final MgmtDistributionSetAutoAssignment autoAssignRequest) {
         final TargetFilterQuery filter = filterManagement.get(filterId);
