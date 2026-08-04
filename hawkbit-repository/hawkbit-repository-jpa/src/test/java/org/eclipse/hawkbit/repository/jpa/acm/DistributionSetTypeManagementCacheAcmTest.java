@@ -51,7 +51,7 @@ class DistributionSetTypeManagementCacheAcmTest extends AbstractTypeManagementCa
      */
     @Test
     void verifyDeniedUserThrowsWithoutQuery() {
-        long dsType1Id = ds1Type1.getId();
+        long dsType1Id = dsType1.getId();
         distributionSetTypeManagement.get(dsType1Id); // warm cache
 
         runAs(withAuthorities(READ_PREFIX + DISTRIBUTION_SET_TYPE + "/id==" + dsType2.getId()), () -> {
@@ -106,7 +106,7 @@ class DistributionSetTypeManagementCacheAcmTest extends AbstractTypeManagementCa
      */
     @Test
     void verifyDeniedColdMissCachesRawEntityForPermittedUser() {
-        long dsType1Id = ds1Type1.getId();
+        long dsType1Id = dsType1.getId();
         evict(JpaDistributionSetType.class.getSimpleName(), dsType1Id);
 
         // denied user causes the cold cache miss
