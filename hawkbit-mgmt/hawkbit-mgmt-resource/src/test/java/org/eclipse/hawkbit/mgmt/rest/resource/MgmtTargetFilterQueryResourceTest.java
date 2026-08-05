@@ -232,7 +232,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final String filterQuery2 = "name==test_02_changed";
         final String body = new JSONObject().put("query", filterQuery2).toString();
 
-        final AutoAssignment autoAssignment = autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder()
+        autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder()
                 .name(filterName)
                 .targetFilterQuery(filterQuery)
                 .distributionSet(testdataFactory.createDistributionSet()).
@@ -295,7 +295,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final String filterQuery = "name==test_03";
         final String body = new JSONObject().put("name", filterName2).toString();
 
-        final AutoAssignment autoAssignment = autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder()
+        autoAssignmentManagement.create(AutoAssignmentManagement.Create.builder()
                 .name(filterName)
                 .targetFilterQuery(filterQuery)
                 .distributionSet(testdataFactory.createDistributionSet()).

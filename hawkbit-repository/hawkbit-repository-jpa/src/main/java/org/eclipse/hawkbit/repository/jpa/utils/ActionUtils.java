@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.utils;
 
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -18,7 +19,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.stream.Collectors;
 
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ActionUtils {
 
     private static final EnumSet<Action.Status> EMPTY_STATUS_SET = EnumSet.noneOf(Action.Status.class);

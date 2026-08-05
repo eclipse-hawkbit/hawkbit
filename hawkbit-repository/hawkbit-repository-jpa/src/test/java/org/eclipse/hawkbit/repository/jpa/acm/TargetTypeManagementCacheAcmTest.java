@@ -49,11 +49,12 @@ class TargetTypeManagementCacheAcmTest extends AbstractTypeManagementCacheAcmTes
      */
     @Test
     void verifyDeniedUserThrowsWithoutQuery() {
-        targetTypeManagement.get(targetType1.getId()); // warm cache
+        long targetType1Id = targetType1.getId();
+        targetTypeManagement.get(targetType1Id); // warm cache
 
         runAs(withAuthorities(READ_PREFIX + TARGET_TYPE + "/id==" + targetType2.getId()), () -> {
             final long before = readQueries();
-            assertThatThrownBy(() -> targetTypeManagement.get(targetType1.getId()))
+            assertThatThrownBy(() -> targetTypeManagement.get(targetType1Id))
                     .isInstanceOf(EntityNotFoundException.class);
             assertThat(readQueries() - before)
                     .as("permission rejection from cache must produce 0 DB queries")

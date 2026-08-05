@@ -202,6 +202,7 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
     // run in the context the auto assignment is made in, i.e. if there is access control context it runs in it
     // otherwise in the tenant & user context built by createdBy
     // Note: It must be called in a tenant context, i.e. Security.getCurrentTenant() returns the tenant
+    @SuppressWarnings("java:S3776")
     private void forEachAutoAssignment(final Consumer<AutoAssignment> consumer) {
         Slice<AutoAssignment> autoAssignments;
         Pageable query = PageRequest.of(0, PAGE_SIZE);

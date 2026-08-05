@@ -63,18 +63,14 @@ public class MgmtAutoAssignmentMapper {
 
         body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).getAutoAssignment(body.getId())).withSelfRel().expand());
         switch (autoAssignment.getStatus()) {
-            case WAITING_FOR_APPROVAL:
+            case WAITING_FOR_APPROVAL -> {
                 body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).approve(body.getId(), null)).withRel("approve").expand());
                 body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).deny(body.getId(), null)).withRel("deny").expand());
-                break;
-            case READY:
-                body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).start(body.getId())).withRel("start").expand());
-                break;
-            case RUNNING:
-                body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).pause(body.getId())).withRel("pause").expand());
-                break;
-            case PAUSED:
-                body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).resume(body.getId())).withRel("resume").expand());
+            }
+            case READY -> body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).start(body.getId())).withRel("start").expand());
+            case RUNNING -> body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).pause(body.getId())).withRel("pause").expand());
+            case PAUSED -> body.add(linkTo(methodOn(MgmtAutoAssignmentRestApi.class).resume(body.getId())).withRel("resume").expand());
+            case APPROVAL_DENIED -> { /* terminal state, no action links */ }
         }
 
         final DistributionSet distributionSet = autoAssignment.getDistributionSet();

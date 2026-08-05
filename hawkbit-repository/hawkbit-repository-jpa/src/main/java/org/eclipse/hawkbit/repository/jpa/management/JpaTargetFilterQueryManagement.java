@@ -20,7 +20,6 @@ import cz.jirutka.rsql.parser.RSQLParserException;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.AutoAssignmentManagement;
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
@@ -28,7 +27,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
 import org.eclipse.hawkbit.repository.model.AutoAssignment;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.qfields.TargetFields;
 import org.eclipse.hawkbit.repository.qfields.TargetFilterQueryFields;
@@ -51,15 +49,12 @@ class JpaTargetFilterQueryManagement
         implements TargetFilterQueryManagement<JpaTargetFilterQuery> {
 
     private AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement;
-    private DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
 
     protected JpaTargetFilterQueryManagement(
             final TargetFilterQueryRepository targetFilterQueryRepository, final EntityManager entityManager,
-            final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement,
-            final DistributionSetManagement<? extends DistributionSet> distributionSetManagement) {
+            final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement) {
         super(targetFilterQueryRepository, entityManager);
         this.autoAssignmentManagement = autoAssignmentManagement;
-        this.distributionSetManagement = distributionSetManagement;
     }
 
     @Override
@@ -205,7 +200,6 @@ class JpaTargetFilterQueryManagement
      * reference to the no-longer-persistent auto assignment, which Hibernate rejects on flush. Callers that delete or
      * replace the linked auto assignment must call this first.
      */
-    @Transactional
     private void unlinkAutoAssignment(final long id) {
         jpaRepository.getById(id).setAutoAssignment(null);
     }

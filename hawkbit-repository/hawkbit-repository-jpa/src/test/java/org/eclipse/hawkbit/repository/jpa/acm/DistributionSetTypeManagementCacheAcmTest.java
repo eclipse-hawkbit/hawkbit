@@ -51,11 +51,12 @@ class DistributionSetTypeManagementCacheAcmTest extends AbstractTypeManagementCa
      */
     @Test
     void verifyDeniedUserThrowsWithoutQuery() {
-        distributionSetTypeManagement.get(dsType1.getId()); // warm cache
+        long dsType1Id = dsType1.getId();
+        distributionSetTypeManagement.get(dsType1Id); // warm cache
 
         runAs(withAuthorities(READ_PREFIX + DISTRIBUTION_SET_TYPE + "/id==" + dsType2.getId()), () -> {
             final long before = readQueries();
-            assertThatThrownBy(() -> distributionSetTypeManagement.get(dsType1.getId()))
+            assertThatThrownBy(() -> distributionSetTypeManagement.get(dsType1Id))
                     .isInstanceOf(EntityNotFoundException.class);
             assertThat(readQueries() - before)
                     .as("permission rejection from cache must produce 0 DB queries")
@@ -105,18 +106,19 @@ class DistributionSetTypeManagementCacheAcmTest extends AbstractTypeManagementCa
      */
     @Test
     void verifyDeniedColdMissCachesRawEntityForPermittedUser() {
-        evict(JpaDistributionSetType.class.getSimpleName(), dsType1.getId());
+        long dsType1Id = dsType1.getId();
+        evict(JpaDistributionSetType.class.getSimpleName(), dsType1Id);
 
         // denied user causes the cold cache miss
         runAs(withAuthorities(READ_PREFIX + DISTRIBUTION_SET_TYPE + "/id==" + dsType2.getId()), () -> assertThatThrownBy(
-                () -> distributionSetTypeManagement.get(dsType1.getId()))
+                () -> distributionSetTypeManagement.get(dsType1Id))
                 .isInstanceOf(EntityNotFoundException.class));
 
         // raw entity is now cached; a permitted user must serve from cache without any DB access
         // (measure inside runAs, after the harness' one-off tenant setup)
         runAs(withAuthorities(READ_PREFIX + DISTRIBUTION_SET_TYPE + "/id==" + dsType1.getId()), () -> {
             final long before = readQueries();
-            assertThat(distributionSetTypeManagement.get(dsType1.getId()).getId()).isEqualTo(dsType1.getId());
+            assertThat(distributionSetTypeManagement.get(dsType1Id).getId()).isEqualTo(dsType1.getId());
             assertThat(readQueries() - before)
                     .as("permitted user after a denied cold-miss must serve from cache — 0 DB queries")
                     .isZero();
