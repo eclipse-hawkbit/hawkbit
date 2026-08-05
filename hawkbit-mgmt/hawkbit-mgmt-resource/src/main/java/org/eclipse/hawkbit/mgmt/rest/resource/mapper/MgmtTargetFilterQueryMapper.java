@@ -49,12 +49,14 @@ public final class MgmtTargetFilterQueryMapper {
         final DistributionSet distributionSet = autoAssignment.map(AutoAssignment::getDistributionSet).orElse(null);
         if (distributionSet != null) {
             targetRest.setAutoAssignDistributionSet(distributionSet.getId());
+
             if (autoAssignment.isPresent()) {
                 targetRest.setAutoAssignActionType(MgmtRestModelMapper.convertActionType(autoAssignment.get().getActionType()));
                 autoAssignment.get().getWeight().ifPresent(targetRest::setAutoAssignWeight);
-            }
-            if (confirmationFlowEnabled) {
-                targetRest.setConfirmationRequired(autoAssignment.get().isConfirmationRequired());
+
+                if (confirmationFlowEnabled) {
+                    targetRest.setConfirmationRequired(autoAssignment.get().isConfirmationRequired());
+                }
             }
         }
 

@@ -244,13 +244,13 @@ public class BaseEntityRepositoryProxy<T extends AbstractJpaBaseEntity> implemen
     }
 
     @Override
-    public long update(@Nullable final UpdateSpecification<T> spec) {
-        return repository.update((accessController == null && spec != null) ? spec : accessController.appendAccessRules(Operation.UPDATE, spec));
+    public long update(final UpdateSpecification<T> spec) {
+        return repository.update(accessController == null ? spec : accessController.appendAccessRules(Operation.UPDATE, spec));
     }
 
     @Override
-    public long delete(@Nullable final DeleteSpecification<T> spec) {
-        return repository.delete((accessController == null && spec != null) ? spec : accessController.appendAccessRules(Operation.DELETE, spec));
+    public long delete(final DeleteSpecification<T> spec) {
+        return repository.delete(accessController == null ? spec : accessController.appendAccessRules(Operation.DELETE, spec));
     }
 
     @Override
