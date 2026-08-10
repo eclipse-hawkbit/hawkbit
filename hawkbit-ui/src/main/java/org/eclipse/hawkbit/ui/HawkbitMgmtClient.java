@@ -89,6 +89,10 @@ public class HawkbitMgmtClient {
         return hasRead(() -> tenantManagementRestApi.getTenantConfigurationValue("_#ETE$ER"));
     }
 
+    public boolean hasAutoAssignmentRead() {
+        return hasRead(() -> autoAssignmentRestApi.getAutoAssignment(-1L));
+    }
+
     private boolean hasRead(final Supplier<ResponseEntity<?>> doCall) {
         try {
             final int statusCode = doCall.get().getStatusCode().value();

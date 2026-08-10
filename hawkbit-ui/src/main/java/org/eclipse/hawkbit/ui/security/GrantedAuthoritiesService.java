@@ -49,6 +49,9 @@ public class GrantedAuthoritiesService {
         if (hawkbitClient.hasConfigRead()) {
             roles.add("CONFIG_READ");
         }
+        if (hawkbitClient.hasAutoAssignmentRead()) {
+            roles.add("AUTO_ASSIGNMENT_READ");
+        }
         return roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role)).toList();
     }
 

@@ -105,6 +105,7 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
                     selectionGrid.refreshGrid(false);
                     return CompletableFuture.completedFuture(null);
                 });
+        selectionGrid.getDataCommunicator().getKeyMapper().setIdentifierGetter(MgmtRolloutResponseBody::getId);
     }
 
     private static class Actions extends HorizontalLayout {
@@ -199,7 +200,7 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
             removeAll();
             final MgmtRolloutResponseBody body = hawkbitClient.getRolloutRestApi().getRollout(rolloutId).getBody();
             if (body != null) {
-                init(body);
+                grid.getDataProvider().refreshItem(body);
             }
         }
     }
