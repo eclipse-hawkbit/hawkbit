@@ -21,6 +21,8 @@ CREATE TABLE sp_auto_assignment (
     PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX uk_auto_assignment ON sp_auto_assignment (name, tenant);
+CREATE INDEX sp_idx_auto_assignment_prim ON sp_auto_assignment (tenant, id);
+CREATE INDEX sp_idx_auto_assignment_01 ON sp_auto_assignment (tenant, status);
 ALTER TABLE sp_auto_assignment
     ADD CONSTRAINT fk_auto_assignment_distribution_set FOREIGN KEY (distribution_set) REFERENCES sp_distribution_set (id) ON DELETE CASCADE;
 

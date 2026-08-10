@@ -24,6 +24,9 @@ public enum AutoAssignmentFields implements QueryField {
     CREATEDBY("createdBy"),
     LASTMODIFIEDAT("lastModifiedAt"),
     LASTMODIFIEDBY("lastModifiedBy"),
+    STATUS("status"),
+    ACTIONTYPE("actionType"),
+    APPROVALDECIDEDBY("approvalDecidedBy"),
     DISTRIBUTIONSET("distributionSet", "name", "version");
 
     private final String name;
