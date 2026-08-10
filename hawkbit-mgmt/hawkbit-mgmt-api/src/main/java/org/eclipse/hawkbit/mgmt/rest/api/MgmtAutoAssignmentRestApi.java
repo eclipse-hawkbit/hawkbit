@@ -61,8 +61,7 @@ public interface MgmtAutoAssignmentRestApi {
      * and the newly created auto assignment. In case of a failure the {@code JsonResponseExceptionHandler} is handling the response
      */
 
-    @Operation(summary = "Create a new auto assignment",
-            description = "Handles the POST request for creating an auto assignment. Required Permission: UPDATE_TARGET")
+    @Operation(summary = "Create a new auto assignment", description = "Handles the POST request for creating an auto assignment. Required Permission: CREATE_AUTO_ASSIGNMENT")
     @PostCreateResponses
     @PostMapping(value = AUTO_ASSIGNMENTS_V1,
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
@@ -195,8 +194,7 @@ public interface MgmtAutoAssignmentRestApi {
      * @param id the id of the auto assignment
      * @return OK response (200) if the auto assignment could be deleted. In case of any exceptions the corresponding errors occur
      */
-    @Operation(summary = "Delete an auto assignment",
-            description = "Handles the DELETE request for deleting an auto assignment. Required Permission: UPDATE_TARGET")
+    @Operation(summary = "Delete an auto assignment", description = "Handles the DELETE request for deleting an auto assignment. Required Permission: DELETE_AUTO_ASSIGNMENT")
     @DeleteResponses
     @DeleteMapping(value = AUTO_ASSIGNMENTS_V1 + "/{id}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> delete(@PathVariable("id") long id);

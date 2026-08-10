@@ -294,6 +294,32 @@ class MgmtAutoAssignmentResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     /**
+     * Starting an already running auto assignment is an illegal state transition and returns 400 (not 500)
+     */
+    @Test
+    @WithUser(principal = "bumlux", authorities = { SpRole.TARGET_ADMIN, SpRole.REPOSITORY_ADMIN })
+    void startAutoAssignmentInIllegalStateFailsWithBadRequest() throws Exception {
+        final long autoAssignmentId = createAutoAssignmentEntity("ds", "name==*", testdataFactory.createDistributionSet()).getId();
+        autoAssignmentManagement.start(autoAssignmentId);
+        assertThat(autoAssignmentManagement.get(autoAssignmentId).getStatus()).isEqualTo(RUNNING);
+
+        mvc.perform(post("/rest/v1/autoassignments/{autoAssignmentId}/start", autoAssignmentId))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isConflict());
+    }
+
+    /**
+     * Starting a non-existing auto assignment returns 404
+     */
+    @Test
+    @WithUser(principal = "bumlux", authorities = { SpRole.TARGET_ADMIN, SpRole.REPOSITORY_ADMIN })
+    void startNonExistingAutoAssignmentFailsWithNotFound() throws Exception {
+        mvc.perform(post("/rest/v1/autoassignments/{autoAssignmentId}/start", 1234L))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
+    }
+
+    /**
      * Start an auto assignment with insufficient permissions
      */
     @Test

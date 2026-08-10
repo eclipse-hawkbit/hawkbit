@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 public class AutoAssignmentDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
 
     @Serial
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 1L;
 
     public AutoAssignmentDeletedEvent(final String tenant, final Long entityId, final Class<? extends TenantAwareBaseEntity> entityClass) {
         super(tenant, entityId, entityClass);
