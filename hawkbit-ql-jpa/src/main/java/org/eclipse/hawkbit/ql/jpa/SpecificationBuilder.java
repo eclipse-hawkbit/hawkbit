@@ -155,9 +155,9 @@ public class SpecificationBuilder<T> {
                                 String.format("Operator %s is not supported for map fields with value null", op));
                     };
                 } else {
-                    // map entry with key not null (exist) - use left join per key, key/value filtered in where
-                    final MapJoin<?, ?, ?> mapJoin = pathResolver.getJoinForWhere(attribute, split[1]);
-                    return cb.and(equal(mapJoin.key(), split[1]), compare(comparison, toMapValuePath(mapJoin)));
+                    // map entry with key not null (exist) - correlated EXISTS semi-join per predicate;
+                    // avoids the LEFT JOIN + DISTINCT row explosion on large attribute tables
+                    return existsMapEntry(comparison, attribute, split[1]);
                 }
             } else if (attribute instanceof SetAttribute<?, ?> setAttribute) {
                 if (split.length < 2 || ObjectUtils.isEmpty(split[1])) {
@@ -213,6 +213,14 @@ public class SpecificationBuilder<T> {
         private static Path<String> toMapValuePath(final Path<?> mapJoin) {
             final Path<?> valuePath = ((MapJoin<?, ?, ?>) mapJoin).value();
             return valuePath.getJavaType() == String.class ? (Path<String>) valuePath : valuePath.get("value");
+        }
+
+        // correlated EXISTS semi-join for a map entry with a non-null value filter (key/value in the subquery where)
+        private Predicate existsMapEntry(final Comparison comparison, final Attribute<? super T, ?> attribute, final String mapKey) {
+            final Subquery<Integer> subquery = query.subquery(Integer.class);
+            final MapJoin<?, ?, ?> mapJoin = (MapJoin<?, ?, ?>) subquery.correlate(root).join(attribute.getName(), JoinType.INNER);
+            return cb.exists(subquery.select(cb.literal(1))
+                    .where(cb.and(equal(mapJoin.key(), mapKey), compare(comparison, toMapValuePath(mapJoin)))));
         }
 
         private Predicate compare(final Comparison comparison, final Path<?> fieldPath) {
@@ -461,10 +469,6 @@ public class SpecificationBuilder<T> {
                 return getCollectionPathResolver(attribute.getName()).getJoinOn(value);
             }
 
-            private MapJoin<?, ?, ?> getJoinForWhere(final Attribute<?, ?> attribute, final Object mapKeyName) {
-                return getCollectionPathResolver(attribute.getName()).getJoinForWhere(mapKeyName);
-            }
-
             private Map<String, Integer> getState() {
                 return attributeToPathResolver.entrySet().stream()
                         .collect(Collectors.toMap(Map.Entry::getKey, resolver -> resolver.getValue().getPos()));
@@ -487,7 +491,6 @@ public class SpecificationBuilder<T> {
                 @Setter
                 private int pos;
                 private final Map<Object, MapJoin<?, ?, ?>> joinOnCache = new HashMap<>();
-                private final Map<Object, MapJoin<?, ?, ?>> joinForWhereCache = new HashMap<>();
 
                 private CollectionPathResolver(final String attributeName) {
                     this.attributeName = attributeName;
@@ -510,11 +513,6 @@ public class SpecificationBuilder<T> {
                         mapPath.on(equal(mapPath.key(), k));
                         return mapPath;
                     });
-                }
-
-                private MapJoin<?, ?, ?> getJoinForWhere(final Object mapKeyName) {
-                    return joinForWhereCache.computeIfAbsent(mapKeyName, k ->
-                            (MapJoin<?, ?, ?>) root.join(attributeName, JoinType.LEFT));
                 }
             }
         }
