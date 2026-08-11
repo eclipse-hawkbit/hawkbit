@@ -48,9 +48,8 @@ public class MgmtAutoAssignmentMapper {
     public static MgmtAutoAssignmentResponseBody toResponseAutoAssignment(final AutoAssignment autoAssignment) {
 
         final MgmtAutoAssignmentResponseBody body = new MgmtAutoAssignmentResponseBody();
+        MgmtRestModelMapper.mapNamedToNamed(body, autoAssignment);
         body.setId(autoAssignment.getId());
-        body.setName(autoAssignment.getName());
-        body.setDescription(autoAssignment.getDescription());
         body.setDistributionSetId(autoAssignment.getDistributionSet().getId());
         body.setTargetFilterQuery(autoAssignment.getTargetFilterQuery());
         body.setStatus(autoAssignment.getStatus().toString().toLowerCase());

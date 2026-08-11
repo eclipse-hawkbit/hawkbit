@@ -43,6 +43,7 @@ import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.eclipse.hawkbit.ui.security.AuthenticatedUser;
 import org.eclipse.hawkbit.ui.view.AboutView;
+import org.eclipse.hawkbit.ui.view.AutoAssignmentView;
 import org.eclipse.hawkbit.ui.view.ConfigView;
 import org.eclipse.hawkbit.ui.view.DistributionSetView;
 import org.eclipse.hawkbit.ui.view.RolloutView;
@@ -61,6 +62,7 @@ public class MainLayout extends AppLayout {
 
     private static final List<Class<? extends Component>> DEFAULT_VIEW_PRIORITY = List.of(
             TargetView.class,
+            AutoAssignmentView.class,
             DistributionSetView.class,
             SoftwareModuleView.class,
             RolloutView.class,
@@ -131,6 +133,9 @@ public class MainLayout extends AppLayout {
         }
         if (accessChecker.hasAccess(RolloutView.class)) {
             nav.addItem(new SideNavItem("Rollouts", RolloutView.class, VaadinIcon.COGS.create()));
+        }
+        if (accessChecker.hasAccess(AutoAssignmentView.class)) {
+            nav.addItem(new SideNavItem("Auto Assignments", AutoAssignmentView.class, VaadinIcon.COGS.create()));
         }
         if (accessChecker.hasAccess(DistributionSetView.class)) {
             nav.addItem(new SideNavItem("Distribution Sets", DistributionSetView.class, VaadinIcon.FILE_TREE.create()));
