@@ -28,12 +28,6 @@ updates:
     schedule:
       interval: "daily"
     ignore:
-      - dependency-name: "org.springframework.boot:*"
-        versions: [ ">= 4.0.0" ]
-      - dependency-name: "org.springframework.cloud:spring-cloud-dependencies"
-        update-types: [ "version-update:semver-minor" ]
-      - dependency-name: "org.springframework.cloud:spring-cloud-starter-openfeign"
-        versions: [ ">= 5.0.0" ]
       - dependency-name: "org.springframework.shell:*"
         update-types: [ "version-update:semver-major" ]
       - dependency-name: "org.springframework.ai:*"
