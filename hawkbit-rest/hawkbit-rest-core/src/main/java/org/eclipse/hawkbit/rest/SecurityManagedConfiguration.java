@@ -18,10 +18,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.rest.security.DosFilter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -35,10 +35,10 @@ import org.springframework.util.CollectionUtils;
  * All configurations related to HawkBit's authentication and authorization layer.
  */
 @Slf4j
-@Configuration
+@AutoConfiguration
 @EnableWebSecurity
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@PropertySource("classpath:hawkbit-security-defaults.properties")
+@PropertySource("classpath:hawkbit-rest-defaults.properties")
 public class SecurityManagedConfiguration {
 
     public static final int DOS_FILTER_ORDER = -200;

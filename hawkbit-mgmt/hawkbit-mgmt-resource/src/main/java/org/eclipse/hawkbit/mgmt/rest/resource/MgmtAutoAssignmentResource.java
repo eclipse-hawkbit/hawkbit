@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import static org.eclipse.hawkbit.repository.model.AutoAssignment.AutoAssignApprovalDecision.APPROVED;
@@ -44,7 +43,8 @@ public class MgmtAutoAssignmentResource implements MgmtAutoAssignmentRestApi {
     private final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement;
     private final DistributionSetManagement<? extends DistributionSet> distributionSetManagement;
 
-    public MgmtAutoAssignmentResource(final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement,
+    public MgmtAutoAssignmentResource(
+            final AutoAssignmentManagement<? extends AutoAssignment> autoAssignmentManagement,
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement) {
         this.autoAssignmentManagement = autoAssignmentManagement;
         this.distributionSetManagement = distributionSetManagement;
@@ -60,8 +60,8 @@ public class MgmtAutoAssignmentResource implements MgmtAutoAssignmentRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtAutoAssignmentResponseBody>> getAutoAssignments(final String rsqlParam, final int pagingOffsetParam,
-            final int pagingLimitParam, final String sortParam) {
+    public ResponseEntity<PagedList<MgmtAutoAssignmentResponseBody>> getAutoAssignments(
+            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam,
                 PagingUtility.sanitizeAutoAssignmentSortParam(sortParam));
         final Page<AutoAssignment> autoAssignments = autoAssignmentManagement.findAutoAssignmentByRsql(rsqlParam, pageable);
@@ -76,8 +76,8 @@ public class MgmtAutoAssignmentResource implements MgmtAutoAssignmentRestApi {
 
     @Override
     @AuditLog(entity = "AutoAssignment", type = AuditLog.Type.UPDATE, description = "Update Auto Assignment")
-    public ResponseEntity<MgmtAutoAssignmentResponseBody> update(final long id,
-            final MgmtAutoAssignmentRestRequestBodyPut autoAssignmentRequestBody) {
+    public ResponseEntity<MgmtAutoAssignmentResponseBody> update(
+            final long id, final MgmtAutoAssignmentRestRequestBodyPut autoAssignmentRequestBody) {
         final AutoAssignment updated = autoAssignmentManagement.update(MgmtAutoAssignmentMapper.fromRequest(autoAssignmentRequestBody, id));
         return ResponseEntity.ok(MgmtAutoAssignmentMapper.toResponseAutoAssignment(updated));
     }
