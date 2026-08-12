@@ -134,6 +134,11 @@ class JpaTargetFilterQueryManagement
     }
 
     @Override
+    public Optional<TargetFilterQuery> findByName(final String name) {
+        return jpaRepository.findByName(name);
+    }
+
+    @Override
     public Optional<AutoAssignment> findLinkedAutoAssignment(final long id) {
         final TargetFilterQuery targetFilterQuery = get(id);
         Optional<AutoAssignment> searchResult = autoAssignmentManagement.findByName(targetFilterQuery.getName());
