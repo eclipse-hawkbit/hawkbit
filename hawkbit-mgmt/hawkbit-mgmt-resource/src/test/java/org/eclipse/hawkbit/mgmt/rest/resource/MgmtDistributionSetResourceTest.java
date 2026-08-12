@@ -52,6 +52,7 @@ import org.eclipse.hawkbit.repository.AutoAssignmentManagement.Create;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement.Update;
 import org.eclipse.hawkbit.repository.Identifiable;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -713,7 +714,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         autoAssignmentManagement.create(
                 Create.builder().name("c").targetFilterQuery("name==y").distributionSet(otherDs).build());
 
-        mvc.perform(get(DISTRIBUTIONSETS_V1 + "/" + createdDs.getId() + "/autoAssignTargetFilters"))
+        mvc.perform(get(DISTRIBUTIONSETS_V1 + "/" + createdDs.getId() + "/autoAssignments"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size", equalTo(1)))
                 .andExpect(jsonPath("$.content[0].name", equalTo(knownFilterName)));
@@ -726,6 +727,96 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     @Test
     void getAutoAssignmentOfDistributionSetWithParameters() throws Exception {
         final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
+        autoAssignmentManagement.create(Create.builder().name("filter1").targetFilterQuery("name==a").distributionSet(set).build());
+
+        mvc.perform(get(DISTRIBUTIONSETS_V1 + "/" + set.getId() + "/autoAssignments")
+                        .param("offset", "1").param("limit", "2").param("sort", "name:DESC").param("q", "name==*1")
+                        .accept(APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON));
+    }
+
+    /**
+     * Ensures that an error is returned when the query is invalid.
+     */
+    @Test
+    void getAutoAssignmentsOfDSWithInvalidFilter() throws Exception {
+        // prepare distribution set
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
+        final String invalidQuery = "unknownField=le=42";
+
+        mvc.perform(get(DISTRIBUTIONSETS_V1 + "/" + createdDs.getId() + "/autoAssignments")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, invalidQuery))
+                .andExpect(status().isBadRequest());
+    }
+
+    /**
+     * Ensures that target filters with auto assign DS are returned according to the query.
+     */
+    @Test
+    void getMultipleAutoAssignmentsOfDistributionSet() throws Exception {
+        final String filterNamePrefix = "filter-";
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
+        final String query = "name==" + filterNamePrefix + "*";
+
+        prepareTestAutoAssignments(filterNamePrefix, createdDs);
+
+        mvc.perform(get(DISTRIBUTIONSETS_V1 + "/" + createdDs.getId() + "/autoAssignments")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, query))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size", equalTo(2)))
+                .andExpect(jsonPath("$.content[0].name", equalTo(filterNamePrefix + "1")))
+                .andExpect(jsonPath("$.content[1].name", equalTo(filterNamePrefix + "2")));
+    }
+
+    /**
+     * Ensures that no target filters are returned according to the non matching query.
+     */
+    @Test
+    void getEmptyAutoAssignmentsOfDistributionSet() throws Exception {
+        final String filterNamePrefix = "filter-";
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
+        final String query = "name==doesNotExist";
+
+        prepareTestAutoAssignments(filterNamePrefix, createdDs);
+
+        mvc.perform(get(DISTRIBUTIONSETS_V1 + "/" + createdDs.getId() + "/autoAssignments")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, query))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size", equalTo(0)));
+    }
+
+    /**
+     * Ensures that target filters with auto assign DS are returned as persisted in the repository.
+     */
+    @Test
+    void getAutoAssignTargetFiltersOfDistributionSet() throws Exception {
+        // prepare distribution set
+        final String knownFilterName = "a";
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
+
+        targetFilterQueryManagement.create(TargetFilterQueryManagement.UpdateCreate.builder().name(knownFilterName).query("name==y").build());
+        autoAssignmentManagement.create(
+                Create.builder().name(knownFilterName).targetFilterQuery("name==y").distributionSet(createdDs).build());
+
+        // create some dummy target filter queries
+        targetFilterQueryManagement.create(TargetFilterQueryManagement.UpdateCreate.builder().name("b").query("name==y").build());
+        targetFilterQueryManagement.create(TargetFilterQueryManagement.UpdateCreate.builder().name("c").query("name==y").build());
+
+        mvc.perform(get(DISTRIBUTIONSETS_V1 + "/" + createdDs.getId() + "/autoAssignTargetFilters"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size", equalTo(1)))
+                .andExpect(jsonPath("$.content[0].name", equalTo(knownFilterName)));
+    }
+
+    /**
+     * Handles the GET request for retrieving assigned target filter queries of a single distribution set with a defined page size and offset, sorted by name in descending order and filtered down to all targets with a name that ends with '1'.
+     */
+    @Test
+    void getAutoAssignTargetFiltersOfDistributionSetWithParameters() throws Exception {
+        final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
+        targetFilterQueryManagement.create(TargetFilterQueryManagement.UpdateCreate.builder().name("filter1").query("name==a").build());
         autoAssignmentManagement.create(Create.builder().name("filter1").targetFilterQuery("name==a").distributionSet(set).build());
 
         mvc.perform(get(DISTRIBUTIONSETS_V1 + "/" + set.getId() + "/autoAssignTargetFilters")
@@ -759,7 +850,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         final String query = "name==" + filterNamePrefix + "*";
 
-        prepareTestAutoAssignments(filterNamePrefix, createdDs);
+        prepareTestFilters(filterNamePrefix, createdDs);
 
         mvc.perform(get(DISTRIBUTIONSETS_V1 + "/" + createdDs.getId() + "/autoAssignTargetFilters")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, query))
@@ -778,7 +869,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         final String query = "name==doesNotExist";
 
-        prepareTestAutoAssignments(filterNamePrefix, createdDs);
+        prepareTestFilters(filterNamePrefix, createdDs);
 
         mvc.perform(get(DISTRIBUTIONSETS_V1 + "/" + createdDs.getId() + "/autoAssignTargetFilters")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, query))
@@ -2015,6 +2106,19 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .targetFilterQuery("name==y").distributionSet(otherDS).build());
         autoAssignmentManagement.create(Create.builder().name(namePrefix + "4")
                 .targetFilterQuery("name==y").distributionSet(otherDS).build());
+    }
+
+    private void prepareTestFilters(final String filterNamePrefix, final DistributionSet createdDs) {
+        // create target filter queries with a matching auto assignment that should be found
+        targetFilterQueryManagement.create(TargetFilterQueryManagement.UpdateCreate.builder().name(filterNamePrefix + "1").query("name==y").build());
+        autoAssignmentManagement.create(Create.builder().name(filterNamePrefix + "1")
+                .targetFilterQuery("name==y").distributionSet(createdDs).build());
+        targetFilterQueryManagement.create(TargetFilterQueryManagement.UpdateCreate.builder().name(filterNamePrefix + "2").query("name==y").build());
+        autoAssignmentManagement.create(Create.builder().name(filterNamePrefix + "2")
+                .targetFilterQuery("name==y").distributionSet(createdDs).build());
+        // create some dummy target filter queries
+        targetFilterQueryManagement.create(TargetFilterQueryManagement.UpdateCreate.builder().name(filterNamePrefix + "b").query("name==y").build());
+        targetFilterQueryManagement.create(TargetFilterQueryManagement.UpdateCreate.builder().name(filterNamePrefix + "c").query("name==y").build());
     }
 
     private MvcResult executeMgmtTargetPost(
