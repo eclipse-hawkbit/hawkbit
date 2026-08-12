@@ -10,14 +10,15 @@
 package org.eclipse.hawkbit.autoconfigure.mgmt;
 
 import org.eclipse.hawkbit.mgmt.rest.resource.MgmtApiConfiguration;
+import org.eclipse.hawkbit.rest.util.LogAutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
  * Auto-Configuration for enabling the Management API REST-Resources.
  */
-@Configuration
+@AutoConfiguration(before = LogAutoConfiguration.class) // before LogAutoConfiguration in order to register LogAutoConfiguration#RestPackages
 @ConditionalOnClass(MgmtApiConfiguration.class)
 @Import(MgmtApiConfiguration.class)
 public class MgmtApiAutoConfiguration {}
