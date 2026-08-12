@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-
 package org.eclipse.hawkbit.mgmt.rest.api;
 
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.AUTO_ASSIGNMENT_ORDER;
@@ -198,5 +197,4 @@ public interface MgmtAutoAssignmentRestApi {
     @DeleteResponses
     @DeleteMapping(value = AUTO_ASSIGNMENTS_V1 + "/{id}", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<Void> delete(@PathVariable("id") long id);
-
 }

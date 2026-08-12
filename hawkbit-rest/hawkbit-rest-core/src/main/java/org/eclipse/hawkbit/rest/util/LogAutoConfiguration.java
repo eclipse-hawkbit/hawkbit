@@ -37,19 +37,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 /**
  * Wires the deprecated-REST-API logging.
  * <p>
- * The advised packages are contributed by modules via {@link DeprecatedLogPackages} beans - each module declares its own,
- * and their union is advised.<br/>
- * Only wired when the {@code DEPRECATED_USAGE} logger is at DEBUG and at least one {@link DeprecatedLogPackages} bean is present.
+ * The advised packages are contributed by modules via {@link RestPackages} beans - each module may declare its own,
+ * and their union is advised.
  */
 @AutoConfiguration
-@Conditional(DeprecatedLogAutoConfiguration.LoggingEnabledCondition.class) // only if log is enabled
-public class DeprecatedLogAutoConfiguration {
+public class LogAutoConfiguration {
 
-    private final Map<Method, Boolean> deprecatedStatus = new ConcurrentHashMap<>();
+    private final Map<Method, LogDecision> deprecatedStatus = new ConcurrentHashMap<>();
 
     @Bean
-    @ConditionalOnBean(DeprecatedLogAutoConfiguration.DeprecatedLogPackages.class) // and if some module contributed packages
-    Advisor deprecationLoggingAdvisor(final ObjectProvider<DeprecatedLogPackages> contributions) {
+    @Conditional(LogEnabledCondition.class) // only if log is enabled
+    @ConditionalOnBean(RestPackages.class)
+        // and if some module contributed packages
+    Advisor loggingAdvisor(final ObjectProvider<RestPackages> contributions) {
         // union of all module contributions - appended and de-duplicated, resolved lazily so contributor ordering does not matter
         final List<String> packages = contributions.stream()
                 .flatMap(c -> c.patterns().stream())
@@ -57,7 +57,11 @@ public class DeprecatedLogAutoConfiguration {
                 .map(String::trim)
                 .distinct()
                 .toList();
-        LogUtility.LOGGER.info("Deprecated logging advisor enabled for packages: {}", packages);
+        if (LogUtility.LOGGER.isDebugEnabled()) {
+            LogUtility.LOGGER.info("REST logging advisor enabled for packages: {}", packages);
+        } else if (LogUtility.DEPRECATED_LOGGER.isDebugEnabled()) {
+            LogUtility.DEPRECATED_LOGGER.info("REST logging advisor (deprecated only mode) enabled for packages: {}", packages);
+        }
 
         final AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
         pointcut.setExpression(packages.stream()
@@ -65,8 +69,13 @@ public class DeprecatedLogAutoConfiguration {
                 .collect(Collectors.joining(" || ")));
         return new DefaultPointcutAdvisor(pointcut, (MethodInterceptor) invocation -> {
             final Method method = invocation.getMethod();
-            if (deprecatedStatus.computeIfAbsent(method, DeprecatedLogAutoConfiguration::resolveDeprecated)) {
-                LogUtility.logDeprecated("Usage of " + method + ": result that is up to modification.");
+            switch (deprecatedStatus.computeIfAbsent(method, LogAutoConfiguration::logDecision)) {
+                case YES:
+                    LogUtility.logRequest("Called " + method);
+                    break;
+                case YES_DEPRECATED:
+                    LogUtility.logRequestDeprecated("Usage of deprecated " + method + " method");
+                    break;
             }
             return invocation.proceed();
         });
@@ -74,18 +83,20 @@ public class DeprecatedLogAutoConfiguration {
 
     // option to define declarative some packages to log
     @Bean
-    @ConditionalOnProperty("deprecated.usage.logging.packages")
-    DeprecatedLogPackages deprecatedLogPackages(@Value("${deprecated.usage.logging.packages}") final String[] packages) {
-        return new DeprecatedLogPackages(packages);
+    @ConditionalOnProperty("rest.packages")
+    RestPackages deprecatedLogPackages(@Value("${rest.packages}") final String[] packages) {
+        return new RestPackages(packages);
     }
 
     // A method is deprecated when, anywhere in its type hierarchy:
     // * it is a REST mapping method and
     // * it (or its declaring type) is @Deprecated
     // AnnotatedElementUtils resolves meta-annotations, so @GetMapping/@PostMapping/... count as @RequestMapping.
-    private static boolean resolveDeprecated(final Method method) {
+    private static LogDecision logDecision(final Method method) {
         boolean rest = false;
+        boolean log = false;
         boolean deprecated = false;
+
         final Set<Class<?>> types = typeAndSuperTypes(method.getDeclaringClass());
         for (final Method candidate : hierarchyMethods(method, types)) {
             if (!rest) {
@@ -96,17 +107,31 @@ public class DeprecatedLogAutoConfiguration {
                         || candidate.getDeclaringClass().isAnnotationPresent(Deprecated.class);
             }
             if (rest && deprecated) {
-                return true;
+                return LogDecision.YES_DEPRECATED; // no matter if @Log annotated
             }
-        }
-        if (rest && !deprecated) { // check if there is a @Deprecated anontated class with not method declaration
+
+            if (!log) {
+                log = AnnotatedElementUtils.hasAnnotation(candidate, Log.class)
+                        || candidate.getDeclaringClass().isAnnotationPresent(Log.class);
+            }
+        } // after the method rest is finally resolved
+
+        if (rest) { // check if there is a @Deprecated or @Log annotated class without this method declaration
             for (final Class<?> type : types) {
                 if (type.isAnnotationPresent(Deprecated.class)) {
-                    return true;
+                    return LogDecision.YES_DEPRECATED;  // no matter if @Log annotated
+                }
+                if (!log) {
+                    log = AnnotatedElementUtils.hasAnnotation(type, Log.class);
                 }
             }
+
+            if (log) {
+                return LogDecision.YES;
+            }
         }
-        return false;
+
+        return LogDecision.NO;
     }
 
     // The method itself plus the matching method declared by every super class / interface.
@@ -145,22 +170,28 @@ public class DeprecatedLogAutoConfiguration {
      * Each entry is an AspectJ type pattern, e.g. {@code org.eclipse.hawkbit.mgmt.rest.resource.} (package and sub-packages)
      * cor {@code org.eclipse.hawkbit.mgmt.rest.resource} (that package only).
      */
-    public record DeprecatedLogPackages(List<String> patterns) {
+    public record RestPackages(List<String> patterns) {
 
-        public DeprecatedLogPackages(final String... patterns) {
+        public RestPackages(final String... patterns) {
             this(List.of(patterns));
         }
     }
 
-    /**
-     * Only wire the advisor when deprecated-usage logging is actually enabled, so no interception is added otherwise.
-     * Evaluated once at context startup - a log level toggled at runtime afterwards is not picked up.
-     */
-    static class LoggingEnabledCondition implements Condition {
+    private enum LogDecision {
+        NO,
+        YES,
+        YES_DEPRECATED
+    }
+
+    static class LogEnabledCondition implements Condition {
 
         @Override
         public boolean matches(final ConditionContext context, final AnnotatedTypeMetadata metadata) {
-            return LogUtility.LOGGER.isDebugEnabled();
+            final boolean matches = LogUtility.LOGGER.isDebugEnabled() || LogUtility.DEPRECATED_LOGGER.isDebugEnabled();
+            if (!matches) {
+                LogUtility.LOGGER.info("REST logging is disabled");
+            }
+            return matches;
         }
     }
 }

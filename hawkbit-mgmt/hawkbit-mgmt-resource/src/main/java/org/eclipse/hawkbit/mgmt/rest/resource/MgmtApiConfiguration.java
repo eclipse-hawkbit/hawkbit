@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import org.eclipse.hawkbit.rest.OpenApi;
 import org.eclipse.hawkbit.rest.RestConfiguration;
-import org.eclipse.hawkbit.rest.util.DeprecatedLogAutoConfiguration.DeprecatedLogPackages;
+import org.eclipse.hawkbit.rest.util.LogAutoConfiguration.RestPackages;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -34,11 +34,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class MgmtApiConfiguration implements WebMvcConfigurer {
 
     /**
-     * Advise this module's Management API resources for deprecated-usage logging.
+     * Advise this module's Management API resources for request logging.
      */
     @Bean
-    @ConditionalOnProperty(value = "hawkbit.server.mgmt.deprecated-log.enabled", matchIfMissing = true)
-    DeprecatedLogPackages mgmtDeprecatedLogPackages() {
-        return new DeprecatedLogPackages("org.eclipse.hawkbit.mgmt.rest.resource");
+    @ConditionalOnProperty(value = "hawkbit.server.mgmt.log.enabled", matchIfMissing = true)
+    RestPackages mgmtRestPackages() {
+        return new RestPackages("org.eclipse.hawkbit.mgmt.rest.resource");
     }
 }

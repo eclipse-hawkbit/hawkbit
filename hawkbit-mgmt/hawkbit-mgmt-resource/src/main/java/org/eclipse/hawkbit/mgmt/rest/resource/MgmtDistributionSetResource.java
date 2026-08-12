@@ -70,6 +70,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.rest.util.LogUtility;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -124,7 +125,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam,
             final MgmtSoftDeletedMode softDeletedModeParam) {
         if (rsqlParam != null && rsqlParam.toLowerCase().contains("complete")) {
-            LogUtility.logDeprecated(
+            LogUtility.logRequestDeprecated(
                     "Usage of MgmtDistributionSetResource.getActions with 'complete': 'complete' distribution set search field is limited and may be removed.");
         }
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
