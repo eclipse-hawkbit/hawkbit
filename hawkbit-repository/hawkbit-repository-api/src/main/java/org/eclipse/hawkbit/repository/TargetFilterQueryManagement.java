@@ -39,6 +39,15 @@ public interface TargetFilterQueryManagement<T extends TargetFilterQuery>
     }
 
     /**
+     * Retrieves the {@link TargetFilterQuery} with the given name. Names are unique per tenant, so at most one is returned.
+     *
+     * @param name the name of the target filter query
+     * @return the matching {@link TargetFilterQuery} or an empty {@link Optional} if none exists
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    Optional<TargetFilterQuery> findByName(@NotNull String name);
+
+    /**
      * Finds the auto assignment with the same name and query as the target filter query if it exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)

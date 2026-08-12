@@ -54,6 +54,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentR
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
+import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateNoContentResponses;
 import org.eclipse.hawkbit.rest.ApiResponsesConstants.PostUpdateResponses;
 import org.eclipse.hawkbit.rest.OpenApi;
@@ -243,12 +244,48 @@ public interface MgmtDistributionSetRestApi {
      * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
      * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
      * @return status OK if get request is successful with the paged list of targets
+     * @deprecated will be removed in 2.x
      */
+    @Deprecated
     @Operation(summary = "Return target filter queries that have the given distribution set as auto assign DS",
             description = "Handles the GET request for retrieving assigned target filter queries of a single " +
                     "distribution set. Required permissions: READ_REPOSITORY and READ_TARGET")
     @GetResponses
     @GetMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/autoAssignTargetFilters", produces = { HAL_JSON_VALUE,
+            APPLICATION_JSON_VALUE })
+    ResponseEntity<PagedList<MgmtTargetFilterQuery>> getAutoAssignTargetFilterQueries(
+            @PathVariable("distributionSetId") Long distributionSetId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
+            @Schema(description = "Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for available fields.")
+            String rsqlParam,
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
+            @Schema(description = "The paging offset (default is 0)")
+            int pagingOffsetParam,
+            @RequestParam(value = REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
+            @Schema(description = "The maximum number of entries in a page (default is 50)")
+            int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false)
+            @Schema(description = "The query parameter sort allows to define the sort order for the result of a query. " +
+                    "A sort criteria consists of the name of a field and the sort direction (ASC for ascending and DESC descending)." +
+                    "The sequence of the sort criteria (multiple can be used) defines the sort order of the entities in the result.")
+            String sortParam);
+
+    /**
+     * Handles the GET request to retrieve auto assignments that have the given distribution set.
+     *
+     * @param distributionSetId the ID of the distribution set to retrieve the assigned targets
+     * @param rsqlParam the search name parameter in the request URL, syntax {@code q=myFilter}
+     * @param pagingOffsetParam the offset of list of targets for pagination, might not be present in the rest request then default value will
+     *         be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @return status OK if get request is successful with the paged list of targets
+     */
+    @Operation(summary = "Return target filter queries that have the given distribution set as auto assign DS",
+            description = "Handles the GET request for retrieving assigned target filter queries of a single " +
+                    "distribution set. Required permissions: READ_REPOSITORY and READ_TARGET")
+    @GetResponses
+    @GetMapping(value = DISTRIBUTIONSETS_V1 + "/{distributionSetId}/autoAssignments", produces = { HAL_JSON_VALUE,
             APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtAutoAssignmentResponseBody>> getAutoAssignments(
             @PathVariable("distributionSetId") Long distributionSetId,
