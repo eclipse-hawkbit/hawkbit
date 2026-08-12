@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.mgmt.rest.resource.util;
+package org.eclipse.hawkbit.rest.util;
 
 import java.util.Optional;
 
@@ -15,14 +15,14 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class LogUtility {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger("DEPRECATED_USAGE");
+    public static final String DEPRECATED_USAGE = "DEPRECATED_USAGE";
+    public static final Logger LOGGER = LoggerFactory.getLogger(DEPRECATED_USAGE);
 
     public static void logDeprecated(final String message) {
         try {
