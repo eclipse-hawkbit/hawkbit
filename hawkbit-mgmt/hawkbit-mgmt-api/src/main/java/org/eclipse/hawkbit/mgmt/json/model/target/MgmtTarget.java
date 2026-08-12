@@ -44,6 +44,7 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtPollStatus;
            "controllerId" : "137",
            "updateStatus" : "in_sync",
            "lastControllerRequestAt" : 1682408577978,
+           "lastControllerAttributesUpdate" : 1682408577998,
            "installedAt" : 1682408577987,
            "ipAddress" : "192.168.0.1",
            "address" : "http://192.168.0.1",
@@ -114,6 +115,9 @@ public class MgmtTarget extends MgmtNamedEntity {
 
     @Schema(description = "Timestamp of the last controller request", example = "1691065941102")
     private Long lastControllerRequestAt;
+
+    @Schema(description = "Timestamp of the last controller attributes (config data) update", example = "1691065941102")
+    private Long lastControllerAttributesUpdate;
 
     @Schema(description = "Install timestamp", example = "1691065941155")
     private Long installedAt;

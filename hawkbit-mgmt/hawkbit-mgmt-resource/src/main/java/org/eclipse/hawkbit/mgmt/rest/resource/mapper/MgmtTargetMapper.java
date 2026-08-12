@@ -168,6 +168,10 @@ public final class MgmtTargetMapper {
         if (lastTargetQuery != null) {
             targetRest.setLastControllerRequestAt(lastTargetQuery);
         }
+        final Long lastControllerAttributesUpdate = target.getLastControllerAttributesUpdate();
+        if (lastControllerAttributesUpdate != null) {
+            targetRest.setLastControllerAttributesUpdate(lastControllerAttributesUpdate);
+        }
         if (installationDate != null) {
             targetRest.setInstalledAt(installationDate);
         }

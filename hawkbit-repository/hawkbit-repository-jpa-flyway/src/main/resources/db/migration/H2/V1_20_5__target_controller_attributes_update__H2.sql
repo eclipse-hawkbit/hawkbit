@@ -1,0 +1,2 @@
+ALTER TABLE sp_target ADD COLUMN last_controller_attributes_update BIGINT;
+ALTER TABLE sp_target ADD COLUMN last_controller_attributes_update_requested BOOLEAN;
