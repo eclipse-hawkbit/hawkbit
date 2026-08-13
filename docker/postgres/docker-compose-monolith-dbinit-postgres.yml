@@ -21,7 +21,7 @@ services:
     image: "hawkbit/hawkbit-repository-jpa-init:latest"
     environment:
       - 'HAWKBIT_DB_MODE=migrate'
-      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit'
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit?stringtype=unspecified'
       - 'SPRING_DATASOURCE_USERNAME=postgres'
       - 'SPRING_DATASOURCE_PASSWORD=admin'
       - 'AND_THEN=sleep infinity'
@@ -46,7 +46,7 @@ services:
     environment:
       - 'PROFILES=postgresql'
       - 'SPRING_FLYWAY_ENABLED=false'
-      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit'
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit?stringtype=unspecified'
       - 'SPRING_DATASOURCE_USERNAME=postgres'
       - 'SPRING_DATASOURCE_PASSWORD=admin'
       - 'SPRING_RABBITMQ_HOST=rabbitmq'

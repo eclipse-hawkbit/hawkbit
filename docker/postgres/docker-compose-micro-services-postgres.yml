@@ -21,7 +21,7 @@ services:
     image: "hawkbit/hawkbit-ddi-server:latest"
     environment:
       - 'PROFILES=postgresql'
-      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit'
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit?stringtype=unspecified'
       - 'SPRING_DATASOURCE_USERNAME=postgres'
       - 'SPRING_DATASOURCE_PASSWORD=admin'
       - 'SPRING_RABBITMQ_HOST=rabbitmq'
@@ -45,7 +45,7 @@ services:
     image: "hawkbit/hawkbit-dmf-server:latest"
     environment:
       - 'PROFILES=postgresql'
-      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit'
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit?stringtype=unspecified'
       - 'SPRING_DATASOURCE_USERNAME=postgres'
       - 'SPRING_DATASOURCE_PASSWORD=admin'
       - 'SPRING_RABBITMQ_HOST=rabbitmq'
@@ -65,7 +65,7 @@ services:
     image: "hawkbit/hawkbit-mgmt-server:latest"
     environment:
       - 'PROFILES=postgresql'
-      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit'
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit?stringtype=unspecified'
       - 'SPRING_DATASOURCE_USERNAME=postgres'
       - 'SPRING_DATASOURCE_PASSWORD=admin'
       - 'SPRING_RABBITMQ_HOST=rabbitmq'

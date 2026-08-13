@@ -44,13 +44,12 @@ public class PostgreSqlTestDatabase extends AbstractSqlTestDatabase {
 
     @Override
     protected String getRandomSchemaUri() {
-        return getBaseUri() + CURRENT_SCHEMA_AND_SURROUNDINGS + context.getRandomSchemaName();
+        return getBaseUri() + CURRENT_SCHEMA_AND_SURROUNDINGS + context.getRandomSchemaName() + "&stringtype=unspecified";
     }
 
     private String getBaseUri() {
         final String uri = context.getDatasourceUrl();
         final Map<String, String> databaseProperties = MATCHER.extractUriTemplateVariables(POSTGRESQL_URI_PATTERN, uri);
-
         return POSTGRESQL_URI_PATTERN.replace("{host}", databaseProperties.get("host"))
                 .replace("{port}", databaseProperties.get("port"))
                 .replace("{db}*", getSchemaName());
