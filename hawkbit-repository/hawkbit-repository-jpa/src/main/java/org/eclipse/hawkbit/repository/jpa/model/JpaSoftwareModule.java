@@ -74,7 +74,7 @@ public class JpaSoftwareModule
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "softwareModule",
             cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
             targetEntity = JpaArtifact.class, orphanRemoval = true)
-    @OrderBy("filename ASC")
+    @OrderBy("id ASC")
     private List<JpaArtifact> artifacts;
 
     @Column(name = "vendor", length = SoftwareModule.VENDOR_MAX_SIZE)
