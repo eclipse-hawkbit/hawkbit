@@ -9,7 +9,11 @@
  */
 package org.eclipse.hawkbit.rest.util;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,15 +21,17 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import lombok.Data;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
@@ -41,9 +47,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * and their union is advised.
  */
 @AutoConfiguration
+@EnableConfigurationProperties(LogAutoConfiguration.Properties.class)
 public class LogAutoConfiguration {
 
+    private final Properties properties;
     private final Map<Method, LogDecision> deprecatedStatus = new ConcurrentHashMap<>();
+
+    LogAutoConfiguration(final Properties properties) {
+        this.properties = properties;
+    }
 
     @Bean
     @Conditional(LogEnabledCondition.class) // only if log is enabled
@@ -69,13 +81,15 @@ public class LogAutoConfiguration {
                 .collect(Collectors.joining(" || ")));
         return new DefaultPointcutAdvisor(pointcut, (MethodInterceptor) invocation -> {
             final Method method = invocation.getMethod();
-            switch (deprecatedStatus.computeIfAbsent(method, LogAutoConfiguration::logDecision)) {
+            switch (deprecatedStatus.computeIfAbsent(method, this::logDecision)) {
                 case YES:
-                    LogUtility.logRequest("Called " + method);
+                    LogUtility.logRequest("Call of " + method);
                     break;
                 case YES_DEPRECATED:
-                    LogUtility.logRequestDeprecated("Usage of deprecated " + method + " method");
+                    LogUtility.logRequestDeprecated("Call of deprecated " + method + " method");
                     break;
+                case NO:
+                    break; // skip
             }
             return invocation.proceed();
         });
@@ -83,68 +97,64 @@ public class LogAutoConfiguration {
 
     // option to define declarative some packages to log
     @Bean
-    @ConditionalOnProperty("rest.packages")
-    RestPackages deprecatedLogPackages(@Value("${rest.packages}") final String[] packages) {
-        return new RestPackages(packages);
+    @ConditionalOnExpression(
+            "#{!T(org.springframework.util.ObjectUtils).isEmpty('${" + Properties.PREFIX + ".packages:}') || !T(org.springframework.util.ObjectUtils).isEmpty('${" + Properties.PREFIX + ".packages[0]:}')}")
+    RestPackages deprecatedLogPackages() {
+        return new RestPackages(properties.getPackages());
     }
 
     // A method is deprecated when, anywhere in its type hierarchy:
     // * it is a REST mapping method and
     // * it (or its declaring type) is @Deprecated
     // AnnotatedElementUtils resolves meta-annotations, so @GetMapping/@PostMapping/... count as @RequestMapping.
-    private static LogDecision logDecision(final Method method) {
+    @SuppressWarnings("java:S3776") // cyclomatic complexity is high, but the logic is clear and readable
+    private LogDecision logDecision(final Method method) {
         boolean rest = false;
         boolean log = false;
         boolean deprecated = false;
 
-        final Set<Class<?>> types = typeAndSuperTypes(method.getDeclaringClass());
-        for (final Method candidate : hierarchyMethods(method, types)) {
-            if (!rest) {
-                rest = AnnotatedElementUtils.hasAnnotation(candidate, RequestMapping.class);
+        for (final Class<?> type : typeAndSuperTypes(method.getDeclaringClass())) { // traverse this (first and supper) for decision
+            final Method declared = byPatternIn(method, type);
+            if (declared != null) { // if there is a method declared - check annotations there
+                rest = rest || AnnotatedElementUtils.hasAnnotation(declared, RequestMapping.class);
+                deprecated = deprecated || hasAnnotation(declared, Deprecated.class);
+                if (rest && deprecated) {
+                    return LogDecision.YES_DEPRECATED; // no matter if @Log annotated, early return
+                }
+
+                log = log || hasAnnotation(declared, Log.class);
             }
-            if (!deprecated) {
-                deprecated = AnnotatedElementUtils.hasAnnotation(candidate, Deprecated.class)
-                        || candidate.getDeclaringClass().isAnnotationPresent(Deprecated.class);
-            }
+            // check class annotations, RequestMapping is also a type annotation but doesn't make methods magically rest endpoints
+            deprecated = deprecated || hasAnnotation(type, Deprecated.class);
             if (rest && deprecated) {
-                return LogDecision.YES_DEPRECATED; // no matter if @Log annotated
+                return LogDecision.YES_DEPRECATED; // no matter if @Log annotated, early return
             }
-
-            if (!log) {
-                log = AnnotatedElementUtils.hasAnnotation(candidate, Log.class)
-                        || candidate.getDeclaringClass().isAnnotationPresent(Log.class);
-            }
-        } // after the method rest is finally resolved
-
-        if (rest) { // check if there is a @Deprecated or @Log annotated class without this method declaration
-            for (final Class<?> type : types) {
-                if (type.isAnnotationPresent(Deprecated.class)) {
-                    return LogDecision.YES_DEPRECATED;  // no matter if @Log annotated
-                }
-                if (!log) {
-                    log = AnnotatedElementUtils.hasAnnotation(type, Log.class);
-                }
-            }
-
-            if (log) {
-                return LogDecision.YES;
-            }
+            log = log || hasAnnotation(type, Log.class);
         }
 
-        return LogDecision.NO;
+        return rest && log ? LogDecision.YES : LogDecision.NO;
     }
 
-    // The method itself plus the matching method declared by every super class / interface.
-    private static Set<Method> hierarchyMethods(final Method method, final Set<Class<?>> declaringTypeAndSuperTypes) {
-        final Set<Method> methods = new LinkedHashSet<>();
-        for (final Class<?> type : declaringTypeAndSuperTypes) {
-            try {
-                methods.add(type.getDeclaredMethod(method.getName(), method.getParameterTypes()));
-            } catch (final NoSuchMethodException ignored) {
-                // this supertype does not declare the method - skip
-            }
+    private boolean hasAnnotation(final Method declared, final Class<? extends Annotation> annotation) {
+        return AnnotatedElementUtils.hasAnnotation(declared, annotation)
+                || properties.getDeclarativeAnnotations().getOrDefault(annotation.getName(), Set.of()).contains(
+                declared.getDeclaringClass().getName() + "." + declared.getName() + Arrays.stream(declared.getParameterTypes())
+                        .map(Type::getTypeName)
+                        .collect(Collectors.joining(",", "(", ")")));
+    }
+
+    private boolean hasAnnotation(final Class<?> type, final Class<? extends Annotation> annotation) {
+        return type.isAnnotationPresent(annotation)
+                || properties.getDeclarativeAnnotations().getOrDefault(annotation.getName(), Set.of()).contains(type.getName());
+    }
+
+    private static Method byPatternIn(final Method method, final Class<?> type) {
+        try {
+            return type.getDeclaredMethod(method.getName(), method.getParameterTypes());
+        } catch (final NoSuchMethodException ignored) {
+            // this supertype does not declare the method - skip
+            return null;
         }
-        return methods;
     }
 
     private static Set<Class<?>> typeAndSuperTypes(final Class<?> type) {
@@ -177,10 +187,20 @@ public class LogAutoConfiguration {
         }
     }
 
-    private enum LogDecision {
-        NO,
-        YES,
-        YES_DEPRECATED
+    @Data
+    @ConfigurationProperties(Properties.PREFIX)
+    static class Properties {
+
+        private static final String PREFIX = "hawkbit.rest.log";
+
+        // used to declaratively ADD rest packages
+        String[] packages;
+        // used to configure declarative (out of the source annotation just for logging purposes), e.g.:
+        // hawkbit.rest.log.declarative-annotations.org.eclipse.hawkbit.rest.util.Log[0]=org.eclipse.hawkbit.mgmt.rest.resource.MgmtTargetResource
+        // hawkbit.rest.log.declarative-annotations.org.eclipse.hawkbit.rest.util.Log[1]=org.eclipse.hawkbit.mgmt.rest.resource.MgmtActionResource.getActions(java.lang.String,int,int,java.lang.String,java.lang.String)
+        // ...
+        // note that method signatures contains commas! so declaring as comma separated list in .properties won't work
+        Map<String, Set<String>> declarativeAnnotations = new LinkedHashMap<>();
     }
 
     static class LogEnabledCondition implements Condition {
@@ -193,5 +213,11 @@ public class LogAutoConfiguration {
             }
             return matches;
         }
+    }
+
+    private enum LogDecision {
+        NO,
+        YES,
+        YES_DEPRECATED
     }
 }
