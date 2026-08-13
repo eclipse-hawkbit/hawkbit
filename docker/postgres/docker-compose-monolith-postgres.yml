@@ -21,7 +21,7 @@ services:
     image: "hawkbit/hawkbit-update-server:latest"
     environment:
       - 'PROFILES=postgresql'
-      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit'
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit?stringtype=unspecified'
       - 'SPRING_DATASOURCE_USERNAME=postgres'
       - 'SPRING_DATASOURCE_PASSWORD=admin'
       - 'SPRING_RABBITMQ_HOST=rabbitmq'
