@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.acm;
 
-import org.eclipse.hawkbit.repository.test.util.QueryCount;
+import org.eclipse.hawkbit.repository.test.util.QueryUtil;
 import org.eclipse.hawkbit.repository.test.util.QueryCountConfiguration;
 import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ import org.springframework.test.context.TestPropertySource;
  * caller is rejected without a DB hit.
  * <p>
  * Enables a real cache (test defaults set {@code maximumSize=0}, a NOP cache, which would defeat these assertions) and
- * counts SQL via a provider-agnostic JDBC recorder ({@link QueryCount}), so the same assertions hold under both
+ * counts SQL via a provider-agnostic JDBC recorder ({@link QueryUtil}), so the same assertions hold under both
  * EclipseLink and Hibernate.
  */
 @Import(QueryCountConfiguration.class)
@@ -36,7 +36,7 @@ import org.springframework.test.context.TestPropertySource;
 abstract class AbstractTypeManagementCacheAcmTest extends AbstractAccessControllerManagementTest {
 
     @Autowired
-    private QueryCount queryCount;
+    private QueryUtil queryUtil;
 
     /** Evicts the given id from the by-id cache named after the entity class' simple name. */
     protected void evict(final String cacheName, final Long id) {
@@ -45,6 +45,6 @@ abstract class AbstractTypeManagementCacheAcmTest extends AbstractAccessControll
 
     /** Cumulative count of {@code SELECT} statements sent to the DB - use deltas around the measured section. */
     protected long readQueries() {
-        return queryCount.selects();
+        return queryUtil.countSelectQueries();
     }
 }

@@ -76,6 +76,22 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
                 .collect(Collectors.toSet());
     }
 
+    @Override
+    public Set<Long> getMandatoryModuleTypeIds() {
+        return elements.stream()
+                .filter(DistributionSetTypeElement::isMandatory)
+                .map(DistributionSetTypeElement::getSmTypeId)
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<Long> getOptionalModuleTypeIds() {
+        return elements.stream()
+                .filter(element -> !element.isMandatory())
+                .map(DistributionSetTypeElement::getSmTypeId)
+                .collect(Collectors.toSet());
+    }
+
     public JpaDistributionSetType setMandatoryModuleTypes(final Set<SoftwareModuleType> smType) {
         return replaceOrAddModuleTypes(smType, true, true);
     }
@@ -94,7 +110,7 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
 
     public JpaDistributionSetType removeModuleType(final SoftwareModuleType smType) {
         elements.stream()
-                .filter(element -> smType.getId().equals(element.getSmType().getId()))
+                .filter(element -> smType.getId().equals(element.getSmTypeId()))
                 .toList() // collect to a list to avoid ConcurrentModificationException
                 .forEach(element -> elements.remove(element));
         return this;
@@ -142,7 +158,7 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
                     .map(SoftwareModuleType::getId)
                     .collect(Collectors.toSet());
             elements.stream()
-                    .filter(element -> element.isMandatory() == mandatory && !smTypeIds.contains(element.getSmType().getId()))
+                    .filter(element -> element.isMandatory() == mandatory && !smTypeIds.contains(element.getSmTypeId()))
                     .collect(Collectors.toSet())
                     .forEach(element -> elements.remove(element));
         }

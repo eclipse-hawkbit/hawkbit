@@ -12,10 +12,10 @@ package org.eclipse.hawkbit.repository.jpa.model;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -47,7 +47,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.core.annotation.Order;
 
@@ -148,11 +147,10 @@ public class JpaDistributionSet
             if (getModules().stream().anyMatch(module -> !module.isComplete())) {
                 return false; // incomplete module
             }
-            final List<SoftwareModuleType> smTypes = getModules().stream()
-                    .map(SoftwareModule::getType)
-                    .distinct()
-                    .toList();
-            return !smTypes.isEmpty() && new HashSet<>(smTypes).containsAll(dsType.getMandatoryModuleTypes());
+            final Set<Long> moduleTypeIds = getModules().stream()
+                    .map(module -> module.getType().getId())
+                    .collect(Collectors.toSet());
+            return !moduleTypeIds.isEmpty() && moduleTypeIds.containsAll(dsType.getMandatoryModuleTypeIds());
         }).orElse(true);
     }
 

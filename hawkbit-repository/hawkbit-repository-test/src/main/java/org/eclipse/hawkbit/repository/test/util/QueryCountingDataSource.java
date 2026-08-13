@@ -24,7 +24,7 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.datasource.DelegatingDataSource;
 
 /**
- * A {@link DataSource} wrapper that records every SQL statement executed through it into a {@link QueryCount}.
+ * A {@link DataSource} wrapper that records every SQL statement executed through it into a {@link QueryUtil}.
  * <p>
  * Works at the JDBC layer via dynamic proxies on {@link Connection} and {@link Statement}, so it is completely
  * JPA-provider agnostic (both EclipseLink and Hibernate issue their SQL through this data source). The SQL of a
@@ -33,11 +33,11 @@ import org.springframework.jdbc.datasource.DelegatingDataSource;
  */
 public class QueryCountingDataSource extends DelegatingDataSource {
 
-    private final QueryCount queryCount;
+    private final QueryUtil queryUtil;
 
-    public QueryCountingDataSource(final DataSource targetDataSource, final QueryCount queryCount) {
+    public QueryCountingDataSource(final DataSource targetDataSource, final QueryUtil queryUtil) {
         super(targetDataSource);
-        this.queryCount = queryCount;
+        this.queryUtil = queryUtil;
     }
 
     @Override
@@ -70,17 +70,16 @@ public class QueryCountingDataSource extends DelegatingDataSource {
                 // prepareStatement/prepareCall carry the SQL as first arg; createStatement has none (SQL at execute time)
                 final String preparedSql = (args != null && args.length > 0 && args[0] instanceof String sql) ? sql : null;
                 return Proxy.newProxyInstance(getClass().getClassLoader(),
-                        new Class<?>[] { statementInterface(method) }, new StatementHandler(statement, preparedSql));
+                        new Class<?>[] { statementInterface(statement) }, new StatementHandler(statement, preparedSql));
             }
             return result;
         }
 
-        private Class<?> statementInterface(final Method factoryMethod) {
-            final String name = factoryMethod.getName();
-            if (name.equals("prepareCall")) {
+        private Class<?> statementInterface(final Statement statement) {
+            if (statement instanceof CallableStatement) {
                 return CallableStatement.class;
             }
-            return name.equals("prepareStatement") ? PreparedStatement.class : Statement.class;
+            return statement instanceof PreparedStatement ? PreparedStatement.class : Statement.class;
         }
     }
 
@@ -99,7 +98,7 @@ public class QueryCountingDataSource extends DelegatingDataSource {
             if (method.getName().startsWith("execute")) {
                 // plain Statement passes the SQL as first arg; PreparedStatement uses the SQL captured at prepare time
                 final String sql = (args != null && args.length > 0 && args[0] instanceof String s) ? s : preparedSql;
-                queryCount.record(sql);
+                queryUtil.record(sql);
             }
             return invokeTarget(statement, method, args);
         }

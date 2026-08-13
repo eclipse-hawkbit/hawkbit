@@ -15,46 +15,43 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Provider-agnostic JDBC statement recorder used by performance/caching tests to count SQL actually sent to the DB.
+ * Provider-agnostic JDBC statement recorder used by performance/caching tests to inspect the SQL actually sent to the DB.
  * <p>
- * Counts at the JDBC layer (see {@link QueryCountingDataSource}) rather than through a JPA-provider profiler, so the
- * same assertions hold under both EclipseLink and Hibernate. Reset it before the measured section and query the counts
- * afterwards.
+ * Records at the JDBC layer (see {@link QueryCountingDataSource}) rather than through a JPA-provider profiler, so the
+ * same assertions hold under both EclipseLink and Hibernate. Reset it before the measured section, then inspect the
+ * recorded statements afterwards - as a count ({@link #countSelectQueries()} / {@link #countSelectsFromTable(String)})
+ * or as the raw list ({@link #getAllQueries()}).
  */
-public class QueryCount {
+public class QueryUtil {
 
     private final List<String> statements = Collections.synchronizedList(new ArrayList<>());
 
     /** Clears all recorded statements - call right before the section under measurement. */
-    public void reset() {
+    public void resetQueries() {
         statements.clear();
     }
 
-    /** Total number of executed statements recorded since the last {@link #reset()}. */
-    public long total() {
-        return statements.size();
-    }
-
-    /** Number of executed {@code SELECT} statements since the last {@link #reset()}. */
-    public long selects() {
+    /** Number of executed {@code SELECT} statements since the last {@link #resetQueries()}. */
+    public long countSelectQueries() {
         synchronized (statements) {
-            return statements.stream().filter(QueryCount::isSelect).count();
+            return statements.stream().filter(QueryUtil::isSelect).count();
         }
     }
 
     /**
-     * Number of executed statements whose SQL contains the given (case-insensitive) fragment - typically a table name
-     * such as {@code sp_software_module_type}.
+     * Number of statements (since the last {@link #resetQueries()}) that read FROM the given table - i.e. contain
+     * {@code "from <table>"}. Distinguishes e.g. a {@code sp_software_module_type} by-id load from a query that merely
+     * has a {@code software_module_type} column.
      */
-    public long matching(final String sqlFragment) {
-        final String needle = sqlFragment.toLowerCase(Locale.ROOT);
+    public long countSelectsFromTable(final String table) {
+        final String needle = "from " + table.toLowerCase(Locale.ROOT);
         synchronized (statements) {
             return statements.stream().filter(s -> s != null && s.toLowerCase(Locale.ROOT).contains(needle)).count();
         }
     }
 
     /** Immutable snapshot of the recorded statements - useful for debugging an unexpected count. */
-    public List<String> statements() {
+    public List<String> getAllQueries() {
         synchronized (statements) {
             return List.copyOf(statements);
         }

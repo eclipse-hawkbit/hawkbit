@@ -29,15 +29,15 @@ class SoftwareModuleTypeManagementCacheTest extends AbstractTypeManagementCacheT
     void verifySoftwareModuleTypeCacheMissThenHit() {
         evict(JpaSoftwareModuleType.class.getSimpleName(), osType.getId());
 
-        final long afterEvict = readQueries();
+        final long afterEvict = queryUtil.countSelectQueries();
         softwareModuleTypeManagement.get(osType.getId()); // miss
-        assertThat(readQueries() - afterEvict)
+        assertThat(queryUtil.countSelectQueries() - afterEvict)
                 .as("SMType cache miss must produce exactly 1 query")
                 .isEqualTo(1);
 
-        final long afterMiss = readQueries();
+        final long afterMiss = queryUtil.countSelectQueries();
         softwareModuleTypeManagement.get(osType.getId()); // hit
-        assertThat(readQueries() - afterMiss)
+        assertThat(queryUtil.countSelectQueries() - afterMiss)
                 .as("SMType cache hit must produce 0 queries")
                 .isZero();
     }

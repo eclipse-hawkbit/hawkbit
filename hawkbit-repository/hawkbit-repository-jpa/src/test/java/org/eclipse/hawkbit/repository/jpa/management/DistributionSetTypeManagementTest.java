@@ -38,7 +38,11 @@ import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.eclipse.hawkbit.repository.test.util.QueryCountConfiguration;
+import org.eclipse.hawkbit.repository.test.util.QueryUtil;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 
 /**
  * {@link DistributionSetManagement} tests.
@@ -46,9 +50,13 @@ import org.junit.jupiter.api.Test;
  * Feature: Component Tests - Repository<br/>
  * Story: DistributionSet Management
  */
+@Import(QueryCountConfiguration.class)
 class DistributionSetTypeManagementTest extends AbstractRepositoryManagementTest<DistributionSetType, Create, Update> {
 
     public static final String USED_BY_DS_TYPE_KEY = "updatableType";
+
+    @Autowired
+    private QueryUtil queryUtil;
 
     /**
      * Tests the successful module update of unused distribution set type which is in fact allowed.
@@ -233,6 +241,22 @@ class DistributionSetTypeManagementTest extends AbstractRepositoryManagementTest
                 .isInstanceOf(EntityReadOnlyException.class);
     }
 
+    /**
+     * Loading a distribution set type and reading its module-type ids issues no {@code sp_software_module_type} query -
+     * the ids are served from the type element composite keys, without materialising the module type entities.
+     */
+    @Test
+    void loadingTypeAndReadingModuleTypeIdsIssuesNoSoftwareModuleTypeQuery() {
+        final long typeId = defaultDsType().getId();
+
+        queryUtil.resetQueries();
+        final DistributionSetType type = distributionSetTypeManagement.get(typeId);
+        type.getMandatoryModuleTypeIds();
+        type.getOptionalModuleTypeIds();
+
+        assertThat(queryUtil.countSelectsFromTable("sp_software_module_type")).isZero();
+    }
+
     private void createAndUpdateDistributionSetWithInvalidDescription(final DistributionSet set) {
         final DistributionSetManagement.Create distributionSetCreate = DistributionSetManagement.Create.builder()
                 .name("a").version("a").description(randomString(513)).build();
@@ -322,8 +346,8 @@ class DistributionSetTypeManagementTest extends AbstractRepositoryManagementTest
                 .as("set with too short version should not be created")
                 .isThrownBy(() -> distributionSetManagement.create(distributionSetCreate3));
 
-        final DistributionSetManagement.Create distributionSetCreate4 =
-                DistributionSetManagement.Create.builder().name("a").version(null).build();
+        final DistributionSetManagement.Create distributionSetCreate4 = DistributionSetManagement.Create.builder().name("a").version(null)
+                .build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("set with null version should not be created")
                 .isThrownBy(() -> distributionSetManagement.create(distributionSetCreate4));
@@ -334,14 +358,14 @@ class DistributionSetTypeManagementTest extends AbstractRepositoryManagementTest
                 .as("set with too long version should not be updated")
                 .isThrownBy(() -> distributionSetManagement.update(distributionSetUpdate));
 
-        final DistributionSetManagement.Update distributionSetUpdate2 =
-                DistributionSetManagement.Update.builder().id(set.getId()).version(INVALID_TEXT_HTML).build();
+        final DistributionSetManagement.Update distributionSetUpdate2 = DistributionSetManagement.Update.builder().id(set.getId()).version(
+                INVALID_TEXT_HTML).build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("set with invalid version should not be updated")
                 .isThrownBy(() -> distributionSetManagement.update(distributionSetUpdate2));
 
-        final DistributionSetManagement.Update distributionSetUpdate3 =
-                DistributionSetManagement.Update.builder().id(set.getId()).version("").build();
+        final DistributionSetManagement.Update distributionSetUpdate3 = DistributionSetManagement.Update.builder().id(set.getId()).version("")
+                .build();
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("set with too short version should not be updated")
                 .isThrownBy(() -> distributionSetManagement.update(distributionSetUpdate3));
