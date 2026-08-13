@@ -29,6 +29,7 @@ import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -73,6 +74,7 @@ public class JpaSoftwareModule
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "softwareModule",
             cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
             targetEntity = JpaArtifact.class, orphanRemoval = true)
+    @OrderBy("filename ASC")
     private List<JpaArtifact> artifacts;
 
     @Column(name = "vendor", length = SoftwareModule.VENDOR_MAX_SIZE)
