@@ -30,7 +30,7 @@ import org.eclipse.hawkbit.repository.model.Type;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.QueryCountConfiguration;
-import org.eclipse.hawkbit.repository.test.util.QueryUtil;
+import org.eclipse.hawkbit.repository.test.util.QueryCount;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -43,7 +43,7 @@ import org.springframework.context.annotation.Import;
 class TargetTypeManagementTest extends AbstractRepositoryManagementTest<TargetType, Create, Update> {
 
     @Autowired
-    private QueryUtil queryUtil;
+    private QueryCount queryCount;
 
     /**
      * Tests the successful assignment of compatible distribution set types to a target type
@@ -210,9 +210,9 @@ class TargetTypeManagementTest extends AbstractRepositoryManagementTest<TargetTy
         targetTypeManagement.assignCompatibleDistributionSetTypes(
                 targetType.getId(), Collections.singletonList(defaultDsType().getId()));
 
-        queryUtil.resetQueries();
+        queryCount.resetQueries();
         targetTypeManagement.get(targetType.getId()).getDistributionSetTypes().forEach(dst -> dst.getKey());
 
-        assertThat(queryUtil.countSelectsFromTable("sp_software_module_type")).isZero();
+        assertThat(queryCount.countSelectsFromTable("sp_software_module_type")).isZero();
     }
 }

@@ -29,17 +29,17 @@ class TargetTypeManagementCacheTest extends AbstractTypeManagementCacheTest {
         final TargetType targetType = testdataFactory.findOrCreateTargetType("cacheTargetType");
         evict(JpaTargetType.class.getSimpleName(), targetType.getId());
 
-        final long beforeMiss = queryUtil.countSelectQueries();
+        final long beforeMiss = queryCount.countSelect();
         targetTypeManagement.get(targetType.getId()); // miss — hits DB
-        assertThat(queryUtil.countSelectQueries() - beforeMiss)
+        assertThat(queryCount.countSelect() - beforeMiss)
                 .as("cache miss must load from DB")
                 .isPositive();
 
-        final long beforeHits = queryUtil.countSelectQueries();
+        final long beforeHits = queryCount.countSelect();
         for (int i = 0; i < 5; i++) {
             targetTypeManagement.get(targetType.getId()); // all served from cache
         }
-        assertThat(queryUtil.countSelectQueries() - beforeHits)
+        assertThat(queryCount.countSelect() - beforeHits)
                 .as("repeated reads must be served from cache — 0 DB queries")
                 .isZero();
     }

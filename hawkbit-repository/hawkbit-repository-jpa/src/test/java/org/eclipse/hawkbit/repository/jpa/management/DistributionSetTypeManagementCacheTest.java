@@ -35,17 +35,17 @@ class DistributionSetTypeManagementCacheTest extends AbstractTypeManagementCache
     void missLoadsTypeWithoutModuleTypeStormThenReadsAreCached() {
         evict(JpaDistributionSetType.class.getSimpleName(), standardDsType.getId());
 
-        queryUtil.resetQueries();
+        queryCount.resetQueries();
         distributionSetTypeManagement.get(standardDsType.getId()); // cache miss -> DB
-        assertThat(queryUtil.countSelectQueries()).as("cache miss must load from DB").isPositive();
-        assertThat(queryUtil.countSelectsFromTable("sp_software_module_type"))
+        assertThat(queryCount.countSelect()).as("cache miss must load from DB").isPositive();
+        assertThat(queryCount.countSelectsFromTable("sp_software_module_type"))
                 .as("loading a DS-type must NOT storm sp_software_module_type by-id (element smType is no longer @MapsId)")
                 .isZero();
 
-        queryUtil.resetQueries();
+        queryCount.resetQueries();
         for (int i = 0; i < 5; i++) {
             distributionSetTypeManagement.get(standardDsType.getId()); // all served from cache
         }
-        assertThat(queryUtil.countSelectQueries()).as("repeated reads must be served from cache - 0 DB queries").isZero();
+        assertThat(queryCount.countSelect()).as("repeated reads must be served from cache - 0 DB queries").isZero();
     }
 }

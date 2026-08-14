@@ -73,14 +73,12 @@ public class DistributionSetTypeElement {
      *             additional query (does not resolve the {@link SoftwareModuleType} entity).
      */
     public Long getSmTypeId() {
-        return key == null ? null : key.getSmType();
+        return key.getSmType();
     }
 
     @Override
     public String toString() {
-        return "DistributionSetTypeElement [mandatory=" + mandatory + ", dsTypeId=" + (key == null
-                ? null
-                : key.getDsType()) + ", smTypeId=" + (key == null ? null : key.getSmType()) + "]";
+        return "DistributionSetTypeElement [mandatory=" + mandatory + ", dsTypeId=" + key.getDsType() + ", smTypeId=" + key.getSmType() + "]";
     }
 
     @Override

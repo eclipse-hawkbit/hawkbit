@@ -24,7 +24,7 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.datasource.DelegatingDataSource;
 
 /**
- * A {@link DataSource} wrapper that records every SQL statement executed through it into a {@link QueryUtil}.
+ * A {@link DataSource} wrapper that records every SQL statement executed through it into a {@link QueryCount}.
  * <p>
  * Works at the JDBC layer via dynamic proxies on {@link Connection} and {@link Statement}, so it is completely
  * JPA-provider agnostic (both EclipseLink and Hibernate issue their SQL through this data source). The SQL of a
@@ -33,11 +33,11 @@ import org.springframework.jdbc.datasource.DelegatingDataSource;
  */
 public class QueryCountingDataSource extends DelegatingDataSource {
 
-    private final QueryUtil queryUtil;
+    private final QueryCount queryCount;
 
-    public QueryCountingDataSource(final DataSource targetDataSource, final QueryUtil queryUtil) {
+    public QueryCountingDataSource(final DataSource targetDataSource, final QueryCount queryCount) {
         super(targetDataSource);
-        this.queryUtil = queryUtil;
+        this.queryCount = queryCount;
     }
 
     @Override
@@ -98,7 +98,7 @@ public class QueryCountingDataSource extends DelegatingDataSource {
             if (method.getName().startsWith("execute")) {
                 // plain Statement passes the SQL as first arg; PreparedStatement uses the SQL captured at prepare time
                 final String sql = (args != null && args.length > 0 && args[0] instanceof String s) ? s : preparedSql;
-                queryUtil.record(sql);
+                queryCount.record(sql);
             }
             return invokeTarget(statement, method, args);
         }

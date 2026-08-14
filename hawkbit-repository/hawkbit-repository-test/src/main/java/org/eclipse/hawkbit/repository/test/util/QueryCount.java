@@ -19,10 +19,10 @@ import java.util.Locale;
  * <p>
  * Records at the JDBC layer (see {@link QueryCountingDataSource}) rather than through a JPA-provider profiler, so the
  * same assertions hold under both EclipseLink and Hibernate. Reset it before the measured section, then inspect the
- * recorded statements afterwards - as a count ({@link #countSelectQueries()} / {@link #countSelectsFromTable(String)})
- * or as the raw list ({@link #getAllQueries()}).
+ * recorded statements afterwards - as a count ({@link #countSelect()} / {@link #countSelectsFromTable(String)})
+ * or as the raw list ({@link #getAllStatements()}).
  */
-public class QueryUtil {
+public class QueryCount {
 
     private final List<String> statements = Collections.synchronizedList(new ArrayList<>());
 
@@ -32,9 +32,9 @@ public class QueryUtil {
     }
 
     /** Number of executed {@code SELECT} statements since the last {@link #resetQueries()}. */
-    public long countSelectQueries() {
+    public long countSelect() {
         synchronized (statements) {
-            return statements.stream().filter(QueryUtil::isSelect).count();
+            return statements.stream().filter(QueryCount::isSelect).count();
         }
     }
 
@@ -51,7 +51,7 @@ public class QueryUtil {
     }
 
     /** Immutable snapshot of the recorded statements - useful for debugging an unexpected count. */
-    public List<String> getAllQueries() {
+    public List<String> getAllStatements() {
         synchronized (statements) {
             return List.copyOf(statements);
         }

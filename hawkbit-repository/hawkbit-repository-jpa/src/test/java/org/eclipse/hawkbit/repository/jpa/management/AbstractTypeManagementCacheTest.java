@@ -10,8 +10,8 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.test.util.QueryCount;
 import org.eclipse.hawkbit.repository.test.util.QueryCountConfiguration;
-import org.eclipse.hawkbit.repository.test.util.QueryUtil;
 import org.eclipse.hawkbit.tenancy.TenantAwareCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -19,7 +19,7 @@ import org.springframework.test.context.TestPropertySource;
 
 /**
  * Base for the per-type by-id cache tests (no ACM). Enables a real cache for the cached type management services and
- * opts in to the provider-agnostic SQL recorder ({@link QueryUtil}) via {@link QueryCountConfiguration}, exposing it as
+ * opts in to the provider-agnostic SQL recorder ({@link QueryCount}) via {@link QueryCountConfiguration}, exposing it as
  * the {@code queryUtil} field ({@code resetQueries()}, {@code countSelectQueries()}, {@code countSelectsFromTable(..)},
  * {@code getAllQueries()}). Only {@link #evict(String, Long)} is specific to these tests.
  * <p>
@@ -37,7 +37,7 @@ import org.springframework.test.context.TestPropertySource;
 abstract class AbstractTypeManagementCacheTest extends AbstractJpaIntegrationTest {
 
     @Autowired
-    protected QueryUtil queryUtil;
+    protected QueryCount queryCount;
 
     /** Evicts the given id from the by-id cache named after the entity class' simple name. */
     protected void evict(final String cacheName, final Long id) {

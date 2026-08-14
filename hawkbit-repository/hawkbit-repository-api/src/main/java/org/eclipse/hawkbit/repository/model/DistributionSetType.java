@@ -34,17 +34,13 @@ public interface DistributionSetType extends Type {
      * @return ids of the mandatory {@link SoftwareModuleType}s. Implementations should serve these without loading the
      *         full {@link SoftwareModuleType} entities where possible (id-only, storm-free).
      */
-    default Set<Long> getMandatoryModuleTypeIds() {
-        return getMandatoryModuleTypes().stream().map(SoftwareModuleType::getId).collect(Collectors.toSet());
-    }
+    Set<Long> getMandatoryModuleTypeIds();
 
     /**
      * @return ids of the optional {@link SoftwareModuleType}s. Implementations should serve these without loading the
      *         full {@link SoftwareModuleType} entities where possible (id-only, storm-free).
      */
-    default Set<Long> getOptionalModuleTypeIds() {
-        return getOptionalModuleTypes().stream().map(SoftwareModuleType::getId).collect(Collectors.toSet());
-    }
+    Set<Long> getOptionalModuleTypeIds();
 
     /**
      * Checks if the given {@link SoftwareModuleType} is in this {@link DistributionSetType}.

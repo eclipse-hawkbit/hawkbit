@@ -38,8 +38,8 @@ import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.eclipse.hawkbit.repository.test.util.QueryCount;
 import org.eclipse.hawkbit.repository.test.util.QueryCountConfiguration;
-import org.eclipse.hawkbit.repository.test.util.QueryUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -56,7 +56,7 @@ class DistributionSetTypeManagementTest extends AbstractRepositoryManagementTest
     public static final String USED_BY_DS_TYPE_KEY = "updatableType";
 
     @Autowired
-    private QueryUtil queryUtil;
+    private QueryCount queryCount;
 
     /**
      * Tests the successful module update of unused distribution set type which is in fact allowed.
@@ -249,12 +249,12 @@ class DistributionSetTypeManagementTest extends AbstractRepositoryManagementTest
     void loadingTypeAndReadingModuleTypeIdsIssuesNoSoftwareModuleTypeQuery() {
         final long typeId = defaultDsType().getId();
 
-        queryUtil.resetQueries();
+        queryCount.resetQueries();
         final DistributionSetType type = distributionSetTypeManagement.get(typeId);
         type.getMandatoryModuleTypeIds();
         type.getOptionalModuleTypeIds();
 
-        assertThat(queryUtil.countSelectsFromTable("sp_software_module_type")).isZero();
+        assertThat(queryCount.countSelectsFromTable("sp_software_module_type")).isZero();
     }
 
     private void createAndUpdateDistributionSetWithInvalidDescription(final DistributionSet set) {

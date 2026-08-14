@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Wraps the application {@link DataSource} with a {@link QueryCountingDataSource} and exposes the shared
- * {@link QueryUtil}. {@code @Import} it only on the tests that need SQL inspection (opt-in), then autowire the
+ * {@link QueryCount}. {@code @Import} it only on the tests that need SQL inspection (opt-in), then autowire the
  * {@code queryUtil} bean:
  *
  * <pre>{@code
@@ -33,12 +33,12 @@ import org.springframework.context.annotation.Configuration;
 public class QueryCountConfiguration {
 
     @Bean
-    public QueryUtil queryCount() {
-        return new QueryUtil();
+    public QueryCount queryCount() {
+        return new QueryCount();
     }
 
     @Bean
-    static BeanPostProcessor queryCountingDataSourcePostProcessor(final ObjectProvider<QueryUtil> queryCount) {
+    static BeanPostProcessor queryCountingDataSourcePostProcessor(final ObjectProvider<QueryCount> queryCount) {
         return new BeanPostProcessor() {
 
             @Override
