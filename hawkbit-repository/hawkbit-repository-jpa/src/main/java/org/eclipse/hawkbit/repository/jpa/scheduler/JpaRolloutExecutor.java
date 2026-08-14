@@ -108,8 +108,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     /**
      * In case of DOWNLOAD_ONLY, actions can be finished with DOWNLOADED status.
      */
-    private static final List<Status> DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES =
-            List.of(Status.ERROR, Status.FINISHED, Status.CANCELED, Status.DOWNLOADED);
+    private static final List<Status> DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES = List.of(Status.ERROR, Status.FINISHED, Status.CANCELED,
+            Status.DOWNLOADED);
     private static final String TRANSACTION_ASSIGNING_TARGETS_TO_ROLLOUT_GROUP_FAILED = "Transaction assigning Targets to RolloutGroup failed";
 
     private final ActionRepository actionRepository;
@@ -200,8 +200,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         log.debug("handleCreateRollout called for rollout {}", rollout.getId());
 
         final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(
-                        rollout.getId(),
-                        PageRequest.of(0, quotaManagement.getMaxRolloutGroupsPerRollout(), Sort.by(Direction.ASC, "id")))
+                rollout.getId(),
+                PageRequest.of(0, quotaManagement.getMaxRolloutGroupsPerRollout(), Sort.by(Direction.ASC, "id")))
                 .getContent();
 
         int readyGroups = 0;
@@ -447,8 +447,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 callErrorAction(rollout, rolloutGroup);
             } else {// not in error so check success condition and group completed
                 // 'success' is either group completed or success condition reached - execute 'success' Action
-                final boolean groupCompleted = !(rolloutGroup == lastGroup && rolloutGroup.isDynamic())
-                        && isRolloutGroupComplete(rollout, rolloutGroup);
+                final boolean groupCompleted = !(rolloutGroup == lastGroup && rolloutGroup.isDynamic()) && isRolloutGroupComplete(rollout,
+                        rolloutGroup);
                 checkSuccessCondition(rollout, rolloutGroup, evalProxy, rolloutGroup.getSuccessCondition(), groupCompleted);
                 if (groupCompleted) {
                     rolloutGroup.setStatus(RolloutGroupStatus.FINISHED);
@@ -482,11 +482,11 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private boolean isRolloutGroupComplete(final JpaRollout rollout, final JpaRolloutGroup rolloutGroup) {
-        final Long actionsLeftForRollout =
-                actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(
-                        rollout, rolloutGroup,
-                        ActionType.DOWNLOAD_ONLY == rollout.getActionType() ?
-                                DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES : DEFAULT_ACTION_TERMINATION_STATUSES);
+        final Long actionsLeftForRollout = actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(
+                rollout, rolloutGroup,
+                ActionType.DOWNLOAD_ONLY == rollout.getActionType()
+                        ? DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES
+                        : DEFAULT_ACTION_TERMINATION_STATUSES);
         return actionsLeftForRollout == 0;
     }
 
@@ -560,7 +560,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                     txManager,
                     "countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable",
                     count -> countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-                            groupTargetFilter, readyGroups, rollout.getDistributionSet().getType()));
+                            groupTargetFilter, readyGroups, rollout.getDistributionSet().getTypeId()));
         } else { // if it is a rollout retry
             targetsInGroupFilter = DeploymentHelper.runInNewTransaction(
                     txManager,
@@ -611,7 +611,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final Slice<Target> targets;
             if (!RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) {
                 targets = findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-                        readyGroups, targetFilter, rollout.getDistributionSet().getType(), pageRequest);
+                        readyGroups, targetFilter, rollout.getDistributionSet().getTypeId(), pageRequest);
             } else {
                 targets = findByFailedRolloutAndNotInRolloutGroups(
                         RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()), readyGroups, pageRequest);
@@ -652,7 +652,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                     rollout.getTargetFilterQuery(), group);
 
             final Slice<Target> targets = findByRsqlAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
-                    rollout.getId(), groupTargetFilter, rollout.getDistributionSet().getType(),
+                    rollout.getId(), groupTargetFilter, rollout.getDistributionSet().getTypeId(),
                     PageRequest.of(0, Math.toIntExact(Math.min(TRANSACTION_TARGETS, targetsLeftToAdd))));
             if (targets.getNumberOfElements() > 0) {
                 final List<Action> newActions = createActions(
@@ -836,13 +836,13 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
     // package-private just for testing
     Slice<Target> findByRsqlAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
-            final long rolloutId, final String rsql, final DistributionSetType distributionSetType, final Pageable pageable) {
+            final long rolloutId, final String rsql, final long distributionSetTypeId, final Pageable pageable) {
         return targetRepository
                 .findAllWithoutCount(AccessController.Operation.UPDATE,
                         combineWithAnd(List.of(
                                 QLSupport.getInstance().buildSpec(rsql, TargetFields.class),
                                 TargetSpecifications.hasNoOverridingActionsAndNotInRollout(rolloutId),
-                                TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetType.getId()))),
+                                TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetTypeId))),
                         pageable)
                 .map(Target.class::cast);
     }
@@ -850,13 +850,13 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     // Finds all targets for all the given parameter {@link TargetFilterQuery} and that are not assigned to one of the {@link RolloutGroup}s
     // and are compatible with the passed {@link DistributionSetType}
     private Slice<Target> findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-            final Collection<Long> groups, final String rsql, final DistributionSetType dsType, final Pageable pageable) {
+            final Collection<Long> groups, final String rsql, final long dsTypeId, final Pageable pageable) {
         return targetRepository
                 .findAllWithoutCount(AccessController.Operation.UPDATE,
                         combineWithAnd(List.of(
                                 QLSupport.getInstance().buildSpec(rsql, TargetFields.class),
                                 TargetSpecifications.isNotInRolloutGroups(groups),
-                                TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()))),
+                                TargetSpecifications.isCompatibleWithDistributionSetType(dsTypeId))),
                         pageable)
                 .map(Target.class::cast);
     }
@@ -888,12 +888,12 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     // Counts all targets for all the given parameter {@link TargetFilterQuery} and that are not assigned to one of the {@link RolloutGroup}s
     // and are compatible with the passed {@link DistributionSetType}
     private long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-            final String rsql, final Collection<Long> groups, final DistributionSetType dsType) {
+            final String rsql, final Collection<Long> groups, final long dsTypeId) {
         return targetRepository.count(AccessController.Operation.UPDATE,
                 combineWithAnd(List.of(
                         QLSupport.getInstance().buildSpec(rsql, TargetFields.class),
                         TargetSpecifications.isNotInRolloutGroups(groups),
-                        TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()))));
+                        TargetSpecifications.isCompatibleWithDistributionSetType(dsTypeId))));
     }
 
     // Counts all targets with failed actions for specific Rollout and that are not assigned to one of the {@link RolloutGroup}s and are

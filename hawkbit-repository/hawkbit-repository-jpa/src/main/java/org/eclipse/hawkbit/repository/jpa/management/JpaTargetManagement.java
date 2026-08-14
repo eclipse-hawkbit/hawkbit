@@ -112,7 +112,7 @@ public class JpaTargetManagement
             final String controllerId, final long distributionSetId, final String targetFilterQuery) {
         QLSupport.getInstance().validate(targetFilterQuery, TargetFields.class, JpaTarget.class);
         final DistributionSet ds = distributionSetManagement.get(distributionSetId);
-        final Long distSetTypeId = ds.getType().getId();
+        final Long distSetTypeId = ds.getTypeId();
         final List<Specification<JpaTarget>> specList = List.of(
                 QLSupport.getInstance().buildSpec(targetFilterQuery, TargetFields.class),
                 TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
@@ -149,7 +149,7 @@ public class JpaTargetManagement
     public Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(
             final long distributionSetId, final String rsql, final Pageable pageable) {
         final DistributionSet jpaDistributionSet = distributionSetManagement.get(distributionSetId);
-        final Long distSetTypeId = jpaDistributionSet.getType().getId();
+        final Long distSetTypeId = jpaDistributionSet.getTypeId();
 
         return jpaRepository
                 .findAllWithoutCount(
@@ -235,7 +235,7 @@ public class JpaTargetManagement
     @Override
     public long countByRsqlAndNonDsAndCompatibleAndUpdatable(final long distributionSetId, final String rsql) {
         final DistributionSet jpaDistributionSet = distributionSetManagement.get(distributionSetId);
-        final Long distSetTypeId = jpaDistributionSet.getType().getId();
+        final Long distSetTypeId = jpaDistributionSet.getTypeId();
 
         return jpaRepository.count(
                 AccessController.Operation.UPDATE,
@@ -318,8 +318,7 @@ public class JpaTargetManagement
     public Target assignType(final String controllerId, final Long targetTypeId) {
         final JpaTarget target = jpaRepository.getByControllerId(controllerId);
 
-        jpaRepository.getAccessController().ifPresent(acm ->
-                acm.assertOperationAllowed(AccessController.Operation.UPDATE, target));
+        jpaRepository.getAccessController().ifPresent(acm -> acm.assertOperationAllowed(AccessController.Operation.UPDATE, target));
 
         final JpaTargetType targetType = targetTypeRepository.getById(targetTypeId);
         target.setTargetType(targetType);
@@ -522,11 +521,11 @@ public class JpaTargetManagement
             final Collection<String> controllerIds, final long targetTagId, final Consumer<Collection<String>> notFoundHandler,
             final BiFunction<JpaTargetTag, JpaTarget, Target> updater) {
         final JpaTargetTag tag = targetTagRepository.getById(targetTagId);
-        final List<JpaTarget> targets = controllerIds.size() == 1 ?
-                jpaRepository.findByControllerId(controllerIds.iterator().next())
+        final List<JpaTarget> targets = controllerIds.size() == 1
+                ? jpaRepository.findByControllerId(controllerIds.iterator().next())
                         .map(List::of)
-                        .orElseGet(Collections::emptyList) :
-                jpaRepository.findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
+                        .orElseGet(Collections::emptyList)
+                : jpaRepository.findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
         if (targets.size() < controllerIds.size()) {
             final Collection<String> notFound = notFound(controllerIds, targets);
             if (notFoundHandler == null) {
