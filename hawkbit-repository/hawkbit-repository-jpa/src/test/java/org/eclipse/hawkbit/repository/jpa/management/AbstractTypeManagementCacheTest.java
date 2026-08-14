@@ -19,8 +19,9 @@ import org.springframework.test.context.TestPropertySource;
 
 /**
  * Base for the per-type by-id cache tests (no ACM). Enables a real cache for the cached type management services and
- * counts SQL via a provider-agnostic JDBC recorder ({@link QueryCount}), so the same assertions hold under both
- * EclipseLink and Hibernate.
+ * opts in to the provider-agnostic SQL recorder ({@link QueryCount}) via {@link QueryCountConfiguration}, exposing it as
+ * the {@code queryUtil} field ({@code resetQueries()}, {@code countSelectQueries()}, {@code countSelectsFromTable(..)},
+ * {@code getAllQueries()}). Only {@link #evict(String, Long)} is specific to these tests.
  * <p>
  * A dedicated class hierarchy (rather than folding these into the per-type {@code *ManagementTest} classes) is required
  * because the real-cache specs below are class-level and must not change caching semantics for the unrelated
@@ -36,15 +37,10 @@ import org.springframework.test.context.TestPropertySource;
 abstract class AbstractTypeManagementCacheTest extends AbstractJpaIntegrationTest {
 
     @Autowired
-    private QueryCount queryCount;
+    protected QueryCount queryCount;
 
     /** Evicts the given id from the by-id cache named after the entity class' simple name. */
     protected void evict(final String cacheName, final Long id) {
         TenantAwareCacheManager.getInstance().getCache(cacheName).evict(id);
-    }
-
-    /** Cumulative count of {@code SELECT} statements sent to the DB - use deltas around the measured section. */
-    protected long readQueries() {
-        return queryCount.selects();
     }
 }

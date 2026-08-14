@@ -14,6 +14,7 @@ import java.util.Objects;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
@@ -44,9 +45,8 @@ public class DistributionSetTypeElement {
     private JpaDistributionSetType dsType;
 
     @Getter
-    @MapsId("smType")
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "software_module_type", nullable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "software_module_type", nullable = false, insertable = false, updatable = false)
     private JpaSoftwareModuleType smType;
 
     @Setter
@@ -68,9 +68,17 @@ public class DistributionSetTypeElement {
         this.mandatory = mandatory;
     }
 
+    /**
+     * @return the id of the referenced {@link SoftwareModuleType}, read directly from the composite key with no
+     *             additional query (does not resolve the {@link SoftwareModuleType} entity).
+     */
+    public Long getSmTypeId() {
+        return key.getSmType();
+    }
+
     @Override
     public String toString() {
-        return "DistributionSetTypeElement [mandatory=" + mandatory + ", dsType=" + dsType + ", smType=" + smType + "]";
+        return "DistributionSetTypeElement [mandatory=" + mandatory + ", dsTypeId=" + key.getDsType() + ", smTypeId=" + key.getSmType() + "]";
     }
 
     @Override

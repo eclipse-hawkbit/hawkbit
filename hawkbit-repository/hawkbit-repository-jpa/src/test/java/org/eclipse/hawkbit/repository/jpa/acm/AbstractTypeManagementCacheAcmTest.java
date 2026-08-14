@@ -45,6 +45,6 @@ abstract class AbstractTypeManagementCacheAcmTest extends AbstractAccessControll
 
     /** Cumulative count of {@code SELECT} statements sent to the DB - use deltas around the measured section. */
     protected long readQueries() {
-        return queryCount.selects();
+        return queryCount.countSelect();
     }
 }

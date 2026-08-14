@@ -29,13 +29,21 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.Type;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.eclipse.hawkbit.repository.test.util.QueryCountConfiguration;
+import org.eclipse.hawkbit.repository.test.util.QueryCount;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 
 /**
  * Feature: Component Tests - Repository<br/>
  * Story: Target Type Management
  */
+@Import(QueryCountConfiguration.class)
 class TargetTypeManagementTest extends AbstractRepositoryManagementTest<TargetType, Create, Update> {
+
+    @Autowired
+    private QueryCount queryCount;
 
     /**
      * Tests the successful assignment of compatible distribution set types to a target type
@@ -189,5 +197,22 @@ class TargetTypeManagementTest extends AbstractRepositoryManagementTest<TargetTy
                 .as("targetType with too short name should not be updated")
                 .isThrownBy(() -> targetTypeManagement.update(targetTypeUpdateEmpty));
 
+    }
+
+    /**
+     * Navigating a target type's compatible distribution set types issues no {@code sp_software_module_type} query -
+     * materialising the distribution set types does not resolve their module type entities.
+     */
+    @Test
+    void loadingCompatibleDistributionSetTypesIssuesNoSoftwareModuleTypeQuery() {
+        final TargetType targetType = targetTypeManagement.create(
+                Create.builder().name("smtype-compat").description("d").key("smtype-compat.key").build());
+        targetTypeManagement.assignCompatibleDistributionSetTypes(
+                targetType.getId(), Collections.singletonList(defaultDsType().getId()));
+
+        queryCount.resetQueries();
+        targetTypeManagement.get(targetType.getId()).getDistributionSetTypes().forEach(dst -> dst.getKey());
+
+        assertThat(queryCount.countSelectsFromTable("sp_software_module_type")).isZero();
     }
 }

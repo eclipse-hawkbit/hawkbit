@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.model;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A {@link DistributionSetType} is an abstract definition for {@link DistributionSet} that defines what {@link SoftwareModule}s can be
@@ -30,6 +31,18 @@ public interface DistributionSetType extends Type {
     Set<SoftwareModuleType> getOptionalModuleTypes();
 
     /**
+     * @return ids of the mandatory {@link SoftwareModuleType}s. Implementations should serve these without loading the
+     *         full {@link SoftwareModuleType} entities where possible (id-only, storm-free).
+     */
+    Set<Long> getMandatoryModuleTypeIds();
+
+    /**
+     * @return ids of the optional {@link SoftwareModuleType}s. Implementations should serve these without loading the
+     *         full {@link SoftwareModuleType} entities where possible (id-only, storm-free).
+     */
+    Set<Long> getOptionalModuleTypeIds();
+
+    /**
      * Checks if the given {@link SoftwareModuleType} is in this {@link DistributionSetType}.
      *
      * @param softwareModuleType search for
@@ -46,7 +59,7 @@ public interface DistributionSetType extends Type {
      * @return <code>true</code> if found
      */
     default boolean containsMandatoryModuleType(final SoftwareModuleType softwareModuleType) {
-        return getMandatoryModuleTypes().stream().anyMatch(element -> element.getId().equals(softwareModuleType.getId()));
+        return getMandatoryModuleTypeIds().contains(softwareModuleType.getId());
     }
 
     /**
@@ -56,6 +69,6 @@ public interface DistributionSetType extends Type {
      * @return <code>true</code> if found
      */
     default boolean containsOptionalModuleType(final SoftwareModuleType softwareModuleType) {
-        return getOptionalModuleTypes().stream().anyMatch(element -> element.getId().equals(softwareModuleType.getId()));
+        return getOptionalModuleTypeIds().contains(softwareModuleType.getId());
     }
 }

@@ -11,11 +11,8 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Set;
-
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -32,17 +29,17 @@ class TargetTypeManagementCacheTest extends AbstractTypeManagementCacheTest {
         final TargetType targetType = testdataFactory.findOrCreateTargetType("cacheTargetType");
         evict(JpaTargetType.class.getSimpleName(), targetType.getId());
 
-        final long beforeMiss = readQueries();
+        final long beforeMiss = queryCount.countSelect();
         targetTypeManagement.get(targetType.getId()); // miss — hits DB
-        assertThat(readQueries() - beforeMiss)
+        assertThat(queryCount.countSelect() - beforeMiss)
                 .as("cache miss must load from DB")
                 .isPositive();
 
-        final long beforeHits = readQueries();
+        final long beforeHits = queryCount.countSelect();
         for (int i = 0; i < 5; i++) {
             targetTypeManagement.get(targetType.getId()); // all served from cache
         }
-        assertThat(readQueries() - beforeHits)
+        assertThat(queryCount.countSelect() - beforeHits)
                 .as("repeated reads must be served from cache — 0 DB queries")
                 .isZero();
     }

@@ -17,17 +17,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Opt-in test configuration that wraps the application {@link DataSource} with a {@link QueryCountingDataSource} and
- * exposes the shared {@link QueryCount}. Import it on a test that needs to assert how many SQL statements reach the DB:
+ * Wraps the application {@link DataSource} with a {@link QueryCountingDataSource} and exposes the shared
+ * {@link QueryCount}. {@code @Import} it only on the tests that need SQL inspection (opt-in), then autowire the
+ * {@code queryUtil} bean:
  *
  * <pre>{@code
- * @Import(QueryCountConfiguration.class)
- * class MyPerfTest extends AbstractJpaIntegrationTest {
- *     @Autowired QueryCount queryCount;
- * }
+ * queryUtil.resetQueries();
+ * ... code under test ...
+ * assertThat(queryUtil.countSelectsFromTable("sp_software_module_type")).isZero();
  * }</pre>
  *
- * Provider-agnostic - counting happens at the JDBC layer, so it behaves identically under EclipseLink and Hibernate.
+ * Provider-agnostic - recording happens at the JDBC layer, so it behaves identically under EclipseLink and Hibernate.
  */
 @Configuration
 public class QueryCountConfiguration {
