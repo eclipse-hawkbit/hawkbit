@@ -375,7 +375,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Action forceTargetAction(final long actionId) {
         final JpaAction action = actionRepository.findById(actionId)
@@ -390,7 +390,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteAction(final long actionId) {
         log.info("Deleting action {}", actionId);
         final JpaAction action = actionRepository.getById(actionId);
@@ -404,7 +404,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteActionsByRsql(final String rsql) {
         log.info("Deleting actions matching rsql {}", rsql);
         final Specification<JpaAction> rsqlSpec = QLSupport.getInstance().buildSpec(rsql, ActionFields.class);
@@ -427,7 +427,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteActionsByIds(final List<Long> actionIds) {
         log.info("Deleting actions with ids {}", actionIds);
         checkActionsEligibleForDeletion(actionIds);
@@ -435,7 +435,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteTargetActionsByIds(final String controllerId, final List<Long> actionsIds) {
         log.info("Delete actions for target {} with action ids {}", controllerId, actionsIds);
         checkActionsEligibleForDeletion(actionsIds);
@@ -443,7 +443,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteOldestTargetActions(final String controllerId, final int keepLast) {
         final JpaTarget target = targetRepository.findByControllerId(controllerId).orElseThrow(EntityNotFoundException::new);
         // check access to target since deletion will be executed via native query
@@ -469,6 +469,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void startScheduledActionsByRolloutGroupParent(final long rolloutId, final long distributionSetId, final Long rolloutGroupParentId) {
         while (DeploymentHelper.runInNewTransaction(txManager, "startScheduledActions-" + rolloutId, status -> {
             final PageRequest pageRequest = PageRequest.of(0, ACTION_PAGE_LIMIT);
@@ -492,6 +493,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void startScheduledActions(final List<Action> rolloutGroupActions) {
         // Close actions already assigned and collect pending assignments
         final List<JpaAction> pendingTargetAssignments = rolloutGroupActions.stream()
@@ -519,7 +521,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public int deleteActionsByStatusAndLastModifiedBefore(final Set<Status> status, final long lastModified) {
         if (status.isEmpty()) {
             return 0;
@@ -550,7 +552,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void cancelActionsForDistributionSet(final ActionCancellationType cancelationType, final DistributionSet distributionSet) {
         actionRepository.findAll(ActionSpecifications.byDistributionSetIdAndActiveAndStatusIsNot(distributionSet.getId(), Status.CANCELING))
                 .forEach(action -> {
@@ -582,6 +584,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     public record MaxAssignmentsExceededInfo(long targetId, long requested, AssignmentQuotaExceededException quotaExceededException) {}
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void handleMaxAssignmentsExceeded(
             final Long targetId, final Long requested, final AssignmentQuotaExceededException quotaExceededException) {
         int actionsPurgePercentage = getActionsPurgePercentage();
