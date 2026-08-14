@@ -12,4 +12,4 @@ jobs:
     with:
       repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
       ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
-      maven_properties: '-Djpa.vendor=hibernate -Dlogging.level.org.hibernate.collection.spi.AbstractPersistentCollection=ERROR -Dspring.jpa.database=POSTGRESQL -Dspring.datasource.url=jdbc:postgresql://localhost:5432/hawkbit -Dspring.datasource.username=postgres -Dspring.datasource.password=admin'
+      maven_properties: '-Djpa.vendor=hibernate -Dlogging.level.org.hibernate.collection.spi.AbstractPersistentCollection=ERROR -Dspring.jpa.database=POSTGRESQL -Dspring.datasource.url=jdbc:postgresql://localhost:5432/hawkbit?stringtype=unspecified -Dspring.datasource.username=postgres -Dspring.datasource.password=admin'
