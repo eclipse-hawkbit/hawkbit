@@ -33,15 +33,19 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.streams.UploadEvent;
@@ -53,6 +57,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionS
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
 import org.eclipse.hawkbit.ui.HawkbitMgmtClient;
 import org.eclipse.hawkbit.ui.MainLayout;
@@ -81,9 +86,8 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
     public SoftwareModuleView(final boolean isParent, final HawkbitMgmtClient hawkbitClient) {
         super(
                 new SoftwareModuleFilter(hawkbitClient),
+                null,
                 new SelectionGrid.EntityRepresentation<>(MgmtSoftwareModule.class, MgmtSoftwareModule::getId) {
-
-                    private final SoftwareModuleDetails details = new SoftwareModuleDetails(hawkbitClient);
 
                     @Override
                     protected void addColumns(final Grid<MgmtSoftwareModule> grid) {
@@ -92,8 +96,6 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
                         grid.addColumn(MgmtSoftwareModule::getVersion).setHeader(Constants.VERSION).setAutoWidth(true);
                         grid.addColumn(MgmtSoftwareModule::getTypeName).setHeader(Constants.TYPE).setAutoWidth(true);
                         grid.addColumn(MgmtSoftwareModule::getVendor).setHeader(Constants.VENDOR).setAutoWidth(true);
-
-                        grid.setItemDetailsRenderer(new ComponentRenderer<>(() -> details, SoftwareModuleDetails::setItem));
                     }
                 },
                 (query, rsqlFilter) -> Optional.ofNullable(
@@ -108,7 +110,42 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
                             module -> hawkbitClient.getSoftwareModuleRestApi().deleteSoftwareModule(module.getId()));
                     selectionGrid.refreshGrid(false);
                     return CompletableFuture.completedFuture(null);
-                } : null);
+                } : null,
+                softwareModule -> {
+                    final SoftwareModuleDetailedView detailedView = new SoftwareModuleDetailedView(hawkbitClient);
+                    detailedView.setItem(softwareModule);
+                    return detailedView;
+                },
+                SplitLayout.Orientation.VERTICAL,
+                isParent ? softwareModule -> new EditDialog(softwareModule, hawkbitClient).result() : null);
+    }
+
+    private static class SoftwareModuleDetailedView extends VerticalLayout {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        private final Span softwareModuleName;
+        private final SoftwareModuleDetails details;
+
+        private SoftwareModuleDetailedView(final HawkbitMgmtClient hawkbitClient) {
+            softwareModuleName = new Span();
+            details = new SoftwareModuleDetails(hawkbitClient);
+            setWidthFull();
+            setHeightFull();
+            getStyle().set("overflow", "auto");
+
+            add(softwareModuleName);
+            final TabSheet tabSheet = new TabSheet();
+            tabSheet.setWidthFull();
+            tabSheet.add("Details", details);
+            add(tabSheet);
+        }
+
+        private void setItem(final MgmtSoftwareModule softwareModule) {
+            softwareModuleName.setText(softwareModule.getName() + ":" + softwareModule.getVersion());
+            details.setItem(softwareModule);
+        }
     }
 
     public Set<MgmtSoftwareModule> getSelection() {
@@ -171,22 +208,37 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
         private final TextField createdAt = Utils.textField(Constants.CREATED_AT);
         private final TextField lastModifiedBy = Utils.textField(Constants.LAST_MODIFIED_BY);
         private final TextField lastModifiedAt = Utils.textField(Constants.LAST_MODIFIED_AT);
+        private final Checkbox complete = new Checkbox(Constants.COMPLETE);
+        private final Checkbox encrypted = new Checkbox(Constants.ENCRYPTED);
+        private final Checkbox locked = new Checkbox(Constants.LOCKED);
+        private final Checkbox deleted = new Checkbox(Constants.DELETED);
         private final SelectionGrid<MgmtArtifact, Long> artifactGrid;
+        private final Details artifactsSection;
 
         private SoftwareModuleDetails(final HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
 
             description.setMinLength(2);
             artifactGrid = createArtifactGrid();
+            artifactGrid.setAllRowsVisible(true);
+            artifactGrid.setWidthFull();
+            artifactsSection = new Details("Artifacts", artifactGrid);
+            artifactsSection.setOpened(false);
+            artifactsSection.setWidthFull();
             Stream.of(description, createdBy, createdAt, lastModifiedBy, lastModifiedAt).forEach(field -> {
                 field.setReadOnly(true);
                 add(field);
             });
-            add(artifactGrid);
+            Stream.of(complete, encrypted, locked, deleted).forEach(checkbox -> {
+                checkbox.setReadOnly(true);
+                checkbox.setEnabled(false);
+                add(checkbox);
+            });
+            add(artifactsSection);
 
             setResponsiveSteps(new ResponsiveStep("0", 2));
             setColspan(description, 2);
-            setColspan(artifactGrid, 2);
+            setColspan(artifactsSection, 2);
         }
 
         private void setItem(final MgmtSoftwareModule softwareModule) {
@@ -195,6 +247,10 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             createdAt.setValue(Utils.localDateTimeFromTs(softwareModule.getCreatedAt()));
             lastModifiedBy.setValue(softwareModule.getLastModifiedBy());
             lastModifiedAt.setValue(Utils.localDateTimeFromTs(softwareModule.getLastModifiedAt()));
+            complete.setValue(Boolean.TRUE.equals(softwareModule.getComplete()));
+            encrypted.setValue(softwareModule.isEncrypted());
+            locked.setValue(softwareModule.isLocked());
+            deleted.setValue(softwareModule.isDeleted());
 
             artifactGrid.setItems(query -> Optional.ofNullable(
                             hawkbitClient.getSoftwareModuleRestApi()
@@ -244,9 +300,11 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             name = Utils.textField(Constants.NAME, this::readyToCreate);
             version = Utils.textField(Constants.VERSION, this::readyToCreate);
             vendor = Utils.textField(Constants.VENDOR);
+            vendor.setValueChangeMode(ValueChangeMode.EAGER);
             description = new TextArea(Constants.DESCRIPTION);
             description.setWidthFull();
             description.setMinLength(2);
+            description.setValueChangeMode(ValueChangeMode.EAGER);
             enableArtifactEncryption = new Checkbox("Enable artifact encryption");
 
             distType = new Select<>("Distribution Set Type", this::readyToCreate);
@@ -259,7 +317,6 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             distRequiredMigrationStep.setVisible(false);
 
             createDistributionSet = new Checkbox("Create single software module distribution set");
-            createDistributionSet.setHelperText("Create single software module distribution set with this software module");
             createDistributionSet.addValueChangeListener(e -> {
                 if (Boolean.TRUE.equals(createDistributionSet.getValue()) && distType.isEmpty()) {
                     distType.setItems(
@@ -342,6 +399,71 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
                                     .setId(softwareModuleId))).getBody();
                 }
                 new AddArtifactsDialog(softwareModuleId, hawkbitClient).open();
+            });
+        }
+    }
+
+    private static class EditDialog extends Utils.BaseDialog<Void> {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        private final TextField vendor;
+        private final TextArea description;
+        private final Button save;
+
+        private EditDialog(final MgmtSoftwareModule softwareModule, final HawkbitMgmtClient hawkbitClient) {
+            super("Edit Software Module");
+
+            final TextField name = Utils.textField(Constants.NAME);
+            name.setValue(Objects.requireNonNullElse(softwareModule.getName(), ""));
+            name.setReadOnly(true);
+            name.setWidthFull();
+            final TextField version = Utils.textField(Constants.VERSION);
+            version.setValue(Objects.requireNonNullElse(softwareModule.getVersion(), ""));
+            version.setReadOnly(true);
+            version.setWidthFull();
+            final TextField type = Utils.textField(Constants.TYPE);
+            type.setValue(Objects.requireNonNullElse(softwareModule.getTypeName(), ""));
+            type.setReadOnly(true);
+            type.setWidthFull();
+
+            vendor = Utils.textField(Constants.VENDOR);
+            vendor.setValue(Objects.requireNonNullElse(softwareModule.getVendor(), ""));
+            vendor.setWidthFull();
+            vendor.setValueChangeMode(ValueChangeMode.EAGER);
+            description = new TextArea(Constants.DESCRIPTION);
+            description.setValue(Objects.requireNonNullElse(softwareModule.getDescription(), ""));
+            description.setWidthFull();
+            description.setMinLength(2);
+            description.setValueChangeMode(ValueChangeMode.EAGER);
+
+            save = Utils.tooltip(new Button("Save"), "Save (Enter)");
+            addSaveClickListener(softwareModule.getId(), hawkbitClient);
+            save.addClickShortcut(Key.ENTER);
+            save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            final Button cancel = Utils.tooltip(new Button(CANCEL), CANCEL_ESC);
+            cancel.addClickListener(e -> close());
+            cancel.addClickShortcut(Key.ESCAPE);
+            getFooter().add(cancel);
+            getFooter().add(save);
+
+            final VerticalLayout layout = new VerticalLayout();
+            layout.setSizeFull();
+            layout.setSpacing(false);
+            layout.add(name, version, type, vendor, description);
+            add(layout);
+            open();
+        }
+
+        private void addSaveClickListener(final Long softwareModuleId, final HawkbitMgmtClient hawkbitClient) {
+            save.addClickListener(e -> {
+                hawkbitClient.getSoftwareModuleRestApi().updateSoftwareModule(
+                        softwareModuleId,
+                        new MgmtSoftwareModuleRequestBodyPut()
+                                .setVendor(vendor.getValue())
+                                .setDescription(description.getValue()));
+                close();
             });
         }
     }

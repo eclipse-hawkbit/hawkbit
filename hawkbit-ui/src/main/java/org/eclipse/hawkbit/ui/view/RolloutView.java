@@ -29,26 +29,33 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutCondition;
+import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutSuccessAction;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutErrorAction;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.ui.HawkbitMgmtClient;
@@ -57,6 +64,8 @@ import org.eclipse.hawkbit.ui.view.util.Filter;
 import org.eclipse.hawkbit.ui.view.util.SelectionGrid;
 import org.eclipse.hawkbit.ui.view.util.TableView;
 import org.eclipse.hawkbit.ui.view.util.Utils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.ObjectUtils;
 
 @PageTitle("Rollouts")
@@ -72,10 +81,9 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
     public RolloutView(final HawkbitMgmtClient hawkbitClient) {
         super(
                 new RolloutFilter(),
+                null,
                 new SelectionGrid.EntityRepresentation<>(
                         MgmtRolloutResponseBody.class, MgmtRolloutResponseBody::getId) {
-
-                    private final RolloutDetails details = new RolloutDetails(hawkbitClient);
 
                     @Override
                     protected void addColumns(final Grid<MgmtRolloutResponseBody> grid) {
@@ -88,9 +96,6 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
 
                         grid.addComponentColumn(rollout -> new Actions(rollout, grid, hawkbitClient)).setHeader(
                                 Constants.ACTIONS).setAutoWidth(true);
-
-                        grid.setItemDetailsRenderer(new ComponentRenderer<>(
-                                () -> details, RolloutDetails::setItem));
                     }
                 },
                 (query, rsqlFilter) -> Optional.ofNullable(
@@ -104,7 +109,14 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
                             rollout -> hawkbitClient.getRolloutRestApi().delete(rollout.getId()));
                     selectionGrid.refreshGrid(false);
                     return CompletableFuture.completedFuture(null);
-                });
+                },
+                rollout -> {
+                    final RolloutDetailedView detailedView = new RolloutDetailedView(hawkbitClient);
+                    detailedView.setItem(rollout);
+                    return detailedView;
+                },
+                SplitLayout.Orientation.VERTICAL,
+                rollout -> new EditDialog(rollout, hawkbitClient).result());
         selectionGrid.getDataCommunicator().getKeyMapper().setIdentifierGetter(MgmtRolloutResponseBody::getId);
     }
 
@@ -112,6 +124,8 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
 
         @Serial
         private static final long serialVersionUID = 1L;
+
+        private static final String NO_APPROVE_PERMISSION = "Missing APPROVE_ROLLOUT permission";
 
         private final long rolloutId;
         private final Grid<MgmtRolloutResponseBody> grid;
@@ -165,6 +179,19 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
                     }
                 }, "Resume"));
             }
+            if ("WAITING_FOR_APPROVAL".equalsIgnoreCase(rollout.getStatus())) {
+                final boolean canApprove = hasApprovePermission();
+
+                final Button approve = new Button(VaadinIcon.CHECK.create());
+                approve.setEnabled(canApprove);
+                approve.addClickListener(v -> new ApprovalDialog(rollout, true, hawkbitClient, this::refresh));
+                add(Utils.tooltip(approve, canApprove ? "Approve" : NO_APPROVE_PERMISSION));
+
+                final Button deny = new Button(VaadinIcon.CLOSE.create());
+                deny.setEnabled(canApprove);
+                deny.addClickListener(v -> new ApprovalDialog(rollout, false, hawkbitClient, this::refresh));
+                add(Utils.tooltip(deny, canApprove ? "Deny" : NO_APPROVE_PERMISSION));
+            }
             if (ROLLOUT_STATUS_STOPPABLE.contains(rollout.getStatus())) {
                 add(Utils.tooltip(new Button(VaadinIcon.STOP.create()) {
 
@@ -203,6 +230,52 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
                 grid.getDataProvider().refreshItem(body);
             }
         }
+
+        private static boolean hasApprovePermission() {
+            final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            return authentication != null && authentication.getAuthorities().stream()
+                    .anyMatch(authority -> "ROLE_ROLLOUT_APPROVE".equals(authority.getAuthority()));
+        }
+    }
+
+    private static class ApprovalDialog extends Utils.BaseDialog<Void> {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        private ApprovalDialog(final MgmtRolloutResponseBody rollout, final boolean approve,
+                final HawkbitMgmtClient hawkbitClient, final Runnable onDone) {
+            super(approve ? "Approve Rollout" : "Deny Rollout");
+
+            final Span target = new Span((approve ? "Approve" : "Deny") + " rollout: " + rollout.getName());
+            final TextArea remark = new TextArea("Remark");
+            remark.setWidthFull();
+
+            final Button confirm = new Button(approve ? "Approve" : "Deny");
+            confirm.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            confirm.addClickListener(e -> {
+                close();
+                final String remarkValue = ObjectUtils.isEmpty(remark.getValue()) ? null : remark.getValue();
+                if (approve) {
+                    hawkbitClient.getRolloutRestApi().approve(rollout.getId(), remarkValue);
+                } else {
+                    hawkbitClient.getRolloutRestApi().deny(rollout.getId(), remarkValue);
+                }
+                onDone.run();
+            });
+            final Button cancel = Utils.tooltip(new Button(CANCEL), CANCEL_ESC);
+            cancel.addClickListener(e -> close());
+            cancel.addClickShortcut(Key.ESCAPE);
+            getFooter().add(cancel);
+            getFooter().add(confirm);
+
+            final VerticalLayout layout = new VerticalLayout();
+            layout.setSizeFull();
+            layout.setSpacing(false);
+            layout.add(target, remark);
+            add(layout);
+            open();
+        }
     }
 
     private static class RolloutFilter implements Filter.Rsql {
@@ -224,6 +297,34 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
         }
     }
 
+    private static class RolloutDetailedView extends VerticalLayout {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        private final Span rolloutName;
+        private final RolloutDetails details;
+
+        private RolloutDetailedView(final HawkbitMgmtClient hawkbitClient) {
+            rolloutName = new Span();
+            details = new RolloutDetails(hawkbitClient);
+            setWidthFull();
+            setHeightFull();
+            getStyle().set("overflow", "auto");
+
+            add(rolloutName);
+            final TabSheet tabSheet = new TabSheet();
+            tabSheet.setWidthFull();
+            tabSheet.add("Details", details);
+            add(tabSheet);
+        }
+
+        private void setItem(final MgmtRolloutResponseBody rollout) {
+            rolloutName.setText(rollout.getName());
+            details.setItem(rollout);
+        }
+    }
+
     private static class RolloutDetails extends FormLayout {
 
         @Serial
@@ -240,32 +341,48 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
         private final TextField distributionSet = Utils.textField(Constants.DISTRIBUTION_SET);
         private final TextField actonType = Utils.textField(Constants.ACTION_TYPE);
         private final TextField startAt = Utils.textField(Constants.START_AT);
+        private final TextField forceTime = Utils.textField(Constants.FORCE_TIME);
+        private final TextField weight = Utils.textField(Constants.WEIGHT);
+        private final TextField approvalDecidedBy = Utils.textField(Constants.APPROVAL_DECIDED_BY);
+        private final TextField approvalRemark = Utils.textField(Constants.APPROVAL_REMARK);
         private final Checkbox dynamic = new Checkbox(Constants.DYNAMIC);
+        private final Checkbox deleted = new Checkbox(Constants.DELETED);
         private final SelectionGrid<MgmtRolloutGroupResponseBody, Long> groupGrid;
+        private final Details groupsSection;
 
         private RolloutDetails(final HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
 
             description.setMinLength(2);
             groupGrid = createGroupGrid();
+            groupGrid.setAllRowsVisible(true);
+            groupGrid.setWidthFull();
+            groupsSection = new Details(Constants.GROUPS, groupGrid);
+            groupsSection.setOpened(false);
+            groupsSection.setWidthFull();
             Stream.of(
                             description,
                             createdBy, createdAt,
                             lastModifiedBy, lastModifiedAt,
                             targetFilter, distributionSet,
-                            actonType, startAt)
+                            actonType, startAt, forceTime,
+                            weight,
+                            approvalDecidedBy, approvalRemark)
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
                     });
-            dynamic.setReadOnly(true);
-            dynamic.setEnabled(false);
-            add(dynamic);
-            add(groupGrid);
+            Stream.of(dynamic, deleted)
+                    .forEach(checkbox -> {
+                        checkbox.setReadOnly(true);
+                        checkbox.setEnabled(false);
+                        add(checkbox);
+                    });
+            add(groupsSection);
 
             setResponsiveSteps(new ResponsiveStep("0", 2));
             setColspan(description, 2);
-            setColspan(groupGrid, 2);
+            setColspan(groupsSection, 2);
         }
 
         private void setItem(final MgmtRolloutResponseBody rollout) {
@@ -288,7 +405,12 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
                 case TIMEFORCED -> "Scheduled at " + Utils.localDateTimeFromTs(rollout.getForcetime());
             });
             startAt.setValue(ObjectUtils.isEmpty(rollout.getStartAt()) ? "" : Utils.localDateTimeFromTs(rollout.getStartAt()));
+            forceTime.setValue(ObjectUtils.isEmpty(rollout.getForcetime()) ? "" : Utils.localDateTimeFromTs(rollout.getForcetime()));
+            weight.setValue(rollout.getWeight() == null ? "" : String.valueOf(rollout.getWeight()));
+            approvalDecidedBy.setValue(Objects.requireNonNullElse(rollout.getApproveDecidedBy(), ""));
+            approvalRemark.setValue(Objects.requireNonNullElse(rollout.getApprovalRemark(), ""));
             dynamic.setValue(rollout.isDynamic());
+            deleted.setValue(rollout.isDeleted());
 
             groupGrid.setItems(query -> Optional.ofNullable(
                             hawkbitClient.getRolloutRestApi()
@@ -320,6 +442,60 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
         }
     }
 
+    private static class EditDialog extends Utils.BaseDialog<Void> {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        private final TextField name;
+        private final TextArea description;
+        private final Button save;
+
+        private EditDialog(final MgmtRolloutResponseBody rollout, final HawkbitMgmtClient hawkbitClient) {
+            super("Edit Rollout");
+
+            name = Utils.textField(Constants.NAME, this::readyToSave);
+            name.setWidthFull();
+            description = new TextArea(Constants.DESCRIPTION);
+            description.setWidthFull();
+            description.setMinLength(2);
+            description.setValueChangeMode(ValueChangeMode.EAGER);
+
+            save = Utils.tooltip(new Button("Save"), "Save (Enter)");
+            name.setValue(Objects.requireNonNullElse(rollout.getName(), ""));
+            description.setValue(Objects.requireNonNullElse(rollout.getDescription(), ""));
+            save.addClickListener(e -> {
+                final MgmtRolloutRestRequestBodyPut body = new MgmtRolloutRestRequestBodyPut();
+                body.setName(name.getValue());
+                body.setDescription(description.getValue());
+                hawkbitClient.getRolloutRestApi().update(rollout.getId(), body);
+                close();
+            });
+            save.addClickShortcut(Key.ENTER);
+            save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            final Button cancel = Utils.tooltip(new Button(CANCEL), CANCEL_ESC);
+            cancel.addClickListener(e -> close());
+            cancel.addClickShortcut(Key.ESCAPE);
+            getFooter().add(cancel);
+            getFooter().add(save);
+
+            final VerticalLayout layout = new VerticalLayout();
+            layout.setSizeFull();
+            layout.setPadding(true);
+            layout.setSpacing(false);
+            layout.add(name, description);
+            add(layout);
+            open();
+        }
+
+        private void readyToSave(final Object v) {
+            final boolean saveEnabled = !name.isEmpty();
+            if (save.isEnabled() != saveEnabled) {
+                save.setEnabled(saveEnabled);
+            }
+        }
+    }
+
     private static class CreateDialog extends Utils.BaseDialog<Void> {
 
         @Serial
@@ -336,6 +512,9 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
         private final NumberField groupNumber;
         private final NumberField triggerThreshold;
         private final NumberField errorThreshold;
+        private final NumberField weight;
+        private final Select<MgmtRolloutSuccessAction.SuccessAction> successAction;
+        private final Checkbox confirmationRequired = new Checkbox("Confirmation Required");
         private final Checkbox dynamic = new Checkbox(Constants.DYNAMIC);
         private final Button create = new Button("Create");
 
@@ -405,6 +584,17 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
             errorThreshold.setValue(10.0);
             errorThreshold.setSuffixComponent(percentSuffix);
 
+            weight = Utils.numberField("Weight");
+            weight.setMin(0);
+            weight.setMax(1000);
+            weight.setWidthFull();
+
+            successAction = new Select<>();
+            successAction.setLabel("Success Action");
+            successAction.setItems(MgmtRolloutSuccessAction.SuccessAction.values());
+            successAction.setValue(MgmtRolloutSuccessAction.SuccessAction.NEXTGROUP);
+            successAction.setWidthFull();
+
             create.setEnabled(false);
             create.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             addCreateClickListener(hawkbitClient);
@@ -421,7 +611,7 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
                     name, distributionSet, targetFilter, description,
                     actionType, startType,
                     groupNumber, triggerThreshold, errorThreshold,
-                    dynamic);
+                    weight, successAction, confirmationRequired, dynamic);
             add(layout);
             open();
         }
@@ -462,6 +652,8 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
                         new MgmtRolloutCondition(
                                 MgmtRolloutCondition.Condition.THRESHOLD,
                                 triggerThreshold.getValue().intValue() + ""));
+                request.setSuccessAction(
+                        new MgmtRolloutSuccessAction(successAction.getValue(), ""));
                 request.setErrorCondition(
                         new MgmtRolloutCondition(
                                 MgmtRolloutCondition.Condition.THRESHOLD,
@@ -469,6 +661,10 @@ public final class RolloutView extends TableView<MgmtRolloutResponseBody, Long> 
                 request.setErrorAction(
                         new MgmtRolloutErrorAction(
                                 MgmtRolloutErrorAction.ErrorAction.PAUSE, ""));
+                if (!weight.isEmpty()) {
+                    request.setWeight(weight.getValue().intValue());
+                }
+                request.setConfirmationRequired(confirmationRequired.getValue());
                 request.setDynamic(dynamic.getValue());
                 hawkbitClient.getRolloutRestApi().create(request).getBody();
             });

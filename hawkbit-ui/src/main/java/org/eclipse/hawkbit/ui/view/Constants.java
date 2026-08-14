@@ -30,13 +30,39 @@ public interface Constants {
     String LAST_POLL = "Last Poll";
     String SECURITY_TOKEN = "Security Token";
     String ATTRIBUTES = "Attributes";
+    String COMPLETE = "Complete";
+    String LOCKED = "Locked";
+    String DELETED = "Deleted";
+    String ENCRYPTED = "Encrypted";
+    String VALID = "Valid";
+    String REQUIRED_MIGRATION_STEP = "Required Migration Step";
+    String WEIGHT = "Weight";
+
+    // target
+    String UPDATE_STATUS = "Update Status";
+    String LAST_CONTROLLER_REQUEST_AT = "Last Controller Request At";
+    String INSTALLED_AT = "Installed At";
+    String IP_ADDRESS = "IP Address";
+    String TARGET_TYPE = "Target Type";
+    String REQUEST_ATTRIBUTES = "Request Attributes";
+    String AUTO_CONFIRM_ACTIVE = "Auto Confirm Active";
+    String NEXT_EXPECTED_POLL = "Next Expected Poll";
+    String OVERDUE = "Overdue";
 
     // rollout
+    String GROUPS = "Groups";
     String GROUP_COUNT = "Group Count";
     String TARGET_COUNT = "Target Count";
     String STATS = "Stats";
     String STATUS = "Status";
     String ACTIONS = "Actions";
+
+    String TOTAL_TARGETS = "Total Targets";
+    String TOTAL_GROUPS = "Total Groups";
+    String FORCE_TIME = "Force Time";
+    String APPROVAL_REMARK = "Approval Remark";
+    String APPROVAL_DECIDED_BY = "Approval Decided By";
+    String CONFIRMATION_REQUIRED = "Confirmation Required";
 
     // create rollout
     String TARGET_FILTER = "Target Filter";

@@ -20,8 +20,10 @@ import java.util.stream.Stream;
 import jakarta.annotation.security.RolesAllowed;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -32,15 +34,18 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
+import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
 import org.eclipse.hawkbit.ui.HawkbitMgmtClient;
 import org.eclipse.hawkbit.ui.MainLayout;
 import org.eclipse.hawkbit.ui.view.util.Filter;
@@ -99,7 +104,9 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
                     final TargetFilterQueryDetailedView detailedView = new TargetFilterQueryDetailedView();
                     detailedView.setItem(filterQuery);
                     return detailedView;
-                }
+                },
+                SplitLayout.Orientation.VERTICAL,
+                filterQuery -> new EditDialog(filterQuery, hawkbitClient).result()
         );
     }
 
@@ -177,6 +184,8 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
             filterName = new Span();
             details = new TargetFilterQueryDetails();
             setWidthFull();
+            setHeightFull();
+            getStyle().set("overflow", "auto");
 
             add(filterName);
             final TabSheet tabSheet = new TabSheet();
@@ -193,19 +202,17 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
 
     private static class TargetFilterQueryDetails extends FormLayout {
 
-        private final TextField name = Utils.textField(Constants.NAME);
         private final TextArea query = new TextArea("Query");
         private final TextField createdBy = Utils.textField(Constants.CREATED_BY);
         private final TextField createdAt = Utils.textField(Constants.CREATED_AT);
         private final TextField lastModifiedBy = Utils.textField(Constants.LAST_MODIFIED_BY);
-        private final TextField lastModifiedAt = Utils.textField(Constants.LAST_MODIFIED_AT);
 
         private TargetFilterQueryDetails() {
             query.setMinLength(2);
             Stream.of(
-                            name, query,
+                            query,
                             createdBy, createdAt,
-                            lastModifiedBy, lastModifiedAt)
+                            lastModifiedBy)
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
@@ -216,12 +223,66 @@ public class TargetFilterQueryView extends TableView<TargetFilterQueryView.Targe
         }
 
         private void setItem(final TargetFilterQueryGridItem filterQuery) {
-            name.setValue(filterQuery.getName() != null ? filterQuery.getName() : "");
             query.setValue(filterQuery.getQuery() != null ? filterQuery.getQuery() : "");
             createdBy.setValue(filterQuery.getCreatedBy() != null ? filterQuery.getCreatedBy() : "");
             createdAt.setValue(Utils.localDateTimeFromTs(filterQuery.getCreatedAt()));
             lastModifiedBy.setValue(filterQuery.getLastModifiedBy() != null ? filterQuery.getLastModifiedBy() : "");
-            lastModifiedAt.setValue(Utils.localDateTimeFromTs(filterQuery.getLastModifiedAt()));
+        }
+    }
+
+    private static class EditDialog extends Utils.BaseDialog<Void> {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        private final TextField name;
+        private final TextArea query;
+        private final Button save;
+
+        private EditDialog(final TargetFilterQueryGridItem filterQuery, final HawkbitMgmtClient hawkbitClient) {
+            super("Edit Target Filter Query");
+
+            name = Utils.textField(Constants.NAME, this::readyToSave);
+            name.setWidthFull();
+            query = new TextArea("Query");
+            query.setWidthFull();
+            query.setMinLength(2);
+            query.setValueChangeMode(ValueChangeMode.EAGER);
+            query.addValueChangeListener(this::readyToSave);
+
+            save = Utils.tooltip(new Button("Save"), "Save (Enter)");
+            name.setValue(Objects.requireNonNullElse(filterQuery.getName(), ""));
+            query.setValue(Objects.requireNonNullElse(filterQuery.getQuery(), ""));
+            save.addClickListener(e -> {
+                hawkbitClient.getTargetFilterQueryRestApi().updateFilter(
+                        filterQuery.getId(),
+                        new MgmtTargetFilterQueryRequestBody()
+                                .setName(name.getValue())
+                                .setQuery(query.getValue()));
+                close();
+            });
+            save.addClickShortcut(Key.ENTER);
+            save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            final Button cancel = Utils.tooltip(new Button(CANCEL), CANCEL_ESC);
+            cancel.addClickListener(e -> close());
+            cancel.addClickShortcut(Key.ESCAPE);
+            getFooter().add(cancel);
+            getFooter().add(save);
+
+            final VerticalLayout layout = new VerticalLayout();
+            layout.setSizeFull();
+            layout.setPadding(true);
+            layout.setSpacing(false);
+            layout.add(name, query);
+            add(layout);
+            open();
+        }
+
+        private void readyToSave(final Object v) {
+            final boolean saveEnabled = !name.isEmpty() && !query.isEmpty();
+            if (save.isEnabled() != saveEnabled) {
+                save.setEnabled(saveEnabled);
+            }
         }
     }
 

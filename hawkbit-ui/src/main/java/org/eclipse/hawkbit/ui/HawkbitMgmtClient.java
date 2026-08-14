@@ -77,6 +77,10 @@ public class HawkbitMgmtClient {
         return hasRead(() -> rolloutRestApi.getRollout(-1L));
     }
 
+    public boolean hasRolloutApprove() {
+        return hasRead(() -> rolloutRestApi.approve(-1L, null));
+    }
+
     public boolean hasDistributionSetRead() {
         return hasRead(() -> distributionSetRestApi.getDistributionSet(-1L));
     }
@@ -91,6 +95,10 @@ public class HawkbitMgmtClient {
 
     public boolean hasAutoAssignmentRead() {
         return hasRead(() -> autoAssignmentRestApi.getAutoAssignment(-1L));
+    }
+
+    public boolean hasAutoAssignmentApprove() {
+        return hasRead(() -> autoAssignmentRestApi.approve(-1L, null));
     }
 
     private boolean hasRead(final Supplier<ResponseEntity<?>> doCall) {

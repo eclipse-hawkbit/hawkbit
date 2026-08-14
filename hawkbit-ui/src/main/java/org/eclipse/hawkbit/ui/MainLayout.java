@@ -107,13 +107,13 @@ public class MainLayout extends AppLayout {
     }
 
     private void addDrawerContent() {
-        final H1 appName = new H1("hawkBit UI");
+        final H2 appName = new H2("HawkBit");
         final HorizontalLayout layout = new HorizontalLayout();
         layout.setPadding(true);
-        layout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        layout.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
         final Image icon = new Image("images/hawkbit.png", "hawkBit icon");
-        icon.setMaxHeight(24, Unit.PIXELS);
-        icon.setMaxWidth(24, Unit.PIXELS);
+        icon.setMaxHeight(40, Unit.PIXELS);
+        icon.setMaxWidth(40, Unit.PIXELS);
         appName.addClassNames(LumoUtility.AlignItems.BASELINE, LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
         layout.add(icon, appName);
         final Header header = new Header(layout);

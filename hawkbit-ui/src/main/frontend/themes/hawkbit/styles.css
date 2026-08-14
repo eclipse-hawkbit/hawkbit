@@ -5,3 +5,13 @@ a.nocolor:link {
 a.nocolor:visited {
     color: inherit;
 }
+
+vaadin-split-layout.no-splitter::part(splitter) {
+    display: none;
+}
+
+vaadin-grid::part(selected-row) {
+    /* layer the tint over an opaque base so frozen (sticky) cells like Edit/Details stay opaque */
+    background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct));
+    background-color: var(--lumo-base-color);
+}
