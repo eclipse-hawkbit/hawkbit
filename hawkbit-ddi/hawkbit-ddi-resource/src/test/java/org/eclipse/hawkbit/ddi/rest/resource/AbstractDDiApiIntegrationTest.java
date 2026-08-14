@@ -328,6 +328,12 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
             final String prefix, final ResultActions resultActions, final String controllerId,
             final DistributionSet ds, final Artifact artifact, final Artifact artifactSignature, final Long actionId,
             final Long osModuleId, final String downloadType, final String updateType) throws Exception {
+        // artifacts are matched by filename rather than by index, since the DDI payload does not
+        // guarantee a specific artifact order (order is DB-dependent - see #3251)
+        final String osArtifact = prefix + ".chunks[?(@.part=='os')].artifacts[?(@.filename=='"
+                + artifact.getFilename() + "')]";
+        final String osSignature = prefix + ".chunks[?(@.part=='os')].artifacts[?(@.filename=='"
+                + artifactSignature.getFilename() + "')]";
         return resultActions.andExpect(jsonPath("$.id", equalTo(String.valueOf(actionId))))
                 .andExpect(jsonPath(prefix + ".download", equalTo(downloadType)))
                 .andExpect(jsonPath(prefix + ".update", equalTo(updateType)))
@@ -339,34 +345,26 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
                         contains(findFirstModuleByType(ds, osType).orElseThrow().getName())))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].version",
                         contains(findFirstModuleByType(ds, osType).orElseThrow().getVersion())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].size", contains(ARTIFACT_SIZE)))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].filename",
-                        contains(artifact.getFilename())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].hashes.md5",
-                        contains(artifact.getMd5Hash())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].hashes.sha1",
-                        contains(artifact.getSha1Hash())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].hashes.sha256",
-                        contains(artifact.getSha256Hash())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0]._links.download-http.href",
+                .andExpect(jsonPath(osArtifact + ".size", contains(ARTIFACT_SIZE)))
+                .andExpect(jsonPath(osArtifact + ".filename", contains(artifact.getFilename())))
+                .andExpect(jsonPath(osArtifact + ".hashes.md5", contains(artifact.getMd5Hash())))
+                .andExpect(jsonPath(osArtifact + ".hashes.sha1", contains(artifact.getSha1Hash())))
+                .andExpect(jsonPath(osArtifact + ".hashes.sha256", contains(artifact.getSha256Hash())))
+                .andExpect(jsonPath(osArtifact + "._links.download-http.href",
                         contains(HTTP_LOCALHOST + AccessContext.tenant() + "/controller/v1/" + controllerId +
                                 "/softwaremodules/" + osModuleId + "/artifacts/" + artifact.getFilename())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0]._links.md5sum-http.href",
+                .andExpect(jsonPath(osArtifact + "._links.md5sum-http.href",
                         contains(HTTP_LOCALHOST + AccessContext.tenant() + "/controller/v1/" + controllerId +
                                 "/softwaremodules/" + osModuleId + "/artifacts/" + artifact.getFilename() + ".MD5SUM")))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].size", contains(ARTIFACT_SIZE)))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].filename",
-                        contains(artifactSignature.getFilename())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].hashes.md5",
-                        contains(artifactSignature.getMd5Hash())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].hashes.sha1",
-                        contains(artifactSignature.getSha1Hash())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].hashes.sha256",
-                        contains(artifactSignature.getSha256Hash())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1]._links.download-http.href",
+                .andExpect(jsonPath(osSignature + ".size", contains(ARTIFACT_SIZE)))
+                .andExpect(jsonPath(osSignature + ".filename", contains(artifactSignature.getFilename())))
+                .andExpect(jsonPath(osSignature + ".hashes.md5", contains(artifactSignature.getMd5Hash())))
+                .andExpect(jsonPath(osSignature + ".hashes.sha1", contains(artifactSignature.getSha1Hash())))
+                .andExpect(jsonPath(osSignature + ".hashes.sha256", contains(artifactSignature.getSha256Hash())))
+                .andExpect(jsonPath(osSignature + "._links.download-http.href",
                         contains(HTTP_LOCALHOST + AccessContext.tenant() + "/controller/v1/" + controllerId +
                                 "/softwaremodules/" + osModuleId + "/artifacts/" + artifactSignature.getFilename())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1]._links.md5sum-http.href",
+                .andExpect(jsonPath(osSignature + "._links.md5sum-http.href",
                         contains(HTTP_LOCALHOST + AccessContext.tenant() + "/controller/v1/" + controllerId +
                                 "/softwaremodules/" + osModuleId + "/artifacts/" + artifactSignature.getFilename() + ".MD5SUM")))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='bApp')].version",
