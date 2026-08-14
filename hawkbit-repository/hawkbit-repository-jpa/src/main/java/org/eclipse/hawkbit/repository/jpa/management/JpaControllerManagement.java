@@ -198,34 +198,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    protected void onActionStatusUpdate(final JpaActionStatus newActionStatus, final JpaAction action) {
-        final Action.Status updatedActionStatus = newActionStatus.getStatus();
-        final long timestamp = newActionStatus.getTimestamp();
-        switch (updatedActionStatus) {
-            case ERROR: {
-                final JpaTarget target = action.getTarget();
-                target.setUpdateStatus(TargetUpdateStatus.ERROR);
-                handleErrorOnAction(action, target);
-                break;
-            }
-            case FINISHED: {
-                requestControllerAttributes(handleFinishedAndStoreInTargetStatus(timestamp, action));
-                break;
-            }
-            case DOWNLOADED: {
-                handleDownloadedActionStatus(action).ifPresent(controllerId ->
-                        requestControllerAttributes(findByControllerId(controllerId)
-                                .map(JpaTarget.class::cast)
-                                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId))));
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-    }
-
-    @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Action addCancelActionStatus(final ActionStatusCreate create) {
@@ -271,7 +243,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public ActionStatus addInformationalActionStatus(final ActionStatusCreate create) {
         final JpaAction action = actionRepository.getById(create.getActionId());
@@ -348,13 +320,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         return findOrRegisterTargetIfItDoesNotExist0(controllerId, address, name, type);
     }
 
-    private Target findOrRegisterTargetIfItDoesNotExist0(final String controllerId, final URI address, final String name, final String type) {
-        final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
-        return targetRepository.findOne(spec)
-                .map(target -> updateTarget(target, address, name, type))
-                .orElseGet(() -> createTarget(controllerId, address, name, type));
-    }
-
     @Override
     public Action getActionForDownloadByTargetAndSoftwareModule(final String controllerId, final long moduleId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
@@ -426,14 +391,14 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public void registerRetrieved(final long actionId, final String message) {
         handleRegisterRetrieved(actionId, message);
     }
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(includes = ConcurrencyFailureException.class, maxRetriesString = Constants.RETRY_MAX, delayString = Constants.RETRY_DELAY)
     public Target updateControllerAttributes(final String controllerId, final Map<String, String> data, final UpdateMode mode) {
         // Constraints on attribute keys & values are not validated by EclipseLink. Hence, they are validated here.
@@ -544,6 +509,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateActionExternalRef(final long actionId, @NotEmpty final String externalRef) {
         // if access control for target repository is present check that caller has UPDATE access to the target of the action
         targetRepository.getAccessController().ifPresent(
@@ -554,6 +520,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteExistingTarget(@NotEmpty final String controllerId) {
         final JpaTarget target = targetRepository.getByControllerId(controllerId);
         targetRepository.deleteById(target.getId());
@@ -569,16 +536,19 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public AutoConfirmationStatus activateAutoConfirmation(final String controllerId, final String initiator, final String remark) {
         return confirmationManagement.activateAutoConfirmation(controllerId, initiator, remark);
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deactivateAutoConfirmation(final String controllerId) {
         confirmationManagement.deactivateAutoConfirmation(controllerId);
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public boolean updateOfflineAssignedVersion(@NotEmpty final String controllerId, final String distributionName, final String version) {
         List<DistributionSetAssignmentResult> distributionSetAssignmentResults =
                 asSystem(() -> asActor(controllerId, () -> deploymentManagement.offlineAssignedDistributionSets(
@@ -590,13 +560,49 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 .orElseThrow();
     }
 
-    private Optional<TargetType> findTargetType(String targetTypeName) {
-        return targetTypeRepository.findOne(TargetTypeSpecification.hasName(targetTypeName)).map(TargetType.class::cast);
+    // transaction write contract shall be handled by the callers
+    @Override
+    protected void onActionStatusUpdate(final JpaActionStatus newActionStatus, final JpaAction action) {
+        final Action.Status updatedActionStatus = newActionStatus.getStatus();
+        final long timestamp = newActionStatus.getTimestamp();
+        switch (updatedActionStatus) {
+            case ERROR: {
+                final JpaTarget target = action.getTarget();
+                target.setUpdateStatus(TargetUpdateStatus.ERROR);
+                handleErrorOnAction(action, target);
+                break;
+            }
+            case FINISHED: {
+                requestControllerAttributes(handleFinishedAndStoreInTargetStatus(timestamp, action));
+                break;
+            }
+            case DOWNLOADED: {
+                handleDownloadedActionStatus(action).ifPresent(controllerId ->
+                        requestControllerAttributes(findByControllerId(controllerId)
+                                .map(JpaTarget.class::cast)
+                                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId))));
+                break;
+            }
+            default: {
+                break;
+            }
+        }
     }
 
     // for testing
     void setTargetRepository(final TargetRepository targetRepositorySpy) {
         this.targetRepository = targetRepositorySpy;
+    }
+
+    private Target findOrRegisterTargetIfItDoesNotExist0(final String controllerId, final URI address, final String name, final String type) {
+        final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
+        return targetRepository.findOne(spec)
+                .map(target -> updateTarget(target, address, name, type))
+                .orElseGet(() -> createTarget(controllerId, address, name, type));
+    }
+
+    private Optional<TargetType> findTargetType(String targetTypeName) {
+        return targetTypeRepository.findOne(TargetTypeSpecification.hasName(targetTypeName)).map(TargetType.class::cast);
     }
 
     private static boolean isAddressChanged(final URI addressToUpdate, final URI address) {
