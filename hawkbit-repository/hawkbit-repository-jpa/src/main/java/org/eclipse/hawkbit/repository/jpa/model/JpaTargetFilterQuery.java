@@ -52,11 +52,6 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
     @NotEmpty
     private String query;
 
-    @Column(name = "access_control_context")
-    @Lob
-    @Size(max = TargetFilterQuery.ACCESS_CONTROL_CONTEXT_MAX_SIZE)
-    private String accessControlContext;
-
     @OneToOne(fetch = FetchType.LAZY, targetEntity = JpaAutoAssignment.class)
     @JoinColumn(name = "name", referencedColumnName = "name", insertable = false, updatable = false)
     @JoinColumn(name = "query", referencedColumnName = "query", insertable = false, updatable = false)

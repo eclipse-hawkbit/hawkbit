@@ -45,4 +45,5 @@ ALTER TABLE sp_target_filter_query
     DROP COLUMN auto_assign_action_type,
     DROP COLUMN auto_assign_weight,
     DROP COLUMN auto_assign_initiated_by,
-    DROP COLUMN confirmation_required;
+    DROP COLUMN confirmation_required,
+    DROP COLUMN access_control_context;

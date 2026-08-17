@@ -41,4 +41,4 @@ ALTER TABLE sp_target_filter_query
     DROP CONSTRAINT fk_target_filter_query_auto_assign_distribution_set;
 ALTER TABLE sp_target_filter_query
     DROP COLUMN auto_assign_distribution_set, auto_assign_action_type, auto_assign_weight,
-        auto_assign_initiated_by, confirmation_required;
+        auto_assign_initiated_by, confirmation_required, access_control_context;
