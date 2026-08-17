@@ -30,7 +30,12 @@ public final class SelectionGrid<T, ID> extends Grid<T> {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    private static final String HIGHLIGHTED_ROW_PART = "selected-row";
+
+    private final transient Function<T, ID> idFn;
+
     private volatile String rsqlFilter;
+    private transient T highlightedItem;
 
     public SelectionGrid(
             final EntityRepresentation<T, ID> entityRepresentation) {
@@ -42,8 +47,14 @@ public final class SelectionGrid<T, ID> extends Grid<T> {
             final BiFunction<Query<T, Void>, String, Stream<T>> queryFn) {
         super(entityRepresentation.beanType, false);
 
+        this.idFn = entityRepresentation.idFn;
+
         addThemeVariants(GridVariant.LUMO_NO_BORDER);
         addClassNames(LumoUtility.Border.TOP, LumoUtility.BorderColor.CONTRAST_10);
+
+        getDataCommunicator().getKeyMapper().setIdentifierGetter(idFn::apply);
+        setPartNameGenerator(item -> highlightedItem != null
+                && Objects.equals(idFn.apply(item), idFn.apply(highlightedItem)) ? HIGHLIGHTED_ROW_PART : null);
 
         setSelectionMode(Grid.SelectionMode.MULTI);
         entityRepresentation.addColumns(this);
@@ -60,14 +71,11 @@ public final class SelectionGrid<T, ID> extends Grid<T> {
                 } else {
                     final Set<ID> selectedIds = new HashSet<>();
                     selected.forEach(next -> selectedIds.add(entityRepresentation.idFn.apply(next)));
-                    // if matching keeps old entries instead of new the new ones in order to
-                    // select them in case refresh is made with keepSelection
-                    // this however means that if they are changed the old state will be shown!!!
                     return Stream.concat(selected.stream(),
                             fetch.filter(next -> !selectedIds.contains(entityRepresentation.idFn.apply(next))));
                 }
             });
-        } // else externally managed
+        }
     }
 
     public void setRsqlFilter(final String rsqlFilter, boolean refreshGrid) {
@@ -89,6 +97,35 @@ public final class SelectionGrid<T, ID> extends Grid<T> {
             deselectAll();
             getDataProvider().refreshAll();
         }
+    }
+
+    /**
+     * Highlights the given item's row (e.g. the row whose details panel is open) and clears the
+     * previous highlight. Only the affected rows are re-rendered. Passing {@code null} clears it.
+     */
+    public void setHighlightedItem(final T item) {
+        final T previous = highlightedItem;
+        if (Objects.equals(idOf(previous), idOf(item))) {
+            return;
+        }
+        highlightedItem = item;
+        if (previous != null) {
+            getDataProvider().refreshItem(previous);
+        }
+        if (item != null) {
+            getDataProvider().refreshItem(item);
+        }
+    }
+
+    /**
+     * Whether the given item is the currently highlighted row (i.e. the row whose details panel is open).
+     */
+    public boolean isHighlighted(final T item) {
+        return highlightedItem != null && Objects.equals(idOf(item), idOf(highlightedItem));
+    }
+
+    private ID idOf(final T item) {
+        return item == null ? null : idFn.apply(item);
     }
 
     public abstract static class EntityRepresentation<T, ID> {

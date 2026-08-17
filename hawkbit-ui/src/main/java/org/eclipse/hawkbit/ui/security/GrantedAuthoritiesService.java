@@ -40,6 +40,9 @@ public class GrantedAuthoritiesService {
         if (hawkbitClient.hasRolloutRead()) {
             roles.add("ROLLOUT_READ");
         }
+        if (hawkbitClient.hasRolloutApprove()) {
+            roles.add("ROLLOUT_APPROVE");
+        }
         if (hawkbitClient.hasDistributionSetRead()) {
             roles.add("DISTRIBUTION_SET_READ");
         }
@@ -51,6 +54,9 @@ public class GrantedAuthoritiesService {
         }
         if (hawkbitClient.hasAutoAssignmentRead()) {
             roles.add("AUTO_ASSIGNMENT_READ");
+        }
+        if (hawkbitClient.hasAutoAssignmentApprove()) {
+            roles.add("AUTO_ASSIGNMENT_APPROVE");
         }
         return roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role)).toList();
     }

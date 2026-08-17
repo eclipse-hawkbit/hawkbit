@@ -36,6 +36,7 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
@@ -50,11 +51,13 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
@@ -154,7 +157,9 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
                     final TargetDetailedView targetDetailedView = new TargetDetailedView(hawkbitClient);
                     targetDetailedView.setItem(target);
                     return targetDetailedView;
-                }
+                },
+                SplitLayout.Orientation.VERTICAL,
+                target -> new EditDialog(target, hawkbitClient).result()
         );
 
         final Function<SelectionGrid<TargetWithDs, String>, CompletionStage<Void>> assignHandler = source -> new AssignDialog(
@@ -363,6 +368,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             targetMetadata = new TargetMetadata(hawkbitClient);
             targetActionsHistoryLayout = new TargetActionsHistoryLayout(hawkbitClient);
             setSizeFull();
+            getStyle().set("overflow", "auto");
 
             add(targetId);
             tabSheet.add("Details", targetDetails);
@@ -393,11 +399,17 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
         private final TextField createdBy = Utils.textField(Constants.CREATED_BY);
         private final TextField createdAt = Utils.textField(Constants.CREATED_AT);
         private final TextField lastModifiedBy = Utils.textField(Constants.LAST_MODIFIED_BY);
-        private final TextField lastModifiedAt = Utils.textField(Constants.LAST_MODIFIED_AT);
         private final TextField securityToken = Utils.textField(Constants.SECURITY_TOKEN);
+        private final TextField ipAddress = Utils.textField(Constants.IP_ADDRESS);
+        private final TextField lastControllerRequestAt = Utils.textField(Constants.LAST_CONTROLLER_REQUEST_AT);
+        private final TextField installedAt = Utils.textField(Constants.INSTALLED_AT);
         private final TextField lastPoll = Utils.textField(Constants.LAST_POLL);
+        private final TextField nextExpectedPoll = Utils.textField(Constants.NEXT_EXPECTED_POLL);
         private final TextField group = Utils.textField(Constants.GROUP);
         private final TextField targetAddress = Utils.textField(Constants.ADDRESS);
+        private final Checkbox requestAttributes = new Checkbox(Constants.REQUEST_ATTRIBUTES);
+        private final Checkbox autoConfirmActive = new Checkbox(Constants.AUTO_CONFIRM_ACTIVE);
+        private final Checkbox overdue = new Checkbox(Constants.OVERDUE);
         private final TextArea targetAttributes = new TextArea(Constants.ATTRIBUTES);
         private transient MgmtTarget target;
 
@@ -407,16 +419,27 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             Stream.of(
                             description,
                             createdBy, createdAt,
-                            lastModifiedBy, lastModifiedAt,
-                            securityToken, lastPoll, group, targetAddress, targetAttributes
+                            lastModifiedBy,
+                            securityToken, ipAddress,
+                            lastControllerRequestAt, installedAt, lastPoll, nextExpectedPoll,
+                            group, targetAddress
                     )
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
                     });
+            Stream.of(requestAttributes, autoConfirmActive, overdue)
+                    .forEach(checkbox -> {
+                        checkbox.setReadOnly(true);
+                        checkbox.setEnabled(false);
+                        add(checkbox);
+                    });
+            targetAttributes.setReadOnly(true);
+            add(targetAttributes);
 
             setResponsiveSteps(new ResponsiveStep("0", 2));
             setColspan(description, 2);
+            setColspan(targetAttributes, 2);
         }
 
         private void setItem(final MgmtTarget target) {
@@ -429,13 +452,22 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             createdBy.setValue(target.getCreatedBy());
             createdAt.setValue(Utils.localDateTimeFromTs(target.getCreatedAt()));
             lastModifiedBy.setValue(target.getLastModifiedBy());
-            lastModifiedAt.setValue(Utils.localDateTimeFromTs(target.getLastModifiedAt()));
             securityToken.setValue(Objects.requireNonNullElse(target.getSecurityToken(), ""));
+            ipAddress.setValue(Objects.requireNonNullElse(target.getIpAddress(), ""));
+            lastControllerRequestAt.setValue(
+                    target.getLastControllerRequestAt() == null ? "" : Utils.localDateTimeFromTs(target.getLastControllerRequestAt()));
+            installedAt.setValue(target.getInstalledAt() == null ? "" : Utils.localDateTimeFromTs(target.getInstalledAt()));
             group.setValue(target.getGroup() != null ? target.getGroup() : "");
             targetAddress.setValue(target.getAddress() != null ? target.getAddress() : "");
+            requestAttributes.setValue(target.isRequestAttributes());
+            autoConfirmActive.setValue(Boolean.TRUE.equals(target.getAutoConfirmActive()));
 
             final MgmtPollStatus pollStatus = target.getPollStatus();
             lastPoll.setValue(pollStatus == null ? NOT_AVAILABLE_NULL : Utils.localDateTimeFromTs(pollStatus.getLastRequestAt()));
+            nextExpectedPoll.setValue(pollStatus == null || pollStatus.getNextExpectedRequestAt() == null
+                    ? NOT_AVAILABLE_NULL
+                    : Utils.localDateTimeFromTs(pollStatus.getNextExpectedRequestAt()));
+            overdue.setValue(pollStatus != null && pollStatus.isOverdue());
             final ResponseEntity<MgmtTargetAttributes> response = hawkbitClient.getTargetRestApi().getAttributes(target.getControllerId());
             if (response.getStatusCode().is2xxSuccessful()) {
                 targetAttributes.setValue(Objects.requireNonNullElse(response.getBody(), Collections.emptyMap()).entrySet().stream()
@@ -809,6 +841,9 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
         private final TextField name;
         private final TextArea description;
         private final TextField group;
+        private final TextField address;
+        private final TextField securityToken;
+        private final Checkbox requestAttributes;
 
         private RegisterDialog(final HawkbitMgmtClient hawkbitClient) {
             super("Register Target");
@@ -833,8 +868,14 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             description = new TextArea(Constants.DESCRIPTION);
             description.setMinLength(2);
             description.setWidthFull();
+            description.setValueChangeMode(ValueChangeMode.EAGER);
             group = Utils.textField(Constants.GROUP);
             group.setWidthFull();
+            address = Utils.textField(Constants.ADDRESS);
+            address.setWidthFull();
+            securityToken = Utils.textField(Constants.SECURITY_TOKEN);
+            securityToken.setWidthFull();
+            requestAttributes = new Checkbox("Request Attributes");
 
             addCreateClickListener(register, hawkbitClient);
             register.setEnabled(false);
@@ -850,7 +891,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             layout.setSizeFull();
             layout.setPadding(true);
             layout.setSpacing(false);
-            layout.add(type, controllerId, name, description, group);
+            layout.add(type, controllerId, name, description, group, address, securityToken, requestAttributes);
             add(layout);
             open();
         }
@@ -861,9 +902,16 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
                         .setControllerId(controllerId.getValue())
                         .setName(name.getValue())
                         .setDescription(description.getValue())
-                        .setGroup(group.getValue());
+                        .setGroup(group.getValue())
+                        .setRequestAttributes(requestAttributes.getValue());
                 if (!ObjectUtils.isEmpty(type.getValue())) {
                     request.setTargetType(type.getValue().getId());
+                }
+                if (!ObjectUtils.isEmpty(address.getValue())) {
+                    request.setAddress(address.getValue());
+                }
+                if (!ObjectUtils.isEmpty(securityToken.getValue())) {
+                    request.setSecurityToken(securityToken.getValue());
                 }
                 hawkbitClient.getTargetRestApi().createTargets(
                                 List.of(request))
@@ -874,6 +922,98 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
                         .getControllerId();
                 close();
             });
+        }
+    }
+
+    private static class EditDialog extends Utils.BaseDialog<Void> {
+
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        private final Select<MgmtTargetType> type;
+        private final TextField name;
+        private final TextArea description;
+        private final TextField group;
+        private final TextField address;
+        private final TextField securityToken;
+        private final Checkbox requestAttributes;
+
+        private EditDialog(final MgmtTarget target, final HawkbitMgmtClient hawkbitClient) {
+            super("Edit Target");
+
+            final TextField controllerId = Utils.textField(CONTROLLER_ID);
+            controllerId.setValue(target.getControllerId());
+            controllerId.setReadOnly(true);
+            controllerId.setWidthFull();
+
+            final MgmtTargetType[] types = hawkbitClient.getTargetTypeRestApi()
+                    .getTargetTypes(null, 0, 30, Constants.NAME_ASC)
+                    .getBody()
+                    .getContent()
+                    .toArray(new MgmtTargetType[0]);
+            type = new Select<>("Type", e -> {}, types);
+            type.setWidthFull();
+            type.setEmptySelectionAllowed(true);
+            type.setItemLabelGenerator(item -> item == null ? "" : item.getName());
+            if (target.getTargetType() != null) {
+                Stream.of(types)
+                        .filter(t -> target.getTargetType().equals(t.getId()))
+                        .findFirst()
+                        .ifPresent(type::setValue);
+            }
+
+            name = Utils.textField(Constants.NAME);
+            name.setValue(Objects.requireNonNullElse(target.getName(), ""));
+            name.setWidthFull();
+            description = new TextArea(Constants.DESCRIPTION);
+            description.setValue(Objects.requireNonNullElse(target.getDescription(), ""));
+            description.setMinLength(2);
+            description.setWidthFull();
+            description.setValueChangeMode(ValueChangeMode.EAGER);
+            group = Utils.textField(Constants.GROUP);
+            group.setValue(Objects.requireNonNullElse(target.getGroup(), ""));
+            group.setWidthFull();
+            address = Utils.textField(Constants.ADDRESS);
+            address.setValue(Objects.requireNonNullElse(target.getAddress(), ""));
+            address.setWidthFull();
+            securityToken = Utils.textField(Constants.SECURITY_TOKEN);
+            securityToken.setValue(Objects.requireNonNullElse(target.getSecurityToken(), ""));
+            securityToken.setWidthFull();
+            requestAttributes = new Checkbox("Request Attributes");
+            requestAttributes.setValue(target.isRequestAttributes());
+
+            final Button save = Utils.tooltip(new Button("Save"), "Save (Enter)");
+            save.addClickListener(e -> {
+                final MgmtTargetRequestBody request = new MgmtTargetRequestBody()
+                        .setName(name.getValue())
+                        .setDescription(description.getValue())
+                        .setGroup(group.getValue())
+                        .setRequestAttributes(requestAttributes.getValue());
+                request.setTargetType(ObjectUtils.isEmpty(type.getValue()) ? null : type.getValue().getId());
+                if (!ObjectUtils.isEmpty(address.getValue())) {
+                    request.setAddress(address.getValue());
+                }
+                if (!ObjectUtils.isEmpty(securityToken.getValue())) {
+                    request.setSecurityToken(securityToken.getValue());
+                }
+                hawkbitClient.getTargetRestApi().updateTarget(target.getControllerId(), request);
+                close();
+            });
+            save.addClickShortcut(Key.ENTER);
+            save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            final Button cancel = Utils.tooltip(new Button(CANCEL), CANCEL_ESC);
+            cancel.addClickListener(e -> close());
+            cancel.addClickShortcut(Key.ESCAPE);
+            getFooter().add(cancel);
+            getFooter().add(save);
+
+            final VerticalLayout layout = new VerticalLayout();
+            layout.setSizeFull();
+            layout.setPadding(true);
+            layout.setSpacing(false);
+            layout.add(controllerId, type, name, description, group, address, securityToken, requestAttributes);
+            add(layout);
+            open();
         }
     }
 
@@ -969,6 +1109,7 @@ public final class TargetView extends TableView<TargetView.TargetWithDs, String>
             final Input colorInput = new Input();
             colorInput.setType("color");
             name = Utils.textField("Tag Name", e -> create.setEnabled(!e.getHasValue().isEmpty()));
+            description.setValueChangeMode(ValueChangeMode.EAGER);
             formLayout.add(name);
             formLayout.add(description);
             formLayout.addFormItem(colorInput, "Color Selection");

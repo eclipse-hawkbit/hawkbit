@@ -20,7 +20,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -46,6 +45,7 @@ public class TableView<T, ID> extends Div implements Constants, BeforeEnterObser
     private static final String VAR_LUMO_PRIMARY_COLOR = "var(--lumo-primary-color)";
     private static final int DEFAULT_OPEN_POSITION_SIZE = 50;
     private static final String QUERY_PARAM_FILTER = "q";
+    private static final String NO_SPLITTER = "no-splitter";
 
     protected SelectionGrid<T, ID> selectionGrid;
     private final Filter filter;
@@ -53,7 +53,6 @@ public class TableView<T, ID> extends Div implements Constants, BeforeEnterObser
     protected final HorizontalLayout controlsLayout;
     private final SplitLayout splitLayout;
     private final Div detailsPanel;
-    private Button currentSelectionButton;
 
     public TableView(
             final Filter.Rsql rsql,
@@ -71,18 +70,49 @@ public class TableView<T, ID> extends Div implements Constants, BeforeEnterObser
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> addHandler,
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler,
             final Function<T, Component> detailsButtonHandler) {
+        this(rsql, alternativeRsql, entityRepresentation, queryFn, addHandler, removeHandler, detailsButtonHandler,
+                SplitLayout.Orientation.HORIZONTAL);
+    }
+
+    public TableView(
+            final Filter.Rsql rsql, final Filter.Rsql alternativeRsql,
+            final SelectionGrid.EntityRepresentation<T, ID> entityRepresentation,
+            final BiFunction<Query<T, Void>, String, Stream<T>> queryFn,
+            final Function<SelectionGrid<T, ID>, CompletionStage<Void>> addHandler,
+            final Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler,
+            final Function<T, Component> detailsButtonHandler,
+            final SplitLayout.Orientation detailsOrientation) {
+        this(rsql, alternativeRsql, entityRepresentation, queryFn, addHandler, removeHandler, detailsButtonHandler,
+                detailsOrientation, null);
+    }
+
+    public TableView(
+            final Filter.Rsql rsql, final Filter.Rsql alternativeRsql,
+            final SelectionGrid.EntityRepresentation<T, ID> entityRepresentation,
+            final BiFunction<Query<T, Void>, String, Stream<T>> queryFn,
+            final Function<SelectionGrid<T, ID>, CompletionStage<Void>> addHandler,
+            final Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler,
+            final Function<T, Component> detailsButtonHandler,
+            final SplitLayout.Orientation detailsOrientation,
+            final Function<T, CompletionStage<Void>> editHandler) {
         selectionGrid = new SelectionGrid<>(entityRepresentation, queryFn);
         selectionGrid.setSizeFull();
         setSizeFull();
 
         splitLayout = new SplitLayout();
         splitLayout.setSizeFull();
-        splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);
+        splitLayout.setOrientation(detailsOrientation);
         splitLayout.setSplitterPosition(100);
+        splitLayout.addClassName(NO_SPLITTER);
         splitLayout.addToPrimary(selectionGrid);
         detailsPanel = new Div();
         detailsPanel.setSizeFull();
         detailsPanel.getStyle().set("display", "flex").set("flex-direction", "column").set("min-height", "0");
+
+        if (editHandler != null) {
+            ComponentRenderer<Button, T> renderer = new ComponentRenderer<>(renderEditButton(editHandler));
+            selectionGrid.addColumn(renderer).setHeader("Edit").setAutoWidth(true).setFlexGrow(0).setFrozenToEnd(true);
+        }
 
         if (detailsButtonHandler != null) {
             ComponentRenderer<Button, T> renderer = new ComponentRenderer<>(renderDetailsButton(detailsButtonHandler));
@@ -124,39 +154,50 @@ public class TableView<T, ID> extends Div implements Constants, BeforeEnterObser
             splitLayout.remove(detailsPanel);
         }
         splitLayout.setSplitterPosition(100);
-        currentSelectionButton = null;
+        splitLayout.addClassName(NO_SPLITTER);
+        selectionGrid.setHighlightedItem(null);
+    }
+
+    private void openDetailsPanel(final T selectedItem, final Function<T, Component> selectionHandler) {
+        if (splitLayout.getSecondaryComponent() == null) {
+            splitLayout.addToSecondary(detailsPanel);
+        }
+        detailsPanel.removeAll();
+        splitLayout.removeClassName(NO_SPLITTER);
+        splitLayout.setSplitterPosition(DEFAULT_OPEN_POSITION_SIZE);
+        detailsPanel.add(selectionHandler.apply(selectedItem));
+        // updates the highlight and re-renders the affected rows, so their details buttons
+        // reflect the open/closed state (see renderDetailsButton)
+        selectionGrid.setHighlightedItem(selectedItem);
     }
 
     private SerializableFunction<T, Button> renderDetailsButton(final Function<T, Component> selectionHandler) {
         return selectedItem -> {
-            final Button button = new Button(VaadinIcon.EYE.create());
-            button.getStyle().set(COLOR, VAR_LUMO_SECONDARY_TEXT_COLOR);
+            // derive the icon from the open/closed state so it stays correct across row re-renders
+            final boolean open = selectionGrid.isHighlighted(selectedItem);
+            final Button button = new Button((open ? VaadinIcon.CLOSE_SMALL : VaadinIcon.EYE).create());
+            button.getStyle().set(COLOR, open ? VAR_LUMO_PRIMARY_COLOR : VAR_LUMO_SECONDARY_TEXT_COLOR);
 
             button.addClickListener(event -> {
-                final Icon eyeIcon = VaadinIcon.EYE.create();
-                final Icon closeIcon = VaadinIcon.CLOSE_SMALL.create();
-
-                if (button == currentSelectionButton) {
-                    button.setIcon(eyeIcon);
-                    button.getStyle().set(COLOR, VAR_LUMO_SECONDARY_TEXT_COLOR);
+                if (selectionGrid.isHighlighted(selectedItem)) {
                     closeDetailsPanel();
                 } else {
-                    button.setIcon(closeIcon);
-                    button.getStyle().set(COLOR, VAR_LUMO_PRIMARY_COLOR);
-                    if (currentSelectionButton == null) {
-                        splitLayout.addToSecondary(detailsPanel);
-                    } else {
-                        currentSelectionButton.setIcon(eyeIcon);
-                        currentSelectionButton.getStyle().set(COLOR, VAR_LUMO_SECONDARY_TEXT_COLOR);
-                    }
-                    detailsPanel.removeAll();
-                    splitLayout.setSplitterPosition(DEFAULT_OPEN_POSITION_SIZE);
-                    detailsPanel.add(selectionHandler.apply(selectedItem));
-                    currentSelectionButton = button;
+                    openDetailsPanel(selectedItem, selectionHandler);
                 }
             });
 
             button.setTooltipText("Show details");
+            button.addThemeVariants(ButtonVariant.LUMO_SMALL);
+            return button;
+        };
+    }
+
+    private SerializableFunction<T, Button> renderEditButton(final Function<T, CompletionStage<Void>> editHandler) {
+        return item -> {
+            final Button button = new Button(VaadinIcon.EDIT.create());
+            button.getStyle().set(COLOR, VAR_LUMO_SECONDARY_TEXT_COLOR);
+            button.addClickListener(event -> editHandler.apply(item).thenAccept(v -> selectionGrid.refreshGrid(false)));
+            button.setTooltipText("Edit");
             button.addThemeVariants(ButtonVariant.LUMO_SMALL);
             return button;
         };
