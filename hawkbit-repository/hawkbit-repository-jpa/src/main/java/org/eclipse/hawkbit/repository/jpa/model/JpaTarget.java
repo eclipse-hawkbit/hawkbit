@@ -145,7 +145,9 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     private String group;
 
     // actually it is OneToOne - but lazy loading is not supported for OneToOne (at least for hibernate 6.6.2)
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "target", cascade = { CascadeType.ALL }, orphanRemoval = true)
+    // All CascadeType except DETACH
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "target",
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH }, orphanRemoval = true)
     @PrimaryKeyJoinColumn
     private List<JpaAutoConfirmationStatus> autoConfirmationStatus;
 

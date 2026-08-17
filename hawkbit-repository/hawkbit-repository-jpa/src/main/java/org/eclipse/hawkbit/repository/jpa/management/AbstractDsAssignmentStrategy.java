@@ -85,15 +85,29 @@ public abstract class AbstractDsAssignmentStrategy {
         this.maxAssignmentExceededHandler = maxAssignmentExceededHandler;
     }
 
+    // safe default: enforces the per-target action quota and creates the action - use this for any standalone creation
     public JpaAction createTargetAction(
             final TargetWithActionType targetWithActionType,
             final List<JpaTarget> targets, final JpaDistributionSet set) {
+        return createTargetAction(targetWithActionType, targets, set, isConfirmationFlowEnabled(), true);
+    }
+
+    // The per-target action quota is enforced unless checkQuota is false. Pass checkQuota=false ONLY when the quota has
+    // already been enforced for the whole batch upstream (the assignment validate phase, enforceMaxActionsPerTarget) -
+    // making the skip an explicit, informed decision at the call site, so there is no way to create an action silently
+    // without a quota check. confirmationFlowEnabled is the precomputed tenant-wide flag (read once per assignment); the
+    // base ignores it - only the online strategy uses it to set the initial action status.
+    public JpaAction createTargetAction(
+            final TargetWithActionType targetWithActionType, final List<JpaTarget> targets, final JpaDistributionSet set,
+            final boolean confirmationFlowEnabled, final boolean checkQuota) {
         final Optional<JpaTarget> optTarget = targets.stream()
                 .filter(t -> t.getControllerId().equals(targetWithActionType.getControllerId())).findFirst();
 
         // create the action
         return optTarget.map(target -> {
-            assertActionsPerTargetQuota(target);
+            if (checkQuota) {
+                assertActionsPerTargetQuota(target);
+            }
             final JpaAction actionForTarget = new JpaAction();
             actionForTarget.setActionType(targetWithActionType.getActionType());
             actionForTarget.setForcedTime(targetWithActionType.getForceTime());
@@ -127,6 +141,11 @@ public abstract class AbstractDsAssignmentStrategy {
         }
 
         return actionStatus;
+    }
+
+    // overload taking the precomputed, per-assignment confirmation-flow flag (see createTargetAction overload)
+    public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage, final boolean confirmationFlowEnabled) {
+        return createActionStatus(action, actionMessage);
     }
 
     protected void sendTargetUpdatedEvent(final JpaTarget target) {

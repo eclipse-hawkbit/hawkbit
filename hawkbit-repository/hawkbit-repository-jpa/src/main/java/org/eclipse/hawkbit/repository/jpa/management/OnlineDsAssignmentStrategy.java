@@ -69,12 +69,14 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     @Override
     public JpaAction createTargetAction(final TargetWithActionType targetWithActionType,
-            final List<JpaTarget> targets, final JpaDistributionSet set) {
-        final JpaAction result = super.createTargetAction(targetWithActionType, targets, set);
+            final List<JpaTarget> targets, final JpaDistributionSet set, final boolean confirmationFlowEnabled, final boolean checkQuota) {
+        final JpaAction result = super.createTargetAction(targetWithActionType, targets, set, confirmationFlowEnabled, checkQuota);
         if (result != null) {
-            final boolean confirmationRequired = targetWithActionType.isConfirmationRequired()
-                    && result.getTarget().getAutoConfirmationStatus() == null;
-            if (isConfirmationFlowEnabled() && confirmationRequired) {
+            // evaluate the lazy auto-confirmation status only when the confirmation flow is on - when off the action
+            // always goes to RUNNING and the status is irrelevant, so we avoid a per-target sp_target_conf_status read
+            final boolean confirmationRequired = confirmationFlowEnabled && targetWithActionType.isConfirmationRequired() &&
+                    result.getTarget().getAutoConfirmationStatus() == null;
+            if (confirmationRequired) {
                 result.setStatus(Status.WAIT_FOR_CONFIRMATION);
             } else {
                 result.setStatus(Status.RUNNING);
@@ -88,12 +90,13 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
      */
     @Override
     public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
+        return createActionStatus(action, actionMessage, isConfirmationFlowEnabled());
+    }
+
+    @Override
+    public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage, final boolean confirmationFlowEnabled) {
         final JpaActionStatus result = super.createActionStatus(action, actionMessage);
-        if (isConfirmationFlowEnabled()) {
-            result.setStatus(Status.WAIT_FOR_CONFIRMATION);
-        } else {
-            result.setStatus(Status.RUNNING);
-        }
+        result.setStatus(confirmationFlowEnabled ? Status.WAIT_FOR_CONFIRMATION : Status.RUNNING);
         return result;
     }
 

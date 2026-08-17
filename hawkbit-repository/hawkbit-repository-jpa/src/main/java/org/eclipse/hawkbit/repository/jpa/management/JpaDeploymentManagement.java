@@ -877,17 +877,21 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final List<JpaTarget> targetEntities) {
         final List<List<Long>> targetEntitiesIdsChunks = getTargetEntitiesAsChunks(targetEntities);
 
+        // tenant-wide flag - invariant within this assignment transaction; read once and thread it through the
+        // per-target loops below instead of reading sp_tenant_configuration once per target
+        final boolean confirmationFlowEnabled = isConfirmationFlowEnabled();
+
         closeOrCancelActiveActions(assignmentStrategy, targetEntitiesIdsChunks);
         // cancel all scheduled actions which are in-active, these actions were
         // not active before and the manual assignment which has been done cancels them
         targetEntitiesIdsChunks.forEach(this::cancelInactiveScheduledActionsForTargets);
         setAssignedDistributionSetAndTargetUpdateStatus(assignmentStrategy, distributionSetEntity, targetEntitiesIdsChunks);
         final Map<TargetWithActionType, JpaAction> assignedActions =
-                createActions(targetsWithActionType, targetEntities, distributionSetEntity, assignmentStrategy);
+                createActions(targetsWithActionType, targetEntities, distributionSetEntity, assignmentStrategy, confirmationFlowEnabled);
         // create initial action status when action is created, so we remember
         // the initial running status because we will change the status
         // of the action itself and with this action status we have a nicer action history.
-        createActionsStatus(assignedActions, assignmentStrategy, actionMessage);
+        createActionsStatus(assignedActions, assignmentStrategy, actionMessage, confirmationFlowEnabled);
 
         detachEntitiesAndSendTargetUpdatedEvents(distributionSetEntity, targetEntities, assignmentStrategy);
         return new ArrayList<>(assignedActions.values());
@@ -936,10 +940,13 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     private Map<TargetWithActionType, JpaAction> createActions(
             final Collection<TargetWithActionType> targetsWithActionType,
-            final List<JpaTarget> targets, final JpaDistributionSet set, final AbstractDsAssignmentStrategy assignmentStrategy) {
+            final List<JpaTarget> targets, final JpaDistributionSet set, final AbstractDsAssignmentStrategy assignmentStrategy,
+            final boolean confirmationFlowEnabled) {
         final Map<TargetWithActionType, JpaAction> persistedActions = new LinkedHashMap<>();
         for (final TargetWithActionType twt : targetsWithActionType) {
-            final JpaAction targetAction = assignmentStrategy.createTargetAction(twt, targets, set);
+            // checkQuota=false: the per-target action quota was already enforced for the whole request in the validate
+            // phase (enforceMaxActionsPerTarget); this is an explicit, informed opt-out of the redundant re-count
+            final JpaAction targetAction = assignmentStrategy.createTargetAction(twt, targets, set, confirmationFlowEnabled, false);
             if (targetAction != null) {
                 persistedActions.put(twt, actionRepository.save(targetAction));
             }
@@ -949,10 +956,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     private void createActionsStatus(
             final Map<TargetWithActionType, JpaAction> actions, final AbstractDsAssignmentStrategy assignmentStrategy,
-            final String actionMessage) {
+            final String actionMessage, final boolean confirmationFlowEnabled) {
         actionStatusRepository.saveAll(actions.entrySet().stream().map(entry -> {
             final JpaAction action = entry.getValue();
-            final JpaActionStatus actionStatus = assignmentStrategy.createActionStatus(action, actionMessage);
+            final JpaActionStatus actionStatus = assignmentStrategy.createActionStatus(action, actionMessage, confirmationFlowEnabled);
             verifyAndAddConfirmationStatus(action, actionStatus, entry.getKey().isConfirmationRequired());
             return actionStatus;
         }).toList());

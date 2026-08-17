@@ -55,7 +55,9 @@ class SqlProbeTest extends AbstractJpaIntegrationTest {
 
     // expected per-table SELECT footprints (EclipseLink, this scenario) - captured from the dump; see assertSelectsByTable
     private static final Map<String, Long> ASSIGNING_TICK = Map.of(
-            "sp_action", 20L,
+            // #3: bulk create passes checkQuota=false (validate phase already enforced), so the per-target quota
+            // COUNT is not duplicated in createTargetAction - 20 -> 10 ([5-14] validate only)
+            "sp_action", 10L,
             "sp_auto_assignment", 2L,
             "sp_distribution_set", 4L,
             "sp_distribution_set_type", 1L,
@@ -63,8 +65,10 @@ class SqlProbeTest extends AbstractJpaIntegrationTest {
             "sp_ds_type_element", 1L,
             "sp_software_module_type", 3L,
             "sp_target", 17L,
-            "sp_target_conf_status", 10L,
-            "sp_tenant_configuration", 21L);
+            // #7: autoConfirmationStatus cascade no longer includes DETACH, so detaching targets no longer force-loads the
+            // (LAZY) collection - was 10 per-target sp_target_conf_status reads, now 0 (table not touched)
+            // #1: isConfirmationFlowEnabled() read once per assignment (was per-target ×2) - 21 -> 2 ([27] autoclose + 1 confirmation)
+            "sp_tenant_configuration", 2L);
     private static final Map<String, Long> AUTO_ASSIGN_STEADY_TICK = Map.of(
             "sp_auto_assignment", 1L,
             "sp_distribution_set", 1L,
@@ -154,7 +158,8 @@ class SqlProbeTest extends AbstractJpaIntegrationTest {
     private void autoAssignScenario() {
         final DistributionSet ds = testdataFactory.createDistributionSet("aaguard");
         testdataFactory.createTargets(PREFIX, 0, TARGETS);
-        autoAssignmentManagement.create(Create.builder().name("aaguard").targetFilterQuery("controllerid==" + PREFIX + "*").distributionSet(ds).build());
+        autoAssignmentManagement.create(Create.builder().name("aaguard").targetFilterQuery("controllerid==" + PREFIX + "*").distributionSet(ds)
+                .build());
     }
 
     /**

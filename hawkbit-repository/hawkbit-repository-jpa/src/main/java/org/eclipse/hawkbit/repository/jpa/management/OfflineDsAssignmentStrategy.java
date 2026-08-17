@@ -55,8 +55,9 @@ class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     @Override
     public JpaAction createTargetAction(
-            final TargetWithActionType targetWithActionType, final List<JpaTarget> targets, final JpaDistributionSet set) {
-        final JpaAction result = super.createTargetAction(targetWithActionType, targets, set);
+            final TargetWithActionType targetWithActionType, final List<JpaTarget> targets, final JpaDistributionSet set,
+            final boolean confirmationFlowEnabled, final boolean checkQuota) {
+        final JpaAction result = super.createTargetAction(targetWithActionType, targets, set, confirmationFlowEnabled, checkQuota);
         if (result != null) {
             result.setStatus(Status.FINISHED);
             result.setActive(Boolean.FALSE);
