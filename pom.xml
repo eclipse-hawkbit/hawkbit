@@ -549,13 +549,54 @@
                                 <addOutputDirectory>false</addOutputDirectory>
                             </configuration>
                         </execution>
-                    </executions><dependencies>
-                    <dependency>
-                        <groupId>org.projectlombok</groupId>
-                        <artifactId>lombok</artifactId>
-                        <version>${lombok.version}</version>
-                    </dependency>
-                </dependencies>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+
+                <!-- Bytecode enhancement for Hibernate, needs to be in the module where the entity classes are.
+                     Makes @Basic(fetch = LAZY) basic fields (e.g. accessControlContext) actually lazy -->
+                <plugin>
+                    <groupId>org.hibernate.orm</groupId>
+                    <artifactId>hibernate-maven-plugin</artifactId>
+                    <version>${hibernate.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>enhance</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <!-- Inline dirty tracking (enabled by default) switches all enhanced entities from
+                             snapshot-based dirty checking to self-dirty tracking, which changes flush behavior,
+                             optLockRevision bumping and the number of *UpdatedEvent fired. -->
+                        <enableDirtyTracking>false</enableDirtyTracking>
+                    </configuration>
+                </plugin>
+
+                <!-- Static weaver for EclipseLink, needs to be in the module where the entity classes are.
+                     basePackage shall be set in module via the eclipselink.weave.basePackage property. -->
+                <plugin>
+                    <groupId>com.ethlo.persistence.tools</groupId>
+                    <artifactId>eclipselink-maven-plugin</artifactId>
+                    <version>${eclipselink-maven-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <phase>process-classes</phase>
+                            <goals>
+                                <goal>weave</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <basePackage>${eclipselink.weave.basePackage}</basePackage>
+                    </configuration>
                 </plugin>
 
                 <plugin>

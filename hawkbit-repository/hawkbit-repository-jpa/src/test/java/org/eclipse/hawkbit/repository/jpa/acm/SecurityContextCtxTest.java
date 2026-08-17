@@ -14,6 +14,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockStatic;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
@@ -56,7 +58,7 @@ class SecurityContextCtxTest extends AbstractJpaIntegrationTest {
         assertThat(userContext).isNotNull();
 
         final Rollout exampleRollout = withSecurityContext(userContext, testdataFactory::createRollout);
-        assertThat(exampleRollout.getAccessControlContext())
+        assertThat(withSecurityContext(userContext, () -> rolloutManagement.getAccessControlContext(exampleRollout.getId())))
                 .hasValueSatisfying(ctx -> assertEssentialEquals(deserialize(ctx), userContext));
     }
 
@@ -68,7 +70,9 @@ class SecurityContextCtxTest extends AbstractJpaIntegrationTest {
         final SecurityContext userContext = createUserContext(2);
 
         final AutoAssignment autoAssignment = withSecurityContext(userContext, testdataFactory::createTargetsAndAutoAssignment);
-        assertThat(autoAssignment.getAccessControlContext())
+        assertThat(withSecurityContext(userContext,
+                () -> Optional.ofNullable(
+                        autoAssignmentManagement.getAccessControlContexts(List.of(autoAssignment.getId())).get(autoAssignment.getId()))))
                 .hasValueSatisfying(ctx -> assertEssentialEquals(deserialize(ctx), userContext));
     }
 

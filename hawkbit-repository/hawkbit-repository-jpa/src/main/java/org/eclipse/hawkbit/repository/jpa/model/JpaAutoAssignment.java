@@ -16,6 +16,7 @@ import static org.eclipse.hawkbit.repository.model.TargetFilterQuery.QUERY_MAX_S
 import java.util.EnumMap;
 import java.util.Optional;
 
+import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Converter;
@@ -44,7 +45,6 @@ import org.eclipse.hawkbit.repository.jpa.utils.MapAttributeConverter;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.AutoAssignment;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
 /**
  * JPA implementation of an {@link AutoAssignment}.
@@ -93,6 +93,11 @@ public class JpaAutoAssignment extends AbstractJpaNamedEntity implements AutoAss
 
     @Column(name = "access_control_context")
     @Lob
+    // Lazy + no getter: the access control context is large and only needed by the auto-assign scheduler, which
+    // fetches it explicitly (in batch) via AutoAssignmentRepository. It must never be read off the managed entity -
+    // a plain field read would not trigger the lazy fault-in and would silently return null.
+    @Basic(fetch = FetchType.LAZY)
+    @Getter(AccessLevel.NONE)
     @Size(max = AutoAssignment.ACCESS_CONTROL_CONTEXT_MAX_SIZE)
     private String accessControlContext;
 
@@ -115,11 +120,6 @@ public class JpaAutoAssignment extends AbstractJpaNamedEntity implements AutoAss
     @Override
     public Optional<Integer> getWeight() {
         return Optional.ofNullable(weight);
-    }
-
-    @Override
-    public Optional<String> getAccessControlContext() {
-        return Optional.ofNullable(accessControlContext);
     }
 
     @Override

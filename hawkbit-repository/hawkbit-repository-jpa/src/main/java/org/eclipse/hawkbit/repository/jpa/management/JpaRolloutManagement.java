@@ -340,6 +340,11 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
+    public Optional<String> getAccessControlContext(final long rolloutId) {
+        return rolloutRepository.getAccessControlContext(rolloutId);
+    }
+
+    @Override
     public boolean exists(final long rolloutId) {
         return rolloutRepository.existsById(rolloutId);
     }

@@ -24,6 +24,8 @@
 
     <properties>
         <apt.source.dir>${project.build.directory}/generated-sources/apt/</apt.source.dir>
+        <!-- base package woven by the EclipseLink static weaver; a module may override it in its properties -->
+        <eclipselink.weave.basePackage>org.eclipse.hawkbit.repository.jpa.model</eclipselink.weave.basePackage>
     </properties>
 
     <dependencies>
@@ -58,18 +60,6 @@
             <plugin>
                 <groupId>com.ethlo.persistence.tools</groupId>
                 <artifactId>eclipselink-maven-plugin</artifactId>
-                <version>${eclipselink-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>weave</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <basePackage>org.eclipse.hawkbit.repository.jpa.model</basePackage>
-                </configuration>
             </plugin>
         </plugins>
     </build>

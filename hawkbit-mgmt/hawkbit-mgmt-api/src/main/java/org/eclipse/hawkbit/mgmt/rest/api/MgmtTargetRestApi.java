@@ -331,7 +331,7 @@ public interface MgmtTargetRestApi {
     ResponseEntity<Void> updateActionConfirmation(
             @PathVariable("targetId") String targetId,
             @PathVariable("actionId") Long actionId,
-            @Valid @RequestBody MgmtActionConfirmationRequestBodyPut actionConfirmation);
+            @RequestBody @Valid MgmtActionConfirmationRequestBodyPut actionConfirmation);
 
     /**
      * Handles the GET request of retrieving the ActionStatus of a specific target and action.
@@ -386,7 +386,7 @@ public interface MgmtTargetRestApi {
             consumes = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE }, produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
             @PathVariable("targetId") String targetId,
-            @RequestBody @Valid MgmtDistributionSetAssignments dsAssignments,
+            @RequestBody MgmtDistributionSetAssignments dsAssignments,
             @RequestParam(value = "offline", required = false)
             @Schema(description = """
                     Offline update (set param to true) that is only reported but not managed by the service, e.g.

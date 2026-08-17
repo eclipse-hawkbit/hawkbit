@@ -89,12 +89,6 @@ public interface AutoAssignment extends NamedEntity {
     boolean isConfirmationRequired();
 
     /**
-     * Defining a serialized access control context which needs to be set when
-     * performing the auto-assignment by the scheduler
-     */
-    Optional<String> getAccessControlContext();
-
-    /**
      * State machine for an auto assignment
      */
     enum AutoAssignStatus {

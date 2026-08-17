@@ -20,7 +20,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -386,7 +385,7 @@ public interface TargetManagement<T extends Target>
      * @throws EntityNotFoundException in case the meta-data entry does not exist and cannot be updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    void createMetadata(@NotNull String controllerId, @NotEmpty String key, @NotNull @Valid String value);
+    void createMetadata(@NotNull String controllerId, @NotEmpty String key, @NotNull String value);
 
     /**
      * Creates a list of entity meta-data entries.
@@ -398,7 +397,7 @@ public interface TargetManagement<T extends Target>
      * @throws AssignmentQuotaExceededException if the maximum number of meta-data entries is exceeded for the addressed entity
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    void createMetadata(@NotNull String controllerId, @NotEmpty @Valid Map<String, String> metadata);
+    void createMetadata(@NotNull String controllerId, @NotEmpty Map<String, String> metadata);
 
     /**
      * Finds all meta-data by the given entity id and key.

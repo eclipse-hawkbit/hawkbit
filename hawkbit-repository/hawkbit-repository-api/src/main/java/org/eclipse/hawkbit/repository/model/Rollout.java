@@ -113,11 +113,6 @@ public interface Rollout extends NamedEntity {
     boolean isDynamic();
 
     /**
-     * @return the stored access control context (if present)
-     */
-    Optional<String> getAccessControlContext();
-
-    /**
      * State machine for rollout.
      */
     enum RolloutStatus {

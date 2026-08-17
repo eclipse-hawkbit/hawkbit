@@ -56,7 +56,7 @@ public interface RepositoryManagement<T extends BaseEntity, C, U extends Identif
      * @throws ConstraintViolationException if fields are not filled as specified. Check {@link BaseEntity} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_CREATE_REPOSITORY)
-    List<T> create(@NotNull @Valid Collection<C> create);
+    List<T> create(@NotNull Collection<@Valid C> create);
 
     /**
      * Retrieve {@link BaseEntity} and throws exception if not found.
@@ -164,7 +164,7 @@ public interface RepositoryManagement<T extends BaseEntity, C, U extends Identif
      * @throws ConstraintViolationException if fields are not filled as specified. Check {@link BaseEntity} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    Map<Long, T> update(@NotNull @Valid Collection<U> update);
+    Map<Long, T> update(@NotNull Collection<@Valid U> update);
 
     /**
      * Deletes or marks as delete in case the {@link BaseEntity} is in use.

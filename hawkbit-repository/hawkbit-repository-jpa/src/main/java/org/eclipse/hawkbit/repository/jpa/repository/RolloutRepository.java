@@ -48,6 +48,17 @@ public interface RolloutRepository extends BaseEntityRepository<JpaRollout> {
     List<Long> findByStatusIn(Collection<RolloutStatus> status);
 
     /**
+     * Fetches the stored access control context of a single rollout. The context is a large, lazily mapped
+     * {@code @Lob} that is intentionally not exposed on the entity, so the scheduler resolves it explicitly by id
+     * (rollout processing is already one-per-transaction, so no N+1 amplification here).
+     *
+     * @param id the rollout id
+     * @return the serialized access control context, or empty if none is stored (or the rollout no longer exists)
+     */
+    @Query("SELECT r.accessControlContext FROM JpaRollout r WHERE r.id = :id")
+    Optional<String> getAccessControlContext(@Param("id") long id);
+
+    /**
      * Retrieves all {@link Rollout} for a specific {@code name}
      *
      * @param name the rollout name

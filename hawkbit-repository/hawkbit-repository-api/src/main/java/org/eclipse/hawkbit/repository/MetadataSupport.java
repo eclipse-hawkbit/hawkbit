@@ -50,7 +50,7 @@ public interface MetadataSupport<MV> {
      * @throws AssignmentQuotaExceededException if the maximum number of meta-data entries is exceeded for the addressed entity
      */
     @PreAuthorize(SpringEvalExpressions.HAS_UPDATE_REPOSITORY)
-    void createMetadata(@NotNull Long id, @NotEmpty @Valid Map<String, ? extends MV> metadata);
+    void createMetadata(@NotNull Long id, @NotEmpty Map<String, @Valid ? extends MV> metadata);
 
     /**
      * Finds all meta-data by the given entity id and key.
