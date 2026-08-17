@@ -30,7 +30,7 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.data.jpa.domain.Specification;
 
 @SuppressWarnings("java:S5961") // complex check because the matter is very complex
-@DataJpaTest(properties = "spring.jpa.database=H2")
+@DataJpaTest(properties = "spring.jpa.database=H2", showSql = false)
 @EnableAutoConfiguration
 @Slf4j
 class SpecificationBuilderTest {

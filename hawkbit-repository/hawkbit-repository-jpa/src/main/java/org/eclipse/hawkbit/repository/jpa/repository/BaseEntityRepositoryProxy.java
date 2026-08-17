@@ -372,7 +372,8 @@ public class BaseEntityRepositoryProxy<T extends AbstractJpaBaseEntity> implemen
      * Invokes {@code method} on {@code target}, unwrapping reflection's {@link InvocationTargetException} so the proxy
      * propagates the real (possibly checked) exception transparently instead of the reflection wrapper.
      */
-    @SuppressWarnings("java:S112") // rethrows original cause transparently through dynamic proxy; InvocationHandler contract requires throws Throwable
+    @SuppressWarnings("java:S112")
+    // rethrows original cause transparently through dynamic proxy; InvocationHandler contract requires throws Throwable
     private static Object invokeUnwrapping(final Method method, final Object target, final Object[] args) throws Throwable {
         try {
             return method.invoke(target, args);
@@ -398,22 +399,39 @@ public class BaseEntityRepositoryProxy<T extends AbstractJpaBaseEntity> implemen
                         try {
                             return Optional.of(BaseEntityRepositoryProxy.class.getDeclaredMethod(m.getName(), m.getParameterTypes()));
                         } catch (final NoSuchMethodException nsme) {
-                            // spring bean proxy extends DecoratingProxy and Advised (extending TargetClassAware)
-                            // and call their methods, e.g. TargetClassAware#getTargetClass() - we don't need to implement these
-                            // hence we don't log those hit misses
-                            if (!List.of(TargetClassAware.class, Advised.class, DecoratingProxy.class).contains(m.getDeclaringClass())) {
-                                log.warn("RepositoryProxy does not override method {} - call will fall through to the raw repository", m, nsme);
+                            if (accessController != null && ( // want to log only when ACM is enabled, and we don't apply it
+                                    // spring bean proxy extends DecoratingProxy and Advised (extending TargetClassAware)
+                                    // and call their methods, e.g. TargetClassAware#getTargetClass() - we don't need to implement these
+                                    // hence we don't log those hit misses
+                                    // BaseEntityRepository is hawkBit curated - has getCache, getManagementClass that is  not needed to be handled
+                                    !List.of(TargetClassAware.class, Advised.class, DecoratingProxy.class, BaseEntityRepository.class)
+                                            .contains(m.getDeclaringClass())
+                                            // toString shall not be ACM handled
+                                            && !(("toString".equals(m.getName()) && m.getParameterCount() == 0))
+                                            // not a find or get methods with handled response types
+                                            && !((m.getName().startsWith("find") || m.getName().startsWith("get"))
+                                                && (Iterable.class.isAssignableFrom(method.getReturnType())
+                                                    || Optional.class.isAssignableFrom(method.getReturnType())
+                                                    || repository.getDomainClass().isAssignableFrom(method.getReturnType()))))) {
+                                if (log.isDebugEnabled() || !m.getName().startsWith("count")) {
+                                    log.debug("RepositoryProxy does not override method {} - call will fall through to the raw repository",
+                                            m, nsme);
+                                } else { // if no debug, and countXXX - not a big problem (small inconsistency) - minimal log
+                                    log.warn("RepositoryProxy does not override method {} - call will fall through to the raw repository", m);
+                                }
                             }
                             return Optional.empty();
                         }
                     });
                     if (delegate.isPresent()) {
+                        // declared by BaseEntityRepositoryProxy (i.e. repositoryACM) - call directly to it. Apply ACM and cacheing
                         return invokeUnwrapping(delegate.get(), repositoryACM, args);
                     }
-                    // call a repository method the wrapper does not override
+
+                    // call a repository method the wrapper does not override, check the access
                     if (method.getName().startsWith("find") || method.getName().startsWith("get")) {
                         final Object result = invokeUnwrapping(method, repository, args);
-                        if (accessController != null) {
+                        if (accessController != null && result != null) {
                             // Iterable, List, Page, Slice
                             if (Iterable.class.isAssignableFrom(method.getReturnType())) {
                                 for (final Object e : (Iterable<?>) result) {
@@ -421,18 +439,19 @@ public class BaseEntityRepositoryProxy<T extends AbstractJpaBaseEntity> implemen
                                         accessController.assertOperationAllowed(Operation.READ, (T) e);
                                     }
                                 }
-                            } else if (Optional.class.isAssignableFrom(method.getReturnType()) && ((Optional<?>) result)
-                                    .filter(value -> repository.getDomainClass().isAssignableFrom(value.getClass()))
-                                    .isPresent()) {
-                                        return ((Optional<T>) result).filter(
-                                                t -> {
-                                                    // if not accessible - throws exception (as for iterables or single entities)
-                                                    accessController.assertOperationAllowed(Operation.READ, t);
-                                                    return true;
-                                                });
-                                    } else if (repository.getDomainClass().isAssignableFrom(method.getReturnType())) {
-                                        accessController.assertOperationAllowed(Operation.READ, (T) result);
-                                    }
+                            } else if (Optional.class.isAssignableFrom(method.getReturnType())) {
+                                return ((Optional<T>) result).filter(
+                                        t -> {
+                                            // if not accessible - throws exception (as for iterables or single entities)
+                                            accessController.assertOperationAllowed(Operation.READ, t);
+                                            return true;
+                                        });
+                            } else if (repository.getDomainClass().isAssignableFrom(method.getReturnType())) {
+                                accessController.assertOperationAllowed(Operation.READ, (T) result);
+                            } else if (!List.of(TargetClassAware.class, Advised.class, DecoratingProxy.class, BaseEntityRepository.class)
+                                    .contains(method.getDeclaringClass())) {
+                                throw new IllegalStateException("Unsupported by ACM get/find method: " + method);
+                            }
                         }
                         return result;
                     } else if ("toString".equals(method.getName()) && method.getParameterCount() == 0) {

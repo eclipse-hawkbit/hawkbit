@@ -18,6 +18,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.eclipse.hawkbit.context.Principal;
 import org.eclipse.hawkbit.tenancy.TenantAwareUserProperties;
 import org.jspecify.annotations.NonNull;
@@ -135,6 +136,7 @@ public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
     }
 
     @Data
+    @EqualsAndHashCode(callSuper = true)
     private static class TenantAwareUser extends User {
 
         private final String tenant;
