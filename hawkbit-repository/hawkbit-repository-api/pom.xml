@@ -57,13 +57,17 @@
 
     <build>
         <plugins>
+            <!-- without delombok, javadoc fail on TargetTypeManagement.Create because of lombok CreateBuildaer-->
+            <plugin>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok-maven-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <doclint>syntax</doclint>
-                    <!-- javadoc fail on TargetTypeManagement.Create because of lombok CreateBuildaer-->
-                    <failOnError>false</failOnError>
+                    <sourcepath>${project.build.directory}/delombok</sourcepath>
                 </configuration>
             </plugin>
         </plugins>
