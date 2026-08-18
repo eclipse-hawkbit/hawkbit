@@ -40,11 +40,6 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
     int QUERY_MAX_SIZE = 1024;
 
     /**
-     * Maximum length of access control context.
-     */
-    int ACCESS_CONTROL_CONTEXT_MAX_SIZE = 32768;
-
-    /**
      * @return name of the {@link TargetFilterQuery}.
      */
     String getName();
@@ -53,10 +48,4 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
      * @return RSQL query
      */
     String getQuery();
-
-    /**
-     * Defining a serialized access control context which needs to be set when
-     * performing the auto-assignment by the scheduler
-     */
-    String getAccessControlContext();
 }

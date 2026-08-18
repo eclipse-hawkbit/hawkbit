@@ -93,7 +93,7 @@ public class JpaAutoAssignment extends AbstractJpaNamedEntity implements AutoAss
 
     @Column(name = "access_control_context")
     @Lob
-    @Size(max = TargetFilterQuery.ACCESS_CONTROL_CONTEXT_MAX_SIZE)
+    @Size(max = AutoAssignment.ACCESS_CONTROL_CONTEXT_MAX_SIZE)
     private String accessControlContext;
 
     @Column(name = "status")
