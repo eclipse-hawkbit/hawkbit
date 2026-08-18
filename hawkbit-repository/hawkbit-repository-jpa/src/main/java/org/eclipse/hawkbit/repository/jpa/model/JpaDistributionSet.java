@@ -58,8 +58,8 @@ import org.springframework.core.annotation.Order;
 @ToString(callSuper = true)
 @Entity
 @Table(name = "sp_distribution_set")
-@NamedEntityGraph(name = "DistributionSet.detail", attributeNodes = { @NamedAttributeNode("modules"), @NamedAttributeNode("tags"),
-        @NamedAttributeNode("type") })
+@NamedEntityGraph(name = "DistributionSet.detail",
+        attributeNodes = { @NamedAttributeNode("modules"), @NamedAttributeNode("tags"), @NamedAttributeNode("type") })
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaDistributionSet
@@ -78,21 +78,24 @@ public class JpaDistributionSet
 
     @ManyToMany(targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY)
     @JoinTable(
-            name = "sp_ds_sm", joinColumns = { @JoinColumn(name = "ds_id", nullable = false) }, inverseJoinColumns = {
-                    @JoinColumn(name = "sm_id", nullable = false) })
+            name = "sp_ds_sm",
+            joinColumns = { @JoinColumn(name = "ds_id", nullable = false) },
+            inverseJoinColumns = { @JoinColumn(name = "sm_id", nullable = false) })
     private Set<JpaSoftwareModule> modules = new HashSet<>();
 
     @ManyToMany(targetEntity = JpaDistributionSetTag.class)
     @JoinTable(
-            name = "sp_ds_tag", joinColumns = { @JoinColumn(name = "ds", nullable = false) }, inverseJoinColumns = {
-                    @JoinColumn(name = "tag", nullable = false) })
+            name = "sp_ds_tag",
+            joinColumns = { @JoinColumn(name = "ds", nullable = false) },
+            inverseJoinColumns = { @JoinColumn(name = "tag", nullable = false) })
     private Set<JpaDistributionSetTag> tags = new HashSet<>();
 
     // no cascade option on an ElementCollection, the target objects are always persisted, merged, removed with their parent
     @Getter
     @ElementCollection
     @CollectionTable(
-            name = "sp_ds_metadata", joinColumns = { @JoinColumn(name = "ds", nullable = false) })
+            name = "sp_ds_metadata",
+            joinColumns = { @JoinColumn(name = "ds", nullable = false) })
     @MapKeyColumn(name = "meta_key", length = DistributionSet.METADATA_MAX_KEY_SIZE)
     @Column(name = "meta_value", length = DistributionSet.METADATA_MAX_VALUE_SIZE)
     private Map<String, String> metadata = new HashMap<>();

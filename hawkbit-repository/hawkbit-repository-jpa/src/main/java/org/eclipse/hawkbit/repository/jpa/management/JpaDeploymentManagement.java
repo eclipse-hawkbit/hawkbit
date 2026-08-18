@@ -27,7 +27,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -169,17 +168,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 .maxRetries(maxRetries)
                 .maxDelay(Duration.ofMillis(delay))
                 .build());
-        final Consumer<MaxAssignmentsExceededInfo> maxAssignmentsExceededHandler = maxAssignmentsExceededInfo ->
-                handleMaxAssignmentsExceeded(
-                        maxAssignmentsExceededInfo.targetId,
-                        maxAssignmentsExceededInfo.requested,
-                        maxAssignmentsExceededInfo.quotaExceededException);
         onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository,
-                quotaManagement, this::isConfirmationFlowEnabled, repositoryProperties,
-                maxAssignmentsExceededHandler);
+                this::isConfirmationFlowEnabled, repositoryProperties);
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository,
-                quotaManagement, this::isConfirmationFlowEnabled, repositoryProperties,
-                maxAssignmentsExceededHandler);
+                this::isConfirmationFlowEnabled, repositoryProperties);
         this.tenantConfigurationManagement = tenantConfigurationManagement;
     }
 
@@ -581,8 +573,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         }
     }
 
-    public record MaxAssignmentsExceededInfo(long targetId, long requested, AssignmentQuotaExceededException quotaExceededException) {}
-
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void handleMaxAssignmentsExceeded(
@@ -877,8 +867,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final List<JpaTarget> targetEntities) {
         final List<List<Long>> targetEntitiesIdsChunks = getTargetEntitiesAsChunks(targetEntities);
 
-        // tenant-wide flag - invariant within this assignment transaction; read once and thread it through the
-        // per-target loops below instead of reading sp_tenant_configuration once per target
         final boolean confirmationFlowEnabled = isConfirmationFlowEnabled();
 
         closeOrCancelActiveActions(assignmentStrategy, targetEntitiesIdsChunks);
@@ -944,9 +932,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final boolean confirmationFlowEnabled) {
         final Map<TargetWithActionType, JpaAction> persistedActions = new LinkedHashMap<>();
         for (final TargetWithActionType twt : targetsWithActionType) {
-            // checkQuota=false: the per-target action quota was already enforced for the whole request in the validate
-            // phase (enforceMaxActionsPerTarget); this is an explicit, informed opt-out of the redundant re-count
-            final JpaAction targetAction = assignmentStrategy.createTargetAction(twt, targets, set, confirmationFlowEnabled, false);
+            final JpaAction targetAction = assignmentStrategy.createTargetAction(twt, targets, set, confirmationFlowEnabled);
             if (targetAction != null) {
                 persistedActions.put(twt, actionRepository.save(targetAction));
             }

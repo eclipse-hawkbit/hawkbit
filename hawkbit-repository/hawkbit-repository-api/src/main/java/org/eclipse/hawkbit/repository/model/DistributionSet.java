@@ -38,7 +38,10 @@ public interface DistributionSet extends NamedVersionedEntity {
      * @return id of the {@link #getType()}. Implementations should serve this without materializing the full
      *             {@link DistributionSetType} entity (and its module-type elements) where possible - id-only, storm-free.
      */
-    Long getTypeId();
+    default Long getTypeId() {
+        final DistributionSetType type = getType();
+        return type == null ? null : type.getId();
+    }
 
     /**
      * @return unmodifiableSet of {@link SoftwareModule}.
@@ -47,7 +50,7 @@ public interface DistributionSet extends NamedVersionedEntity {
 
     /**
      * @return <code>true</code> if this {@link DistributionSet} is locked. If so it's 'functional' properties (e.g. software modules) could not
-     *             be modified anymore.
+     *         be modified anymore.
      */
     boolean isLocked();
 
@@ -63,16 +66,15 @@ public interface DistributionSet extends NamedVersionedEntity {
 
     /**
      * @return <code>true</code> if {@link DistributionSet} contains a mandatory migration step, i.e. unfinished {@link Action}s will be kept
-     *             active and not automatically canceled if overridden by a newer update.
+     *         active and not automatically canceled if overridden by a newer update.
      */
     boolean isRequiredMigrationStep();
 
     /**
-     * Returns if the distribution set could be assumed as completed. I.e. all requirements (e.g. mandatory software module types) are
-     * satisfied.
+     * Returns if the distribution set could be assumed as completed. I.e. all requirements (e.g. mandatory software module types) are satisfied.
      *
      * @return <code>true</code> if all defined {@link DistributionSetType#getMandatoryModuleTypes()} of {@link #getType()} are present in
-     *             this {@link DistributionSet}.
+     *         this {@link DistributionSet}.
      */
     boolean isComplete();
 }

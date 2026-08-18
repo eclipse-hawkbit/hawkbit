@@ -11,19 +11,16 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.util.List;
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.context.AccessContext;
-import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
-import org.eclipse.hawkbit.repository.jpa.management.JpaDeploymentManagement.MaxAssignmentsExceededInfo;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -46,18 +43,15 @@ class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     OfflineDsAssignmentStrategy(
             final TargetRepository targetRepository,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-            final QuotaManagement quotaManagement,
-            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties,
-            final Consumer<MaxAssignmentsExceededInfo> maxAssignmentExceededHandler) {
-        super(targetRepository, actionRepository, actionStatusRepository,
-                quotaManagement, confirmationFlowConfig, repositoryProperties, maxAssignmentExceededHandler);
+            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
+        super(targetRepository, actionRepository, actionStatusRepository, confirmationFlowConfig, repositoryProperties);
     }
 
     @Override
     public JpaAction createTargetAction(
             final TargetWithActionType targetWithActionType, final List<JpaTarget> targets, final JpaDistributionSet set,
-            final boolean confirmationFlowEnabled, final boolean checkQuota) {
-        final JpaAction result = super.createTargetAction(targetWithActionType, targets, set, confirmationFlowEnabled, checkQuota);
+            final boolean confirmationFlowEnabled) {
+        final JpaAction result = super.createTargetAction(targetWithActionType, targets, set, confirmationFlowEnabled);
         if (result != null) {
             result.setStatus(Status.FINISHED);
             result.setActive(Boolean.FALSE);

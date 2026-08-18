@@ -16,21 +16,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 
 import jakarta.persistence.criteria.JoinType;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.context.AccessContext;
-import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
-import org.eclipse.hawkbit.repository.jpa.management.JpaDeploymentManagement.MaxAssignmentsExceededInfo;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -41,7 +37,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
-import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -64,50 +59,28 @@ public abstract class AbstractDsAssignmentStrategy {
     protected final ActionRepository actionRepository;
 
     private final ActionStatusRepository actionStatusRepository;
-    private final QuotaManagement quotaManagement;
     private final BooleanSupplier confirmationFlowConfig;
     private final RepositoryProperties repositoryProperties;
-    private final Consumer<MaxAssignmentsExceededInfo> maxAssignmentExceededHandler;
 
     @SuppressWarnings("java:S107")
     AbstractDsAssignmentStrategy(
             final TargetRepository targetRepository,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-            final QuotaManagement quotaManagement, final BooleanSupplier confirmationFlowConfig,
-            final RepositoryProperties repositoryProperties,
-            final Consumer<MaxAssignmentsExceededInfo> maxAssignmentExceededHandler) {
+            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
         this.targetRepository = targetRepository;
         this.actionRepository = actionRepository;
         this.actionStatusRepository = actionStatusRepository;
-        this.quotaManagement = quotaManagement;
         this.confirmationFlowConfig = confirmationFlowConfig;
         this.repositoryProperties = repositoryProperties;
-        this.maxAssignmentExceededHandler = maxAssignmentExceededHandler;
     }
 
-    // safe default: enforces the per-target action quota and creates the action - use this for any standalone creation
-    public JpaAction createTargetAction(
-            final TargetWithActionType targetWithActionType,
-            final List<JpaTarget> targets, final JpaDistributionSet set) {
-        return createTargetAction(targetWithActionType, targets, set, isConfirmationFlowEnabled(), true);
-    }
-
-    // The per-target action quota is enforced unless checkQuota is false. Pass checkQuota=false ONLY when the quota has
-    // already been enforced for the whole batch upstream (the assignment validate phase, enforceMaxActionsPerTarget) -
-    // making the skip an explicit, informed decision at the call site, so there is no way to create an action silently
-    // without a quota check. confirmationFlowEnabled is the precomputed tenant-wide flag (read once per assignment); the
-    // base ignores it - only the online strategy uses it to set the initial action status.
     public JpaAction createTargetAction(
             final TargetWithActionType targetWithActionType, final List<JpaTarget> targets, final JpaDistributionSet set,
-            final boolean confirmationFlowEnabled, final boolean checkQuota) {
+            final boolean confirmationFlowEnabled) {
         final Optional<JpaTarget> optTarget = targets.stream()
                 .filter(t -> t.getControllerId().equals(targetWithActionType.getControllerId())).findFirst();
 
-        // create the action
         return optTarget.map(target -> {
-            if (checkQuota) {
-                assertActionsPerTargetQuota(target);
-            }
             final JpaAction actionForTarget = new JpaAction();
             actionForTarget.setActionType(targetWithActionType.getActionType());
             actionForTarget.setForcedTime(targetWithActionType.getForceTime());
@@ -143,7 +116,6 @@ public abstract class AbstractDsAssignmentStrategy {
         return actionStatus;
     }
 
-    // overload taking the precomputed, per-assignment confirmation-flow flag (see createTargetAction overload)
     public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage, final boolean confirmationFlowEnabled) {
         return createActionStatus(action, actionMessage);
     }
@@ -291,12 +263,4 @@ public abstract class AbstractDsAssignmentStrategy {
                 new CancelTargetAssignmentEvent(tenant, actions)));
     }
 
-    private void assertActionsPerTargetQuota(final Target target) {
-        final int quota = quotaManagement.getMaxActionsPerTarget();
-        try {
-            QuotaHelper.assertAssignmentQuota(target.getId(), 1, quota, Action.class, Target.class, actionRepository::countByTargetId);
-        } catch (AssignmentQuotaExceededException e) {
-            maxAssignmentExceededHandler.accept(new MaxAssignmentsExceededInfo(target.getId(), 1, e));
-        }
-    }
 }
