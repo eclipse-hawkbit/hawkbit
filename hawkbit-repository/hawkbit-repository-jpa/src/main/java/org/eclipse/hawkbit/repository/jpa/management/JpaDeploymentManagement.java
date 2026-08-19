@@ -926,6 +926,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         assignmentStrategy.setAssignedDistributionSetAndTargetStatus(set, targetIdsChunks);
     }
 
+    // precondition: the actions-per-target quota has already been enforced upstream in
+    // validateAndFilterRequestForAssignments (enforceMaxActionsPerTarget); this only builds/persists the actions
     private Map<TargetWithActionType, JpaAction> createActions(
             final Collection<TargetWithActionType> targetsWithActionType,
             final List<JpaTarget> targets, final JpaDistributionSet set, final AbstractDsAssignmentStrategy assignmentStrategy,

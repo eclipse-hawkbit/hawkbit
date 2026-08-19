@@ -74,6 +74,11 @@ public abstract class AbstractDsAssignmentStrategy {
         this.repositoryProperties = repositoryProperties;
     }
 
+    /**
+     * Builds (does not persist) the assignment action. Pure factory - does NOT enforce the actions-per-target quota;
+     * callers must validate it beforehand (e.g. {@code JpaDeploymentManagement#enforceMaxActionsPerTarget}
+     * for manual assignment, {@code JpaRolloutExecutor#assertActionsPerTargetQuota} for rollouts).
+     */
     public JpaAction createTargetAction(
             final TargetWithActionType targetWithActionType, final List<JpaTarget> targets, final JpaDistributionSet set,
             final boolean confirmationFlowEnabled) {
@@ -102,6 +107,12 @@ public abstract class AbstractDsAssignmentStrategy {
         });
     }
 
+    /**
+     * Builds (does not persist) the initial action status. Pure factory - does NOT enforce the status-per-action quota
+     * ({@code maxStatusEntriesPerAction}); that quota guards repeated device-feedback appends and is enforced at
+     * ({@code JpaActionManagement#assertActionStatusQuota}).
+     * This initial status is the first entry, so exempt.
+     */
     public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage, final boolean confirmationFlowEnabled) {
         final JpaActionStatus actionStatus = new JpaActionStatus();
         actionStatus.setAction(action);
