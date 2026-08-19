@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.auth.SpPermission;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
@@ -80,6 +82,7 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.TargetTestData;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2028,5 +2031,110 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Map<String, String> result = targetManagement.getControllerAttributes(controllerId);
         assertThat(result).doesNotContainKey("a");
         assertThat(result).containsEntry("b", "2");
+    }
+
+    @Autowired
+    private HawkbitSecurityProperties securityProperties;
+
+    @AfterEach
+    void resetAttributeThrottle() {
+        securityProperties.getDos().getControllerAttributes().getPerTenant().clear();
+    }
+
+    /**
+     * Requested attribute updates (server requested them) are always accepted and are
+     * never throttled, even in rapid succession; the update source is recorded.
+     */
+    @Test
+    void requestedAttributeUpdatesAreNeverThrottled() {
+        final String controllerId = "requested";
+        testdataFactory.createTarget(controllerId);
+        securityProperties.getDos().getControllerAttributes().setMinUpdateInterval(Duration.ofHours(1));
+
+        final WithUser controller = SecurityContextSwitch.withController("controller");
+        // target starts with requestControllerAttributes = true (requested)
+        runAs(controller, () -> writeAttributes(controllerId, 1, "a", "v1"));
+
+        // force it requested again (admin context) and update once more, still accepted
+        JpaTarget target  = (JpaTarget) targetManagement.getByControllerId(controllerId);
+        target.setRequestControllerAttributes(true);
+        targetRepository.save(target);
+        runAs(controller, () -> writeAttributes(controllerId, 1, "b", "v2"));
+
+        target = (JpaTarget) targetManagement.getByControllerId(controllerId);
+        assertThat(targetManagement.getControllerAttributes(controllerId)).containsKeys("a0", "b0");
+        assertThat(target.getLastControllerAttributesUpdateRequested()).isTrue();
+        assertThat(target.getLastControllerAttributesUpdate()).isNotNull();
+    }
+
+    /**
+     * Two consecutive device-initiated updates within the interval: the second is dropped
+     * (no write) and returns silently.
+     */
+    @Test
+    void deviceInitiatedUpdateWithinIntervalIsDropped() {
+        final String controllerId = "throttled";
+        testdataFactory.createTarget(controllerId);
+        securityProperties.getDos().getControllerAttributes().setMinUpdateInterval(Duration.ofHours(1));
+
+        final WithUser controller = SecurityContextSwitch.withController("controller");
+        runAs(controller, () -> {
+            // accepted - initially requestAttribute is true, internally requestAttribute is set to false, lastControllerAttributesUpdateRequested is set to true, lastControllerAttributesUpdate is set to now
+            writeAttributes(controllerId, 1, "initial", "v");
+            // accepted - requestAttribute is false, but lastControllerAttributesUpdateRequested is true - i.e. this update is first to be initated from device -> lastControllerAttributesUpdateRequested is set to false, lastControllerAttributesUpdate is ste to now
+            writeAttributes(controllerId, 1, "first-device-initiated", "v1");
+            // rejected - requestAttribute is false and lastControllerAttributesUpdateRequested is false and timeout has not passed
+            writeAttributes(controllerId, 1, "second-device-initiated", "v2");
+        });
+
+        assertThat(targetManagement.getControllerAttributes(controllerId))
+                .containsKeys("initial0", "first-device-initiated0")
+                .doesNotContainKey("second-device-initiated0");
+    }
+
+    /**
+     * A device-initiated update after the interval has elapsed is accepted.
+     */
+    @Test
+    void deviceInitiatedUpdateAfterIntervalIsAccepted() {
+        final String controllerId = "elapsed";
+        testdataFactory.createTarget(controllerId);
+        securityProperties.getDos().getControllerAttributes().setMinUpdateInterval(Duration.ofHours(1));
+
+        final WithUser controller = SecurityContextSwitch.withController("controller");
+        runAs(controller, () -> {
+            writeAttributes(controllerId, 1, "initial", "v"); // accepted - initialize requestAttribute is true for new devices
+            writeAttributes(controllerId, 1, "first-device-initiated", "v1"); // device-initiated, accepted, stamps now
+        });
+
+        // backdate the stamp beyond the interval
+        final JpaTarget backdated = (JpaTarget) targetManagement.getByControllerId(controllerId);
+        backdated.setLastControllerAttributesUpdate(System.currentTimeMillis() - Duration.ofHours(2).toMillis());
+        targetRepository.save(backdated);
+
+        runAs(controller, () -> writeAttributes(controllerId, 1, "second-device-initiated0", "v2")); // device-initiated, elapsed -> accepted
+
+        assertThat(targetManagement.getControllerAttributes(controllerId))
+                .containsKeys("initial0", "first-device-initiated0", "second-device-initiated0");
+    }
+
+    /**
+     * With throttling disabled (default 0), rapid device-initiated updates are all accepted.
+     */
+    @Test
+    void deviceInitiatedUpdatesNotThrottledWhenDisabled() {
+        final String controllerId = "disabled";
+        testdataFactory.createTarget(controllerId);
+        // minUpdateInterval left at ZERO (default)
+
+        final WithUser controller = SecurityContextSwitch.withController("controller");
+        runAs(controller, () -> {
+            writeAttributes(controllerId, 1, "initial", "v");
+            writeAttributes(controllerId, 1, "first-device-initiated", "v1");
+            writeAttributes(controllerId, 1, "second-device-initiated", "v2");
+        });
+
+        assertThat(targetManagement.getControllerAttributes(controllerId))
+                .containsKeys("initial0", "first-device-initiated0", "second-device-initiated0");
     }
 }

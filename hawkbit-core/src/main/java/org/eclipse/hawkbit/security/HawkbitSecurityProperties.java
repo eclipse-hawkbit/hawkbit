@@ -9,9 +9,12 @@
  */
 package org.eclipse.hawkbit.security;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -124,6 +127,7 @@ public class HawkbitSecurityProperties {
 
         private final Filter filter = new Filter();
         private final Filter uiFilter = new Filter();
+        private final ControllerAttributes controllerAttributes = new ControllerAttributes();
         /**
          * Maximum number of status updates that the controller can report for
          * an action (0 to disable).
@@ -223,6 +227,40 @@ public class HawkbitSecurityProperties {
              * second per client IP.
              */
             private int maxWrite = 50;
+        }
+
+        /**
+         * Throttling of not-requested (device-initiated without actual update) controller attribute updates.
+         */
+        @Data
+        public static class ControllerAttributes {
+
+            /**
+             * Default minimum interval between accepted device-initiated attribute
+             * updates. ZERO (default) disables throttling for all tenants.
+             */
+            private Duration minUpdateInterval = Duration.ZERO;
+
+            /**
+             * Per-tenant overrides of {@link #minUpdateInterval}, keyed by tenant name
+             * (case-insensitive). Tenants without an entry use {@link #minUpdateInterval}.
+             */
+            private Map<String, Duration> perTenant = new HashMap<>();
+
+            /**
+             * @param tenant current tenant (may be {@code null})
+             * @return the configured minimum interval for the tenant, or the default
+             */
+            public Duration intervalFor(final String tenant) {
+                if (tenant != null) {
+                    for (final Map.Entry<String, Duration> entry : perTenant.entrySet()) {
+                        if (entry.getKey().equalsIgnoreCase(tenant)) {
+                            return entry.getValue();
+                        }
+                    }
+                }
+                return minUpdateInterval;
+            }
         }
     }
 }

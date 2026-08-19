@@ -111,6 +111,16 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
 
     @Setter
     @Getter
+    @Column(name = "last_controller_attributes_update")
+    private Long lastControllerAttributesUpdate;
+
+    @Setter
+    @Getter
+    @Column(name = "last_controller_attributes_update_requested")
+    private Boolean lastControllerAttributesUpdateRequested;
+
+    @Setter
+    @Getter
     @Column(name = "install_date")
     private Long installationDate;
 

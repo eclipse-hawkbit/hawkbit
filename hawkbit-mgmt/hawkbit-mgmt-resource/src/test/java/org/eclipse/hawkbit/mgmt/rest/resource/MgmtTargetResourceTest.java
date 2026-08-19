@@ -2828,6 +2828,23 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isMethodNotAllowed());
     }
 
+    @Test
+    void targetResponseContainsLastControllerAttributesUpdate() throws Exception {
+        final String knownTargetId = "attrTs";
+        testdataFactory.createTarget(knownTargetId);
+
+        // before any attributes update the timestamp is absent
+        mvc.perform(get(TARGETS_V1 + "/" + knownTargetId).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.lastControllerAttributesUpdate").doesNotExist());
+
+        controllerManagement.updateControllerAttributes(knownTargetId, Map.of("k", "v"), null);
+
+        mvc.perform(get(TARGETS_V1 + "/" + knownTargetId).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.lastControllerAttributesUpdate", notNullValue()));
+    }
+
     private static Stream<Arguments> confirmationOptions() {
         return Stream.of(Arguments.of(true, true), Arguments.of(true, false), Arguments.of(false, true),
                 Arguments.of(false, false), Arguments.of(true, null), Arguments.of(false, null));

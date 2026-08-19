@@ -79,6 +79,11 @@ public interface Target extends NamedEntity, Identifiable<Long> {
     Long getLastTargetQuery();
 
     /**
+     * @return timestamp (epoch millis) of the last accepted controller attributes update, or {@code null} if never updated
+     */
+    Long getLastControllerAttributesUpdate();
+
+    /**
      * @return time in {@link TimeUnit#MILLISECONDS} GMT when {@link #getInstalledDistributionSet()} was applied.
      */
     Long getInstallationDate();

@@ -48,6 +48,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.context.AccessContext;
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.ql.jpa.QLSupport;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -146,6 +147,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private final ControllerPollProperties controllerPollProperties;
     private final PlatformTransactionManager txManager;
     private final EntityManager entityManager;
+    private final HawkbitSecurityProperties securityProperties;
 
     private final Duration minPollingTime;
     private final Duration maxPollingTime;
@@ -162,6 +164,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             final DistributionSetManagement<? extends DistributionSet> distributionSetManagement,
             final ControllerPollProperties controllerPollProperties,
             final PlatformTransactionManager txManager, final EntityManager entityManager,
+            final HawkbitSecurityProperties securityProperties,
             final ScheduledExecutorService executorService) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
 
@@ -175,6 +178,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         this.controllerPollProperties = controllerPollProperties;
         this.txManager = txManager;
         this.entityManager = entityManager;
+        this.securityProperties = securityProperties;
 
         minPollingTime = controllerPollProperties.getMinPollingTime() == null
                 ? Duration.of(0, ChronoUnit.SECONDS)
@@ -407,6 +411,19 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         }
 
         final JpaTarget jpaTarget = targetRepository.getByControllerId(controllerId);
+        final boolean requestedAttributes = jpaTarget.isRequestControllerAttributes();
+        final long now = System.currentTimeMillis();
+
+        if (!requestedAttributes) { // server did not request attributes update
+            final Duration updateInterval = securityProperties.getDos().getControllerAttributes().intervalFor(AccessContext.tenant());
+            final Long lastAttributesUpdate = jpaTarget.getLastControllerAttributesUpdate();
+            if (!updateInterval.isZero() &&
+                    lastAttributesUpdate != null && Boolean.FALSE.equals(jpaTarget.getLastControllerAttributesUpdateRequested()) &&
+                    now - lastAttributesUpdate < updateInterval.toMillis()) {
+                return jpaTarget; // silent no-op, no DB write
+            }
+        }
+
         final UpdateMode updateMode = mode != null ? mode : UpdateMode.MERGE;
 
         boolean targetChanged = false;
@@ -447,6 +464,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         if (jpaTarget.isRequestControllerAttributes()) {
             jpaTarget.setRequestControllerAttributes(false);
             targetChanged = true;
+        }
+        if (targetChanged) {
+            jpaTarget.setLastControllerAttributesUpdate(now); // every accepted update (UI)
+            jpaTarget.setLastControllerAttributesUpdateRequested(requestedAttributes); // source, throttle-only
         }
         return targetChanged ? targetRepository.save(jpaTarget) : jpaTarget;
     }
