@@ -49,4 +49,14 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Bytecode enhancement for Hibernate, needs to be in the module where the entity classes are. -->
+            <plugin>
+                <groupId>org.hibernate.orm</groupId>
+                <artifactId>hibernate-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>

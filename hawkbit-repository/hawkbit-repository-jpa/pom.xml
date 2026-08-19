@@ -37,6 +37,11 @@
                 </property>
             </activation>
 
+            <properties>
+                <!-- base package woven by the EclipseLink static weaver; a module may override it in its properties -->
+                <eclipselink.weave.basePackage>org.eclipse.hawkbit.repository.jpa.model</eclipselink.weave.basePackage>
+            </properties>
+
             <dependencies>
                 <dependency>
                     <groupId>org.eclipse.hawkbit</groupId>
@@ -51,18 +56,6 @@
                     <plugin>
                         <groupId>com.ethlo.persistence.tools</groupId>
                         <artifactId>eclipselink-maven-plugin</artifactId>
-                        <version>${eclipselink-maven-plugin.version}</version>
-                        <executions>
-                            <execution>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>weave</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <basePackage>org.eclipse.hawkbit.repository.jpa.model</basePackage>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -83,6 +76,16 @@
                     <version>${project.version}</version>
                 </dependency>
             </dependencies>
+
+            <build>
+                <plugins>
+                    <!-- Bytecode enhancement for Hibernate, needs to be in the module where the entity classes are. -->
+                    <plugin>
+                        <groupId>org.hibernate.orm</groupId>
+                        <artifactId>hibernate-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 

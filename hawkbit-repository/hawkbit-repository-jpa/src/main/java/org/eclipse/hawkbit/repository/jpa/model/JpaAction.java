@@ -79,8 +79,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     @Getter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(
-            name = "target", updatable = false)
+    @JoinColumn(name = "target", updatable = false)
     @NotNull
     private JpaTarget target;
 
@@ -119,8 +118,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     @Getter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "rollout_group", updatable = false)
+    @JoinColumn(name = "rollout_group", updatable = false)
     private JpaRolloutGroup rolloutGroup;
 
     @Getter

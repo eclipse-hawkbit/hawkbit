@@ -156,7 +156,9 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
     @Override
     public void execute(final Rollout rollout) {
-        rollout.getAccessControlContext().ifPresentOrElse(
+        // the access control context is a large, lazily mapped @Lob that is not exposed on the entity; resolve it
+        // explicitly through the management layer (rollout processing is already one-per-transaction, so no N+1)
+        rolloutManagement.getAccessControlContext(rollout.getId()).ifPresentOrElse(
                 // has stored context - executes it with it
                 context -> withSecurityContext(context, () -> execute0(rollout)),
                 // has no stored context - executes it in the tenant & user scope

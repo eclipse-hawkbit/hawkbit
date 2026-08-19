@@ -12,6 +12,8 @@ package org.eclipse.hawkbit.repository;
 import static org.eclipse.hawkbit.auth.SpPermission.APPROVE_AUTO_ASSIGNMENT;
 import static org.eclipse.hawkbit.auth.SpPermission.HANDLE_AUTO_ASSIGNMENT;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.validation.constraints.Max;
@@ -92,6 +94,17 @@ public interface AutoAssignmentManagement<T extends AutoAssignment>
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Optional<AutoAssignment> findByName(@NotNull String name);
+
+    /**
+     * Batch-fetches the stored access control contexts of the given auto assignments, to be applied by the scheduler.
+     * The context is intentionally not exposed on the {@link AutoAssignment} entity (it is a large, lazily mapped
+     * field); resolving it in one call per page avoids the N+1 that per-entity loading would cause.
+     *
+     * @param autoAssignmentIds the auto assignment ids
+     * @return map of auto assignment id to its serialized access control context; ids without a stored context are absent
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    Map<Long, String> getAccessControlContexts(Collection<Long> autoAssignmentIds);
 
     /**
      * Removes the given {@link DistributionSet} from all auto assignments.

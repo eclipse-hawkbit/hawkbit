@@ -12,6 +12,8 @@ package org.eclipse.hawkbit.mgmt.json.model.target;
 import java.io.Serial;
 import java.util.ArrayList;
 
+import jakarta.validation.Valid;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.NoArgsConstructor;
 import tools.jackson.databind.annotation.JsonDeserialize;
@@ -23,7 +25,7 @@ import tools.jackson.databind.annotation.JsonDeserialize;
  */
 @NoArgsConstructor
 @JsonDeserialize(using = MgmtDistributionSetAssignmentsDeserializer.class)
-public final class MgmtDistributionSetAssignments extends ArrayList<MgmtDistributionSetAssignment> {
+public final class MgmtDistributionSetAssignments extends ArrayList<@Valid MgmtDistributionSetAssignment> {
 
     @Serial
     private static final long serialVersionUID = 1L;

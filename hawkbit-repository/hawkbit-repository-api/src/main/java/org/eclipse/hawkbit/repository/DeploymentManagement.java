@@ -81,7 +81,7 @@ public interface DeploymentManagement extends PermissionSupport {
      */
     @PreAuthorize(HAS_UPDATE_TARGET_AND_READ_DISTRIBUTION_SET)
     List<DistributionSetAssignmentResult> assignDistributionSets(
-            @Valid @NotEmpty List<DeploymentRequest> deploymentRequests, @Nullable String actionMessage);
+            @NotEmpty List<@Valid DeploymentRequest> deploymentRequests, @Nullable String actionMessage);
 
     /**
      * Registers "offline" assignments. "offline" assignment means adding a completed action for a {@link DistributionSet} to a {@link Target}.

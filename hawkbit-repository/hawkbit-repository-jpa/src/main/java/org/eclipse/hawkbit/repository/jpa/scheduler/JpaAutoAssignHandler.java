@@ -17,6 +17,7 @@ import static org.eclipse.hawkbit.tenancy.DefaultTenantConfiguration.TENANT_TAG_
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -110,7 +111,6 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
                         throw LOCK_TIMEOUT_EXCEPTION;
                     } else {
                         lockRef.set(lock);
-
                         log.debug("Start auto-assign handling");
                     }
                 }
@@ -209,6 +209,11 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
         do {
             autoAssignments = autoAssignmentManagement.getActiveAutoAssignments(query);
 
+            // the access control context is a large, lazily mapped @Lob that is not exposed on the entity; fetch it for
+            // the whole page in a single management call (id -> context) to avoid the N+1 that per-entity loading causes
+            final Map<Long, String> accessControlContextById = autoAssignmentManagement.getAccessControlContexts(
+                    autoAssignments.getContent().stream().map(AutoAssignment::getId).toList());
+
             try {
                 autoAssignments.forEach(autoAssignment -> {
                     try {
@@ -219,11 +224,15 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
                             }
                             autoAssignmentManagement.start(autoAssignment.getId());
                         }
-                        autoAssignment.getAccessControlContext().ifPresentOrElse(
-                                // has stored context - executes it with it
-                                context -> withSecurityContext(context, () -> consumer.accept(autoAssignment)),
-                                // has no stored context - executes it in the tenant & user scope
-                                () -> asActor(getAutoAssignmentInitiatedBy(autoAssignment), () -> consumer.accept(autoAssignment)));
+                        final String accessControlContext = accessControlContextById.get(autoAssignment.getId());
+                        if (accessControlContext == null) {
+                            // has no stored context - executes it in the tenant & user scope
+                            asActor(getAutoAssignmentInitiatedBy(autoAssignment), () -> consumer.accept(autoAssignment));
+
+                        } else {
+                            // has stored context - executes it with it
+                            withSecurityContext(accessControlContext, () -> consumer.accept(autoAssignment));
+                        }
                     } catch (final RuntimeException ex) {
                         if (ex == LOCK_TIMEOUT_EXCEPTION) {
                             // expected - just stop processing further

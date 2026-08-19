@@ -22,6 +22,7 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
@@ -153,6 +154,11 @@ public class JpaAutoAssignmentManagement extends
         return JpaManagementHelper.<AutoAssignment, JpaAutoAssignment> findAllWithCountBySpec(jpaRepository,
                 List.of(AutoAssignmentSpecification.getAll(), AutoAssignmentSpecification.byName(name)), Pageable.ofSize(1))
                 .stream().findFirst();
+    }
+
+    @Override
+    public Map<Long, String> getAccessControlContexts(final Collection<Long> autoAssignmentIds) {
+        return jpaRepository.getAccessControlContexts(autoAssignmentIds);
     }
 
     @Override

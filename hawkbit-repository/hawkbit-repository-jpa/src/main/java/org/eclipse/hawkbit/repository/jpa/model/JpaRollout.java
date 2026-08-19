@@ -15,6 +15,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -77,8 +78,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     @Getter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(
-            name = "distribution_set", nullable = false, updatable = false)
+    @JoinColumn(name = "distribution_set", nullable = false, updatable = false)
     @NotNull
     private JpaDistributionSet distributionSet;
 
@@ -151,7 +151,10 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Setter
     @Column(name = "access_control_context")
     @Lob
-    @Size(max = Rollout.ACCESS_CONTROL_CONTEXT_MAX_SIZE)
+    // Lazy + no getter: the access control context is large and only needed by the rollout scheduler, which fetches
+    // it explicitly (by id) via RolloutRepository. It must never be read off the managed entity - a plain field read
+    // would not trigger the lazy fault-in and would silently return null.
+    @Basic(fetch = FetchType.LAZY)
     private String accessControlContext;
 
     @Setter
@@ -187,10 +190,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Override
     public boolean isDynamic() {
         return Boolean.TRUE.equals(dynamic);
-    }
-
-    public Optional<String> getAccessControlContext() {
-        return Optional.ofNullable(accessControlContext);
     }
 
     @Override

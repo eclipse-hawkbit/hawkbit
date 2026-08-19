@@ -152,7 +152,7 @@ public interface RolloutManagement extends PermissionSupport {
      * @throws AssignmentQuotaExceededException if the maximum number of allowed targets per rollout group is exceeded.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_CREATE_REPOSITORY)
-    Rollout create(@Valid @NotNull Create rollout, @NotNull @Valid List<GroupCreate> groups, RolloutGroupConditions conditions);
+    Rollout create(@Valid @NotNull Create rollout, @NotNull List<@Valid GroupCreate> groups, RolloutGroupConditions conditions);
 
     /**
      * Retrieves all rollouts.
@@ -257,6 +257,17 @@ public interface RolloutManagement extends PermissionSupport {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
     Rollout getWithDetailedStatus(long rolloutId);
+
+    /**
+     * Fetches the stored access control context of a rollout, to be applied by the scheduler when processing it. The
+     * context is intentionally not exposed on the {@link Rollout} entity (it is a large, lazily mapped field) and is
+     * resolved explicitly through the management layer.
+     *
+     * @param rolloutId the rollout id
+     * @return the serialized access control context, or empty if none is stored (or the rollout no longer exists)
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_READ_REPOSITORY)
+    Optional<String> getAccessControlContext(long rolloutId);
 
     /**
      * Checks if rollout with given ID exists.

@@ -39,8 +39,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Artifact {
 
     @ManyToOne(optional = false, cascade = { CascadeType.PERSIST }, fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "software_module", nullable = false, updatable = false)
+    @JoinColumn(name = "software_module", nullable = false, updatable = false)
     private JpaSoftwareModule softwareModule;
 
     @Column(name = "provided_file_name", length = 256, updatable = false)
