@@ -72,7 +72,7 @@ class RolloutExecutorTest extends AbstractJpaIntegrationTest {
 
         final Slice<Target> matching =
                 jpaRolloutExecutor.findByRsqlAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
-                        rollout.getId(), "controllerid==dyn_action_filter_*", distributionSet.getType(), PAGE);
+                        rollout.getId(), "controllerid==dyn_action_filter_*", distributionSet.getTypeId(), PAGE);
 
         assertThat(matching.getNumberOfElements()).isEqualTo(expected.size());
         assertThat(matching.stream()

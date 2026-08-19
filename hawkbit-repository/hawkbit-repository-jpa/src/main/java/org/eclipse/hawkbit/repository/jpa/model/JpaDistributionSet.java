@@ -71,6 +71,11 @@ public class JpaDistributionSet
     @NotNull
     private DistributionSetType type;
 
+    // read-only mapping of the ds_type FK, so the type id can be read without materializing the (LAZY) type entity
+    // and its EAGER elements collection - see getTypeId()
+    @Column(name = "ds_type", insertable = false, updatable = false)
+    private Long typeId;
+
     @ManyToMany(targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY)
     @JoinTable(
             name = "sp_ds_sm",
@@ -139,6 +144,13 @@ public class JpaDistributionSet
 
             this.requiredMigrationStep = requiredMigrationStep;
         }
+    }
+
+    @Override
+    public Long getTypeId() {
+        // typeId mirrors the ds_type FK and is populated only when the entity is loaded from the DB; a freshly
+        // created (not yet reloaded) instance has it null, so fall back to the in-memory type.
+        return typeId != null ? typeId : (type == null ? null : type.getId());
     }
 
     @Override

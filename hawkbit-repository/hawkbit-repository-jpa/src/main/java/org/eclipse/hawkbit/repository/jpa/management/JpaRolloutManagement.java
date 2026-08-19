@@ -166,7 +166,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         this.repositoryProperties = repositoryProperties;
 
         onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository,
-                quotaManagement, this::isConfirmationFlowEnabled, repositoryProperties, null);
+                this::isConfirmationFlowEnabled, repositoryProperties);
     }
 
     @Autowired

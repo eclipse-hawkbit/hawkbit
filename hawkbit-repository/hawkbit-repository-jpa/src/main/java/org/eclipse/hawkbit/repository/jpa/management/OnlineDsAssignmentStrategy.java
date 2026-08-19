@@ -14,20 +14,17 @@ import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommit
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.context.AccessContext;
-import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
-import org.eclipse.hawkbit.repository.jpa.management.JpaDeploymentManagement.MaxAssignmentsExceededInfo;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -52,11 +49,8 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     OnlineDsAssignmentStrategy(
             final TargetRepository targetRepository,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-            final QuotaManagement quotaManagement,
-            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties,
-            final Consumer<MaxAssignmentsExceededInfo> maxAssignmentExceededHandler) {
-        super(targetRepository, actionRepository, actionStatusRepository,
-                quotaManagement, confirmationFlowConfig, repositoryProperties, maxAssignmentExceededHandler);
+            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
+        super(targetRepository, actionRepository, actionStatusRepository, confirmationFlowConfig, repositoryProperties);
     }
 
     public void sendDeploymentEvents(final long distributionSetId, final List<Action> actions) {
@@ -69,12 +63,12 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     @Override
     public JpaAction createTargetAction(final TargetWithActionType targetWithActionType,
-            final List<JpaTarget> targets, final JpaDistributionSet set) {
-        final JpaAction result = super.createTargetAction(targetWithActionType, targets, set);
+            final List<JpaTarget> targets, final JpaDistributionSet set, final boolean confirmationFlowEnabled) {
+        final JpaAction result = super.createTargetAction(targetWithActionType, targets, set, confirmationFlowEnabled);
         if (result != null) {
-            final boolean confirmationRequired = targetWithActionType.isConfirmationRequired()
-                    && result.getTarget().getAutoConfirmationStatus() == null;
-            if (isConfirmationFlowEnabled() && confirmationRequired) {
+            final boolean confirmationRequired = confirmationFlowEnabled && targetWithActionType.isConfirmationRequired() &&
+                    result.getTarget().getAutoConfirmationStatus() == null;
+            if (confirmationRequired) {
                 result.setStatus(Status.WAIT_FOR_CONFIRMATION);
             } else {
                 result.setStatus(Status.RUNNING);
@@ -87,13 +81,9 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
      * Will be called to create the initial action status for an action
      */
     @Override
-    public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
-        final JpaActionStatus result = super.createActionStatus(action, actionMessage);
-        if (isConfirmationFlowEnabled()) {
-            result.setStatus(Status.WAIT_FOR_CONFIRMATION);
-        } else {
-            result.setStatus(Status.RUNNING);
-        }
+    public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage, final boolean confirmationFlowEnabled) {
+        final JpaActionStatus result = super.createActionStatus(action, actionMessage, confirmationFlowEnabled);
+        result.setStatus(confirmationFlowEnabled ? Status.WAIT_FOR_CONFIRMATION : Status.RUNNING);
         return result;
     }
 

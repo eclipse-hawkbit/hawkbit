@@ -16,21 +16,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 
 import jakarta.persistence.criteria.JoinType;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.context.AccessContext;
-import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.event.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
-import org.eclipse.hawkbit.repository.jpa.management.JpaDeploymentManagement.MaxAssignmentsExceededInfo;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -41,7 +37,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
-import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -64,36 +59,33 @@ public abstract class AbstractDsAssignmentStrategy {
     protected final ActionRepository actionRepository;
 
     private final ActionStatusRepository actionStatusRepository;
-    private final QuotaManagement quotaManagement;
     private final BooleanSupplier confirmationFlowConfig;
     private final RepositoryProperties repositoryProperties;
-    private final Consumer<MaxAssignmentsExceededInfo> maxAssignmentExceededHandler;
 
     @SuppressWarnings("java:S107")
     AbstractDsAssignmentStrategy(
             final TargetRepository targetRepository,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-            final QuotaManagement quotaManagement, final BooleanSupplier confirmationFlowConfig,
-            final RepositoryProperties repositoryProperties,
-            final Consumer<MaxAssignmentsExceededInfo> maxAssignmentExceededHandler) {
+            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
         this.targetRepository = targetRepository;
         this.actionRepository = actionRepository;
         this.actionStatusRepository = actionStatusRepository;
-        this.quotaManagement = quotaManagement;
         this.confirmationFlowConfig = confirmationFlowConfig;
         this.repositoryProperties = repositoryProperties;
-        this.maxAssignmentExceededHandler = maxAssignmentExceededHandler;
     }
 
+    /**
+     * Builds (does not persist) the assignment action. Pure factory - does NOT enforce the actions-per-target quota;
+     * callers must validate it beforehand (e.g. {@code JpaDeploymentManagement#enforceMaxActionsPerTarget}
+     * for manual assignment, {@code JpaRolloutExecutor#assertActionsPerTargetQuota} for rollouts).
+     */
     public JpaAction createTargetAction(
-            final TargetWithActionType targetWithActionType,
-            final List<JpaTarget> targets, final JpaDistributionSet set) {
+            final TargetWithActionType targetWithActionType, final List<JpaTarget> targets, final JpaDistributionSet set,
+            final boolean confirmationFlowEnabled) {
         final Optional<JpaTarget> optTarget = targets.stream()
                 .filter(t -> t.getControllerId().equals(targetWithActionType.getControllerId())).findFirst();
 
-        // create the action
         return optTarget.map(target -> {
-            assertActionsPerTargetQuota(target);
             final JpaAction actionForTarget = new JpaAction();
             actionForTarget.setActionType(targetWithActionType.getActionType());
             actionForTarget.setForcedTime(targetWithActionType.getForceTime());
@@ -115,7 +107,13 @@ public abstract class AbstractDsAssignmentStrategy {
         });
     }
 
-    public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
+    /**
+     * Builds (does not persist) the initial action status. Pure factory - does NOT enforce the status-per-action quota
+     * ({@code maxStatusEntriesPerAction}); that quota guards repeated device-feedback appends and is enforced at
+     * ({@code JpaActionManagement#assertActionStatusQuota}).
+     * This initial status is the first entry, so exempt.
+     */
+    public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage, final boolean confirmationFlowEnabled) {
         final JpaActionStatus actionStatus = new JpaActionStatus();
         actionStatus.setAction(action);
         actionStatus.setTimestamp(action.getCreatedAt());
@@ -272,12 +270,4 @@ public abstract class AbstractDsAssignmentStrategy {
                 new CancelTargetAssignmentEvent(tenant, actions)));
     }
 
-    private void assertActionsPerTargetQuota(final Target target) {
-        final int quota = quotaManagement.getMaxActionsPerTarget();
-        try {
-            QuotaHelper.assertAssignmentQuota(target.getId(), 1, quota, Action.class, Target.class, actionRepository::countByTargetId);
-        } catch (AssignmentQuotaExceededException e) {
-            maxAssignmentExceededHandler.accept(new MaxAssignmentsExceededInfo(target.getId(), 1, e));
-        }
-    }
 }

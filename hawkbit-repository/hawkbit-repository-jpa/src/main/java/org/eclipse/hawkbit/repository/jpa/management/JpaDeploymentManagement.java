@@ -27,7 +27,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -169,17 +168,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 .maxRetries(maxRetries)
                 .maxDelay(Duration.ofMillis(delay))
                 .build());
-        final Consumer<MaxAssignmentsExceededInfo> maxAssignmentsExceededHandler = maxAssignmentsExceededInfo ->
-                handleMaxAssignmentsExceeded(
-                        maxAssignmentsExceededInfo.targetId,
-                        maxAssignmentsExceededInfo.requested,
-                        maxAssignmentsExceededInfo.quotaExceededException);
         onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository,
-                quotaManagement, this::isConfirmationFlowEnabled, repositoryProperties,
-                maxAssignmentsExceededHandler);
+                this::isConfirmationFlowEnabled, repositoryProperties);
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, actionRepository, actionStatusRepository,
-                quotaManagement, this::isConfirmationFlowEnabled, repositoryProperties,
-                maxAssignmentsExceededHandler);
+                this::isConfirmationFlowEnabled, repositoryProperties);
         this.tenantConfigurationManagement = tenantConfigurationManagement;
     }
 
@@ -581,8 +573,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         }
     }
 
-    public record MaxAssignmentsExceededInfo(long targetId, long requested, AssignmentQuotaExceededException quotaExceededException) {}
-
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void handleMaxAssignmentsExceeded(
@@ -877,17 +867,19 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final List<JpaTarget> targetEntities) {
         final List<List<Long>> targetEntitiesIdsChunks = getTargetEntitiesAsChunks(targetEntities);
 
+        final boolean confirmationFlowEnabled = isConfirmationFlowEnabled();
+
         closeOrCancelActiveActions(assignmentStrategy, targetEntitiesIdsChunks);
         // cancel all scheduled actions which are in-active, these actions were
         // not active before and the manual assignment which has been done cancels them
         targetEntitiesIdsChunks.forEach(this::cancelInactiveScheduledActionsForTargets);
         setAssignedDistributionSetAndTargetUpdateStatus(assignmentStrategy, distributionSetEntity, targetEntitiesIdsChunks);
         final Map<TargetWithActionType, JpaAction> assignedActions =
-                createActions(targetsWithActionType, targetEntities, distributionSetEntity, assignmentStrategy);
+                createActions(targetsWithActionType, targetEntities, distributionSetEntity, assignmentStrategy, confirmationFlowEnabled);
         // create initial action status when action is created, so we remember
         // the initial running status because we will change the status
         // of the action itself and with this action status we have a nicer action history.
-        createActionsStatus(assignedActions, assignmentStrategy, actionMessage);
+        createActionsStatus(assignedActions, assignmentStrategy, actionMessage, confirmationFlowEnabled);
 
         detachEntitiesAndSendTargetUpdatedEvents(distributionSetEntity, targetEntities, assignmentStrategy);
         return new ArrayList<>(assignedActions.values());
@@ -934,12 +926,15 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         assignmentStrategy.setAssignedDistributionSetAndTargetStatus(set, targetIdsChunks);
     }
 
+    // precondition: the actions-per-target quota has already been enforced upstream in
+    // validateAndFilterRequestForAssignments (enforceMaxActionsPerTarget); this only builds/persists the actions
     private Map<TargetWithActionType, JpaAction> createActions(
             final Collection<TargetWithActionType> targetsWithActionType,
-            final List<JpaTarget> targets, final JpaDistributionSet set, final AbstractDsAssignmentStrategy assignmentStrategy) {
+            final List<JpaTarget> targets, final JpaDistributionSet set, final AbstractDsAssignmentStrategy assignmentStrategy,
+            final boolean confirmationFlowEnabled) {
         final Map<TargetWithActionType, JpaAction> persistedActions = new LinkedHashMap<>();
         for (final TargetWithActionType twt : targetsWithActionType) {
-            final JpaAction targetAction = assignmentStrategy.createTargetAction(twt, targets, set);
+            final JpaAction targetAction = assignmentStrategy.createTargetAction(twt, targets, set, confirmationFlowEnabled);
             if (targetAction != null) {
                 persistedActions.put(twt, actionRepository.save(targetAction));
             }
@@ -949,10 +944,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     private void createActionsStatus(
             final Map<TargetWithActionType, JpaAction> actions, final AbstractDsAssignmentStrategy assignmentStrategy,
-            final String actionMessage) {
+            final String actionMessage, final boolean confirmationFlowEnabled) {
         actionStatusRepository.saveAll(actions.entrySet().stream().map(entry -> {
             final JpaAction action = entry.getValue();
-            final JpaActionStatus actionStatus = assignmentStrategy.createActionStatus(action, actionMessage);
+            final JpaActionStatus actionStatus = assignmentStrategy.createActionStatus(action, actionMessage, confirmationFlowEnabled);
             verifyAndAddConfirmationStatus(action, actionStatus, entry.getKey().isConfirmationRequired());
             return actionStatus;
         }).toList());
@@ -960,8 +955,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     private void setInitialActionStatusOfRolloutGroup(final List<JpaAction> actions) {
         final List<JpaActionStatus> statusList = new ArrayList<>();
+        final boolean confirmationFlowEnabled = isConfirmationFlowEnabled();
         for (final JpaAction action : actions) {
-            final JpaActionStatus actionStatus = onlineDsAssignmentStrategy.createActionStatus(action, null);
+            final JpaActionStatus actionStatus = onlineDsAssignmentStrategy.createActionStatus(action, null, confirmationFlowEnabled);
             verifyAndAddConfirmationStatus(action, actionStatus, action.getRolloutGroup().isConfirmationRequired());
             statusList.add(actionStatus);
         }

@@ -112,7 +112,7 @@ public class JpaTargetManagement
             final String controllerId, final long distributionSetId, final String targetFilterQuery) {
         QLSupport.getInstance().validate(targetFilterQuery, TargetFields.class, JpaTarget.class);
         final DistributionSet ds = distributionSetManagement.get(distributionSetId);
-        final Long distSetTypeId = ds.getType().getId();
+        final Long distSetTypeId = ds.getTypeId();
         final List<Specification<JpaTarget>> specList = List.of(
                 QLSupport.getInstance().buildSpec(targetFilterQuery, TargetFields.class),
                 TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
@@ -149,7 +149,7 @@ public class JpaTargetManagement
     public Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(
             final long distributionSetId, final String rsql, final Pageable pageable) {
         final DistributionSet jpaDistributionSet = distributionSetManagement.get(distributionSetId);
-        final Long distSetTypeId = jpaDistributionSet.getType().getId();
+        final Long distSetTypeId = jpaDistributionSet.getTypeId();
 
         return jpaRepository
                 .findAllWithoutCount(
@@ -235,7 +235,7 @@ public class JpaTargetManagement
     @Override
     public long countByRsqlAndNonDsAndCompatibleAndUpdatable(final long distributionSetId, final String rsql) {
         final DistributionSet jpaDistributionSet = distributionSetManagement.get(distributionSetId);
-        final Long distSetTypeId = jpaDistributionSet.getType().getId();
+        final Long distSetTypeId = jpaDistributionSet.getTypeId();
 
         return jpaRepository.count(
                 AccessController.Operation.UPDATE,

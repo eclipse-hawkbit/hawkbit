@@ -35,6 +35,15 @@ public interface DistributionSet extends NamedVersionedEntity {
     DistributionSetType getType();
 
     /**
+     * @return id of the {@link #getType()}. Implementations should serve this without materializing the full
+     *             {@link DistributionSetType} entity (and its module-type elements) where possible - id-only, storm-free.
+     */
+    default Long getTypeId() {
+        final DistributionSetType type = getType();
+        return type == null ? null : type.getId();
+    }
+
+    /**
      * @return unmodifiableSet of {@link SoftwareModule}.
      */
     Set<SoftwareModule> getModules();
