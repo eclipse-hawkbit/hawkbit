@@ -81,13 +81,8 @@ class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
      * Will be called to create the initial action status for an action
      */
     @Override
-    public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
-        return createActionStatus(action, actionMessage, isConfirmationFlowEnabled());
-    }
-
-    @Override
     public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage, final boolean confirmationFlowEnabled) {
-        final JpaActionStatus result = super.createActionStatus(action, actionMessage);
+        final JpaActionStatus result = super.createActionStatus(action, actionMessage, confirmationFlowEnabled);
         result.setStatus(confirmationFlowEnabled ? Status.WAIT_FOR_CONFIRMATION : Status.RUNNING);
         return result;
     }

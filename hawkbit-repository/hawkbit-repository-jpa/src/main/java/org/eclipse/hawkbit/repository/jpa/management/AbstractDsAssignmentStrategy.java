@@ -102,7 +102,7 @@ public abstract class AbstractDsAssignmentStrategy {
         });
     }
 
-    public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
+    public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage, final boolean confirmationFlowEnabled) {
         final JpaActionStatus actionStatus = new JpaActionStatus();
         actionStatus.setAction(action);
         actionStatus.setTimestamp(action.getCreatedAt());
@@ -114,10 +114,6 @@ public abstract class AbstractDsAssignmentStrategy {
         }
 
         return actionStatus;
-    }
-
-    public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage, final boolean confirmationFlowEnabled) {
-        return createActionStatus(action, actionMessage);
     }
 
     protected void sendTargetUpdatedEvent(final JpaTarget target) {

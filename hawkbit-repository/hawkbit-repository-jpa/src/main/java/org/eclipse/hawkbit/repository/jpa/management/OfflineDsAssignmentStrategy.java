@@ -60,8 +60,8 @@ class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
-        final JpaActionStatus result = super.createActionStatus(action, actionMessage);
+    public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage, final boolean confirmationFlowEnabled) {
+        final JpaActionStatus result = super.createActionStatus(action, actionMessage, confirmationFlowEnabled);
         result.setStatus(Status.FINISHED);
         result.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Action reported as offline deployment");
         return result;

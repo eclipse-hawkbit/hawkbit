@@ -953,8 +953,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     private void setInitialActionStatusOfRolloutGroup(final List<JpaAction> actions) {
         final List<JpaActionStatus> statusList = new ArrayList<>();
+        final boolean confirmationFlowEnabled = isConfirmationFlowEnabled();
         for (final JpaAction action : actions) {
-            final JpaActionStatus actionStatus = onlineDsAssignmentStrategy.createActionStatus(action, null);
+            final JpaActionStatus actionStatus = onlineDsAssignmentStrategy.createActionStatus(action, null, confirmationFlowEnabled);
             verifyAndAddConfirmationStatus(action, actionStatus, action.getRolloutGroup().isConfirmationRequired());
             statusList.add(actionStatus);
         }
