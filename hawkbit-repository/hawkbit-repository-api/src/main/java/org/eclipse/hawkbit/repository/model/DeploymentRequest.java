@@ -47,17 +47,18 @@ public class DeploymentRequest {
      *         {@link org.eclipse.hawkbit.repository.model.Action.Status#RUNNING} state. Otherwise, the confirmation flow will be triggered
      *         and the {@link Action} will stay in the {@link org.eclipse.hawkbit.repository.model.Action.Status#WAIT_FOR_CONFIRMATION}
      *         state until the confirmation is given. (Only considered with CONFIRMATION_FLOW active via tenant configuration)
+     * @param externalRef (optional) external reference that is set on the resulting {@link Action}.
      * @throws InvalidMaintenanceScheduleException if the parameters do not define a valid maintenance schedule.
      */
     @SuppressWarnings("java:S107")
     public DeploymentRequest(
             final String controllerId, final Long distributionSetId, final ActionType actionType, final long forceTime, final Integer weight,
             final String maintenanceSchedule, final String maintenanceWindowDuration, final String maintenanceWindowTimeZone,
-            final boolean confirmationRequired) {
+            final boolean confirmationRequired, final String externalRef) {
         this.targetWithActionType = new TargetWithActionType(
                 controllerId, actionType, forceTime, weight,
                 maintenanceSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone,
-                confirmationRequired);
+                confirmationRequired, externalRef);
         this.distributionSetId = distributionSetId;
     }
 
@@ -87,6 +88,8 @@ public class DeploymentRequest {
         private String maintenanceWindowTimeZone;
         @Setter
         private boolean confirmationRequired;
+        @Setter
+        private String externalRef;
 
         /**
          * Create a builder for a target distribution set assignment with the mandatory fields
@@ -119,7 +122,7 @@ public class DeploymentRequest {
 
         public DeploymentRequest build() {
             return new DeploymentRequest(controllerId, distributionSetId, actionType, forceTime, weight,
-                    maintenanceSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone, confirmationRequired);
+                    maintenanceSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone, confirmationRequired, externalRef);
         }
     }
 }

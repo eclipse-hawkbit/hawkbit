@@ -16,6 +16,7 @@ import static org.eclipse.hawkbit.repository.model.Action.Status.WAIT_FOR_CONFIR
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import jakarta.validation.ConstraintViolationException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,9 +28,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import jakarta.validation.ConstraintViolationException;
-
 import lombok.Getter;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.context.AccessContext;
@@ -1594,7 +1592,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
         for (final String controllerId : targetIds) {
             deploymentRequests.add(new DeploymentRequest(controllerId, distributionSet.getId(), ActionType.FORCED, 0,
-                    null, null, null, null, confirmationRequired));
+                    null, null, null, null, confirmationRequired, null));
         }
         return deploymentManagement.assignDistributionSets(deploymentRequests, null);
     }

@@ -11,14 +11,12 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor.afterCommit;
 
+import jakarta.persistence.criteria.JoinType;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
-
-import jakarta.persistence.criteria.JoinType;
-
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.context.AccessContext;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -99,6 +97,9 @@ public abstract class AbstractDsAssignmentStrategy {
             actionForTarget.setMaintenanceWindowSchedule(targetWithActionType.getMaintenanceSchedule());
             actionForTarget.setMaintenanceWindowDuration(targetWithActionType.getMaintenanceWindowDuration());
             actionForTarget.setMaintenanceWindowTimeZone(targetWithActionType.getMaintenanceWindowTimeZone());
+            if (StringUtils.hasText(targetWithActionType.getExternalRef())) {
+                actionForTarget.setExternalRef(targetWithActionType.getExternalRef());
+            }
             actionForTarget.setInitiatedBy(AccessContext.actor());
             return actionForTarget;
         }).orElseGet(() -> {

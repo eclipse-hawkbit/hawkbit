@@ -35,7 +35,7 @@ public final class MgmtDeploymentRequestMapper {
     public static DeploymentRequestBuilder createAssignmentRequestBuilder(
             final MgmtDistributionSetAssignment dsAssignment, final String targetId) {
         return createAssignmentRequestBuilder(targetId, dsAssignment.getId(), dsAssignment.getType(),
-                dsAssignment.getForcetime(), dsAssignment.getWeight(), dsAssignment.getMaintenanceWindow());
+                dsAssignment.getForcetime(), dsAssignment.getWeight(), dsAssignment.getMaintenanceWindow(), dsAssignment.getExternalRef());
     }
 
     /**
@@ -48,14 +48,17 @@ public final class MgmtDeploymentRequestMapper {
     public static DeploymentRequestBuilder createAssignmentRequestBuilder(
             final MgmtTargetAssignmentRequestBody targetAssignment, final Long dsId) {
         return createAssignmentRequestBuilder(targetAssignment.getId(), dsId, targetAssignment.getType(),
-                targetAssignment.getForcetime(), targetAssignment.getWeight(), targetAssignment.getMaintenanceWindow());
+                targetAssignment.getForcetime(), targetAssignment.getWeight(), targetAssignment.getMaintenanceWindow(),
+                targetAssignment.getExternalRef());
     }
 
+    @SuppressWarnings("java:S107")
     private static DeploymentRequestBuilder createAssignmentRequestBuilder(final String targetId, final Long dsId,
             final MgmtActionType type, final long forcetime, final Integer weight,
-            final MgmtMaintenanceWindowRequestBody maintenanceWindow) {
+            final MgmtMaintenanceWindowRequestBody maintenanceWindow, final String externalRef) {
         final DeploymentRequestBuilder request = DeploymentRequest.builder(targetId, dsId)
-                .actionType(MgmtRestModelMapper.convertActionType(type)).forceTime(forcetime).weight(weight);
+                .actionType(MgmtRestModelMapper.convertActionType(type)).forceTime(forcetime).weight(weight)
+                .externalRef(externalRef);
         if (maintenanceWindow != null) {
             final String cronSchedule = maintenanceWindow.getSchedule();
             final String duration = maintenanceWindow.getDuration();
