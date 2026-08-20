@@ -228,7 +228,6 @@ public class JpaAutoAssignHandler implements AutoAssignHandler {
                         if (accessControlContext == null) {
                             // has no stored context - executes it in the tenant & user scope
                             asActor(getAutoAssignmentInitiatedBy(autoAssignment), () -> consumer.accept(autoAssignment));
-
                         } else {
                             // has stored context - executes it with it
                             withSecurityContext(accessControlContext, () -> consumer.accept(autoAssignment));
