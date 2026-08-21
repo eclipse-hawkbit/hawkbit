@@ -155,6 +155,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     // it explicitly (by id) via RolloutRepository. It must never be read off the managed entity - a plain field read
     // would not trigger the lazy fault-in and would silently return null.
     @Basic(fetch = FetchType.LAZY)
+    @Size(max = Rollout.ACCESS_CONTROL_CONTEXT_MAX_SIZE)
     private String accessControlContext;
 
     @Setter

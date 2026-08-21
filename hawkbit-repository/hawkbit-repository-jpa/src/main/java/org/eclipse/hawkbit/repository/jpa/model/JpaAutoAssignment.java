@@ -91,13 +91,13 @@ public class JpaAutoAssignment extends AbstractJpaNamedEntity implements AutoAss
     @Getter(AccessLevel.NONE)
     private Boolean confirmationRequired;
 
+    @Getter(AccessLevel.NONE)
     @Column(name = "access_control_context")
     @Lob
     // Lazy + no getter: the access control context is large and only needed by the auto-assign scheduler, which
     // fetches it explicitly (in batch) via AutoAssignmentRepository. It must never be read off the managed entity -
     // a plain field read would not trigger the lazy fault-in and would silently return null.
     @Basic(fetch = FetchType.LAZY)
-    @Getter(AccessLevel.NONE)
     @Size(max = AutoAssignment.ACCESS_CONTROL_CONTEXT_MAX_SIZE)
     private String accessControlContext;
 

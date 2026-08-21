@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.0</version>
+        <version>4.1.1</version>
     </parent>
 
     <groupId>org.eclipse.hawkbit</groupId>
@@ -61,7 +61,7 @@
         <java.client.version>17</java.client.version>
 
         <!-- must be the same as the parent version -->
-        <spring-boot.version>4.1.0</spring-boot.version>
+        <spring-boot.version>4.1.1</spring-boot.version>
         <spring-cloud.version>2025.1.2</spring-cloud.version>
         <spring-ai.version>2.0.0</spring-ai.version>
         <springdoc-openapi.version>3.1.0</springdoc-openapi.version>
